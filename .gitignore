@@ -1,0 +1,20 @@
+# Arquivos de ambiente
+.env
+.env.local
+
+# Backups e dumps de banco
+*.dump
+*.backup
+*.sql.gz
+
+# Dados reais ou sensiveis
+dados_reais/
+planilhas_reais/
+backups/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
