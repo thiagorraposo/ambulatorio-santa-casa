@@ -1,0 +1,193 @@
+# Registro de Alterações
+
+Atualizado em: 2026-07-01
+
+## Como Registrar Mudanças
+
+Toda mudança relevante no projeto deve ser registrada neste arquivo antes de concluir a tarefa.
+
+Registre mudanças quando houver:
+
+- Criação ou alteração de migration.
+- Criação, remoção ou alteração de tabela.
+- Inclusão, remoção ou alteração de coluna.
+- Mudança de PK, FK, índice, `CHECK`, `UNIQUE`, `DEFAULT` ou regra de deleção.
+- Alteração de relacionamento entre entidades.
+- Criação ou alteração de módulo.
+- Ajuste de regra de negócio.
+- Mudança na estrutura do sistema, backend, frontend, importação, testes ou implantação.
+
+Além deste arquivo, atualize quando necessário:
+
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/MODELO_FISICO_ATUAL.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/HISTORICO_DE_IMPLEMENTACAO.md`
+
+Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
+
+## Modelo para Novas Alterações
+
+Copie o bloco abaixo para cada nova alteração:
+
+```markdown
+## AAAA-MM-DD - Título da Alteração
+
+Data:
+
+Título da alteração:
+
+Motivo:
+
+Arquivos modificados:
+
+- 
+
+Migrations envolvidas:
+
+- 
+
+Tabelas e colunas afetadas:
+
+- 
+
+Impacto no sistema:
+
+Como testar:
+
+Pendências ou riscos:
+
+- 
+```
+
+## 2026-07-01 - Documentação técnica do estado atual
+
+Data: 2026-07-01
+
+Título da alteração: Documentação técnica do estado atual do projeto.
+
+Motivo: consolidar o estado real do repositório, histórico Git, migrations SQL e pendências conhecidas sem alterar código, migrations, banco ou configurações.
+
+Arquivos modificados:
+
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/HISTORICO_DE_IMPLEMENTACAO.md`
+- `docs/MODELO_FISICO_ATUAL.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+- `docs/PROXIMOS_PASSOS.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada ou alterada.
+- Migrations analisadas: `sql/00_criar_banco.sql` a `sql/09_tabelas_medicamentos_tratamentos.sql`.
+
+Tabelas e colunas afetadas:
+
+- Nenhuma tabela ou coluna foi alterada.
+
+Impacto no sistema:
+
+- Sem impacto funcional ou físico no banco.
+- A documentação passa a refletir a estrutura versionada nas migrations existentes.
+
+Como testar:
+
+- Verificar que não houve alteração nos arquivos `sql/`.
+- Verificar `git diff -- docs/`.
+- Ler os documentos gerados e comparar com os scripts SQL versionados.
+
+Pendências ou riscos:
+
+- Pendência original superada em 2026-07-01 pela reconciliação com `docs/evidencias/schema_atual_ambulatorio.sql`.
+- Documentos antigos `README.md`, `docs/dicionario-dados.md` e `docs/decisoes-modelagem.md` permanecem vazios.
+
+## 2026-07-01 - Reconciliação documental com schema físico aplicado
+
+Data: 2026-07-01
+
+Título da alteração: Reconciliação documental com schema físico aplicado.
+
+Motivo: incorporar a evidência `docs/evidencias/schema_atual_ambulatorio.sql`, que representa a estrutura física real aplicada no PostgreSQL, e corrigir trechos que tratavam a validação do banco como pendente.
+
+Arquivos modificados:
+
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/HISTORICO_DE_IMPLEMENTACAO.md`
+- `docs/MODELO_FISICO_ATUAL.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/VALIDACAO_MODELO_FISICO.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada ou alterada.
+- Migrations reconciliadas: `sql/00_criar_banco.sql` a `sql/09_tabelas_medicamentos_tratamentos.sql`.
+
+Tabelas e colunas afetadas:
+
+- Nenhuma tabela ou coluna foi alterada.
+- A documentação registra que o schema físico `ambulatorio` possui 25 tabelas aplicadas.
+
+Impacto no sistema:
+
+- Sem impacto funcional ou físico no banco.
+- A documentação passa a priorizar a evidência do dump físico sobre inferências feitas apenas pelas migrations.
+
+Como testar:
+
+- Verificar que não houve alteração em `sql/`.
+- Comparar `docs/evidencias/schema_atual_ambulatorio.sql` com `docs/VALIDACAO_MODELO_FISICO.md`.
+- Conferir que as 25 tabelas físicas estão listadas como existentes também nas migrations.
+
+Pendências ou riscos:
+
+- Não reaplicar scripts antigos no banco atual.
+- Criar migrations incrementais apenas após definição explícita de ajustes físicos necessários.
+- O dicionário de dados e decisões de modelagem anteriores continuam vazios no repositório.
+
+## 2026-07-01 - Implementação incremental do modelo físico
+
+Data: 2026-07-01
+
+Título da alteração: Implementação incremental do modelo físico.
+
+Motivo: registrar como decisão arquitetural que as 25 tabelas atuais são o núcleo funcional inicial do banco e que a cobertura completa da planilha será construída em fases posteriores.
+
+Tipo de registro: decisão arquitetural.
+
+Arquivos modificados:
+
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/MODELO_FISICO_ATUAL.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+- `docs/VALIDACAO_MODELO_FISICO.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada ou alterada.
+- Nenhuma migration antiga deve ser alterada ou reaplicada no banco atual.
+
+Tabelas e colunas afetadas:
+
+- Nenhuma tabela ou coluna foi alterada.
+- A decisão registra que as 25 tabelas atuais correspondem ao núcleo funcional inicial.
+- A cobertura integral das 140 colunas da planilha será tratada em fases posteriores, antes da importação completa.
+
+Impacto no sistema:
+
+- Sem impacto físico no banco.
+- A documentação passa a declarar que o modelo físico é incremental e que a ausência temporária das demais tabelas planejadas não é falha, lacuna involuntária ou divergência crítica.
+
+Como testar:
+
+- Criar dados de teste para o núcleo atual.
+- Validar inserções, FKs, `UNIQUE`, `CHECK` e regras de integridade.
+- Executar consultas representativas.
+- Registrar problemas e decisões encontradas antes de definir o próximo módulo.
+
+Pendências ou riscos:
+
+- Definir o próximo módulo de tabelas a implementar.
+- Criar migration incremental apenas depois da validação do núcleo atual.
+- Atualizar a documentação antes de encerrar qualquer alteração futura.
