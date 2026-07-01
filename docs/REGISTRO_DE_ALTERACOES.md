@@ -191,3 +191,39 @@ Pendências ou riscos:
 - Definir o próximo módulo de tabelas a implementar.
 - Criar migration incremental apenas depois da validação do núcleo atual.
 - Atualizar a documentação antes de encerrar qualquer alteração futura.
+
+## 2026-07-01 - Adoção do padrão Conventional Commits
+
+Data: 2026-07-01
+
+Título da alteração: Adoção do padrão Conventional Commits.
+
+Motivo: padronizar as mensagens de commit do projeto em português, usando tipos convencionais para facilitar leitura do histórico, revisão e futuras automações.
+
+Arquivos modificados:
+
+- `docs/PADRAO_DE_COMMITS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada ou alterada.
+
+Tabelas e colunas afetadas:
+
+- Nenhuma tabela ou coluna foi alterada.
+
+Impacto no sistema:
+
+- Sem impacto físico no banco ou no comportamento do projeto.
+- O projeto passa a documentar o padrão oficial de mensagens de commit.
+
+Como testar:
+
+- Conferir `docs/PADRAO_DE_COMMITS.md`.
+- Conferir se commits futuros usam um dos prefixos permitidos.
+
+Pendências ou riscos:
+
+- Reforçar o padrão em revisões futuras.
+- Avaliar futuramente hook local ou validação em CI para mensagens de commit.
