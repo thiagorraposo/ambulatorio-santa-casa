@@ -227,3 +227,51 @@ Pendências ou riscos:
 
 - Reforçar o padrão em revisões futuras.
 - Avaliar futuramente hook local ou validação em CI para mensagens de commit.
+
+## 2026-07-01 - Rotina de validação do núcleo inicial
+
+Data: 2026-07-01
+
+Título da alteração: Rotina de validação do núcleo inicial.
+
+Motivo: criar uma rotina reutilizável para validar dados mínimos, relacionamentos e constraints principais das 25 tabelas atuais do schema `ambulatorio`.
+
+Arquivos modificados:
+
+- `tests/sql/01_validar_nucleo_inicial.sql`
+- `docs/VALIDACAO_DADOS_DE_TESTE.md`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada ou alterada.
+
+Tabelas e colunas afetadas:
+
+- Nenhuma tabela ou coluna foi alterada.
+- A rotina cobre as 25 tabelas atuais do núcleo físico inicial apenas com dados temporários dentro de transação.
+
+Impacto no sistema:
+
+- Sem impacto físico no banco, desde que executada até o `ROLLBACK` final.
+- A rotina adiciona validação reutilizável para inserções, FKs, `UNIQUE`, `CHECK`, `NOT NULL` e consulta final de consistência.
+
+Como testar:
+
+- Executar:
+
+```bash
+psql -U ambulatorio_user -d ambulatorio_santa_casa -h localhost -v ON_ERROR_STOP=1 -f tests/sql/01_validar_nucleo_inicial.sql
+```
+
+- Conferir os `NOTICE` de sucesso.
+- Conferir a consulta final de registros temporários.
+- Confirmar que os dados não permanecem no banco após o `ROLLBACK`.
+
+Pendências ou riscos:
+
+- O script ainda não foi executado nesta tarefa.
+- Regras clínicas, permissões, performance, triggers inexistentes e cobertura completa da planilha continuam fora do escopo desta rotina.
+- Atualizar a rotina após migrations relevantes que alterem tabelas, colunas ou constraints do núcleo.

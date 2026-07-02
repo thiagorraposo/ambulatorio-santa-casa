@@ -26,6 +26,8 @@ Até o momento, o repositório contém scripts SQL de criação de banco, schema
 - O dump foi gerado com PostgreSQL 16.14 e contém o schema `ambulatorio` com 25 tabelas aplicadas.
 - As 25 tabelas físicas encontradas também estão cobertas pelos scripts SQL em `sql/`.
 - Não foi encontrada tabela física sem migration correspondente, nem tabela em migration ausente do dump analisado.
+- Existe uma rotina reutilizável de validação com dados de teste em `tests/sql/01_validar_nucleo_inicial.sql`.
+- A rotina de validação usa transação com `ROLLBACK`, não altera a estrutura física do banco e não deixa dados de teste persistidos quando executada com sucesso.
 
 ## Estratégia de Implementação Incremental
 
@@ -127,28 +129,27 @@ Resumo da reconciliação:
 - Autenticação, autorização e perfis de usuário.
 - Regras de negócio de cadastro, atendimento, diagnóstico e acompanhamento.
 - Testes automatizados.
+- Rotinas adicionais de teste para futuras fases incrementais do modelo físico.
 - Estratégia de deploy, backup e observabilidade.
 - Documentação operacional de execução dos scripts e restauração de ambiente.
 
 ## Próximos Passos Recomendados
 
-1. Criar dados de teste para o núcleo atual.
-2. Validar inserções, FKs, `UNIQUE`, `CHECK` e regras de integridade.
-3. Executar consultas representativas.
-4. Registrar problemas e decisões encontradas.
-5. Definir o próximo módulo de tabelas a implementar.
-6. Criar migration incremental.
-7. Atualizar documentação antes de encerrar a alteração.
+1. Executar `tests/sql/01_validar_nucleo_inicial.sql` em ambiente local ou de homologação.
+2. Analisar `NOTICE`, consulta final e eventuais falhas do `psql`.
+3. Registrar problemas e decisões encontradas.
+4. Definir o próximo módulo de tabelas a implementar.
+5. Criar migration incremental.
+6. Atualizar documentação antes de encerrar a alteração.
 
 ## Próxima fase técnica
 
-1. Criar dados de teste para o núcleo atual.
-2. Validar inserções, FKs, `UNIQUE`, `CHECK` e regras de integridade.
-3. Executar consultas representativas.
-4. Registrar problemas e decisões encontradas.
-5. Definir o próximo módulo de tabelas a implementar.
-6. Criar migration incremental.
-7. Atualizar documentação antes de encerrar a alteração.
+1. Executar `tests/sql/01_validar_nucleo_inicial.sql` em ambiente local ou de homologação.
+2. Analisar `NOTICE`, consulta final e eventuais falhas do `psql`.
+3. Registrar problemas e decisões encontradas.
+4. Definir o próximo módulo de tabelas a implementar.
+5. Criar migration incremental.
+6. Atualizar documentação antes de encerrar a alteração.
 
 ## Regra Permanente de Documentação
 
