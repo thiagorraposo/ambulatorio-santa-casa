@@ -26,7 +26,8 @@ Atualizado em: 2026-07-01
 2. Decidir se `docs/dicionario-dados.md` e `docs/decisoes-modelagem.md` serão preenchidos, substituídos ou mantidos como histórico vazio.
 3. Documentar convenções de nomenclatura, valores padronizados e uso dos campos `valor_original_*`.
 4. Documentar regras de atualização dos campos `atualizado_em`, pois ainda não há triggers ou mecanismos automáticos versionados.
-5. Documentar estratégia de backup, restauração e ambientes.
+5. Manter `docs/DECISOES_ARQUITETURAIS.md` como fonte de decisões duradouras.
+6. Usar `docs/WORKFLOW_DE_DESENVOLVIMENTO.md` e `AGENTS.md` como orientação para tarefas complexas.
 
 ## 4. Expansão e Importação da Planilha
 
@@ -70,3 +71,9 @@ Atualizado em: 2026-07-01
 ## Próximo Passo Técnico Recomendado
 
 O próximo passo prático no banco é executar `tests/sql/01_validar_nucleo_inicial.sql` em ambiente local ou de homologação para validar inserções, FKs, `UNIQUE`, `CHECK`, regras de integridade e consultas representativas. Só depois disso deve ser definido o próximo módulo de tabelas e criada uma migration incremental. Não alterar migrations antigas e não reaplicar scripts antigos no banco atual.
+
+Comando local recomendado para verificar documentação e estado do projeto:
+
+```bash
+make project-check
+```

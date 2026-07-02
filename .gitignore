@@ -1,16 +1,55 @@
 # Arquivos de ambiente
 .env
 .env.local
+.env.*
+!.env.example
+
+# Credenciais e segredos
+*credential*
+*credentials*
+*secret*
+*secrets*
+*.key
+*.pem
+*.p12
+*.pfx
+pgpass
+.pgpass
 
 # Backups e dumps de banco
 *.dump
 *.backup
 *.sql.gz
+*.dump.gz
+*.backup.gz
+*.bak
+*.bkp
+dump_com_dados/
+dumps_com_dados/
+db_backups/
 
 # Dados reais ou sensiveis
 dados_reais/
 planilhas_reais/
 backups/
+exports_pacientes/
+pacientes_exportados/
+dados_pacientes/
+*.xlsx
+*.xls
+*.ods
+*.csv
+*.tsv
+!*sintetico*.csv
+!*sinteticos*.csv
+!tests/fixtures/**
+
+# Temporarios PostgreSQL e arquivos locais
+postgres_tmp/
+pg_tmp/
+*.tmp
+*.temp
+*.swp
 
 # Sistema operacional
 .DS_Store

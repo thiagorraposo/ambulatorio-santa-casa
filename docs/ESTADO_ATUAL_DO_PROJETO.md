@@ -28,6 +28,11 @@ Até o momento, o repositório contém scripts SQL de criação de banco, schema
 - Não foi encontrada tabela física sem migration correspondente, nem tabela em migration ausente do dump analisado.
 - Existe uma rotina reutilizável de validação com dados de teste em `tests/sql/01_validar_nucleo_inicial.sql`.
 - A rotina de validação usa transação com `ROLLBACK`, não altera a estrutura física do banco e não deixa dados de teste persistidos quando executada com sucesso.
+- O projeto possui orientações permanentes para Codex em `AGENTS.md`, `sql/AGENTS.md`, `tests/AGENTS.md` e `docs/AGENTS.md`.
+- Decisões arquiteturais duradouras são registradas em `docs/DECISOES_ARQUITETURAIS.md`.
+- O workflow oficial está documentado em `docs/WORKFLOW_DE_DESENVOLVIMENTO.md`.
+- Regras de segurança de dados estão documentadas em `docs/SEGURANCA_DE_DADOS.md`.
+- Comandos locais reproduzíveis estão definidos no `Makefile`.
 
 ## Estratégia de Implementação Incremental
 
@@ -132,6 +137,7 @@ Resumo da reconciliação:
 - Rotinas adicionais de teste para futuras fases incrementais do modelo físico.
 - Estratégia de deploy, backup e observabilidade.
 - Documentação operacional de execução dos scripts e restauração de ambiente.
+- Automação futura de CI, se o projeto passar a ter colaboração recorrente, API ou frontend.
 
 ## Próximos Passos Recomendados
 

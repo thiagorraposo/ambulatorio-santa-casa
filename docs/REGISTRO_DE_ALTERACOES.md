@@ -275,3 +275,53 @@ Pendências ou riscos:
 - O script ainda não foi executado nesta tarefa.
 - Regras clínicas, permissões, performance, triggers inexistentes e cobertura completa da planilha continuam fora do escopo desta rotina.
 - Atualizar a rotina após migrations relevantes que alterem tabelas, colunas ou constraints do núcleo.
+
+## 2026-07-01 - Melhoria de workflow e governança técnica
+
+Data: 2026-07-01
+
+Título da alteração: Melhoria de workflow e governança técnica.
+
+Motivo: tornar o trabalho com Codex mais previsível, seguro, reproduzível e fácil de retomar.
+
+Arquivos modificados:
+
+- `AGENTS.md`
+- `sql/AGENTS.md`
+- `tests/AGENTS.md`
+- `docs/AGENTS.md`
+- `docs/DECISOES_ARQUITETURAIS.md`
+- `docs/SEGURANCA_DE_DADOS.md`
+- `docs/WORKFLOW_DE_DESENVOLVIMENTO.md`
+- `Makefile`
+- `.gitignore`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada ou alterada.
+- Nenhum script SQL aplicado foi modificado.
+
+Tabelas e colunas afetadas:
+
+- Nenhuma tabela ou coluna foi alterada.
+
+Impacto no sistema:
+
+- Sem impacto físico no banco.
+- Adiciona orientações permanentes para agentes, decisões arquiteturais, comandos locais seguros, regras de segurança de dados e workflow oficial.
+
+Como testar:
+
+- Executar `make help`.
+- Executar `make docs-check`.
+- Verificar que o Makefile não possui comandos destrutivos.
+- Executar `git diff --check`.
+
+Pendências ou riscos:
+
+- `README.md` permanece vazio e deve ser preenchido em tarefa futura.
+- CI e hooks de validação ainda não foram configurados.
+- Comandos que acessam PostgreSQL dependem de ambiente local configurado.
