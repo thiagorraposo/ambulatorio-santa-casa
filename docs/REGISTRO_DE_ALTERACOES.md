@@ -1,6 +1,6 @@
 # Registro de Alterações
 
-Atualizado em: 2026-07-01
+Atualizado em: 2026-07-16
 
 ## Como Registrar Mudanças
 
@@ -59,6 +59,88 @@ Pendências ou riscos:
 
 - 
 ```
+
+## 2026-07-16 - Validação prática do núcleo inicial
+
+Data: 2026-07-16
+
+Título da alteração: Validação prática do núcleo atual de 25 tabelas.
+
+Motivo: executar a Etapa 1 no PostgreSQL local e registrar evidências verificáveis de inserções, constraints, consulta final e ausência de dados sintéticos persistidos.
+
+Arquivos modificados:
+
+- `docs/VALIDACAO_DADOS_DE_TESTE.md`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada, alterada ou reaplicada.
+
+Tabelas e colunas afetadas:
+
+- Nenhuma tabela ou coluna foi alterada.
+- As 25 tabelas do núcleo receberam somente dados sintéticos temporários dentro da transação de teste.
+
+Impacto no sistema:
+
+- Sem alteração física ou persistência de dados no banco.
+- A Etapa 1 passa a constar como validada no ambiente local em 2026-07-16.
+
+Como testar:
+
+- Executar `psql -U ambulatorio_user -d ambulatorio_santa_casa -h localhost -v ON_ERROR_STOP=1 -f tests/sql/01_validar_nucleo_inicial.sql`.
+- Confirmar os `NOTICE` dos testes positivos e negativos, as 25 linhas da consulta final e a saída `ROLLBACK`.
+- Em nova sessão, consultar os identificadores-raiz e confirmar zero registros com prefixo `validacao_nucleo_`.
+- Executar `make project-check`, `git diff --check` e `git status --short`.
+
+Pendências ou riscos:
+
+- A cobertura permanece limitada às constraints e aos cenários descritos em `docs/VALIDACAO_DADOS_DE_TESTE.md`.
+- O próximo módulo físico ainda precisa ser definido antes de uma nova migration incremental.
+
+## 2026-07-16 - Reconciliação da cobertura da planilha
+
+Data: 2026-07-16
+
+Título da alteração: Reconciliação das colunas mapeadas da planilha com o núcleo físico atual.
+
+Motivo: identificar o que as 25 tabelas aplicadas já representam, separar lacunas reais de tabelas planejadas já absorvidas e orientar a próxima expansão incremental.
+
+Arquivos modificados:
+
+- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada, alterada ou reaplicada.
+
+Tabelas e colunas afetadas:
+
+- Nenhuma tabela ou coluna física foi alterada.
+- Foram classificadas 140 entradas únicas do CSV de mapeamento: 6 diretas, 91 com transformação, 12 parciais, 19 não cobertas e 12 dúvidas.
+
+Impacto no sistema:
+
+- Sem impacto físico no banco.
+- A documentação passa a distinguir o planejamento antigo do schema aplicado e recomenda o módulo de avaliação clínica, eventos, dispositivos e desfecho.
+
+Como testar:
+
+- Conferir as 140 entradas contra `planejamento/tabelas dicionário de dados/03_coluna_planilha_destino.csv`.
+- Comparar destinos propostos com `docs/evidencias/schema_atual_ambulatorio.sql` e migrations `sql/00` a `sql/09`.
+- Executar `make project-check`, `git diff --check` e `git status --short`.
+
+Pendências ou riscos:
+
+- A lista canônica e ordenada das colunas por aba ainda precisa ser confirmada.
+- O DER visual referenciado não está presente no repositório.
+- Nenhuma recomendação deste levantamento autoriza alteração física sem decisão e migration incremental próprias.
 
 ## 2026-07-01 - Documentação técnica do estado atual
 

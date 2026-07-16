@@ -1,6 +1,6 @@
 # Validação com Dados de Teste do Núcleo Inicial
 
-Atualizado em: 2026-07-01
+Atualizado em: 2026-07-16
 
 ## Objetivo
 
@@ -9,6 +9,21 @@ Atualizado em: 2026-07-01
 O script insere dados mínimos, coerentes e encadeados nas 25 tabelas atuais, valida relacionamentos e restrições principais, executa testes negativos e finaliza com `ROLLBACK` para não deixar dados de teste persistidos.
 
 Esta rotina não altera migrations, schema, tabelas ou estrutura física do banco.
+
+## Resultado da Execução de 2026-07-16
+
+A rotina foi executada no banco local `ambulatorio_santa_casa` com `ON_ERROR_STOP=1` e terminou com código de saída `0`.
+
+- As inserções sintéticas foram aceitas nas 25 tabelas do núcleo.
+- A consulta final retornou 25 módulos, cada um com 1 registro temporário.
+- A FK inexistente foi rejeitada por `foreign_key_violation`.
+- A duplicidade de `comorbidade.nome_comorbidade` foi rejeitada por `unique_violation`.
+- Os dois valores inválidos cobertos por `CHECK` foram rejeitados por `check_violation`.
+- A ausência de `paciente.nome` foi rejeitada por `not_null_violation`.
+- O script alcançou o `ROLLBACK` final.
+- Uma consulta independente, executada depois do teste, encontrou zero registros com o prefixo sintético `validacao_nucleo_` nos seis identificadores-raiz usados pela rotina.
+
+Não foi necessária correção no teste nem no schema físico.
 
 ## Pré-requisitos
 

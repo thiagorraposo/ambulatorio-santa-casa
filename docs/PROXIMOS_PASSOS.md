@@ -1,6 +1,6 @@
 # Próximos Passos
 
-Atualizado em: 2026-07-01
+Atualizado em: 2026-07-16
 
 ## 1. Estratégia Incremental do Modelo Físico
 
@@ -13,12 +13,11 @@ Atualizado em: 2026-07-01
 
 ## 2. Próxima fase técnica
 
-1. Executar `tests/sql/01_validar_nucleo_inicial.sql` em ambiente local ou de homologação.
-2. Analisar `NOTICE`, consulta final e eventuais falhas do `psql`.
-3. Registrar problemas e decisões encontradas.
-4. Definir o próximo módulo de tabelas a implementar.
-5. Criar migration incremental.
-6. Atualizar documentação antes de encerrar a alteração.
+1. Validar as decisões humanas e o módulo de avaliação clínica, eventos, dispositivos e desfecho proposto em `docs/COBERTURA_COLUNAS_PLANILHA.md`.
+2. Registrar a decisão técnica e o escopo da próxima fase.
+3. Criar uma nova migration incremental, sem alterar ou reaplicar migrations antigas.
+4. Criar ou ampliar os testes sintéticos correspondentes.
+5. Atualizar documentação antes de encerrar a alteração.
 
 ## 3. Ajustes e Documentação Pendentes
 
@@ -70,7 +69,7 @@ Atualizado em: 2026-07-01
 
 ## Próximo Passo Técnico Recomendado
 
-O próximo passo prático no banco é executar `tests/sql/01_validar_nucleo_inicial.sql` em ambiente local ou de homologação para validar inserções, FKs, `UNIQUE`, `CHECK`, regras de integridade e consultas representativas. Só depois disso deve ser definido o próximo módulo de tabelas e criada uma migration incremental. Não alterar migrations antigas e não reaplicar scripts antigos no banco atual.
+O núcleo atual de 25 tabelas foi validado e cobre plenamente 97 das 140 entradas únicas do mapeamento da planilha. O próximo passo prático é decidir unidades, cardinalidades e obrigatoriedade das FKs do módulo de avaliação clínica, eventos, dispositivos e desfecho proposto em `docs/COBERTURA_COLUNAS_PLANILHA.md`. Somente depois deve ser criada uma nova migration incremental. Não alterar migrations antigas e não reaplicar scripts antigos no banco atual.
 
 Comando local recomendado para verificar documentação e estado do projeto:
 

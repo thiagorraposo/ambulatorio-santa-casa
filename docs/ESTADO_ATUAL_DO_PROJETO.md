@@ -1,6 +1,6 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-07-01
+Atualizado em: 2026-07-16
 
 ## Objetivo Geral
 
@@ -28,6 +28,8 @@ Até o momento, o repositório contém scripts SQL de criação de banco, schema
 - Não foi encontrada tabela física sem migration correspondente, nem tabela em migration ausente do dump analisado.
 - Existe uma rotina reutilizável de validação com dados de teste em `tests/sql/01_validar_nucleo_inicial.sql`.
 - A rotina de validação usa transação com `ROLLBACK`, não altera a estrutura física do banco e não deixa dados de teste persistidos quando executada com sucesso.
+- A rotina foi executada com sucesso em 2026-07-16: as 25 tabelas receberam dados sintéticos temporários, os testes de FK, `UNIQUE`, `CHECK` e `NOT NULL` foram aprovados, e uma consulta posterior confirmou ausência de dados de teste persistidos.
+- A reconciliação das 140 entradas do mapeamento da planilha está documentada em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 97 estão plenamente cobertas pelo núcleo atual, 12 parcialmente cobertas, 19 não cobertas e 12 dependem de esclarecimento.
 - O projeto possui orientações permanentes para Codex em `AGENTS.md`, `sql/AGENTS.md`, `tests/AGENTS.md` e `docs/AGENTS.md`.
 - Decisões arquiteturais duradouras são registradas em `docs/DECISOES_ARQUITETURAIS.md`.
 - O workflow oficial está documentado em `docs/WORKFLOW_DE_DESENVOLVIMENTO.md`.
@@ -141,21 +143,19 @@ Resumo da reconciliação:
 
 ## Próximos Passos Recomendados
 
-1. Executar `tests/sql/01_validar_nucleo_inicial.sql` em ambiente local ou de homologação.
-2. Analisar `NOTICE`, consulta final e eventuais falhas do `psql`.
-3. Registrar problemas e decisões encontradas.
-4. Definir o próximo módulo de tabelas a implementar.
-5. Criar migration incremental.
-6. Atualizar documentação antes de encerrar a alteração.
+1. Validar as decisões humanas registradas em `docs/COBERTURA_COLUNAS_PLANILHA.md` e definir o módulo de avaliação clínica, eventos, dispositivos e desfecho.
+2. Registrar a decisão técnica e o escopo da próxima fase.
+3. Criar uma nova migration incremental, sem alterar ou reaplicar migrations antigas.
+4. Criar ou ampliar os testes sintéticos correspondentes.
+5. Atualizar a documentação antes de encerrar a alteração.
 
 ## Próxima fase técnica
 
-1. Executar `tests/sql/01_validar_nucleo_inicial.sql` em ambiente local ou de homologação.
-2. Analisar `NOTICE`, consulta final e eventuais falhas do `psql`.
-3. Registrar problemas e decisões encontradas.
-4. Definir o próximo módulo de tabelas a implementar.
-5. Criar migration incremental.
-6. Atualizar documentação antes de encerrar a alteração.
+1. Validar as decisões humanas registradas em `docs/COBERTURA_COLUNAS_PLANILHA.md` e definir o módulo de avaliação clínica, eventos, dispositivos e desfecho.
+2. Registrar a decisão técnica e o escopo da próxima fase.
+3. Criar uma nova migration incremental, sem alterar ou reaplicar migrations antigas.
+4. Criar ou ampliar os testes sintéticos correspondentes.
+5. Atualizar a documentação antes de encerrar a alteração.
 
 ## Regra Permanente de Documentação
 
