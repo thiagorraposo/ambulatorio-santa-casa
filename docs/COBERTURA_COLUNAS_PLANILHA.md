@@ -206,7 +206,7 @@ Estrutura proposta para decisão antes de migration:
 - `houve_obito`, `data_obito`, `causa_obito`, `relacao_chagas`;
 - `valor_original_obito`, `valor_original_causa`, `observacoes`, timestamps.
 
-Este desenho ainda não autoriza migration. Unidades, cardinalidade, obrigatoriedade do atendimento e domínios clínicos devem ser decididos primeiro.
+O desenho detalhado, as fronteiras com tabelas existentes e as constraints propostas estão em `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`. A especificação definiu medidas por atendimento e fatos longitudinais apenas por paciente, mas ainda não autoriza migration enquanto as pendências de semântica e origem não forem validadas.
 
 ## Decisões humanas pendentes
 

@@ -13,11 +13,11 @@ Atualizado em: 2026-07-16
 
 ## 2. Próxima fase técnica
 
-1. Validar as decisões humanas e o módulo de avaliação clínica, eventos, dispositivos e desfecho proposto em `docs/COBERTURA_COLUNAS_PLANILHA.md`.
-2. Registrar a decisão técnica e o escopo da próxima fase.
-3. Criar uma nova migration incremental, sem alterar ou reaplicar migrations antigas.
-4. Criar ou ampliar os testes sintéticos correspondentes.
-5. Atualizar documentação antes de encerrar a alteração.
+1. Confirmar unidades, NYHA, semântica de reação adversa e política de linhas negativas conforme `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`.
+2. Validar que eventos, dispositivos e óbito podem ficar vinculados apenas ao paciente até existir rastreabilidade de importação.
+3. Após essas decisões, criar uma nova migration incremental, sem alterar ou reaplicar migrations antigas.
+4. Criar testes sintéticos para campos, FKs, `UNIQUE`, `CHECK`, deleções e ausência de duplicação com o núcleo.
+5. Atualizar a evidência do schema e a documentação depois da aplicação controlada.
 
 ## 3. Ajustes e Documentação Pendentes
 
@@ -69,7 +69,7 @@ Atualizado em: 2026-07-16
 
 ## Próximo Passo Técnico Recomendado
 
-O núcleo atual de 25 tabelas foi validado e cobre plenamente 97 das 140 entradas únicas do mapeamento da planilha. O próximo passo prático é decidir unidades, cardinalidades e obrigatoriedade das FKs do módulo de avaliação clínica, eventos, dispositivos e desfecho proposto em `docs/COBERTURA_COLUNAS_PLANILHA.md`. Somente depois deve ser criada uma nova migration incremental. Não alterar migrations antigas e não reaplicar scripts antigos no banco atual.
+O próximo módulo está especificado em `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`, mas ainda não está pronto para migration. O próximo passo prático é validar as unidades de origem, NYHA, a semântica de reação adversa, a política para valores negativos/desconhecidos e a ausência de vínculo com atendimento nos fatos longitudinais. Não alterar migrations antigas e não reaplicar scripts antigos no banco atual.
 
 Comando local recomendado para verificar documentação e estado do projeto:
 

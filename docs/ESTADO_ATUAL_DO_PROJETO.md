@@ -30,6 +30,7 @@ Até o momento, o repositório contém scripts SQL de criação de banco, schema
 - A rotina de validação usa transação com `ROLLBACK`, não altera a estrutura física do banco e não deixa dados de teste persistidos quando executada com sucesso.
 - A rotina foi executada com sucesso em 2026-07-16: as 25 tabelas receberam dados sintéticos temporários, os testes de FK, `UNIQUE`, `CHECK` e `NOT NULL` foram aprovados, e uma consulta posterior confirmou ausência de dados de teste persistidos.
 - A reconciliação das 140 entradas do mapeamento da planilha está documentada em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 97 estão plenamente cobertas pelo núcleo atual, 12 parcialmente cobertas, 19 não cobertas e 12 dependem de esclarecimento.
+- O próximo módulo está tecnicamente especificado em `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`, sem migration criada; validações humanas de unidades, semântica e proveniência ainda bloqueiam a implementação física.
 - O projeto possui orientações permanentes para Codex em `AGENTS.md`, `sql/AGENTS.md`, `tests/AGENTS.md` e `docs/AGENTS.md`.
 - Decisões arquiteturais duradouras são registradas em `docs/DECISOES_ARQUITETURAIS.md`.
 - O workflow oficial está documentado em `docs/WORKFLOW_DE_DESENVOLVIMENTO.md`.
@@ -143,7 +144,7 @@ Resumo da reconciliação:
 
 ## Próximos Passos Recomendados
 
-1. Validar as decisões humanas registradas em `docs/COBERTURA_COLUNAS_PLANILHA.md` e definir o módulo de avaliação clínica, eventos, dispositivos e desfecho.
+1. Resolver as pendências pré-migration de `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`.
 2. Registrar a decisão técnica e o escopo da próxima fase.
 3. Criar uma nova migration incremental, sem alterar ou reaplicar migrations antigas.
 4. Criar ou ampliar os testes sintéticos correspondentes.
@@ -151,7 +152,7 @@ Resumo da reconciliação:
 
 ## Próxima fase técnica
 
-1. Validar as decisões humanas registradas em `docs/COBERTURA_COLUNAS_PLANILHA.md` e definir o módulo de avaliação clínica, eventos, dispositivos e desfecho.
+1. Resolver as pendências pré-migration de `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`.
 2. Registrar a decisão técnica e o escopo da próxima fase.
 3. Criar uma nova migration incremental, sem alterar ou reaplicar migrations antigas.
 4. Criar ou ampliar os testes sintéticos correspondentes.

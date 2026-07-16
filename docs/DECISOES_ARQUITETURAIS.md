@@ -1,6 +1,6 @@
 # Decisões Arquiteturais
 
-Atualizado em: 2026-07-01
+Atualizado em: 2026-07-16
 
 Este documento registra decisões duradouras do projeto. Mudanças cronológicas continuam em `docs/REGISTRO_DE_ALTERACOES.md`.
 
@@ -163,3 +163,23 @@ Consequências: Commits futuros devem usar prefixos aceitos e mensagem curta em 
 Alternativas rejeitadas: Mensagens livres sem padronização.
 
 Documentos relacionados: `docs/PADRAO_DE_COMMITS.md`, `docs/WORKFLOW_DE_DESENVOLVIMENTO.md`.
+
+## ADR-009
+
+ID: ADR-009
+
+Título: Separação entre avaliação por atendimento e fatos longitudinais do paciente
+
+Data: 2026-07-16
+
+Status: Aceita para a especificação; implementação pendente de validações pré-migration
+
+Contexto: O próximo módulo precisa representar medidas coletadas em consulta, AVC prévio, reação adversa, dispositivos implantados e óbito sem duplicar tabelas atuais nem criar atendimentos artificiais para fatos históricos.
+
+Decisão: Vincular `dados_clinicos_atendimento` obrigatória e unicamente a `atendimento`. Vincular `evento_clinico`, `dispositivo_implantado` e `obito` somente a `paciente` na primeira versão. Manter reações adversas atribuídas ao tratamento exclusivamente em `tratamento_chagas`.
+
+Consequências: Medidas preservam sua temporalidade por atendimento; fatos longitudinais podem ser registrados sem atendimento correspondente. A proveniência do atendimento de digitação desses fatos não será armazenada até existir mecanismo próprio de importação/auditoria.
+
+Alternativas rejeitadas: duplicar `paciente_id` em dados clínicos; tornar `atendimento_id` obrigatório para fatos históricos; adicionar FK opcional de atendimento sem garantia de pertencer ao mesmo paciente; duplicar reações do tratamento em evento clínico.
+
+Documentos relacionados: `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`, `docs/COBERTURA_COLUNAS_PLANILHA.md`, `docs/MODELO_FISICO_ATUAL.md`.

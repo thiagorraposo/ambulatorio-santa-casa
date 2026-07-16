@@ -142,6 +142,47 @@ Pendências ou riscos:
 - O DER visual referenciado não está presente no repositório.
 - Nenhuma recomendação deste levantamento autoriza alteração física sem decisão e migration incremental próprias.
 
+## 2026-07-16 - Especificação do módulo de avaliação clínica
+
+Data: 2026-07-16
+
+Título da alteração: Especificação física de avaliação clínica, eventos, dispositivos e óbito.
+
+Motivo: definir campos, tipos, cardinalidades, constraints, índices, deleções e fronteiras do próximo módulo sem criar migration prematuramente.
+
+Arquivos modificados:
+
+- `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`
+- `docs/DECISOES_ARQUITETURAIS.md`
+- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada, alterada ou reaplicada.
+
+Tabelas e colunas afetadas:
+
+- Nenhuma estrutura física foi alterada.
+- Foram especificadas, mas não criadas, `dados_clinicos_atendimento`, `evento_clinico`, `dispositivo_implantado` e `obito`.
+
+Impacto no sistema:
+
+- Sem impacto físico ou funcional.
+- Define medidas por atendimento, fatos longitudinais por paciente e exclusividade de reação adversa atribuída ao tratamento em `tratamento_chagas`.
+
+Como testar:
+
+- Comparar a especificação com o dump físico, as migrations existentes e os campos do dicionário de planejamento.
+- Conferir que nenhuma migration ou arquivo em `sql/` foi alterado.
+- Executar `make project-check`, `git diff --check` e `git status --short`.
+
+Pendências ou riscos:
+
+- O módulo não está pronto para migration até validar unidades, NYHA, reação adversa, linhas negativas/desconhecidas e requisitos de proveniência.
+
 ## 2026-07-01 - Documentação técnica do estado atual
 
 Data: 2026-07-01
