@@ -2,7 +2,7 @@
 
 Atualizado em: 2026-07-16
 
-Status: especificação técnica concluída, com pendências antes da migration.
+Status: pronta para orientar migration incremental; regras de importação permanecem pendentes.
 
 ## Escopo e fronteiras
 
@@ -25,24 +25,24 @@ Fronteiras com o núcleo atual:
 
 Consequência: a primeira versão não registra em qual atendimento um fato histórico foi digitado. Se essa auditoria for necessária antes do módulo de importação, será preciso reavaliar a decisão.
 
-## Unidades e formatos canônicos
+## Unidades e formatos de armazenamento
 
-As unidades abaixo são propostas para armazenamento normalizado. Não definem faixa clínica normal.
+As unidades e tipos abaixo constam no dicionário técnico de planejamento e definem o formato de armazenamento normalizado. O projeto não contém evidência das unidades efetivamente presentes nas células da planilha.
 
-| Informação | Campo | Tipo | Unidade/formato canônico | Validação física proposta |
+| Informação | Campo | Tipo | Unidade/formato de destino | Validação na migration |
 | --- | --- | --- | --- | --- |
-| Altura | `altura_cm` | `NUMERIC(5,2)` | centímetros | valor maior que zero |
-| Peso | `peso_kg` | `NUMERIC(6,2)` | quilogramas | valor maior que zero |
-| Circunferência abdominal | `circunferencia_abdominal_cm` | `NUMERIC(5,2)` | centímetros | valor maior que zero |
-| Frequência cardíaca | `frequencia_cardiaca_bpm` | `SMALLINT` | batimentos por minuto | valor maior que zero |
-| Saturação | `saturacao_percentual` | `NUMERIC(5,2)` | percentual de 0 a 100 | entre 0 e 100 |
-| Pressão sistólica | `pa_sistolica_mmhg` | `SMALLINT` | mmHg | valor maior que zero |
-| Pressão diastólica | `pa_diastolica_mmhg` | `SMALLINT` | mmHg | valor maior que zero |
-| NYHA | `nyha` | `VARCHAR(20)` | `i`, `ii`, `iii`, `iv`, `nao_informado` | lista fechada inicial |
+| Altura | `altura_cm` | `NUMERIC(5,2)` | centímetros | sem `CHECK` de faixa |
+| Peso | `peso_kg` | `NUMERIC(5,2)` | quilogramas | sem `CHECK` de faixa |
+| Circunferência abdominal | `circunferencia_abdominal_cm` | `NUMERIC(5,2)` | centímetros | sem `CHECK` de faixa |
+| Frequência cardíaca | `frequencia_cardiaca_bpm` | `INTEGER` | batimentos por minuto | sem `CHECK` de faixa |
+| Saturação | `saturacao_percentual` | `NUMERIC(5,2)` | percentual | sem `CHECK` de faixa |
+| Pressão sistólica | `pa_sistolica_mmhg` | `INTEGER` | mmHg | sem `CHECK` de faixa |
+| Pressão diastólica | `pa_diastolica_mmhg` | `INTEGER` | mmHg | sem `CHECK` de faixa |
+| NYHA | `nyha` | `VARCHAR(20)` | texto a normalizar futuramente | sem lista fechada |
 
-Conversões de metros para centímetros, gramas para quilogramas, separador decimal e remoção de símbolos pertencem à importação. O valor da célula deve ser preservado em `valor_original_*` mesmo quando a conversão falhar.
+Conversões de unidade, separador decimal e remoção de símbolos pertencem à futura importação. Até confirmar a origem, a rotina não poderá presumir metros, centímetros, gramas, quilogramas, fração ou percentual. O valor da célula deve ser preservado em `valor_original_*` mesmo quando a conversão não for executada ou falhar.
 
-Não foram propostas faixas fisiológicas mínimas/máximas para altura, peso, circunferência, frequência ou pressão, pois exigem validação clínica. Os `CHECK` acima impedem apenas valores incompatíveis com a unidade física.
+Não serão criados `CHECK`s de faixa nem domínio de NYHA nesta migration. As fontes locais não fornecem valores observados nem regra clínica validada; os tipos e a preservação do original são suficientes para criar a estrutura sem antecipar a importação.
 
 ## Tabela `dados_clinicos_atendimento`
 
@@ -59,14 +59,14 @@ Concentrar uma avaliação objetiva consolidada por atendimento.
 | --- | --- | --- | --- |
 | `dados_clinicos_atendimento_id` | `BIGSERIAL` | sim | PK |
 | `atendimento_id` | `BIGINT` | sim | FK e `UNIQUE` |
-| `altura_cm` | `NUMERIC(5,2)` | não | maior que zero |
-| `peso_kg` | `NUMERIC(6,2)` | não | maior que zero |
-| `circunferencia_abdominal_cm` | `NUMERIC(5,2)` | não | maior que zero |
-| `frequencia_cardiaca_bpm` | `SMALLINT` | não | maior que zero |
-| `saturacao_percentual` | `NUMERIC(5,2)` | não | entre 0 e 100 |
-| `pa_sistolica_mmhg` | `SMALLINT` | não | maior que zero |
-| `pa_diastolica_mmhg` | `SMALLINT` | não | maior que zero |
-| `nyha` | `VARCHAR(20)` | não | domínio textual proposto |
+| `altura_cm` | `NUMERIC(5,2)` | não | unidade de destino: cm |
+| `peso_kg` | `NUMERIC(5,2)` | não | unidade de destino: kg |
+| `circunferencia_abdominal_cm` | `NUMERIC(5,2)` | não | unidade de destino: cm |
+| `frequencia_cardiaca_bpm` | `INTEGER` | não | unidade de destino: bpm |
+| `saturacao_percentual` | `NUMERIC(5,2)` | não | unidade de destino: percentual |
+| `pa_sistolica_mmhg` | `INTEGER` | não | unidade de destino: mmHg |
+| `pa_diastolica_mmhg` | `INTEGER` | não | unidade de destino: mmHg |
+| `nyha` | `VARCHAR(20)` | não | sem domínio fechado nesta fase |
 | `valor_original_altura` | `TEXT` | não | célula original |
 | `valor_original_peso` | `TEXT` | não | célula original |
 | `valor_original_circunferencia_abdominal` | `TEXT` | não | célula original |
@@ -84,11 +84,10 @@ Concentrar uma avaliação objetiva consolidada por atendimento.
 - PK em `dados_clinicos_atendimento_id`.
 - FK `atendimento_id` → `atendimento(atendimento_id)` com `ON DELETE CASCADE`.
 - `UNIQUE(atendimento_id)`, que já fornece o índice de busca pelo atendimento.
-- `CHECK` individual para cada valor físico conforme a tabela de unidades.
-- `CHECK (nyha IS NULL OR nyha IN ('i', 'ii', 'iii', 'iv', 'nao_informado'))`.
+- Nenhum `CHECK` de faixa física ou domínio clínico nesta fase.
 - Não criar índice isolado adicional em `atendimento_id`, pois seria redundante com o `UNIQUE`.
 
-Não se propõe `CHECK` relacionando pressão sistólica e diastólica; essa é uma regra clínica a validar, e valores originais inconsistentes devem poder ser auditados.
+Não se propõe `CHECK` relacionando pressão sistólica e diastólica. O dicionário não define essa regra, e valores não normalizados devem poder ser preservados para auditoria.
 
 ## Tabela `evento_clinico`
 
@@ -102,9 +101,9 @@ Registrar afirmações positivas, negativas ou desconhecidas sobre eventos longi
 ### Representação de AVC e reação adversa
 
 - `teve AVC` gera registro `tipo_evento = 'avc'`; `ocorreu` recebe o booleano normalizado.
-- `Ano do ultimo AVC` preenche `ano_evento`. Não se inventa mês ou dia; `data_evento` permanece nula.
-- `teve reação adversa?` gera `tipo_evento = 'reacao_adversa'` somente quando não for possível atribuí-la ao tratamento de Chagas.
-- Quando a reação for atribuída ao tratamento, usar exclusivamente `tratamento_chagas`.
+- `Ano do ultimo AVC` preenche `ano_evento`. Não existe `data_evento`, pois a fonte local prevê apenas o ano.
+- O dicionário mapeia `teve reação adversa?` para `evento_clinico`, mas não informa se a pergunta se refere ao tratamento de Chagas. A tabela aceitará `tipo_evento = 'reacao_adversa'`, porém a transformação dessa coluna fica suspensa até decisão semântica.
+- Se futuramente for comprovado vínculo com tratamento, usar exclusivamente `tratamento_chagas` e não criar evento duplicado.
 
 ### Campos
 
@@ -112,13 +111,12 @@ Registrar afirmações positivas, negativas ou desconhecidas sobre eventos longi
 | --- | --- | --- | --- |
 | `evento_clinico_id` | `BIGSERIAL` | sim | PK |
 | `paciente_id` | `BIGINT` | sim | FK |
-| `tipo_evento` | `VARCHAR(60)` | sim | domínio textual |
+| `tipo_evento` | `VARCHAR(100)` | sim | valor padronizado pela origem futura |
 | `ocorreu` | `BOOLEAN` | não | permite desconhecido |
-| `data_evento` | `DATE` | não | data completa, se conhecida |
-| `ano_evento` | `SMALLINT` | não | ano sem data artificial |
+| `ano_evento` | `INTEGER` | não | ano sem data artificial |
 | `descricao` | `TEXT` | não | detalhe disponível |
 | `valor_original_ocorrencia` | `TEXT` | não | célula de presença/ausência |
-| `valor_original_data` | `TEXT` | não | ano ou data original |
+| `valor_original_data` | `TEXT` | não | ano original |
 | `valor_original_descricao` | `TEXT` | não | detalhe original |
 | `observacoes` | `TEXT` | não | informação complementar |
 | `criado_em` | `TIMESTAMP` | sim | `DEFAULT CURRENT_TIMESTAMP` |
@@ -128,10 +126,9 @@ Registrar afirmações positivas, negativas ou desconhecidas sobre eventos longi
 
 - PK em `evento_clinico_id`.
 - FK `paciente_id` → `paciente(paciente_id)` com `ON DELETE CASCADE`, alinhada às extensões clínicas atuais do paciente.
-- `CHECK (tipo_evento IN ('avc', 'reacao_adversa', 'outro', 'nao_informado'))`.
-- `CHECK (ano_evento IS NULL OR ano_evento BETWEEN 1000 AND 9999)`, que valida somente o formato de quatro dígitos, não plausibilidade clínica.
+- Nenhum `CHECK` de tipo ou formato do ano nesta fase; o dicionário prevê `VARCHAR(100)` e `INTEGER`, mas não fornece domínios validados.
 - Não criar `UNIQUE` por paciente/tipo/ano: eventos diferentes podem compartilhar tipo e ano.
-- Índices em `(paciente_id, tipo_evento)` e `data_evento`. Não criar índice isolado em `paciente_id`, pois o índice composto já atende buscas pelo paciente.
+- Índice em `(paciente_id, tipo_evento)`. Não criar índice isolado em `paciente_id`, pois o índice composto já atende buscas pelo paciente.
 
 ## Tabela `dispositivo_implantado`
 
@@ -146,7 +143,7 @@ Registrar o estado consolidado informado para cada tipo de dispositivo implantá
 
 - `portador de marcapasso?` → `tipo_dispositivo = 'marcapasso'`.
 - `portador de CDI?` → `tipo_dispositivo = 'cdi'`.
-- `possui_dispositivo` recebe `TRUE`, `FALSE` ou `NULL` quando o valor for desconhecido; o valor bruto é preservado.
+- Para célula não vazia, `possui_dispositivo` recebe `TRUE`, `FALSE` ou `NULL` quando o valor for ambíguo; o valor bruto é preservado. Célula vazia não gera linha.
 - A tabela não representa o procedimento de implante. Se o procedimento for conhecido, ele continua em `procedimento_clinico` sem duplicar o estado do dispositivo.
 
 ### Campos
@@ -155,12 +152,10 @@ Registrar o estado consolidado informado para cada tipo de dispositivo implantá
 | --- | --- | --- | --- |
 | `dispositivo_implantado_id` | `BIGSERIAL` | sim | PK |
 | `paciente_id` | `BIGINT` | sim | FK |
-| `tipo_dispositivo` | `VARCHAR(60)` | sim | domínio textual |
+| `tipo_dispositivo` | `VARCHAR(100)` | sim | `marcapasso` ou `cdi` conforme a coluna de origem |
 | `possui_dispositivo` | `BOOLEAN` | não | permite desconhecido |
-| `data_implante` | `DATE` | não | somente se conhecida |
 | `valor_original_tipo` | `TEXT` | não | cabeçalho/tipo original quando necessário |
 | `valor_original_presenca` | `TEXT` | não | célula original |
-| `valor_original_data` | `TEXT` | não | data original |
 | `observacoes` | `TEXT` | não | informação complementar |
 | `criado_em` | `TIMESTAMP` | sim | `DEFAULT CURRENT_TIMESTAMP` |
 | `atualizado_em` | `TIMESTAMP` | sim | `DEFAULT CURRENT_TIMESTAMP` |
@@ -170,7 +165,7 @@ Registrar o estado consolidado informado para cada tipo de dispositivo implantá
 - PK em `dispositivo_implantado_id`.
 - FK `paciente_id` → `paciente(paciente_id)` com `ON DELETE CASCADE`.
 - `UNIQUE(paciente_id, tipo_dispositivo)` para o estado consolidado da primeira versão.
-- `CHECK (tipo_dispositivo IN ('marcapasso', 'cdi', 'outro', 'nao_informado'))`.
+- Nenhum `CHECK` de tipo além do `NOT NULL`; os dois valores conhecidos serão definidos pela transformação futura, sem fechar o domínio físico prematuramente.
 - Índice isolado em `paciente_id` é dispensável porque ele é a primeira coluna do `UNIQUE`.
 
 Risco conhecido: o `UNIQUE` não modela troca de dispositivo ou múltiplos dispositivos do mesmo tipo. Se o escopo futuro exigir inventário/histórico individual, será necessário introduzir identificação e vigência ou substituir o estado consolidado por registros históricos.
@@ -185,7 +180,7 @@ Registrar o desfecho de óbito consolidado do paciente sem tratá-lo como observ
 
 ### Representação
 
-- `Óbito` → `houve_obito`, aceitando `TRUE`, `FALSE` ou `NULL` quando desconhecido.
+- Para célula `Óbito` não vazia, criar a linha e preencher `houve_obito` com `TRUE`, `FALSE` ou `NULL` quando o valor for ambíguo; célula vazia, sem data e sem causa não gera linha.
 - `Data do óbito` → `data_obito`, somente quando houver data válida.
 - `causa do óbito` → `causa_obito`, sem codificação clínica nesta fase.
 - Não será criado campo de relação causal com doença de Chagas sem fonte explícita.
@@ -228,21 +223,31 @@ As quatro tabelas dependem apenas de estruturas já existentes e não dependem e
 
 A ordem acompanha avaliação do atendimento, histórico clínico, estado de dispositivos e desfecho, facilitando revisão e testes.
 
-## Pendências antes da migration
+## Pendências resolvidas ou delimitadas
 
-1. Confirmar se a planilha usa centímetros/quilogramas/mmHg/percentual ou se há valores em outras unidades.
-2. Confirmar o domínio de NYHA e como tratar valores combinados ou textuais.
-3. Confirmar se `Ano do ultimo AVC` sempre contém quatro dígitos e se pode existir sem `teve AVC = true`.
-4. Confirmar se `teve reação adversa?` se refere ao benzonidazol/tratamento de Chagas ou a evento genérico.
-5. Confirmar se valores `FALSE` de marcapasso/CDI e óbito devem gerar linhas estruturadas ou ficar apenas na camada bruta de importação.
-6. Confirmar se o estado consolidado por tipo de dispositivo é suficiente ou se existe necessidade de histórico/troca.
-7. Confirmar se a ausência de vínculo com atendimento é aceitável para auditoria antes de `importacao_linha`.
-8. Definir política de atualização de `atualizado_em`, pois o núcleo ainda não possui trigger versionada.
-9. Definir se `causa_obito` permanecerá texto livre ou terá codificação futura; nenhuma codificação foi presumida.
+| Tema | Decisão ou delimitação baseada nas fontes locais | Bloqueia migration? |
+| --- | --- | --- |
+| Unidades de origem | Destinos seguem nomes/tipos do dicionário (`cm`, `kg`, `bpm`, percentual e `mmHg`), mas nenhuma conversão será definida até conhecer a unidade da célula. Originais permanecem em `TEXT`. | Não; bloqueia transformação automática. |
+| NYHA | Manter `VARCHAR(20)` e `valor_original_nyha`, sem `CHECK` ou normalização nesta fase. | Não; bloqueia padronização na importação. |
+| Ano do AVC | Manter `INTEGER`, sem fabricar data e sem `CHECK` de quatro dígitos. | Não; formato será validado na importação. |
+| Reação adversa | A estrutura aceita evento genérico, mas essa coluna não será importada até esclarecer vínculo com tratamento. | Não; bloqueia somente o mapeamento da coluna. |
+| Respostas falsas/ambíguas | A regra R001 sustenta `TRUE`, `FALSE` ou `NULL` com original preservado. Célula não vazia gera linha; célula totalmente vazia não gera. | Não. |
+| Histórico de dispositivos | O dicionário contém apenas presença por tipo, sem identificador ou troca. A primeira versão é estado consolidado com `UNIQUE(paciente_id, tipo_dispositivo)`; histórico fica fora do escopo. | Não. |
+| Vínculo com atendimento | ADR-009 já decidiu vínculo apenas com paciente para eventos, dispositivos e óbito; proveniência aguarda `importacao_linha`. | Não. |
+| `atualizado_em` | Repetir o padrão físico atual: `NOT NULL DEFAULT CURRENT_TIMESTAMP`, sem trigger. Atualizações futuras devem preencher o campo explicitamente. | Não. |
+| Causa de óbito | O dicionário define `TEXT` e não fornece codificação. Permanecerá texto livre com original preservado. | Não. |
+
+## Pendências restantes para importação
+
+1. Confirmar unidades e formatos efetivos das células de medidas.
+2. Definir valores padronizados de NYHA.
+3. Definir validação do ano do AVC e tratamento de inconsistência entre ano e ocorrência.
+4. Esclarecer se `teve reação adversa?` pertence ao tratamento de Chagas ou ao histórico clínico genérico.
+5. Definir a rastreabilidade por `importacao_linha` antes da importação completa.
 
 ## Riscos de modelagem
 
-- Valores normalizados incorretamente se as unidades reais não forem confirmadas.
+- Valores normalizados incorretamente se uma futura importação presumir unidades sem confirmação.
 - Perda da proveniência do atendimento de digitação para eventos, dispositivos e óbito até existir rastreabilidade de importação.
 - Duplicidade de reação adversa se a regra de exclusividade com `tratamento_chagas` não for aplicada.
 - `evento_clinico` mistura afirmação negativa/desconhecida com ocorrência histórica para preservar o formato da planilha; consultas devem considerar `ocorreu`.
@@ -251,4 +256,6 @@ A ordem acompanha avaliação do atendimento, histórico clínico, estado de dis
 
 ## Prontidão
 
-O módulo **não está pronto para virar migration**. A estrutura relacional e os tipos estão definidos, mas as pendências 1 a 7 afetam transformação, cardinalidade ou semântica dos dados e precisam de validação humana antes de fixar constraints em SQL.
+O módulo **está pronto para virar migration incremental**, desde que a migration siga exatamente a estrutura permissiva desta especificação, não inclua `CHECK`s clínicos/domínios não comprovados e venha acompanhada de teste SQL sintético e estratégia de reversão.
+
+As pendências restantes impedem a rotina de importação automática dessas colunas, mas não impedem criar tabelas nullable com preservação de valores originais. A migration não autoriza importar dados reais nem inferir unidades ou semântica clínica.

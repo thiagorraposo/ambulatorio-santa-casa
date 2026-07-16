@@ -172,13 +172,15 @@ Título: Separação entre avaliação por atendimento e fatos longitudinais do 
 
 Data: 2026-07-16
 
-Status: Aceita para a especificação; implementação pendente de validações pré-migration
+Status: Aceita; pronta para implementação por migration incremental
 
 Contexto: O próximo módulo precisa representar medidas coletadas em consulta, AVC prévio, reação adversa, dispositivos implantados e óbito sem duplicar tabelas atuais nem criar atendimentos artificiais para fatos históricos.
 
 Decisão: Vincular `dados_clinicos_atendimento` obrigatória e unicamente a `atendimento`. Vincular `evento_clinico`, `dispositivo_implantado` e `obito` somente a `paciente` na primeira versão. Manter reações adversas atribuídas ao tratamento exclusivamente em `tratamento_chagas`.
 
 Consequências: Medidas preservam sua temporalidade por atendimento; fatos longitudinais podem ser registrados sem atendimento correspondente. A proveniência do atendimento de digitação desses fatos não será armazenada até existir mecanismo próprio de importação/auditoria.
+
+Delimitação adicional: incertezas de unidade, NYHA, formato do ano e semântica de reação adversa serão tratadas na futura importação. Elas não serão convertidas em `CHECK`s ou regras clínicas na migration; campos normalizados permanecem opcionais e os valores originais são preservados.
 
 Alternativas rejeitadas: duplicar `paciente_id` em dados clínicos; tornar `atendimento_id` obrigatório para fatos históricos; adicionar FK opcional de atendimento sem garantia de pertencer ao mesmo paciente; duplicar reações do tratamento em evento clínico.
 

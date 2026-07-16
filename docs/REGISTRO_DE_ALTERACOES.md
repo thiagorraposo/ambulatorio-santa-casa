@@ -228,6 +228,48 @@ Pendências ou riscos:
 - `db-test` depende de todos os arquivos em `tests/sql/` serem transacionais e seguros, conforme `tests/AGENTS.md`.
 - O dump preserva a evidência quando não há mudança estrutural; quando houver alteração, o diff gerado exige revisão.
 
+## 2026-07-16 - Delimitação das pendências do módulo clínico
+
+Data: 2026-07-16
+
+Título da alteração: Resolução e delimitação das pendências que bloqueavam a migration do módulo clínico.
+
+Motivo: separar decisões de estrutura física das regras de transformação que dependem de conhecer unidades e semântica da planilha, sem inventar regras clínicas.
+
+Arquivos modificados:
+
+- `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`
+- `docs/DECISOES_ARQUITETURAIS.md`
+- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada, alterada ou aplicada.
+
+Tabelas e colunas afetadas:
+
+- Nenhuma estrutura física foi alterada.
+- A especificação futura das quatro tabelas foi tornada permissiva, removendo campos e `CHECK`s sem evidência local suficiente.
+
+Impacto no sistema:
+
+- Sem impacto físico ou funcional.
+- O módulo passa a estar pronto para migration incremental; dúvidas de unidades, NYHA, ano e reação adversa permanecem bloqueadoras apenas da importação automática.
+
+Como testar:
+
+- Conferir a especificação contra o dicionário técnico, CSVs de mapeamento/transformação e ADR-009.
+- Confirmar que nenhum arquivo em `sql/` ou `tests/sql/` foi alterado.
+- Executar `make project-check`.
+
+Pendências ou riscos:
+
+- A futura migration deve seguir a especificação permissiva e não antecipar regras de importação.
+- A importação continua bloqueada até resolver unidades, NYHA, ano do AVC, reação adversa e rastreabilidade por linha.
+
 ## 2026-07-01 - Documentação técnica do estado atual
 
 Data: 2026-07-01

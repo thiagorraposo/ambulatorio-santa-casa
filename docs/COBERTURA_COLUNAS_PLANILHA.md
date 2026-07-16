@@ -187,26 +187,26 @@ Estrutura proposta para decisão antes de migration:
 - `evento_clinico_id`, PK;
 - `paciente_id`, FK;
 - `atendimento_id`, FK opcional até decisão sobre legado;
-- `tipo_evento`, `ocorreu`, `data_evento`, `ano_evento`, `descricao`;
-- `valor_original_evento`, `valor_original_data`, `observacoes`, timestamps.
+- `tipo_evento`, `ocorreu`, `ano_evento`, `descricao`;
+- `valor_original_ocorrencia`, `valor_original_data`, `valor_original_descricao`, `observacoes`, timestamps.
 
 ### `dispositivo_implantado`
 
 - `dispositivo_implantado_id`, PK;
 - `paciente_id`, FK;
 - `atendimento_id`, FK opcional como origem do registro;
-- `tipo_dispositivo`, `possui_dispositivo`, `data_implante`, `status_dispositivo`;
-- `valor_original_dispositivo`, `observacoes`, timestamps.
+- `tipo_dispositivo`, `possui_dispositivo`;
+- `valor_original_tipo`, `valor_original_presenca`, `observacoes`, timestamps.
 
 ### `obito`
 
 - `obito_id`, PK;
 - `paciente_id`, FK e `UNIQUE` se houver apenas um desfecho consolidado;
 - `atendimento_id`, FK opcional como origem do registro;
-- `houve_obito`, `data_obito`, `causa_obito`, `relacao_chagas`;
-- `valor_original_obito`, `valor_original_causa`, `observacoes`, timestamps.
+- `houve_obito`, `data_obito`, `causa_obito`;
+- `valor_original_obito`, `valor_original_data`, `valor_original_causa`, `observacoes`, timestamps.
 
-O desenho detalhado, as fronteiras com tabelas existentes e as constraints propostas estão em `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`. A especificação definiu medidas por atendimento e fatos longitudinais apenas por paciente, mas ainda não autoriza migration enquanto as pendências de semântica e origem não forem validadas.
+O desenho detalhado, as fronteiras com tabelas existentes e as constraints propostas estão em `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`. A estrutura está pronta para migration incremental com campos permissivos e preservação de originais; as pendências de unidade e semântica continuam bloqueando a importação automática, não a criação física.
 
 ## Decisões humanas pendentes
 

@@ -13,11 +13,11 @@ Atualizado em: 2026-07-16
 
 ## 2. Próxima fase técnica
 
-1. Confirmar unidades, NYHA, semântica de reação adversa e política de linhas negativas conforme `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`.
-2. Validar que eventos, dispositivos e óbito podem ficar vinculados apenas ao paciente até existir rastreabilidade de importação.
-3. Após essas decisões, criar uma nova migration incremental, sem alterar ou reaplicar migrations antigas.
-4. Criar testes sintéticos para campos, FKs, `UNIQUE`, `CHECK`, deleções e ausência de duplicação com o núcleo.
-5. Atualizar a evidência do schema e a documentação depois da aplicação controlada.
+1. Criar uma nova migration incremental para as quatro tabelas especificadas, sem alterar ou reaplicar migrations antigas.
+2. Não adicionar faixas, domínios de NYHA, conversões ou regras de reação adversa que não constem na especificação.
+3. Criar testes sintéticos para campos, FKs, `UNIQUE`, deleções e ausência de duplicação com o núcleo.
+4. Validar com `make project-check` antes e depois da aplicação controlada.
+5. Atualizar a evidência do schema e a documentação somente depois da aplicação.
 
 ## 3. Ajustes e Documentação Pendentes
 
@@ -69,7 +69,7 @@ Atualizado em: 2026-07-16
 
 ## Próximo Passo Técnico Recomendado
 
-O próximo módulo está especificado em `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`, mas ainda não está pronto para migration. O próximo passo prático é validar as unidades de origem, NYHA, a semântica de reação adversa, a política para valores negativos/desconhecidos e a ausência de vínculo com atendimento nos fatos longitudinais. Não alterar migrations antigas e não reaplicar scripts antigos no banco atual.
+O próximo módulo está pronto para uma migration incremental conforme `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`. As dúvidas restantes foram delimitadas à importação: a migration deve manter campos normalizados opcionais, preservar valores originais e não criar regras clínicas não comprovadas. Não alterar migrations antigas e não reaplicar scripts antigos no banco atual.
 
 Comando local recomendado para verificar documentação e estado do projeto:
 
