@@ -38,6 +38,9 @@ O projeto `ambulatorio-santa-casa` implementa, por fases, a base PostgreSQL para
 - Tarefas complexas devem começar por plano antes de alteração.
 - Toda mudança deve definir como será validada.
 - Não execute comandos destrutivos sem autorização explícita.
+- Priorize os alvos padronizados do `Makefile` em vez de repetir comandos extensos: `make db-check`, `make db-test`, `make docs-check`, `make project-check` e `make db-schema-dump`.
+- Use `make project-check` como validação local padrão antes e depois de mudanças, salvo limitação documentada.
+- Use `make db-schema-dump` somente quando houver motivo explícito para atualizar a evidência estrutural; o alvo não aplica migrations.
 
 ## Definição de Pronto
 

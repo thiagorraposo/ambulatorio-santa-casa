@@ -183,6 +183,51 @@ Pendências ou riscos:
 
 - O módulo não está pronto para migration até validar unidades, NYHA, reação adversa, linhas negativas/desconhecidas e requisitos de proveniência.
 
+## 2026-07-16 - Padronização do fluxo local com Make
+
+Data: 2026-07-16
+
+Título da alteração: Simplificação e automação do fluxo local não destrutivo.
+
+Motivo: centralizar conexão, testes, documentação, validação do projeto e dump estrutural em comandos curtos e reproduzíveis, sem repetir linhas extensas em prompts.
+
+Arquivos modificados:
+
+- `Makefile`
+- `README.md`
+- `AGENTS.md`
+- `docs/WORKFLOW_DE_DESENVOLVIMENTO.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada, alterada ou reaplicada.
+
+Tabelas e colunas afetadas:
+
+- Nenhuma tabela ou coluna foi alterada.
+
+Impacto no sistema:
+
+- Adiciona `make db-check` e `make db-test`.
+- Torna `make project-check` estrito e responsável por documentação, banco, testes SQL, diff e status.
+- Torna o dump estrutural atômico e mantém autenticação exclusivamente pelo mecanismo local do PostgreSQL.
+
+Como testar:
+
+- Executar `make help`.
+- Executar `make db-check`.
+- Executar `make db-test`.
+- Executar `make docs-check`.
+- Executar `make project-check`.
+- Executar `make db-schema-dump` e revisar que o dump contém somente estrutura.
+- Executar `git diff --check` e `git status --short`.
+
+Pendências ou riscos:
+
+- `db-test` depende de todos os arquivos em `tests/sql/` serem transacionais e seguros, conforme `tests/AGENTS.md`.
+- O dump preserva a evidência quando não há mudança estrutural; quando houver alteração, o diff gerado exige revisão.
+
 ## 2026-07-01 - Documentação técnica do estado atual
 
 Data: 2026-07-01

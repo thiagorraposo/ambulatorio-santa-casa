@@ -1,6 +1,20 @@
 # Workflow de Desenvolvimento
 
-Atualizado em: 2026-07-01
+Atualizado em: 2026-07-16
+
+## Comandos Oficiais
+
+Use os alvos do `Makefile` como interface local padrão:
+
+| Comando | Quando usar |
+| --- | --- |
+| `make db-check` | Confirmar conexão, banco, usuário e schema. |
+| `make db-test` | Executar todos os testes SQL versionados. |
+| `make docs-check` | Conferir documentação obrigatória. |
+| `make project-check` | Validação não destrutiva padrão antes e depois da tarefa. |
+| `make db-schema-dump` | Atualizar a evidência estrutural após mudança física aplicada e autorizada. |
+
+Os alvos usam a autenticação local do PostgreSQL por `~/.pgpass`. Nunca inclua senha no prompt ou na linha de comando. `make db-schema-dump` gera somente estrutura; nenhum desses alvos aplica migrations antigas, cria ou remove banco, faz commit ou push.
 
 ## Fluxo Oficial
 
@@ -9,10 +23,10 @@ Atualizado em: 2026-07-01
 3. Pedir plano ao Codex para tarefas complexas.
 4. Definir objetivo, escopo, arquivos afetados, restrições e critérios de aceite.
 5. Implementar uma alteração pequena e isolada.
-6. Executar validação real.
+6. Executar validação real, normalmente com `make project-check`.
 7. Revisar o diff.
 8. Atualizar a documentação necessária.
-9. Validar `git status`.
+9. Validar `git status`, já exibido por `make project-check`.
 10. Criar commit no padrão adotado.
 11. Enviar para o repositório remoto.
 12. Usar pull request quando API, frontend ou trabalho colaborativo começarem.
@@ -63,6 +77,14 @@ Atualizado em: 2026-07-01
 
 ## Modelos de Prompt para Codex
 
+Prefira prompts curtos que referenciem as regras e os comandos oficiais, acrescentando detalhes apenas quando alterarem o escopo.
+
+### Prompt Mínimo Recomendado
+
+```text
+Leia AGENTS.md e a documentação relacionada. Execute <objetivo>. Preserve mudanças existentes, não altere migrations antigas e valide com make project-check. Não faça commit nem push.
+```
+
 ### Planejamento de Mudança
 
 ```text
@@ -73,6 +95,7 @@ Arquivos relevantes:
 Restrições:
 Critérios de aceite:
 Validação esperada:
+Use os alvos aplicáveis do Makefile e finalize com make project-check.
 ```
 
 ### Migration Incremental
@@ -84,7 +107,7 @@ Schema/tabelas envolvidos:
 Regras de integridade:
 Rollback ou reversão:
 Documentação a atualizar:
-Teste SQL esperado:
+Teste SQL esperado; execute com make db-test:
 ```
 
 ### Revisão de Diff
@@ -94,7 +117,7 @@ Revise o diff atual com foco em bugs, riscos e documentação.
 Contexto da mudança:
 Critérios de aceite:
 Pontos de atenção:
-Comandos de validação já executados:
+Comandos de validação já executados; prefira make project-check:
 ```
 
 ### Criação de Teste
