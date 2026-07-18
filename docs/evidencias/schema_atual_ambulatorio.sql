@@ -898,6 +898,75 @@ ALTER SEQUENCE ambulatorio.condicao_chagas_condicao_chagas_id_seq OWNED BY ambul
 
 
 --
+-- Name: dados_clinicos_atendimento; Type: TABLE; Schema: ambulatorio; Owner: -
+--
+
+CREATE TABLE ambulatorio.dados_clinicos_atendimento (
+    dados_clinicos_atendimento_id bigint NOT NULL,
+    atendimento_id bigint NOT NULL,
+    altura_cm numeric(5,2),
+    peso_kg numeric(5,2),
+    circunferencia_abdominal_cm numeric(5,2),
+    frequencia_cardiaca_bpm integer,
+    saturacao_percentual numeric(5,2),
+    pa_sistolica_mmhg integer,
+    pa_diastolica_mmhg integer,
+    nyha character varying(20),
+    valor_original_altura text,
+    valor_original_peso text,
+    valor_original_circunferencia_abdominal text,
+    valor_original_frequencia_cardiaca text,
+    valor_original_saturacao text,
+    valor_original_pa_sistolica text,
+    valor_original_pa_diastolica text,
+    valor_original_nyha text,
+    observacoes text,
+    criado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    atualizado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: TABLE dados_clinicos_atendimento; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON TABLE ambulatorio.dados_clinicos_atendimento IS 'Avaliacao objetiva consolidada produzida em um atendimento.';
+
+
+--
+-- Name: COLUMN dados_clinicos_atendimento.atendimento_id; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.dados_clinicos_atendimento.atendimento_id IS 'Atendimento que produziu a avaliacao; permite no maximo uma avaliacao por atendimento.';
+
+
+--
+-- Name: COLUMN dados_clinicos_atendimento.nyha; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.dados_clinicos_atendimento.nyha IS 'Classificacao funcional em texto ainda sem dominio fechado.';
+
+
+--
+-- Name: dados_clinicos_atendimento_dados_clinicos_atendimento_id_seq; Type: SEQUENCE; Schema: ambulatorio; Owner: -
+--
+
+CREATE SEQUENCE ambulatorio.dados_clinicos_atendimento_dados_clinicos_atendimento_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: dados_clinicos_atendimento_dados_clinicos_atendimento_id_seq; Type: SEQUENCE OWNED BY; Schema: ambulatorio; Owner: -
+--
+
+ALTER SEQUENCE ambulatorio.dados_clinicos_atendimento_dados_clinicos_atendimento_id_seq OWNED BY ambulatorio.dados_clinicos_atendimento.dados_clinicos_atendimento_id;
+
+
+--
 -- Name: diagnostico_chagas; Type: TABLE; Schema: ambulatorio; Owner: -
 --
 
@@ -992,6 +1061,56 @@ CREATE SEQUENCE ambulatorio.diagnostico_chagas_diagnostico_chagas_id_seq
 --
 
 ALTER SEQUENCE ambulatorio.diagnostico_chagas_diagnostico_chagas_id_seq OWNED BY ambulatorio.diagnostico_chagas.diagnostico_chagas_id;
+
+
+--
+-- Name: dispositivo_implantado; Type: TABLE; Schema: ambulatorio; Owner: -
+--
+
+CREATE TABLE ambulatorio.dispositivo_implantado (
+    dispositivo_implantado_id bigint NOT NULL,
+    paciente_id bigint NOT NULL,
+    tipo_dispositivo character varying(100) NOT NULL,
+    possui_dispositivo boolean,
+    valor_original_tipo text,
+    valor_original_presenca text,
+    observacoes text,
+    criado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    atualizado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: TABLE dispositivo_implantado; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON TABLE ambulatorio.dispositivo_implantado IS 'Estado consolidado informado de cada tipo de dispositivo implantavel do paciente.';
+
+
+--
+-- Name: COLUMN dispositivo_implantado.possui_dispositivo; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.dispositivo_implantado.possui_dispositivo IS 'Presenca normalizada; NULL representa informacao desconhecida ou ambigua.';
+
+
+--
+-- Name: dispositivo_implantado_dispositivo_implantado_id_seq; Type: SEQUENCE; Schema: ambulatorio; Owner: -
+--
+
+CREATE SEQUENCE ambulatorio.dispositivo_implantado_dispositivo_implantado_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: dispositivo_implantado_dispositivo_implantado_id_seq; Type: SEQUENCE OWNED BY; Schema: ambulatorio; Owner: -
+--
+
+ALTER SEQUENCE ambulatorio.dispositivo_implantado_dispositivo_implantado_id_seq OWNED BY ambulatorio.dispositivo_implantado.dispositivo_implantado_id;
 
 
 --
@@ -1127,6 +1246,66 @@ CREATE SEQUENCE ambulatorio.encaminhamento_encaminhamento_id_seq
 --
 
 ALTER SEQUENCE ambulatorio.encaminhamento_encaminhamento_id_seq OWNED BY ambulatorio.encaminhamento.encaminhamento_id;
+
+
+--
+-- Name: evento_clinico; Type: TABLE; Schema: ambulatorio; Owner: -
+--
+
+CREATE TABLE ambulatorio.evento_clinico (
+    evento_clinico_id bigint NOT NULL,
+    paciente_id bigint NOT NULL,
+    tipo_evento character varying(100) NOT NULL,
+    ocorreu boolean,
+    ano_evento integer,
+    descricao text,
+    valor_original_ocorrencia text,
+    valor_original_data text,
+    valor_original_descricao text,
+    observacoes text,
+    criado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    atualizado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: TABLE evento_clinico; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON TABLE ambulatorio.evento_clinico IS 'Eventos clinicos longitudinais positivos, negativos ou desconhecidos do paciente.';
+
+
+--
+-- Name: COLUMN evento_clinico.ocorreu; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.evento_clinico.ocorreu IS 'Ocorrencia normalizada; NULL representa informacao desconhecida ou ambigua.';
+
+
+--
+-- Name: COLUMN evento_clinico.ano_evento; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.evento_clinico.ano_evento IS 'Ano informado para o evento, sem criacao de data artificial.';
+
+
+--
+-- Name: evento_clinico_evento_clinico_id_seq; Type: SEQUENCE; Schema: ambulatorio; Owner: -
+--
+
+CREATE SEQUENCE ambulatorio.evento_clinico_evento_clinico_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: evento_clinico_evento_clinico_id_seq; Type: SEQUENCE OWNED BY; Schema: ambulatorio; Owner: -
+--
+
+ALTER SEQUENCE ambulatorio.evento_clinico_evento_clinico_id_seq OWNED BY ambulatorio.evento_clinico.evento_clinico_id;
 
 
 --
@@ -1377,6 +1556,65 @@ CREATE SEQUENCE ambulatorio.medicamento_medicamento_id_seq
 --
 
 ALTER SEQUENCE ambulatorio.medicamento_medicamento_id_seq OWNED BY ambulatorio.medicamento.medicamento_id;
+
+
+--
+-- Name: obito; Type: TABLE; Schema: ambulatorio; Owner: -
+--
+
+CREATE TABLE ambulatorio.obito (
+    obito_id bigint NOT NULL,
+    paciente_id bigint NOT NULL,
+    houve_obito boolean,
+    data_obito date,
+    causa_obito text,
+    valor_original_obito text,
+    valor_original_data text,
+    valor_original_causa text,
+    observacoes text,
+    criado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    atualizado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: TABLE obito; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON TABLE ambulatorio.obito IS 'Desfecho consolidado de obito do paciente.';
+
+
+--
+-- Name: COLUMN obito.houve_obito; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.obito.houve_obito IS 'Indicador normalizado; NULL representa informacao desconhecida ou ambigua.';
+
+
+--
+-- Name: COLUMN obito.causa_obito; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.obito.causa_obito IS 'Causa em texto livre, sem codificacao clinica nesta fase.';
+
+
+--
+-- Name: obito_obito_id_seq; Type: SEQUENCE; Schema: ambulatorio; Owner: -
+--
+
+CREATE SEQUENCE ambulatorio.obito_obito_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: obito_obito_id_seq; Type: SEQUENCE OWNED BY; Schema: ambulatorio; Owner: -
+--
+
+ALTER SEQUENCE ambulatorio.obito_obito_id_seq OWNED BY ambulatorio.obito.obito_id;
 
 
 --
@@ -2497,6 +2735,13 @@ ALTER TABLE ONLY ambulatorio.condicao_chagas ALTER COLUMN condicao_chagas_id SET
 
 
 --
+-- Name: dados_clinicos_atendimento dados_clinicos_atendimento_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.dados_clinicos_atendimento ALTER COLUMN dados_clinicos_atendimento_id SET DEFAULT nextval('ambulatorio.dados_clinicos_atendimento_dados_clinicos_atendimento_id_seq'::regclass);
+
+
+--
 -- Name: diagnostico_chagas diagnostico_chagas_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
 --
 
@@ -2504,10 +2749,24 @@ ALTER TABLE ONLY ambulatorio.diagnostico_chagas ALTER COLUMN diagnostico_chagas_
 
 
 --
+-- Name: dispositivo_implantado dispositivo_implantado_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.dispositivo_implantado ALTER COLUMN dispositivo_implantado_id SET DEFAULT nextval('ambulatorio.dispositivo_implantado_dispositivo_implantado_id_seq'::regclass);
+
+
+--
 -- Name: encaminhamento encaminhamento_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
 --
 
 ALTER TABLE ONLY ambulatorio.encaminhamento ALTER COLUMN encaminhamento_id SET DEFAULT nextval('ambulatorio.encaminhamento_encaminhamento_id_seq'::regclass);
+
+
+--
+-- Name: evento_clinico evento_clinico_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.evento_clinico ALTER COLUMN evento_clinico_id SET DEFAULT nextval('ambulatorio.evento_clinico_evento_clinico_id_seq'::regclass);
 
 
 --
@@ -2529,6 +2788,13 @@ ALTER TABLE ONLY ambulatorio.historico_familiar_chagas ALTER COLUMN historico_fa
 --
 
 ALTER TABLE ONLY ambulatorio.medicamento ALTER COLUMN medicamento_id SET DEFAULT nextval('ambulatorio.medicamento_medicamento_id_seq'::regclass);
+
+
+--
+-- Name: obito obito_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.obito ALTER COLUMN obito_id SET DEFAULT nextval('ambulatorio.obito_obito_id_seq'::regclass);
 
 
 --
@@ -2680,6 +2946,14 @@ ALTER TABLE ONLY ambulatorio.condicao_chagas
 
 
 --
+-- Name: dados_clinicos_atendimento dados_clinicos_atendimento_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.dados_clinicos_atendimento
+    ADD CONSTRAINT dados_clinicos_atendimento_pkey PRIMARY KEY (dados_clinicos_atendimento_id);
+
+
+--
 -- Name: diagnostico_chagas diagnostico_chagas_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
 --
 
@@ -2688,11 +2962,27 @@ ALTER TABLE ONLY ambulatorio.diagnostico_chagas
 
 
 --
+-- Name: dispositivo_implantado dispositivo_implantado_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.dispositivo_implantado
+    ADD CONSTRAINT dispositivo_implantado_pkey PRIMARY KEY (dispositivo_implantado_id);
+
+
+--
 -- Name: encaminhamento encaminhamento_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
 --
 
 ALTER TABLE ONLY ambulatorio.encaminhamento
     ADD CONSTRAINT encaminhamento_pkey PRIMARY KEY (encaminhamento_id);
+
+
+--
+-- Name: evento_clinico evento_clinico_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.evento_clinico
+    ADD CONSTRAINT evento_clinico_pkey PRIMARY KEY (evento_clinico_id);
 
 
 --
@@ -2717,6 +3007,14 @@ ALTER TABLE ONLY ambulatorio.historico_familiar_chagas
 
 ALTER TABLE ONLY ambulatorio.medicamento
     ADD CONSTRAINT medicamento_pkey PRIMARY KEY (medicamento_id);
+
+
+--
+-- Name: obito obito_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.obito
+    ADD CONSTRAINT obito_pkey PRIMARY KEY (obito_id);
 
 
 --
@@ -2840,11 +3138,27 @@ ALTER TABLE ONLY ambulatorio.condicao_chagas
 
 
 --
+-- Name: dados_clinicos_atendimento uq_dados_clinicos_atendimento_atendimento; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.dados_clinicos_atendimento
+    ADD CONSTRAINT uq_dados_clinicos_atendimento_atendimento UNIQUE (atendimento_id);
+
+
+--
 -- Name: diagnostico_chagas uq_diagnostico_chagas_atendimento; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
 --
 
 ALTER TABLE ONLY ambulatorio.diagnostico_chagas
     ADD CONSTRAINT uq_diagnostico_chagas_atendimento UNIQUE (atendimento_id);
+
+
+--
+-- Name: dispositivo_implantado uq_dispositivo_implantado_paciente_tipo; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.dispositivo_implantado
+    ADD CONSTRAINT uq_dispositivo_implantado_paciente_tipo UNIQUE (paciente_id, tipo_dispositivo);
 
 
 --
@@ -2861,6 +3175,14 @@ ALTER TABLE ONLY ambulatorio.historico_familiar_chagas
 
 ALTER TABLE ONLY ambulatorio.medicamento
     ADD CONSTRAINT uq_medicamento_codigo UNIQUE (codigo_medicamento);
+
+
+--
+-- Name: obito uq_obito_paciente; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.obito
+    ADD CONSTRAINT uq_obito_paciente UNIQUE (paciente_id);
 
 
 --
@@ -3065,6 +3387,13 @@ CREATE INDEX idx_encaminhamento_tipo_id ON ambulatorio.encaminhamento USING btre
 
 
 --
+-- Name: idx_evento_clinico_paciente_tipo; Type: INDEX; Schema: ambulatorio; Owner: -
+--
+
+CREATE INDEX idx_evento_clinico_paciente_tipo ON ambulatorio.evento_clinico USING btree (paciente_id, tipo_evento);
+
+
+--
 -- Name: idx_exame_resultado_exame_id; Type: INDEX; Schema: ambulatorio; Owner: -
 --
 
@@ -3090,6 +3419,13 @@ CREATE INDEX idx_historico_familiar_chagas_paciente_id ON ambulatorio.historico_
 --
 
 CREATE INDEX idx_medicamento_codigo ON ambulatorio.medicamento USING btree (codigo_medicamento);
+
+
+--
+-- Name: idx_obito_data_obito; Type: INDEX; Schema: ambulatorio; Owner: -
+--
+
+CREATE INDEX idx_obito_data_obito ON ambulatorio.obito USING btree (data_obito);
 
 
 --
@@ -3272,11 +3608,27 @@ ALTER TABLE ONLY ambulatorio.condicao_chagas
 
 
 --
+-- Name: dados_clinicos_atendimento fk_dados_clinicos_atendimento_atendimento; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.dados_clinicos_atendimento
+    ADD CONSTRAINT fk_dados_clinicos_atendimento_atendimento FOREIGN KEY (atendimento_id) REFERENCES ambulatorio.atendimento(atendimento_id) ON DELETE CASCADE;
+
+
+--
 -- Name: diagnostico_chagas fk_diagnostico_chagas_atendimento; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
 --
 
 ALTER TABLE ONLY ambulatorio.diagnostico_chagas
     ADD CONSTRAINT fk_diagnostico_chagas_atendimento FOREIGN KEY (atendimento_id) REFERENCES ambulatorio.atendimento(atendimento_id) ON DELETE CASCADE;
+
+
+--
+-- Name: dispositivo_implantado fk_dispositivo_implantado_paciente; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.dispositivo_implantado
+    ADD CONSTRAINT fk_dispositivo_implantado_paciente FOREIGN KEY (paciente_id) REFERENCES ambulatorio.paciente(paciente_id) ON DELETE CASCADE;
 
 
 --
@@ -3296,6 +3648,14 @@ ALTER TABLE ONLY ambulatorio.encaminhamento
 
 
 --
+-- Name: evento_clinico fk_evento_clinico_paciente; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.evento_clinico
+    ADD CONSTRAINT fk_evento_clinico_paciente FOREIGN KEY (paciente_id) REFERENCES ambulatorio.paciente(paciente_id) ON DELETE CASCADE;
+
+
+--
 -- Name: exame_complementar_resultado fk_exame_resultado_exame; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
 --
 
@@ -3309,6 +3669,14 @@ ALTER TABLE ONLY ambulatorio.exame_complementar_resultado
 
 ALTER TABLE ONLY ambulatorio.historico_familiar_chagas
     ADD CONSTRAINT fk_historico_familiar_chagas_paciente FOREIGN KEY (paciente_id) REFERENCES ambulatorio.paciente(paciente_id) ON DELETE CASCADE;
+
+
+--
+-- Name: obito fk_obito_paciente; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.obito
+    ADD CONSTRAINT fk_obito_paciente FOREIGN KEY (paciente_id) REFERENCES ambulatorio.paciente(paciente_id) ON DELETE CASCADE;
 
 
 --

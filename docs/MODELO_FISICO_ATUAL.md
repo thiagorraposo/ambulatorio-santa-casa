@@ -1,14 +1,14 @@
 # Modelo Físico Atual
 
-Atualizado em: 2026-07-01
+Atualizado em: 2026-07-18
 
 Este documento descreve a estrutura física real aplicada no schema `ambulatorio`, usando como fonte principal o dump `docs/evidencias/schema_atual_ambulatorio.sql`. Os scripts em `sql/` foram usados como fonte de reconciliação.
 
-O schema físico aplicado possui 25 tabelas. Todas as 25 tabelas encontradas no dump também existem nas migrations versionadas, e nenhuma tabela das migrations ficou ausente da evidência analisada.
+O schema físico aplicado possui 29 tabelas. Todas as tabelas encontradas no dump existem nas migrations versionadas, e nenhuma tabela das migrations ficou ausente da evidência analisada.
 
 ## Estratégia de Construção por Fases
 
-O modelo físico atual é o núcleo funcional inicial do banco, não a cobertura completa e final da planilha original. Essas 25 tabelas foram implementadas para validar funcionamento, integridade referencial, restrições, dados de teste e consultas básicas antes da expansão do modelo.
+O modelo físico atual reúne as 25 tabelas do núcleo funcional inicial e as quatro tabelas do módulo de avaliação clínica. Ainda não representa a cobertura completa e final da planilha original.
 
 As demais tabelas previstas serão implementadas posteriormente por migrations incrementais. A ausência temporária dessas estruturas não representa falha, lacuna involuntária ou divergência crítica em relação ao plano do projeto.
 
@@ -35,11 +35,15 @@ Nenhuma migration antiga deve ser alterada ou reaplicada no banco atual. A cober
 | `comorbidade` | Sim | `sql/06_tabelas_condicoes_comorbidades.sql` | Banco e migration |
 | `complicacao_chagas` | Sim | `sql/06_tabelas_condicoes_comorbidades.sql` | Banco e migration |
 | `condicao_chagas` | Sim | `sql/06_tabelas_condicoes_comorbidades.sql` | Banco e migration |
+| `dados_clinicos_atendimento` | Sim | `sql/10_modulo_avaliacao_clinica.sql` | Banco e migration |
 | `diagnostico_chagas` | Sim | `sql/05_tabelas_diagnostico_sorologia.sql` | Banco e migration |
+| `dispositivo_implantado` | Sim | `sql/10_modulo_avaliacao_clinica.sql` | Banco e migration |
 | `encaminhamento` | Sim | `sql/08_tabelas_encaminhamentos_acompanhamento.sql` | Banco e migration |
+| `evento_clinico` | Sim | `sql/10_modulo_avaliacao_clinica.sql` | Banco e migration |
 | `exame_complementar_resultado` | Sim | `sql/07_tabelas_exames_complementares.sql` | Banco e migration |
 | `historico_familiar_chagas` | Sim | `sql/05_tabelas_diagnostico_sorologia.sql` | Banco e migration |
 | `medicamento` | Sim | `sql/09_tabelas_medicamentos_tratamentos.sql` | Banco e migration |
+| `obito` | Sim | `sql/10_modulo_avaliacao_clinica.sql` | Banco e migration |
 | `paciente` | Sim | `sql/02_tabelas_paciente.sql` | Banco e migration |
 | `paciente_comorbidade` | Sim | `sql/06_tabelas_condicoes_comorbidades.sql` | Banco e migration |
 | `paciente_contato` | Sim | `sql/02_tabelas_paciente.sql` | Banco e migration |
@@ -654,6 +658,41 @@ Restrições e índices:
 - Check de `status_procedimento`.
 - Índices em `atendimento_id` e `status_procedimento`.
 
+### `dados_clinicos_atendimento`
+
+Finalidade: avaliação objetiva consolidada, limitada a uma por atendimento.
+
+- PK `dados_clinicos_atendimento_id`.
+- FK `atendimento_id` para `atendimento`, com `ON DELETE CASCADE`.
+- `UNIQUE (atendimento_id)`.
+- Medidas normalizadas opcionais, valores originais em texto, observações e timestamps obrigatórios.
+
+### `evento_clinico`
+
+Finalidade: eventos clínicos longitudinais positivos, negativos ou desconhecidos do paciente.
+
+- PK `evento_clinico_id`.
+- FK `paciente_id` para `paciente`, com `ON DELETE CASCADE`.
+- `tipo_evento` obrigatório; eventos do mesmo tipo e ano podem se repetir.
+- Índice em `(paciente_id, tipo_evento)`.
+
+### `dispositivo_implantado`
+
+Finalidade: estado consolidado de cada tipo de dispositivo informado para o paciente.
+
+- PK `dispositivo_implantado_id`.
+- FK `paciente_id` para `paciente`, com `ON DELETE CASCADE`.
+- `tipo_dispositivo` obrigatório e `UNIQUE (paciente_id, tipo_dispositivo)`.
+
+### `obito`
+
+Finalidade: desfecho consolidado de óbito do paciente.
+
+- PK `obito_id`.
+- FK `paciente_id` para `paciente`, com `ON DELETE CASCADE`.
+- `UNIQUE (paciente_id)` e índice em `data_obito`.
+- Indicador, data, causa e valores originais permanecem opcionais para representar informação desconhecida.
+
 ## Diferenças em Relação ao Dicionário de Dados ou Modelo Lógico Anterior
 
 - `docs/dicionario-dados.md` está vazio.
@@ -669,10 +708,8 @@ Restrições e índices:
 
 ## Próxima fase técnica
 
-1. Criar dados de teste para o núcleo atual.
-2. Validar inserções, FKs, `UNIQUE`, `CHECK` e regras de integridade.
-3. Executar consultas representativas.
-4. Registrar problemas e decisões encontradas.
-5. Definir o próximo módulo de tabelas a implementar.
-6. Criar migration incremental.
-7. Atualizar documentação antes de encerrar a alteração.
+1. Definir o próximo módulo físico a partir das lacunas de cobertura documentadas.
+2. Registrar decisões e pendências semânticas antes de nova alteração estrutural.
+3. Criar migration incremental e teste SQL correspondentes.
+4. Validar em banco limpo e no ambiente local controlado.
+5. Atualizar o dump estrutural e a documentação afetada após a aplicação.

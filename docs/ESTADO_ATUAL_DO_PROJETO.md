@@ -1,6 +1,6 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-07-16
+Atualizado em: 2026-07-18
 
 ## Objetivo Geral
 
@@ -20,17 +20,18 @@ Até o momento, o repositório contém scripts SQL de criação de banco, schema
 
 ## Status Atual
 
-- Scripts SQL existentes de `sql/00_criar_banco.sql` a `sql/09_tabelas_medicamentos_tratamentos.sql`.
+- Scripts SQL existentes de `sql/00_criar_banco.sql` a `sql/10_modulo_avaliacao_clinica.sql`.
 - README e documentos antigos `docs/dicionario-dados.md` e `docs/decisoes-modelagem.md` existem, mas estão vazios.
 - A estrutura física real aplicada no PostgreSQL foi validada por evidência versionada em `docs/evidencias/schema_atual_ambulatorio.sql`.
-- O dump foi gerado com PostgreSQL 16.14 e contém o schema `ambulatorio` com 25 tabelas aplicadas.
-- As 25 tabelas físicas encontradas também estão cobertas pelos scripts SQL em `sql/`.
+- O dump foi atualizado em 2026-07-18 e contém o schema `ambulatorio` com 29 tabelas aplicadas.
+- As 29 tabelas físicas encontradas também estão cobertas pelos scripts SQL em `sql/`.
 - Não foi encontrada tabela física sem migration correspondente, nem tabela em migration ausente do dump analisado.
 - Existe uma rotina reutilizável de validação com dados de teste em `tests/sql/01_validar_nucleo_inicial.sql`.
 - A rotina de validação usa transação com `ROLLBACK`, não altera a estrutura física do banco e não deixa dados de teste persistidos quando executada com sucesso.
 - A rotina foi executada com sucesso em 2026-07-16: as 25 tabelas receberam dados sintéticos temporários, os testes de FK, `UNIQUE`, `CHECK` e `NOT NULL` foram aprovados, e uma consulta posterior confirmou ausência de dados de teste persistidos.
 - A reconciliação das 140 entradas do mapeamento da planilha está documentada em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 97 estão plenamente cobertas pelo núcleo atual, 12 parcialmente cobertas, 19 não cobertas e 12 dependem de esclarecimento.
-- O próximo módulo está tecnicamente especificado em `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md` e pronto para uma nova migration incremental permissiva; unidades e semântica ainda bloqueiam somente a futura importação automática.
+- O módulo de avaliação clínica foi aplicado pela migration incremental `sql/10_modulo_avaliacao_clinica.sql`; as quatro novas tabelas e suas constraints constam no banco local e na evidência física.
+- Os dois testes SQL passaram no banco local em 2026-07-18. Ambos executaram `ROLLBACK`, e consulta independente confirmou ausência de dados sintéticos persistidos.
 - O projeto possui orientações permanentes para Codex em `AGENTS.md`, `sql/AGENTS.md`, `tests/AGENTS.md` e `docs/AGENTS.md`.
 - Decisões arquiteturais duradouras são registradas em `docs/DECISOES_ARQUITETURAIS.md`.
 - O workflow oficial está documentado em `docs/WORKFLOW_DE_DESENVOLVIMENTO.md`.
@@ -39,7 +40,7 @@ Até o momento, o repositório contém scripts SQL de criação de banco, schema
 
 ## Estratégia de Implementação Incremental
 
-O modelo físico está sendo construído por fases. As 25 tabelas atuais correspondem ao núcleo funcional inicial, implementado deliberadamente para validar o funcionamento do banco, os relacionamentos, as regras de integridade, os padrões de migrations e os fluxos principais antes da expansão do modelo.
+O modelo físico está sendo construído por fases. As 25 tabelas do núcleo funcional inicial foram expandidas pelas quatro tabelas do módulo de avaliação clínica, totalizando 29 tabelas validadas.
 
 A ausência temporária das demais tabelas planejadas não deve ser tratada como falha, lacuna involuntária ou divergência crítica. As demais estruturas previstas serão implementadas posteriormente por migrations incrementais.
 
@@ -49,7 +50,7 @@ O objetivo da fase atual é validar funcionamento, integridade referencial, rest
 
 ## Tabelas Atualmente Existentes no Banco
 
-O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulatorio.sql`, possui atualmente 25 tabelas:
+O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulatorio.sql`, possui atualmente 29 tabelas:
 
 1. `paciente`
 2. `paciente_endereco`
@@ -76,6 +77,10 @@ O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulator
 23. `atendimento_medicamento`
 24. `tratamento_chagas`
 25. `procedimento_clinico`
+26. `dados_clinicos_atendimento`
+27. `evento_clinico`
+28. `dispositivo_implantado`
+29. `obito`
 
 ## Cobertura Banco x Migrations
 
@@ -89,11 +94,15 @@ O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulator
 | `comorbidade` | Existe no banco e nas migrations |
 | `complicacao_chagas` | Existe no banco e nas migrations |
 | `condicao_chagas` | Existe no banco e nas migrations |
+| `dados_clinicos_atendimento` | Existe no banco e nas migrations |
 | `diagnostico_chagas` | Existe no banco e nas migrations |
+| `dispositivo_implantado` | Existe no banco e nas migrations |
 | `encaminhamento` | Existe no banco e nas migrations |
+| `evento_clinico` | Existe no banco e nas migrations |
 | `exame_complementar_resultado` | Existe no banco e nas migrations |
 | `historico_familiar_chagas` | Existe no banco e nas migrations |
 | `medicamento` | Existe no banco e nas migrations |
+| `obito` | Existe no banco e nas migrations |
 | `paciente` | Existe no banco e nas migrations |
 | `paciente_comorbidade` | Existe no banco e nas migrations |
 | `paciente_contato` | Existe no banco e nas migrations |
@@ -109,7 +118,7 @@ O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulator
 
 Resumo da reconciliação:
 
-- Tabelas existentes tanto no banco quanto nas migrations: 25.
+- Tabelas existentes tanto no banco quanto nas migrations: 29.
 - Tabelas existentes no banco mas não cobertas pelas migrations: nenhuma identificada.
 - Tabelas existentes nas migrations mas ausentes no banco: nenhuma identificada.
 
@@ -124,6 +133,7 @@ Resumo da reconciliação:
 - Exames complementares: catálogo de tipos de exame, exames por atendimento e resultados estruturados.
 - Encaminhamentos e acompanhamento: catálogo de encaminhamentos, encaminhamentos, acompanhamento de cuidado e pendências.
 - Medicamentos e tratamentos: catálogo de medicamentos, medicamentos por atendimento, tratamento de Chagas e procedimentos clínicos.
+- Avaliação clínica por atendimento, eventos clínicos, dispositivos implantados e óbito, aplicada e validada no banco local.
 
 ## Módulos Ainda Pendentes
 
@@ -144,19 +154,15 @@ Resumo da reconciliação:
 
 ## Próximos Passos Recomendados
 
-1. Criar a migration incremental do módulo conforme `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`, sem acrescentar regras clínicas não documentadas.
-2. Registrar a decisão técnica e o escopo da próxima fase.
-3. Criar uma nova migration incremental, sem alterar ou reaplicar migrations antigas.
-4. Criar ou ampliar os testes sintéticos correspondentes.
-5. Atualizar a documentação antes de encerrar a alteração.
+1. Manter as pendências de importação delimitadas na especificação.
+2. Definir a próxima expansão incremental com base na cobertura restante da planilha.
+3. Não iniciar importação até resolver as pendências semânticas, de unidades e de rastreabilidade documentadas.
 
 ## Próxima fase técnica
 
-1. Criar a migration incremental do módulo conforme `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`, sem acrescentar regras clínicas não documentadas.
-2. Registrar a decisão técnica e o escopo da próxima fase.
-3. Criar uma nova migration incremental, sem alterar ou reaplicar migrations antigas.
-4. Criar ou ampliar os testes sintéticos correspondentes.
-5. Atualizar a documentação antes de encerrar a alteração.
+1. Definir o próximo módulo físico sem alterar migrations aplicadas.
+2. Criar migration incremental e teste SQL correspondentes somente após decisão técnica registrada.
+3. Não iniciar importação até resolver as pendências semânticas, de unidades e de rastreabilidade documentadas.
 
 ## Regra Permanente de Documentação
 

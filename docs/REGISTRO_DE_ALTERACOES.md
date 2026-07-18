@@ -1,6 +1,6 @@
 # Registro de Alterações
 
-Atualizado em: 2026-07-16
+Atualizado em: 2026-07-18
 
 ## Como Registrar Mudanças
 
@@ -25,6 +25,58 @@ Além deste arquivo, atualize quando necessário:
 - `docs/HISTORICO_DE_IMPLEMENTACAO.md`
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
+
+## 2026-07-18 - Implementação do módulo de avaliação clínica
+
+Data: 2026-07-18
+
+Título da alteração: Migration incremental de avaliação clínica, eventos, dispositivos e óbito.
+
+Motivo: implementar a estrutura aprovada em `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md` sem alterar migrations antigas nem antecipar regras de importação.
+
+Arquivos modificados:
+
+- `sql/10_modulo_avaliacao_clinica.sql`
+- `tests/sql/02_validar_modulo_avaliacao_clinica.sql`
+- `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`
+- `docs/VALIDACAO_MODULO_AVALIACAO_CLINICA.md`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/MODELO_FISICO_ATUAL.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+- `docs/evidencias/schema_atual_ambulatorio.sql`
+- `README.md`
+
+Migrations envolvidas:
+
+- Criada `sql/10_modulo_avaliacao_clinica.sql`.
+- Aplicada de forma controlada no banco local previamente confirmado com 25 tabelas e sem aplicação parcial.
+- Nenhuma migration antiga foi alterada ou reaplicada.
+
+Tabelas e colunas afetadas:
+
+- `dados_clinicos_atendimento`: avaliação objetiva opcional, uma por atendimento.
+- `evento_clinico`: eventos longitudinais repetíveis por paciente.
+- `dispositivo_implantado`: estado consolidado único por paciente e tipo.
+- `obito`: desfecho consolidado único por paciente.
+
+Impacto no sistema:
+
+- A migration adiciona quatro tabelas, quatro FKs com `ON DELETE CASCADE`, três constraints `UNIQUE` e dois índices explícitos.
+- Não adiciona dados, triggers, regras clínicas de faixa, domínios fechados ou importação.
+- A estratégia de reversão está documentada na migration, sem execução automática.
+
+Como testar:
+
+- Executar `make project-check` no banco local e conferir os `NOTICE` dos dois testes SQL.
+- Confirmar a saída `ROLLBACK`, o aviso pós-transação de ausência do paciente sintético e o código de saída `0`.
+- Confirmar pelo catálogo as 29 tabelas e as constraints das quatro tabelas novas.
+
+Pendências ou riscos:
+
+- A migration foi aplicada no banco local; os dois testes passaram e uma consulta independente confirmou zero dados sintéticos persistidos.
+- O dump estrutural foi atualizado com `make db-schema-dump` e reconciliado com a documentação física.
+- Unidades, NYHA, ano de AVC, semântica de reação adversa e rastreabilidade continuam pendentes para a futura importação.
 
 ## Modelo para Novas Alterações
 

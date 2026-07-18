@@ -1,6 +1,6 @@
 # Ambulatório Santa Casa
 
-Base PostgreSQL construída incrementalmente para organizar dados do ambulatório. A fase atual mantém um núcleo físico validado de 25 tabelas e prepara as próximas migrations antes da importação completa, API e frontend.
+Base PostgreSQL construída incrementalmente para organizar dados do ambulatório. A fase atual mantém um schema físico validado de 29 tabelas, incluindo o módulo de avaliação clínica, antes da importação completa, API e frontend.
 
 O schema aplicado é `ambulatorio`. A principal evidência física versionada é `docs/evidencias/schema_atual_ambulatorio.sql`.
 
@@ -47,7 +47,7 @@ make db-check DB_HOST=localhost DB_PORT=5432 DB_NAME=ambulatorio_santa_casa DB_U
 | `make db-schema-dump` | Atualiza atomicamente o dump somente estrutural do schema. | Não altera o banco; altera o arquivo de evidência. |
 | `make git-status` | Exibe status e últimos commits. | Não |
 
-Nenhum alvo reaplica `sql/00` a `sql/09`, cria ou remove banco, executa `DROP`, faz commit ou push.
+Nenhum alvo reaplica `sql/00` a `sql/10`, cria ou remove banco, executa `DROP`, faz commit ou push.
 
 ## Ordem segura para retomar o trabalho
 

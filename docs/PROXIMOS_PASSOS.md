@@ -1,10 +1,10 @@
 # Próximos Passos
 
-Atualizado em: 2026-07-16
+Atualizado em: 2026-07-18
 
 ## 1. Estratégia Incremental do Modelo Físico
 
-1. Manter as 25 tabelas atuais como núcleo funcional inicial.
+1. Manter as 29 tabelas atuais como base física validada, preservando as 25 tabelas do núcleo inicial.
 2. Tratar o modelo físico como construção por fases, não como entrega final da cobertura da planilha.
 3. Implementar as demais tabelas previstas posteriormente por migrations incrementais.
 4. Não alterar migrations antigas e não reaplicar scripts antigos no banco atual.
@@ -13,11 +13,11 @@ Atualizado em: 2026-07-16
 
 ## 2. Próxima fase técnica
 
-1. Criar uma nova migration incremental para as quatro tabelas especificadas, sem alterar ou reaplicar migrations antigas.
-2. Não adicionar faixas, domínios de NYHA, conversões ou regras de reação adversa que não constem na especificação.
-3. Criar testes sintéticos para campos, FKs, `UNIQUE`, deleções e ausência de duplicação com o núcleo.
-4. Validar com `make project-check` antes e depois da aplicação controlada.
-5. Atualizar a evidência do schema e a documentação somente depois da aplicação.
+1. Definir o próximo módulo físico com base nas lacunas restantes de cobertura da planilha.
+2. Resolver antes da importação as pendências de unidades, NYHA, ano de eventos, reação adversa e rastreabilidade.
+3. Não adicionar regras clínicas fora de especificação sem nova evidência e decisão técnica.
+4. Criar nova migration incremental e teste SQL correspondente sem alterar migrations aplicadas.
+5. Validar em banco limpo e no ambiente local antes de atualizar novamente a evidência física.
 
 ## 3. Ajustes e Documentação Pendentes
 
@@ -69,7 +69,7 @@ Atualizado em: 2026-07-16
 
 ## Próximo Passo Técnico Recomendado
 
-O próximo módulo está pronto para uma migration incremental conforme `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`. As dúvidas restantes foram delimitadas à importação: a migration deve manter campos normalizados opcionais, preservar valores originais e não criar regras clínicas não comprovadas. Não alterar migrations antigas e não reaplicar scripts antigos no banco atual.
+O módulo de avaliação clínica está aplicado e validado, e o schema físico possui 29 tabelas. O próximo passo é definir a expansão incremental seguinte e resolver as pendências que ainda impedem a importação automática. Não alterar migrations antigas nem reaplicar scripts antigos no banco atual.
 
 Comando local recomendado para verificar documentação e estado do projeto:
 

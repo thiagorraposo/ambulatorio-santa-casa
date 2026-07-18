@@ -1,12 +1,12 @@
 # Especificação do Módulo de Avaliação Clínica, Eventos, Dispositivos e Óbito
 
-Atualizado em: 2026-07-16
+Atualizado em: 2026-07-18
 
-Status: pronta para orientar migration incremental; regras de importação permanecem pendentes.
+Status: implementada e aplicada no banco local; regras de importação permanecem pendentes.
 
 ## Escopo e fronteiras
 
-O módulo proposto cobre `dados_clinicos_atendimento`, `evento_clinico`, `dispositivo_implantado` e `obito`. Esta especificação não altera o schema e deve orientar uma futura migration incremental.
+O módulo cobre `dados_clinicos_atendimento`, `evento_clinico`, `dispositivo_implantado` e `obito`. Esta especificação orientou a migration incremental versionada e não aplica alterações por si própria.
 
 Fronteiras com o núcleo atual:
 
@@ -256,6 +256,6 @@ A ordem acompanha avaliação do atendimento, histórico clínico, estado de dis
 
 ## Prontidão
 
-O módulo **está pronto para virar migration incremental**, desde que a migration siga exatamente a estrutura permissiva desta especificação, não inclua `CHECK`s clínicos/domínios não comprovados e venha acompanhada de teste SQL sintético e estratégia de reversão.
+O módulo foi implementado em `sql/10_modulo_avaliacao_clinica.sql`, aplicado no banco local e registrado no dump estrutural. `tests/sql/02_validar_modulo_avaliacao_clinica.sql` validou as quatro tabelas, constraints, deleções em cascata e ausência de dados sintéticos persistidos.
 
 As pendências restantes impedem a rotina de importação automática dessas colunas, mas não impedem criar tabelas nullable com preservação de valores originais. A migration não autoriza importar dados reais nem inferir unidades ou semântica clínica.
