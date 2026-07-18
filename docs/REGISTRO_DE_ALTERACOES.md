@@ -26,6 +26,45 @@ Além deste arquivo, atualize quando necessário:
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
 
+## 2026-07-18 - Especificação do módulo de notificação
+
+Data: 2026-07-18
+
+Título da alteração: Definição física do estado consolidado de notificação por paciente.
+
+Motivo: preparar o próximo módulo incremental para `Paciente notificado?`, `Número notificação` e `Caso não, justifique` sem inventar regras sanitárias nem alterar o schema.
+
+Arquivos modificados:
+
+- `docs/ESPECIFICACAO_MODULO_NOTIFICACAO.md`
+- `docs/DECISOES_ARQUITETURAIS.md`
+- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada, alterada ou aplicada.
+
+Decisões:
+
+- Uma notificação consolidada por paciente, com `UNIQUE(paciente_id)` e sem vínculo com atendimento na primeira versão.
+- FK para paciente com `ON DELETE CASCADE` e índice não único para número da notificação.
+- Valores normalizados opcionais e três campos `valor_original_*`.
+- Combinações incompletas ou contraditórias serão preservadas; validações condicionais pertencem à futura importação, sem `CHECK` rígido.
+
+Como validar:
+
+- Revisar a especificação contra o dump físico, o dicionário planejado e a ADR-010.
+- Executar `make project-check` sem modificar o schema.
+
+Pendências ou riscos:
+
+- Confirmar posição e valores reais dos três cabeçalhos antes da importação.
+- Histórico, retificações, data e fluxo sanitário permanecem fora do escopo por falta de evidência.
+- A migration futura deverá seguir a especificação e incluir teste SQL transacional; não foi criada nesta etapa.
+
 ## 2026-07-18 - Recálculo de cobertura do schema de 29 tabelas
 
 Data: 2026-07-18

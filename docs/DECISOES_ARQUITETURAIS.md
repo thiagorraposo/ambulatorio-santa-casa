@@ -1,6 +1,6 @@
 # Decisões Arquiteturais
 
-Atualizado em: 2026-07-16
+Atualizado em: 2026-07-18
 
 Este documento registra decisões duradouras do projeto. Mudanças cronológicas continuam em `docs/REGISTRO_DE_ALTERACOES.md`.
 
@@ -185,3 +185,23 @@ Delimitação adicional: incertezas de unidade, NYHA, formato do ano e semântic
 Alternativas rejeitadas: duplicar `paciente_id` em dados clínicos; tornar `atendimento_id` obrigatório para fatos históricos; adicionar FK opcional de atendimento sem garantia de pertencer ao mesmo paciente; duplicar reações do tratamento em evento clínico.
 
 Documentos relacionados: `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`, `docs/COBERTURA_COLUNAS_PLANILHA.md`, `docs/MODELO_FISICO_ATUAL.md`.
+
+## ADR-010
+
+ID: ADR-010
+
+Título: Notificação como estado consolidado do paciente
+
+Data: 2026-07-18
+
+Status: Aceita; pronta para implementação por migration incremental
+
+Contexto: As entradas `Paciente notificado?`, `Número notificação` e `Caso não, justifique` precisam de destino estruturado, mas não fornecem data, histórico ou vínculo inequívoco com atendimento.
+
+Decisão: Criar na próxima evolução uma única `notificacao` por paciente, com FK obrigatória para `paciente`, sem `atendimento_id` na primeira versão. Preservar os três valores originais e permitir informação normalizada incompleta ou contraditória. Não impor `CHECK`s condicionais nem unicidade global do número sem evidência.
+
+Consequências: O modelo cobre o estado consolidado disponível e evita uma proveniência clínica artificial. Histórico, retificações e atendimento de digitação não serão representados até existir requisito próprio ou rastreabilidade por importação.
+
+Alternativas rejeitadas: uma linha por atendimento sem origem comprovada; múltiplas linhas sem temporalidade; número globalmente único; rejeição no banco de combinações incompletas; campos sanitários ou operacionais não presentes nas fontes.
+
+Documentos relacionados: `docs/ESPECIFICACAO_MODULO_NOTIFICACAO.md`, `docs/COBERTURA_COLUNAS_PLANILHA.md`, `docs/PROXIMOS_PASSOS.md`.

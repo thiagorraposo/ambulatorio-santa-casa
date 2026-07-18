@@ -13,10 +13,10 @@ Atualizado em: 2026-07-18
 
 ## 2. Próxima fase técnica
 
-1. Especificar o módulo de notificação da doença de Chagas, sem criar migration nesta etapa.
-2. Decidir cardinalidade, temporalidade, vínculo opcional com atendimento e regras entre indicador, número e justificativa.
-3. Confirmar na lista canônica se `Caso não, justifique` pertence ao bloco de notificação.
-4. Criar nova migration incremental e teste SQL correspondente somente depois dessas decisões.
+1. Criar futura migration incremental do módulo de notificação conforme `docs/ESPECIFICACAO_MODULO_NOTIFICACAO.md`.
+2. Manter estado consolidado por paciente, sem `atendimento_id` e sem regras condicionais rígidas não comprovadas.
+3. Criar teste SQL sintético para FK, `UNIQUE`, deleção, combinações condicionais permissivas e `ROLLBACK`.
+4. Confirmar na lista canônica a posição de `Caso não, justifique` antes da importação automática.
 5. Planejar separadamente importação e proveniência antes de usar dados reais.
 
 ## 3. Ajustes e Documentação Pendentes
@@ -69,7 +69,7 @@ Atualizado em: 2026-07-18
 
 ## Próximo Passo Técnico Recomendado
 
-Com 112 das 140 entradas plenamente cobertas, o próximo módulo recomendado é notificação da doença de Chagas. Ele acrescenta destino estruturado para indicador e número de notificação e, após confirmação semântica, para a justificativa de não notificação. Não alterar migrations antigas nem reaplicar scripts antigos no banco atual.
+Com 112 das 140 entradas plenamente cobertas, o próximo módulo recomendado é notificação da doença de Chagas. A especificação está pronta para orientar migration incremental e cobre indicador, número e justificativa com estrutura permissiva e valores originais. Não alterar migrations antigas nem reaplicar scripts antigos no banco atual.
 
 Comando local recomendado para verificar documentação e estado do projeto:
 

@@ -168,31 +168,32 @@ O schema físico já consegue representar exames trazidos e solicitados. A dúvi
 
 ## Próximo módulo físico recomendado
 
-Recomenda-se o módulo **notificação da doença de Chagas**. Ele cobre `Paciente notificado?` e `Número notificação`, hoje sem destino, e pode cobrir `Caso não, justifique` depois que a posição canônica confirmar que esse cabeçalho pertence ao mesmo bloco. A informação tem valor assistencial e sanitário próprio, não deve ser reduzida a observações livres e depende somente de `paciente`; um vínculo opcional com `atendimento` deve ser decidido antes da migration.
+Recomenda-se o módulo **notificação da doença de Chagas**. Ele cobre `Paciente notificado?`, `Número notificação` e dispõe de campo próprio para `Caso não, justifique`; a posição canônica desse último cabeçalho ainda deve ser confirmada antes da importação. A informação não deve ser reduzida a observações livres e depende somente de `paciente` na primeira versão.
 
 O módulo é preferível como próxima expansão porque forma uma unidade funcional coesa e pequena. A alternativa de implementar primeiro importação/proveniência tem maior acoplamento: exige decidir identidade do responsável, fronteira com autenticação, lote, linha bruta e vínculos com vários registros. Essa infraestrutura continua obrigatória antes de importar dados reais, mas não precisa ser misturada à notificação.
 
-Estrutura proposta para especificação antes de qualquer migration:
+O desenho detalhado e suas justificativas estão em `docs/ESPECIFICACAO_MODULO_NOTIFICACAO.md`.
+
+Estrutura pronta para orientar uma futura migration:
 
 ### `notificacao`
 
 - `notificacao_id`, PK;
 - `paciente_id`, FK obrigatória para `paciente`;
-- `atendimento_id`, FK opcional, somente se a notificação puder ser atribuída com segurança a um atendimento;
 - `paciente_notificado`, booleano opcional;
 - `numero_notificacao`, texto opcional, preservando zeros e formatação;
 - `justificativa_nao_notificacao`, texto opcional, condicionado à confirmação do cabeçalho;
 - `valor_original_notificado`, `valor_original_numero` e `valor_original_justificativa`;
 - `observacoes`, `criado_em` e `atualizado_em`.
 
-Antes da migration, a especificação deve decidir cardinalidade por paciente, possibilidade de múltiplas notificações, temporalidade, vínculo com atendimento e se haverá regras condicionais entre indicador, número e justificativa. Sem essas decisões, não se recomenda criar `UNIQUE` nem `CHECK` clínico/operacional.
+A especificação decidiu `UNIQUE(paciente_id)`, ausência de `atendimento_id`, índice não único em `numero_notificacao` e nenhuma validação condicional rígida no banco. As dúvidas restantes bloqueiam somente a importação automática, não a criação da estrutura permissiva.
 
 ## Decisões humanas pendentes
 
 - Confirmar a lista canônica e ordenada das colunas por aba, incluindo cabeçalhos duplicados.
 - Confirmar se as duas descrições de importação pertencem ou não às 140 colunas.
 - Definir unidades e regras de normalização para medidas clínicas e FEVE antes da importação.
-- Definir cardinalidade, temporalidade e vínculo com atendimento para notificações.
+- Confirmar a posição canônica de `Caso não, justifique` e os valores efetivos antes da importação.
 - Confirmar a semântica de autorrelato, exame de familiares, contrarreferência, notificação e motivo do não tratamento.
 - Normalizar duplicatas `BenBrasil`/`Benbrasil` e `Falha EPOCA`/`EPOCA FALHA`.
 - Decidir se classes de medicamento precisam de catálogo próprio.

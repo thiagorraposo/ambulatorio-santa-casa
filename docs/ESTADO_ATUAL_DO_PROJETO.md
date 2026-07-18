@@ -31,6 +31,7 @@ Até o momento, o repositório contém scripts SQL de criação de banco, schema
 - A rotina foi executada com sucesso em 2026-07-16: as 25 tabelas receberam dados sintéticos temporários, os testes de FK, `UNIQUE`, `CHECK` e `NOT NULL` foram aprovados, e uma consulta posterior confirmou ausência de dados de teste persistidos.
 - A reconciliação das 140 entradas do mapeamento da planilha está documentada em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 112 estão plenamente cobertas pelo schema atual, 12 parcialmente cobertas, 4 não cobertas e 12 dependem de esclarecimento.
 - O módulo de avaliação clínica foi aplicado pela migration incremental `sql/10_modulo_avaliacao_clinica.sql`; as quatro novas tabelas e suas constraints constam no banco local e na evidência física.
+- O módulo de notificação está especificado em `docs/ESPECIFICACAO_MODULO_NOTIFICACAO.md` e pronto para orientar uma futura migration; nenhuma alteração física foi aplicada.
 - Os dois testes SQL passaram no banco local em 2026-07-18. Ambos executaram `ROLLBACK`, e consulta independente confirmou ausência de dados sintéticos persistidos.
 - O projeto possui orientações permanentes para Codex em `AGENTS.md`, `sql/AGENTS.md`, `tests/AGENTS.md` e `docs/AGENTS.md`.
 - Decisões arquiteturais duradouras são registradas em `docs/DECISOES_ARQUITETURAIS.md`.
@@ -154,14 +155,14 @@ Resumo da reconciliação:
 
 ## Próximos Passos Recomendados
 
-1. Especificar o módulo de notificação, incluindo cardinalidade, temporalidade e vínculo opcional com atendimento.
-2. Confirmar se `Caso não, justifique` pertence ao bloco de notificação antes de definir seu destino.
+1. Implementar futuramente o módulo de notificação conforme a especificação, por nova migration incremental e teste SQL.
+2. Confirmar a posição de `Caso não, justifique` antes de configurar sua importação automática.
 3. Não iniciar importação até resolver as pendências semânticas, de unidades e de rastreabilidade documentadas.
 
 ## Próxima fase técnica
 
-1. Produzir a especificação técnica do módulo de notificação sem alterar o schema.
-2. Criar migration incremental e teste SQL correspondentes somente após decisão técnica registrada.
+1. Criar migration incremental do módulo de notificação sem alterar migrations aplicadas.
+2. Criar teste SQL sintético transacional correspondente.
 3. Planejar separadamente o módulo de importação e proveniência antes de usar dados reais.
 
 ## Regra Permanente de Documentação
