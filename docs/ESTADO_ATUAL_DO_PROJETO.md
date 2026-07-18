@@ -29,7 +29,7 @@ Até o momento, o repositório contém scripts SQL de criação de banco, schema
 - Existe uma rotina reutilizável de validação com dados de teste em `tests/sql/01_validar_nucleo_inicial.sql`.
 - A rotina de validação usa transação com `ROLLBACK`, não altera a estrutura física do banco e não deixa dados de teste persistidos quando executada com sucesso.
 - A rotina foi executada com sucesso em 2026-07-16: as 25 tabelas receberam dados sintéticos temporários, os testes de FK, `UNIQUE`, `CHECK` e `NOT NULL` foram aprovados, e uma consulta posterior confirmou ausência de dados de teste persistidos.
-- A reconciliação das 140 entradas do mapeamento da planilha está documentada em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 97 estão plenamente cobertas pelo núcleo atual, 12 parcialmente cobertas, 19 não cobertas e 12 dependem de esclarecimento.
+- A reconciliação das 140 entradas do mapeamento da planilha está documentada em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 112 estão plenamente cobertas pelo schema atual, 12 parcialmente cobertas, 4 não cobertas e 12 dependem de esclarecimento.
 - O módulo de avaliação clínica foi aplicado pela migration incremental `sql/10_modulo_avaliacao_clinica.sql`; as quatro novas tabelas e suas constraints constam no banco local e na evidência física.
 - Os dois testes SQL passaram no banco local em 2026-07-18. Ambos executaram `ROLLBACK`, e consulta independente confirmou ausência de dados sintéticos persistidos.
 - O projeto possui orientações permanentes para Codex em `AGENTS.md`, `sql/AGENTS.md`, `tests/AGENTS.md` e `docs/AGENTS.md`.
@@ -154,15 +154,15 @@ Resumo da reconciliação:
 
 ## Próximos Passos Recomendados
 
-1. Manter as pendências de importação delimitadas na especificação.
-2. Definir a próxima expansão incremental com base na cobertura restante da planilha.
+1. Especificar o módulo de notificação, incluindo cardinalidade, temporalidade e vínculo opcional com atendimento.
+2. Confirmar se `Caso não, justifique` pertence ao bloco de notificação antes de definir seu destino.
 3. Não iniciar importação até resolver as pendências semânticas, de unidades e de rastreabilidade documentadas.
 
 ## Próxima fase técnica
 
-1. Definir o próximo módulo físico sem alterar migrations aplicadas.
+1. Produzir a especificação técnica do módulo de notificação sem alterar o schema.
 2. Criar migration incremental e teste SQL correspondentes somente após decisão técnica registrada.
-3. Não iniciar importação até resolver as pendências semânticas, de unidades e de rastreabilidade documentadas.
+3. Planejar separadamente o módulo de importação e proveniência antes de usar dados reais.
 
 ## Regra Permanente de Documentação
 

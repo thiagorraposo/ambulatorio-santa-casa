@@ -13,11 +13,11 @@ Atualizado em: 2026-07-18
 
 ## 2. Próxima fase técnica
 
-1. Definir o próximo módulo físico com base nas lacunas restantes de cobertura da planilha.
-2. Resolver antes da importação as pendências de unidades, NYHA, ano de eventos, reação adversa e rastreabilidade.
-3. Não adicionar regras clínicas fora de especificação sem nova evidência e decisão técnica.
-4. Criar nova migration incremental e teste SQL correspondente sem alterar migrations aplicadas.
-5. Validar em banco limpo e no ambiente local antes de atualizar novamente a evidência física.
+1. Especificar o módulo de notificação da doença de Chagas, sem criar migration nesta etapa.
+2. Decidir cardinalidade, temporalidade, vínculo opcional com atendimento e regras entre indicador, número e justificativa.
+3. Confirmar na lista canônica se `Caso não, justifique` pertence ao bloco de notificação.
+4. Criar nova migration incremental e teste SQL correspondente somente depois dessas decisões.
+5. Planejar separadamente importação e proveniência antes de usar dados reais.
 
 ## 3. Ajustes e Documentação Pendentes
 
@@ -69,7 +69,7 @@ Atualizado em: 2026-07-18
 
 ## Próximo Passo Técnico Recomendado
 
-O módulo de avaliação clínica está aplicado e validado, e o schema físico possui 29 tabelas. O próximo passo é definir a expansão incremental seguinte e resolver as pendências que ainda impedem a importação automática. Não alterar migrations antigas nem reaplicar scripts antigos no banco atual.
+Com 112 das 140 entradas plenamente cobertas, o próximo módulo recomendado é notificação da doença de Chagas. Ele acrescenta destino estruturado para indicador e número de notificação e, após confirmação semântica, para a justificativa de não notificação. Não alterar migrations antigas nem reaplicar scripts antigos no banco atual.
 
 Comando local recomendado para verificar documentação e estado do projeto:
 

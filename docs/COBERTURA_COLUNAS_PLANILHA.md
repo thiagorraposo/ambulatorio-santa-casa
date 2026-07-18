@@ -1,15 +1,15 @@
 # Cobertura das Colunas da Planilha pelo Núcleo Físico
 
-Atualizado em: 2026-07-16
+Atualizado em: 2026-07-18
 
 ## Objetivo e fontes
 
-Este documento reconcilia as 140 entradas únicas de `planejamento/tabelas dicionário de dados/03_coluna_planilha_destino.csv` com o núcleo físico aplicado de 25 tabelas.
+Este documento reconcilia as 140 entradas únicas de `planejamento/tabelas dicionário de dados/03_coluna_planilha_destino.csv` com o schema físico aplicado de 29 tabelas.
 
 Ordem de precedência usada:
 
 1. `docs/evidencias/schema_atual_ambulatorio.sql`, como evidência do schema aplicado;
-2. migrations `sql/00` a `sql/09`, para confirmar a origem versionada da estrutura;
+2. migrations `sql/00` a `sql/10`, para confirmar a origem versionada da estrutura;
 3. documentos atuais em `docs/`;
 4. DER, dicionário técnico, relação coluna-tabela e seis CSVs em `planejamento/`, como intenção de modelagem sujeita a reconciliação.
 
@@ -28,13 +28,13 @@ Nenhum dado real foi lido. A análise considera nomes, tipos, constraints e sem�
 | Classificação | Quantidade | Percentual sobre 140 |
 | --- | ---: | ---: |
 | Coberta diretamente | 6 | 4,29% |
-| Coberta com transformação | 91 | 65,00% |
+| Coberta com transformação | 106 | 75,71% |
 | Parcialmente coberta | 12 | 8,57% |
-| Não coberta | 19 | 13,57% |
+| Não coberta | 4 | 2,86% |
 | Dúvida pendente | 12 | 8,57% |
 | Total | 140 | 100,00% |
 
-Cobertura plena atual: **97 de 140 entradas (69,29%)**. Incluindo cobertura parcial: **109 de 140 (77,86%)**.
+Cobertura plena atual: **112 de 140 entradas (80,00%)**. Incluindo cobertura parcial: **124 de 140 (88,57%)**.
 
 Há uma ressalva no denominador: `Controle da importação como processo.` e `Todas as colunas originais da planilha em formato bruto para auditoria.` são descrições técnicas, não cabeçalhos clínicos demonstrados. Sem elas, o catálogo possui 138 possíveis colunas de origem; elas permanecem classificadas como dúvida até confirmação da lista canônica.
 
@@ -49,7 +49,7 @@ Há uma ressalva no denominador: `Controle da importação como processo.` e `To
 - `Telefone de Contato` → `paciente_contato.telefone`.
 - `Localização do prontuário` → `atendimento.localizacao_prontuario`.
 
-### Coberta com transformação (91)
+### Coberta com transformação (106)
 
 Conversões simples e padronizações:
 
@@ -77,6 +77,13 @@ Medicamentos e acompanhamento:
 - `Uso do benzonidazol para tratamento da DC?` e `Tem indicação de BZN?` → `medicamento` e `tratamento_chagas`.
 - `Retorno 30 dias de tratamento`, `Retorno final de tratamento`, `Retorno anual realizado` e `Desfecho do retorno` → linhas tipadas em `acompanhamento_cuidado`.
 
+Avaliação clínica e fatos longitudinais:
+
+- `Altura`, `Peso`, `Circunferencia Abdominal`, `Frequencia cardiaca`, `Saturacao`, `PA sistolica`, `PA diastolica` e `NYHA` → campos normalizados e respectivos valores originais em `dados_clinicos_atendimento`.
+- `teve AVC` e `Ano do ultimo AVC` → linha de `evento_clinico` com tipo `avc`, ocorrência e ano informados.
+- `portador de marcapasso?` e `portador de CDI?` → linhas de `dispositivo_implantado`, uma por tipo de dispositivo.
+- `Óbito`, `Data do óbito` e `causa do óbito` → registro consolidado em `obito`.
+
 ### Parcialmente coberta (12)
 
 | Coluna | Cobertura atual | Lacuna |
@@ -86,7 +93,7 @@ Medicamentos e acompanhamento:
 | `Trouxe encaminhamento` | `encaminhamento.valor_original_encaminhamento` e existência do registro | Falta booleano estruturado equivalente. |
 | `Autorelato diagnóstico de Chagas do participante (data)` | `diagnostico_chagas.data_resultado_final` ou observações | Data de autorrelato não é semanticamente igual à data do resultado; falta campo próprio. |
 | `Familiares diretos (mãe, pai, irmãos) realizaram o exame de Chagas?` | `historico_familiar_chagas` | `possui_historico_familiar` não expressa especificamente realização de exame por familiar. |
-| `teve reação adversa?` | Eventos adversos existem em `tratamento_chagas` | Só cobre reação ligada ao tratamento de Chagas; não há evento clínico genérico. |
+| `teve reação adversa?` | Eventos adversos existem em `tratamento_chagas`; `evento_clinico` não deve duplicá-los conforme ADR-009 | Falta confirmar se o cabeçalho se refere ao tratamento de Chagas ou a evento adverso genérico. |
 | `tratamento pelo ambulatorio?` | Contexto pode ser inferido de atendimento/tratamento | Falta campo explícito no tratamento. |
 | `Em qual ano tomou a medicação (Benzonidazol)?` | `tratamento_chagas.data_inicio` | Uma informação apenas anual não possui regra segura de conversão para data completa. |
 | `Prescrição do BZN (data)` | `tratamento_chagas.data_indicacao` | Indicação e prescrição são eventos distintos. |
@@ -94,17 +101,13 @@ Medicamentos e acompanhamento:
 | `Encaminhado a qual projeto?` | `encaminhamento` e `atendimento_projeto_estudo` | Falta relação explícita entre o encaminhamento e o projeto. |
 | `Paciente com contrarreferencia realizada?` | Pode ser descrita em `acompanhamento_cuidado` | Falta tipo/booleano inequívoco de contrarreferência. |
 
-### Não coberta (19)
+### Não coberta (4)
 
 | Grupo | Colunas | Expansão necessária |
 | --- | --- | --- |
 | Autoria | `Responsavel pela digitacao` | Identidade de usuário/importador e referência no atendimento ou lote. |
-| Eventos | `teve AVC`, `Ano do ultimo AVC` | Evento clínico estruturado. |
-| Dispositivos | `portador de marcapasso?`, `portador de CDI?` | Dispositivo implantado estruturado. |
 | Tratamento | `Por quanto tempo foi usado?` | Duração original ou regra derivada no tratamento. |
 | Notificação | `Paciente notificado?`, `Número notificação` | Módulo de notificação. |
-| Sinais e medidas | `Altura`, `Peso`, `Circunferencia Abdominal`, `Frequencia cardiaca`, `Saturacao`, `PA sistolica`, `PA diastolica`, `NYHA` | Dados clínicos por atendimento. |
-| Desfecho | `Óbito`, `Data do óbito`, `causa do óbito` | Evento de óbito vinculado ao paciente. |
 
 ### Dúvida pendente (12)
 
@@ -127,22 +130,19 @@ O schema físico já consegue representar exames trazidos e solicitados. A dúvi
 
 ## Reconciliação das 38 tabelas planejadas
 
-### Absorvidas pelo núcleo atual
+### Absorvidas pelo schema atual
 
 - Correspondência direta ou renomeada: `paciente`, `paciente_endereco`, `paciente_contato`, `atendimento`, `encaminhamento`, `diagnostico_chagas`, `sorologia_chagas`, `sorologia_solicitacao`, `historico_familiar_chagas`, `condicao_chagas`, `complicacao_chagas`, `comorbidade`, `paciente_comorbidade` e `tipo_exame_complementar`.
 - `programa` e `paciente_programa` foram absorvidas por `projeto_estudo` e `atendimento_projeto_estudo`; o vínculo atual é temporal por atendimento, do qual se deriva o paciente.
 - `tipo_exame_laboratorial`, `resultado_laboratorial`, `tipo_exame`, `exame`, `ecocardiograma` e `exame_complementar` foram absorvidas pelo trio genérico `tipo_exame_complementar`, `atendimento_exame_complementar` e `exame_complementar_resultado`.
 - `tratamento_benzonidazol` foi absorvida por `tratamento_chagas` mais o catálogo `medicamento`.
 - `retorno_tratamento` e `retorno_anual` foram absorvidas por registros tipados em `acompanhamento_cuidado`.
+- `dados_clinicos_atendimento`, `evento_clinico`, `dispositivo_implantado` e `obito` foram implementadas por `sql/10_modulo_avaliacao_clinica.sql`.
 
 ### Ainda precisam ser criadas
 
 - `usuario` ou, antes de autenticação, uma entidade mínima de responsável/importador.
-- `evento_clinico`.
-- `dispositivo_implantado`.
 - `notificacao`.
-- `dados_clinicos_atendimento`.
-- `obito`.
 - `importacao_planilha` e `importacao_linha`, antes da importação controlada.
 
 ### Redundantes ou a reformular
@@ -155,7 +155,7 @@ O schema físico já consegue representar exames trazidos e solicitados. A dúvi
 
 ## Divergências encontradas
 
-- O dicionário planeja 38 tabelas e 364 campos; o schema aplicado possui 25 tabelas com nomes, chaves `BIGINT` e estruturas diferentes. O dicionário não é retrato do banco atual.
+- O dicionário planeja 38 tabelas e 364 campos; o schema aplicado possui 29 tabelas com nomes, chaves `BIGINT` e estruturas diferentes. O dicionário não é retrato do banco atual.
 - O relatório automático afirma 140 colunas originais, mas sua fonte canônica esperada não existe; o fallback contém duas descrições técnicas tratadas como se fossem colunas.
 - O CSV possui 192 linhas de destino para 140 nomes únicos. Parte é decomposição legítima, mas nomes repetidos perderam posição/aba e não distinguem os blocos trazido e solicitado.
 - Campos planejados como `paciente.nome_completo`, `paciente.origem_aba` e `paciente_contato.valor_contato` existem fisicamente como `nome`, `grupo_origem_planilha` e `telefone`.
@@ -164,58 +164,36 @@ O schema físico já consegue representar exames trazidos e solicitados. A dúvi
 - Medicamentos foram generalizados por atendimento; o catálogo separado de classes planejado não existe.
 - `Ambulatório unicamente` e `Ambulatório anexo ao projeto` foram mapeados como programas no documento antigo, mas são campos físicos de contexto em `atendimento`.
 - A pergunta sobre exame realizado por familiares não equivale ao campo físico de histórico familiar.
-- O DER citado por `DER Definitivo.md` referencia `DER_organizado_paineis.svg`, mas o arquivo SVG não está presente no inventário do repositório; só foi possível analisar a descrição textual do DER.
+- O DER e o dicionário planejado incluem estruturas ainda não aplicadas; ambos são fontes de intenção e não evidência do estado físico.
 
 ## Próximo módulo físico recomendado
 
-Recomenda-se o módulo **avaliação clínica, eventos, dispositivos e desfecho**, porque depende apenas de `paciente` e `atendimento`, acrescenta cobertura direta para 15 das 19 colunas hoje não cobertas e preserva informação clínica de alto valor que não deve ficar em observações livres.
+Recomenda-se o módulo **notificação da doença de Chagas**. Ele cobre `Paciente notificado?` e `Número notificação`, hoje sem destino, e pode cobrir `Caso não, justifique` depois que a posição canônica confirmar que esse cabeçalho pertence ao mesmo bloco. A informação tem valor assistencial e sanitário próprio, não deve ser reduzida a observações livres e depende somente de `paciente`; um vínculo opcional com `atendimento` deve ser decidido antes da migration.
 
-Estrutura proposta para decisão antes de migration:
+O módulo é preferível como próxima expansão porque forma uma unidade funcional coesa e pequena. A alternativa de implementar primeiro importação/proveniência tem maior acoplamento: exige decidir identidade do responsável, fronteira com autenticação, lote, linha bruta e vínculos com vários registros. Essa infraestrutura continua obrigatória antes de importar dados reais, mas não precisa ser misturada à notificação.
 
-### `dados_clinicos_atendimento`
+Estrutura proposta para especificação antes de qualquer migration:
 
-- `dados_clinicos_atendimento_id`, PK;
-- `atendimento_id`, FK e `UNIQUE` se houver uma avaliação consolidada por atendimento;
-- `altura_cm`, `peso_kg`, `circunferencia_abdominal_cm`;
-- `frequencia_cardiaca_bpm`, `saturacao_percentual`;
-- `pa_sistolica_mmhg`, `pa_diastolica_mmhg`, `nyha`;
-- campos `valor_original_*` para medidas cuja unidade/formato ainda precisa ser validado;
-- `observacoes`, `criado_em`, `atualizado_em`.
+### `notificacao`
 
-### `evento_clinico`
+- `notificacao_id`, PK;
+- `paciente_id`, FK obrigatória para `paciente`;
+- `atendimento_id`, FK opcional, somente se a notificação puder ser atribuída com segurança a um atendimento;
+- `paciente_notificado`, booleano opcional;
+- `numero_notificacao`, texto opcional, preservando zeros e formatação;
+- `justificativa_nao_notificacao`, texto opcional, condicionado à confirmação do cabeçalho;
+- `valor_original_notificado`, `valor_original_numero` e `valor_original_justificativa`;
+- `observacoes`, `criado_em` e `atualizado_em`.
 
-- `evento_clinico_id`, PK;
-- `paciente_id`, FK;
-- `atendimento_id`, FK opcional até decisão sobre legado;
-- `tipo_evento`, `ocorreu`, `ano_evento`, `descricao`;
-- `valor_original_ocorrencia`, `valor_original_data`, `valor_original_descricao`, `observacoes`, timestamps.
-
-### `dispositivo_implantado`
-
-- `dispositivo_implantado_id`, PK;
-- `paciente_id`, FK;
-- `atendimento_id`, FK opcional como origem do registro;
-- `tipo_dispositivo`, `possui_dispositivo`;
-- `valor_original_tipo`, `valor_original_presenca`, `observacoes`, timestamps.
-
-### `obito`
-
-- `obito_id`, PK;
-- `paciente_id`, FK e `UNIQUE` se houver apenas um desfecho consolidado;
-- `atendimento_id`, FK opcional como origem do registro;
-- `houve_obito`, `data_obito`, `causa_obito`;
-- `valor_original_obito`, `valor_original_data`, `valor_original_causa`, `observacoes`, timestamps.
-
-O desenho detalhado, as fronteiras com tabelas existentes e as constraints propostas estão em `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`. A estrutura está pronta para migration incremental com campos permissivos e preservação de originais; as pendências de unidade e semântica continuam bloqueando a importação automática, não a criação física.
+Antes da migration, a especificação deve decidir cardinalidade por paciente, possibilidade de múltiplas notificações, temporalidade, vínculo com atendimento e se haverá regras condicionais entre indicador, número e justificativa. Sem essas decisões, não se recomenda criar `UNIQUE` nem `CHECK` clínico/operacional.
 
 ## Decisões humanas pendentes
 
 - Confirmar a lista canônica e ordenada das colunas por aba, incluindo cabeçalhos duplicados.
 - Confirmar se as duas descrições de importação pertencem ou não às 140 colunas.
-- Definir unidades e faixas aceitáveis para medidas clínicas e FEVE.
-- Definir se eventos e dispositivos exigem `atendimento_id` obrigatório ou podem representar histórico legado sem atendimento.
-- Definir se óbito é único por paciente e se `houve_obito=false` deve gerar linha.
+- Definir unidades e regras de normalização para medidas clínicas e FEVE antes da importação.
+- Definir cardinalidade, temporalidade e vínculo com atendimento para notificações.
 - Confirmar a semântica de autorrelato, exame de familiares, contrarreferência, notificação e motivo do não tratamento.
 - Normalizar duplicatas `BenBrasil`/`Benbrasil` e `Falha EPOCA`/`EPOCA FALHA`.
 - Decidir se classes de medicamento precisam de catálogo próprio.
-- Obter ou regenerar o DER visual ausente e alinhá-lo ao schema aplicado.
+- Reconciliar futuramente o DER planejado com o schema aplicado, sem tratá-lo como fonte física.

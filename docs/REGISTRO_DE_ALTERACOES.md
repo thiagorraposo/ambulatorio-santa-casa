@@ -26,6 +26,43 @@ Além deste arquivo, atualize quando necessário:
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
 
+## 2026-07-18 - Recálculo de cobertura do schema de 29 tabelas
+
+Data: 2026-07-18
+
+Título da alteração: Reconciliação das 140 entradas da planilha após o módulo de avaliação clínica.
+
+Motivo: recalcular a cobertura contra o dump físico de 29 tabelas e orientar a próxima expansão sem alterar o schema.
+
+Arquivos modificados:
+
+- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada, alterada ou aplicada.
+
+Impacto no sistema:
+
+- A cobertura plena passou de 97 para 112 entradas de 140, porque 15 entradas agora possuem destino nas quatro tabelas de `sql/10_modulo_avaliacao_clinica.sql`.
+- Permanecem 12 entradas parcialmente cobertas, 4 não cobertas e 12 dúvidas pendentes.
+- O próximo módulo recomendado passa a ser notificação da doença de Chagas, sujeito a especificação e decisões de cardinalidade, temporalidade e vínculo.
+
+Como validar:
+
+- Conferir as classificações contra `docs/evidencias/schema_atual_ambulatorio.sql` e as migrations versionadas.
+- Confirmar que as cinco categorias somam 140 e que os percentuais são consistentes.
+- Executar `make project-check` sem modificar o schema.
+
+Pendências ou riscos:
+
+- A lista canônica ordenada da planilha e a posição dos cabeçalhos duplicados continuam ausentes.
+- `Caso não, justifique` precisa ser confirmado como parte do bloco de notificação.
+- Autoria da digitação, duração original do tratamento e infraestrutura de importação/proveniência continuam sem destino físico completo.
+
 ## 2026-07-18 - Implementação do módulo de avaliação clínica
 
 Data: 2026-07-18
