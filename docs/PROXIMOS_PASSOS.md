@@ -4,7 +4,7 @@ Atualizado em: 2026-07-19
 
 ## 1. Estratégia Incremental do Modelo Físico
 
-1. Manter as 30 tabelas atuais como base física validada, preservando as 25 tabelas do núcleo inicial.
+1. Manter as 33 tabelas atuais como base física validada, preservando as 25 tabelas do núcleo inicial.
 2. Tratar o modelo físico como construção por fases, não como entrega final da cobertura da planilha.
 3. Implementar as demais tabelas previstas posteriormente por migrations incrementais.
 4. Não alterar migrations antigas e não reaplicar scripts antigos no banco atual.
@@ -13,11 +13,10 @@ Atualizado em: 2026-07-19
 
 ## 2. Próxima fase técnica
 
-1. Criar futura migration incremental de `importacao_lote`, `importacao_linha` e `importacao_registro` conforme a especificação aprovada.
-2. Criar teste SQL sintético transacional para identidade, reprocessamento, JSONB posicional, status, vínculo N:N, constraints, deleção restrita e `ROLLBACK`.
-3. Não implementar nem executar o importador até obter manifesto físico seguro de abas e colunas e definir roles operacionais.
-4. Definir política institucional de retenção e rotina de auditoria de associações genéricas antes de usar dados reais.
-5. Especificar em seguida a extensão de tratamento de Chagas e, separadamente, o fluxo de encaminhamento/contrarreferência.
+1. Não implementar nem executar o importador até obter manifesto físico seguro de abas e colunas e definir roles operacionais.
+2. Definir política institucional de retenção e rotina de auditoria de associações genéricas antes de usar dados reais.
+3. Definir transições, retomada e idempotência clínica do futuro importador.
+4. Especificar em seguida a extensão de tratamento de Chagas e, separadamente, o fluxo de encaminhamento/contrarreferência.
 
 ## 3. Ajustes e Documentação Pendentes
 
@@ -69,7 +68,7 @@ Atualizado em: 2026-07-19
 
 ## Próximo Passo Técnico Recomendado
 
-O próximo módulo recomendado, agora pronto para orientar migration, é importação e proveniência. A migration futura deve seguir `docs/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`; ela não autoriza implementar o importador nem usar dados reais. Não alterar migrations antigas nem reaplicar scripts antigos no banco atual.
+O módulo físico de importação e proveniência está implementado. O próximo trabalho deve preparar, somente com metadados seguros, as condições operacionais que ainda bloqueiam o importador e especificar a próxima extensão clínica. Não alterar migrations antigas, reaplicar scripts antigos ou usar dados reais.
 
 Comando local recomendado para verificar documentação e estado do projeto:
 

@@ -26,6 +26,45 @@ Além deste arquivo, atualize quando necessário:
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
 
+## 2026-07-19 - Implementação do módulo de importação e proveniência
+
+Data: 2026-07-19
+
+Título da alteração: Migration incremental de lote, linha bruta e associação genérica.
+
+Motivo: implementar a estrutura aprovada de proveniência antes de qualquer importador ou acesso a dados reais.
+
+Arquivos modificados:
+
+- `sql/12_modulo_importacao_proveniencia.sql`
+- `tests/sql/04_validar_modulo_importacao_proveniencia.sql`
+- `docs/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`
+- `docs/VALIDACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`
+- `docs/MODELO_FISICO_ATUAL.md`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/DECISOES_ARQUITETURAIS.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+- `docs/evidencias/schema_atual_ambulatorio.sql`
+
+Migrations envolvidas:
+
+- Criada e aplicada localmente `sql/12_modulo_importacao_proveniencia.sql`.
+- Nenhuma migration antiga foi alterada ou reaplicada.
+
+Impacto e validação:
+
+- Adicionadas `importacao_lote`, `importacao_linha` e `importacao_registro`, elevando o schema de 30 para 33 tabelas.
+- Implementados SHA-256, reprocessamento composto, status, JSONB posicional, responsável legado, associação N:N, constraints, índices e deleções restritas.
+- Não foram criados importador, manifesto, auditoria, roles, GIN, triggers, logs clínicos ou FK polimórfica.
+- O teste isolado e a suíte completa passaram com `ROLLBACK`; nenhuma linha sintética persistiu.
+
+Pendências ou riscos:
+
+- Manifesto físico seguro, roles, política de retenção, auditoria operacional, transições e idempotência continuam necessários antes do importador.
+- A associação genérica depende de validação operacional do alvo heterogêneo.
+
 ## 2026-07-19 - Fechamento da especificação de importação e proveniência
 
 Data: 2026-07-19

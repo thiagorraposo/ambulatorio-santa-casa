@@ -4,12 +4,12 @@ Atualizado em: 2026-07-19
 
 ## Objetivo e fontes
 
-Este documento reconcilia as 140 entradas únicas de `planejamento/tabelas dicionário de dados/03_coluna_planilha_destino.csv` com o schema físico aplicado de 30 tabelas.
+Este documento reconcilia as 140 entradas únicas de `planejamento/tabelas dicionário de dados/03_coluna_planilha_destino.csv` com o schema físico aplicado de 33 tabelas.
 
 Ordem de precedência usada:
 
 1. `docs/evidencias/schema_atual_ambulatorio.sql`, como evidência do schema aplicado;
-2. migrations `sql/00` a `sql/11`, para confirmar a origem versionada da estrutura;
+2. migrations `sql/00` a `sql/12`, para confirmar a origem versionada da estrutura;
 3. documentos atuais em `docs/`;
 4. DER, dicionário técnico, relação coluna-tabela e seis CSVs em `planejamento/`, como intenção de modelagem sujeita a reconciliação.
 
@@ -28,23 +28,23 @@ Nenhum dado real foi lido. A análise considera nomes, tipos, constraints e sem�
 | Classificação | Quantidade | Percentual sobre 140 |
 | --- | ---: | ---: |
 | Coberta diretamente | 6 | 4,29% |
-| Coberta com transformação | 108 | 77,14% |
+| Coberta com transformação | 109 | 77,86% |
 | Parcialmente coberta | 12 | 8,57% |
-| Não coberta | 2 | 1,43% |
+| Não coberta | 1 | 0,71% |
 | Dúvida pendente | 12 | 8,57% |
 | Total | 140 | 100,00% |
 
-Cobertura plena atual: **114 de 140 entradas (81,43%)**. Incluindo cobertura parcial: **126 de 140 (90,00%)**.
+Cobertura plena atual: **115 de 140 entradas (82,14%)**. Incluindo cobertura parcial: **127 de 140 (90,71%)**.
 
 Há uma ressalva no denominador: `Controle da importação como processo.` e `Todas as colunas originais da planilha em formato bruto para auditoria.` são descrições técnicas, não cabeçalhos clínicos demonstrados. Sem elas, o catálogo possui 138 possíveis colunas de origem; elas permanecem classificadas como dúvida até confirmação da lista canônica.
 
-## Reavaliação das 26 entradas fora da cobertura plena
+## Reavaliação das 25 entradas fora da cobertura plena
 
-A reavaliação contra as 30 tabelas mantém as quantidades atuais. Nenhuma entrada pode ser promovida sem nova estrutura ou sem evidência da posição e da semântica da origem.
+A aplicação do módulo de importação e proveniência promove `Responsavel pela digitacao` para cobertura plena, preservada como texto legado em `importacao_linha`. As demais 25 entradas mantêm suas classificações.
 
 | Grupo | Entradas | Conclusão no schema atual | Evolução indicada |
 | --- | ---: | --- | --- |
-| Identidade e importação | 1 não coberta e 2 duvidosas | `Responsavel pela digitacao` não equivale aos campos livres `responsavel` de pendência ou procedimento. As duas descrições técnicas não são cabeçalhos comprovados. | Módulo de importação e proveniência, preservando responsável e linha brutos sem antecipar autenticação. |
+| Identidade e importação | 1 coberta com transformação e 2 duvidosas | `Responsavel pela digitacao` possui destino em `importacao_linha.responsavel_digitacao_original`. As duas descrições técnicas não são cabeçalhos comprovados. | Estrutura aplicada; manifesto físico e importador permanecem pendentes. |
 | Tratamento de Chagas | 5 parciais e 1 não coberta | Datas, status, motivo e eventos adversos existentes ajudam, mas não preservam duração original, ano isolado, data de prescrição, execução pelo ambulatório nem a semântica exata do motivo. | Extensão incremental de `tratamento_chagas`, após confirmar cabeçalhos e granularidade. |
 | Encaminhamento e continuidade | 3 parciais | A existência de `encaminhamento` não prova que o paciente trouxe documento; projeto e contrarreferência não têm vínculo ou indicador inequívoco. | Extensão de fluxo assistencial, sem criar tabelas paralelas redundantes. |
 | Observação e pendência | 1 parcial | `atendimento.observacoes` e `pendencia_atendimento` armazenam conteúdo, mas não há regra segura para dividir a célula. | Resolver na importação; nova coluna/tabela apenas se a origem comprovar múltiplos elementos tipados. |
@@ -65,7 +65,7 @@ Nos cinco itens de tratamento considerados parciais estão `teve reação advers
 - `Telefone de Contato` → `paciente_contato.telefone`.
 - `Localização do prontuário` → `atendimento.localizacao_prontuario`.
 
-### Coberta com transformação (108)
+### Coberta com transformação (109)
 
 Conversões simples e padronizações:
 
@@ -101,6 +101,10 @@ Avaliação clínica e fatos longitudinais:
 - `Óbito`, `Data do óbito` e `causa do óbito` → registro consolidado em `obito`.
 - `Paciente notificado?` e `Número notificação` → estado consolidado em `notificacao`, com valores originais preservados.
 
+Importação e proveniência:
+
+- `Responsavel pela digitacao` → `importacao_linha.responsavel_digitacao_original`, como texto legado sem equivalência com usuário autenticado.
+
 ### Parcialmente coberta (12)
 
 | Coluna | Cobertura atual | Lacuna |
@@ -118,11 +122,10 @@ Avaliação clínica e fatos longitudinais:
 | `Encaminhado a qual projeto?` | `encaminhamento` e `atendimento_projeto_estudo` | Falta relação explícita entre o encaminhamento e o projeto. |
 | `Paciente com contrarreferencia realizada?` | Pode ser descrita em `acompanhamento_cuidado` | Falta tipo/booleano inequívoco de contrarreferência. |
 
-### Não coberta (2)
+### Não coberta (1)
 
 | Grupo | Colunas | Expansão necessária |
 | --- | --- | --- |
-| Autoria | `Responsavel pela digitacao` | Identidade de usuário/importador e referência no atendimento ou lote. |
 | Tratamento | `Por quanto tempo foi usado?` | Duração original ou regra derivada no tratamento. |
 
 ### Dúvida pendente (12)
@@ -155,11 +158,11 @@ O schema físico já consegue representar exames trazidos e solicitados. A dúvi
 - `retorno_tratamento` e `retorno_anual` foram absorvidas por registros tipados em `acompanhamento_cuidado`.
 - `dados_clinicos_atendimento`, `evento_clinico`, `dispositivo_implantado` e `obito` foram implementadas por `sql/10_modulo_avaliacao_clinica.sql`.
 - `notificacao` foi implementada por `sql/11_modulo_notificacao.sql`.
+- `importacao_planilha` e `importacao_linha` foram implementadas como `importacao_lote`, `importacao_linha` e `importacao_registro` por `sql/12_modulo_importacao_proveniencia.sql`.
 
 ### Ainda precisam ser criadas
 
 - `usuario` ou, antes de autenticação, uma entidade mínima de responsável/importador.
-- `importacao_planilha` e `importacao_linha`, antes da importação controlada.
 
 ### Redundantes ou a reformular
 
@@ -171,7 +174,7 @@ O schema físico já consegue representar exames trazidos e solicitados. A dúvi
 
 ## Divergências encontradas
 
-- O dicionário planeja 38 tabelas e 364 campos; o schema aplicado possui 30 tabelas com nomes, chaves `BIGINT` e estruturas diferentes. O dicionário não é retrato do banco atual.
+- O dicionário planeja 38 tabelas e 364 campos; o schema aplicado possui 33 tabelas com nomes, chaves `BIGINT` e estruturas diferentes. O dicionário não é retrato do banco atual.
 - O relatório automático afirma 140 colunas originais, mas sua fonte canônica esperada não existe; o fallback contém duas descrições técnicas tratadas como se fossem colunas.
 - O CSV possui 192 linhas de destino para 140 nomes únicos. Parte é decomposição legítima, mas nomes repetidos perderam posição/aba e não distinguem os blocos trazido e solicitado.
 - Campos planejados como `paciente.nome_completo`, `paciente.origem_aba` e `paciente_contato.valor_contato` existem fisicamente como `nome`, `grupo_origem_planilha` e `telefone`.
@@ -182,7 +185,7 @@ O schema físico já consegue representar exames trazidos e solicitados. A dúvi
 - A pergunta sobre exame realizado por familiares não equivale ao campo físico de histórico familiar.
 - O DER e o dicionário planejado incluem estruturas ainda não aplicadas; ambos são fontes de intenção e não evidência do estado físico.
 
-## Comparação dos próximos módulos candidatos
+## Comparação que fundamentou a priorização
 
 | Candidato | Ganho imediato de cobertura | Dependências | Valor funcional | Risco de retrabalho |
 | --- | --- | --- | --- | --- |
@@ -191,9 +194,9 @@ O schema físico já consegue representar exames trazidos e solicitados. A dúvi
 | Fluxo de encaminhamento e contrarreferência | Até 3 entradas parciais | Confirmar documento trazido, vínculo com projeto e conceito de contrarreferência | Médio/alto para continuidade do cuidado | Médio, com risco de duplicar `encaminhamento` e `acompanhamento_cuidado` |
 | Ajustes isolados de observação, idade, autorrelato e família | Até 4 entradas parciais | Regras específicas e confirmação semântica independentes | Localizado | Alto se implementados como campos soltos antes da importação |
 
-## Próximo módulo recomendado: importação e proveniência
+## Módulo de importação e proveniência implementado
 
-O próximo módulo incremental recomendado é **importação e proveniência**, antes das extensões clínicas. A recomendação não decorre da maior contagem imediata de colunas, mas de sua dependência transversal: ele preserva a origem necessária para interpretar cabeçalhos repetidos, separa o responsável legado do futuro usuário autenticado e evita retrofitar rastreabilidade em todas as tabelas depois que dados forem importados.
+O módulo de **importação e proveniência** foi implementado antes das extensões clínicas. Ele preserva a origem necessária para interpretar cabeçalhos repetidos, separa o responsável legado do futuro usuário autenticado e fornece rastreabilidade estrutural sem implementar importador.
 
 Estrutura definida:
 
@@ -203,7 +206,7 @@ Estrutura definida:
 - `ON DELETE RESTRICT` para preservar proveniência e índices somente para identidade, processamento e rastreio inverso;
 - nenhuma entidade `usuario` nesta fase: o texto legado não comprova identidade única e não deve ser confundido com autenticação futura.
 
-A especificação está pronta para orientar migration incremental. O manifesto físico seguro, permissões operacionais e regras do importador continuam pendentes, mas não bloqueiam a criação das estruturas genéricas. As fontes canônicas e limitações do layout estão em `docs/METADADOS_SEGUROS_LAYOUT_PLANILHA.md`.
+A estrutura está aplicada e validada. Manifesto físico seguro, permissões operacionais, política de retenção, auditoria e regras do importador continuam pendentes. As fontes canônicas e limitações do layout estão em `docs/METADADOS_SEGUROS_LAYOUT_PLANILHA.md`.
 
 ## Módulo de notificação implementado
 

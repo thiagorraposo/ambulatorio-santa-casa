@@ -4,11 +4,11 @@ Atualizado em: 2026-07-19
 
 Este documento descreve a estrutura física real aplicada no schema `ambulatorio`, usando como fonte principal o dump `docs/evidencias/schema_atual_ambulatorio.sql`. Os scripts em `sql/` foram usados como fonte de reconciliação.
 
-O schema físico aplicado possui 30 tabelas. Todas as tabelas encontradas no dump existem nas migrations versionadas, e nenhuma tabela das migrations ficou ausente da evidência analisada.
+O schema físico aplicado possui 33 tabelas. Todas as tabelas encontradas no dump existem nas migrations versionadas, e nenhuma tabela das migrations ficou ausente da evidência analisada.
 
 ## Estratégia de Construção por Fases
 
-O modelo físico atual reúne as 25 tabelas do núcleo funcional inicial, as quatro tabelas do módulo de avaliação clínica e a tabela do módulo de notificação. Ainda não representa a cobertura completa e final da planilha original.
+O modelo físico atual reúne as 25 tabelas do núcleo funcional inicial, as quatro tabelas do módulo de avaliação clínica, a tabela de notificação e as três tabelas de importação e proveniência. Ainda não representa a cobertura completa e final da planilha original.
 
 As demais tabelas previstas serão implementadas posteriormente por migrations incrementais. A ausência temporária dessas estruturas não representa falha, lacuna involuntária ou divergência crítica em relação ao plano do projeto.
 
@@ -42,6 +42,9 @@ Nenhuma migration antiga deve ser alterada ou reaplicada no banco atual. A cober
 | `evento_clinico` | Sim | `sql/10_modulo_avaliacao_clinica.sql` | Banco e migration |
 | `exame_complementar_resultado` | Sim | `sql/07_tabelas_exames_complementares.sql` | Banco e migration |
 | `historico_familiar_chagas` | Sim | `sql/05_tabelas_diagnostico_sorologia.sql` | Banco e migration |
+| `importacao_linha` | Sim | `sql/12_modulo_importacao_proveniencia.sql` | Banco e migration |
+| `importacao_lote` | Sim | `sql/12_modulo_importacao_proveniencia.sql` | Banco e migration |
+| `importacao_registro` | Sim | `sql/12_modulo_importacao_proveniencia.sql` | Banco e migration |
 | `medicamento` | Sim | `sql/09_tabelas_medicamentos_tratamentos.sql` | Banco e migration |
 | `obito` | Sim | `sql/10_modulo_avaliacao_clinica.sql` | Banco e migration |
 | `notificacao` | Sim | `sql/11_modulo_notificacao.sql` | Banco e migration |
@@ -704,6 +707,36 @@ Finalidade: estado consolidado de notificação informado para o paciente.
 - Índice não único `idx_notificacao_numero_notificacao` em `numero_notificacao`.
 - Sem `CHECK` condicional, vínculo com atendimento ou unicidade global do número.
 
+### `importacao_lote`
+
+Finalidade: identificar cada execução e sua cadeia de reprocessamento.
+
+- PK `importacao_lote_id` e `UNIQUE(codigo_lote)`.
+- SHA-256 e versão de layout obrigatórios.
+- FK composta autorreferente de reprocessamento com `ON DELETE RESTRICT`.
+- Oito status permitidos, validação de período e bloqueio de autorreferência direta.
+- Índice único parcial para um lote inicial por hash/layout e índice de consulta da cadeia.
+
+### `importacao_linha`
+
+Finalidade: preservar linha sintática de origem antes da normalização.
+
+- PK `importacao_linha_id` e FK para lote com `ON DELETE RESTRICT`.
+- `UNIQUE(importacao_lote_id, aba_ordem, numero_linha)`.
+- Aba e posições obrigatórias e positivas.
+- `dados_brutos JSONB` obrigatório e limitado a array, sem índice GIN.
+- Responsável da digitação preservado como texto legado, sem vínculo com usuário.
+- Seis status permitidos e índice por lote/status.
+
+### `importacao_registro`
+
+Finalidade: associação genérica N:N entre linhas e registros estruturados.
+
+- PK `importacao_registro_id` e FK para linha com `ON DELETE RESTRICT`.
+- Alvo identificado por schema `ambulatorio`, tabela e ID positivo, sem FK polimórfica.
+- Ações permitidas: `criado`, `atualizado` e `associado`.
+- `UNIQUE` do vínculo e índice de rastreio inverso do destino.
+
 ## Diferenças em Relação ao Dicionário de Dados ou Modelo Lógico Anterior
 
 - `docs/dicionario-dados.md` está vazio.
@@ -719,8 +752,6 @@ Finalidade: estado consolidado de notificação informado para o paciente.
 
 ## Próxima fase técnica
 
-1. Definir o próximo módulo físico a partir das lacunas de cobertura documentadas.
-2. Registrar decisões e pendências semânticas antes de nova alteração estrutural.
-3. Criar migration incremental e teste SQL correspondentes.
-4. Validar em banco limpo e no ambiente local controlado.
-5. Atualizar o dump estrutural e a documentação afetada após a aplicação.
+1. Manter o importador bloqueado até existir manifesto físico seguro e regras operacionais.
+2. Definir política de retenção e auditoria da associação genérica antes de dados reais.
+3. Especificar a próxima extensão clínica a partir das lacunas de cobertura.

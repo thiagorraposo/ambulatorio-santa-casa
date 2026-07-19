@@ -2,7 +2,7 @@
 
 Atualizado em: 2026-07-19
 
-Status: pronta para orientar migration incremental; importador e importação de dados reais permanecem bloqueados.
+Status: implementada por migration incremental e validada; importador e importação de dados reais permanecem bloqueados.
 
 ## Objetivo e fronteiras
 
@@ -171,9 +171,9 @@ Uma futura normalização deverá manter o valor original e depender de inventá
 - `importacao_registro` só pode ser removida por ação explícita e auditada. A remoção de um registro clínico não é propagada por falta de FK genérica e pode deixar associação órfã; uma rotina futura de integridade deverá detectar isso.
 - Reversão estrutural futura será destrutiva e deverá exigir autorização explícita, começando por `importacao_registro`, depois `importacao_linha` e por último `importacao_lote`.
 
-## Validação esperada da migration
+## Validação da migration
 
-O teste SQL sintético e transacional deverá cobrir:
+O teste SQL sintético e transacional cobre:
 
 - lote inicial e reprocessamento com mesmo hash/layout;
 - bloqueio de segundo lote inicial duplicado;
@@ -196,4 +196,4 @@ O teste SQL sintético e transacional deverá cobrir:
 
 ## Prontidão
 
-As decisões necessárias para identidade, reprocessamento, formato bruto, status, responsável legado, vínculo genérico, cardinalidades, constraints, índices e deleção estão fechadas ou explicitamente delimitadas. O módulo está **pronto para orientar uma migration incremental e seu teste SQL sintético**, mas não está pronto para importar dados reais nem autoriza implementar o importador.
+As decisões necessárias para identidade, reprocessamento, formato bruto, status, responsável legado, vínculo genérico, cardinalidades, constraints, índices e deleção estão implementadas por `sql/12_modulo_importacao_proveniencia.sql`. `tests/sql/04_validar_modulo_importacao_proveniencia.sql` aprovou os cenários previstos e confirmou o `ROLLBACK`. O módulo físico está **implementado e validado**, mas não está pronto para importar dados reais nem autoriza implementar o importador.

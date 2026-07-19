@@ -1489,6 +1489,186 @@ ALTER SEQUENCE ambulatorio.historico_familiar_chagas_historico_familiar_chagas_i
 
 
 --
+-- Name: importacao_linha; Type: TABLE; Schema: ambulatorio; Owner: -
+--
+
+CREATE TABLE ambulatorio.importacao_linha (
+    importacao_linha_id bigint NOT NULL,
+    importacao_lote_id bigint NOT NULL,
+    aba_nome_original text NOT NULL,
+    aba_ordem integer NOT NULL,
+    numero_linha integer NOT NULL,
+    dados_brutos jsonb NOT NULL,
+    responsavel_digitacao_original text,
+    status_linha character varying(40) DEFAULT 'pendente'::character varying NOT NULL,
+    mensagem_processamento text,
+    criado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    atualizado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT chk_importacao_linha_aba_nome CHECK ((btrim(aba_nome_original) <> ''::text)),
+    CONSTRAINT chk_importacao_linha_aba_ordem CHECK ((aba_ordem > 0)),
+    CONSTRAINT chk_importacao_linha_dados_brutos CHECK ((jsonb_typeof(dados_brutos) = 'array'::text)),
+    CONSTRAINT chk_importacao_linha_numero CHECK ((numero_linha > 0)),
+    CONSTRAINT chk_importacao_linha_status CHECK (((status_linha)::text = ANY ((ARRAY['pendente'::character varying, 'processando'::character varying, 'importada'::character varying, 'importada_com_pendencia'::character varying, 'rejeitada'::character varying, 'ignorada'::character varying])::text[])))
+);
+
+
+--
+-- Name: TABLE importacao_linha; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON TABLE ambulatorio.importacao_linha IS 'Linha de origem preservada antes de normalizacao clinica.';
+
+
+--
+-- Name: COLUMN importacao_linha.dados_brutos; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.importacao_linha.dados_brutos IS 'Array JSONB ordenado de celulas; preserva posicao e cabecalhos repetidos.';
+
+
+--
+-- Name: COLUMN importacao_linha.responsavel_digitacao_original; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.importacao_linha.responsavel_digitacao_original IS 'Texto legado preservado sem equivalencia com usuario autenticado.';
+
+
+--
+-- Name: importacao_linha_importacao_linha_id_seq; Type: SEQUENCE; Schema: ambulatorio; Owner: -
+--
+
+CREATE SEQUENCE ambulatorio.importacao_linha_importacao_linha_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: importacao_linha_importacao_linha_id_seq; Type: SEQUENCE OWNED BY; Schema: ambulatorio; Owner: -
+--
+
+ALTER SEQUENCE ambulatorio.importacao_linha_importacao_linha_id_seq OWNED BY ambulatorio.importacao_linha.importacao_linha_id;
+
+
+--
+-- Name: importacao_lote; Type: TABLE; Schema: ambulatorio; Owner: -
+--
+
+CREATE TABLE ambulatorio.importacao_lote (
+    importacao_lote_id bigint NOT NULL,
+    codigo_lote character varying(100) NOT NULL,
+    hash_arquivo_sha256 character varying(64) NOT NULL,
+    layout_versao character varying(80) NOT NULL,
+    lote_reprocessado_de_id bigint,
+    status_lote character varying(40) DEFAULT 'recebido'::character varying NOT NULL,
+    iniciado_em timestamp without time zone,
+    finalizado_em timestamp without time zone,
+    mensagem_erro text,
+    observacoes text,
+    criado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    atualizado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT chk_importacao_lote_hash_sha256 CHECK (((hash_arquivo_sha256)::text ~ '^[0-9a-f]{64}$'::text)),
+    CONSTRAINT chk_importacao_lote_periodo CHECK (((finalizado_em IS NULL) OR (iniciado_em IS NULL) OR (finalizado_em >= iniciado_em))),
+    CONSTRAINT chk_importacao_lote_reprocessamento CHECK (((lote_reprocessado_de_id IS NULL) OR (lote_reprocessado_de_id <> importacao_lote_id))),
+    CONSTRAINT chk_importacao_lote_status CHECK (((status_lote)::text = ANY ((ARRAY['recebido'::character varying, 'validando'::character varying, 'pronto'::character varying, 'processando'::character varying, 'concluido'::character varying, 'concluido_com_pendencias'::character varying, 'falhou'::character varying, 'cancelado'::character varying])::text[])))
+);
+
+
+--
+-- Name: TABLE importacao_lote; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON TABLE ambulatorio.importacao_lote IS 'Execucao identificada de importacao, incluindo reprocessamentos auditaveis.';
+
+
+--
+-- Name: COLUMN importacao_lote.hash_arquivo_sha256; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.importacao_lote.hash_arquivo_sha256 IS 'SHA-256 hexadecimal minusculo do conteudo de origem, sem caminho local.';
+
+
+--
+-- Name: COLUMN importacao_lote.lote_reprocessado_de_id; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.importacao_lote.lote_reprocessado_de_id IS 'Execucao anterior do mesmo conteudo e layout quando houver reprocessamento.';
+
+
+--
+-- Name: importacao_lote_importacao_lote_id_seq; Type: SEQUENCE; Schema: ambulatorio; Owner: -
+--
+
+CREATE SEQUENCE ambulatorio.importacao_lote_importacao_lote_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: importacao_lote_importacao_lote_id_seq; Type: SEQUENCE OWNED BY; Schema: ambulatorio; Owner: -
+--
+
+ALTER SEQUENCE ambulatorio.importacao_lote_importacao_lote_id_seq OWNED BY ambulatorio.importacao_lote.importacao_lote_id;
+
+
+--
+-- Name: importacao_registro; Type: TABLE; Schema: ambulatorio; Owner: -
+--
+
+CREATE TABLE ambulatorio.importacao_registro (
+    importacao_registro_id bigint NOT NULL,
+    importacao_linha_id bigint NOT NULL,
+    schema_destino character varying(63) DEFAULT 'ambulatorio'::character varying NOT NULL,
+    tabela_destino character varying(63) NOT NULL,
+    registro_id bigint NOT NULL,
+    acao character varying(20) NOT NULL,
+    criado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT chk_importacao_registro_acao CHECK (((acao)::text = ANY ((ARRAY['criado'::character varying, 'atualizado'::character varying, 'associado'::character varying])::text[]))),
+    CONSTRAINT chk_importacao_registro_id CHECK ((registro_id > 0)),
+    CONSTRAINT chk_importacao_registro_schema CHECK (((schema_destino)::text = 'ambulatorio'::text)),
+    CONSTRAINT chk_importacao_registro_tabela CHECK ((btrim((tabela_destino)::text) <> ''::text))
+);
+
+
+--
+-- Name: TABLE importacao_registro; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON TABLE ambulatorio.importacao_registro IS 'Associacao generica N:N entre linha de origem e registro estruturado.';
+
+
+--
+-- Name: COLUMN importacao_registro.registro_id; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.importacao_registro.registro_id IS 'Identificador do alvo heterogeneo, validado operacionalmente sem FK polimorfica.';
+
+
+--
+-- Name: importacao_registro_importacao_registro_id_seq; Type: SEQUENCE; Schema: ambulatorio; Owner: -
+--
+
+CREATE SEQUENCE ambulatorio.importacao_registro_importacao_registro_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: importacao_registro_importacao_registro_id_seq; Type: SEQUENCE OWNED BY; Schema: ambulatorio; Owner: -
+--
+
+ALTER SEQUENCE ambulatorio.importacao_registro_importacao_registro_id_seq OWNED BY ambulatorio.importacao_registro.importacao_registro_id;
+
+
+--
 -- Name: medicamento; Type: TABLE; Schema: ambulatorio; Owner: -
 --
 
@@ -2857,6 +3037,27 @@ ALTER TABLE ONLY ambulatorio.historico_familiar_chagas ALTER COLUMN historico_fa
 
 
 --
+-- Name: importacao_linha importacao_linha_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.importacao_linha ALTER COLUMN importacao_linha_id SET DEFAULT nextval('ambulatorio.importacao_linha_importacao_linha_id_seq'::regclass);
+
+
+--
+-- Name: importacao_lote importacao_lote_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.importacao_lote ALTER COLUMN importacao_lote_id SET DEFAULT nextval('ambulatorio.importacao_lote_importacao_lote_id_seq'::regclass);
+
+
+--
+-- Name: importacao_registro importacao_registro_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.importacao_registro ALTER COLUMN importacao_registro_id SET DEFAULT nextval('ambulatorio.importacao_registro_importacao_registro_id_seq'::regclass);
+
+
+--
 -- Name: medicamento medicamento_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
 --
 
@@ -3082,6 +3283,30 @@ ALTER TABLE ONLY ambulatorio.historico_familiar_chagas
 
 
 --
+-- Name: importacao_linha importacao_linha_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.importacao_linha
+    ADD CONSTRAINT importacao_linha_pkey PRIMARY KEY (importacao_linha_id);
+
+
+--
+-- Name: importacao_lote importacao_lote_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.importacao_lote
+    ADD CONSTRAINT importacao_lote_pkey PRIMARY KEY (importacao_lote_id);
+
+
+--
+-- Name: importacao_registro importacao_registro_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.importacao_registro
+    ADD CONSTRAINT importacao_registro_pkey PRIMARY KEY (importacao_registro_id);
+
+
+--
 -- Name: medicamento medicamento_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
 --
 
@@ -3255,6 +3480,38 @@ ALTER TABLE ONLY ambulatorio.dispositivo_implantado
 
 ALTER TABLE ONLY ambulatorio.historico_familiar_chagas
     ADD CONSTRAINT uq_historico_familiar_chagas_paciente UNIQUE (paciente_id);
+
+
+--
+-- Name: importacao_linha uq_importacao_linha_posicao; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.importacao_linha
+    ADD CONSTRAINT uq_importacao_linha_posicao UNIQUE (importacao_lote_id, aba_ordem, numero_linha);
+
+
+--
+-- Name: importacao_lote uq_importacao_lote_codigo; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.importacao_lote
+    ADD CONSTRAINT uq_importacao_lote_codigo UNIQUE (codigo_lote);
+
+
+--
+-- Name: importacao_lote uq_importacao_lote_identidade; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.importacao_lote
+    ADD CONSTRAINT uq_importacao_lote_identidade UNIQUE (importacao_lote_id, hash_arquivo_sha256, layout_versao);
+
+
+--
+-- Name: importacao_registro uq_importacao_registro_vinculo; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.importacao_registro
+    ADD CONSTRAINT uq_importacao_registro_vinculo UNIQUE (importacao_linha_id, schema_destino, tabela_destino, registro_id);
 
 
 --
@@ -3511,6 +3768,27 @@ CREATE INDEX idx_historico_familiar_chagas_paciente_id ON ambulatorio.historico_
 
 
 --
+-- Name: idx_importacao_linha_lote_status; Type: INDEX; Schema: ambulatorio; Owner: -
+--
+
+CREATE INDEX idx_importacao_linha_lote_status ON ambulatorio.importacao_linha USING btree (importacao_lote_id, status_linha);
+
+
+--
+-- Name: idx_importacao_lote_hash_layout; Type: INDEX; Schema: ambulatorio; Owner: -
+--
+
+CREATE INDEX idx_importacao_lote_hash_layout ON ambulatorio.importacao_lote USING btree (hash_arquivo_sha256, layout_versao);
+
+
+--
+-- Name: idx_importacao_registro_destino; Type: INDEX; Schema: ambulatorio; Owner: -
+--
+
+CREATE INDEX idx_importacao_registro_destino ON ambulatorio.importacao_registro USING btree (schema_destino, tabela_destino, registro_id);
+
+
+--
 -- Name: idx_medicamento_codigo; Type: INDEX; Schema: ambulatorio; Owner: -
 --
 
@@ -3620,6 +3898,13 @@ CREATE INDEX idx_tratamento_chagas_medicamento_id ON ambulatorio.tratamento_chag
 --
 
 CREATE INDEX idx_tratamento_chagas_status ON ambulatorio.tratamento_chagas USING btree (status_tratamento);
+
+
+--
+-- Name: uq_importacao_lote_inicial; Type: INDEX; Schema: ambulatorio; Owner: -
+--
+
+CREATE UNIQUE INDEX uq_importacao_lote_inicial ON ambulatorio.importacao_lote USING btree (hash_arquivo_sha256, layout_versao) WHERE (lote_reprocessado_de_id IS NULL);
 
 
 --
@@ -3772,6 +4057,30 @@ ALTER TABLE ONLY ambulatorio.exame_complementar_resultado
 
 ALTER TABLE ONLY ambulatorio.historico_familiar_chagas
     ADD CONSTRAINT fk_historico_familiar_chagas_paciente FOREIGN KEY (paciente_id) REFERENCES ambulatorio.paciente(paciente_id) ON DELETE CASCADE;
+
+
+--
+-- Name: importacao_linha fk_importacao_linha_lote; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.importacao_linha
+    ADD CONSTRAINT fk_importacao_linha_lote FOREIGN KEY (importacao_lote_id) REFERENCES ambulatorio.importacao_lote(importacao_lote_id) ON DELETE RESTRICT;
+
+
+--
+-- Name: importacao_lote fk_importacao_lote_reprocessamento; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.importacao_lote
+    ADD CONSTRAINT fk_importacao_lote_reprocessamento FOREIGN KEY (lote_reprocessado_de_id, hash_arquivo_sha256, layout_versao) REFERENCES ambulatorio.importacao_lote(importacao_lote_id, hash_arquivo_sha256, layout_versao) ON DELETE RESTRICT;
+
+
+--
+-- Name: importacao_registro fk_importacao_registro_linha; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.importacao_registro
+    ADD CONSTRAINT fk_importacao_registro_linha FOREIGN KEY (importacao_linha_id) REFERENCES ambulatorio.importacao_linha(importacao_linha_id) ON DELETE RESTRICT;
 
 
 --

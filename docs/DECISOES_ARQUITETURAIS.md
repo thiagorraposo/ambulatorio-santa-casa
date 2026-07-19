@@ -214,13 +214,13 @@ Título: Importação e proveniência antes das próximas extensões clínicas
 
 Data: 2026-07-19
 
-Status: Aceita; pronta para implementação por migration incremental
+Status: Aceita e implementada por `sql/12_modulo_importacao_proveniencia.sql`
 
-Contexto: O schema de 30 tabelas cobre plenamente 114 de 140 entradas. As lacunas clínicas restantes têm ambiguidades próprias, enquanto responsável pela digitação, cabeçalhos repetidos e preservação da linha original dependem de uma origem auditável comum.
+Contexto: O schema anterior de 30 tabelas cobria plenamente 114 de 140 entradas. As lacunas clínicas restantes tinham ambiguidades próprias, enquanto responsável pela digitação, cabeçalhos repetidos e preservação da linha original dependiam de uma origem auditável comum.
 
 Decisão: Priorizar como próximo módulo incremental a infraestrutura de importação e proveniência, com lote por execução, linha bruta posicional em array JSONB, responsável legado em texto e associação genérica N:N `importacao_registro`. Reprocessamentos formam cadeia explícita pelo mesmo hash e layout. Não criar entidade `usuario` apenas a partir do nome informado na planilha e não usar FKs clínicas opcionais como substituto de proveniência.
 
-Consequências: A estrutura está pronta para migration, mas o importador permanece bloqueado até existir manifesto físico seguro e regras operacionais. O vínculo genérico não possui FK para alvos heterogêneos; existência do alvo será validada transacionalmente e associações órfãs exigirão auditoria futura. Conteúdo bruto não terá purga automática até política institucional de retenção.
+Consequências: A estrutura foi aplicada, mas o importador permanece bloqueado até existir manifesto físico seguro e regras operacionais. O vínculo genérico não possui FK para alvos heterogêneos; existência do alvo será validada transacionalmente e associações órfãs exigirão auditoria futura. Conteúdo bruto não terá purga automática até política institucional de retenção.
 
 Alternativas rejeitadas: iniciar por campos clínicos isolados; tratar responsável legado como usuário autenticado; atribuir toda origem a atendimento; importar antes de definir rastreabilidade; adicionar FK de origem a todas as tabelas; usar triggers dinâmicas para simular FK genérica; guardar cabeçalhos duplicados em objeto JSON.
 
