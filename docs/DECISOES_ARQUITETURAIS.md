@@ -214,14 +214,14 @@ Título: Importação e proveniência antes das próximas extensões clínicas
 
 Data: 2026-07-19
 
-Status: Aceita como direção; desenho físico ainda bloqueado por decisões pendentes
+Status: Aceita; pronta para implementação por migration incremental
 
 Contexto: O schema de 30 tabelas cobre plenamente 114 de 140 entradas. As lacunas clínicas restantes têm ambiguidades próprias, enquanto responsável pela digitação, cabeçalhos repetidos e preservação da linha original dependem de uma origem auditável comum.
 
-Decisão: Priorizar como próximo módulo incremental a infraestrutura de importação e proveniência, com lote, linha bruta, posição/aba e responsável legado em texto. Não criar entidade `usuario` apenas a partir do nome informado na planilha e não usar FKs clínicas opcionais como substituto de proveniência.
+Decisão: Priorizar como próximo módulo incremental a infraestrutura de importação e proveniência, com lote por execução, linha bruta posicional em array JSONB, responsável legado em texto e associação genérica N:N `importacao_registro`. Reprocessamentos formam cadeia explícita pelo mesmo hash e layout. Não criar entidade `usuario` apenas a partir do nome informado na planilha e não usar FKs clínicas opcionais como substituto de proveniência.
 
-Consequências: As extensões de tratamento, encaminhamento, contrarreferência e observações serão especificadas depois de existir uma estratégia para preservar origem. A migration do módulo de importação permanece bloqueada até definir reprocessamento, retenção de dados brutos e vínculo entre linha e registros gerados.
+Consequências: A estrutura está pronta para migration, mas o importador permanece bloqueado até existir manifesto físico seguro e regras operacionais. O vínculo genérico não possui FK para alvos heterogêneos; existência do alvo será validada transacionalmente e associações órfãs exigirão auditoria futura. Conteúdo bruto não terá purga automática até política institucional de retenção.
 
-Alternativas rejeitadas: iniciar por campos clínicos isolados; tratar responsável legado como usuário autenticado; atribuir toda origem a atendimento; importar antes de definir rastreabilidade; criar associação polimórfica sem avaliar perda de integridade.
+Alternativas rejeitadas: iniciar por campos clínicos isolados; tratar responsável legado como usuário autenticado; atribuir toda origem a atendimento; importar antes de definir rastreabilidade; adicionar FK de origem a todas as tabelas; usar triggers dinâmicas para simular FK genérica; guardar cabeçalhos duplicados em objeto JSON.
 
 Documentos relacionados: `docs/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`, `docs/COBERTURA_COLUNAS_PLANILHA.md`, `docs/PROXIMOS_PASSOS.md`.

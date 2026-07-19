@@ -138,7 +138,8 @@ Resumo da reconciliação:
 - Medicamentos e tratamentos: catálogo de medicamentos, medicamentos por atendimento, tratamento de Chagas e procedimentos clínicos.
 - Avaliação clínica por atendimento, eventos clínicos, dispositivos implantados e óbito, aplicada e validada no banco local.
 - Notificação consolidada por paciente, aplicada e validada no banco local.
-- A reavaliação das 26 entradas fora da cobertura plena manteve os totais atuais e definiu importação e proveniência como próximo módulo recomendado, ainda sem autorização para migration.
+- A reavaliação das 26 entradas fora da cobertura plena manteve os totais atuais e definiu importação e proveniência como próximo módulo recomendado.
+- Identidade, reprocessamento, JSONB posicional, status, responsável legado, associação genérica N:N, cardinalidades, constraints, índices e deleção foram definidos; o módulo está pronto para orientar migration, mas não para importar dados reais.
 
 ## Módulos Ainda Pendentes
 
@@ -165,8 +166,9 @@ Resumo da reconciliação:
 
 ## Próxima fase técnica
 
-1. Fechar as decisões pendentes da especificação inicial de importação e proveniência.
-2. Não criar a migration até definir retenção, reprocessamento e vínculo entre linhas de origem e registros gerados.
+1. Criar futuramente a migration incremental do módulo de importação e proveniência conforme a especificação aprovada.
+2. Criar teste SQL sintético transacional cobrindo lote inicial, reprocessamento, JSONB posicional, vínculo N:N, constraints, deleção restrita e `ROLLBACK`.
+3. Manter o importador bloqueado até existir manifesto físico seguro e regras operacionais de acesso, retenção e auditoria.
 
 ## Regra Permanente de Documentação
 

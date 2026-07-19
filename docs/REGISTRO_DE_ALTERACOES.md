@@ -26,6 +26,47 @@ Além deste arquivo, atualize quando necessário:
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
 
+## 2026-07-19 - Fechamento da especificação de importação e proveniência
+
+Data: 2026-07-19
+
+Título da alteração: Resolução e delimitação dos bloqueios da migration de importação e proveniência.
+
+Motivo: fechar o desenho estrutural do próximo módulo sem acessar dados reais, implementar importador ou alterar o schema.
+
+Arquivos modificados:
+
+- `docs/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`
+- `docs/METADADOS_SEGUROS_LAYOUT_PLANILHA.md`
+- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/DECISOES_ARQUITETURAIS.md`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada, alterada ou aplicada.
+
+Decisões e impacto:
+
+- Cada lote representa uma execução; reprocessamentos criam novo lote ligado a predecessor com o mesmo SHA-256 e layout.
+- Linhas preservam posição e cabeçalhos duplicados em array JSONB ordenado.
+- Responsável pela digitação permanece texto legado sem vínculo com usuário.
+- `importacao_registro` materializa relação N:N genérica com os registros estruturados.
+- Status, cardinalidades, constraints, índices e `ON DELETE RESTRICT` foram definidos.
+- O módulo passa a estar pronto para orientar migration incremental e teste SQL sintético.
+
+Como validar:
+
+- Revisar a especificação contra os metadados seguros existentes.
+- Executar `make project-check` e confirmar ausência de alterações em `sql/`, `tests/sql/`, dump e banco.
+
+Pendências ou riscos:
+
+- Manifesto físico de abas/posições, roles, política de retenção, importador e auditoria de alvos genéricos ainda precisam ser implementados antes de dados reais.
+- A associação genérica não oferece FK para registros em tabelas heterogêneas.
+
 ## 2026-07-19 - Priorização de importação e proveniência
 
 Data: 2026-07-19

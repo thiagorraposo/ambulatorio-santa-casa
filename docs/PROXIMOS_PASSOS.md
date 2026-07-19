@@ -13,10 +13,10 @@ Atualizado em: 2026-07-19
 
 ## 2. Próxima fase técnica
 
-1. Resolver as pendências de desenho de importação e proveniência descritas em `docs/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`.
-2. Obter a lista canônica ordenada de abas e colunas como metadados seguros, sem versionar dados clínicos.
-3. Definir reprocessamento, retenção do conteúdo bruto e vínculo entre linha e registros gerados.
-4. Somente depois preparar a migration incremental e o teste SQL sintético transacional do módulo.
+1. Criar futura migration incremental de `importacao_lote`, `importacao_linha` e `importacao_registro` conforme a especificação aprovada.
+2. Criar teste SQL sintético transacional para identidade, reprocessamento, JSONB posicional, status, vínculo N:N, constraints, deleção restrita e `ROLLBACK`.
+3. Não implementar nem executar o importador até obter manifesto físico seguro de abas e colunas e definir roles operacionais.
+4. Definir política institucional de retenção e rotina de auditoria de associações genéricas antes de usar dados reais.
 5. Especificar em seguida a extensão de tratamento de Chagas e, separadamente, o fluxo de encaminhamento/contrarreferência.
 
 ## 3. Ajustes e Documentação Pendentes
@@ -69,7 +69,7 @@ Atualizado em: 2026-07-19
 
 ## Próximo Passo Técnico Recomendado
 
-O próximo módulo recomendado é importação e proveniência. Antes de qualquer migration, devem ser fechadas identidade de lote, retenção de `JSONB`, reprocessamento e associação entre a linha de origem e os registros gerados. Não importar dados reais, alterar migrations antigas nem reaplicar scripts antigos no banco atual.
+O próximo módulo recomendado, agora pronto para orientar migration, é importação e proveniência. A migration futura deve seguir `docs/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`; ela não autoriza implementar o importador nem usar dados reais. Não alterar migrations antigas nem reaplicar scripts antigos no banco atual.
 
 Comando local recomendado para verificar documentação e estado do projeto:
 

@@ -195,15 +195,15 @@ O schema físico já consegue representar exames trazidos e solicitados. A dúvi
 
 O próximo módulo incremental recomendado é **importação e proveniência**, antes das extensões clínicas. A recomendação não decorre da maior contagem imediata de colunas, mas de sua dependência transversal: ele preserva a origem necessária para interpretar cabeçalhos repetidos, separa o responsável legado do futuro usuário autenticado e evita retrofitar rastreabilidade em todas as tabelas depois que dados forem importados.
 
-Estrutura inicial proposta:
+Estrutura definida:
 
-- `importacao_lote`: identidade técnica do lote, origem lógica, nome seguro ou identificador do arquivo, hash quando disponível, timestamps, status operacional e resumo de processamento;
-- `importacao_linha`: FK para o lote, aba/origem, número ou posição da linha, conteúdo bruto em `JSONB`, responsável pela digitação em texto original, estado de processamento e mensagens de revisão;
-- mecanismo de vínculo entre `importacao_linha` e os registros gerados, ainda a definir entre uma associação explícita e FKs opcionais nas tabelas de destino;
-- índices para lote/posição, status e responsável original somente se justificados pelas consultas previstas;
+- `importacao_lote`: uma execução identificada por código opaco, SHA-256 e versão de layout, com cadeia explícita de reprocessamento;
+- `importacao_linha`: FK para o lote, aba e posição, array `JSONB` ordenado, responsável pela digitação em texto original e status;
+- `importacao_registro`: associação genérica N:N entre linha e registros gerados, com alvo identificado por schema, tabela e ID;
+- `ON DELETE RESTRICT` para preservar proveniência e índices somente para identidade, processamento e rastreio inverso;
 - nenhuma entidade `usuario` nesta fase: o texto legado não comprova identidade única e não deve ser confundido com autenticação futura.
 
-A especificação inicial e os bloqueios antes de migration estão em `docs/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`.
+A especificação está pronta para orientar migration incremental. O manifesto físico seguro, permissões operacionais e regras do importador continuam pendentes, mas não bloqueiam a criação das estruturas genéricas. As fontes canônicas e limitações do layout estão em `docs/METADADOS_SEGUROS_LAYOUT_PLANILHA.md`.
 
 ## Módulo de notificação implementado
 
