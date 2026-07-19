@@ -1,14 +1,14 @@
 # Modelo Físico Atual
 
-Atualizado em: 2026-07-18
+Atualizado em: 2026-07-19
 
 Este documento descreve a estrutura física real aplicada no schema `ambulatorio`, usando como fonte principal o dump `docs/evidencias/schema_atual_ambulatorio.sql`. Os scripts em `sql/` foram usados como fonte de reconciliação.
 
-O schema físico aplicado possui 29 tabelas. Todas as tabelas encontradas no dump existem nas migrations versionadas, e nenhuma tabela das migrations ficou ausente da evidência analisada.
+O schema físico aplicado possui 30 tabelas. Todas as tabelas encontradas no dump existem nas migrations versionadas, e nenhuma tabela das migrations ficou ausente da evidência analisada.
 
 ## Estratégia de Construção por Fases
 
-O modelo físico atual reúne as 25 tabelas do núcleo funcional inicial e as quatro tabelas do módulo de avaliação clínica. Ainda não representa a cobertura completa e final da planilha original.
+O modelo físico atual reúne as 25 tabelas do núcleo funcional inicial, as quatro tabelas do módulo de avaliação clínica e a tabela do módulo de notificação. Ainda não representa a cobertura completa e final da planilha original.
 
 As demais tabelas previstas serão implementadas posteriormente por migrations incrementais. A ausência temporária dessas estruturas não representa falha, lacuna involuntária ou divergência crítica em relação ao plano do projeto.
 
@@ -44,6 +44,7 @@ Nenhuma migration antiga deve ser alterada ou reaplicada no banco atual. A cober
 | `historico_familiar_chagas` | Sim | `sql/05_tabelas_diagnostico_sorologia.sql` | Banco e migration |
 | `medicamento` | Sim | `sql/09_tabelas_medicamentos_tratamentos.sql` | Banco e migration |
 | `obito` | Sim | `sql/10_modulo_avaliacao_clinica.sql` | Banco e migration |
+| `notificacao` | Sim | `sql/11_modulo_notificacao.sql` | Banco e migration |
 | `paciente` | Sim | `sql/02_tabelas_paciente.sql` | Banco e migration |
 | `paciente_comorbidade` | Sim | `sql/06_tabelas_condicoes_comorbidades.sql` | Banco e migration |
 | `paciente_contato` | Sim | `sql/02_tabelas_paciente.sql` | Banco e migration |
@@ -692,6 +693,16 @@ Finalidade: desfecho consolidado de óbito do paciente.
 - FK `paciente_id` para `paciente`, com `ON DELETE CASCADE`.
 - `UNIQUE (paciente_id)` e índice em `data_obito`.
 - Indicador, data, causa e valores originais permanecem opcionais para representar informação desconhecida.
+
+### `notificacao`
+
+Finalidade: estado consolidado de notificação informado para o paciente.
+
+- PK `notificacao_id`.
+- FK `paciente_id` para `paciente`, com `ON DELETE CASCADE` e `UNIQUE (paciente_id)`.
+- Indicador, número, justificativa, valores originais e observações opcionais.
+- Índice não único `idx_notificacao_numero_notificacao` em `numero_notificacao`.
+- Sem `CHECK` condicional, vínculo com atendimento ou unicidade global do número.
 
 ## Diferenças em Relação ao Dicionário de Dados ou Modelo Lógico Anterior
 

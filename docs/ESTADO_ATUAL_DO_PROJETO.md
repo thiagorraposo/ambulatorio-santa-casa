@@ -1,6 +1,6 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-07-18
+Atualizado em: 2026-07-19
 
 ## Objetivo Geral
 
@@ -20,19 +20,19 @@ Até o momento, o repositório contém scripts SQL de criação de banco, schema
 
 ## Status Atual
 
-- Scripts SQL existentes de `sql/00_criar_banco.sql` a `sql/10_modulo_avaliacao_clinica.sql`.
+- Scripts SQL existentes de `sql/00_criar_banco.sql` a `sql/11_modulo_notificacao.sql`.
 - README e documentos antigos `docs/dicionario-dados.md` e `docs/decisoes-modelagem.md` existem, mas estão vazios.
 - A estrutura física real aplicada no PostgreSQL foi validada por evidência versionada em `docs/evidencias/schema_atual_ambulatorio.sql`.
-- O dump foi atualizado em 2026-07-18 e contém o schema `ambulatorio` com 29 tabelas aplicadas.
-- As 29 tabelas físicas encontradas também estão cobertas pelos scripts SQL em `sql/`.
+- O dump foi atualizado em 2026-07-19 e contém o schema `ambulatorio` com 30 tabelas aplicadas.
+- As 30 tabelas físicas encontradas também estão cobertas pelos scripts SQL em `sql/`.
 - Não foi encontrada tabela física sem migration correspondente, nem tabela em migration ausente do dump analisado.
 - Existe uma rotina reutilizável de validação com dados de teste em `tests/sql/01_validar_nucleo_inicial.sql`.
 - A rotina de validação usa transação com `ROLLBACK`, não altera a estrutura física do banco e não deixa dados de teste persistidos quando executada com sucesso.
 - A rotina foi executada com sucesso em 2026-07-16: as 25 tabelas receberam dados sintéticos temporários, os testes de FK, `UNIQUE`, `CHECK` e `NOT NULL` foram aprovados, e uma consulta posterior confirmou ausência de dados de teste persistidos.
-- A reconciliação das 140 entradas do mapeamento da planilha está documentada em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 112 estão plenamente cobertas pelo schema atual, 12 parcialmente cobertas, 4 não cobertas e 12 dependem de esclarecimento.
+- A reconciliação das 140 entradas do mapeamento da planilha está documentada em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 114 estão plenamente cobertas pelo schema atual, 12 parcialmente cobertas, 2 não cobertas e 12 dependem de esclarecimento.
 - O módulo de avaliação clínica foi aplicado pela migration incremental `sql/10_modulo_avaliacao_clinica.sql`; as quatro novas tabelas e suas constraints constam no banco local e na evidência física.
-- O módulo de notificação está especificado em `docs/ESPECIFICACAO_MODULO_NOTIFICACAO.md` e pronto para orientar uma futura migration; nenhuma alteração física foi aplicada.
-- Os dois testes SQL passaram no banco local em 2026-07-18. Ambos executaram `ROLLBACK`, e consulta independente confirmou ausência de dados sintéticos persistidos.
+- O módulo de notificação foi aplicado pela migration incremental `sql/11_modulo_notificacao.sql`; a tabela e suas constraints constam no banco local e na evidência física.
+- Os três testes SQL passaram no banco local em 2026-07-19. Todos executaram `ROLLBACK`, e consulta independente confirmou ausência de dados sintéticos persistidos.
 - O projeto possui orientações permanentes para Codex em `AGENTS.md`, `sql/AGENTS.md`, `tests/AGENTS.md` e `docs/AGENTS.md`.
 - Decisões arquiteturais duradouras são registradas em `docs/DECISOES_ARQUITETURAIS.md`.
 - O workflow oficial está documentado em `docs/WORKFLOW_DE_DESENVOLVIMENTO.md`.
@@ -41,7 +41,7 @@ Até o momento, o repositório contém scripts SQL de criação de banco, schema
 
 ## Estratégia de Implementação Incremental
 
-O modelo físico está sendo construído por fases. As 25 tabelas do núcleo funcional inicial foram expandidas pelas quatro tabelas do módulo de avaliação clínica, totalizando 29 tabelas validadas.
+O modelo físico está sendo construído por fases. As 25 tabelas do núcleo funcional inicial foram expandidas pelas quatro tabelas do módulo de avaliação clínica e pela tabela de notificação, totalizando 30 tabelas validadas.
 
 A ausência temporária das demais tabelas planejadas não deve ser tratada como falha, lacuna involuntária ou divergência crítica. As demais estruturas previstas serão implementadas posteriormente por migrations incrementais.
 
@@ -51,7 +51,7 @@ O objetivo da fase atual é validar funcionamento, integridade referencial, rest
 
 ## Tabelas Atualmente Existentes no Banco
 
-O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulatorio.sql`, possui atualmente 29 tabelas:
+O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulatorio.sql`, possui atualmente 30 tabelas:
 
 1. `paciente`
 2. `paciente_endereco`
@@ -82,6 +82,7 @@ O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulator
 27. `evento_clinico`
 28. `dispositivo_implantado`
 29. `obito`
+30. `notificacao`
 
 ## Cobertura Banco x Migrations
 
@@ -104,6 +105,7 @@ O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulator
 | `historico_familiar_chagas` | Existe no banco e nas migrations |
 | `medicamento` | Existe no banco e nas migrations |
 | `obito` | Existe no banco e nas migrations |
+| `notificacao` | Existe no banco e nas migrations |
 | `paciente` | Existe no banco e nas migrations |
 | `paciente_comorbidade` | Existe no banco e nas migrations |
 | `paciente_contato` | Existe no banco e nas migrations |
@@ -119,7 +121,7 @@ O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulator
 
 Resumo da reconciliação:
 
-- Tabelas existentes tanto no banco quanto nas migrations: 29.
+- Tabelas existentes tanto no banco quanto nas migrations: 30.
 - Tabelas existentes no banco mas não cobertas pelas migrations: nenhuma identificada.
 - Tabelas existentes nas migrations mas ausentes no banco: nenhuma identificada.
 
@@ -135,6 +137,7 @@ Resumo da reconciliação:
 - Encaminhamentos e acompanhamento: catálogo de encaminhamentos, encaminhamentos, acompanhamento de cuidado e pendências.
 - Medicamentos e tratamentos: catálogo de medicamentos, medicamentos por atendimento, tratamento de Chagas e procedimentos clínicos.
 - Avaliação clínica por atendimento, eventos clínicos, dispositivos implantados e óbito, aplicada e validada no banco local.
+- Notificação consolidada por paciente, aplicada e validada no banco local.
 
 ## Módulos Ainda Pendentes
 
@@ -155,15 +158,14 @@ Resumo da reconciliação:
 
 ## Próximos Passos Recomendados
 
-1. Implementar futuramente o módulo de notificação conforme a especificação, por nova migration incremental e teste SQL.
-2. Confirmar a posição de `Caso não, justifique` antes de configurar sua importação automática.
+1. Confirmar a posição de `Caso não, justifique` antes de configurar sua importação automática.
+2. Planejar o módulo de importação e proveniência antes de usar dados reais.
 3. Não iniciar importação até resolver as pendências semânticas, de unidades e de rastreabilidade documentadas.
 
 ## Próxima fase técnica
 
-1. Criar migration incremental do módulo de notificação sem alterar migrations aplicadas.
-2. Criar teste SQL sintético transacional correspondente.
-3. Planejar separadamente o módulo de importação e proveniência antes de usar dados reais.
+1. Definir o próximo módulo físico a partir das lacunas de cobertura restantes.
+2. Planejar separadamente o módulo de importação e proveniência antes de usar dados reais.
 
 ## Regra Permanente de Documentação
 

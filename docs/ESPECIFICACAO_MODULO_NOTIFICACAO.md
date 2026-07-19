@@ -1,8 +1,8 @@
 # Especificação do Módulo de Notificação
 
-Atualizado em: 2026-07-18
+Atualizado em: 2026-07-19
 
-Status: pronta para orientar migration incremental; regras de importação permanecem pendentes.
+Status: implementada por migration incremental e validada; regras de importação permanecem pendentes.
 
 ## Objetivo e fontes
 
@@ -94,9 +94,9 @@ Uma futura migration deverá documentar, mas não executar automaticamente, a re
 
 Qualquer reversão será destrutiva para dados do módulo e exigirá autorização explícita. Nenhum `DROP` faz parte desta especificação.
 
-## Validação esperada da futura migration
+## Validação da migration
 
-O teste SQL sintético do módulo deverá usar `BEGIN`, `ON_ERROR_STOP=1` e `ROLLBACK`, cobrindo:
+O teste SQL sintético do módulo usa `BEGIN`, `ON_ERROR_STOP=1` e `ROLLBACK`, cobrindo:
 
 - inserção dos cinco estados condicionais descritos acima;
 - preenchimento dos defaults de timestamps;
@@ -126,10 +126,10 @@ O teste SQL sintético do módulo deverá usar `BEGIN`, `ON_ERROR_STOP=1` e `ROL
 4. Definir como registrar e revisar combinações condicionais incompletas ou contraditórias.
 5. Implementar rastreabilidade por lote e linha antes de importar dados reais.
 
-## Bloqueios da migration
+## Resultado da implementação
 
-Nenhum bloqueio estrutural permanece. As decisões necessárias para tabela, cardinalidade, vínculo, campos e constraints estão delimitadas com tipos permissivos e preservação dos originais.
+`sql/11_modulo_notificacao.sql` foi aplicada no PostgreSQL local em 2026-07-19. `tests/sql/03_validar_modulo_notificacao.sql` aprovou todos os cenários previstos e confirmou após o `ROLLBACK` que nenhum dado sintético persistiu.
 
 ## Prontidão
 
-O módulo está **pronto para orientar uma migration incremental**, desde que a migration siga esta especificação, não acrescente regras sanitárias ou condicionais não comprovadas, inclua estratégia de reversão e venha acompanhada de teste SQL sintético transacional. Esta prontidão não autoriza aplicar a migration, alterar o schema ou importar dados reais.
+O módulo está **implementado e validado** conforme esta especificação, sem regras sanitárias ou condicionais não comprovadas. A implementação não autoriza importar dados reais; as pendências de normalização e rastreabilidade continuam abertas.

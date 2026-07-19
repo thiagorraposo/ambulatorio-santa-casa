@@ -1,6 +1,6 @@
 # Registro de Alterações
 
-Atualizado em: 2026-07-18
+Atualizado em: 2026-07-19
 
 ## Como Registrar Mudanças
 
@@ -25,6 +25,44 @@ Além deste arquivo, atualize quando necessário:
 - `docs/HISTORICO_DE_IMPLEMENTACAO.md`
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
+
+## 2026-07-19 - Implementação do módulo de notificação
+
+Data: 2026-07-19
+
+Título da alteração: Migration incremental de notificação consolidada por paciente.
+
+Motivo: implementar a estrutura aprovada para preservar indicador, número e justificativa de notificação sem acrescentar regras condicionais ou sanitárias não comprovadas.
+
+Arquivos modificados:
+
+- `sql/11_modulo_notificacao.sql`
+- `tests/sql/03_validar_modulo_notificacao.sql`
+- `docs/ESPECIFICACAO_MODULO_NOTIFICACAO.md`
+- `docs/VALIDACAO_MODULO_NOTIFICACAO.md`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/MODELO_FISICO_ATUAL.md`
+- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+- `docs/evidencias/schema_atual_ambulatorio.sql`
+
+Migrations envolvidas:
+
+- Criada e aplicada localmente `sql/11_modulo_notificacao.sql`.
+- Nenhuma migration antiga foi alterada ou reaplicada.
+
+Impacto e validação:
+
+- Adicionada `notificacao`, elevando o schema de 29 para 30 tabelas.
+- Implementadas PK, FK para paciente com `ON DELETE CASCADE`, `UNIQUE(paciente_id)` e índice não único em `numero_notificacao`.
+- O teste transacional aprovou os cinco estados permissivos, campos opcionais, defaults, número repetido, índice, `UNIQUE`, FK, cascata e `ROLLBACK`.
+- A suíte completa passou e nenhuma linha sintética persistiu.
+
+Pendências ou riscos:
+
+- Normalização, posição canônica de `Caso não, justifique`, importação e proveniência permanecem pendentes.
+- Histórico, retificações, data e fluxo sanitário continuam fora do escopo.
 
 ## 2026-07-18 - Especificação do módulo de notificação
 

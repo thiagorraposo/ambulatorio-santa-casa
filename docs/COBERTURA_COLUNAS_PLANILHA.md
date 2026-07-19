@@ -1,15 +1,15 @@
 # Cobertura das Colunas da Planilha pelo Núcleo Físico
 
-Atualizado em: 2026-07-18
+Atualizado em: 2026-07-19
 
 ## Objetivo e fontes
 
-Este documento reconcilia as 140 entradas únicas de `planejamento/tabelas dicionário de dados/03_coluna_planilha_destino.csv` com o schema físico aplicado de 29 tabelas.
+Este documento reconcilia as 140 entradas únicas de `planejamento/tabelas dicionário de dados/03_coluna_planilha_destino.csv` com o schema físico aplicado de 30 tabelas.
 
 Ordem de precedência usada:
 
 1. `docs/evidencias/schema_atual_ambulatorio.sql`, como evidência do schema aplicado;
-2. migrations `sql/00` a `sql/10`, para confirmar a origem versionada da estrutura;
+2. migrations `sql/00` a `sql/11`, para confirmar a origem versionada da estrutura;
 3. documentos atuais em `docs/`;
 4. DER, dicionário técnico, relação coluna-tabela e seis CSVs em `planejamento/`, como intenção de modelagem sujeita a reconciliação.
 
@@ -28,13 +28,13 @@ Nenhum dado real foi lido. A análise considera nomes, tipos, constraints e sem�
 | Classificação | Quantidade | Percentual sobre 140 |
 | --- | ---: | ---: |
 | Coberta diretamente | 6 | 4,29% |
-| Coberta com transformação | 106 | 75,71% |
+| Coberta com transformação | 108 | 77,14% |
 | Parcialmente coberta | 12 | 8,57% |
-| Não coberta | 4 | 2,86% |
+| Não coberta | 2 | 1,43% |
 | Dúvida pendente | 12 | 8,57% |
 | Total | 140 | 100,00% |
 
-Cobertura plena atual: **112 de 140 entradas (80,00%)**. Incluindo cobertura parcial: **124 de 140 (88,57%)**.
+Cobertura plena atual: **114 de 140 entradas (81,43%)**. Incluindo cobertura parcial: **126 de 140 (90,00%)**.
 
 Há uma ressalva no denominador: `Controle da importação como processo.` e `Todas as colunas originais da planilha em formato bruto para auditoria.` são descrições técnicas, não cabeçalhos clínicos demonstrados. Sem elas, o catálogo possui 138 possíveis colunas de origem; elas permanecem classificadas como dúvida até confirmação da lista canônica.
 
@@ -49,7 +49,7 @@ Há uma ressalva no denominador: `Controle da importação como processo.` e `To
 - `Telefone de Contato` → `paciente_contato.telefone`.
 - `Localização do prontuário` → `atendimento.localizacao_prontuario`.
 
-### Coberta com transformação (106)
+### Coberta com transformação (108)
 
 Conversões simples e padronizações:
 
@@ -83,6 +83,7 @@ Avaliação clínica e fatos longitudinais:
 - `teve AVC` e `Ano do ultimo AVC` → linha de `evento_clinico` com tipo `avc`, ocorrência e ano informados.
 - `portador de marcapasso?` e `portador de CDI?` → linhas de `dispositivo_implantado`, uma por tipo de dispositivo.
 - `Óbito`, `Data do óbito` e `causa do óbito` → registro consolidado em `obito`.
+- `Paciente notificado?` e `Número notificação` → estado consolidado em `notificacao`, com valores originais preservados.
 
 ### Parcialmente coberta (12)
 
@@ -101,13 +102,12 @@ Avaliação clínica e fatos longitudinais:
 | `Encaminhado a qual projeto?` | `encaminhamento` e `atendimento_projeto_estudo` | Falta relação explícita entre o encaminhamento e o projeto. |
 | `Paciente com contrarreferencia realizada?` | Pode ser descrita em `acompanhamento_cuidado` | Falta tipo/booleano inequívoco de contrarreferência. |
 
-### Não coberta (4)
+### Não coberta (2)
 
 | Grupo | Colunas | Expansão necessária |
 | --- | --- | --- |
 | Autoria | `Responsavel pela digitacao` | Identidade de usuário/importador e referência no atendimento ou lote. |
 | Tratamento | `Por quanto tempo foi usado?` | Duração original ou regra derivada no tratamento. |
-| Notificação | `Paciente notificado?`, `Número notificação` | Módulo de notificação. |
 
 ### Dúvida pendente (12)
 
@@ -138,11 +138,11 @@ O schema físico já consegue representar exames trazidos e solicitados. A dúvi
 - `tratamento_benzonidazol` foi absorvida por `tratamento_chagas` mais o catálogo `medicamento`.
 - `retorno_tratamento` e `retorno_anual` foram absorvidas por registros tipados em `acompanhamento_cuidado`.
 - `dados_clinicos_atendimento`, `evento_clinico`, `dispositivo_implantado` e `obito` foram implementadas por `sql/10_modulo_avaliacao_clinica.sql`.
+- `notificacao` foi implementada por `sql/11_modulo_notificacao.sql`.
 
 ### Ainda precisam ser criadas
 
 - `usuario` ou, antes de autenticação, uma entidade mínima de responsável/importador.
-- `notificacao`.
 - `importacao_planilha` e `importacao_linha`, antes da importação controlada.
 
 ### Redundantes ou a reformular
@@ -155,7 +155,7 @@ O schema físico já consegue representar exames trazidos e solicitados. A dúvi
 
 ## Divergências encontradas
 
-- O dicionário planeja 38 tabelas e 364 campos; o schema aplicado possui 29 tabelas com nomes, chaves `BIGINT` e estruturas diferentes. O dicionário não é retrato do banco atual.
+- O dicionário planeja 38 tabelas e 364 campos; o schema aplicado possui 30 tabelas com nomes, chaves `BIGINT` e estruturas diferentes. O dicionário não é retrato do banco atual.
 - O relatório automático afirma 140 colunas originais, mas sua fonte canônica esperada não existe; o fallback contém duas descrições técnicas tratadas como se fossem colunas.
 - O CSV possui 192 linhas de destino para 140 nomes únicos. Parte é decomposição legítima, mas nomes repetidos perderam posição/aba e não distinguem os blocos trazido e solicitado.
 - Campos planejados como `paciente.nome_completo`, `paciente.origem_aba` e `paciente_contato.valor_contato` existem fisicamente como `nome`, `grupo_origem_planilha` e `telefone`.
@@ -166,15 +166,15 @@ O schema físico já consegue representar exames trazidos e solicitados. A dúvi
 - A pergunta sobre exame realizado por familiares não equivale ao campo físico de histórico familiar.
 - O DER e o dicionário planejado incluem estruturas ainda não aplicadas; ambos são fontes de intenção e não evidência do estado físico.
 
-## Próximo módulo físico recomendado
+## Módulo de notificação implementado
 
-Recomenda-se o módulo **notificação da doença de Chagas**. Ele cobre `Paciente notificado?`, `Número notificação` e dispõe de campo próprio para `Caso não, justifique`; a posição canônica desse último cabeçalho ainda deve ser confirmada antes da importação. A informação não deve ser reduzida a observações livres e depende somente de `paciente` na primeira versão.
+O módulo **notificação da doença de Chagas** foi implementado. Ele cobre `Paciente notificado?`, `Número notificação` e dispõe de campo próprio para `Caso não, justifique`; a posição canônica desse último cabeçalho ainda deve ser confirmada antes da importação.
 
-O módulo é preferível como próxima expansão porque forma uma unidade funcional coesa e pequena. A alternativa de implementar primeiro importação/proveniência tem maior acoplamento: exige decidir identidade do responsável, fronteira com autenticação, lote, linha bruta e vínculos com vários registros. Essa infraestrutura continua obrigatória antes de importar dados reais, mas não precisa ser misturada à notificação.
+Importação/proveniência continua pendente e exige decidir identidade do responsável, fronteira com autenticação, lote, linha bruta e vínculos com vários registros.
 
 O desenho detalhado e suas justificativas estão em `docs/ESPECIFICACAO_MODULO_NOTIFICACAO.md`.
 
-Estrutura pronta para orientar uma futura migration:
+Estrutura física aplicada:
 
 ### `notificacao`
 

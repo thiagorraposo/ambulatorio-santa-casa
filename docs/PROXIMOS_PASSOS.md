@@ -1,10 +1,10 @@
 # Próximos Passos
 
-Atualizado em: 2026-07-18
+Atualizado em: 2026-07-19
 
 ## 1. Estratégia Incremental do Modelo Físico
 
-1. Manter as 29 tabelas atuais como base física validada, preservando as 25 tabelas do núcleo inicial.
+1. Manter as 30 tabelas atuais como base física validada, preservando as 25 tabelas do núcleo inicial.
 2. Tratar o modelo físico como construção por fases, não como entrega final da cobertura da planilha.
 3. Implementar as demais tabelas previstas posteriormente por migrations incrementais.
 4. Não alterar migrations antigas e não reaplicar scripts antigos no banco atual.
@@ -13,11 +13,9 @@ Atualizado em: 2026-07-18
 
 ## 2. Próxima fase técnica
 
-1. Criar futura migration incremental do módulo de notificação conforme `docs/ESPECIFICACAO_MODULO_NOTIFICACAO.md`.
-2. Manter estado consolidado por paciente, sem `atendimento_id` e sem regras condicionais rígidas não comprovadas.
-3. Criar teste SQL sintético para FK, `UNIQUE`, deleção, combinações condicionais permissivas e `ROLLBACK`.
-4. Confirmar na lista canônica a posição de `Caso não, justifique` antes da importação automática.
-5. Planejar separadamente importação e proveniência antes de usar dados reais.
+1. Definir o próximo módulo físico a partir das lacunas de cobertura restantes.
+2. Confirmar na lista canônica a posição de `Caso não, justifique` antes da importação automática.
+3. Planejar separadamente importação e proveniência antes de usar dados reais.
 
 ## 3. Ajustes e Documentação Pendentes
 
@@ -69,7 +67,7 @@ Atualizado em: 2026-07-18
 
 ## Próximo Passo Técnico Recomendado
 
-Com 112 das 140 entradas plenamente cobertas, o próximo módulo recomendado é notificação da doença de Chagas. A especificação está pronta para orientar migration incremental e cobre indicador, número e justificativa com estrutura permissiva e valores originais. Não alterar migrations antigas nem reaplicar scripts antigos no banco atual.
+Com o módulo de notificação implementado, o próximo passo é escolher a expansão seguinte a partir da cobertura atual e planejar importação/proveniência sem usar dados reais. Não alterar migrations antigas nem reaplicar scripts antigos no banco atual.
 
 Comando local recomendado para verificar documentação e estado do projeto:
 

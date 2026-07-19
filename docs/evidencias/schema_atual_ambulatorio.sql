@@ -1559,6 +1559,79 @@ ALTER SEQUENCE ambulatorio.medicamento_medicamento_id_seq OWNED BY ambulatorio.m
 
 
 --
+-- Name: notificacao; Type: TABLE; Schema: ambulatorio; Owner: -
+--
+
+CREATE TABLE ambulatorio.notificacao (
+    notificacao_id bigint NOT NULL,
+    paciente_id bigint NOT NULL,
+    paciente_notificado boolean,
+    numero_notificacao character varying(100),
+    justificativa_nao_notificacao text,
+    valor_original_notificado text,
+    valor_original_numero text,
+    valor_original_justificativa text,
+    observacoes text,
+    criado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    atualizado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: TABLE notificacao; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON TABLE ambulatorio.notificacao IS 'Estado consolidado informado de notificacao do paciente, sem historico de transmissoes.';
+
+
+--
+-- Name: COLUMN notificacao.paciente_id; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.notificacao.paciente_id IS 'Paciente ao qual pertence o estado consolidado; permite no maximo uma notificacao por paciente.';
+
+
+--
+-- Name: COLUMN notificacao.paciente_notificado; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.notificacao.paciente_notificado IS 'Indicador normalizado; NULL representa informacao desconhecida ou ambigua.';
+
+
+--
+-- Name: COLUMN notificacao.numero_notificacao; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.notificacao.numero_notificacao IS 'Identificador textual informado, sem formato fechado nem unicidade global.';
+
+
+--
+-- Name: COLUMN notificacao.justificativa_nao_notificacao; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.notificacao.justificativa_nao_notificacao IS 'Justificativa livre informada, sem vocabulario fechado.';
+
+
+--
+-- Name: notificacao_notificacao_id_seq; Type: SEQUENCE; Schema: ambulatorio; Owner: -
+--
+
+CREATE SEQUENCE ambulatorio.notificacao_notificacao_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: notificacao_notificacao_id_seq; Type: SEQUENCE OWNED BY; Schema: ambulatorio; Owner: -
+--
+
+ALTER SEQUENCE ambulatorio.notificacao_notificacao_id_seq OWNED BY ambulatorio.notificacao.notificacao_id;
+
+
+--
 -- Name: obito; Type: TABLE; Schema: ambulatorio; Owner: -
 --
 
@@ -2791,6 +2864,13 @@ ALTER TABLE ONLY ambulatorio.medicamento ALTER COLUMN medicamento_id SET DEFAULT
 
 
 --
+-- Name: notificacao notificacao_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.notificacao ALTER COLUMN notificacao_id SET DEFAULT nextval('ambulatorio.notificacao_notificacao_id_seq'::regclass);
+
+
+--
 -- Name: obito obito_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
 --
 
@@ -3010,6 +3090,14 @@ ALTER TABLE ONLY ambulatorio.medicamento
 
 
 --
+-- Name: notificacao notificacao_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.notificacao
+    ADD CONSTRAINT notificacao_pkey PRIMARY KEY (notificacao_id);
+
+
+--
 -- Name: obito obito_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
 --
 
@@ -3175,6 +3263,14 @@ ALTER TABLE ONLY ambulatorio.historico_familiar_chagas
 
 ALTER TABLE ONLY ambulatorio.medicamento
     ADD CONSTRAINT uq_medicamento_codigo UNIQUE (codigo_medicamento);
+
+
+--
+-- Name: notificacao uq_notificacao_paciente; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.notificacao
+    ADD CONSTRAINT uq_notificacao_paciente UNIQUE (paciente_id);
 
 
 --
@@ -3419,6 +3515,13 @@ CREATE INDEX idx_historico_familiar_chagas_paciente_id ON ambulatorio.historico_
 --
 
 CREATE INDEX idx_medicamento_codigo ON ambulatorio.medicamento USING btree (codigo_medicamento);
+
+
+--
+-- Name: idx_notificacao_numero_notificacao; Type: INDEX; Schema: ambulatorio; Owner: -
+--
+
+CREATE INDEX idx_notificacao_numero_notificacao ON ambulatorio.notificacao USING btree (numero_notificacao);
 
 
 --
@@ -3669,6 +3772,14 @@ ALTER TABLE ONLY ambulatorio.exame_complementar_resultado
 
 ALTER TABLE ONLY ambulatorio.historico_familiar_chagas
     ADD CONSTRAINT fk_historico_familiar_chagas_paciente FOREIGN KEY (paciente_id) REFERENCES ambulatorio.paciente(paciente_id) ON DELETE CASCADE;
+
+
+--
+-- Name: notificacao fk_notificacao_paciente; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.notificacao
+    ADD CONSTRAINT fk_notificacao_paciente FOREIGN KEY (paciente_id) REFERENCES ambulatorio.paciente(paciente_id) ON DELETE CASCADE;
 
 
 --
