@@ -38,6 +38,22 @@ Cobertura plena atual: **114 de 140 entradas (81,43%)**. Incluindo cobertura par
 
 Há uma ressalva no denominador: `Controle da importação como processo.` e `Todas as colunas originais da planilha em formato bruto para auditoria.` são descrições técnicas, não cabeçalhos clínicos demonstrados. Sem elas, o catálogo possui 138 possíveis colunas de origem; elas permanecem classificadas como dúvida até confirmação da lista canônica.
 
+## Reavaliação das 26 entradas fora da cobertura plena
+
+A reavaliação contra as 30 tabelas mantém as quantidades atuais. Nenhuma entrada pode ser promovida sem nova estrutura ou sem evidência da posição e da semântica da origem.
+
+| Grupo | Entradas | Conclusão no schema atual | Evolução indicada |
+| --- | ---: | --- | --- |
+| Identidade e importação | 1 não coberta e 2 duvidosas | `Responsavel pela digitacao` não equivale aos campos livres `responsavel` de pendência ou procedimento. As duas descrições técnicas não são cabeçalhos comprovados. | Módulo de importação e proveniência, preservando responsável e linha brutos sem antecipar autenticação. |
+| Tratamento de Chagas | 5 parciais e 1 não coberta | Datas, status, motivo e eventos adversos existentes ajudam, mas não preservam duração original, ano isolado, data de prescrição, execução pelo ambulatório nem a semântica exata do motivo. | Extensão incremental de `tratamento_chagas`, após confirmar cabeçalhos e granularidade. |
+| Encaminhamento e continuidade | 3 parciais | A existência de `encaminhamento` não prova que o paciente trouxe documento; projeto e contrarreferência não têm vínculo ou indicador inequívoco. | Extensão de fluxo assistencial, sem criar tabelas paralelas redundantes. |
+| Observação e pendência | 1 parcial | `atendimento.observacoes` e `pendencia_atendimento` armazenam conteúdo, mas não há regra segura para dividir a célula. | Resolver na importação; nova coluna/tabela apenas se a origem comprovar múltiplos elementos tipados. |
+| Demografia, diagnóstico e família | 3 parciais | Idade calculada não preserva o original; data de autorrelato não é resultado laboratorial; histórico familiar não representa exame realizado. | Extensões clínicas pequenas depois da proveniência e da confirmação semântica. |
+| Notificação | 1 duvidosa | `notificacao` possui destino para justificativa, mas falta confirmar que o cabeçalho pertence ao bloco. | Resolver por posição da coluna durante o desenho da importação; não requer nova tabela. |
+| Exames com cabeçalhos repetidos | 9 duvidosas | O modelo genérico representa exames trazidos e solicitados; o nome isolado não identifica o bloco de origem. | Preservar aba, posição e cabeçalho original em `importacao_linha`; não expandir o módulo de exames por essa dúvida. |
+
+Nos cinco itens de tratamento considerados parciais estão `teve reação adversa?`, `tratamento pelo ambulatorio?`, `Em qual ano tomou a medicação (Benzonidazol)?`, `Prescrição do BZN (data)` e `Se não, descreva o motivo`. `Por quanto tempo foi usado?` permanece não coberta. `teve reação adversa?` continua suspensa até se confirmar se pertence ao tratamento ou a evento clínico genérico.
+
 ## Classificação de cada coluna
 
 ### Coberta diretamente (6)
@@ -165,6 +181,29 @@ O schema físico já consegue representar exames trazidos e solicitados. A dúvi
 - `Ambulatório unicamente` e `Ambulatório anexo ao projeto` foram mapeados como programas no documento antigo, mas são campos físicos de contexto em `atendimento`.
 - A pergunta sobre exame realizado por familiares não equivale ao campo físico de histórico familiar.
 - O DER e o dicionário planejado incluem estruturas ainda não aplicadas; ambos são fontes de intenção e não evidência do estado físico.
+
+## Comparação dos próximos módulos candidatos
+
+| Candidato | Ganho imediato de cobertura | Dependências | Valor funcional | Risco de retrabalho |
+| --- | --- | --- | --- | --- |
+| Importação e proveniência | 1 entrada clínica não coberta; dá suporte às 2 descrições técnicas e à resolução de 10 dúvidas de origem | Definir identidade legada, lote, linha bruta e vínculo com registros gerados | Alto: torna futura importação auditável e beneficia todos os módulos | Menor se vier antes da importação; cresce muito se for retroajustado depois |
+| Extensão de tratamento de Chagas | Até 6 entradas hoje parciais/não cobertas | Confirmar semântica, unidade da duração e diferença entre indicação, prescrição e início | Alto no cuidado com benzonidazol | Alto enquanto os cabeçalhos e valores reais não forem inventariados |
+| Fluxo de encaminhamento e contrarreferência | Até 3 entradas parciais | Confirmar documento trazido, vínculo com projeto e conceito de contrarreferência | Médio/alto para continuidade do cuidado | Médio, com risco de duplicar `encaminhamento` e `acompanhamento_cuidado` |
+| Ajustes isolados de observação, idade, autorrelato e família | Até 4 entradas parciais | Regras específicas e confirmação semântica independentes | Localizado | Alto se implementados como campos soltos antes da importação |
+
+## Próximo módulo recomendado: importação e proveniência
+
+O próximo módulo incremental recomendado é **importação e proveniência**, antes das extensões clínicas. A recomendação não decorre da maior contagem imediata de colunas, mas de sua dependência transversal: ele preserva a origem necessária para interpretar cabeçalhos repetidos, separa o responsável legado do futuro usuário autenticado e evita retrofitar rastreabilidade em todas as tabelas depois que dados forem importados.
+
+Estrutura inicial proposta:
+
+- `importacao_lote`: identidade técnica do lote, origem lógica, nome seguro ou identificador do arquivo, hash quando disponível, timestamps, status operacional e resumo de processamento;
+- `importacao_linha`: FK para o lote, aba/origem, número ou posição da linha, conteúdo bruto em `JSONB`, responsável pela digitação em texto original, estado de processamento e mensagens de revisão;
+- mecanismo de vínculo entre `importacao_linha` e os registros gerados, ainda a definir entre uma associação explícita e FKs opcionais nas tabelas de destino;
+- índices para lote/posição, status e responsável original somente se justificados pelas consultas previstas;
+- nenhuma entidade `usuario` nesta fase: o texto legado não comprova identidade única e não deve ser confundido com autenticação futura.
+
+A especificação inicial e os bloqueios antes de migration estão em `docs/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`.
 
 ## Módulo de notificação implementado
 

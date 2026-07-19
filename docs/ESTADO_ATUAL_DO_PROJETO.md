@@ -138,6 +138,7 @@ Resumo da reconciliação:
 - Medicamentos e tratamentos: catálogo de medicamentos, medicamentos por atendimento, tratamento de Chagas e procedimentos clínicos.
 - Avaliação clínica por atendimento, eventos clínicos, dispositivos implantados e óbito, aplicada e validada no banco local.
 - Notificação consolidada por paciente, aplicada e validada no banco local.
+- A reavaliação das 26 entradas fora da cobertura plena manteve os totais atuais e definiu importação e proveniência como próximo módulo recomendado, ainda sem autorização para migration.
 
 ## Módulos Ainda Pendentes
 
@@ -164,8 +165,8 @@ Resumo da reconciliação:
 
 ## Próxima fase técnica
 
-1. Definir o próximo módulo físico a partir das lacunas de cobertura restantes.
-2. Planejar separadamente o módulo de importação e proveniência antes de usar dados reais.
+1. Fechar as decisões pendentes da especificação inicial de importação e proveniência.
+2. Não criar a migration até definir retenção, reprocessamento e vínculo entre linhas de origem e registros gerados.
 
 ## Regra Permanente de Documentação
 

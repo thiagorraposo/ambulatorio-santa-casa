@@ -13,9 +13,11 @@ Atualizado em: 2026-07-19
 
 ## 2. Próxima fase técnica
 
-1. Definir o próximo módulo físico a partir das lacunas de cobertura restantes.
-2. Confirmar na lista canônica a posição de `Caso não, justifique` antes da importação automática.
-3. Planejar separadamente importação e proveniência antes de usar dados reais.
+1. Resolver as pendências de desenho de importação e proveniência descritas em `docs/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`.
+2. Obter a lista canônica ordenada de abas e colunas como metadados seguros, sem versionar dados clínicos.
+3. Definir reprocessamento, retenção do conteúdo bruto e vínculo entre linha e registros gerados.
+4. Somente depois preparar a migration incremental e o teste SQL sintético transacional do módulo.
+5. Especificar em seguida a extensão de tratamento de Chagas e, separadamente, o fluxo de encaminhamento/contrarreferência.
 
 ## 3. Ajustes e Documentação Pendentes
 
@@ -67,7 +69,7 @@ Atualizado em: 2026-07-19
 
 ## Próximo Passo Técnico Recomendado
 
-Com o módulo de notificação implementado, o próximo passo é escolher a expansão seguinte a partir da cobertura atual e planejar importação/proveniência sem usar dados reais. Não alterar migrations antigas nem reaplicar scripts antigos no banco atual.
+O próximo módulo recomendado é importação e proveniência. Antes de qualquer migration, devem ser fechadas identidade de lote, retenção de `JSONB`, reprocessamento e associação entre a linha de origem e os registros gerados. Não importar dados reais, alterar migrations antigas nem reaplicar scripts antigos no banco atual.
 
 Comando local recomendado para verificar documentação e estado do projeto:
 

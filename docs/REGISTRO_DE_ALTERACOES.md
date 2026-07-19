@@ -26,6 +26,45 @@ Além deste arquivo, atualize quando necessário:
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
 
+## 2026-07-19 - Priorização de importação e proveniência
+
+Data: 2026-07-19
+
+Título da alteração: Reavaliação de cobertura e definição do próximo módulo incremental.
+
+Motivo: reavaliar as entradas parciais, não cobertas e duvidosas contra o schema aplicado de 30 tabelas e reduzir risco de retrabalho antes das próximas extensões clínicas.
+
+Arquivos modificados:
+
+- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`
+- `docs/DECISOES_ARQUITETURAIS.md`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada, alterada ou aplicada.
+
+Decisões e impacto:
+
+- A cobertura permanece em 114 entradas plenas, 12 parciais, 2 não cobertas e 12 duvidosas.
+- Importação e proveniência foi priorizada antes de extensões de tratamento e fluxo assistencial por sua dependência transversal.
+- O responsável legado será inicialmente preservado como texto de origem, sem equivalência automática com usuário autenticado.
+- A futura migration permanece bloqueada até definir lote, reprocessamento, retenção do conteúdo bruto e vínculo aos registros gerados.
+
+Como validar:
+
+- Conferir a classificação contra o dump estrutural de 30 tabelas.
+- Executar `make project-check` e confirmar ausência de alterações em `sql/`, `tests/sql/` e no banco.
+
+Pendências ou riscos:
+
+- Lista canônica ordenada de abas e colunas ainda ausente.
+- Semântica e valores reais das lacunas clínicas ainda não inventariados.
+- Retenção de conteúdo clínico bruto exige decisão de segurança antes da migration.
+
 ## 2026-07-19 - Implementação do módulo de notificação
 
 Data: 2026-07-19
