@@ -34,3 +34,16 @@ posição e ocorrência. Deve haver configuração distinta para cada aba princi
 Espaços e grafias originais devem ser preservados junto da chave normalizada.
 As abas operacional e auxiliares permanecem fora do manifesto de importação até
 confirmação humana.
+
+## Decisões aplicáveis ao MVP
+
+- somente as duas abas clínicas entram na primeira versão;
+- cada linha representa um atendimento e a aba determina a condição de Chagas;
+- portadores prevalece em conflito de paciente entre abas;
+- coluna ausente ou célula vazia significa não informado, nunca resposta negativa;
+- os dois blocos de exames devem registrar bloco, posição, ocorrência e tipo;
+- o cabeçalho canônico é `Responsável pela digitação`;
+- `Localizado` permanece sem semântica suficiente e fora do mapeamento estruturado;
+- a aba operacional e as duas abas AIM3 ficam fora do MVP.
+
+As regras completas estão em `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`.

@@ -2,78 +2,79 @@
 
 Atualizado em: 2026-07-20
 
-## 1. Estratégia Incremental do Modelo Físico
+## Escopo confirmado do MVP
 
-1. Manter as 33 tabelas atuais como base física validada, preservando as 25 tabelas do núcleo inicial.
-2. Tratar o modelo físico como construção por fases, não como entrega final da cobertura da planilha.
-3. Implementar as demais tabelas previstas posteriormente por migrations incrementais.
-4. Não alterar migrations antigas e não reaplicar scripts antigos no banco atual.
-5. Validar funcionamento, integridade referencial, restrições, dados de teste e consultas básicas antes da próxima expansão.
-6. Planejar a cobertura dos 136 rótulos físicos distintos das abas principais antes da importação completa.
+- importar somente `Pacientes portadores de DC` e
+  `Pacientes não portadores de DC`;
+- tratar cada linha como atendimento e reconciliar pacientes por nome/data de
+  nascimento, sem merge automático de conflitos;
+- manter as 25 primeiras tabelas como núcleo indispensável e reutilizar os módulos
+  de avaliação clínica, notificação e proveniência já aplicados;
+- deixar a aba operacional, as abas AIM3 e campos parcialmente estruturados não
+  críticos no backlog;
+- manter `Localizado` apenas no conteúdo bruto enquanto sua semântica não existir.
 
-## 2. Próxima fase técnica
+A fonte detalhada das decisões é
+`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`.
 
-1. Validar humanamente o inventário de `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md` e formalizar um manifesto físico seguro, separado por aba, posição e ocorrência.
-2. Definir política institucional de retenção e rotina de auditoria de associações genéricas antes de usar dados reais.
-3. Definir transições, retomada e idempotência clínica do futuro importador.
-4. Fechar aliases, semânticas, tipos, unidades e regras de vazio antes de especificar o importador.
-5. Especificar em seguida a extensão de tratamento de Chagas e, separadamente, o fluxo de encaminhamento/contrarreferência.
+## 1. Especificar migrations mínimas
 
-## 3. Ajustes e Documentação Pendentes
+1. Associação paciente–projeto, preservando participação, pendência e falha.
+2. Exame com paciente obrigatório e atendimento opcional, mantendo múltiplas
+   ocorrências e resultados textuais.
+3. Tratamento BZN por paciente, no máximo um, com duração cumprida em dias, ano
+   aproximado, prescrição, tratamento pelo ambulatório e reações adversas
+   detalhadas/repetíveis.
+4. Encaminhamento com documento apresentado e projeto oficial opcional.
 
-1. Preencher ou revisar `README.md` com objetivo do projeto, requisitos e ordem de execução dos scripts.
-2. Decidir se `docs/dicionario-dados.md` e `docs/decisoes-modelagem.md` serão preenchidos, substituídos ou mantidos como histórico vazio.
-3. Documentar convenções de nomenclatura, valores padronizados e uso dos campos `valor_original_*`.
-4. Documentar regras de atualização dos campos `atualizado_em`, pois ainda não há triggers ou mecanismos automáticos versionados.
-5. Manter `docs/DECISOES_ARQUITETURAIS.md` como fonte de decisões duradouras.
-6. Usar `docs/WORKFLOW_DE_DESENVOLVIMENTO.md` e `AGENTS.md` como orientação para tarefas complexas.
+As migrations serão incrementais e não devem alterar scripts já aplicados.
 
-## 4. Expansão e Importação da Planilha
+## 2. Formalizar manifesto e regras de importação
 
-1. Manter a planilha canônica local ignorada e versionar apenas seu futuro manifesto de metadados seguros.
-2. Mapear as duas abas principais por nome, posição e ocorrência; não reutilizar um único mapa posicional.
-3. Confirmar separadamente o papel da aba operacional e das duas abas auxiliares AIM3.
-4. Definir as próximas fases de expansão apenas para lacunas semanticamente confirmadas.
-5. Definir regras de padronização para enums textuais usados nos `CHECK`.
-6. Criar migrations incrementais somente para os módulos adicionais confirmados.
-7. Preservar valores originais nos campos `valor_original_*`.
-8. Criar rotina de importação em ambiente controlado somente depois da cobertura necessária.
-9. Criar relatório de registros importados, rejeitados e pendentes de revisão.
+1. Configuração distinta por aba, posição, ocorrência, bloco e tipo.
+2. Precedência de portadores em conflito entre abas.
+3. Coluna ausente e célula vazia como não informado.
+4. Normalização de booleanos, datas `dd/mm/aaaa`, anos e NYHA.
+5. Conversão documentada de altura: metros × 100 para centímetros.
+6. Identificação de paciente sem mesclar candidatos conflitantes.
+7. Criação de um atendimento por linha válida.
+8. Responsável pela digitação preservado como legado, sem vínculo automático.
+9. Campos ambíguos somente no JSONB bruto.
+10. Reprocessamentos como novos lotes encadeados, sem sobrescrever histórico.
 
-## 5. Backend/API
+## 3. Resolver bloqueios para dados reais
 
-1. Definir linguagem, framework e estratégia de conexão com PostgreSQL.
-2. Implementar camada de acesso a dados respeitando constraints existentes.
-3. Criar endpoints mínimos para pacientes, atendimentos e consultas do modelo clínico.
-4. Implementar validações compatíveis com os `CHECK` do banco.
-5. Definir autenticação, autorização e auditoria antes de uso real com dados sensíveis.
-6. Criar documentação da API.
+1. Prazo institucional de retenção.
+2. Responsável por autorizar importações.
+3. Responsável por revisar erros e contradições.
+4. Roles e privilégios operacionais.
+5. Política de auditoria e acesso ao JSONB.
+6. Semântica de `Localizado`, somente se incluído no MVP.
+7. Servidor protegido, transporte seguro, segredos, backup/restauração e registro
+   de acesso.
 
-## 6. Frontend React
+## 4. Implementar e homologar
 
-1. Definir stack do frontend React somente após estabilizar a API.
-2. Criar telas iniciais de consulta de paciente e histórico de atendimentos.
-3. Criar fluxos de cadastro/edição que respeitem valores padronizados do banco.
-4. Criar visualizações para diagnóstico, sorologias, exames, encaminhamentos e tratamentos.
-5. Tratar estados de carregamento, erro, permissões e dados incompletos.
+1. Implementar e testar as migrations com dados sintéticos.
+2. Implementar o importador somente depois das migrations e do manifesto.
+3. Criar planilha sintética para testar repetição de pacientes, conflitos de abas,
+   múltiplos exames, falhas de projetos, tratamento e reprocessamento.
+4. Validar idempotência, retomada, rejeições e rastreabilidade.
+5. Homologar carga controlada em servidor seguro antes da carga real completa.
 
-## 7. Testes e Implantação
+## 5. Backlog permitido
 
-1. Criar testes de execução das migrations em banco limpo.
-2. Criar testes de integridade referencial e checks principais.
-3. Criar testes de importação da planilha com amostras anonimizadas.
-4. Criar testes do backend/API.
-5. Criar testes básicos de frontend.
-6. Definir pipeline de CI.
-7. Definir estratégia de deploy, variáveis de ambiente, backup, restauração e monitoramento.
-8. Validar requisitos de segurança e privacidade antes de qualquer uso com dados reais.
+- prontuário permanente opcional, enquanto não houver identificador na fonte;
+- data própria da complicação quando o atendimento não bastar;
+- múltiplas contrarreferências;
+- autorrelato, exame de familiares, idade original e separação avançada de
+  pendência/observação;
+- vínculo entre responsável legado e usuário autenticado;
+- constraints adicionais de unidades e NYHA;
+- aba operacional e fluxo AIM3;
+- API e frontend além do mínimo necessário à operação segura do servidor.
 
-## Próximo Passo Técnico Recomendado
+## Validação padrão
 
-O módulo físico de importação e proveniência está implementado. O próximo trabalho deve validar humanamente o novo inventário, formalizar o manifesto por aba e resolver as decisões bloqueadoras antes de especificar o importador. Depois disso, devem ser especificadas somente as extensões clínicas confirmadas. Não alterar migrations antigas, reaplicar scripts antigos ou usar dados reais.
-
-Comando local recomendado para verificar documentação e estado do projeto:
-
-```bash
-make project-check
-```
+Executar `make project-check`. Se o PostgreSQL estiver indisponível, registrar a
+limitação e executar `make docs-check` e `git diff --check`.

@@ -14,8 +14,9 @@ dimensões, filtros, congelamento, mesclagens, tipos de célula, estilos e forma
 gerais. Nenhum valor de paciente ou valor clínico foi impresso, copiado, resumido
 ou registrado.
 
-Este documento é a fonte de verdade para o impacto do layout de 2026-07-20. A
-evidência do banco continua sendo
+Este documento é a fonte de verdade para a estrutura e o impacto físico do layout
+de 2026-07-20. As decisões semânticas posteriores estão consolidadas em
+`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`. A evidência do banco continua sendo
 `docs/evidencias/schema_atual_ambulatorio.sql`.
 
 ## Estrutura física encontrada
@@ -125,12 +126,12 @@ Na aba `P Digitar`, `DN`, `Nome` e `D. Atend` se repetem nos blocos `A:C` e `J:L
 
 ### Sem significado suficientemente claro
 
-`Responao se aplicavel pela digitacao`, `Localizado`, `observação`, `DN` e
-`D. Atend` exigem confirmação. Também continuam pendentes as semânticas de
-`Caso não, justifique`, `Se não, descreva o motivo`, autorrelato, exame de
-familiares, contrarreferência, unidades clínicas e valores categóricos.
+`Localizado` continua sem significado e entidade confirmados. `DN` e `D. Atend`
+ficam fora do MVP com a aba operacional. A grafia canônica de responsável,
+`observação`, os blocos de exames, notificação, tratamento, unidades e valores
+foram definidos posteriormente em `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`.
 
-## Cobertura recalculada do schema de 33 tabelas
+## Cobertura histórica antes das decisões humanas
 
 A contagem conservadora usa os 136 rótulos distintos das duas abas principais.
 Cabeçalhos repetidos contam uma vez no denominador semântico, mas continuam como
@@ -148,10 +149,10 @@ ocorrências físicas separadas no futuro manifesto.
 Cobertura plena: **110 de 136 (80,88%)**. Incluindo cobertura parcial:
 **122 de 136 (89,71%)**.
 
-As 13 dúvidas são os nove rótulos repetidos de exames, `Caso não, justifique` e os
-três cabeçalhos novos/ambíguos da aba de portadores. A cobertura não foi aumentada
-por inferência. As 12 coberturas parciais e a única não coberta (`Por quanto tempo
-foi usado?`) permanecem como na análise anterior.
+Esta era a fotografia anterior às decisões humanas. A cobertura corrente,
+rebaixada quando o schema tem cardinalidade incompatível, está em
+`docs/COBERTURA_COLUNAS_PLANILHA.md`: **88/136 (64,71%)** plena e
+**134/136 (98,53%)** incluindo parcial.
 
 ## Impacto nas 33 tabelas
 
@@ -202,32 +203,17 @@ alterada. O impacto é de revisão futura, não de mudança física imediata.
 - elegibilidade/participação AIM3 fora do ambulatório, somente após confirmar o
   papel das duas abas auxiliares e evitar duplicar `projeto_estudo`.
 
-## Decisões bloqueadoras
+## Decisões anteriormente bloqueadoras
 
-1. Confirmar o significado dos cinco cabeçalhos/aliases ambíguos.
-2. Confirmar se as variantes BenBrasil e EPOCA são semanticamente equivalentes.
-3. Definir se as abas AIM3 e `P Digitar` participam da importação, são controles
-   transitórios ou apenas apoio manual.
-4. Confirmar que a ausência das complicações em não portadores significa
-   "não aplicável", e não quatro campos perdidos.
-5. Definir regras para os dois blocos de exames e para os motivos/justificativas.
-6. Definir unidades, formatos aceitos, vazios e categorias antes de normalizar.
-7. Aprovar política operacional de acesso, retenção e auditoria de dados brutos.
+A maior parte foi resolvida e incorporada em
+`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`. Permanecem como bloqueios para dados
+reais a governança operacional, retenção, roles, auditoria/acesso ao JSONB e a
+semântica de `Localizado` caso seja incluído no MVP.
 
-## Sequência recomendada
+## Sequência histórica
 
-1. Validar este inventário de metadados com responsável humano, sem abrir valores.
-2. Versionar um manifesto seguro derivado dos cabeçalhos, com uma configuração por
-   aba e ocorrências explícitas.
-3. Fechar aliases, semânticas bloqueadoras, tipos, unidades e regras de vazio.
-4. Especificar a importação das duas abas principais sobre o módulo de proveniência,
-   sem executá-la com dados reais.
-5. Especificar e implementar por migrations novas apenas as lacunas confirmadas de
-   tratamento e fluxo assistencial.
-6. Criar testes sintéticos do manifesto e do importador antes de qualquer carga.
-7. Avaliar separadamente os fluxos operacional e auxiliares.
-8. Só então implementar/importar em ambiente controlado; API, autenticação e
-   frontend permanecem posteriores à estabilização do modelo e da importação.
+A rota atual substitui esta sequência e está definida em
+`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md` e `docs/PROXIMOS_PASSOS.md`.
 
 ## Validação
 

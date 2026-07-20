@@ -30,7 +30,8 @@ Até o momento, o repositório contém scripts SQL de criação de banco, schema
 - A rotina de validação usa transação com `ROLLBACK`, não altera a estrutura física do banco e não deixa dados de teste persistidos quando executada com sucesso.
 - A rotina foi executada com sucesso em 2026-07-16: as 25 tabelas receberam dados sintéticos temporários, os testes de FK, `UNIQUE`, `CHECK` e `NOT NULL` foram aprovados, e uma consulta posterior confirmou ausência de dados de teste persistidos.
 - A nova fonte canônica de layout é o arquivo local e ignorado pelo Git `planejamento/Nova Planilha ambulatório.xlsx`; a análise usou somente metadados seguros.
-- As duas abas clínicas principais possuem 136 rótulos semânticos distintos. A cobertura recalculada está em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 110 estão plenamente cobertos, 12 parcialmente cobertos, 1 não coberto e 13 dependem de esclarecimento.
+- As duas abas clínicas principais possuem 136 rótulos semânticos distintos. Após as decisões humanas e a reavaliação de cardinalidades, a cobertura atual está em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 88 estão plenamente cobertos, 46 parcialmente cobertos, 1 não coberto e 1 permanece semanticamente desconhecido.
+- As decisões semânticas e a rota até o MVP estão consolidadas em `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`.
 - O impacto físico e de planejamento do novo layout está documentado em `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md`; nenhuma migration, tabela ou teste SQL foi alterado.
 - O módulo de avaliação clínica foi aplicado pela migration incremental `sql/10_modulo_avaliacao_clinica.sql`; as quatro novas tabelas e suas constraints constam no banco local e na evidência física.
 - O módulo de notificação foi aplicado pela migration incremental `sql/11_modulo_notificacao.sql`; a tabela e suas constraints constam no banco local e na evidência física.
@@ -168,14 +169,14 @@ Resumo da reconciliação:
 
 ## Próximos Passos Recomendados
 
-1. Validar humanamente os metadados e aliases ambíguos registrados no relatório de impacto.
-2. Formalizar um manifesto físico seguro e distinto por aba, posição e ocorrência.
-3. Não iniciar importação até resolver as pendências semânticas, de unidades, das abas auxiliares e de rastreabilidade documentadas.
+1. Especificar as migrations incrementais mínimas de projetos por paciente, exames por paciente, tratamento/reação adversa e encaminhamento/projeto.
+2. Formalizar o manifesto das duas abas clínicas com aliases, blocos, posições, ocorrências, conversões e regras de vazio.
+3. Resolver os bloqueios operacionais e de segurança antes de usar dados reais.
 
 ## Próxima fase técnica
 
-1. Manter o importador bloqueado até existir manifesto físico seguro e regras operacionais de acesso, retenção e auditoria.
-2. Especificar a próxima extensão clínica a partir das lacunas de tratamento e fluxo assistencial.
+1. Não implementar o importador nesta etapa; primeiro especificar e aplicar, em tarefas futuras, as migrations mínimas do MVP.
+2. Manter dados reais bloqueados até existir manifesto, governança, roles, auditoria, retenção e ambiente seguro.
 
 ## Regra Permanente de Documentação
 

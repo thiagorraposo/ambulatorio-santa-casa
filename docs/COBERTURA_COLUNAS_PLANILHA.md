@@ -4,103 +4,98 @@ Atualizado em: 2026-07-20
 
 ## Fonte e critério
 
-A cobertura foi recalculada contra os metadados de
-`planejamento/Nova Planilha ambulatório.xlsx`, arquivo local ignorado pelo Git, e
-contra as 33 tabelas documentadas em
-`docs/evidencias/schema_atual_ambulatorio.sql`. Nenhum valor de dado foi lido para
-esta classificação.
+A cobertura usa os 136 rótulos distintos das duas abas clínicas e o schema físico
+atual de 33 tabelas. As decisões humanas consolidadas em
+`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md` resolvem semânticas, mas não contam como
+cobertura física quando a cardinalidade ou obrigatoriedade do banco é incompatível.
 
-O inventário detalhado, posições, diferenças entre abas e impactos por módulo
-estão em `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md`.
+- **Direta:** destino semanticamente equivalente sem decomposição.
+- **Com transformação:** destino atual preserva toda a informação após conversão,
+  lookup ou transformação coluna-linha.
+- **Parcial:** há destino aproximado, mas a estrutura atual viola uma cardinalidade,
+  obrigatoriedade ou detalhe confirmado.
+- **Não coberta:** não existe destino para a informação normalizada exigida.
+- **Dúvida:** a semântica ainda não foi confirmada.
 
-- **Direta:** campo físico semanticamente equivalente.
-- **Com transformação:** toda a informação cabe no modelo após conversão,
-  normalização, lookup ou transformação coluna-linha.
-- **Parcial:** parte da semântica cabe no modelo, mas há perda ou ambiguidade.
-- **Não coberta:** não há destino físico adequado.
-- **Dúvida:** posição repetida ou significado ainda impede decisão segura.
-
-## Resultado
-
-O denominador é de 136 rótulos distintos nas duas abas principais, aparando
-espaços externos, mas preservando variantes de grafia. As ocorrências repetidas
-serão individualizadas no manifesto físico.
+## Resultado conservador atual
 
 | Classificação | Quantidade | Percentual |
 | --- | ---: | ---: |
 | Coberta diretamente | 6 | 4,41% |
-| Coberta com transformação | 104 | 76,47% |
-| Parcialmente coberta | 12 | 8,82% |
+| Coberta com transformação | 82 | 60,29% |
+| Parcialmente coberta | 46 | 33,82% |
 | Não coberta | 1 | 0,74% |
-| Dúvida pendente | 13 | 9,56% |
+| Dúvida pendente | 1 | 0,74% |
 | Total | 136 | 100,00% |
 
-Cobertura plena: **110/136 (80,88%)**. Com cobertura parcial:
-**122/136 (89,71%)**.
+Cobertura plena atual: **88/136 (64,71%)**. Incluindo cobertura parcial:
+**134/136 (98,53%)**.
 
-## Coberta diretamente (6)
+A queda da cobertura plena não representa perda do schema. Ela decorre de decisões
+mais precisas: projetos pertencem ao paciente e exames não podem depender
+obrigatoriamente do atendimento. O modelo atual consegue guardar valores, mas não
+respeita ainda essas cardinalidades.
 
-`ID`, `Nome`, `Endereço`, `Cidade`, `Telefone de Contato` e
-`Localização do prontuário`.
+## Alterações de classificação após confirmação humana
 
-## Coberta com transformação (104)
+Passaram de dúvida para cobertura com transformação:
 
-São os 109 itens anteriormente classificados nessa categoria, exceto os cinco que
-o arquivo comprovou não serem cabeçalhos físicos: `Origem da aba: portador ou não
-portador de DC` é derivado da aba; `Glicemia`, `Colesterol HDL`, `Colesterol LDL` e
-`Triglicerídeos` eram nomes de catálogo. A origem da aba continua coberta como
-metadado do processo, mas não entra no denominador de colunas.
+- `Responsável pela digitação`, com preservação como texto legado;
+- `Caso não, justifique`, no bloco de notificação;
+- `observação`, como texto livre genérico do atendimento;
+- variantes BenBrasil/EPOCA, preservando o indicador de falha;
+- identificação dos nove tipos repetidos pelo bloco, posição e ocorrência.
 
-Permanecem nesse grupo os cabeçalhos de demografia, atendimento, projetos,
-diagnóstico, sorologia, condições/complicações, comorbidades, valores laboratoriais,
-medicamentos, avaliação clínica, eventos, dispositivos, óbito, notificação,
-acompanhamento e responsável pela digitação cuja equivalência é comprovada.
+Passaram de parcial para cobertura com transformação:
 
-## Parcialmente coberta (12)
+- `Se não, descreva o motivo`, confirmado como motivo da não indicação de BZN;
+- `Paciente com contrarreferencia realizada?`, representável provisoriamente como
+  estado consolidado; múltiplas ocorrências permanecem no backlog.
+
+Continuam como dúvida:
+
+- `Localizado`: o domínio sim/não foi confirmado, mas não o significado nem a
+  entidade. Não será estruturado no MVP sem nova decisão.
+
+## Grupos parcialmente cobertos (46)
+
+### Projetos — 15
+
+Os cabeçalhos de participação, pendência e falha dos projetos podem ser guardados,
+mas `atendimento_projeto_estudo` vincula o projeto ao atendimento. A decisão exige
+vínculo ao paciente. A futura associação deverá preservar `houve_falha` sem
+confundir BenBrasil e EPOCA.
+
+### Exames — 21
+
+Incluem valores laboratoriais, ECG/ECO/FEVE, os dois indicadores de bloco e os nove
+tipos repetidos. O modelo genérico representa tipo, origem e resultado textual,
+mas exige `atendimento_id`; a decisão exige paciente obrigatório e atendimento
+opcional.
+
+### Demais parciais — 10
 
 | Cabeçalho | Lacuna atual |
 | --- | --- |
-| `Idade` | calculável, mas sem preservação estruturada do original |
-| `Pendencias/Observação` | regra de separação entre texto e pendência ausente |
-| `Trouxe encaminhamento` | falta booleano equivalente inequívoco |
+| `Idade` | não preserva idade original estruturada |
+| `Pendencias/Observação` | divisão entre texto e pendência segue ambígua |
+| `Trouxe encaminhamento` | falta booleano de documento apresentado |
 | `Autorelato diagnóstico de Chagas do participante (data)` | autorrelato não equivale a resultado laboratorial |
-| `Familiares diretos (mãe, pai, irmãos) realizaram o exame de Chagas?` | histórico familiar não representa especificamente exame realizado |
-| `teve reação adversa?` | vínculo com tratamento ou evento genérico não confirmado |
-| `tratamento pelo ambulatorio?` | falta campo explícito no tratamento |
-| `Em qual ano tomou a medicação (Benzonidazol)?` | ano isolado não converte com segurança em data |
-| `Prescrição do BZN (data)` | prescrição e indicação são eventos distintos |
-| `Se não, descreva o motivo` | objeto do motivo não está definido |
-| `Encaminhado a qual projeto?` | falta vínculo explícito encaminhamento-projeto |
-| `Paciente com contrarreferencia realizada?` | falta tipo/estado inequívoco |
+| `Familiares diretos (mãe, pai, irmãos) realizaram o exame de Chagas?` | histórico familiar não representa exame realizado |
+| `teve reação adversa?` | faltam gravidade, data, consequência e estrutura repetível |
+| `tratamento pelo ambulatorio?` | falta indicador explícito |
+| `Em qual ano tomou a medicação (Benzonidazol)?` | falta ano aproximado próprio |
+| `Prescrição do BZN (data)` | falta data de prescrição distinta da indicação |
+| `Encaminhado a qual projeto?` | falta FK do encaminhamento para projeto oficial |
 
 ## Não coberta (1)
 
-`Por quanto tempo foi usado?`: falta duração original ou regra derivada em
-`tratamento_chagas`.
+`Por quanto tempo foi usado?`: o schema não possui duração efetivamente cumprida
+em dias. A coluna deve ser coberta por migration incremental antes do MVP.
 
-## Dúvida pendente (13)
+## Cobertura projetada após migrations mínimas
 
-- Nove rótulos repetidos: `ECO`, `Laboratoriais`, `De imagem`, `Holter`,
-  `Endoscopia`, `Colonoscopia`, `Teste Ergometrico`, `Mapa` e `Outros`. O schema
-  genérico cobre exames, mas aba, posição, ocorrência e bloco são indispensáveis.
-- `Caso não, justifique`: a posição sugere notificação, mas a regra semântica ainda
-  requer confirmação humana.
-- `Responao se aplicavel pela digitacao`: possível forma corrompida de responsável,
-  sem equivalência automática segura.
-- `Localizado`: objeto e domínio desconhecidos.
-- `observação`: relação com `Pendencias/Observação` desconhecida.
-
-## Itens retirados do denominador antigo
-
-Além dos cinco itens técnicos/de catálogo descritos acima,
-`Controle da importação como processo.` e `Todas as colunas originais da planilha
-em formato bruto para auditoria.` são descrições das tabelas de proveniência, não
-cabeçalhos. Sua retirada explica a mudança do denominador, sem reduzir a capacidade
-das tabelas `importacao_lote`, `importacao_linha` e `importacao_registro`.
-
-## Consequência
-
-O schema de 33 tabelas permanece uma base válida, mas a redução percentual de
-82,14% para 80,88% reflete um denominador agora físico e três cabeçalhos novos
-mantidos como dúvida. Nenhuma migration deve ser criada antes das confirmações
-listadas no relatório de impacto.
+As migrations de paciente–projeto, exame por paciente, tratamento/reação adversa
+e encaminhamento eliminam as lacunas estruturais prioritárias. A cobertura exata
+pós-migration deverá ser recalculada a partir das especificações aprovadas, sem
+promover antecipadamente itens de backlog ou `Localizado`.

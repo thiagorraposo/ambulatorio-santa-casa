@@ -26,6 +26,53 @@ Além deste arquivo, atualize quando necessário:
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
 
+## 2026-07-20 - Consolidação das decisões humanas do MVP
+
+Data: 2026-07-20
+
+Título da alteração: Consolidação das decisões humanas da nova planilha e revisão
+da rota até o MVP.
+
+Motivo: incorporar semânticas, cardinalidades, conversões, escopo e requisitos de
+segurança confirmados, reconciliando-os com as 33 tabelas atuais.
+
+Arquivos criados ou modificados:
+
+- `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`
+- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md`
+- `docs/METADADOS_SEGUROS_LAYOUT_PLANILHA.md`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada ou alterada nesta tarefa.
+- Foram identificadas quatro especificações incrementais necessárias antes do MVP:
+  paciente–projeto, exame por paciente, tratamento/reação adversa e
+  encaminhamento/projeto.
+
+Impacto:
+
+- Cobertura atual conservadora: 88 plenos, 46 parciais, 1 não coberto e 1 dúvida,
+  sobre 136 rótulos.
+- A primeira versão limita-se às duas abas clínicas.
+- Uso de dados reais permanece bloqueado por governança, privilégios, auditoria,
+  retenção e preparação segura do servidor.
+
+Validação executada:
+
+- `make project-check` passou pelas verificações documentais e parou em `db-check`
+  porque o PostgreSQL local esperado não estava disponível/configurado;
+- `make docs-check` e `git diff --check` passaram como fallback.
+
+Pendências:
+
+- especificar e implementar as migrations futuras com testes sintéticos;
+- formalizar o manifesto e o importador em tarefas posteriores;
+- resolver os bloqueios operacionais antes de dados reais.
+
 ## 2026-07-19 - Implementação do módulo de importação e proveniência
 
 Data: 2026-07-19
