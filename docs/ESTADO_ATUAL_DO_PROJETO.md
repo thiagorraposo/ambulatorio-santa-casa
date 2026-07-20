@@ -1,6 +1,6 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-07-19
+Atualizado em: 2026-07-20
 
 ## Objetivo Geral
 
@@ -29,7 +29,9 @@ Até o momento, o repositório contém scripts SQL de criação de banco, schema
 - Existe uma rotina reutilizável de validação com dados de teste em `tests/sql/01_validar_nucleo_inicial.sql`.
 - A rotina de validação usa transação com `ROLLBACK`, não altera a estrutura física do banco e não deixa dados de teste persistidos quando executada com sucesso.
 - A rotina foi executada com sucesso em 2026-07-16: as 25 tabelas receberam dados sintéticos temporários, os testes de FK, `UNIQUE`, `CHECK` e `NOT NULL` foram aprovados, e uma consulta posterior confirmou ausência de dados de teste persistidos.
-- A reconciliação das 140 entradas do mapeamento da planilha está documentada em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 115 estão plenamente cobertas pelo schema atual, 12 parcialmente cobertas, 1 não coberta e 12 dependem de esclarecimento.
+- A nova fonte canônica de layout é o arquivo local e ignorado pelo Git `planejamento/Nova Planilha ambulatório.xlsx`; a análise usou somente metadados seguros.
+- As duas abas clínicas principais possuem 136 rótulos semânticos distintos. A cobertura recalculada está em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 110 estão plenamente cobertos, 12 parcialmente cobertos, 1 não coberto e 13 dependem de esclarecimento.
+- O impacto físico e de planejamento do novo layout está documentado em `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md`; nenhuma migration, tabela ou teste SQL foi alterado.
 - O módulo de avaliação clínica foi aplicado pela migration incremental `sql/10_modulo_avaliacao_clinica.sql`; as quatro novas tabelas e suas constraints constam no banco local e na evidência física.
 - O módulo de notificação foi aplicado pela migration incremental `sql/11_modulo_notificacao.sql`; a tabela e suas constraints constam no banco local e na evidência física.
 - O módulo de importação e proveniência foi aplicado pela migration incremental `sql/12_modulo_importacao_proveniencia.sql`; as três tabelas e suas constraints constam no banco local e na evidência física.
@@ -48,7 +50,7 @@ A ausência temporária das demais tabelas planejadas não deve ser tratada como
 
 Nenhuma migration antiga deve ser alterada ou reaplicada no banco atual. Qualquer evolução física deve ser feita por nova migration incremental, depois de registrada a decisão técnica e atualizada a documentação.
 
-O objetivo da fase atual é validar funcionamento, integridade referencial, restrições, dados de teste e consultas básicas sobre o núcleo atual. A cobertura integral das 140 colunas da planilha original será tratada em fases posteriores de expansão e antes da importação completa da planilha.
+O objetivo da fase atual é validar funcionamento, integridade referencial, restrições, dados de teste e consultas básicas sobre o núcleo atual. A cobertura integral dos 136 rótulos físicos distintos das abas principais será tratada em fases posteriores de expansão e antes da importação completa da planilha.
 
 ## Tabelas Atualmente Existentes no Banco
 
@@ -151,7 +153,7 @@ Resumo da reconciliação:
 
 - Migrações formais com ferramenta de versionamento, se o projeto evoluir para aplicação.
 - Expansão incremental do modelo físico para cobrir as demais tabelas e campos planejados.
-- Cobertura integral das 140 colunas da planilha original, em fases posteriores e antes da importação completa.
+- Cobertura integral dos 136 rótulos físicos distintos das abas principais, em fases posteriores e antes da importação completa.
 - Importação completa da planilha original, após expansão e validação do modelo.
 - Normalização e limpeza dos valores brutos da planilha.
 - Backend/API.
@@ -166,9 +168,9 @@ Resumo da reconciliação:
 
 ## Próximos Passos Recomendados
 
-1. Confirmar a posição de `Caso não, justifique` antes de configurar sua importação automática.
-2. Produzir futuramente o manifesto físico seguro e regras operacionais antes de implementar o importador.
-3. Não iniciar importação até resolver as pendências semânticas, de unidades e de rastreabilidade documentadas.
+1. Validar humanamente os metadados e aliases ambíguos registrados no relatório de impacto.
+2. Formalizar um manifesto físico seguro e distinto por aba, posição e ocorrência.
+3. Não iniciar importação até resolver as pendências semânticas, de unidades, das abas auxiliares e de rastreabilidade documentadas.
 
 ## Próxima fase técnica
 

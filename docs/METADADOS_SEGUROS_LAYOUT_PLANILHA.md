@@ -1,41 +1,36 @@
 # Metadados Seguros do Layout da Planilha
 
-Atualizado em: 2026-07-19
+Atualizado em: 2026-07-20
 
-## Fonte canônica disponível
+## Fonte canônica
 
-O inventário semântico atual usa os 140 nomes únicos de `planejamento/tabelas dicionário de dados/03_coluna_planilha_destino.csv`. Esse arquivo contém somente metadados de mapeamento, mas foi produzido a partir de um fallback documental e não comprova o layout físico.
+A fonte canônica do layout é o arquivo local, não versionado e ignorado pelo Git
+`planejamento/Nova Planilha ambulatório.xlsx`. Somente seus metadados estruturais
+podem orientar o planejamento. O relatório completo e a classificação das
+diferenças estão em `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md`, fonte de verdade desta
+análise.
 
-Ele é canônico para:
+O catálogo antigo de 140 nomes deixa de ser canônico para o layout físico. Ele
+continua útil apenas como histórico de intenção e mapeamento.
 
-- conjunto de nomes semânticos conhecidos;
-- mapeamentos planejados e dúvidas já registradas;
-- reconciliação de cobertura enquanto não existir manifesto físico melhor.
+## Inventário seguro resumido
 
-Ele não é canônico para:
+- cinco abas: duas clínicas principais, uma operacional e duas auxiliares;
+- cabeçalho na linha 1 das abas principais;
+- 142 posições preenchidas na aba de portadores e 136 na de não portadores;
+- nove cabeçalhos repetidos em dois blocos de exames nas duas abas;
+- quatro colunas de complicações somente na aba de portadores;
+- 81 rótulos compartilhados deslocados entre as abas;
+- cabeçalho na linha 2 e dois blocos repetidos na aba operacional;
+- ausência de cabeçalho demonstrado nas duas abas auxiliares AIM3;
+- mistura geral de texto, número e booleano, sem fórmulas.
 
-- nomes exatos e ordem das abas;
-- ordem física das colunas;
-- quantidade e posição de cabeçalhos repetidos;
-- valores de células ou regras de normalização.
+Nenhum valor de célula assistencial ou identificável integra este inventário.
 
-## Abas
+## Requisito do manifesto
 
-Os grupos `portador de DC` e `não portador de DC` são conhecidos pelo metadado `Origem da aba: portador ou não portador de DC`, mas os nomes físicos, a capitalização e a ordem das abas não estão comprovados. Nenhum nome físico será inventado.
-
-## Manifesto físico futuro
-
-Antes de implementar o importador, deve ser criado um manifesto versionado contendo apenas:
-
-- `layout_versao`;
-- `aba_chave`, `aba_nome_original` e `aba_ordem`;
-- `coluna_chave`, `cabecalho_original` e `coluna_ordem`;
-- `ocorrencia_cabecalho`.
-
-O manifesto não pode conter valores de células, exemplos clínicos, identificadores de pacientes, caminhos locais ou credenciais. Sua extração deverá ler somente a estrutura do arquivo em ambiente controlado.
-
-## Cabeçalhos repetidos
-
-`ECO`, `Laboratoriais`, `De imagem`, `Holter`, `Endoscopia`, `Colonoscopia`, `Teste Ergometrico`, `Mapa` e `Outros` dependem de aba, posição e ocorrência. Até o manifesto existir, continuam semanticamente inventariados, mas fisicamente não identificáveis para importação automática.
-
-Esta limitação não bloqueia a migration genérica de importação e proveniência. Ela bloqueia somente a configuração e execução do importador.
+O futuro manifesto versionado deve conter apenas versão, aba, ordem, cabeçalho,
+posição e ocorrência. Deve haver configuração distinta para cada aba principal.
+Espaços e grafias originais devem ser preservados junto da chave normalizada.
+As abas operacional e auxiliares permanecem fora do manifesto de importação até
+confirmação humana.

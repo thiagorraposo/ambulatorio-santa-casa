@@ -1,6 +1,6 @@
 # Próximos Passos
 
-Atualizado em: 2026-07-19
+Atualizado em: 2026-07-20
 
 ## 1. Estratégia Incremental do Modelo Físico
 
@@ -9,14 +9,15 @@ Atualizado em: 2026-07-19
 3. Implementar as demais tabelas previstas posteriormente por migrations incrementais.
 4. Não alterar migrations antigas e não reaplicar scripts antigos no banco atual.
 5. Validar funcionamento, integridade referencial, restrições, dados de teste e consultas básicas antes da próxima expansão.
-6. Planejar a cobertura integral das 140 colunas da planilha em fases posteriores e antes da importação completa.
+6. Planejar a cobertura dos 136 rótulos físicos distintos das abas principais antes da importação completa.
 
 ## 2. Próxima fase técnica
 
-1. Não implementar nem executar o importador até obter manifesto físico seguro de abas e colunas e definir roles operacionais.
+1. Validar humanamente o inventário de `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md` e formalizar um manifesto físico seguro, separado por aba, posição e ocorrência.
 2. Definir política institucional de retenção e rotina de auditoria de associações genéricas antes de usar dados reais.
 3. Definir transições, retomada e idempotência clínica do futuro importador.
-4. Especificar em seguida a extensão de tratamento de Chagas e, separadamente, o fluxo de encaminhamento/contrarreferência.
+4. Fechar aliases, semânticas, tipos, unidades e regras de vazio antes de especificar o importador.
+5. Especificar em seguida a extensão de tratamento de Chagas e, separadamente, o fluxo de encaminhamento/contrarreferência.
 
 ## 3. Ajustes e Documentação Pendentes
 
@@ -29,14 +30,15 @@ Atualizado em: 2026-07-19
 
 ## 4. Expansão e Importação da Planilha
 
-1. Localizar e versionar apenas metadados seguros da planilha, sem dados sensíveis.
-2. Mapear as 140 colunas da planilha para o núcleo atual e para os módulos futuros.
-3. Definir as próximas fases de expansão do modelo antes da importação completa.
-4. Definir regras de padronização para enums textuais usados nos `CHECK`.
-5. Criar migrations incrementais para os módulos adicionais definidos.
-6. Preservar valores originais nos campos `valor_original_*`.
-7. Criar rotina de importação em ambiente controlado somente depois da cobertura necessária.
-8. Criar relatório de registros importados, rejeitados e pendentes de revisão.
+1. Manter a planilha canônica local ignorada e versionar apenas seu futuro manifesto de metadados seguros.
+2. Mapear as duas abas principais por nome, posição e ocorrência; não reutilizar um único mapa posicional.
+3. Confirmar separadamente o papel da aba operacional e das duas abas auxiliares AIM3.
+4. Definir as próximas fases de expansão apenas para lacunas semanticamente confirmadas.
+5. Definir regras de padronização para enums textuais usados nos `CHECK`.
+6. Criar migrations incrementais somente para os módulos adicionais confirmados.
+7. Preservar valores originais nos campos `valor_original_*`.
+8. Criar rotina de importação em ambiente controlado somente depois da cobertura necessária.
+9. Criar relatório de registros importados, rejeitados e pendentes de revisão.
 
 ## 5. Backend/API
 
@@ -68,7 +70,7 @@ Atualizado em: 2026-07-19
 
 ## Próximo Passo Técnico Recomendado
 
-O módulo físico de importação e proveniência está implementado. O próximo trabalho deve preparar, somente com metadados seguros, as condições operacionais que ainda bloqueiam o importador e especificar a próxima extensão clínica. Não alterar migrations antigas, reaplicar scripts antigos ou usar dados reais.
+O módulo físico de importação e proveniência está implementado. O próximo trabalho deve validar humanamente o novo inventário, formalizar o manifesto por aba e resolver as decisões bloqueadoras antes de especificar o importador. Depois disso, devem ser especificadas somente as extensões clínicas confirmadas. Não alterar migrations antigas, reaplicar scripts antigos ou usar dados reais.
 
 Comando local recomendado para verificar documentação e estado do projeto:
 

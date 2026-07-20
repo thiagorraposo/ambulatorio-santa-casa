@@ -1,6 +1,6 @@
 # Registro de Alterações
 
-Atualizado em: 2026-07-19
+Atualizado em: 2026-07-20
 
 ## Como Registrar Mudanças
 
@@ -820,3 +820,50 @@ Pendências ou riscos:
 - `README.md` permanece vazio e deve ser preenchido em tarefa futura.
 - CI e hooks de validação ainda não foram configurados.
 - Comandos que acessam PostgreSQL dependem de ambiente local configurado.
+## 2026-07-20 - Análise de impacto do novo layout canônico
+
+Data: 2026-07-20
+
+Título da alteração: Análise de impacto do novo layout canônico da planilha.
+
+Motivo: substituir o catálogo documental inferido pelos metadados físicos da nova
+fonte canônica local e recalcular a cobertura do schema atual.
+
+Arquivos modificados:
+
+- `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md`
+- `docs/METADADOS_SEGUROS_LAYOUT_PLANILHA.md`
+- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada ou alterada.
+
+Tabelas e colunas afetadas:
+
+- Nenhuma estrutura física alterada.
+- A cobertura documental passa a usar 136 rótulos distintos das duas abas
+  principais: 110 plenamente cobertos, 12 parciais, 1 não coberto e 13 dúvidas.
+
+Impacto no sistema:
+
+- Sem impacto no banco ou nos testes SQL.
+- O planejamento passa a exigir mapeamento distinto por aba, posição e ocorrência.
+- Abas operacional e auxiliares permanecem bloqueadas para importação até
+  confirmação humana.
+
+Como testar:
+
+- Confirmar o `.xlsx` com `git check-ignore -v`.
+- Executar `make project-check`.
+- Revisar `git diff --check` e `git status --short`.
+
+Pendências ou riscos:
+
+- PostgreSQL local precisa estar disponível para concluir as etapas de banco do
+  `make project-check`.
+- Resolver os aliases, cabeçalhos ambíguos, tipos, unidades e papéis das abas
+  auxiliares antes do importador ou de novas migrations.
