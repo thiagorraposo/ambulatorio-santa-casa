@@ -26,6 +26,47 @@ Além deste arquivo, atualize quando necessário:
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
 
+## 2026-08-06 - Especificação da evolução dos exames complementares
+
+Data: 2026-08-06
+
+Título da alteração: Especificação de exames canônicos por paciente.
+
+Motivo: fechar a estrutura incremental necessária para os dois blocos de exames
+do novo layout sem alterar o schema ou deduzir vínculos legados.
+
+Arquivos criados ou modificados:
+
+- `docs/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`;
+- `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`;
+- `docs/DECISOES_ARQUITETURAIS.md`;
+- `docs/COBERTURA_COLUNAS_PLANILHA.md`;
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`;
+- `docs/PROXIMOS_PASSOS.md`;
+- `docs/REGISTRO_DE_ALTERACOES.md`.
+
+Migrations envolvidas:
+
+- nenhuma migration criada, alterada ou aplicada;
+- a futura evolução deverá ocorrer em nova migration incremental.
+
+Impacto:
+
+- definida nova tabela canônica `paciente_exame_complementar`, com paciente
+  obrigatório, atendimento opcional consistente e múltiplas ocorrências;
+- definidos blocos `trazido` e `solicitado`, catálogo reutilizado, tipos livres,
+  textos e valores originais;
+- preservadas integralmente as três estruturas atuais de exames, sem backfill;
+- cobertura física permanece inalterada até aplicação da futura migration.
+
+Validação executada:
+
+- `make docs-check`;
+- `git diff --check`;
+- `make db-check` confirmou o PostgreSQL local disponível;
+- `make project-check` passou com os cinco testes SQL transacionais;
+- PostgreSQL local 16.14 confirmado para a estratégia documentada.
+
 ## 2026-08-06 - Implementação da associação paciente–projeto
 
 Data: 2026-08-06

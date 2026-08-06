@@ -19,8 +19,9 @@ A fonte detalhada das decisões é
 
 ## 1. Especificar migrations mínimas
 
-1. Exame com paciente obrigatório e atendimento opcional, mantendo múltiplas
-   ocorrências e resultados textuais.
+1. Implementar a evolução de exames especificada em
+   `docs/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`, com nova tabela por
+   paciente, atendimento opcional e preservação das estruturas legadas.
 2. Tratamento BZN por paciente, no máximo um, com duração cumprida em dias, ano
    aproximado, prescrição, tratamento pelo ambulatório e reações adversas
    detalhadas/repetíveis.

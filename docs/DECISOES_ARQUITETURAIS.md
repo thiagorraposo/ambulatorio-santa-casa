@@ -260,3 +260,38 @@ Documentos relacionados:
 `docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`,
 `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
 `docs/MODELO_FISICO_ATUAL.md`.
+
+## ADR-013
+
+ID: ADR-013
+
+Título: Exame canônico por paciente com atendimento opcional
+
+Data: 2026-08-06
+
+Status: Aceita; especificação pronta para migration incremental
+
+Contexto: O registro atual de exame exige atendimento e não possui paciente. O
+novo layout define o paciente como proprietário do exame, aceita atendimento
+opcional, múltiplas ocorrências do mesmo tipo e blocos distintos de exames
+trazidos e solicitados.
+
+Decisão: Criar futuramente `paciente_exame_complementar`, reutilizando o catálogo
+de tipos, com paciente obrigatório, atendimento opcional consistente por FK
+composta, bloco obrigatório, resultado textual e valores originais. Preservar as
+tabelas de exame por atendimento sem backfill ou escrita dupla automática.
+
+Consequências: Novos exames deixam de depender do atendimento de digitação e
+podem repetir tipo e bloco. A tabela `atendimento` recebe somente uma chave única
+composta redundante para suportar a consistência do vínculo opcional. Manifesto,
+aliases, vazio, idempotência e ambiguidades permanecem no importador.
+
+Alternativas rejeitadas: alterar diretamente a tabela legada e exigir backfill;
+adicionar apenas uma associação paciente–exame; permitir duas FKs independentes
+sem verificar que atendimento pertence ao paciente; deduplicar paciente e tipo;
+criar tipos automaticamente a partir de texto livre.
+
+Documentos relacionados:
+`docs/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`,
+`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
+`docs/COBERTURA_COLUNAS_PLANILHA.md`.

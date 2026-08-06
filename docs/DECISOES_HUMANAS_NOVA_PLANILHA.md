@@ -117,6 +117,13 @@ vínculo obrigatório e o atendimento opcional, assegurando, quando ambos existi
 que o atendimento pertença ao mesmo paciente. Não deve haver unicidade por tipo,
 pois múltiplas ocorrências são válidas. Classes 1, 2 e 3.
 
+A estrutura futura foi fechada em
+`docs/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`: nova tabela canônica
+`paciente_exame_complementar`, paciente obrigatório, atendimento opcional com
+consistência por FK composta, bloco único `trazido` ou `solicitado`, resultado
+livre e preservação das tabelas legadas sem backfill. O manifesto e a
+reconciliação de reprocessamentos continuam como regras do futuro importador.
+
 ## Benzonidazol e reação adversa
 
 Decisões confirmadas:

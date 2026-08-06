@@ -33,11 +33,15 @@ suíte automatizada da aplicação, CI ou aplicação executável versionados.
 - A rotina de validação usa transação com `ROLLBACK`, não altera a estrutura física do banco e não deixa dados de teste persistidos quando executada com sucesso.
 - A rotina foi executada com sucesso em 2026-07-16: as 25 tabelas receberam dados sintéticos temporários, os testes de FK, `UNIQUE`, `CHECK` e `NOT NULL` foram aprovados, e uma consulta posterior confirmou ausência de dados de teste persistidos.
 - A nova fonte canônica de layout é o arquivo local e ignorado pelo Git `planejamento/Nova Planilha ambulatório.xlsx`; a análise usou somente metadados seguros.
-- As duas abas clínicas principais possuem 136 rótulos semânticos distintos. Após as decisões humanas e a reavaliação de cardinalidades, a cobertura atual está em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 88 estão plenamente cobertos, 46 parcialmente cobertos, 1 não coberto e 1 permanece semanticamente desconhecido.
+- As duas abas clínicas principais possuem 136 rótulos semânticos distintos. Após as decisões humanas e a reavaliação de cardinalidades, a cobertura atual está em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 103 estão plenamente cobertos, 31 parcialmente cobertos, 1 não coberto e 1 permanece semanticamente desconhecido.
 - As decisões semânticas e a rota até o MVP estão consolidadas em `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`.
 - A associação canônica entre paciente e projeto foi aplicada por
   `sql/13_associacao_paciente_projeto.sql` e validada nos 17 cenários definidos em
   `docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`.
+- A evolução canônica dos exames por paciente está definida em
+  `docs/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md` e pronta para orientar
+  migration incremental; nenhuma estrutura física de exames foi alterada nesta
+  etapa.
 - O impacto físico e de planejamento do novo layout está documentado em `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md`; nenhuma migration, tabela ou teste SQL foi alterado.
 - O módulo de avaliação clínica foi aplicado pela migration incremental `sql/10_modulo_avaliacao_clinica.sql`; as quatro novas tabelas e suas constraints constam no banco local e na evidência física.
 - O módulo de notificação foi aplicado pela migration incremental `sql/11_modulo_notificacao.sql`; a tabela e suas constraints constam no banco local e na evidência física.
@@ -179,8 +183,8 @@ Resumo da reconciliação:
 
 ## Próximos Passos Recomendados
 
-1. Especificar e implementar as migrations mínimas restantes de exames por
-   paciente, tratamento/reação adversa e encaminhamento/projeto.
+1. Implementar a migration de exames já especificada e especificar as migrations
+   mínimas restantes de tratamento/reação adversa e encaminhamento/projeto.
 2. Formalizar o manifesto das duas abas clínicas com aliases, blocos, posições, ocorrências, conversões e regras de vazio.
 3. Resolver os bloqueios operacionais e de segurança antes de usar dados reais.
 

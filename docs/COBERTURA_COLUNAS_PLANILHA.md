@@ -74,6 +74,11 @@ tipos repetidos. O modelo genérico representa tipo, origem e resultado textual,
 mas exige `atendimento_id`; a decisão exige paciente obrigatório e atendimento
 opcional.
 
+A evolução necessária está tecnicamente fechada em
+`docs/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`. A classificação permanece
+parcial até a futura migration ser aplicada; especificação documental não conta
+como cobertura física.
+
 ### Demais parciais — 10
 
 | Cabeçalho | Lacuna atual |
