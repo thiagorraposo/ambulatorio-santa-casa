@@ -1,6 +1,6 @@
 # Decisões Arquiteturais
 
-Atualizado em: 2026-07-19
+Atualizado em: 2026-08-06
 
 Este documento registra decisões duradouras do projeto. Mudanças cronológicas continuam em `docs/REGISTRO_DE_ALTERACOES.md`.
 
@@ -172,7 +172,7 @@ Título: Separação entre avaliação por atendimento e fatos longitudinais do 
 
 Data: 2026-07-16
 
-Status: Aceita; pronta para implementação por migration incremental
+Status: Aceita e implementada por `sql/10_modulo_avaliacao_clinica.sql`
 
 Contexto: O próximo módulo precisa representar medidas coletadas em consulta, AVC prévio, reação adversa, dispositivos implantados e óbito sem duplicar tabelas atuais nem criar atendimentos artificiais para fatos históricos.
 
@@ -194,7 +194,7 @@ Título: Notificação como estado consolidado do paciente
 
 Data: 2026-07-18
 
-Status: Aceita; pronta para implementação por migration incremental
+Status: Aceita e implementada por `sql/11_modulo_notificacao.sql`
 
 Contexto: As entradas `Paciente notificado?`, `Número notificação` e `Caso não, justifique` precisam de destino estruturado, mas não fornecem data, histórico ou vínculo inequívoco com atendimento.
 
@@ -225,3 +225,38 @@ Consequências: A estrutura foi aplicada, mas o importador permanece bloqueado a
 Alternativas rejeitadas: iniciar por campos clínicos isolados; tratar responsável legado como usuário autenticado; atribuir toda origem a atendimento; importar antes de definir rastreabilidade; adicionar FK de origem a todas as tabelas; usar triggers dinâmicas para simular FK genérica; guardar cabeçalhos duplicados em objeto JSON.
 
 Documentos relacionados: `docs/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`, `docs/COBERTURA_COLUNAS_PLANILHA.md`, `docs/PROXIMOS_PASSOS.md`.
+
+## ADR-012
+
+ID: ADR-012
+
+Título: Associação consolidada entre paciente e projeto
+
+Data: 2026-08-06
+
+Status: Aceita; especificação pronta para migration incremental
+
+Contexto: A planilha representa participação, pendência e falha em projetos como
+estado do paciente. A associação existente `atendimento_projeto_estudo` exige
+atendimento e não atende essa cardinalidade sem atribuir o vínculo a uma consulta
+específica.
+
+Decisão: Criar futuramente `paciente_projeto_estudo`, única pelo par paciente e
+projeto, com estados booleanos anuláveis, detalhes e valores originais. Reutilizar
+`projeto_estudo`; mapear variantes de falha para BenBrasil ou EPOCA e registrar a
+falha separadamente. Preservar `atendimento_projeto_estudo` sem alteração,
+backfill automático ou remoção no MVP.
+
+Consequências: Participação em vários projetos passa a ser representável sem
+atendimento artificial. A associação será consolidada, e várias linhas de origem
+poderão apontar para o mesmo registro por `importacao_registro`. Reconciliação de
+conflitos pertence ao futuro importador.
+
+Alternativas rejeitadas: alterar retroativamente a FK da associação antiga;
+duplicar BenBrasil/EPOCA em projetos específicos de falha; vincular a nova relação
+a um atendimento opcional; executar backfill sem regra de reconciliação.
+
+Documentos relacionados:
+`docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`,
+`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
+`docs/MODELO_FISICO_ATUAL.md`.

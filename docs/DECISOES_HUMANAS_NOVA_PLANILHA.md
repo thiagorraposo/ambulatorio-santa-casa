@@ -1,6 +1,6 @@
 # Decisões Humanas para a Nova Planilha
 
-Atualizado em: 2026-07-20
+Atualizado em: 2026-08-06
 
 ## Finalidade e precedência
 
@@ -78,6 +78,13 @@ por atendimento. É necessária antes do MVP uma nova associação paciente–pr
 com participação, pendência, falha, textos originais e proveniência. A tabela
 atual não deve ser apagada nesta fase; sua transição e eventual obsolescência
 precisam ser especificadas. Classes 1, 2 e 3.
+
+A estrutura futura foi fechada em
+`docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`: associação consolidada
+`paciente_projeto_estudo`, única por paciente e projeto, sem atendimento e sem
+alteração retroativa de `atendimento_projeto_estudo`. A especificação está pronta
+para migration incremental; aliases, conflitos e consolidação entre linhas
+continuam como regras do futuro importador.
 
 ## Condição e complicações de Chagas
 

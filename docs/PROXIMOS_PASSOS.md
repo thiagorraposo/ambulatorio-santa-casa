@@ -1,6 +1,6 @@
 # Próximos Passos
 
-Atualizado em: 2026-07-20
+Atualizado em: 2026-08-06
 
 ## Escopo confirmado do MVP
 
@@ -19,7 +19,10 @@ A fonte detalhada das decisões é
 
 ## 1. Especificar migrations mínimas
 
-1. Associação paciente–projeto, preservando participação, pendência e falha.
+1. Associação paciente–projeto: especificação concluída em
+   `docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`; a futura migration deve
+   preservar participação, pendência, falha, valores originais e convivência com
+   a associação legada por atendimento.
 2. Exame com paciente obrigatório e atendimento opcional, mantendo múltiplas
    ocorrências e resultados textuais.
 3. Tratamento BZN por paciente, no máximo um, com duração cumprida em dias, ano

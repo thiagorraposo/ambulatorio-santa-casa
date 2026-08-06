@@ -1,6 +1,6 @@
 # Modelo Físico Atual
 
-Atualizado em: 2026-07-19
+Atualizado em: 2026-08-06
 
 Este documento descreve a estrutura física real aplicada no schema `ambulatorio`, usando como fonte principal o dump `docs/evidencias/schema_atual_ambulatorio.sql`. Os scripts em `sql/` foram usados como fonte de reconciliação.
 
@@ -12,7 +12,10 @@ O modelo físico atual reúne as 25 tabelas do núcleo funcional inicial, as qua
 
 As demais tabelas previstas serão implementadas posteriormente por migrations incrementais. A ausência temporária dessas estruturas não representa falha, lacuna involuntária ou divergência crítica em relação ao plano do projeto.
 
-Nenhuma migration antiga deve ser alterada ou reaplicada no banco atual. A cobertura integral das 140 colunas da planilha será tratada em fases posteriores de expansão e antes da importação completa da planilha.
+Nenhuma migration antiga deve ser alterada ou reaplicada no banco atual. A
+cobertura integral dos 136 cabeçalhos canônicos das duas abas clínicas será
+tratada em fases posteriores de expansão e antes da importação completa da
+planilha.
 
 ## Banco, Usuário e Schema
 
@@ -198,6 +201,13 @@ Restrições e índices:
 - FK `projeto_estudo_id` -> `projeto_estudo(projeto_estudo_id)` com `ON DELETE RESTRICT`.
 - `uq_atendimento_projeto UNIQUE(atendimento_id, projeto_estudo_id)`.
 - Índices em `atendimento_id` e `projeto_estudo_id`.
+
+Limite conhecido: esta associação pertence ao atendimento, enquanto a decisão do
+MVP exige uma relação consolidada por paciente. A futura tabela
+`paciente_projeto_estudo` está definida em
+`docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`. Ela ainda não integra o
+schema físico de 33 tabelas. A tabela atual permanecerá intacta como associação
+legada/contextual, sem backfill ou remoção automática.
 
 ### `diagnostico_chagas`
 
@@ -742,7 +752,9 @@ Finalidade: associação genérica N:N entre linhas e registros estruturados.
 - `docs/dicionario-dados.md` está vazio.
 - `docs/decisoes-modelagem.md` está vazio.
 - Não há modelo lógico anterior preenchido no repositório para comparação detalhada.
-- A comparação com a planilha completa será feita em fases posteriores, considerando que o núcleo atual não pretende cobrir integralmente as 140 colunas.
+- A comparação com a planilha completa será feita em fases posteriores,
+  considerando que o núcleo atual não pretende cobrir integralmente os 136
+  cabeçalhos canônicos das duas abas clínicas.
 
 ## Pendências de Validação
 
@@ -754,4 +766,5 @@ Finalidade: associação genérica N:N entre linhas e registros estruturados.
 
 1. Manter o importador bloqueado até existir manifesto físico seguro e regras operacionais.
 2. Definir política de retenção e auditoria da associação genérica antes de dados reais.
-3. Especificar a próxima extensão clínica a partir das lacunas de cobertura.
+3. Implementar futuramente a associação paciente–projeto já especificada e
+   especificar as demais extensões mínimas a partir das lacunas de cobertura.

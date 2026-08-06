@@ -1,6 +1,6 @@
 # Registro de Alterações
 
-Atualizado em: 2026-07-20
+Atualizado em: 2026-08-06
 
 ## Como Registrar Mudanças
 
@@ -25,6 +25,99 @@ Além deste arquivo, atualize quando necessário:
 - `docs/HISTORICO_DE_IMPLEMENTACAO.md`
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
+
+## 2026-08-06 - Especificação da associação paciente–projeto
+
+Data: 2026-08-06
+
+Título da alteração: Especificação física da associação consolidada entre
+paciente e projeto.
+
+Motivo: fechar nome, cardinalidades, campos, constraints, proveniência e transição
+da primeira migration mínima do MVP sem alterar o schema aplicado.
+
+Arquivos criados ou modificados:
+
+- `docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`
+- `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`
+- `docs/DECISOES_ARQUITETURAIS.md`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/MODELO_FISICO_ATUAL.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada, alterada ou aplicada.
+- A futura `paciente_projeto_estudo` foi especificada para migration incremental
+  posterior a `sql/12`.
+
+Impacto:
+
+- Definida associação única por paciente e projeto, com participação, pendência,
+  falha, valores originais e proveniência por `importacao_registro`.
+- `atendimento_projeto_estudo` permanece intacta como associação
+  legada/contextual, sem backfill ou remoção no MVP.
+- A especificação está pronta para orientar migration e teste SQL sintético; as
+  pendências restantes pertencem ao importador ou ao backlog.
+- Corrigidas inconsistências sobre testes SQL, 136 cabeçalhos canônicos, status
+  das ADRs implementadas e ordem cronológica do registro do novo layout.
+
+Validação executada:
+
+- `make docs-check` passou;
+- `git diff --check` passou;
+- `pg_isready -h localhost -p 5432 -d ambulatorio_santa_casa` retornou
+  `no response`; por isso `make project-check` não foi executado e as etapas de
+  banco permanecem sem revalidação nesta tarefa.
+
+## 2026-07-20 - Análise de impacto do novo layout canônico
+
+Data: 2026-07-20
+
+Título da alteração: Análise de impacto do novo layout canônico da planilha.
+
+Motivo: substituir o catálogo documental inferido pelos metadados físicos da nova
+fonte canônica local e recalcular a cobertura do schema atual.
+
+Arquivos modificados:
+
+- `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md`
+- `docs/METADADOS_SEGUROS_LAYOUT_PLANILHA.md`
+- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`
+- `docs/PROXIMOS_PASSOS.md`
+- `docs/REGISTRO_DE_ALTERACOES.md`
+
+Migrations envolvidas:
+
+- Nenhuma migration criada ou alterada.
+
+Tabelas e colunas afetadas:
+
+- Nenhuma estrutura física alterada.
+- A cobertura documental passa a usar 136 rótulos distintos das duas abas
+  principais: 110 plenamente cobertos, 12 parciais, 1 não coberto e 13 dúvidas.
+
+Impacto no sistema:
+
+- Sem impacto no banco ou nos testes SQL.
+- O planejamento passa a exigir mapeamento distinto por aba, posição e ocorrência.
+- Abas operacional e auxiliares permanecem bloqueadas para importação até
+  confirmação humana.
+
+Como testar:
+
+- Confirmar o `.xlsx` com `git check-ignore -v`.
+- Executar `make project-check`.
+- Revisar `git diff --check` e `git status --short`.
+
+Pendências ou riscos:
+
+- PostgreSQL local precisa estar disponível para concluir as etapas de banco do
+  `make project-check`.
+- Resolver os aliases, cabeçalhos ambíguos, tipos, unidades e papéis das abas
+  auxiliares antes do importador ou de novas migrations.
 
 ## 2026-07-20 - Consolidação das decisões humanas do MVP
 
@@ -867,50 +960,3 @@ Pendências ou riscos:
 - `README.md` permanece vazio e deve ser preenchido em tarefa futura.
 - CI e hooks de validação ainda não foram configurados.
 - Comandos que acessam PostgreSQL dependem de ambiente local configurado.
-## 2026-07-20 - Análise de impacto do novo layout canônico
-
-Data: 2026-07-20
-
-Título da alteração: Análise de impacto do novo layout canônico da planilha.
-
-Motivo: substituir o catálogo documental inferido pelos metadados físicos da nova
-fonte canônica local e recalcular a cobertura do schema atual.
-
-Arquivos modificados:
-
-- `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md`
-- `docs/METADADOS_SEGUROS_LAYOUT_PLANILHA.md`
-- `docs/COBERTURA_COLUNAS_PLANILHA.md`
-- `docs/ESTADO_ATUAL_DO_PROJETO.md`
-- `docs/PROXIMOS_PASSOS.md`
-- `docs/REGISTRO_DE_ALTERACOES.md`
-
-Migrations envolvidas:
-
-- Nenhuma migration criada ou alterada.
-
-Tabelas e colunas afetadas:
-
-- Nenhuma estrutura física alterada.
-- A cobertura documental passa a usar 136 rótulos distintos das duas abas
-  principais: 110 plenamente cobertos, 12 parciais, 1 não coberto e 13 dúvidas.
-
-Impacto no sistema:
-
-- Sem impacto no banco ou nos testes SQL.
-- O planejamento passa a exigir mapeamento distinto por aba, posição e ocorrência.
-- Abas operacional e auxiliares permanecem bloqueadas para importação até
-  confirmação humana.
-
-Como testar:
-
-- Confirmar o `.xlsx` com `git check-ignore -v`.
-- Executar `make project-check`.
-- Revisar `git diff --check` e `git status --short`.
-
-Pendências ou riscos:
-
-- PostgreSQL local precisa estar disponível para concluir as etapas de banco do
-  `make project-check`.
-- Resolver os aliases, cabeçalhos ambíguos, tipos, unidades e papéis das abas
-  auxiliares antes do importador ou de novas migrations.

@@ -1,12 +1,15 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-07-20
+Atualizado em: 2026-08-06
 
 ## Objetivo Geral
 
 O projeto `ambulatorio-santa-casa` define a base de dados PostgreSQL para organizar registros de pacientes, atendimentos ambulatoriais, diagnóstico de doença de Chagas, sorologias, condições clínicas, comorbidades, exames complementares, encaminhamentos, acompanhamentos, medicamentos, tratamentos e procedimentos clínicos.
 
-Até o momento, o repositório contém scripts SQL de criação de banco, schema, tabelas, índices, restrições e alguns dados iniciais de catálogo. Não há backend, frontend, scripts de importação, testes automatizados ou aplicação executável versionados.
+Até o momento, o repositório contém scripts SQL de criação de banco, schema,
+tabelas, índices, restrições, dados iniciais de catálogo e quatro testes SQL
+transacionais reutilizáveis. Não há backend, frontend, scripts de importação,
+suíte automatizada da aplicação, CI ou aplicação executável versionados.
 
 ## Stack e Tecnologias Usadas
 
@@ -32,6 +35,9 @@ Até o momento, o repositório contém scripts SQL de criação de banco, schema
 - A nova fonte canônica de layout é o arquivo local e ignorado pelo Git `planejamento/Nova Planilha ambulatório.xlsx`; a análise usou somente metadados seguros.
 - As duas abas clínicas principais possuem 136 rótulos semânticos distintos. Após as decisões humanas e a reavaliação de cardinalidades, a cobertura atual está em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 88 estão plenamente cobertos, 46 parcialmente cobertos, 1 não coberto e 1 permanece semanticamente desconhecido.
 - As decisões semânticas e a rota até o MVP estão consolidadas em `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`.
+- A associação canônica entre paciente e projeto está especificada em
+  `docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md` e pronta para orientar uma
+  futura migration incremental; nenhuma estrutura física foi criada nesta etapa.
 - O impacto físico e de planejamento do novo layout está documentado em `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md`; nenhuma migration, tabela ou teste SQL foi alterado.
 - O módulo de avaliação clínica foi aplicado pela migration incremental `sql/10_modulo_avaliacao_clinica.sql`; as quatro novas tabelas e suas constraints constam no banco local e na evidência física.
 - O módulo de notificação foi aplicado pela migration incremental `sql/11_modulo_notificacao.sql`; a tabela e suas constraints constam no banco local e na evidência física.
@@ -161,7 +167,8 @@ Resumo da reconciliação:
 - Frontend React.
 - Autenticação, autorização e perfis de usuário.
 - Regras de negócio de cadastro, atendimento, diagnóstico e acompanhamento.
-- Testes automatizados.
+- Suíte automatizada da futura aplicação e integração em CI; os quatro testes SQL
+  transacionais atuais continuam sendo a validação do banco.
 - Rotinas adicionais de teste para futuras fases incrementais do modelo físico.
 - Estratégia de deploy, backup e observabilidade.
 - Documentação operacional de execução dos scripts e restauração de ambiente.
@@ -169,7 +176,9 @@ Resumo da reconciliação:
 
 ## Próximos Passos Recomendados
 
-1. Especificar as migrations incrementais mínimas de projetos por paciente, exames por paciente, tratamento/reação adversa e encaminhamento/projeto.
+1. Implementar futuramente a associação paciente–projeto já especificada e
+   especificar as migrations mínimas de exames por paciente,
+   tratamento/reação adversa e encaminhamento/projeto.
 2. Formalizar o manifesto das duas abas clínicas com aliases, blocos, posições, ocorrências, conversões e regras de vazio.
 3. Resolver os bloqueios operacionais e de segurança antes de usar dados reais.
 
