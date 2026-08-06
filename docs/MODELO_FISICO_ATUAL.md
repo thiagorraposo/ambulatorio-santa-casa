@@ -4,11 +4,11 @@ Atualizado em: 2026-08-06
 
 Este documento descreve a estrutura física real aplicada no schema `ambulatorio`, usando como fonte principal o dump `docs/evidencias/schema_atual_ambulatorio.sql`. Os scripts em `sql/` foram usados como fonte de reconciliação.
 
-O schema físico aplicado possui 33 tabelas. Todas as tabelas encontradas no dump existem nas migrations versionadas, e nenhuma tabela das migrations ficou ausente da evidência analisada.
+O schema físico aplicado possui 34 tabelas. Todas as tabelas encontradas no dump existem nas migrations versionadas, e nenhuma tabela das migrations ficou ausente da evidência analisada.
 
 ## Estratégia de Construção por Fases
 
-O modelo físico atual reúne as 25 tabelas do núcleo funcional inicial, as quatro tabelas do módulo de avaliação clínica, a tabela de notificação e as três tabelas de importação e proveniência. Ainda não representa a cobertura completa e final da planilha original.
+O modelo físico atual reúne as 25 tabelas do núcleo funcional inicial, as quatro tabelas do módulo de avaliação clínica, a tabela de notificação, as três tabelas de importação e proveniência e a associação consolidada paciente–projeto. Ainda não representa a cobertura completa e final da planilha original.
 
 As demais tabelas previstas serão implementadas posteriormente por migrations incrementais. A ausência temporária dessas estruturas não representa falha, lacuna involuntária ou divergência crítica em relação ao plano do projeto.
 
@@ -52,6 +52,7 @@ planilha.
 | `obito` | Sim | `sql/10_modulo_avaliacao_clinica.sql` | Banco e migration |
 | `notificacao` | Sim | `sql/11_modulo_notificacao.sql` | Banco e migration |
 | `paciente` | Sim | `sql/02_tabelas_paciente.sql` | Banco e migration |
+| `paciente_projeto_estudo` | Sim | `sql/13_associacao_paciente_projeto.sql` | Banco e migration |
 | `paciente_comorbidade` | Sim | `sql/06_tabelas_condicoes_comorbidades.sql` | Banco e migration |
 | `paciente_contato` | Sim | `sql/02_tabelas_paciente.sql` | Banco e migration |
 | `paciente_endereco` | Sim | `sql/02_tabelas_paciente.sql` | Banco e migration |
@@ -202,12 +203,34 @@ Restrições e índices:
 - `uq_atendimento_projeto UNIQUE(atendimento_id, projeto_estudo_id)`.
 - Índices em `atendimento_id` e `projeto_estudo_id`.
 
-Limite conhecido: esta associação pertence ao atendimento, enquanto a decisão do
-MVP exige uma relação consolidada por paciente. A futura tabela
-`paciente_projeto_estudo` está definida em
-`docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`. Ela ainda não integra o
-schema físico de 33 tabelas. A tabela atual permanecerá intacta como associação
-legada/contextual, sem backfill ou remoção automática.
+Esta associação permanece intacta como vínculo legado/contextual por atendimento.
+Não houve backfill, remoção ou migração silenciosa para a associação consolidada
+por paciente.
+
+### `paciente_projeto_estudo`
+
+Finalidade: estado consolidado da relação entre paciente e projeto oficial,
+independente de atendimento.
+
+Campos principais:
+
+- `paciente_projeto_estudo_id BIGSERIAL` PK.
+- `paciente_id BIGINT NOT NULL` FK.
+- `projeto_estudo_id BIGINT NOT NULL` FK.
+- booleanos anuláveis `participa`, `possui_pendencia` e `houve_falha`.
+- descrições de pendência e falha, três valores originais e `observacoes`.
+- `criado_em` e `atualizado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP`.
+
+Restrições e índices:
+
+- FK `fk_paciente_projeto_paciente` com `ON DELETE CASCADE`.
+- FK `fk_paciente_projeto_projeto` com `ON DELETE RESTRICT`.
+- `uq_paciente_projeto UNIQUE (paciente_id, projeto_estudo_id)`.
+- índice `idx_paciente_projeto_projeto_id` em `projeto_estudo_id`.
+
+A tabela não possui FK para atendimento ou linha de importação. A proveniência
+reutiliza `importacao_registro`, permitindo várias linhas apontarem para a mesma
+associação consolidada.
 
 ### `diagnostico_chagas`
 

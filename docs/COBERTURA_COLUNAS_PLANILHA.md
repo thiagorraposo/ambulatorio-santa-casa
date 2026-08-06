@@ -5,7 +5,7 @@ Atualizado em: 2026-07-20
 ## Fonte e critério
 
 A cobertura usa os 136 rótulos distintos das duas abas clínicas e o schema físico
-atual de 33 tabelas. As decisões humanas consolidadas em
+atual de 34 tabelas. As decisões humanas consolidadas em
 `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md` resolvem semânticas, mas não contam como
 cobertura física quando a cardinalidade ou obrigatoriedade do banco é incompatível.
 
@@ -22,13 +22,13 @@ cobertura física quando a cardinalidade ou obrigatoriedade do banco é incompat
 | Classificação | Quantidade | Percentual |
 | --- | ---: | ---: |
 | Coberta diretamente | 6 | 4,41% |
-| Coberta com transformação | 82 | 60,29% |
-| Parcialmente coberta | 46 | 33,82% |
+| Coberta com transformação | 97 | 71,32% |
+| Parcialmente coberta | 31 | 22,79% |
 | Não coberta | 1 | 0,74% |
 | Dúvida pendente | 1 | 0,74% |
 | Total | 136 | 100,00% |
 
-Cobertura plena atual: **88/136 (64,71%)**. Incluindo cobertura parcial:
+Cobertura plena atual: **103/136 (75,74%)**. Incluindo cobertura parcial:
 **134/136 (98,53%)**.
 
 A queda da cobertura plena não representa perda do schema. Ela decorre de decisões
@@ -57,14 +57,15 @@ Continuam como dúvida:
 - `Localizado`: o domínio sim/não foi confirmado, mas não o significado nem a
   entidade. Não será estruturado no MVP sem nova decisão.
 
-## Grupos parcialmente cobertos (46)
+## Impacto da associação paciente–projeto
 
-### Projetos — 15
+Os 15 cabeçalhos de participação, pendência e falha dos projetos passaram de
+cobertura parcial para cobertura com transformação. A tabela
+`paciente_projeto_estudo` representa o vínculo consolidado por paciente, preserva
+os valores originais e registra falhas em BenBrasil e EPOCA sem criar projetos
+adicionais.
 
-Os cabeçalhos de participação, pendência e falha dos projetos podem ser guardados,
-mas `atendimento_projeto_estudo` vincula o projeto ao atendimento. A decisão exige
-vínculo ao paciente. A futura associação deverá preservar `houve_falha` sem
-confundir BenBrasil e EPOCA.
+## Grupos parcialmente cobertos (31)
 
 ### Exames — 21
 
@@ -95,7 +96,7 @@ em dias. A coluna deve ser coberta por migration incremental antes do MVP.
 
 ## Cobertura projetada após migrations mínimas
 
-As migrations de paciente–projeto, exame por paciente, tratamento/reação adversa
-e encaminhamento eliminam as lacunas estruturais prioritárias. A cobertura exata
+As migrations de exame por paciente, tratamento/reação adversa e encaminhamento
+eliminarão as lacunas estruturais prioritárias restantes. A cobertura exata
 pós-migration deverá ser recalculada a partir das especificações aprovadas, sem
 promover antecipadamente itens de backlog ou `Localizado`.

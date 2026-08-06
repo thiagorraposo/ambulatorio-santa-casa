@@ -4,15 +4,15 @@ Atualizado em: 2026-08-06
 
 ## Objetivo e escopo
 
-Este documento especifica a próxima associação incremental entre pacientes e o
-catálogo existente de projetos. É a fonte de verdade para a futura migration
+Este documento especifica a associação incremental entre pacientes e o
+catálogo existente de projetos. É a fonte de verdade para a migration
 desse vínculo. As decisões semânticas permanecem em
 `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`, e o schema aplicado continua descrito
 em `docs/MODELO_FISICO_ATUAL.md` e evidenciado por
 `docs/evidencias/schema_atual_ambulatorio.sql`.
 
-Nenhuma tabela, migration ou teste SQL é criado ou alterado por esta
-especificação.
+A estrutura foi implementada por `sql/13_associacao_paciente_projeto.sql` e
+validada por `tests/sql/05_validar_associacao_paciente_projeto.sql`.
 
 ## Decisão estrutural
 
@@ -136,7 +136,7 @@ atendimento; a nova tabela representa a relação canônica por paciente.
 
 Regras de transição:
 
-1. a futura migration somente cria `paciente_projeto_estudo`, suas constraints e
+1. a migration cria somente `paciente_projeto_estudo`, suas constraints e
    seu índice; não altera nem remove a associação antiga;
 2. não haverá backfill automático a partir de `atendimento_projeto_estudo`, pois
    múltiplos atendimentos podem conter estados divergentes e a conversão exige
@@ -152,7 +152,7 @@ Regras de transição:
    migration incremental. A migration desta especificação não autoriza essas
    ações.
 
-## Cenários do futuro teste SQL
+## Cenários do teste SQL
 
 O teste deverá usar dados sintéticos, `BEGIN` e `ROLLBACK`, e validar:
 
@@ -209,11 +209,11 @@ Essas regras bloqueiam o importador real, mas não a criação da estrutura fís
 - índices adicionais orientados por métricas reais de uso;
 - fluxo das abas AIM3 e eventual relação com participação em projetos.
 
-## Prontidão e validação prevista
+## Implementação e validação
 
-Status: **especificação pronta para migration incremental**.
+Status: **implementada e validada**.
 
-A implementação futura deverá criar uma nova migration posterior a `sql/12`, sem
-editar migrations aplicadas, e um novo teste SQL transacional. Depois da aplicação
-controlada, a evidência estrutural e a documentação do modelo físico deverão ser
-atualizadas.
+`sql/13_associacao_paciente_projeto.sql` foi aplicada de forma controlada sem
+editar migrations anteriores. O teste transacional cobriu os 17 cenários, atingiu
+o `ROLLBACK` e confirmou ausência de dados sintéticos persistidos. A evidência
+estrutural e a documentação física foram atualizadas.

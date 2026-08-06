@@ -26,6 +26,41 @@ Além deste arquivo, atualize quando necessário:
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
 
+## 2026-08-06 - Implementação da associação paciente–projeto
+
+Data: 2026-08-06
+
+Título da alteração: Associação consolidada entre paciente e projeto oficial.
+
+Motivo: implementar a primeira extensão mínima do MVP conforme especificação
+aprovada, sem alterar ou migrar silenciosamente os vínculos por atendimento.
+
+Arquivos criados ou modificados:
+
+- `sql/13_associacao_paciente_projeto.sql`;
+- `tests/sql/05_validar_associacao_paciente_projeto.sql`;
+- `docs/VALIDACAO_ASSOCIACAO_PACIENTE_PROJETO.md`;
+- evidência estrutural, especificação e documentos de estado, modelo, cobertura,
+  próximos passos e README.
+
+Impacto:
+
+- adicionada `paciente_projeto_estudo`, elevando o schema de 33 para 34 tabelas;
+- adicionadas PK, FKs para paciente e projeto, unicidade do par e índice inverso;
+- os 15 cabeçalhos de projetos passaram de cobertura parcial para cobertura com
+  transformação, elevando a cobertura plena para 103/136 (75,74%);
+- `atendimento_projeto_estudo` permaneceu intacta, sem backfill ou remoção;
+- nenhuma regra do importador ou projeto adicional de falha foi criado.
+
+Validação executada:
+
+- migration aplicada com `ON_ERROR_STOP=1`;
+- teste isolado passou nos 17 cenários e confirmou o `ROLLBACK`;
+- ausência final de dados sintéticos confirmada;
+- assinatura estrutural de `atendimento_projeto_estudo` idêntica antes e depois;
+- `make db-schema-dump` atualizou somente a evidência estrutural;
+- `make project-check` e `git diff --check` passaram.
+
 ## 2026-08-06 - Especificação da associação paciente–projeto
 
 Data: 2026-08-06

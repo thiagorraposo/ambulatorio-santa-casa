@@ -19,16 +19,12 @@ A fonte detalhada das decisões é
 
 ## 1. Especificar migrations mínimas
 
-1. Associação paciente–projeto: especificação concluída em
-   `docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`; a futura migration deve
-   preservar participação, pendência, falha, valores originais e convivência com
-   a associação legada por atendimento.
-2. Exame com paciente obrigatório e atendimento opcional, mantendo múltiplas
+1. Exame com paciente obrigatório e atendimento opcional, mantendo múltiplas
    ocorrências e resultados textuais.
-3. Tratamento BZN por paciente, no máximo um, com duração cumprida em dias, ano
+2. Tratamento BZN por paciente, no máximo um, com duração cumprida em dias, ano
    aproximado, prescrição, tratamento pelo ambulatório e reações adversas
    detalhadas/repetíveis.
-4. Encaminhamento com documento apresentado e projeto oficial opcional.
+3. Encaminhamento com documento apresentado e projeto oficial opcional.
 
 As migrations serão incrementais e não devem alterar scripts já aplicados.
 

@@ -7,7 +7,7 @@ Atualizado em: 2026-08-06
 O projeto `ambulatorio-santa-casa` define a base de dados PostgreSQL para organizar registros de pacientes, atendimentos ambulatoriais, diagnóstico de doença de Chagas, sorologias, condições clínicas, comorbidades, exames complementares, encaminhamentos, acompanhamentos, medicamentos, tratamentos e procedimentos clínicos.
 
 Até o momento, o repositório contém scripts SQL de criação de banco, schema,
-tabelas, índices, restrições, dados iniciais de catálogo e quatro testes SQL
+tabelas, índices, restrições, dados iniciais de catálogo e cinco testes SQL
 transacionais reutilizáveis. Não há backend, frontend, scripts de importação,
 suíte automatizada da aplicação, CI ou aplicação executável versionados.
 
@@ -23,11 +23,11 @@ suíte automatizada da aplicação, CI ou aplicação executável versionados.
 
 ## Status Atual
 
-- Scripts SQL existentes de `sql/00_criar_banco.sql` a `sql/12_modulo_importacao_proveniencia.sql`.
+- Scripts SQL existentes de `sql/00_criar_banco.sql` a `sql/13_associacao_paciente_projeto.sql`.
 - README e documentos antigos `docs/dicionario-dados.md` e `docs/decisoes-modelagem.md` existem, mas estão vazios.
 - A estrutura física real aplicada no PostgreSQL foi validada por evidência versionada em `docs/evidencias/schema_atual_ambulatorio.sql`.
-- O dump foi atualizado em 2026-07-19 e contém o schema `ambulatorio` com 33 tabelas aplicadas.
-- As 33 tabelas físicas encontradas também estão cobertas pelos scripts SQL em `sql/`.
+- O dump foi atualizado em 2026-08-06 e contém o schema `ambulatorio` com 34 tabelas aplicadas.
+- As 34 tabelas físicas encontradas também estão cobertas pelos scripts SQL em `sql/`.
 - Não foi encontrada tabela física sem migration correspondente, nem tabela em migration ausente do dump analisado.
 - Existe uma rotina reutilizável de validação com dados de teste em `tests/sql/01_validar_nucleo_inicial.sql`.
 - A rotina de validação usa transação com `ROLLBACK`, não altera a estrutura física do banco e não deixa dados de teste persistidos quando executada com sucesso.
@@ -35,14 +35,14 @@ suíte automatizada da aplicação, CI ou aplicação executável versionados.
 - A nova fonte canônica de layout é o arquivo local e ignorado pelo Git `planejamento/Nova Planilha ambulatório.xlsx`; a análise usou somente metadados seguros.
 - As duas abas clínicas principais possuem 136 rótulos semânticos distintos. Após as decisões humanas e a reavaliação de cardinalidades, a cobertura atual está em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 88 estão plenamente cobertos, 46 parcialmente cobertos, 1 não coberto e 1 permanece semanticamente desconhecido.
 - As decisões semânticas e a rota até o MVP estão consolidadas em `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`.
-- A associação canônica entre paciente e projeto está especificada em
-  `docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md` e pronta para orientar uma
-  futura migration incremental; nenhuma estrutura física foi criada nesta etapa.
+- A associação canônica entre paciente e projeto foi aplicada por
+  `sql/13_associacao_paciente_projeto.sql` e validada nos 17 cenários definidos em
+  `docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`.
 - O impacto físico e de planejamento do novo layout está documentado em `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md`; nenhuma migration, tabela ou teste SQL foi alterado.
 - O módulo de avaliação clínica foi aplicado pela migration incremental `sql/10_modulo_avaliacao_clinica.sql`; as quatro novas tabelas e suas constraints constam no banco local e na evidência física.
 - O módulo de notificação foi aplicado pela migration incremental `sql/11_modulo_notificacao.sql`; a tabela e suas constraints constam no banco local e na evidência física.
 - O módulo de importação e proveniência foi aplicado pela migration incremental `sql/12_modulo_importacao_proveniencia.sql`; as três tabelas e suas constraints constam no banco local e na evidência física.
-- Os quatro testes SQL passaram no banco local em 2026-07-19. Todos executaram `ROLLBACK`, e consulta independente confirmou ausência de dados sintéticos persistidos.
+- Os cinco testes SQL passaram no banco local em 2026-08-06. Todos executaram `ROLLBACK`, e consulta independente confirmou ausência de dados sintéticos persistidos.
 - O projeto possui orientações permanentes para Codex em `AGENTS.md`, `sql/AGENTS.md`, `tests/AGENTS.md` e `docs/AGENTS.md`.
 - Decisões arquiteturais duradouras são registradas em `docs/DECISOES_ARQUITETURAIS.md`.
 - O workflow oficial está documentado em `docs/WORKFLOW_DE_DESENVOLVIMENTO.md`.
@@ -51,7 +51,7 @@ suíte automatizada da aplicação, CI ou aplicação executável versionados.
 
 ## Estratégia de Implementação Incremental
 
-O modelo físico está sendo construído por fases. As 25 tabelas do núcleo funcional inicial foram expandidas pelas quatro tabelas do módulo de avaliação clínica, pela tabela de notificação e pelas três tabelas de importação e proveniência, totalizando 33 tabelas validadas.
+O modelo físico está sendo construído por fases. As 25 tabelas do núcleo funcional inicial foram expandidas pelas quatro tabelas do módulo de avaliação clínica, pela tabela de notificação, pelas três tabelas de importação e proveniência e pela associação paciente–projeto, totalizando 34 tabelas validadas.
 
 A ausência temporária das demais tabelas planejadas não deve ser tratada como falha, lacuna involuntária ou divergência crítica. As demais estruturas previstas serão implementadas posteriormente por migrations incrementais.
 
@@ -61,7 +61,7 @@ O objetivo da fase atual é validar funcionamento, integridade referencial, rest
 
 ## Tabelas Atualmente Existentes no Banco
 
-O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulatorio.sql`, possui atualmente 33 tabelas:
+O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulatorio.sql`, possui atualmente 34 tabelas:
 
 1. `paciente`
 2. `paciente_endereco`
@@ -96,6 +96,7 @@ O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulator
 31. `importacao_lote`
 32. `importacao_linha`
 33. `importacao_registro`
+34. `paciente_projeto_estudo`
 
 ## Cobertura Banco x Migrations
 
@@ -123,6 +124,7 @@ O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulator
 | `obito` | Existe no banco e nas migrations |
 | `notificacao` | Existe no banco e nas migrations |
 | `paciente` | Existe no banco e nas migrations |
+| `paciente_projeto_estudo` | Existe no banco e nas migrations |
 | `paciente_comorbidade` | Existe no banco e nas migrations |
 | `paciente_contato` | Existe no banco e nas migrations |
 | `paciente_endereco` | Existe no banco e nas migrations |
@@ -137,7 +139,7 @@ O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulator
 
 Resumo da reconciliação:
 
-- Tabelas existentes tanto no banco quanto nas migrations: 33.
+- Tabelas existentes tanto no banco quanto nas migrations: 34.
 - Tabelas existentes no banco mas não cobertas pelas migrations: nenhuma identificada.
 - Tabelas existentes nas migrations mas ausentes no banco: nenhuma identificada.
 
@@ -155,6 +157,7 @@ Resumo da reconciliação:
 - Avaliação clínica por atendimento, eventos clínicos, dispositivos implantados e óbito, aplicada e validada no banco local.
 - Notificação consolidada por paciente, aplicada e validada no banco local.
 - Importação e proveniência com lote, linha bruta e associação genérica N:N, aplicada e validada no banco local; nenhum importador foi implementado.
+- Associação consolidada paciente–projeto, independente de atendimento e com convivência preservada da associação antiga.
 
 ## Módulos Ainda Pendentes
 
@@ -167,7 +170,7 @@ Resumo da reconciliação:
 - Frontend React.
 - Autenticação, autorização e perfis de usuário.
 - Regras de negócio de cadastro, atendimento, diagnóstico e acompanhamento.
-- Suíte automatizada da futura aplicação e integração em CI; os quatro testes SQL
+- Suíte automatizada da futura aplicação e integração em CI; os cinco testes SQL
   transacionais atuais continuam sendo a validação do banco.
 - Rotinas adicionais de teste para futuras fases incrementais do modelo físico.
 - Estratégia de deploy, backup e observabilidade.
@@ -176,9 +179,8 @@ Resumo da reconciliação:
 
 ## Próximos Passos Recomendados
 
-1. Implementar futuramente a associação paciente–projeto já especificada e
-   especificar as migrations mínimas de exames por paciente,
-   tratamento/reação adversa e encaminhamento/projeto.
+1. Especificar e implementar as migrations mínimas restantes de exames por
+   paciente, tratamento/reação adversa e encaminhamento/projeto.
 2. Formalizar o manifesto das duas abas clínicas com aliases, blocos, posições, ocorrências, conversões e regras de vazio.
 3. Resolver os bloqueios operacionais e de segurança antes de usar dados reais.
 

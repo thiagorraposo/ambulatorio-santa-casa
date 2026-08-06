@@ -2193,6 +2193,82 @@ ALTER SEQUENCE ambulatorio.paciente_paciente_id_seq OWNED BY ambulatorio.pacient
 
 
 --
+-- Name: paciente_projeto_estudo; Type: TABLE; Schema: ambulatorio; Owner: -
+--
+
+CREATE TABLE ambulatorio.paciente_projeto_estudo (
+    paciente_projeto_estudo_id bigint NOT NULL,
+    paciente_id bigint NOT NULL,
+    projeto_estudo_id bigint NOT NULL,
+    participa boolean,
+    possui_pendencia boolean,
+    descricao_pendencia text,
+    houve_falha boolean,
+    descricao_falha text,
+    valor_original_participacao text,
+    valor_original_pendencia text,
+    valor_original_falha text,
+    observacoes text,
+    criado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    atualizado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: TABLE paciente_projeto_estudo; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON TABLE ambulatorio.paciente_projeto_estudo IS 'Estado consolidado da relacao entre paciente e projeto oficial, independente de atendimento.';
+
+
+--
+-- Name: COLUMN paciente_projeto_estudo.participa; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.paciente_projeto_estudo.participa IS 'Estado triestado de participacao: verdadeiro, falso ou nao informado.';
+
+
+--
+-- Name: COLUMN paciente_projeto_estudo.possui_pendencia; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.paciente_projeto_estudo.possui_pendencia IS 'Estado triestado de pendencia: verdadeiro, falso ou nao informado.';
+
+
+--
+-- Name: COLUMN paciente_projeto_estudo.houve_falha; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.paciente_projeto_estudo.houve_falha IS 'Estado triestado de falha no projeto principal: verdadeiro, falso ou nao informado.';
+
+
+--
+-- Name: COLUMN paciente_projeto_estudo.atualizado_em; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.paciente_projeto_estudo.atualizado_em IS 'Timestamp de processamento atualizado explicitamente pela aplicacao ou importador.';
+
+
+--
+-- Name: paciente_projeto_estudo_paciente_projeto_estudo_id_seq; Type: SEQUENCE; Schema: ambulatorio; Owner: -
+--
+
+CREATE SEQUENCE ambulatorio.paciente_projeto_estudo_paciente_projeto_estudo_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: paciente_projeto_estudo_paciente_projeto_estudo_id_seq; Type: SEQUENCE OWNED BY; Schema: ambulatorio; Owner: -
+--
+
+ALTER SEQUENCE ambulatorio.paciente_projeto_estudo_paciente_projeto_estudo_id_seq OWNED BY ambulatorio.paciente_projeto_estudo.paciente_projeto_estudo_id;
+
+
+--
 -- Name: pendencia_atendimento; Type: TABLE; Schema: ambulatorio; Owner: -
 --
 
@@ -3107,6 +3183,13 @@ ALTER TABLE ONLY ambulatorio.paciente_endereco ALTER COLUMN endereco_id SET DEFA
 
 
 --
+-- Name: paciente_projeto_estudo paciente_projeto_estudo_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.paciente_projeto_estudo ALTER COLUMN paciente_projeto_estudo_id SET DEFAULT nextval('ambulatorio.paciente_projeto_estudo_paciente_projeto_estudo_id_seq'::regclass);
+
+
+--
 -- Name: pendencia_atendimento pendencia_atendimento_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
 --
 
@@ -3363,6 +3446,14 @@ ALTER TABLE ONLY ambulatorio.paciente
 
 
 --
+-- Name: paciente_projeto_estudo paciente_projeto_estudo_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.paciente_projeto_estudo
+    ADD CONSTRAINT paciente_projeto_estudo_pkey PRIMARY KEY (paciente_projeto_estudo_id);
+
+
+--
 -- Name: pendencia_atendimento pendencia_atendimento_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
 --
 
@@ -3544,6 +3635,14 @@ ALTER TABLE ONLY ambulatorio.obito
 
 ALTER TABLE ONLY ambulatorio.paciente_comorbidade
     ADD CONSTRAINT uq_paciente_comorbidade UNIQUE (paciente_id, comorbidade_id);
+
+
+--
+-- Name: paciente_projeto_estudo uq_paciente_projeto; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.paciente_projeto_estudo
+    ADD CONSTRAINT uq_paciente_projeto UNIQUE (paciente_id, projeto_estudo_id);
 
 
 --
@@ -3828,6 +3927,13 @@ CREATE INDEX idx_paciente_comorbidade_comorbidade_id ON ambulatorio.paciente_com
 --
 
 CREATE INDEX idx_paciente_comorbidade_paciente_id ON ambulatorio.paciente_comorbidade USING btree (paciente_id);
+
+
+--
+-- Name: idx_paciente_projeto_projeto_id; Type: INDEX; Schema: ambulatorio; Owner: -
+--
+
+CREATE INDEX idx_paciente_projeto_projeto_id ON ambulatorio.paciente_projeto_estudo USING btree (projeto_estudo_id);
 
 
 --
@@ -4137,6 +4243,22 @@ ALTER TABLE ONLY ambulatorio.paciente_contato
 
 ALTER TABLE ONLY ambulatorio.paciente_endereco
     ADD CONSTRAINT fk_paciente_endereco_paciente FOREIGN KEY (paciente_id) REFERENCES ambulatorio.paciente(paciente_id) ON DELETE CASCADE;
+
+
+--
+-- Name: paciente_projeto_estudo fk_paciente_projeto_paciente; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.paciente_projeto_estudo
+    ADD CONSTRAINT fk_paciente_projeto_paciente FOREIGN KEY (paciente_id) REFERENCES ambulatorio.paciente(paciente_id) ON DELETE CASCADE;
+
+
+--
+-- Name: paciente_projeto_estudo fk_paciente_projeto_projeto; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.paciente_projeto_estudo
+    ADD CONSTRAINT fk_paciente_projeto_projeto FOREIGN KEY (projeto_estudo_id) REFERENCES ambulatorio.projeto_estudo(projeto_estudo_id) ON DELETE RESTRICT;
 
 
 --
