@@ -4,11 +4,11 @@ Atualizado em: 2026-08-06
 
 Este documento descreve a estrutura física real aplicada no schema `ambulatorio`, usando como fonte principal o dump `docs/evidencias/schema_atual_ambulatorio.sql`. Os scripts em `sql/` foram usados como fonte de reconciliação.
 
-O schema físico aplicado possui 34 tabelas. Todas as tabelas encontradas no dump existem nas migrations versionadas, e nenhuma tabela das migrations ficou ausente da evidência analisada.
+O schema físico aplicado possui 35 tabelas. Todas as tabelas encontradas no dump existem nas migrations versionadas, e nenhuma tabela das migrations ficou ausente da evidência analisada.
 
 ## Estratégia de Construção por Fases
 
-O modelo físico atual reúne as 25 tabelas do núcleo funcional inicial, as quatro tabelas do módulo de avaliação clínica, a tabela de notificação, as três tabelas de importação e proveniência e a associação consolidada paciente–projeto. Ainda não representa a cobertura completa e final da planilha original.
+O modelo físico atual reúne as 25 tabelas do núcleo funcional inicial, as quatro tabelas do módulo de avaliação clínica, a tabela de notificação, as três tabelas de importação e proveniência, a associação consolidada paciente–projeto e os exames canônicos por paciente. Ainda não representa a cobertura completa e final da planilha original.
 
 As demais tabelas previstas serão implementadas posteriormente por migrations incrementais. A ausência temporária dessas estruturas não representa falha, lacuna involuntária ou divergência crítica em relação ao plano do projeto.
 
@@ -52,6 +52,7 @@ planilha.
 | `obito` | Sim | `sql/10_modulo_avaliacao_clinica.sql` | Banco e migration |
 | `notificacao` | Sim | `sql/11_modulo_notificacao.sql` | Banco e migration |
 | `paciente` | Sim | `sql/02_tabelas_paciente.sql` | Banco e migration |
+| `paciente_exame_complementar` | Sim | `sql/14_exames_por_paciente.sql` | Banco e migration |
 | `paciente_projeto_estudo` | Sim | `sql/13_associacao_paciente_projeto.sql` | Banco e migration |
 | `paciente_comorbidade` | Sim | `sql/06_tabelas_condicoes_comorbidades.sql` | Banco e migration |
 | `paciente_contato` | Sim | `sql/02_tabelas_paciente.sql` | Banco e migration |
@@ -145,6 +146,8 @@ Campos:
 Restrições e índices:
 
 - FK `paciente_id` -> `paciente(paciente_id)` com `ON DELETE RESTRICT`.
+- `uq_atendimento_id_paciente UNIQUE (atendimento_id, paciente_id)`, chave de
+  suporte para vínculos opcionais que precisam confirmar o paciente.
 - `chk_atendimento_contexto_ambulatorio`: impede `ambulatorio_unicamente` e `ambulatorio_anexo_projeto` ambos verdadeiros.
 - `chk_atendimento_origem_registro`: permite `planilha_portador_dc`, `planilha_nao_portador_dc`, `cadastro_sistema`, `nao_informado` ou `NULL`.
 - Índices: `idx_atendimento_paciente_id`, `idx_atendimento_data_atendimento`.
@@ -431,6 +434,7 @@ Restrições:
 Dados iniciais:
 
 - Eletrocardiograma, ecocardiograma, Holter, teste ergométrico, radiografia de tórax, tomografia, ressonância, hemograma, creatinina, outro e não informado.
+- Tipos genéricos incrementais: laboratoriais, imagem, endoscopia, colonoscopia e MAPA.
 
 ### `atendimento_exame_complementar`
 
@@ -485,6 +489,38 @@ Restrições e índices:
 - FK `atendimento_exame_complementar_id` -> `atendimento_exame_complementar(atendimento_exame_complementar_id)` com `ON DELETE CASCADE`.
 - Check de `interpretacao`.
 - Índices em `atendimento_exame_complementar_id` e `nome_campo`.
+
+### `paciente_exame_complementar`
+
+Finalidade: ocorrências canônicas de exames pertencentes ao paciente,
+independentes do atendimento de digitação.
+
+Campos:
+
+- `paciente_exame_complementar_id BIGSERIAL` PK.
+- `paciente_id BIGINT NOT NULL` FK.
+- `atendimento_id BIGINT` FK opcional e composta com `paciente_id`.
+- `tipo_exame_complementar_id BIGINT NOT NULL` FK.
+- `bloco_origem VARCHAR(20) NOT NULL`.
+- `tipo_exame_original`, `resultado_texto`, `observacoes`,
+  `valor_original_resultado` e `valor_original_observacao` como textos anuláveis.
+- timestamps `criado_em`, `atualizado_em` não nulos com `CURRENT_TIMESTAMP`.
+
+Restrições e índices:
+
+- FK `fk_paciente_exame_paciente` com `ON DELETE CASCADE`.
+- FK composta `fk_paciente_exame_atendimento_paciente` para
+  `(atendimento_id, paciente_id)`, com
+  `ON DELETE SET NULL (atendimento_id)`; preserva `paciente_id`.
+- FK `fk_paciente_exame_tipo` com `ON DELETE RESTRICT`.
+- `chk_paciente_exame_bloco` permite somente `trazido` ou `solicitado`.
+- índices em paciente e tipo, e índice parcial em atendimento não nulo.
+- nenhuma unicidade por paciente, tipo, bloco ou atendimento; múltiplas
+  ocorrências do mesmo tipo são permitidas.
+
+Convivência: `atendimento_exame_complementar` e
+`exame_complementar_resultado` permanecem intactas como estruturas legadas, sem
+backfill, escrita dupla ou migração automática.
 
 ### `tipo_encaminhamento`
 

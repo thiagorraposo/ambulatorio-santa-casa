@@ -79,7 +79,7 @@ com participação, pendência, falha, textos originais e proveniência. A tabel
 atual não deve ser apagada nesta fase; sua transição e eventual obsolescência
 precisam ser especificadas. Classes 1, 2 e 3.
 
-A estrutura futura foi fechada em
+A estrutura foi implementada conforme
 `docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`: associação consolidada
 `paciente_projeto_estudo`, única por paciente e projeto, sem atendimento e sem
 alteração retroativa de `atendimento_projeto_estudo`. A especificação está pronta
@@ -119,7 +119,7 @@ pois múltiplas ocorrências são válidas. Classes 1, 2 e 3.
 
 A estrutura futura foi fechada em
 `docs/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`: nova tabela canônica
-`paciente_exame_complementar`, paciente obrigatório, atendimento opcional com
+`paciente_exame_complementar`, com paciente obrigatório, atendimento opcional com
 consistência por FK composta, bloco único `trazido` ou `solicitado`, resultado
 livre e preservação das tabelas legadas sem backfill. O manifesto e a
 reconciliação de reprocessamentos continuam como regras do futuro importador.
@@ -249,9 +249,10 @@ altera a cobertura de colunas, mas é bloqueio de implantação real.
 
 1. Aprovar este consolidado e declarar `Localizado` fora do mapeamento estruturado
    do MVP enquanto sua semântica não for definida.
-2. Especificar as quatro migrations incrementais: paciente–projeto; exames por
-   paciente; tratamento/reação adversa; encaminhamento/projeto.
-3. Implementar e validar essas migrations com dados sintéticos, sem alterar
+2. Especificar as migrations incrementais restantes de tratamento/reação adversa
+   e encaminhamento/projeto; paciente–projeto e exames por paciente já foram
+   implementados.
+3. Implementar e validar as migrations restantes com dados sintéticos, sem alterar
    migrations antigas.
 4. Formalizar manifesto versionado das duas abas clínicas, incluindo posição,
    ocorrência, bloco, tipo, aliases, conversões e regras de vazio.

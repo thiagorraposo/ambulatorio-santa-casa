@@ -26,6 +26,44 @@ Além deste arquivo, atualize quando necessário:
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
 
+## 2026-08-06 - Implementação dos exames por paciente
+
+Data: 2026-08-06
+
+Título da alteração: Exames canônicos por paciente com atendimento opcional.
+
+Motivo: implementar a segunda extensão mínima do MVP conforme especificação
+aprovada, preservando as estruturas legadas sem backfill ou escrita dupla.
+
+Arquivos criados ou modificados:
+
+- `sql/14_exames_por_paciente.sql`;
+- `tests/sql/06_validar_exames_por_paciente.sql`;
+- `docs/VALIDACAO_EXAMES_POR_PACIENTE.md`;
+- dump estrutural, especificação e documentos de estado, modelo, cobertura,
+  decisões, próximos passos e README.
+
+Impacto:
+
+- adicionada `paciente_exame_complementar`, elevando o schema de 34 para 35
+  tabelas;
+- adicionada `uq_atendimento_id_paciente` e FK composta com
+  `ON DELETE SET NULL (atendimento_id)`;
+- adicionados cinco tipos genéricos aprovados ao catálogo;
+- os 21 cabeçalhos de exames passaram de cobertura parcial para cobertura com
+  transformação, elevando a cobertura plena para 124/136 (91,18%);
+- tabelas legadas preservadas sem backfill, escrita dupla ou migração automática.
+
+Validação executada:
+
+- migration aplicada atomicamente com `ON_ERROR_STOP=1`;
+- teste isolado passou nos 22 cenários e confirmou o `ROLLBACK`;
+- ausência final de dados sintéticos confirmada;
+- assinaturas das duas tabelas legadas idênticas antes e depois;
+- constraints, ações de deleção e índices confirmados no catálogo;
+- `make db-schema-dump` atualizou somente a evidência estrutural;
+- `make project-check` e `git diff --check` passaram.
+
 ## 2026-08-06 - Especificação da evolução dos exames complementares
 
 Data: 2026-08-06

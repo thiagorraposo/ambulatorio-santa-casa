@@ -2174,6 +2174,95 @@ ALTER SEQUENCE ambulatorio.paciente_endereco_endereco_id_seq OWNED BY ambulatori
 
 
 --
+-- Name: paciente_exame_complementar; Type: TABLE; Schema: ambulatorio; Owner: -
+--
+
+CREATE TABLE ambulatorio.paciente_exame_complementar (
+    paciente_exame_complementar_id bigint NOT NULL,
+    paciente_id bigint NOT NULL,
+    atendimento_id bigint,
+    tipo_exame_complementar_id bigint NOT NULL,
+    bloco_origem character varying(20) NOT NULL,
+    tipo_exame_original text,
+    resultado_texto text,
+    observacoes text,
+    valor_original_resultado text,
+    valor_original_observacao text,
+    criado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    atualizado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT chk_paciente_exame_bloco CHECK (((bloco_origem)::text = ANY ((ARRAY['trazido'::character varying, 'solicitado'::character varying])::text[])))
+);
+
+
+--
+-- Name: TABLE paciente_exame_complementar; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON TABLE ambulatorio.paciente_exame_complementar IS 'Ocorrencias canonicas de exames complementares pertencentes ao paciente, com atendimento opcional.';
+
+
+--
+-- Name: COLUMN paciente_exame_complementar.paciente_id; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.paciente_exame_complementar.paciente_id IS 'Paciente ao qual a ocorrencia de exame pertence.';
+
+
+--
+-- Name: COLUMN paciente_exame_complementar.atendimento_id; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.paciente_exame_complementar.atendimento_id IS 'Atendimento clinico opcional; quando informado, deve pertencer ao mesmo paciente.';
+
+
+--
+-- Name: COLUMN paciente_exame_complementar.bloco_origem; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.paciente_exame_complementar.bloco_origem IS 'Bloco semantico da origem: trazido ou solicitado.';
+
+
+--
+-- Name: COLUMN paciente_exame_complementar.tipo_exame_original; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.paciente_exame_complementar.tipo_exame_original IS 'Rotulo ou tipo livre preservado, inclusive quando o catalogo usa o tipo outro.';
+
+
+--
+-- Name: COLUMN paciente_exame_complementar.resultado_texto; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.paciente_exame_complementar.resultado_texto IS 'Resultado livre sem interpretacao clinica automatica.';
+
+
+--
+-- Name: COLUMN paciente_exame_complementar.atualizado_em; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.paciente_exame_complementar.atualizado_em IS 'Timestamp de processamento atualizado explicitamente pela aplicacao ou importador.';
+
+
+--
+-- Name: paciente_exame_complementar_paciente_exame_complementar_id_seq; Type: SEQUENCE; Schema: ambulatorio; Owner: -
+--
+
+CREATE SEQUENCE ambulatorio.paciente_exame_complementar_paciente_exame_complementar_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: paciente_exame_complementar_paciente_exame_complementar_id_seq; Type: SEQUENCE OWNED BY; Schema: ambulatorio; Owner: -
+--
+
+ALTER SEQUENCE ambulatorio.paciente_exame_complementar_paciente_exame_complementar_id_seq OWNED BY ambulatorio.paciente_exame_complementar.paciente_exame_complementar_id;
+
+
+--
 -- Name: paciente_paciente_id_seq; Type: SEQUENCE; Schema: ambulatorio; Owner: -
 --
 
@@ -3183,6 +3272,13 @@ ALTER TABLE ONLY ambulatorio.paciente_endereco ALTER COLUMN endereco_id SET DEFA
 
 
 --
+-- Name: paciente_exame_complementar paciente_exame_complementar_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.paciente_exame_complementar ALTER COLUMN paciente_exame_complementar_id SET DEFAULT nextval('ambulatorio.paciente_exame_complementar_paciente_exame_complementar_id_seq'::regclass);
+
+
+--
 -- Name: paciente_projeto_estudo paciente_projeto_estudo_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
 --
 
@@ -3438,6 +3534,14 @@ ALTER TABLE ONLY ambulatorio.paciente_endereco
 
 
 --
+-- Name: paciente_exame_complementar paciente_exame_complementar_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.paciente_exame_complementar
+    ADD CONSTRAINT paciente_exame_complementar_pkey PRIMARY KEY (paciente_exame_complementar_id);
+
+
+--
 -- Name: paciente paciente_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
 --
 
@@ -3515,6 +3619,14 @@ ALTER TABLE ONLY ambulatorio.tipo_exame_complementar
 
 ALTER TABLE ONLY ambulatorio.tratamento_chagas
     ADD CONSTRAINT tratamento_chagas_pkey PRIMARY KEY (tratamento_chagas_id);
+
+
+--
+-- Name: atendimento uq_atendimento_id_paciente; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.atendimento
+    ADD CONSTRAINT uq_atendimento_id_paciente UNIQUE (atendimento_id, paciente_id);
 
 
 --
@@ -3930,6 +4042,27 @@ CREATE INDEX idx_paciente_comorbidade_paciente_id ON ambulatorio.paciente_comorb
 
 
 --
+-- Name: idx_paciente_exame_atendimento_id; Type: INDEX; Schema: ambulatorio; Owner: -
+--
+
+CREATE INDEX idx_paciente_exame_atendimento_id ON ambulatorio.paciente_exame_complementar USING btree (atendimento_id) WHERE (atendimento_id IS NOT NULL);
+
+
+--
+-- Name: idx_paciente_exame_paciente_id; Type: INDEX; Schema: ambulatorio; Owner: -
+--
+
+CREATE INDEX idx_paciente_exame_paciente_id ON ambulatorio.paciente_exame_complementar USING btree (paciente_id);
+
+
+--
+-- Name: idx_paciente_exame_tipo_id; Type: INDEX; Schema: ambulatorio; Owner: -
+--
+
+CREATE INDEX idx_paciente_exame_tipo_id ON ambulatorio.paciente_exame_complementar USING btree (tipo_exame_complementar_id);
+
+
+--
 -- Name: idx_paciente_projeto_projeto_id; Type: INDEX; Schema: ambulatorio; Owner: -
 --
 
@@ -4243,6 +4376,30 @@ ALTER TABLE ONLY ambulatorio.paciente_contato
 
 ALTER TABLE ONLY ambulatorio.paciente_endereco
     ADD CONSTRAINT fk_paciente_endereco_paciente FOREIGN KEY (paciente_id) REFERENCES ambulatorio.paciente(paciente_id) ON DELETE CASCADE;
+
+
+--
+-- Name: paciente_exame_complementar fk_paciente_exame_atendimento_paciente; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.paciente_exame_complementar
+    ADD CONSTRAINT fk_paciente_exame_atendimento_paciente FOREIGN KEY (atendimento_id, paciente_id) REFERENCES ambulatorio.atendimento(atendimento_id, paciente_id) ON DELETE SET NULL (atendimento_id);
+
+
+--
+-- Name: paciente_exame_complementar fk_paciente_exame_paciente; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.paciente_exame_complementar
+    ADD CONSTRAINT fk_paciente_exame_paciente FOREIGN KEY (paciente_id) REFERENCES ambulatorio.paciente(paciente_id) ON DELETE CASCADE;
+
+
+--
+-- Name: paciente_exame_complementar fk_paciente_exame_tipo; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.paciente_exame_complementar
+    ADD CONSTRAINT fk_paciente_exame_tipo FOREIGN KEY (tipo_exame_complementar_id) REFERENCES ambulatorio.tipo_exame_complementar(tipo_exame_complementar_id) ON DELETE RESTRICT;
 
 
 --

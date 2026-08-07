@@ -4,12 +4,13 @@ Atualizado em: 2026-08-06
 
 ## Objetivo e escopo
 
-Este documento é a fonte de verdade técnica para a futura evolução incremental
+Este documento é a fonte de verdade técnica para a evolução incremental
 dos exames complementares do novo layout. As decisões semânticas permanecem em
 `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`; o schema aplicado continua evidenciado
 por `docs/evidencias/schema_atual_ambulatorio.sql`.
 
-Esta etapa não cria migration, tabela ou teste SQL e não altera o schema atual.
+A estrutura foi implementada por `sql/14_exames_por_paciente.sql` e validada por
+`tests/sql/06_validar_exames_por_paciente.sql`.
 Não autoriza importar dados reais, deduzir resultados clínicos nem converter
 célula vazia em resposta negativa.
 
@@ -37,7 +38,7 @@ por atendimento e criaria dois caminhos obrigatórios para a mesma relação.
 
 ### Nova tabela canônica
 
-Criar futuramente `paciente_exame_complementar` como nova tabela canônica para os
+Criar `paciente_exame_complementar` como nova tabela canônica para os
 fluxos do MVP. Preservar integralmente `atendimento_exame_complementar` e
 `exame_complementar_resultado` como estruturas legadas/contextuais, sem backfill,
 remoção, alteração de nulabilidade ou migração silenciosa.
@@ -191,7 +192,7 @@ usar a identidade da origem e auditoria explícita.
    nova. Migração auditada, visão de leitura ou descontinuação da antiga exige
    decisão e migration próprias.
 
-## Cenários do futuro teste SQL
+## Cenários do teste SQL
 
 O teste deverá usar dados sintéticos, `BEGIN`, `ON_ERROR_STOP=1` e `ROLLBACK`, e
 validar ao menos:
@@ -260,6 +261,6 @@ checagem de portabilidade, não um bloqueio da migration no ambiente atual.
 
 ## Prontidão
 
-Status: **especificação pronta para migration incremental** no PostgreSQL local
-16.14. Nenhuma regra do importador precisa ser implementada para criar e testar a
-estrutura física.
+Status: **implementada e validada** no PostgreSQL local 16.14. A migration foi
+aplicada sem backfill e o teste transacional passou nos 22 cenários, incluindo a
+auditoria posterior ao `ROLLBACK`.

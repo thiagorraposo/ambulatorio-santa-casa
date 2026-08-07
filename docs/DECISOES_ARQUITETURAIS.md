@@ -234,7 +234,7 @@ Título: Associação consolidada entre paciente e projeto
 
 Data: 2026-08-06
 
-Status: Aceita; especificação pronta para migration incremental
+Status: Aceita e implementada por `sql/13_associacao_paciente_projeto.sql`
 
 Contexto: A planilha representa participação, pendência e falha em projetos como
 estado do paciente. A associação existente `atendimento_projeto_estudo` exige
@@ -269,14 +269,14 @@ Título: Exame canônico por paciente com atendimento opcional
 
 Data: 2026-08-06
 
-Status: Aceita; especificação pronta para migration incremental
+Status: Aceita e implementada por `sql/14_exames_por_paciente.sql`
 
 Contexto: O registro atual de exame exige atendimento e não possui paciente. O
 novo layout define o paciente como proprietário do exame, aceita atendimento
 opcional, múltiplas ocorrências do mesmo tipo e blocos distintos de exames
 trazidos e solicitados.
 
-Decisão: Criar futuramente `paciente_exame_complementar`, reutilizando o catálogo
+Decisão: Criar `paciente_exame_complementar`, reutilizando o catálogo
 de tipos, com paciente obrigatório, atendimento opcional consistente por FK
 composta, bloco obrigatório, resultado textual e valores originais. Preservar as
 tabelas de exame por atendimento sem backfill ou escrita dupla automática.

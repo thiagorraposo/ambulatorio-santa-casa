@@ -19,13 +19,10 @@ A fonte detalhada das decisões é
 
 ## 1. Especificar migrations mínimas
 
-1. Implementar a evolução de exames especificada em
-   `docs/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`, com nova tabela por
-   paciente, atendimento opcional e preservação das estruturas legadas.
-2. Tratamento BZN por paciente, no máximo um, com duração cumprida em dias, ano
+1. Especificar o tratamento BZN por paciente, no máximo um, com duração cumprida em dias, ano
    aproximado, prescrição, tratamento pelo ambulatório e reações adversas
    detalhadas/repetíveis.
-3. Encaminhamento com documento apresentado e projeto oficial opcional.
+2. Especificar encaminhamento com documento apresentado e projeto oficial opcional.
 
 As migrations serão incrementais e não devem alterar scripts já aplicados.
 

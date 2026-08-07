@@ -1,6 +1,6 @@
 # Ambulatório Santa Casa
 
-Base PostgreSQL construída incrementalmente para organizar dados do ambulatório. A fase atual mantém um schema físico validado de 34 tabelas, incluindo a associação consolidada paciente–projeto, antes da importação completa, API e frontend.
+Base PostgreSQL construída incrementalmente para organizar dados do ambulatório. A fase atual mantém um schema físico validado de 35 tabelas, incluindo associações canônicas de projetos e exames por paciente, antes da importação completa, API e frontend.
 
 O schema aplicado é `ambulatorio`. A principal evidência física versionada é `docs/evidencias/schema_atual_ambulatorio.sql`.
 

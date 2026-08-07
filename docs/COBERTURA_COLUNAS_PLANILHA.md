@@ -5,7 +5,7 @@ Atualizado em: 2026-07-20
 ## Fonte e critério
 
 A cobertura usa os 136 rótulos distintos das duas abas clínicas e o schema físico
-atual de 34 tabelas. As decisões humanas consolidadas em
+atual de 35 tabelas. As decisões humanas consolidadas em
 `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md` resolvem semânticas, mas não contam como
 cobertura física quando a cardinalidade ou obrigatoriedade do banco é incompatível.
 
@@ -22,19 +22,18 @@ cobertura física quando a cardinalidade ou obrigatoriedade do banco é incompat
 | Classificação | Quantidade | Percentual |
 | --- | ---: | ---: |
 | Coberta diretamente | 6 | 4,41% |
-| Coberta com transformação | 97 | 71,32% |
-| Parcialmente coberta | 31 | 22,79% |
+| Coberta com transformação | 118 | 86,76% |
+| Parcialmente coberta | 10 | 7,35% |
 | Não coberta | 1 | 0,74% |
 | Dúvida pendente | 1 | 0,74% |
 | Total | 136 | 100,00% |
 
-Cobertura plena atual: **103/136 (75,74%)**. Incluindo cobertura parcial:
+Cobertura plena atual: **124/136 (91,18%)**. Incluindo cobertura parcial:
 **134/136 (98,53%)**.
 
-A queda da cobertura plena não representa perda do schema. Ela decorre de decisões
-mais precisas: projetos pertencem ao paciente e exames não podem depender
-obrigatoriamente do atendimento. O modelo atual consegue guardar valores, mas não
-respeita ainda essas cardinalidades.
+A cobertura plena incorpora agora as cardinalidades confirmadas de projetos e
+exames por paciente. As lacunas restantes pertencem aos dez itens parciais, ao
+campo não coberto e à dúvida semântica documentada.
 
 ## Alterações de classificação após confirmação humana
 
@@ -65,19 +64,14 @@ cobertura parcial para cobertura com transformação. A tabela
 os valores originais e registra falhas em BenBrasil e EPOCA sem criar projetos
 adicionais.
 
-## Grupos parcialmente cobertos (31)
+## Impacto dos exames por paciente
 
-### Exames — 21
+Os 21 cabeçalhos de valores laboratoriais, ECG/ECO/FEVE, indicadores de bloco e
+tipos repetidos passaram de cobertura parcial para cobertura com transformação.
+`paciente_exame_complementar` fornece paciente obrigatório, atendimento opcional,
+blocos independentes, tipos catalogados ou livres e resultado textual.
 
-Incluem valores laboratoriais, ECG/ECO/FEVE, os dois indicadores de bloco e os nove
-tipos repetidos. O modelo genérico representa tipo, origem e resultado textual,
-mas exige `atendimento_id`; a decisão exige paciente obrigatório e atendimento
-opcional.
-
-A evolução necessária está tecnicamente fechada em
-`docs/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`. A classificação permanece
-parcial até a futura migration ser aplicada; especificação documental não conta
-como cobertura física.
+## Grupos parcialmente cobertos (10)
 
 ### Demais parciais — 10
 
@@ -101,7 +95,7 @@ em dias. A coluna deve ser coberta por migration incremental antes do MVP.
 
 ## Cobertura projetada após migrations mínimas
 
-As migrations de exame por paciente, tratamento/reação adversa e encaminhamento
-eliminarão as lacunas estruturais prioritárias restantes. A cobertura exata
+As migrations de tratamento/reação adversa e encaminhamento eliminarão as lacunas
+estruturais prioritárias restantes. A cobertura exata
 pós-migration deverá ser recalculada a partir das especificações aprovadas, sem
 promover antecipadamente itens de backlog ou `Localizado`.
