@@ -26,6 +26,48 @@ Além deste arquivo, atualize quando necessário:
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
 
+## 2026-08-13 - PostgreSQL 16 reproduzível com Docker Compose
+
+Data: 2026-08-13
+
+Título da alteração: Ambiente PostgreSQL Docker isolado e opcional.
+
+Arquivos principais:
+
+- `compose.yaml`;
+- `.env.example`;
+- `Makefile`;
+- README, workflow, segurança e estado atual.
+
+Impacto:
+
+- imagem `postgres:16.15`, porta `127.0.0.1:5433`, healthcheck e volume nomeado
+  `ambulatorio_santa_casa_postgres_data`;
+- escolha explícita por `DB_ENV=local` ou `DB_ENV=docker`;
+- alvos para subir, aguardar, consultar status/logs, migrar, testar, gerar dump,
+  recriar preservando volume e destruir somente o ambiente Docker;
+- `.env` local ignorado e `.env.example` sem credencial real;
+- PostgreSQL local preservado como ambiente oficial.
+
+Validação:
+
+- banco Docker vazio reconstruído exclusivamente por `sql/00`–`sql/16`;
+- 37 tabelas confirmadas e oito testes aprovados com `ROLLBACK`;
+- zero pacientes e registros sintéticos finais nas tabelas auditadas;
+- dump Docker comparado à evidência: nenhuma diferença estrutural; apenas token
+  aleatório do `pg_dump` e versão do servidor 16.15 versus 16.14 local;
+- container recriado com novo ID e mesmo volume; 37 tabelas e 10 projetos de
+  catálogo preservados;
+- PostgreSQL local consultado somente para confirmação final: 37 tabelas, 10
+  projetos e zero pacientes;
+- `git diff --check` executado.
+
+Riscos pendentes:
+
+- a imagem está fixada em patch específico e requer atualização controlada;
+- não há backup/restauração automatizado nem política para dados reais;
+- Compose ainda não é o ambiente oficial padrão.
+
 ## 2026-08-13 - Implementação do encaminhamento ampliado
 
 Data: 2026-08-13

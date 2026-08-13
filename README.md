@@ -6,7 +6,8 @@ O schema aplicado é `ambulatorio`. A principal evidência física versionada é
 
 ## Pré-requisitos
 
-- PostgreSQL com `psql`, `pg_dump` e servidor local acessível.
+- PostgreSQL com `psql` e `pg_dump`; o servidor pode ser local ou Docker.
+- Docker Engine com Docker Compose, para o ambiente isolado opcional.
 - GNU Make.
 - Git.
 - Banco `ambulatorio_santa_casa`, usuário `ambulatorio_user` e schema `ambulatorio` já existentes.
@@ -35,6 +36,31 @@ Os parâmetros podem ser sobrescritos sem editar arquivos:
 make db-check DB_HOST=localhost DB_PORT=5432 DB_NAME=ambulatorio_santa_casa DB_USER=ambulatorio_user DB_SCHEMA=ambulatorio
 ```
 
+## PostgreSQL Docker opcional
+
+O PostgreSQL local continua sendo o ambiente padrão. Para usar o ambiente Docker
+isolado em `127.0.0.1:5433`, copie `.env.example` para `.env`, substitua a senha
+fictícia por uma senha exclusiva de desenvolvimento e mantenha o arquivo local:
+
+```bash
+cp .env.example .env
+make docker-up
+make docker-migrate
+make docker-db-check
+make docker-db-test
+```
+
+O Compose executa `postgres:16.15`, persiste dados no volume nomeado
+`ambulatorio_santa_casa_postgres_data` e publica a porta somente no loopback. O
+`.env` é ignorado pelo Git e não deve reutilizar credenciais reais.
+
+Escolha explicitamente o ambiente ao usar os alvos genéricos:
+
+```bash
+make db-check DB_ENV=local
+make db-check DB_ENV=docker
+```
+
 ## Comandos principais
 
 | Comando | Finalidade | Altera o banco? |
@@ -46,8 +72,21 @@ make db-check DB_HOST=localhost DB_PORT=5432 DB_NAME=ambulatorio_santa_casa DB_U
 | `make project-check` | Executa documentação, banco, testes SQL, `git diff --check` e status Git. | Não de forma persistente. |
 | `make db-schema-dump` | Atualiza atomicamente o dump somente estrutural do schema. | Não altera o banco; altera o arquivo de evidência. |
 | `make git-status` | Exibe status e últimos commits. | Não |
+| `make docker-up` | Sobe o PostgreSQL Docker e preserva o volume existente. | Pode criar container, rede e volume Docker. |
+| `make docker-status` | Mostra status e healthcheck. | Não |
+| `make docker-stop` | Para o container sem remover o volume. | Para somente o ambiente Docker. |
+| `make docker-recreate` | Recria o container preservando o volume. | Substitui somente o container Docker. |
+| `make docker-logs` | Acompanha logs do PostgreSQL Docker. | Não |
+| `make docker-migrate` | Aplica `sql/00`–`sql/16` em ordem no Docker vazio. | Sim, somente no banco Docker. |
+| `make docker-db-check` | Executa `db-check` contra `5433`. | Não |
+| `make docker-db-test` | Executa os oito testes SQL no Docker. | Não persiste dados sintéticos. |
+| `make docker-schema-dump` | Gera dump estrutural Docker em `/tmp`. | Não altera o banco nem a evidência oficial. |
+| `make docker-project-check` | Executa o check completo contra o Docker. | Não persiste dados sintéticos. |
+| `make docker-destroy` | Remove container, rede e volume deste Compose. | **Destrutivo somente para o ambiente Docker.** |
 
-Nenhum alvo reaplica `sql/00` a `sql/13`, cria ou remove banco, executa `DROP`, faz commit ou push.
+Os alvos genéricos não aplicam migrations. `docker-migrate` aplica as migrations
+somente quando selecionado explicitamente, e `docker-destroy` é o único alvo que
+remove o volume Docker. Nenhum alvo Docker altera o PostgreSQL local.
 
 ## Ordem segura para retomar o trabalho
 

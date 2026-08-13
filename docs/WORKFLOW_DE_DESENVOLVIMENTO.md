@@ -1,6 +1,6 @@
 # Workflow de Desenvolvimento
 
-Atualizado em: 2026-07-16
+Atualizado em: 2026-08-13
 
 ## Comandos Oficiais
 
@@ -13,8 +13,40 @@ Use os alvos do `Makefile` como interface local padrão:
 | `make docs-check` | Conferir documentação obrigatória. |
 | `make project-check` | Validação não destrutiva padrão antes e depois da tarefa. |
 | `make db-schema-dump` | Atualizar a evidência estrutural após mudança física aplicada e autorizada. |
+| `make docker-up` / `docker-stop` | Subir ou parar o PostgreSQL Docker sem remover o volume. |
+| `make docker-status` / `docker-logs` | Inspecionar health, status e logs. |
+| `make docker-migrate` | Reconstruir um banco Docker vazio pelas migrations `00`–`16`. |
+| `make docker-db-check` / `docker-db-test` | Validar conexão e testes no Docker. |
+| `make docker-schema-dump` | Gerar evidência Docker temporária em `/tmp`. |
+| `make docker-recreate` | Recriar o container preservando o volume nomeado. |
+| `make docker-destroy` | Remover explicitamente apenas o ambiente e o volume Docker deste projeto. |
 
-Os alvos usam a autenticação local do PostgreSQL por `~/.pgpass`. Nunca inclua senha no prompt ou na linha de comando. `make db-schema-dump` gera somente estrutura; nenhum desses alvos aplica migrations antigas, cria ou remove banco, faz commit ou push.
+O ambiente padrão é `DB_ENV=local`, autenticado por `~/.pgpass` na porta 5432.
+O ambiente alternativo usa `DB_ENV=docker`, `.env` ignorado pelo Git e porta
+5433. Nunca inclua senha no prompt, em documentação ou em arquivos versionados.
+`make db-schema-dump` gera somente estrutura; `docker-schema-dump` escreve por
+padrão em `/tmp/schema_ambulatorio_docker.sql` e não substitui a evidência oficial.
+
+## Escolha explícita do PostgreSQL
+
+Local:
+
+```bash
+make project-check DB_ENV=local
+```
+
+Docker:
+
+```bash
+cp .env.example .env
+make docker-up
+make docker-migrate  # somente em volume novo/vazio
+make docker-project-check
+```
+
+Não execute `db-migrate` no PostgreSQL local já aplicado. `docker-destroy` apaga
+o volume persistente e só deve ser chamado quando a destruição do ambiente Docker
+for intencional.
 
 ## Fluxo Oficial
 

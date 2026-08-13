@@ -59,6 +59,9 @@ suíte automatizada da aplicação, CI ou aplicação executável versionados.
 - O workflow oficial está documentado em `docs/WORKFLOW_DE_DESENVOLVIMENTO.md`.
 - Regras de segurança de dados estão documentadas em `docs/SEGURANCA_DE_DADOS.md`.
 - Comandos locais reproduzíveis estão definidos no `Makefile`.
+- Existe ambiente PostgreSQL Docker opcional e isolado, com imagem
+  `postgres:16.15`, porta `127.0.0.1:5433`, healthcheck e volume persistente
+  nomeado. O PostgreSQL local em 5432 permanece o padrão oficial.
 
 ## Estratégia de Implementação Incremental
 
@@ -197,6 +200,8 @@ Resumo da reconciliação:
   transacionais atuais continuam sendo a validação do banco.
 - Rotinas adicionais de teste para futuras fases incrementais do modelo físico.
 - Estratégia de deploy, backup e observabilidade.
+- Política operacional de atualização da imagem PostgreSQL e teste formal de
+  backup/restauração do volume Docker.
 - Documentação operacional de execução dos scripts e restauração de ambiente.
 - Automação futura de CI, se o projeto passar a ter colaboração recorrente, API ou frontend.
 

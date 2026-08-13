@@ -42,6 +42,21 @@ Comando equivalente:
 pg_dump -h localhost -U ambulatorio_user -d ambulatorio_santa_casa --schema=ambulatorio --schema-only --no-owner --no-privileges --file=docs/evidencias/schema_atual_ambulatorio.sql
 ```
 
+## PostgreSQL Docker local
+
+- `.env` contém a senha exclusiva do ambiente Docker e permanece ignorado pelo
+  Git; somente `.env.example`, com valor fictício, pode ser versionado;
+- não reutilizar senha institucional, local existente ou de produção;
+- a porta Docker padrão é `127.0.0.1:5433`, sem exposição em interfaces externas;
+- o volume `ambulatorio_santa_casa_postgres_data` é persistente e pode conter
+  dados sensíveis no futuro; não copiá-lo, publicá-lo nem tratá-lo como backup;
+- `make docker-stop` preserva dados; `make docker-destroy` remove somente o
+  ambiente Docker e seu volume e deve ser usado apenas com intenção explícita;
+- o ambiente Docker atual é destinado a migrations e dados sintéticos, não está
+  autorizado para dados clínicos reais;
+- dumps comparativos do Docker devem ser somente estruturais e permanecer em
+  `/tmp`, salvo decisão explícita de atualizar a evidência oficial.
+
 ## Planilhas Reais
 
 - Mantenha planilhas reais fora do repositório.
