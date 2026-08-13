@@ -1,14 +1,14 @@
 # Modelo Físico Atual
 
-Atualizado em: 2026-08-06
+Atualizado em: 2026-08-13
 
 Este documento descreve a estrutura física real aplicada no schema `ambulatorio`, usando como fonte principal o dump `docs/evidencias/schema_atual_ambulatorio.sql`. Os scripts em `sql/` foram usados como fonte de reconciliação.
 
-O schema físico aplicado possui 35 tabelas. Todas as tabelas encontradas no dump existem nas migrations versionadas, e nenhuma tabela das migrations ficou ausente da evidência analisada.
+O schema físico aplicado possui 37 tabelas. Todas as tabelas encontradas no dump existem nas migrations versionadas, e nenhuma tabela das migrations ficou ausente da evidência analisada.
 
 ## Estratégia de Construção por Fases
 
-O modelo físico atual reúne as 25 tabelas do núcleo funcional inicial, as quatro tabelas do módulo de avaliação clínica, a tabela de notificação, as três tabelas de importação e proveniência, a associação consolidada paciente–projeto e os exames canônicos por paciente. Ainda não representa a cobertura completa e final da planilha original.
+O modelo físico atual reúne as 25 tabelas do núcleo funcional inicial, as quatro tabelas do módulo de avaliação clínica, a tabela de notificação, as três tabelas de importação e proveniência, a associação consolidada paciente–projeto, os exames canônicos por paciente e as duas tabelas de BZN. Ainda não representa a cobertura completa e final da planilha original.
 
 As demais tabelas previstas serão implementadas posteriormente por migrations incrementais. A ausência temporária dessas estruturas não representa falha, lacuna involuntária ou divergência crítica em relação ao plano do projeto.
 
@@ -60,11 +60,13 @@ planilha.
 | `pendencia_atendimento` | Sim | `sql/08_tabelas_encaminhamentos_acompanhamento.sql` | Banco e migration |
 | `procedimento_clinico` | Sim | `sql/09_tabelas_medicamentos_tratamentos.sql` | Banco e migration |
 | `projeto_estudo` | Sim | `sql/04_tabelas_projetos_estudos.sql` | Banco e migration |
+| `reacao_adversa_benzonidazol` | Sim | `sql/15_tratamento_benzonidazol.sql` | Banco e migration |
 | `sorologia_chagas` | Sim | `sql/05_tabelas_diagnostico_sorologia.sql` | Banco e migration |
 | `sorologia_solicitacao` | Sim | `sql/05_tabelas_diagnostico_sorologia.sql` | Banco e migration |
 | `tipo_encaminhamento` | Sim | `sql/08_tabelas_encaminhamentos_acompanhamento.sql` | Banco e migration |
 | `tipo_exame_complementar` | Sim | `sql/07_tabelas_exames_complementares.sql` | Banco e migration |
 | `tratamento_chagas` | Sim | `sql/09_tabelas_medicamentos_tratamentos.sql` | Banco e migration |
+| `tratamento_benzonidazol` | Sim | `sql/15_tratamento_benzonidazol.sql` | Banco e migration |
 
 Não foram identificadas tabelas físicas sem migration correspondente. Não foram identificadas tabelas nas migrations ausentes do banco físico.
 
@@ -705,6 +707,45 @@ Restrições e índices:
 - FK `medicamento_id` -> `medicamento(medicamento_id)` com `ON DELETE SET NULL`.
 - Checks para `status_tratamento` e `adesao_tratamento`.
 - Índices em `atendimento_id`, `medicamento_id` e `status_tratamento`.
+
+### `tratamento_benzonidazol`
+
+Finalidade: estado canônico do tratamento com BZN, no máximo um por paciente.
+
+Campos principais:
+
+- `tratamento_benzonidazol_id BIGSERIAL` PK;
+- `paciente_id BIGINT NOT NULL` e `atendimento_id BIGINT` opcional;
+- indicadores triestados `tem_indicacao`, `iniciado`,
+  `tratamento_pelo_ambulatorio` e `teve_reacao_adversa`;
+- `duracao_cumprida_dias INTEGER`, `ano_uso_aproximado INTEGER` e
+  `data_prescricao DATE`;
+- motivos separados de não indicação e não início;
+- campos `valor_original_*`, observações e timestamps.
+
+Restrições e índices:
+
+- FK do paciente com `ON DELETE CASCADE`;
+- FK composta opcional para `(atendimento_id, paciente_id)`, com
+  `ON DELETE SET NULL (atendimento_id)`;
+- `UNIQUE (paciente_id)`;
+- checks positivos para duração e ano quando informados;
+- índice parcial `idx_tratamento_bzn_atendimento_id`.
+
+### `reacao_adversa_benzonidazol`
+
+Finalidade: ocorrências repetíveis de reações adversas do tratamento com BZN.
+
+- PK `reacao_adversa_benzonidazol_id`;
+- FK obrigatória para `tratamento_benzonidazol` com `ON DELETE CASCADE`;
+- descrição, gravidade, data, consequência, valores originais, observações e
+  timestamps opcionais;
+- gravidade e consequência são textos livres, sem domínio clínico inventado;
+- índice `idx_reacao_bzn_tratamento_id` na FK;
+- não há unicidade por data, descrição ou tratamento.
+
+`tratamento_chagas` permanece intacta como estrutura legada por atendimento. Não
+houve backfill, escrita dupla ou migração automática entre as estruturas.
 
 ### `procedimento_clinico`
 

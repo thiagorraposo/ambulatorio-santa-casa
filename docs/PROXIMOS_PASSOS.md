@@ -19,10 +19,11 @@ A fonte detalhada das decisões é
 
 ## 1. Concluir migrations mínimas
 
-1. Implementar e testar a evolução de tratamento BZN e reações adversas conforme
-   `docs/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md`, já pronta para migration.
-2. Especificar e depois implementar encaminhamento com documento apresentado e
-   projeto oficial opcional.
+1. Tratamento BZN e reações adversas: implementados e validados por
+   `sql/15_tratamento_benzonidazol.sql` e pelo teste SQL correspondente.
+2. Implementar e testar encaminhamento com documento apresentado e projeto
+   oficial opcional conforme `docs/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`, já
+   pronta para migration incremental.
 
 As migrations serão incrementais e não devem alterar scripts já aplicados.
 

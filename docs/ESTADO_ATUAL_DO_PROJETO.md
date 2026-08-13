@@ -7,7 +7,7 @@ Atualizado em: 2026-08-13
 O projeto `ambulatorio-santa-casa` define a base de dados PostgreSQL para organizar registros de pacientes, atendimentos ambulatoriais, diagnóstico de doença de Chagas, sorologias, condições clínicas, comorbidades, exames complementares, encaminhamentos, acompanhamentos, medicamentos, tratamentos e procedimentos clínicos.
 
 Até o momento, o repositório contém scripts SQL de criação de banco, schema,
-tabelas, índices, restrições, dados iniciais de catálogo e seis testes SQL
+tabelas, índices, restrições, dados iniciais de catálogo e sete testes SQL
 transacionais reutilizáveis. Não há backend, frontend, scripts de importação,
 suíte automatizada da aplicação, CI ou aplicação executável versionados.
 
@@ -23,17 +23,17 @@ suíte automatizada da aplicação, CI ou aplicação executável versionados.
 
 ## Status Atual
 
-- Scripts SQL existentes de `sql/00_criar_banco.sql` a `sql/14_exames_por_paciente.sql`.
+- Scripts SQL existentes de `sql/00_criar_banco.sql` a `sql/15_tratamento_benzonidazol.sql`.
 - README e documentos antigos `docs/dicionario-dados.md` e `docs/decisoes-modelagem.md` existem, mas estão vazios.
 - A estrutura física real aplicada no PostgreSQL foi validada por evidência versionada em `docs/evidencias/schema_atual_ambulatorio.sql`.
-- O dump foi atualizado em 2026-08-06 e contém o schema `ambulatorio` com 35 tabelas aplicadas.
-- As 35 tabelas físicas encontradas também estão cobertas pelos scripts SQL em `sql/`.
+- O dump foi atualizado em 2026-08-13 e contém o schema `ambulatorio` com 37 tabelas aplicadas.
+- As 37 tabelas físicas encontradas também estão cobertas pelos scripts SQL em `sql/`.
 - Não foi encontrada tabela física sem migration correspondente, nem tabela em migration ausente do dump analisado.
 - Existe uma rotina reutilizável de validação com dados de teste em `tests/sql/01_validar_nucleo_inicial.sql`.
 - A rotina de validação usa transação com `ROLLBACK`, não altera a estrutura física do banco e não deixa dados de teste persistidos quando executada com sucesso.
 - A rotina foi executada com sucesso em 2026-07-16: as 25 tabelas receberam dados sintéticos temporários, os testes de FK, `UNIQUE`, `CHECK` e `NOT NULL` foram aprovados, e uma consulta posterior confirmou ausência de dados de teste persistidos.
 - A nova fonte canônica de layout é o arquivo local e ignorado pelo Git `planejamento/Nova Planilha ambulatório.xlsx`; a análise usou somente metadados seguros.
-- As duas abas clínicas principais possuem 136 rótulos semânticos distintos. Após as decisões humanas e a reavaliação de cardinalidades, a cobertura atual está em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 124 estão plenamente cobertos, 10 parcialmente cobertos, 1 não coberto e 1 permanece semanticamente desconhecido.
+- As duas abas clínicas principais possuem 136 rótulos semânticos distintos. Após as decisões humanas e a reavaliação de cardinalidades, a cobertura atual está em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 129 estão plenamente cobertos, 6 parcialmente cobertos, nenhum está não coberto e 1 permanece semanticamente desconhecido.
 - As decisões semânticas e a rota até o MVP estão consolidadas em `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`.
 - A associação canônica entre paciente e projeto foi aplicada por
   `sql/13_associacao_paciente_projeto.sql` e validada nos 17 cenários definidos em
@@ -41,15 +41,15 @@ suíte automatizada da aplicação, CI ou aplicação executável versionados.
 - A evolução canônica dos exames por paciente foi aplicada por
   `sql/14_exames_por_paciente.sql` e validada nos 22 cenários definidos em
   `docs/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`.
-- A evolução canônica do tratamento com BZN e das reações adversas está fechada
-  em `docs/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md` e pronta para uma futura
-  migration incremental; o schema, `tratamento_chagas` e os testes SQL ainda não
-  foram alterados.
+- A evolução canônica do tratamento com BZN e das reações adversas foi aplicada
+  por `sql/15_tratamento_benzonidazol.sql` e validada nos 27 cenários definidos
+  em `docs/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md`; `tratamento_chagas`
+  permaneceu estruturalmente intacta e sem backfill.
 - O impacto físico e de planejamento do novo layout está documentado em `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md`; nenhuma migration, tabela ou teste SQL foi alterado.
 - O módulo de avaliação clínica foi aplicado pela migration incremental `sql/10_modulo_avaliacao_clinica.sql`; as quatro novas tabelas e suas constraints constam no banco local e na evidência física.
 - O módulo de notificação foi aplicado pela migration incremental `sql/11_modulo_notificacao.sql`; a tabela e suas constraints constam no banco local e na evidência física.
 - O módulo de importação e proveniência foi aplicado pela migration incremental `sql/12_modulo_importacao_proveniencia.sql`; as três tabelas e suas constraints constam no banco local e na evidência física.
-- Os seis testes SQL passaram no banco local em 2026-08-06. Todos executaram `ROLLBACK`, e consulta independente confirmou ausência de dados sintéticos persistidos.
+- Os sete testes SQL passaram no banco local em 2026-08-13. Todos executaram `ROLLBACK`, e auditoria confirmou ausência de dados sintéticos persistidos.
 - O projeto possui orientações permanentes para Codex em `AGENTS.md`, `sql/AGENTS.md`, `tests/AGENTS.md` e `docs/AGENTS.md`.
 - Decisões arquiteturais duradouras são registradas em `docs/DECISOES_ARQUITETURAIS.md`.
 - O workflow oficial está documentado em `docs/WORKFLOW_DE_DESENVOLVIMENTO.md`.
@@ -58,7 +58,7 @@ suíte automatizada da aplicação, CI ou aplicação executável versionados.
 
 ## Estratégia de Implementação Incremental
 
-O modelo físico está sendo construído por fases. As 25 tabelas do núcleo funcional inicial foram expandidas pelas quatro tabelas do módulo de avaliação clínica, pela tabela de notificação, pelas três tabelas de importação e proveniência, pela associação paciente–projeto e pelos exames por paciente, totalizando 35 tabelas validadas.
+O modelo físico está sendo construído por fases. As 25 tabelas do núcleo funcional inicial foram expandidas pelas quatro tabelas do módulo de avaliação clínica, pela tabela de notificação, pelas três tabelas de importação e proveniência, pela associação paciente–projeto, pelos exames por paciente e pelas duas tabelas de BZN, totalizando 37 tabelas validadas.
 
 A ausência temporária das demais tabelas planejadas não deve ser tratada como falha, lacuna involuntária ou divergência crítica. As demais estruturas previstas serão implementadas posteriormente por migrations incrementais.
 
@@ -68,7 +68,7 @@ O objetivo da fase atual é validar funcionamento, integridade referencial, rest
 
 ## Tabelas Atualmente Existentes no Banco
 
-O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulatorio.sql`, possui atualmente 35 tabelas:
+O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulatorio.sql`, possui atualmente 37 tabelas:
 
 1. `paciente`
 2. `paciente_endereco`
@@ -105,6 +105,8 @@ O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulator
 33. `importacao_registro`
 34. `paciente_projeto_estudo`
 35. `paciente_exame_complementar`
+36. `tratamento_benzonidazol`
+37. `reacao_adversa_benzonidazol`
 
 ## Cobertura Banco x Migrations
 
@@ -140,15 +142,17 @@ O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulator
 | `pendencia_atendimento` | Existe no banco e nas migrations |
 | `procedimento_clinico` | Existe no banco e nas migrations |
 | `projeto_estudo` | Existe no banco e nas migrations |
+| `reacao_adversa_benzonidazol` | Existe no banco e nas migrations |
 | `sorologia_chagas` | Existe no banco e nas migrations |
 | `sorologia_solicitacao` | Existe no banco e nas migrations |
 | `tipo_encaminhamento` | Existe no banco e nas migrations |
 | `tipo_exame_complementar` | Existe no banco e nas migrations |
 | `tratamento_chagas` | Existe no banco e nas migrations |
+| `tratamento_benzonidazol` | Existe no banco e nas migrations |
 
 Resumo da reconciliação:
 
-- Tabelas existentes tanto no banco quanto nas migrations: 35.
+- Tabelas existentes tanto no banco quanto nas migrations: 37.
 - Tabelas existentes no banco mas não cobertas pelas migrations: nenhuma identificada.
 - Tabelas existentes nas migrations mas ausentes no banco: nenhuma identificada.
 
@@ -168,6 +172,8 @@ Resumo da reconciliação:
 - Notificação consolidada por paciente, aplicada e validada no banco local.
 - Importação e proveniência com lote, linha bruta e associação genérica N:N, aplicada e validada no banco local; nenhum importador foi implementado.
 - Associação consolidada paciente–projeto, independente de atendimento e com convivência preservada da associação antiga.
+- Tratamento canônico com BZN por paciente e reações adversas repetíveis, com
+  atendimento opcional e convivência legada preservada.
 
 ## Módulos Ainda Pendentes
 
@@ -180,7 +186,7 @@ Resumo da reconciliação:
 - Frontend React.
 - Autenticação, autorização e perfis de usuário.
 - Regras de negócio de cadastro, atendimento, diagnóstico e acompanhamento.
-- Suíte automatizada da futura aplicação e integração em CI; os seis testes SQL
+- Suíte automatizada da futura aplicação e integração em CI; os sete testes SQL
   transacionais atuais continuam sendo a validação do banco.
 - Rotinas adicionais de teste para futuras fases incrementais do modelo físico.
 - Estratégia de deploy, backup e observabilidade.
@@ -189,7 +195,7 @@ Resumo da reconciliação:
 
 ## Próximos Passos Recomendados
 
-1. Especificar as migrations mínimas restantes de tratamento/reação adversa e
+1. Especificar e implementar a migration mínima restante de
    encaminhamento/projeto.
 2. Formalizar o manifesto das duas abas clínicas com aliases, blocos, posições, ocorrências, conversões e regras de vazio.
 3. Resolver os bloqueios operacionais e de segurança antes de usar dados reais.

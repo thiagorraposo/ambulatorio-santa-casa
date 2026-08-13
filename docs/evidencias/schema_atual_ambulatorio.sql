@@ -2636,6 +2636,74 @@ ALTER SEQUENCE ambulatorio.projeto_estudo_projeto_estudo_id_seq OWNED BY ambulat
 
 
 --
+-- Name: reacao_adversa_benzonidazol; Type: TABLE; Schema: ambulatorio; Owner: -
+--
+
+CREATE TABLE ambulatorio.reacao_adversa_benzonidazol (
+    reacao_adversa_benzonidazol_id bigint NOT NULL,
+    tratamento_benzonidazol_id bigint NOT NULL,
+    descricao text,
+    gravidade text,
+    data_reacao date,
+    consequencia text,
+    valor_original_descricao text,
+    valor_original_gravidade text,
+    valor_original_data_reacao text,
+    valor_original_consequencia text,
+    observacoes text,
+    criado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    atualizado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: TABLE reacao_adversa_benzonidazol; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON TABLE ambulatorio.reacao_adversa_benzonidazol IS 'Ocorrencias repetiveis de reacao adversa vinculadas ao tratamento com benzonidazol.';
+
+
+--
+-- Name: COLUMN reacao_adversa_benzonidazol.gravidade; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.reacao_adversa_benzonidazol.gravidade IS 'Gravidade em texto livre, sem dominio clinico inferido.';
+
+
+--
+-- Name: COLUMN reacao_adversa_benzonidazol.consequencia; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.reacao_adversa_benzonidazol.consequencia IS 'Consequencia em texto livre, sem dominio clinico inferido.';
+
+
+--
+-- Name: COLUMN reacao_adversa_benzonidazol.atualizado_em; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.reacao_adversa_benzonidazol.atualizado_em IS 'Timestamp atualizado explicitamente pela aplicacao ou importador.';
+
+
+--
+-- Name: reacao_adversa_benzonidazol_reacao_adversa_benzonidazol_id_seq; Type: SEQUENCE; Schema: ambulatorio; Owner: -
+--
+
+CREATE SEQUENCE ambulatorio.reacao_adversa_benzonidazol_reacao_adversa_benzonidazol_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: reacao_adversa_benzonidazol_reacao_adversa_benzonidazol_id_seq; Type: SEQUENCE OWNED BY; Schema: ambulatorio; Owner: -
+--
+
+ALTER SEQUENCE ambulatorio.reacao_adversa_benzonidazol_reacao_adversa_benzonidazol_id_seq OWNED BY ambulatorio.reacao_adversa_benzonidazol.reacao_adversa_benzonidazol_id;
+
+
+--
 -- Name: sorologia_chagas; Type: TABLE; Schema: ambulatorio; Owner: -
 --
 
@@ -2960,6 +3028,150 @@ CREATE SEQUENCE ambulatorio.tipo_exame_complementar_tipo_exame_complementar_id_s
 --
 
 ALTER SEQUENCE ambulatorio.tipo_exame_complementar_tipo_exame_complementar_id_seq OWNED BY ambulatorio.tipo_exame_complementar.tipo_exame_complementar_id;
+
+
+--
+-- Name: tratamento_benzonidazol; Type: TABLE; Schema: ambulatorio; Owner: -
+--
+
+CREATE TABLE ambulatorio.tratamento_benzonidazol (
+    tratamento_benzonidazol_id bigint NOT NULL,
+    paciente_id bigint NOT NULL,
+    atendimento_id bigint,
+    tem_indicacao boolean,
+    iniciado boolean,
+    tratamento_pelo_ambulatorio boolean,
+    duracao_cumprida_dias integer,
+    ano_uso_aproximado integer,
+    data_prescricao date,
+    motivo_nao_indicacao text,
+    motivo_nao_inicio text,
+    teve_reacao_adversa boolean,
+    valor_original_indicacao text,
+    valor_original_inicio text,
+    valor_original_tratamento_ambulatorio text,
+    valor_original_duracao text,
+    valor_original_ano_uso text,
+    valor_original_data_prescricao text,
+    valor_original_motivo_nao_indicacao text,
+    valor_original_motivo_nao_inicio text,
+    valor_original_reacao_adversa text,
+    observacoes text,
+    criado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    atualizado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT chk_tratamento_bzn_ano CHECK (((ano_uso_aproximado IS NULL) OR (ano_uso_aproximado > 0))),
+    CONSTRAINT chk_tratamento_bzn_duracao CHECK (((duracao_cumprida_dias IS NULL) OR (duracao_cumprida_dias > 0)))
+);
+
+
+--
+-- Name: TABLE tratamento_benzonidazol; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON TABLE ambulatorio.tratamento_benzonidazol IS 'Estado canonico do tratamento com benzonidazol, no maximo um por paciente.';
+
+
+--
+-- Name: COLUMN tratamento_benzonidazol.paciente_id; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.tratamento_benzonidazol.paciente_id IS 'Paciente ao qual pertence o tratamento canonico com benzonidazol.';
+
+
+--
+-- Name: COLUMN tratamento_benzonidazol.atendimento_id; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.tratamento_benzonidazol.atendimento_id IS 'Atendimento opcional; quando informado, deve pertencer ao mesmo paciente.';
+
+
+--
+-- Name: COLUMN tratamento_benzonidazol.tem_indicacao; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.tratamento_benzonidazol.tem_indicacao IS 'Indicador triestado de indicacao de benzonidazol.';
+
+
+--
+-- Name: COLUMN tratamento_benzonidazol.iniciado; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.tratamento_benzonidazol.iniciado IS 'Indicador triestado de inicio ou uso do benzonidazol.';
+
+
+--
+-- Name: COLUMN tratamento_benzonidazol.tratamento_pelo_ambulatorio; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.tratamento_benzonidazol.tratamento_pelo_ambulatorio IS 'Indicador triestado de prescricao e acompanhamento pelo ambulatorio.';
+
+
+--
+-- Name: COLUMN tratamento_benzonidazol.duracao_cumprida_dias; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.tratamento_benzonidazol.duracao_cumprida_dias IS 'Duracao efetivamente cumprida, normalizada em dias positivos.';
+
+
+--
+-- Name: COLUMN tratamento_benzonidazol.ano_uso_aproximado; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.tratamento_benzonidazol.ano_uso_aproximado IS 'Ano aproximado de uso, sem conversao para data artificial.';
+
+
+--
+-- Name: COLUMN tratamento_benzonidazol.data_prescricao; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.tratamento_benzonidazol.data_prescricao IS 'Data informada no campo Prescricao do BZN, distinta de indicacao e inicio.';
+
+
+--
+-- Name: COLUMN tratamento_benzonidazol.motivo_nao_indicacao; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.tratamento_benzonidazol.motivo_nao_indicacao IS 'Motivo exclusivo de nao indicacao do BZN.';
+
+
+--
+-- Name: COLUMN tratamento_benzonidazol.motivo_nao_inicio; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.tratamento_benzonidazol.motivo_nao_inicio IS 'Motivo exclusivo de nao inicio do BZN, quando houver fonte inequivoca.';
+
+
+--
+-- Name: COLUMN tratamento_benzonidazol.teve_reacao_adversa; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.tratamento_benzonidazol.teve_reacao_adversa IS 'Indicador triestado de reacao adversa ao benzonidazol.';
+
+
+--
+-- Name: COLUMN tratamento_benzonidazol.atualizado_em; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.tratamento_benzonidazol.atualizado_em IS 'Timestamp atualizado explicitamente pela aplicacao ou importador.';
+
+
+--
+-- Name: tratamento_benzonidazol_tratamento_benzonidazol_id_seq; Type: SEQUENCE; Schema: ambulatorio; Owner: -
+--
+
+CREATE SEQUENCE ambulatorio.tratamento_benzonidazol_tratamento_benzonidazol_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: tratamento_benzonidazol_tratamento_benzonidazol_id_seq; Type: SEQUENCE OWNED BY; Schema: ambulatorio; Owner: -
+--
+
+ALTER SEQUENCE ambulatorio.tratamento_benzonidazol_tratamento_benzonidazol_id_seq OWNED BY ambulatorio.tratamento_benzonidazol.tratamento_benzonidazol_id;
 
 
 --
@@ -3307,6 +3519,13 @@ ALTER TABLE ONLY ambulatorio.projeto_estudo ALTER COLUMN projeto_estudo_id SET D
 
 
 --
+-- Name: reacao_adversa_benzonidazol reacao_adversa_benzonidazol_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.reacao_adversa_benzonidazol ALTER COLUMN reacao_adversa_benzonidazol_id SET DEFAULT nextval('ambulatorio.reacao_adversa_benzonidazol_reacao_adversa_benzonidazol_id_seq'::regclass);
+
+
+--
 -- Name: sorologia_chagas sorologia_chagas_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
 --
 
@@ -3332,6 +3551,13 @@ ALTER TABLE ONLY ambulatorio.tipo_encaminhamento ALTER COLUMN tipo_encaminhament
 --
 
 ALTER TABLE ONLY ambulatorio.tipo_exame_complementar ALTER COLUMN tipo_exame_complementar_id SET DEFAULT nextval('ambulatorio.tipo_exame_complementar_tipo_exame_complementar_id_seq'::regclass);
+
+
+--
+-- Name: tratamento_benzonidazol tratamento_benzonidazol_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.tratamento_benzonidazol ALTER COLUMN tratamento_benzonidazol_id SET DEFAULT nextval('ambulatorio.tratamento_benzonidazol_tratamento_benzonidazol_id_seq'::regclass);
 
 
 --
@@ -3582,6 +3808,14 @@ ALTER TABLE ONLY ambulatorio.projeto_estudo
 
 
 --
+-- Name: reacao_adversa_benzonidazol reacao_adversa_benzonidazol_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.reacao_adversa_benzonidazol
+    ADD CONSTRAINT reacao_adversa_benzonidazol_pkey PRIMARY KEY (reacao_adversa_benzonidazol_id);
+
+
+--
 -- Name: sorologia_chagas sorologia_chagas_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
 --
 
@@ -3611,6 +3845,14 @@ ALTER TABLE ONLY ambulatorio.tipo_encaminhamento
 
 ALTER TABLE ONLY ambulatorio.tipo_exame_complementar
     ADD CONSTRAINT tipo_exame_complementar_pkey PRIMARY KEY (tipo_exame_complementar_id);
+
+
+--
+-- Name: tratamento_benzonidazol tratamento_benzonidazol_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.tratamento_benzonidazol
+    ADD CONSTRAINT tratamento_benzonidazol_pkey PRIMARY KEY (tratamento_benzonidazol_id);
 
 
 --
@@ -3787,6 +4029,14 @@ ALTER TABLE ONLY ambulatorio.tipo_encaminhamento
 
 ALTER TABLE ONLY ambulatorio.tipo_exame_complementar
     ADD CONSTRAINT uq_tipo_exame_complementar_codigo UNIQUE (codigo_exame);
+
+
+--
+-- Name: tratamento_benzonidazol uq_tratamento_bzn_paciente; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.tratamento_benzonidazol
+    ADD CONSTRAINT uq_tratamento_bzn_paciente UNIQUE (paciente_id);
 
 
 --
@@ -4098,6 +4348,13 @@ CREATE INDEX idx_procedimento_clinico_status ON ambulatorio.procedimento_clinico
 
 
 --
+-- Name: idx_reacao_bzn_tratamento_id; Type: INDEX; Schema: ambulatorio; Owner: -
+--
+
+CREATE INDEX idx_reacao_bzn_tratamento_id ON ambulatorio.reacao_adversa_benzonidazol USING btree (tratamento_benzonidazol_id);
+
+
+--
 -- Name: idx_sorologia_chagas_diagnostico_id; Type: INDEX; Schema: ambulatorio; Owner: -
 --
 
@@ -4116,6 +4373,13 @@ CREATE INDEX idx_sorologia_chagas_resultado ON ambulatorio.sorologia_chagas USIN
 --
 
 CREATE INDEX idx_sorologia_solicitacao_atendimento_id ON ambulatorio.sorologia_solicitacao USING btree (atendimento_id);
+
+
+--
+-- Name: idx_tratamento_bzn_atendimento_id; Type: INDEX; Schema: ambulatorio; Owner: -
+--
+
+CREATE INDEX idx_tratamento_bzn_atendimento_id ON ambulatorio.tratamento_benzonidazol USING btree (atendimento_id) WHERE (atendimento_id IS NOT NULL);
 
 
 --
@@ -4435,6 +4699,14 @@ ALTER TABLE ONLY ambulatorio.procedimento_clinico
 
 
 --
+-- Name: reacao_adversa_benzonidazol fk_reacao_bzn_tratamento; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.reacao_adversa_benzonidazol
+    ADD CONSTRAINT fk_reacao_bzn_tratamento FOREIGN KEY (tratamento_benzonidazol_id) REFERENCES ambulatorio.tratamento_benzonidazol(tratamento_benzonidazol_id) ON DELETE CASCADE;
+
+
+--
 -- Name: sorologia_chagas fk_sorologia_chagas_diagnostico; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
 --
 
@@ -4448,6 +4720,22 @@ ALTER TABLE ONLY ambulatorio.sorologia_chagas
 
 ALTER TABLE ONLY ambulatorio.sorologia_solicitacao
     ADD CONSTRAINT fk_sorologia_solicitacao_atendimento FOREIGN KEY (atendimento_id) REFERENCES ambulatorio.atendimento(atendimento_id) ON DELETE CASCADE;
+
+
+--
+-- Name: tratamento_benzonidazol fk_tratamento_bzn_atendimento_paciente; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.tratamento_benzonidazol
+    ADD CONSTRAINT fk_tratamento_bzn_atendimento_paciente FOREIGN KEY (atendimento_id, paciente_id) REFERENCES ambulatorio.atendimento(atendimento_id, paciente_id) ON DELETE SET NULL (atendimento_id);
+
+
+--
+-- Name: tratamento_benzonidazol fk_tratamento_bzn_paciente; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.tratamento_benzonidazol
+    ADD CONSTRAINT fk_tratamento_bzn_paciente FOREIGN KEY (paciente_id) REFERENCES ambulatorio.paciente(paciente_id) ON DELETE CASCADE;
 
 
 --

@@ -26,6 +26,90 @@ Além deste arquivo, atualize quando necessário:
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
 
+## 2026-08-13 - Especificação do encaminhamento ampliado
+
+Data: 2026-08-13
+
+Título da alteração: Contrato físico da última evolução mínima antes do MVP.
+
+Motivo: definir documento apresentado e projeto oficial opcional no
+encaminhamento sem reinterpretar registros existentes nem incluir
+contrarreferência ainda indefinida.
+
+Arquivos criados ou modificados nesta especificação:
+
+- `docs/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`;
+- documentos de decisões humanas e arquiteturais, cobertura e próximos passos;
+- este registro cronológico.
+
+Impacto previsto:
+
+- futura migration por `ALTER TABLE encaminhamento`, sem nova tabela;
+- booleano anulável `documento_apresentado` e FK opcional para
+  `projeto_estudo`, ambos com valores originais próprios;
+- paciente determinado pelo atendimento obrigatório, sem coluna redundante;
+- FK do projeto com `ON DELETE RESTRICT` e índice próprio;
+- nenhuma unicidade nova, alteração legada, criação de projeto, backfill, escrita
+  dupla ou dedução automática;
+- contrarreferência mantida fora da migration e no backlog.
+
+Validação prevista e executada nesta etapa documental:
+
+- revisão do schema físico aplicado e das migrations existentes;
+- `make project-check` executado; a etapa documental passou, mas o alvo parou em
+  `db-check` porque a conexão disponível não correspondeu ao banco, usuário e
+  schema esperados pelo projeto;
+- `make docs-check` e `git diff --check` passaram.
+
+Pendências ou riscos:
+
+- implementar a migration incremental e o teste SQL sintético especificado;
+- formalizar aliases, booleanos, conflitos e reprocessamento no importador;
+- decidir cardinalidade da contrarreferência depois do MVP.
+
+## 2026-08-13 - Implementação do tratamento canônico com benzonidazol
+
+Data: 2026-08-13
+
+Título da alteração: Tratamento de BZN por paciente e reações adversas repetíveis.
+
+Motivo: implementar a extensão mínima do MVP conforme especificação aprovada,
+preservando integralmente o tratamento legado por atendimento.
+
+Arquivos criados ou modificados:
+
+- `sql/15_tratamento_benzonidazol.sql`;
+- `tests/sql/07_validar_tratamento_benzonidazol.sql`;
+- `docs/VALIDACAO_TRATAMENTO_BENZONIDAZOL.md`;
+- dump estrutural, especificação, README e documentos de estado, modelo,
+  cobertura, decisões e próximos passos.
+
+Impacto:
+
+- adicionadas `tratamento_benzonidazol` e
+  `reacao_adversa_benzonidazol`, elevando o schema de 35 para 37 tabelas;
+- tratamento limitado a uma linha por paciente, com atendimento opcional
+  consistente por FK composta;
+- adicionados duração cumprida, ano aproximado, prescrição, indicadores
+  triestados, motivos separados, valores originais e reações repetíveis;
+- cobertura plena elevada de 124/136 para 129/136;
+- `tratamento_chagas` preservada sem alteração, backfill ou escrita dupla.
+
+Validação executada:
+
+- `make db-check` passou contra o PostgreSQL local correto;
+- migration aplicada atomicamente com `ON_ERROR_STOP=1`;
+- teste isolado passou nos 27 cenários e confirmou o `ROLLBACK`;
+- ausência final de dados sintéticos confirmada;
+- assinatura de `tratamento_chagas` idêntica antes e depois;
+- `make db-schema-dump` atualizou somente a evidência estrutural.
+
+Pendências ou riscos:
+
+- o importador, conversões e reconciliação permanecem fora deste módulo;
+- encaminhamento ampliado é a migration mínima restante do MVP;
+- domínios clínicos de gravidade e consequência continuam adiados.
+
 ## 2026-08-13 - Especificação do tratamento canônico com benzonidazol
 
 Data: 2026-08-13

@@ -5,7 +5,7 @@ Atualizado em: 2026-08-13
 ## Fonte e critério
 
 A cobertura usa os 136 rótulos distintos das duas abas clínicas e o schema físico
-atual de 35 tabelas. As decisões humanas consolidadas em
+atual de 37 tabelas. As decisões humanas consolidadas em
 `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md` resolvem semânticas, mas não contam como
 cobertura física quando a cardinalidade ou obrigatoriedade do banco é incompatível.
 
@@ -22,18 +22,18 @@ cobertura física quando a cardinalidade ou obrigatoriedade do banco é incompat
 | Classificação | Quantidade | Percentual |
 | --- | ---: | ---: |
 | Coberta diretamente | 6 | 4,41% |
-| Coberta com transformação | 118 | 86,76% |
-| Parcialmente coberta | 10 | 7,35% |
-| Não coberta | 1 | 0,74% |
+| Coberta com transformação | 123 | 90,44% |
+| Parcialmente coberta | 6 | 4,41% |
+| Não coberta | 0 | 0,00% |
 | Dúvida pendente | 1 | 0,74% |
 | Total | 136 | 100,00% |
 
-Cobertura plena atual: **124/136 (91,18%)**. Incluindo cobertura parcial:
-**134/136 (98,53%)**.
+Cobertura plena atual: **129/136 (94,85%)**. Incluindo cobertura parcial:
+**135/136 (99,26%)**.
 
-A cobertura plena incorpora agora as cardinalidades confirmadas de projetos e
-exames por paciente. As lacunas restantes pertencem aos dez itens parciais, ao
-campo não coberto e à dúvida semântica documentada.
+A cobertura plena incorpora agora as cardinalidades confirmadas de projetos,
+exames e tratamento com BZN por paciente. As lacunas restantes pertencem aos seis
+itens parciais e à dúvida semântica documentada.
 
 ## Alterações de classificação após confirmação humana
 
@@ -71,9 +71,18 @@ tipos repetidos passaram de cobertura parcial para cobertura com transformação
 `paciente_exame_complementar` fornece paciente obrigatório, atendimento opcional,
 blocos independentes, tipos catalogados ou livres e resultado textual.
 
-## Grupos parcialmente cobertos (10)
+## Impacto do tratamento com benzonidazol
 
-### Demais parciais — 10
+Os cabeçalhos `teve reação adversa?`, `tratamento pelo ambulatorio?`, `Em qual
+ano tomou a medicação (Benzonidazol)?`, `Prescrição do BZN (data)` e `Por quanto
+tempo foi usado?` passaram para cobertura com transformação. As tabelas
+`tratamento_benzonidazol` e `reacao_adversa_benzonidazol` fornecem cardinalidade
+por paciente, atendimento opcional, duração em dias, ano aproximado, prescrição,
+indicadores triestados, motivos separados e reações repetíveis.
+
+## Grupos parcialmente cobertos (6)
+
+### Demais parciais — 6
 
 | Cabeçalho | Lacuna atual |
 | --- | --- |
@@ -82,27 +91,19 @@ blocos independentes, tipos catalogados ou livres e resultado textual.
 | `Trouxe encaminhamento` | falta booleano de documento apresentado |
 | `Autorelato diagnóstico de Chagas do participante (data)` | autorrelato não equivale a resultado laboratorial |
 | `Familiares diretos (mãe, pai, irmãos) realizaram o exame de Chagas?` | histórico familiar não representa exame realizado |
-| `teve reação adversa?` | faltam gravidade, data, consequência e estrutura repetível |
-| `tratamento pelo ambulatorio?` | falta indicador explícito |
-| `Em qual ano tomou a medicação (Benzonidazol)?` | falta ano aproximado próprio |
-| `Prescrição do BZN (data)` | falta data de prescrição distinta da indicação |
 | `Encaminhado a qual projeto?` | falta FK do encaminhamento para projeto oficial |
 
-## Não coberta (1)
+## Não coberta (0)
 
-`Por quanto tempo foi usado?`: o schema não possui duração efetivamente cumprida
-em dias. A coluna deve ser coberta por migration incremental antes do MVP.
+Não há rótulo confirmado sem destino físico. Isso não elimina as seis coberturas
+parciais nem a dúvida de `Localizado`.
 
 ## Cobertura projetada após migrations mínimas
 
-As migrations de tratamento/reação adversa e encaminhamento eliminarão as lacunas
-estruturais prioritárias restantes. A cobertura exata
-pós-migration deverá ser recalculada a partir das especificações aprovadas, sem
-promover antecipadamente itens de backlog ou `Localizado`.
+A migration de encaminhamento eliminará as lacunas estruturais prioritárias
+restantes desse módulo. Itens de backlog e `Localizado` não serão promovidos sem
+nova evidência ou decisão.
 
-A evolução de tratamento está especificada em
-`docs/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md`. Quando implementada, cobrirá as
-lacunas atuais de reação adversa repetível, realização pelo ambulatório, ano de
-uso, data de prescrição e duração cumprida. Esta atualização é somente documental:
-as contagens atuais permanecem inalteradas até a migration existir, ser aplicada
-e validada.
+O contrato técnico dessa cobertura projetada está em
+`docs/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`. As contagens atuais não mudam
+até a migration ser implementada, aplicada e validada.

@@ -4,14 +4,16 @@ Atualizado em: 2026-08-13
 
 ## Objetivo e escopo
 
-Este documento é a fonte de verdade técnica para a futura migration incremental
+Este documento é a fonte de verdade técnica para a migration incremental
 do tratamento com benzonidazol (BZN) e de suas reações adversas no MVP. As
 decisões semânticas permanecem em
 `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`; o schema aplicado continua descrito em
 `docs/MODELO_FISICO_ATUAL.md` e evidenciado por
 `docs/evidencias/schema_atual_ambulatorio.sql`.
 
-A especificação não altera o schema, não autoriza importação de dados reais e não
+A estrutura foi implementada por `sql/15_tratamento_benzonidazol.sql` e validada
+pelos 27 cenários de `tests/sql/07_validar_tratamento_benzonidazol.sql`. A
+especificação não autoriza importação de dados reais e não
 define conduta clínica. Célula vazia continua significando informação ausente,
 nunca resposta negativa.
 
@@ -241,7 +243,7 @@ não autoriza sobrescrever silenciosamente informação já consolidada.
 
 ## Convivência e transição
 
-1. A futura migration cria apenas `tratamento_benzonidazol`,
+1. A migration cria apenas `tratamento_benzonidazol`,
    `reacao_adversa_benzonidazol`, suas constraints e índices.
 2. `tratamento_chagas` permanece integralmente intacta, consultável e com a
    semântica legada por atendimento.
@@ -258,9 +260,7 @@ não autoriza sobrescrever silenciosamente informação já consolidada.
 
 ### Bloqueio da migration
 
-Nenhum bloqueio técnico ou semântico identificado. Nomes, identidade,
-cardinalidades, tipos, chaves, deleção e transição estão definidos para redigir a
-migration incremental.
+Nenhum. A migration foi implementada e validada.
 
 ### Regras futuras do importador
 
@@ -326,7 +326,5 @@ validar ao menos:
 
 ## Prontidão
 
-A evolução está **pronta para implementação em nova migration incremental**. A
-prontidão significa que o contrato físico da migration e do futuro teste está
-fechado; não significa que a migration já exista, que o schema tenha sido alterado
-ou que a importação de dados reais esteja autorizada.
+A evolução está **implementada e validada** por migration incremental. Isso não
+significa que a importação de dados reais esteja autorizada.

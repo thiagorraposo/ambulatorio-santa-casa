@@ -8,7 +8,7 @@ Este documento consolida as decisões humanas confirmadas para o MVP da nova
 planilha. Ele é a fonte de verdade para semântica, cardinalidade e regras de
 importação. `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md` continua sendo a fonte da
 estrutura física observada e `docs/evidencias/schema_atual_ambulatorio.sql`, a
-fonte do schema aplicado de 35 tabelas.
+fonte do schema aplicado de 37 tabelas.
 
 Nenhuma decisão deste documento altera o banco por si só. Mudanças físicas deverão
 ser especificadas e implementadas em migrations incrementais futuras.
@@ -163,9 +163,9 @@ A estrutura futura foi fechada em
 consistente, indicação, início, realização pelo ambulatório, duração cumprida,
 ano aproximado, prescrição e motivos separados. Reações repetíveis usarão
 `reacao_adversa_benzonidazol`, sem domínio inventado de gravidade ou consequência.
-`tratamento_chagas` permanecerá intacta, sem backfill ou escrita dupla. A
-estrutura está pronta para migration; conversões, conflitos e reprocessamento
-continuam como regras do futuro importador.
+`tratamento_chagas` permaneceu intacta, sem backfill ou escrita dupla. A estrutura
+foi implementada por `sql/15_tratamento_benzonidazol.sql`; conversões, conflitos e
+reprocessamento continuam como regras do futuro importador.
 
 ## Encaminhamento e contrarreferência
 
@@ -182,6 +182,14 @@ antes do MVP para representação estruturada. A contrarreferência pode permane
 no backlog como estado consolidado em `acompanhamento_cuidado` até sua
 multiplicidade ser decidida. Classes 1 e 3 para encaminhamento; classes 2 e 4 para
 contrarreferência.
+
+A evolução foi fechada em
+`docs/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`: `encaminhamento` será ampliada
+por `ALTER TABLE` com booleano anulável, projeto oficial opcional e valores
+originais separados. O atendimento obrigatório continuará determinando o
+paciente, sem FK redundante; não haverá nova tabela, backfill, escrita dupla,
+dedução ou criação automática de projetos. A especificação está pronta para
+migration incremental. Contrarreferência permanece fora dela.
 
 ## Medidas, datas e valores
 
@@ -245,7 +253,7 @@ altera a cobertura de colunas, mas é bloqueio de implantação real.
 | paciente–projeto e variante de falha | 3 | migration antes do MVP |
 | complicações repetíveis ligadas ao atendimento | 1, 2 | schema atual atende; data própria no backlog |
 | exame por paciente com atendimento opcional | 3 | migration antes do MVP |
-| duração, cardinalidade e detalhes do tratamento BZN | 3 | migration antes do MVP |
+| duração, cardinalidade e detalhes do tratamento BZN | 3 | migration implementada e validada |
 | documento apresentado e projeto do encaminhamento | 3 | migration antes do MVP |
 | múltiplas contrarreferências | 4 | backlog |
 | conversões, datas, anos e booleanos | 1 | obrigatório no manifesto/importador |
@@ -259,10 +267,10 @@ altera a cobertura de colunas, mas é bloqueio de implantação real.
 
 1. Aprovar este consolidado e declarar `Localizado` fora do mapeamento estruturado
    do MVP enquanto sua semântica não for definida.
-2. Especificar as migrations incrementais restantes de tratamento/reação adversa
-   e encaminhamento/projeto; paciente–projeto e exames por paciente já foram
+2. Especificar a migration incremental restante de encaminhamento/projeto;
+   paciente–projeto, exames por paciente e tratamento/reação adversa já foram
    implementados.
-3. Implementar e validar as migrations restantes com dados sintéticos, sem alterar
+3. Implementar e validar a migration restante com dados sintéticos, sem alterar
    migrations antigas.
 4. Formalizar manifesto versionado das duas abas clínicas, incluindo posição,
    ocorrência, bloco, tipo, aliases, conversões e regras de vazio.

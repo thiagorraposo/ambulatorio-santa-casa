@@ -304,7 +304,7 @@ Título: Tratamento canônico de BZN por paciente e reações adversas repetíve
 
 Data: 2026-08-13
 
-Status: Aceita e pronta para migration incremental
+Status: Aceita e implementada por `sql/15_tratamento_benzonidazol.sql`
 
 Contexto: `tratamento_chagas` exige atendimento, não limita o BZN a uma linha por
 paciente, mistura motivos de não tratamento e resume eventos adversos em uma única
@@ -332,5 +332,41 @@ sem evidência.
 
 Documentos relacionados:
 `docs/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md`,
+`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
+`docs/COBERTURA_COLUNAS_PLANILHA.md`.
+
+## ADR-015
+
+ID: ADR-015
+
+Título: Ampliação incremental da entidade existente de encaminhamento
+
+Data: 2026-08-13
+
+Status: Aceita e pronta para migration incremental
+
+Contexto: `encaminhamento` já possui identidade própria e atendimento obrigatório,
+mas não registra se o documento foi apresentado nem o projeto oficial relacionado.
+Cada encaminhamento admite no máximo um projeto, e o projeto é opcional.
+
+Decisão: Alterar incrementalmente `encaminhamento` para adicionar
+`documento_apresentado`, `projeto_estudo_id` e valores originais separados. Manter
+o atendimento como vínculo obrigatório e único caminho ao paciente. Referenciar
+`projeto_estudo` com `ON DELETE RESTRICT`, sem criar tabela canônica paralela,
+associação N:N ou `UNIQUE` por atendimento/projeto.
+
+Consequências: A evolução preserva todas as linhas e estruturas atuais; os novos
+campos começam nulos e não haverá backfill ou escrita dupla. BenBrasil e EPOCA
+continuam projetos distintos. Catálogo, aliases, vazio, ambiguidades, identidade
+de reprocessamento e proveniência permanecem sob regras do futuro importador.
+Contrarreferência fica fora da migration.
+
+Alternativas rejeitadas: nova tabela canônica para duplicar a ocorrência já
+existente; associação N:N para uma cardinalidade máxima de um projeto; adicionar
+`paciente_id` redundante; reutilizar um único texto original genérico; deduzir
+projeto de campos legados; criar projetos automaticamente.
+
+Documentos relacionados:
+`docs/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`,
 `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
 `docs/COBERTURA_COLUNAS_PLANILHA.md`.
