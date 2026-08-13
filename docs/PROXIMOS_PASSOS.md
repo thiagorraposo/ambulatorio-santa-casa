@@ -1,6 +1,6 @@
 # Próximos Passos
 
-Atualizado em: 2026-08-06
+Atualizado em: 2026-08-13
 
 ## Escopo confirmado do MVP
 
@@ -17,12 +17,12 @@ Atualizado em: 2026-08-06
 A fonte detalhada das decisões é
 `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`.
 
-## 1. Especificar migrations mínimas
+## 1. Concluir migrations mínimas
 
-1. Especificar o tratamento BZN por paciente, no máximo um, com duração cumprida em dias, ano
-   aproximado, prescrição, tratamento pelo ambulatório e reações adversas
-   detalhadas/repetíveis.
-2. Especificar encaminhamento com documento apresentado e projeto oficial opcional.
+1. Implementar e testar a evolução de tratamento BZN e reações adversas conforme
+   `docs/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md`, já pronta para migration.
+2. Especificar e depois implementar encaminhamento com documento apresentado e
+   projeto oficial opcional.
 
 As migrations serão incrementais e não devem alterar scripts já aplicados.
 

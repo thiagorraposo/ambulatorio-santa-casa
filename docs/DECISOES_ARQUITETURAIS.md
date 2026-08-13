@@ -295,3 +295,42 @@ Documentos relacionados:
 `docs/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`,
 `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
 `docs/COBERTURA_COLUNAS_PLANILHA.md`.
+
+## ADR-014
+
+ID: ADR-014
+
+Título: Tratamento canônico de BZN por paciente e reações adversas repetíveis
+
+Data: 2026-08-13
+
+Status: Aceita e pronta para migration incremental
+
+Contexto: `tratamento_chagas` exige atendimento, não limita o BZN a uma linha por
+paciente, mistura motivos de não tratamento e resume eventos adversos em uma única
+descrição. Alterá-la exigiria reinterpretar registros legados e ainda manteria
+semânticas distintas na mesma identidade.
+
+Decisão: Criar `tratamento_benzonidazol`, única por paciente, com atendimento
+opcional consistente por FK composta, campos triestados, duração cumprida em dias,
+ano aproximado, data de prescrição, motivos separados e valores originais. Criar
+`reacao_adversa_benzonidazol` como detalhe repetível, com descrição, gravidade,
+data, consequência e valores originais livres. Preservar `tratamento_chagas` sem
+alteração, backfill, escrita dupla ou consolidação silenciosa.
+
+Consequências: O MVP terá uma identidade inequívoca do tratamento de BZN por
+paciente e poderá registrar reações repetidas sem inventar domínios clínicos.
+Conversão, conciliação de várias linhas e contradições permanecem sob
+responsabilidade do futuro importador. A estrutura legada continuará consultável
+até decisão de transição específica.
+
+Alternativas rejeitadas: alterar diretamente `tratamento_chagas`; inferir e
+consolidar registros antigos; usar `medicamento_id` opcional para definir se uma
+linha é BZN; armazenar todas as reações em texto único; misturar motivo de não
+indicação com motivo de não início; impor domínios de gravidade ou consequência
+sem evidência.
+
+Documentos relacionados:
+`docs/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md`,
+`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
+`docs/COBERTURA_COLUNAS_PLANILHA.md`.

@@ -1,6 +1,6 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-08-06
+Atualizado em: 2026-08-13
 
 ## Objetivo Geral
 
@@ -41,6 +41,10 @@ suíte automatizada da aplicação, CI ou aplicação executável versionados.
 - A evolução canônica dos exames por paciente foi aplicada por
   `sql/14_exames_por_paciente.sql` e validada nos 22 cenários definidos em
   `docs/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`.
+- A evolução canônica do tratamento com BZN e das reações adversas está fechada
+  em `docs/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md` e pronta para uma futura
+  migration incremental; o schema, `tratamento_chagas` e os testes SQL ainda não
+  foram alterados.
 - O impacto físico e de planejamento do novo layout está documentado em `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md`; nenhuma migration, tabela ou teste SQL foi alterado.
 - O módulo de avaliação clínica foi aplicado pela migration incremental `sql/10_modulo_avaliacao_clinica.sql`; as quatro novas tabelas e suas constraints constam no banco local e na evidência física.
 - O módulo de notificação foi aplicado pela migration incremental `sql/11_modulo_notificacao.sql`; a tabela e suas constraints constam no banco local e na evidência física.

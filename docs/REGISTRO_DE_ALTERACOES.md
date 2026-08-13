@@ -1,6 +1,6 @@
 # Registro de Alterações
 
-Atualizado em: 2026-08-06
+Atualizado em: 2026-08-13
 
 ## Como Registrar Mudanças
 
@@ -25,6 +25,54 @@ Além deste arquivo, atualize quando necessário:
 - `docs/HISTORICO_DE_IMPLEMENTACAO.md`
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
+
+## 2026-08-13 - Especificação do tratamento canônico com benzonidazol
+
+Data: 2026-08-13
+
+Título da alteração: Especificação do tratamento com BZN e reações adversas
+repetíveis para o MVP.
+
+Motivo: fechar o contrato físico da próxima migration mínima sem reinterpretar a
+tabela legada por atendimento nem inventar regras clínicas ausentes da fonte.
+
+Arquivos criados ou modificados:
+
+- `docs/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md`;
+- `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`;
+- `docs/COBERTURA_COLUNAS_PLANILHA.md`;
+- `docs/DECISOES_ARQUITETURAIS.md`;
+- `docs/ESTADO_ATUAL_DO_PROJETO.md`;
+- `docs/PROXIMOS_PASSOS.md`;
+- `docs/REGISTRO_DE_ALTERACOES.md`.
+
+Migrations, tabelas e testes envolvidos:
+
+- nenhuma migration, tabela, coluna ou teste SQL foi criado ou alterado;
+- a futura migration criará `tratamento_benzonidazol`, única por paciente, e
+  `reacao_adversa_benzonidazol`, repetível por tratamento;
+- `tratamento_chagas` permanecerá intacta e não haverá backfill ou escrita dupla.
+
+Impacto:
+
+- fecha identidade, cardinalidades, campos, chaves, deleção, índices,
+  proveniência e estratégia de transição;
+- separa indicação, início, motivo de não indicação e motivo de não início;
+- não promove antecipadamente a cobertura física, pois o schema continua com 35
+  tabelas;
+- classifica regras do importador e itens adiáveis sem bloqueio da migration.
+
+Como validar:
+
+- executar `make project-check`;
+- executar `git diff --check`;
+- confirmar que `git status --short` lista apenas documentação afetada.
+
+Pendências ou riscos:
+
+- implementar a futura migration e o teste SQL sintético especificado;
+- formalizar no manifesto as conversões, reconciliação e reprocessamento;
+- domínios institucionais de gravidade e consequência permanecem depois do MVP.
 
 ## 2026-08-06 - Implementação dos exames por paciente
 

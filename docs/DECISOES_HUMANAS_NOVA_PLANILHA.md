@@ -1,6 +1,6 @@
 # Decisões Humanas para a Nova Planilha
 
-Atualizado em: 2026-08-06
+Atualizado em: 2026-08-13
 
 ## Finalidade e precedência
 
@@ -8,7 +8,7 @@ Este documento consolida as decisões humanas confirmadas para o MVP da nova
 planilha. Ele é a fonte de verdade para semântica, cardinalidade e regras de
 importação. `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md` continua sendo a fonte da
 estrutura física observada e `docs/evidencias/schema_atual_ambulatorio.sql`, a
-fonte do schema aplicado de 33 tabelas.
+fonte do schema aplicado de 35 tabelas.
 
 Nenhuma decisão deste documento altera o banco por si só. Mudanças físicas deverão
 ser especificadas e implementadas em migrations incrementais futuras.
@@ -156,6 +156,16 @@ Antes do MVP é necessária migration incremental para:
   descrição, gravidade, data, consequência e valores originais.
 
 Classes 1, 2 e 3. A duração é explicitamente indispensável ao MVP.
+
+A estrutura futura foi fechada em
+`docs/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md`: nova tabela canônica
+`tratamento_benzonidazol`, única por paciente, com atendimento opcional
+consistente, indicação, início, realização pelo ambulatório, duração cumprida,
+ano aproximado, prescrição e motivos separados. Reações repetíveis usarão
+`reacao_adversa_benzonidazol`, sem domínio inventado de gravidade ou consequência.
+`tratamento_chagas` permanecerá intacta, sem backfill ou escrita dupla. A
+estrutura está pronta para migration; conversões, conflitos e reprocessamento
+continuam como regras do futuro importador.
 
 ## Encaminhamento e contrarreferência
 

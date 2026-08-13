@@ -1,6 +1,6 @@
 # Cobertura das Colunas da Planilha pelo Núcleo Físico
 
-Atualizado em: 2026-07-20
+Atualizado em: 2026-08-13
 
 ## Fonte e critério
 
@@ -99,3 +99,10 @@ As migrations de tratamento/reação adversa e encaminhamento eliminarão as lac
 estruturais prioritárias restantes. A cobertura exata
 pós-migration deverá ser recalculada a partir das especificações aprovadas, sem
 promover antecipadamente itens de backlog ou `Localizado`.
+
+A evolução de tratamento está especificada em
+`docs/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md`. Quando implementada, cobrirá as
+lacunas atuais de reação adversa repetível, realização pelo ambulatório, ano de
+uso, data de prescrição e duração cumprida. Esta atualização é somente documental:
+as contagens atuais permanecem inalteradas até a migration existir, ser aplicada
+e validada.
