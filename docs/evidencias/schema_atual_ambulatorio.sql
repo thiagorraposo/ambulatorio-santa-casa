@@ -1139,6 +1139,10 @@ CREATE TABLE ambulatorio.encaminhamento (
     observacoes text,
     criado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     atualizado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    documento_apresentado boolean,
+    projeto_estudo_id bigint,
+    valor_original_documento_apresentado text,
+    valor_original_projeto text,
     CONSTRAINT chk_encaminhamento_origem CHECK (((origem_encaminhamento IS NULL) OR ((origem_encaminhamento)::text = ANY ((ARRAY['ambulatorio'::character varying, 'projeto_pesquisa'::character varying, 'atencao_basica'::character varying, 'servico_especializado'::character varying, 'hospital'::character varying, 'demanda_espontanea'::character varying, 'planilha'::character varying, 'outro'::character varying, 'nao_informado'::character varying])::text[])))),
     CONSTRAINT chk_encaminhamento_prioridade CHECK (((prioridade IS NULL) OR ((prioridade)::text = ANY ((ARRAY['baixa'::character varying, 'media'::character varying, 'alta'::character varying, 'urgente'::character varying, 'nao_informado'::character varying])::text[])))),
     CONSTRAINT chk_encaminhamento_status CHECK (((status_encaminhamento IS NULL) OR ((status_encaminhamento)::text = ANY ((ARRAY['indicado'::character varying, 'solicitado'::character varying, 'agendado'::character varying, 'realizado'::character varying, 'pendente'::character varying, 'cancelado'::character varying, 'nao_compareceu'::character varying, 'nao_informado'::character varying])::text[]))))
@@ -1227,6 +1231,34 @@ COMMENT ON COLUMN ambulatorio.encaminhamento.conduta_orientada IS 'Conduta orien
 --
 
 COMMENT ON COLUMN ambulatorio.encaminhamento.valor_original_encaminhamento IS 'Valor bruto da planilha relacionado ao encaminhamento.';
+
+
+--
+-- Name: COLUMN encaminhamento.documento_apresentado; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.encaminhamento.documento_apresentado IS 'Indicador triestado de que o paciente apresentou o documento de encaminhamento.';
+
+
+--
+-- Name: COLUMN encaminhamento.projeto_estudo_id; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.encaminhamento.projeto_estudo_id IS 'Projeto oficial opcional relacionado ao encaminhamento.';
+
+
+--
+-- Name: COLUMN encaminhamento.valor_original_documento_apresentado; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.encaminhamento.valor_original_documento_apresentado IS 'Conteudo original usado para interpretar a apresentacao do documento.';
+
+
+--
+-- Name: COLUMN encaminhamento.valor_original_projeto; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.encaminhamento.valor_original_projeto IS 'Grafia original do projeto relacionado ao encaminhamento.';
 
 
 --
@@ -4187,6 +4219,13 @@ CREATE INDEX idx_encaminhamento_data ON ambulatorio.encaminhamento USING btree (
 
 
 --
+-- Name: idx_encaminhamento_projeto_estudo_id; Type: INDEX; Schema: ambulatorio; Owner: -
+--
+
+CREATE INDEX idx_encaminhamento_projeto_estudo_id ON ambulatorio.encaminhamento USING btree (projeto_estudo_id) WHERE (projeto_estudo_id IS NOT NULL);
+
+
+--
 -- Name: idx_encaminhamento_status; Type: INDEX; Schema: ambulatorio; Owner: -
 --
 
@@ -4528,6 +4567,14 @@ ALTER TABLE ONLY ambulatorio.dispositivo_implantado
 
 ALTER TABLE ONLY ambulatorio.encaminhamento
     ADD CONSTRAINT fk_encaminhamento_atendimento FOREIGN KEY (atendimento_id) REFERENCES ambulatorio.atendimento(atendimento_id) ON DELETE CASCADE;
+
+
+--
+-- Name: encaminhamento fk_encaminhamento_projeto; Type: FK CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.encaminhamento
+    ADD CONSTRAINT fk_encaminhamento_projeto FOREIGN KEY (projeto_estudo_id) REFERENCES ambulatorio.projeto_estudo(projeto_estudo_id) ON DELETE RESTRICT;
 
 
 --

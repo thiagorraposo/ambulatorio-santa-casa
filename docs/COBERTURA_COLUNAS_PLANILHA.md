@@ -22,18 +22,18 @@ cobertura física quando a cardinalidade ou obrigatoriedade do banco é incompat
 | Classificação | Quantidade | Percentual |
 | --- | ---: | ---: |
 | Coberta diretamente | 6 | 4,41% |
-| Coberta com transformação | 123 | 90,44% |
-| Parcialmente coberta | 6 | 4,41% |
+| Coberta com transformação | 125 | 91,91% |
+| Parcialmente coberta | 4 | 2,94% |
 | Não coberta | 0 | 0,00% |
 | Dúvida pendente | 1 | 0,74% |
 | Total | 136 | 100,00% |
 
-Cobertura plena atual: **129/136 (94,85%)**. Incluindo cobertura parcial:
+Cobertura plena atual: **131/136 (96,32%)**. Incluindo cobertura parcial:
 **135/136 (99,26%)**.
 
 A cobertura plena incorpora agora as cardinalidades confirmadas de projetos,
-exames e tratamento com BZN por paciente. As lacunas restantes pertencem aos seis
-itens parciais e à dúvida semântica documentada.
+exames e tratamento com BZN por paciente e o encaminhamento ampliado. As lacunas
+restantes pertencem aos quatro itens parciais e à dúvida semântica documentada.
 
 ## Alterações de classificação após confirmação humana
 
@@ -80,30 +80,32 @@ tempo foi usado?` passaram para cobertura com transformação. As tabelas
 por paciente, atendimento opcional, duração em dias, ano aproximado, prescrição,
 indicadores triestados, motivos separados e reações repetíveis.
 
-## Grupos parcialmente cobertos (6)
+## Impacto do encaminhamento ampliado
 
-### Demais parciais — 6
+`Trouxe encaminhamento` e `Encaminhado a qual projeto?` passaram de cobertura
+parcial para cobertura com transformação. `encaminhamento` agora preserva o
+booleano triestado, o projeto oficial opcional e os dois valores originais, sem
+criar projetos ou duplicar o vínculo com paciente.
+
+## Grupos parcialmente cobertos (4)
+
+### Demais parciais — 4
 
 | Cabeçalho | Lacuna atual |
 | --- | --- |
 | `Idade` | não preserva idade original estruturada |
 | `Pendencias/Observação` | divisão entre texto e pendência segue ambígua |
-| `Trouxe encaminhamento` | falta booleano de documento apresentado |
 | `Autorelato diagnóstico de Chagas do participante (data)` | autorrelato não equivale a resultado laboratorial |
 | `Familiares diretos (mãe, pai, irmãos) realizaram o exame de Chagas?` | histórico familiar não representa exame realizado |
-| `Encaminhado a qual projeto?` | falta FK do encaminhamento para projeto oficial |
 
 ## Não coberta (0)
 
-Não há rótulo confirmado sem destino físico. Isso não elimina as seis coberturas
+Não há rótulo confirmado sem destino físico. Isso não elimina as quatro coberturas
 parciais nem a dúvida de `Localizado`.
 
-## Cobertura projetada após migrations mínimas
+## Situação após as migrations mínimas
 
-A migration de encaminhamento eliminará as lacunas estruturais prioritárias
-restantes desse módulo. Itens de backlog e `Localizado` não serão promovidos sem
-nova evidência ou decisão.
-
-O contrato técnico dessa cobertura projetada está em
-`docs/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`. As contagens atuais não mudam
-até a migration ser implementada, aplicada e validada.
+As quatro migrations mínimas do MVP foram implementadas. Os quatro itens parciais
+restantes são backlog permitido, e `Localizado` não será promovido sem definição
+semântica. A implementação do encaminhamento está documentada em
+`docs/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`.

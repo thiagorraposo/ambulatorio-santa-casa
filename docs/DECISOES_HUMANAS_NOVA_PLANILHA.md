@@ -176,20 +176,20 @@ reprocessamento continuam como regras do futuro importador.
   `sim`, `não` ou sem dados;
 - a multiplicidade de contrarreferências continua indefinida.
 
-`encaminhamento` exige atendimento, o que é compatível, mas não possui indicador
-de documento apresentado nem FK para projeto. Esses dois campos exigem migration
-antes do MVP para representação estruturada. A contrarreferência pode permanecer
+`encaminhamento` exige atendimento, o que é compatível. O indicador de documento
+apresentado e a FK para projeto foram adicionados pela última migration mínima do
+MVP. A contrarreferência pode permanecer
 no backlog como estado consolidado em `acompanhamento_cuidado` até sua
 multiplicidade ser decidida. Classes 1 e 3 para encaminhamento; classes 2 e 4 para
 contrarreferência.
 
 A evolução foi fechada em
-`docs/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`: `encaminhamento` será ampliada
-por `ALTER TABLE` com booleano anulável, projeto oficial opcional e valores
+`docs/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`: `encaminhamento` foi ampliada
+por `sql/16_encaminhamento_ampliado.sql` com booleano anulável, projeto oficial opcional e valores
 originais separados. O atendimento obrigatório continuará determinando o
 paciente, sem FK redundante; não haverá nova tabela, backfill, escrita dupla,
-dedução ou criação automática de projetos. A especificação está pronta para
-migration incremental. Contrarreferência permanece fora dela.
+dedução ou criação automática de projetos. A migration foi validada em 23
+cenários. Contrarreferência permanece fora dela.
 
 ## Medidas, datas e valores
 
@@ -250,11 +250,11 @@ altera a cobertura de colunas, mas é bloqueio de implantação real.
 | aba, linha=atendimento, precedência e vazio | 1 | obrigatório no manifesto/importador |
 | identificação nome+nascimento e conflitos sem merge | 1, 5 | regra obrigatória; revisão humana precisa ter responsável |
 | prontuário permanente opcional | 4; futuramente 3 | não bloqueia enquanto ausente na fonte |
-| paciente–projeto e variante de falha | 3 | migration antes do MVP |
+| paciente–projeto e variante de falha | 3 | migration implementada e validada |
 | complicações repetíveis ligadas ao atendimento | 1, 2 | schema atual atende; data própria no backlog |
-| exame por paciente com atendimento opcional | 3 | migration antes do MVP |
+| exame por paciente com atendimento opcional | 3 | migration implementada e validada |
 | duração, cardinalidade e detalhes do tratamento BZN | 3 | migration implementada e validada |
-| documento apresentado e projeto do encaminhamento | 3 | migration antes do MVP |
+| documento apresentado e projeto do encaminhamento | 3 | migration implementada e validada |
 | múltiplas contrarreferências | 4 | backlog |
 | conversões, datas, anos e booleanos | 1 | obrigatório no manifesto/importador |
 | responsável legado–usuário | 4 | sem associação automática no MVP |
@@ -267,24 +267,20 @@ altera a cobertura de colunas, mas é bloqueio de implantação real.
 
 1. Aprovar este consolidado e declarar `Localizado` fora do mapeamento estruturado
    do MVP enquanto sua semântica não for definida.
-2. Especificar a migration incremental restante de encaminhamento/projeto;
-   paciente–projeto, exames por paciente e tratamento/reação adversa já foram
-   implementados.
-3. Implementar e validar a migration restante com dados sintéticos, sem alterar
-   migrations antigas.
-4. Formalizar manifesto versionado das duas abas clínicas, incluindo posição,
+2. Considerar concluídas as quatro migrations mínimas do MVP: paciente–projeto,
+   exames por paciente, tratamento/reação adversa e encaminhamento ampliado.
+3. Formalizar manifesto versionado das duas abas clínicas, incluindo posição,
    ocorrência, bloco, tipo, aliases, conversões e regras de vazio.
-5. Especificar identificação, precedência entre abas, conflitos, idempotência,
+4. Especificar identificação, precedência entre abas, conflitos, idempotência,
    retomada e cadeia de reprocessamento.
-6. Definir retenção, autoridades, revisão, roles, privilégios e auditoria do JSONB.
-7. Implementar o importador e testes exclusivamente com planilha sintética.
-8. Preparar servidor seguro, segredos, backup/restauração e observabilidade.
-9. Homologar uma carga controlada com revisão formal de erros antes da importação
+5. Definir retenção, autoridades, revisão, roles, privilégios e auditoria do JSONB.
+6. Implementar o importador e testes exclusivamente com planilha sintética.
+7. Preparar servidor seguro, segredos, backup/restauração e observabilidade.
+8. Homologar uma carga controlada com revisão formal de erros antes da importação
    real completa.
 
 ## Validação desta atualização
 
-`make project-check` foi executado. As verificações documentais passaram, mas
-`db-check` não pôde validar o banco porque o PostgreSQL local esperado não estava
-disponível/configurado. Como fallback, `make docs-check` e `git diff --check`
-foram executados com sucesso.
+`sql/16_encaminhamento_ampliado.sql` e seu teste transacional concluíram a última
+evolução mínima. A validação detalhada está em
+`docs/VALIDACAO_ENCAMINHAMENTO_AMPLIADO.md`.

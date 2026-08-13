@@ -17,15 +17,15 @@ Atualizado em: 2026-08-13
 A fonte detalhada das decisões é
 `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`.
 
-## 1. Concluir migrations mínimas
+## 1. Migrations mínimas concluídas
 
 1. Tratamento BZN e reações adversas: implementados e validados por
    `sql/15_tratamento_benzonidazol.sql` e pelo teste SQL correspondente.
-2. Implementar e testar encaminhamento com documento apresentado e projeto
-   oficial opcional conforme `docs/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`, já
-   pronta para migration incremental.
+2. Encaminhamento ampliado: implementado por
+   `sql/16_encaminhamento_ampliado.sql` e validado nos 23 cenários previstos.
 
-As migrations serão incrementais e não devem alterar scripts já aplicados.
+As quatro evoluções mínimas do MVP estão implementadas. Evoluções posteriores
+continuarão incrementais e não alterarão scripts já aplicados.
 
 ## 2. Formalizar manifesto e regras de importação
 
@@ -53,12 +53,11 @@ As migrations serão incrementais e não devem alterar scripts já aplicados.
 
 ## 4. Implementar e homologar
 
-1. Implementar e testar as migrations com dados sintéticos.
-2. Implementar o importador somente depois das migrations e do manifesto.
-3. Criar planilha sintética para testar repetição de pacientes, conflitos de abas,
+1. Implementar o importador somente depois do manifesto.
+2. Criar planilha sintética para testar repetição de pacientes, conflitos de abas,
    múltiplos exames, falhas de projetos, tratamento e reprocessamento.
-4. Validar idempotência, retomada, rejeições e rastreabilidade.
-5. Homologar carga controlada em servidor seguro antes da carga real completa.
+3. Validar idempotência, retomada, rejeições e rastreabilidade.
+4. Homologar carga controlada em servidor seguro antes da carga real completa.
 
 ## 5. Backlog permitido
 

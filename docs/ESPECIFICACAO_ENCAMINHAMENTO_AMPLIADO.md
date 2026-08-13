@@ -11,8 +11,8 @@ semânticas permanecem em `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`; o schema
 aplicado continua evidenciado por
 `docs/evidencias/schema_atual_ambulatorio.sql`.
 
-Esta etapa especifica uma migration incremental futura. Não altera schema,
-migrations antigas, evidência estrutural nem testes SQL. Contrarreferência fica
+A estrutura foi implementada por `sql/16_encaminhamento_ampliado.sql` e validada
+por `tests/sql/08_validar_encaminhamento_ampliado.sql`. Contrarreferência ficou
 fora da migration porque sua multiplicidade continua indefinida e ela não está
 inseparavelmente representada em `encaminhamento`.
 
@@ -205,10 +205,9 @@ O teste deverá usar dados exclusivamente sintéticos, `BEGIN`,
 
 ### Bloqueio da migration
 
-Nenhum bloqueio estrutural permanece. Tabela-alvo, campos, nulabilidade,
+Nenhum bloqueio estrutural permaneceu. Tabela-alvo, campos, nulabilidade,
 cardinalidades, PK, FK, deleção, índice, valores originais, timestamps,
-convivência e fronteira de contrarreferência estão definidos. A evolução está
-**pronta para uma migration incremental futura e seu teste SQL sintético**.
+convivência e fronteira de contrarreferência foram implementados e validados.
 
 ### Regra futura do importador
 
@@ -235,8 +234,9 @@ Essas regras bloqueiam a carga estruturada real desse módulo, mas não a migrat
 
 ## Prontidão
 
-Status: **especificação pronta para migration; migration ainda não implementada**.
+Status: **implementada e validada**.
 
-A implementação deverá ocorrer em novo arquivo incremental, sem editar
-`sql/08_tabelas_encaminhamentos_acompanhamento.sql`, sem backfill, sem escrita
-dupla, sem criação de catálogo pelo importador e sem incluir contrarreferência.
+`sql/16_encaminhamento_ampliado.sql` foi aplicada sem editar migrations
+anteriores. Os 23 cenários alcançaram o `ROLLBACK` e a auditoria confirmou
+ausência de dados sintéticos. Não houve backfill, escrita dupla, criação de
+catálogo, inclusão de `paciente_id` nem alteração de contrarreferência.

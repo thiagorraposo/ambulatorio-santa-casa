@@ -343,7 +343,7 @@ Título: Ampliação incremental da entidade existente de encaminhamento
 
 Data: 2026-08-13
 
-Status: Aceita e pronta para migration incremental
+Status: Aceita e implementada por `sql/16_encaminhamento_ampliado.sql`
 
 Contexto: `encaminhamento` já possui identidade própria e atendimento obrigatório,
 mas não registra se o documento foi apresentado nem o projeto oficial relacionado.

@@ -26,6 +26,47 @@ Além deste arquivo, atualize quando necessário:
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
 
+## 2026-08-13 - Implementação do encaminhamento ampliado
+
+Data: 2026-08-13
+
+Título da alteração: Última migration mínima do MVP.
+
+Arquivos principais:
+
+- `sql/16_encaminhamento_ampliado.sql`;
+- `tests/sql/08_validar_encaminhamento_ampliado.sql`;
+- `docs/VALIDACAO_ENCAMINHAMENTO_AMPLIADO.md`;
+- especificação, dump estrutural e documentos de estado, modelo, cobertura,
+  decisões e próximos passos.
+
+Impacto:
+
+- quatro colunas anuláveis adicionadas a `encaminhamento`;
+- FK opcional para `projeto_estudo` com `ON DELETE RESTRICT`;
+- índice parcial por projeto;
+- PK e FK de atendimento com `ON DELETE CASCADE` preservadas;
+- nenhuma tabela, `UNIQUE`, `CHECK` cruzado, backfill, escrita dupla,
+  `paciente_id`, projeto automático ou alteração de contrarreferência;
+- schema mantido em 37 tabelas;
+- cobertura plena elevada de 129/136 para 131/136.
+
+Validação:
+
+- divergência inicial de `db-check` diagnosticada como bloqueio do sandbox à
+  conexão local; PostgreSQL correto confirmado sem recriação;
+- migration aplicada com `ON_ERROR_STOP=1`;
+- 23 cenários aprovados, `ROLLBACK` alcançado e zero dados sintéticos finais;
+- `make db-schema-dump` executado;
+- `make project-check` e `git diff --check` aprovados;
+- hashes das migrations 00–15 preservados.
+
+Pendências:
+
+- manifesto e regras do importador;
+- governança, segurança e preparação do ambiente com Docker Compose;
+- contrarreferência múltipla e demais itens de backlog pós-MVP.
+
 ## 2026-08-13 - Especificação do encaminhamento ampliado
 
 Data: 2026-08-13

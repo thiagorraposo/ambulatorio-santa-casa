@@ -41,7 +41,7 @@ planilha.
 | `dados_clinicos_atendimento` | Sim | `sql/10_modulo_avaliacao_clinica.sql` | Banco e migration |
 | `diagnostico_chagas` | Sim | `sql/05_tabelas_diagnostico_sorologia.sql` | Banco e migration |
 | `dispositivo_implantado` | Sim | `sql/10_modulo_avaliacao_clinica.sql` | Banco e migration |
-| `encaminhamento` | Sim | `sql/08_tabelas_encaminhamentos_acompanhamento.sql` | Banco e migration |
+| `encaminhamento` | Sim | `sql/08_tabelas_encaminhamentos_acompanhamento.sql`, `sql/16_encaminhamento_ampliado.sql` | Banco e migrations |
 | `evento_clinico` | Sim | `sql/10_modulo_avaliacao_clinica.sql` | Banco e migration |
 | `exame_complementar_resultado` | Sim | `sql/07_tabelas_exames_complementares.sql` | Banco e migration |
 | `historico_familiar_chagas` | Sim | `sql/05_tabelas_diagnostico_sorologia.sql` | Banco e migration |
@@ -554,6 +554,8 @@ Campos principais:
 - `encaminhamento_id BIGSERIAL` PK.
 - `atendimento_id BIGINT NOT NULL` FK.
 - `tipo_encaminhamento_id BIGINT` FK opcional.
+- `documento_apresentado BOOLEAN` anulável.
+- `projeto_estudo_id BIGINT` FK opcional.
 - `origem_encaminhamento VARCHAR(60)`.
 - `destino_nome VARCHAR(180)`.
 - `destino_servico VARCHAR(180)`.
@@ -563,7 +565,7 @@ Campos principais:
 - `prioridade VARCHAR(30)`.
 - `motivo TEXT`.
 - `conduta_orientada TEXT`.
-- campos `valor_original_*`.
+- campos `valor_original_*`, incluindo documento apresentado e projeto.
 - `observacoes TEXT`.
 - timestamps `criado_em`, `atualizado_em`.
 
@@ -571,8 +573,10 @@ Restrições e índices:
 
 - FK `atendimento_id` -> `atendimento(atendimento_id)` com `ON DELETE CASCADE`.
 - FK `tipo_encaminhamento_id` -> `tipo_encaminhamento(tipo_encaminhamento_id)` com `ON DELETE SET NULL`.
+- FK `projeto_estudo_id` -> `projeto_estudo(projeto_estudo_id)` com `ON DELETE RESTRICT`.
 - Checks para origem, status e prioridade.
-- Índices em `atendimento_id`, `tipo_encaminhamento_id`, `status_encaminhamento` e `data_encaminhamento`.
+- Índices em `atendimento_id`, `tipo_encaminhamento_id`, `status_encaminhamento` e `data_encaminhamento`, além do índice parcial `idx_encaminhamento_projeto_estudo_id`.
+- Nenhuma `UNIQUE` adicional; paciente continua determinado pelo atendimento.
 
 ### `acompanhamento_cuidado`
 
