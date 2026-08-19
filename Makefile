@@ -1,4 +1,4 @@
-DB_ENV ?= local
+DB_ENV ?= docker
 
 ifneq (,$(wildcard .env))
 include .env
@@ -20,6 +20,10 @@ endif
 DB_SCHEMA ?= ambulatorio
 SCHEMA_DUMP ?= docs/evidencias/schema_atual_ambulatorio.sql
 DOCKER_SCHEMA_DUMP ?= /tmp/schema_ambulatorio_docker.sql
+BACKUP_DIR ?= backups_postgres
+BACKUP_FILE ?=
+RESTORE_ENV ?=
+DESTROY_ENV ?=
 SQL_TESTS := $(sort $(wildcard tests/sql/*.sql))
 SQL_MIGRATIONS := $(sort $(wildcard sql/[0-1][0-9]_*.sql))
 COMPOSE := docker compose --env-file .env
@@ -29,7 +33,8 @@ COMPOSE := docker compose --env-file .env
 .PHONY: help git-status db-check db-test db-migrate docs-check project-check \
 	db-schema-dump docker-config-check docker-up docker-status docker-wait \
 	docker-stop docker-recreate docker-logs docker-migrate docker-db-check docker-db-test \
-	docker-schema-dump docker-project-check docker-destroy
+	docker-schema-dump docker-project-check docker-destroy \
+	docker-backup docker-backup-list docker-restore docker-restore-check docker-restore-test
 
 help:
 	@echo "Comandos disponíveis:"
@@ -50,7 +55,12 @@ help:
 	@echo "  make docker-db-test  Executa os oito testes SQL no Docker"
 	@echo "  make docker-schema-dump Gera dump estrutural Docker em $(DOCKER_SCHEMA_DUMP)"
 	@echo "  make docker-project-check Executa o project-check no Docker"
-	@echo "  make docker-destroy  DESTROI container e volume Docker deste projeto"
+	@echo "  make docker-backup    Cria backup lógico custom em $(BACKUP_DIR)/"
+	@echo "  make docker-backup-list Lista backups locais ignorados pelo Git"
+	@echo "  make docker-restore BACKUP_FILE=... RESTORE_ENV=docker-restore"
+	@echo "  make docker-restore-check Valida o banco Docker restaurado"
+	@echo "  make docker-restore-test Executa os oito testes no banco restaurado"
+	@echo "  make docker-destroy DESTROY_ENV=docker  DESTROI os volumes Docker do projeto"
 
 git-status:
 	@git status --short --branch
@@ -105,6 +115,8 @@ docs-check:
 		docs/PADRAO_DE_COMMITS.md \
 		docs/DECISOES_ARQUITETURAIS.md \
 		docs/MODELO_FISICO_ATUAL.md \
+		docs/RECUPERACAO_POSTGRESQL_DOCKER.md \
+		docs/SEGURANCA_DE_DADOS.md \
 		docs/WORKFLOW_DE_DESENVOLVIMENTO.md; do \
 		if [ ! -s "$$file" ]; then \
 			echo "Ausente ou vazio: $$file"; \
@@ -200,6 +212,51 @@ docker-schema-dump: docker-wait
 docker-project-check: docker-wait
 	@$(MAKE) --no-print-directory project-check DB_ENV=docker
 
+docker-backup: docker-wait
+	@mkdir -p "$(BACKUP_DIR)"
+	@arquivo="$(BACKUP_DIR)/ambulatorio_$$(date -u +%Y%m%dT%H%M%SZ).dump"; \
+		temporario="$$arquivo.tmp"; \
+		$(COMPOSE) exec -T postgres pg_dump -U "$(POSTGRES_USER)" -d "$(POSTGRES_DB)" \
+			--format=custom --no-owner --no-privileges > "$$temporario" && \
+		$(COMPOSE) exec -T postgres pg_restore --list < "$$temporario" >/dev/null && \
+		mv "$$temporario" "$$arquivo" && \
+		echo "OK: backup lógico validado em $$arquivo" || { status=$$?; rm -f "$$temporario"; exit $$status; }
+
+docker-backup-list:
+	@mkdir -p "$(BACKUP_DIR)"
+	@find "$(BACKUP_DIR)" -maxdepth 1 -type f -name '*.dump' -printf '%TY-%Tm-%Td %TH:%TM  %10s bytes  %p\n' | sort -r
+
+docker-restore: docker-config-check
+	@test "$(RESTORE_ENV)" = "docker-restore" || { echo "Erro: confirme RESTORE_ENV=docker-restore; restore local não é suportado."; exit 1; }
+	@test -n "$(BACKUP_FILE)" -a -f "$(BACKUP_FILE)" || { echo "Erro: informe BACKUP_FILE apontando para um backup local existente."; exit 1; }
+	@$(COMPOSE) --profile recovery up -d postgres-restore
+	@container_id="$$( $(COMPOSE) --profile recovery ps -q postgres-restore )"; \
+		for tentativa in $$(seq 1 30); do \
+			saude="$$(docker inspect --format '{{.State.Health.Status}}' "$$container_id")"; \
+			[ "$$saude" = healthy ] && break; \
+			[ "$$saude" = unhealthy ] && { echo "Erro: PostgreSQL de restore unhealthy"; exit 1; }; \
+			sleep 2; \
+		done; \
+		[ "$$(docker inspect --format '{{.State.Health.Status}}' "$$container_id")" = healthy ] || { echo "Erro: timeout no ambiente de restore"; exit 1; }
+	@$(COMPOSE) exec -T postgres-restore psql -X -U "$(POSTGRES_USER)" -d "$(POSTGRES_DB)" -v ON_ERROR_STOP=1 \
+		-c 'DROP SCHEMA IF EXISTS ambulatorio CASCADE;'
+	@$(COMPOSE) exec -T postgres-restore pg_restore -U "$(POSTGRES_USER)" -d "$(POSTGRES_DB)" \
+		--exit-on-error --no-owner --no-privileges < "$(BACKUP_FILE)"
+	@echo "OK: backup restaurado exclusivamente no serviço Docker postgres-restore"
+
+docker-restore-check: docker-config-check
+	@$(COMPOSE) --profile recovery exec -T postgres-restore psql -X -U "$(POSTGRES_USER)" -d "$(POSTGRES_DB)" \
+		-v ON_ERROR_STOP=1 < sql/validar_backup_restaurado.sql
+
+docker-restore-test: docker-restore-check
+	@for test_file in $(SQL_TESTS); do \
+		echo "Executando $$test_file no restore"; \
+		$(COMPOSE) --profile recovery exec -T postgres-restore psql -X -U "$(POSTGRES_USER)" \
+			-d "$(POSTGRES_DB)" -v ON_ERROR_STOP=1 < "$$test_file" || exit 1; \
+	 done
+	@echo "OK: $(words $(SQL_TESTS)) teste(s) SQL executado(s) no restore"
+
 docker-destroy: docker-config-check
+	@test "$(DESTROY_ENV)" = "docker" || { echo "Erro: confirme DESTROY_ENV=docker; o PostgreSQL local não é suportado."; exit 1; }
 	@$(COMPOSE) down --volumes --remove-orphans
-	@echo "OK: somente o container, a rede e o volume Docker deste projeto foram removidos"
+	@echo "OK: somente containers, rede e volumes Docker deste projeto foram removidos"

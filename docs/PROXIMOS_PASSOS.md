@@ -48,8 +48,9 @@ continuarão incrementais e não alterarão scripts já aplicados.
 4. Roles e privilégios operacionais.
 5. Política de auditoria e acesso ao JSONB.
 6. Semântica de `Localizado`, somente se incluído no MVP.
-7. Servidor protegido, transporte seguro, segredos, backup/restauração e registro
-   de acesso.
+7. Servidor protegido, transporte seguro, segredos, política institucional de
+   backup/retenção e registro de acesso. O restore Docker validado cobre apenas
+   desenvolvimento e não substitui esses controles de produção.
 
 ## 4. Implementar e homologar
 

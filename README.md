@@ -7,7 +7,7 @@ O schema aplicado é `ambulatorio`. A principal evidência física versionada é
 ## Pré-requisitos
 
 - PostgreSQL com `psql` e `pg_dump`; o servidor pode ser local ou Docker.
-- Docker Engine com Docker Compose, para o ambiente isolado opcional.
+- Docker Engine com Docker Compose, ambiente padrão de desenvolvimento.
 - GNU Make.
 - Git.
 - Banco `ambulatorio_santa_casa`, usuário `ambulatorio_user` e schema `ambulatorio` já existentes.
@@ -36,10 +36,10 @@ Os parâmetros podem ser sobrescritos sem editar arquivos:
 make db-check DB_HOST=localhost DB_PORT=5432 DB_NAME=ambulatorio_santa_casa DB_USER=ambulatorio_user DB_SCHEMA=ambulatorio
 ```
 
-## PostgreSQL Docker opcional
+## PostgreSQL Docker padrão
 
-O PostgreSQL local continua sendo o ambiente padrão. Para usar o ambiente Docker
-isolado em `127.0.0.1:5433`, copie `.env.example` para `.env`, substitua a senha
+O PostgreSQL Docker isolado em `127.0.0.1:5433` é o ambiente padrão para
+desenvolvimento estrutural e testes. Copie `.env.example` para `.env`, substitua a senha
 fictícia por uma senha exclusiva de desenvolvimento e mantenha o arquivo local:
 
 ```bash
@@ -53,6 +53,8 @@ make docker-db-test
 O Compose executa `postgres:16.15`, persiste dados no volume nomeado
 `ambulatorio_santa_casa_postgres_data` e publica a porta somente no loopback. O
 `.env` é ignorado pelo Git e não deve reutilizar credenciais reais.
+O PostgreSQL local permanece intacto como alternativa manual, sempre selecionado
+explicitamente com `DB_ENV=local`.
 
 Escolha explicitamente o ambiente ao usar os alvos genéricos:
 
@@ -82,11 +84,33 @@ make db-check DB_ENV=docker
 | `make docker-db-test` | Executa os oito testes SQL no Docker. | Não persiste dados sintéticos. |
 | `make docker-schema-dump` | Gera dump estrutural Docker em `/tmp`. | Não altera o banco nem a evidência oficial. |
 | `make docker-project-check` | Executa o check completo contra o Docker. | Não persiste dados sintéticos. |
-| `make docker-destroy` | Remove container, rede e volume deste Compose. | **Destrutivo somente para o ambiente Docker.** |
+| `make docker-backup` | Cria e valida backup lógico custom do Docker. | Lê o banco e grava arquivo local ignorado. |
+| `make docker-backup-list` | Lista os backups lógicos locais. | Não. |
+| `make docker-restore BACKUP_FILE=... RESTORE_ENV=docker-restore` | Restaura no serviço Docker controlado. | **Substitui somente o schema do banco de recuperação.** |
+| `make docker-restore-check` | Confirma estrutura e catálogos restaurados. | Não. |
+| `make docker-restore-test` | Executa os oito testes transacionais no restore. | Não persiste dados sintéticos. |
+| `make docker-destroy DESTROY_ENV=docker` | Remove containers, rede e volumes deste Compose. | **Destrutivo somente para o ambiente Docker.** |
 
 Os alvos genéricos não aplicam migrations. `docker-migrate` aplica as migrations
-somente quando selecionado explicitamente, e `docker-destroy` é o único alvo que
-remove o volume Docker. Nenhum alvo Docker altera o PostgreSQL local.
+somente quando selecionado explicitamente, e `docker-destroy` exige a confirmação
+`DESTROY_ENV=docker` para remover volumes Docker. Nenhum alvo Docker altera o
+PostgreSQL local.
+
+## Backup e recuperação
+
+```bash
+make docker-backup
+make docker-backup-list
+make docker-restore BACKUP_FILE=backups_postgres/ambulatorio_AAAAMMDDTHHMMSSZ.dump RESTORE_ENV=docker-restore
+make docker-restore-check
+make docker-restore-test
+```
+
+Os backups usam o formato custom do `pg_dump` e ficam em `backups_postgres/`,
+diretório ignorado pelo Git. O restore usa `postgres-restore`, sem porta publicada
+e com o volume separado `ambulatorio_santa_casa_postgres_restore_data`. O alvo
+exige a confirmação literal `RESTORE_ENV=docker-restore` e não possui rota para o
+PostgreSQL local. Veja `docs/RECUPERACAO_POSTGRESQL_DOCKER.md`.
 
 ## Ordem segura para retomar o trabalho
 

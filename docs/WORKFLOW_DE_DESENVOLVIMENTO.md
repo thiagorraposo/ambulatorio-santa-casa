@@ -1,6 +1,6 @@
 # Workflow de Desenvolvimento
 
-Atualizado em: 2026-08-13
+Atualizado em: 2026-08-19
 
 ## Comandos Oficiais
 
@@ -19,17 +19,28 @@ Use os alvos do `Makefile` como interface local padrão:
 | `make docker-db-check` / `docker-db-test` | Validar conexão e testes no Docker. |
 | `make docker-schema-dump` | Gerar evidência Docker temporária em `/tmp`. |
 | `make docker-recreate` | Recriar o container preservando o volume nomeado. |
-| `make docker-destroy` | Remover explicitamente apenas o ambiente e o volume Docker deste projeto. |
+| `make docker-backup` / `docker-backup-list` | Criar ou localizar backups lógicos locais. |
+| `make docker-restore ...` | Restaurar somente no serviço Docker controlado. |
+| `make docker-restore-check` / `docker-restore-test` | Validar catálogo e testes no banco restaurado. |
+| `make docker-destroy DESTROY_ENV=docker` | Remover explicitamente apenas o ambiente e os volumes Docker deste projeto. |
 
-O ambiente padrão é `DB_ENV=local`, autenticado por `~/.pgpass` na porta 5432.
-O ambiente alternativo usa `DB_ENV=docker`, `.env` ignorado pelo Git e porta
-5433. Nunca inclua senha no prompt, em documentação ou em arquivos versionados.
+O ambiente padrão é `DB_ENV=docker`, com `.env` ignorado pelo Git e porta 5433.
+O ambiente local na porta 5432 permanece alternativa manual e só é selecionado
+explicitamente com `DB_ENV=local`; nenhuma rotina de restore dá suporte a ele.
+Nunca inclua senha no prompt, em documentação ou em arquivos versionados.
 `make db-schema-dump` gera somente estrutura; `docker-schema-dump` escreve por
 padrão em `/tmp/schema_ambulatorio_docker.sql` e não substitui a evidência oficial.
 
 ## Escolha explícita do PostgreSQL
 
-Local:
+Docker, padrão:
+
+```bash
+make project-check
+make docker-project-check
+```
+
+Local, alternativa manual:
 
 ```bash
 make project-check DB_ENV=local
@@ -44,9 +55,12 @@ make docker-migrate  # somente em volume novo/vazio
 make docker-project-check
 ```
 
-Não execute `db-migrate` no PostgreSQL local já aplicado. `docker-destroy` apaga
-o volume persistente e só deve ser chamado quando a destruição do ambiente Docker
-for intencional.
+Não execute `db-migrate` no PostgreSQL local já aplicado. `docker-destroy` exige
+`DESTROY_ENV=docker`, apaga os volumes persistentes e só deve ser chamado quando
+a destruição do ambiente Docker for intencional.
+
+O procedimento de backup, teste de restauração e recuperação após perda de
+container ou volume está em `docs/RECUPERACAO_POSTGRESQL_DOCKER.md`.
 
 ## Fluxo Oficial
 

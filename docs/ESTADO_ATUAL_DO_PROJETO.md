@@ -199,9 +199,9 @@ Resumo da reconciliação:
 - Suíte automatizada da futura aplicação e integração em CI; os oito testes SQL
   transacionais atuais continuam sendo a validação do banco.
 - Rotinas adicionais de teste para futuras fases incrementais do modelo físico.
-- Estratégia de deploy, backup e observabilidade.
-- Política operacional de atualização da imagem PostgreSQL e teste formal de
-  backup/restauração do volume Docker.
+- Estratégia de deploy e observabilidade; backup/restauração Docker de
+  desenvolvimento já foi validado, sem constituir política de produção.
+- Política operacional de atualização da imagem PostgreSQL.
 - Documentação operacional de execução dos scripts e restauração de ambiente.
 - Automação futura de CI, se o projeto passar a ter colaboração recorrente, API ou frontend.
 

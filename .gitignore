@@ -27,6 +27,7 @@ pgpass
 dump_com_dados/
 dumps_com_dados/
 db_backups/
+backups_postgres/
 
 # Dados reais ou sensiveis
 dados_reais/

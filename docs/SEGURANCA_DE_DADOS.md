@@ -1,6 +1,6 @@
 # Segurança de Dados
 
-Atualizado em: 2026-07-01
+Atualizado em: 2026-08-19
 
 ## Por que Dados Clínicos São Sensíveis
 
@@ -50,12 +50,25 @@ pg_dump -h localhost -U ambulatorio_user -d ambulatorio_santa_casa --schema=ambu
 - a porta Docker padrão é `127.0.0.1:5433`, sem exposição em interfaces externas;
 - o volume `ambulatorio_santa_casa_postgres_data` é persistente e pode conter
   dados sensíveis no futuro; não copiá-lo, publicá-lo nem tratá-lo como backup;
-- `make docker-stop` preserva dados; `make docker-destroy` remove somente o
-  ambiente Docker e seu volume e deve ser usado apenas com intenção explícita;
+- `make docker-stop` preserva dados; `make docker-destroy DESTROY_ENV=docker`
+  remove somente o ambiente Docker e seus volumes, com confirmação explícita;
 - o ambiente Docker atual é destinado a migrations e dados sintéticos, não está
   autorizado para dados clínicos reais;
 - dumps comparativos do Docker devem ser somente estruturais e permanecer em
   `/tmp`, salvo decisão explícita de atualizar a evidência oficial.
+
+## Backups lógicos e segredos
+
+- backups criados por `make docker-backup` ficam em `backups_postgres/`, ignorado
+  pelo Git, e podem conter todas as linhas do banco;
+- nunca versionar, anexar a tickets ou enviar esses arquivos por canais não autorizados;
+- `.env` é a fonte local das variáveis Docker; mantenha permissões restritas e
+  use senha exclusiva de desenvolvimento, nunca credencial institucional;
+- o Makefile e a documentação não contêm senha; a configuração vem do ambiente;
+- restore só é suportado no serviço `postgres-restore`, sem porta publicada, com
+  confirmação `RESTORE_ENV=docker-restore` e volume separado;
+- desenvolvimento e testes usam somente dados sintéticos. Produção futura exigirá
+  servidor, roles, segredos, retenção, auditoria e política institucional próprios.
 
 ## Planilhas Reais
 

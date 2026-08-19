@@ -1,6 +1,6 @@
 # Registro de Alterações
 
-Atualizado em: 2026-08-13
+Atualizado em: 2026-08-19
 
 ## Como Registrar Mudanças
 
@@ -25,6 +25,24 @@ Além deste arquivo, atualize quando necessário:
 - `docs/HISTORICO_DE_IMPLEMENTACAO.md`
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
+
+## 2026-08-19 - Backup, restauração controlada e Docker como padrão
+
+Data: 2026-08-19
+
+Título da alteração: Recuperação lógica validável no Docker de desenvolvimento.
+
+Impacto:
+
+- backups custom do `pg_dump` em diretório local ignorado;
+- serviço de restauração sem porta publicada e com volume separado;
+- confirmação explícita do ambiente para qualquer restore;
+- validação de tabelas, constraints, índices, catálogos e oito testes SQL;
+- Docker Compose passa a ser o padrão estrutural e de testes; PostgreSQL local
+  permanece preservado como alternativa manual explícita.
+
+Validação: fluxo completo de dump/restore, `docker-project-check`, confirmação de
+`ROLLBACK`, ausência sintética e `git diff --check`.
 
 ## 2026-08-13 - PostgreSQL 16 reproduzível com Docker Compose
 
