@@ -1,6 +1,6 @@
 # Registro de Alterações
 
-Atualizado em: 2026-08-19
+Atualizado em: 2026-08-21
 
 ## Como Registrar Mudanças
 
@@ -25,6 +25,23 @@ Além deste arquivo, atualize quando necessário:
 - `docs/HISTORICO_DE_IMPLEMENTACAO.md`
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
+
+## 2026-08-21 - Manifesto físico versionado da nova planilha
+
+Data: 2026-08-21
+
+Título da alteração: Manifesto JSON `planilha_ambulatorio_v1` das duas abas clínicas.
+
+Impacto:
+
+- 142 posições de portadores e 136 de não portadores formalizadas sem valores;
+- 136 rótulos físicos consolidados em 133 chaves semânticas por aliases conhecidos;
+- destinos, cobertura, transformações, blocos e ocorrências registrados por coluna;
+- validação automatizada contra inventário, schema versionado e cabeçalhos locais;
+- nenhuma alteração de schema, migration, dados ou implementação do importador.
+
+Validação: `make manifest-check`, `make docs-check`,
+`make docker-project-check` e `git diff --check`.
 
 ## 2026-08-19 - Backup, restauração controlada e Docker como padrão
 

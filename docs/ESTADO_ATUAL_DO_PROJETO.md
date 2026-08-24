@@ -207,13 +207,13 @@ Resumo da reconciliação:
 
 ## Próximos Passos Recomendados
 
-1. Formalizar o manifesto das duas abas clínicas com aliases, blocos, posições, ocorrências, conversões e regras de vazio.
+1. Especificar identificação, conflitos, idempotência e retomada do importador a partir do manifesto físico v1 concluído.
 2. Resolver os bloqueios operacionais e de segurança antes de usar dados reais.
 
 ## Próxima fase técnica
 
-1. Não implementar o importador antes de fechar o manifesto e suas regras; as quatro migrations mínimas do MVP estão concluídas.
-2. Manter dados reais bloqueados até existir manifesto, governança, roles, auditoria, retenção e ambiente seguro.
+1. Não implementar o importador antes de fechar suas regras operacionais; o manifesto e as quatro migrations mínimas do MVP estão concluídos.
+2. Manter dados reais bloqueados até existir governança, roles, auditoria, retenção e ambiente seguro.
 
 ## Regra Permanente de Documentação
 

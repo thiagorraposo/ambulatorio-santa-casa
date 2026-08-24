@@ -34,7 +34,8 @@ COMPOSE := docker compose --env-file .env
 	db-schema-dump docker-config-check docker-up docker-status docker-wait \
 	docker-stop docker-recreate docker-logs docker-migrate docker-db-check docker-db-test \
 	docker-schema-dump docker-project-check docker-destroy \
-	docker-backup docker-backup-list docker-restore docker-restore-check docker-restore-test
+	docker-backup docker-backup-list docker-restore docker-restore-check docker-restore-test \
+	manifest-check
 
 help:
 	@echo "Comandos disponíveis:"
@@ -43,6 +44,7 @@ help:
 	@echo "  make db-check        Valida conexão, banco, schema e usuário"
 	@echo "  make db-test         Executa todos os testes em tests/sql/"
 	@echo "  make docs-check      Verifica documentos obrigatórios e não vazios"
+	@echo "  make manifest-check  Valida o manifesto físico v1 e a fonte local"
 	@echo "  make project-check   Executa todos os checks locais não destrutivos"
 	@echo "  make db-schema-dump  Atualiza somente o dump estrutural do schema $(DB_SCHEMA)"
 	@echo "  make docker-up       Sobe somente o PostgreSQL Docker"
@@ -115,6 +117,7 @@ docs-check:
 		docs/PADRAO_DE_COMMITS.md \
 		docs/DECISOES_ARQUITETURAIS.md \
 		docs/MODELO_FISICO_ATUAL.md \
+		docs/MANIFESTO_FISICO_PLANILHA_V1.md \
 		docs/RECUPERACAO_POSTGRESQL_DOCKER.md \
 		docs/SEGURANCA_DE_DADOS.md \
 		docs/WORKFLOW_DE_DESENVOLVIMENTO.md; do \
@@ -126,6 +129,9 @@ docs-check:
 		fi; \
 	done; \
 	exit $$missing
+
+manifest-check:
+	@python3 scripts/validar_manifesto_planilha.py --fonte
 
 project-check: docs-check db-test
 	@git diff --check

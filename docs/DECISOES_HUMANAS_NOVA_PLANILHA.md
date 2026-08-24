@@ -1,6 +1,6 @@
 # Decisões Humanas para a Nova Planilha
 
-Atualizado em: 2026-08-13
+Atualizado em: 2026-08-21
 
 ## Finalidade e precedência
 
@@ -12,6 +12,10 @@ fonte do schema aplicado de 37 tabelas.
 
 Nenhuma decisão deste documento altera o banco por si só. Mudanças físicas deverão
 ser especificadas e implementadas em migrations incrementais futuras.
+
+O layout físico que materializa estas decisões é
+`manifestos/planilha_ambulatorio_v1.json`, fonte oficial para a futura
+especificação do importador.
 
 ## Legenda da classificação
 
@@ -269,8 +273,8 @@ altera a cobertura de colunas, mas é bloqueio de implantação real.
    do MVP enquanto sua semântica não for definida.
 2. Considerar concluídas as quatro migrations mínimas do MVP: paciente–projeto,
    exames por paciente, tratamento/reação adversa e encaminhamento ampliado.
-3. Formalizar manifesto versionado das duas abas clínicas, incluindo posição,
-   ocorrência, bloco, tipo, aliases, conversões e regras de vazio.
+3. Usar o manifesto versionado concluído das duas abas clínicas como base da
+   especificação do importador.
 4. Especificar identificação, precedência entre abas, conflitos, idempotência,
    retomada e cadeia de reprocessamento.
 5. Definir retenção, autoridades, revisão, roles, privilégios e auditoria do JSONB.

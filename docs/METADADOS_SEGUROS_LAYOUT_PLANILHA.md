@@ -1,6 +1,6 @@
 # Metadados Seguros do Layout da Planilha
 
-Atualizado em: 2026-07-20
+Atualizado em: 2026-08-21
 
 ## Fonte canônica
 
@@ -27,13 +27,12 @@ continua útil apenas como histórico de intenção e mapeamento.
 
 Nenhum valor de célula assistencial ou identificável integra este inventário.
 
-## Requisito do manifesto
+## Manifesto oficial
 
-O futuro manifesto versionado deve conter apenas versão, aba, ordem, cabeçalho,
-posição e ocorrência. Deve haver configuração distinta para cada aba principal.
-Espaços e grafias originais devem ser preservados junto da chave normalizada.
-As abas operacional e auxiliares permanecem fora do manifesto de importação até
-confirmação humana.
+O requisito foi implementado em `manifestos/planilha_ambulatorio_v1.json`, fonte
+oficial executável do layout físico `v1`. A descrição humana e o procedimento de
+validação estão em `docs/MANIFESTO_FISICO_PLANILHA_V1.md`. As abas operacional e
+auxiliares permanecem fora do manifesto de importação.
 
 ## Decisões aplicáveis ao MVP
 

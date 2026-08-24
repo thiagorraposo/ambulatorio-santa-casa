@@ -134,8 +134,8 @@ foram definidos posteriormente em `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`.
 ## Cobertura histórica antes das decisões humanas
 
 A contagem conservadora usa os 136 rótulos distintos das duas abas principais.
-Cabeçalhos repetidos contam uma vez no denominador semântico, mas continuam como
-ocorrências físicas separadas no futuro manifesto.
+Cabeçalhos repetidos contam uma vez no denominador semântico e estão registrados
+como ocorrências físicas separadas no manifesto v1.
 
 | Classificação | Quantidade | Percentual |
 | --- | ---: | ---: |

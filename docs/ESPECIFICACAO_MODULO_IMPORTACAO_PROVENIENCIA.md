@@ -187,7 +187,9 @@ O teste SQL sintético e transacional cobre:
 
 ## Pendências delimitadas que não bloqueiam a migration
 
-1. O manifesto físico seguro de abas e colunas ainda não existe; bloqueia o importador, não as tabelas genéricas.
+1. O manifesto físico seguro existe em `manifestos/planilha_ambulatorio_v1.json`;
+   identificação, precedência, idempotência e tratamento de conflitos ainda devem
+   ser especificados antes do importador.
 2. Os valores reais de responsável não foram inventariados; serão preservados sem normalização.
 3. A política institucional de prazo de retenção ainda precisa ser aprovada; até lá não haverá purga automática.
 4. A associação genérica não possui FK ao registro heterogêneo; validação transacional e auditoria de órfãos pertencem ao importador/operação futura.

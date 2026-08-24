@@ -27,7 +27,10 @@ A fonte detalhada das decisões é
 As quatro evoluções mínimas do MVP estão implementadas. Evoluções posteriores
 continuarão incrementais e não alterarão scripts já aplicados.
 
-## 2. Formalizar manifesto e regras de importação
+## 2. Especificar regras do importador a partir do manifesto v1
+
+O manifesto físico foi concluído em `manifestos/planilha_ambulatorio_v1.json`.
+Restam as regras operacionais abaixo antes de implementar o importador sintético:
 
 1. Configuração distinta por aba, posição, ocorrência, bloco e tipo.
 2. Precedência de portadores em conflito entre abas.
@@ -54,7 +57,8 @@ continuarão incrementais e não alterarão scripts já aplicados.
 
 ## 4. Implementar e homologar
 
-1. Implementar o importador somente depois do manifesto.
+1. Implementar o importador somente depois de especificar identificação,
+   conflitos, idempotência e retomada a partir do manifesto v1.
 2. Criar planilha sintética para testar repetição de pacientes, conflitos de abas,
    múltiplos exames, falhas de projetos, tratamento e reprocessamento.
 3. Validar idempotência, retomada, rejeições e rastreabilidade.

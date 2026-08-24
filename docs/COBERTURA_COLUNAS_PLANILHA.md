@@ -1,6 +1,6 @@
 # Cobertura das Colunas da Planilha pelo Núcleo Físico
 
-Atualizado em: 2026-08-13
+Atualizado em: 2026-08-21
 
 ## Fonte e critério
 
@@ -8,6 +8,8 @@ A cobertura usa os 136 rótulos distintos das duas abas clínicas e o schema fí
 atual de 37 tabelas. As decisões humanas consolidadas em
 `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md` resolvem semânticas, mas não contam como
 cobertura física quando a cardinalidade ou obrigatoriedade do banco é incompatível.
+O detalhamento por posição, aba e destino está no manifesto oficial
+`manifestos/planilha_ambulatorio_v1.json`.
 
 - **Direta:** destino semanticamente equivalente sem decomposição.
 - **Com transformação:** destino atual preserva toda a informação após conversão,

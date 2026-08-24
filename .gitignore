@@ -48,6 +48,8 @@ dados_pacientes/
 # Temporarios PostgreSQL e arquivos locais
 postgres_tmp/
 pg_tmp/
+__pycache__/
+*.py[cod]
 *.tmp
 *.temp
 *.swp
