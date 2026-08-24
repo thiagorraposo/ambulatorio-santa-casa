@@ -174,9 +174,16 @@ Não existe token aprovado para desconhecido ou não se aplica.
   saturação percentual e pressões mmHg;
 - FEVE e saturação removem somente um sufixo literal `%`, quando presente, e
   preservam o texto original; não dividem por 100;
-- duração de BZN só é convertida quando o texto explicita uma unidade cuja regra
-  esteja aprovada. Como as unidades textuais aceitas ainda não foram decididas,
-  valor textual fica pendente; valor numérico isolado também não presume dias.
+- duração cumprida de BZN aceita somente inteiro positivo em célula numérica ou
+  nos formatos textuais `N`, `N dia`, `N dias`, `N semana` e `N semanas`, após
+  aparar e colapsar espaços e sem distinguir maiúsculas;
+- inteiro isolado ou acompanhado de `dia`/`dias` é gravado como `N` dias;
+  `semana`/`semanas` é convertido exatamente por `N × 7` dias;
+- zero, negativos, decimais, intervalos, aproximações, datas, meses, anos,
+  abreviações e combinações de unidades são ambíguos: não são estimados, ficam
+  sem promoção estruturada e exigem revisão;
+- `valor_original_duracao` e `dados_brutos` preservam sempre a representação
+  recebida, inclusive quando a conversão for bem-sucedida.
 
 NYHA aceita somente `I`, `II`, `III` ou `IV` após espaços externos e conversão
 para maiúsculas. Sexo, raça, comunidade, forma clínica, classificação, sorologia,
@@ -192,7 +199,7 @@ Lookup é sempre por código oficial existente, nunca por criação automática.
 
 | Chave do manifesto | Código oficial |
 | --- | --- |
-| `sami_trop_aim3` | `sami_trop_aim3` |
+| `sami_trop_aim3` / `sami_trop_aim3_pendencia` | `sami_trop_aim3` |
 | `sami_trop_1_1` | `sami_trop_1_1` |
 | `parachute` / `parachute_falha` | `parachute` |
 | `benbrasil` / `benbrasil_falha` | `benbrasil` |
@@ -212,6 +219,51 @@ e triestado; contradição entre valores não é resolvida por inferência.
 `eco` usa `ecocardiograma`; `de_imagem` usa `imagem`; `laboratoriais`, `holter`,
 `teste_ergometrico`, `endoscopia`, `colonoscopia` e `mapa` usam códigos homônimos;
 `outros` usa `outro` e preserva o tipo original. Vazio não usa `nao_informado`.
+
+O conjunto ECG da mesma linha usa uma ocorrência de
+`atendimento_exame_complementar` com tipo `eletrocardiograma`: `ecg` alimenta
+`trouxe_exame`, `ecg_solicitado` alimenta `solicitado_exame`, resultado alimenta
+`resumo_resultado` e a data alimenta `data_realizacao`. Glicemia, HDL, LDL e
+triglicerídeos criam resultados numerados por `nome_campo` em
+`exame_complementar_resultado`, sob uma ocorrência `laboratoriais` do atendimento;
+a data de colesterol alimenta `data_realizacao` dessa ocorrência. Todos os
+valores originais são preservados.
+
+### Medicamentos, comorbidades e demais domínios
+
+Os únicos aliases de medicamento sustentados pelo catálogo físico são:
+
+| Chave do manifesto | Código oficial |
+| --- | --- |
+| `anti_hipertensivo` | `antihipertensivo_nao_especificado` |
+| `diureticos` | `diuretico_nao_especificado` |
+| `anti_arritmicos` | `antiarritmico_nao_especificado` |
+| `alfa_betabloqueador` | `betabloqueador_nao_especificado` |
+
+As demais colunas de medicamentos não ganham alias de catálogo: usam
+`atendimento_medicamento.nome_medicamento_livre` com o rótulo canônico da coluna
+e o booleano em `uso_atual`. Isso não cria item em `medicamento`.
+
+Não há aliases de comorbidade aprovados nem catálogo inicial versionado. A chave
+da coluna só pode resolver um registro oficial previamente existente por nome
+canônico; zero ou múltiplos candidatos geram conflito e nenhuma associação. O
+importador nunca cria `comorbidade` automaticamente.
+
+Além dos booleanos aprovados, somente NYHA possui aliases fechados (`I`, `II`,
+`III`, `IV`). Sexo, raça, comunidade tradicional, forma/classificação clínica,
+sorologia e origem do encaminhamento não possuem variantes de origem aprovadas;
+aceitam apenas valor já igual ao domínio físico após normalização de espaços e
+caixa quando a comparação for inequívoca. Qualquer variante desconhecida exige
+revisão. As tabelas de aliases ficam versionadas em `aliases_versionados` no
+manifesto; lista vazia significa deliberadamente “nenhum alias aprovado”.
+
+### Contexto do atendimento
+
+`ambulatorio_unicamente` grava `atendimento.ambulatorio_unicamente` e
+`ambulatorio_anexo_ao_projeto` grava
+`atendimento.ambulatorio_anexo_projeto`. Ambos são booleanos triestado e não são
+projetos. Se os dois forem `TRUE`, a linha viola a decisão física, não cria o
+atendimento e é `rejeitada`; nenhum valor é escolhido por precedência.
 
 Classes de medicamentos e comorbidades só usam códigos oficiais já existentes e
 explicitamente associados à chave do manifesto. Encaminhamento só aceita projeto
@@ -352,22 +404,14 @@ PostgreSQL controlado, fora de logs, Git, APIs genéricas e dumps compartilhados
 
 ### 1. Bloqueiam o importador
 
-- corrigir ou confirmar no manifesto os destinos de
-  `ambulatorio_unicamente` e `ambulatorio_anexo_ao_projeto`, hoje classificados
-  como projeto embora sejam contexto do atendimento;
-- fechar o mapeamento das colunas com cobertura `parcial` antes de promovê-las;
-  elas podem continuar somente no bruto, mas não podem ser importadas como se o
-  destino estivesse decidido;
-- versionar aliases aceitos para domínios clínicos e classes de medicamentos e
-  comorbidades que ainda não possuem correspondência fechada por código;
-- definir as unidades e expressões aceitas para duração cumprida de BZN;
-- definir autoridade e fluxo operacional de revisão para liberar pendências em
-  qualquer uso com dados reais.
+Nenhuma pendência técnica bloqueia o importador sintético do MVP. As onze chaves
+com cobertura `parcial` possuem comportamento fechado: ficam no bruto, não são
+promovidas e tornam uma linha clínica válida `importada_com_pendencia`. Elas só
+podem ganhar destino pleno após decisão humana específica e atualização
+versionada do contrato.
 
-Os quatro primeiros itens bloqueiam a implementação completa de todas as colunas,
-mas não impedem um importador sintético limitado aos campos com regra fechada,
-desde que ele recuse promoção dos campos pendentes. Governança bloqueia dados
-reais, não os testes sintéticos.
+Autoridade de importação, responsável por revisão, roles, privilégios, retenção e
+auditoria de acesso continuam bloqueando exclusivamente dados reais.
 
 ### 2. Podem ser tratadas durante a implementação
 
@@ -393,8 +437,9 @@ Esses itens não autorizam alterar as regras normativas deste documento.
 
 ## Critério de prontidão
 
-Estas regras estão prontas para orientar a implementação de um importador
-**sintético e deliberadamente limitado aos mapeamentos fechados**. A implementação
-completa de todas as colunas e qualquer carga real continuam bloqueadas pelos
-itens da classe 1. Alterar uma regra normativa exige atualização explícita deste
-documento e, quando afetar layout/destino, nova versão do manifesto.
+Estas regras e o manifesto formam contrato fechado para implementar o importador
+sintético do MVP. “Fechado” inclui o tratamento determinístico das onze chaves
+parciais somente no bruto; não significa cobertura estruturada artificial. Dados
+reais continuam bloqueados pela governança institucional. Alterar uma regra
+normativa exige atualização explícita deste documento e, quando afetar
+layout/destino, revisão versionada do manifesto.

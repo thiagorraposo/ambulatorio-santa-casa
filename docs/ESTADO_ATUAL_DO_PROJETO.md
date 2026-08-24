@@ -33,7 +33,10 @@ suíte automatizada da aplicação, CI ou aplicação executável versionados.
 - A rotina de validação usa transação com `ROLLBACK`, não altera a estrutura física do banco e não deixa dados de teste persistidos quando executada com sucesso.
 - A rotina foi executada com sucesso em 2026-07-16: as 25 tabelas receberam dados sintéticos temporários, os testes de FK, `UNIQUE`, `CHECK` e `NOT NULL` foram aprovados, e uma consulta posterior confirmou ausência de dados de teste persistidos.
 - A nova fonte canônica de layout é o arquivo local e ignorado pelo Git `planejamento/Nova Planilha ambulatório.xlsx`; a análise usou somente metadados seguros.
-- As duas abas clínicas principais possuem 136 rótulos semânticos distintos. Após as quatro migrations mínimas, a cobertura atual está em `docs/COBERTURA_COLUNAS_PLANILHA.md`: 131 estão plenamente cobertos, 4 parcialmente cobertos, nenhum está não coberto e 1 permanece semanticamente desconhecido.
+- As duas abas clínicas principais possuem 136 rótulos físicos distintos. A
+  reconciliação executável em `docs/COBERTURA_COLUNAS_PLANILHA.md` confirma 124
+  plenamente cobertos, 11 parciais com comportamento bruto definido, nenhum não
+  coberto e `Localizado` excluído do estruturado.
 - As decisões semânticas e a rota até o MVP estão consolidadas em `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`.
 - A associação canônica entre paciente e projeto foi aplicada por
   `sql/13_associacao_paciente_projeto.sql` e validada nos 17 cenários definidos em
@@ -207,11 +210,9 @@ Resumo da reconciliação:
 
 ## Próximos Passos Recomendados
 
-1. Resolver os bloqueios de mapeamento classificados na especificação normativa
-   do importador v1.
-2. Implementar e validar primeiro um importador limitado a dados sintéticos e aos
-   mapeamentos fechados.
-3. Resolver os bloqueios operacionais e de segurança antes de usar dados reais.
+1. Implementar e validar o importador do MVP somente com dados sintéticos,
+   respeitando os onze campos parciais sem promoção estruturada.
+2. Resolver os bloqueios operacionais e de segurança antes de usar dados reais.
 
 ## Próxima fase técnica
 

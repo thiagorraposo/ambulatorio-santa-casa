@@ -21,6 +21,68 @@ ALIASES = {
     "responsavel_pela_digitacao":"responsavel_pela_digitacao",
 }
 
+ALIASES_VERSIONADOS = {
+    "booleanos": {
+        "true": ["sim", "S", "x", "1", "verdadeiro"],
+        "false": ["não", "N", "0", "falso"],
+    },
+    "projetos": {
+        "sami_trop_aim3": "sami_trop_aim3",
+        "sami_trop_aim3_pendencia": "sami_trop_aim3",
+        "sami_trop_1_1": "sami_trop_1_1",
+        "parachute": "parachute",
+        "parachute_falha": "parachute",
+        "benbrasil": "benbrasil",
+        "benbrasil_falha": "benbrasil",
+        "epoca": "epoca",
+        "epoca_falha": "epoca",
+        "santa_casa_dica": "santa_casa_dica",
+        "santa_casa_renomica": "renomica",
+        "santa_casa_archimedes": "archimedes",
+        "santa_casa_charm": "charm",
+        "lxe_novartis": "lxe_novartis",
+        "lxe_novartis_falha": "lxe_novartis",
+    },
+    "exames": {
+        "ecg": "eletrocardiograma",
+        "ecg_solicitado": "eletrocardiograma",
+        "resultado_ecg": "eletrocardiograma",
+        "data_do_ecg": "eletrocardiograma",
+        "feve": "ecocardiograma",
+        "valor_da_glicemia": "laboratoriais",
+        "valor_de_colesterol_hdl": "laboratoriais",
+        "valor_de_colesterol_ldl": "laboratoriais",
+        "triglicerideos": "laboratoriais",
+        "data_do_exame_colesterol": "laboratoriais",
+        "eco": "ecocardiograma",
+        "laboratoriais": "laboratoriais",
+        "de_imagem": "imagem",
+        "holter": "holter",
+        "endoscopia": "endoscopia",
+        "colonoscopia": "colonoscopia",
+        "teste_ergometrico": "teste_ergometrico",
+        "mapa": "mapa",
+        "outros": "outro",
+    },
+    "medicamentos": {
+        "anti_hipertensivo": "antihipertensivo_nao_especificado",
+        "diureticos": "diuretico_nao_especificado",
+        "anti_arritmicos": "antiarritmico_nao_especificado",
+        "alfa_betabloqueador": "betabloqueador_nao_especificado",
+    },
+    "comorbidades": {},
+    "dominios": {
+        "nyha": ["I", "II", "III", "IV"],
+        "sexo": [],
+        "raca": [],
+        "tipo_comunidade_tradicional": [],
+        "forma_clinica": [],
+        "classificacao_clinica": [],
+        "resultado_sorologia": [],
+        "origem_encaminhamento": [],
+    },
+}
+
 def semantic_key(header): return ALIASES.get(slug(header), slug(header))
 
 def target(key, header, block):
@@ -33,6 +95,8 @@ def target(key, header, block):
       "sexo":("paciente","sexo","com_transformacao","normalizar domínio e preservar bruto"), "raca":("paciente","raca","com_transformacao","normalizar domínio e preservar bruto"),
       "endereco":("paciente_endereco","endereco","direta","preservar texto"), "cidade":("paciente_endereco","cidade","direta","preservar texto"),
       "telefone_de_contato":("paciente_contato","telefone","direta","preservar texto"),
+      "ambulatorio_unicamente":("atendimento","ambulatorio_unicamente","com_transformacao","normalizar booleano triestado; não pode ser verdadeiro junto de ambulatorio_anexo_ao_projeto"),
+      "ambulatorio_anexo_ao_projeto":("atendimento","ambulatorio_anexo_projeto","com_transformacao","normalizar booleano triestado; não pode ser verdadeiro junto de ambulatorio_unicamente"),
       "pertence_a_comunidade_quilombola_ou_indigena":("paciente","pertence_comunidade_tradicional","com_transformacao","normalizar booleano triestado"),
       "qual_indigena_ou_quilombola":("paciente","tipo_comunidade_tradicional","com_transformacao","normalizar domínio"),
       "trouxe_encaminhamento":("encaminhamento","documento_apresentado","com_transformacao","normalizar booleano triestado"),
@@ -51,19 +115,26 @@ def target(key, header, block):
       "ano_do_ultimo_avc":("evento_clinico","ano_evento","com_transformacao","converter para ano sem inventar data"),
       "portador_de_marcapasso":("dispositivo_implantado","possui_dispositivo","com_transformacao","tipo_dispositivo=marcapasso"),
       "portador_de_cdi":("dispositivo_implantado","possui_dispositivo","com_transformacao","tipo_dispositivo=cdi"),
-      "resultado_ecg":("paciente_exame_complementar","resultado_texto","com_transformacao","tipo=ecg"),
-      "data_do_ecg":("atendimento_exame_complementar","data_realizacao","com_transformacao","converter data; estrutura legada específica"),
+      "ecg":("atendimento_exame_complementar","trouxe_exame","com_transformacao","tipo=eletrocardiograma; normalizar booleano triestado e consolidar com resultado e data do ECG da mesma linha"),
+      "resultado_ecg":("atendimento_exame_complementar","resumo_resultado","com_transformacao","tipo=eletrocardiograma; preservar texto e consolidar com indicadores e data do ECG da mesma linha"),
+      "data_do_ecg":("atendimento_exame_complementar","data_realizacao","com_transformacao","tipo=eletrocardiograma; converter dd/mm/aaaa e consolidar com indicadores e resultado do ECG da mesma linha"),
+      "ecg_solicitado":("atendimento_exame_complementar","solicitado_exame","com_transformacao","tipo=eletrocardiograma; normalizar booleano triestado e consolidar com resultado e data do ECG da mesma linha"),
+      "valor_da_glicemia":("exame_complementar_resultado","valor_numerico","com_transformacao","tipo=laboratoriais; nome_campo=glicemia; converter número e preservar original"),
+      "valor_de_colesterol_hdl":("exame_complementar_resultado","valor_numerico","com_transformacao","tipo=laboratoriais; nome_campo=colesterol_hdl; converter número e preservar original"),
+      "valor_de_colesterol_ldl":("exame_complementar_resultado","valor_numerico","com_transformacao","tipo=laboratoriais; nome_campo=colesterol_ldl; converter número e preservar original"),
+      "triglicerideos":("exame_complementar_resultado","valor_numerico","com_transformacao","tipo=laboratoriais; nome_campo=triglicerideos; converter número e preservar original"),
+      "data_do_exame_colesterol":("atendimento_exame_complementar","data_realizacao","com_transformacao","tipo=laboratoriais; converter dd/mm/aaaa e consolidar com resultados de colesterol da mesma linha"),
       "feve":("exame_complementar_resultado","valor_numerico","com_transformacao","nome_campo=FEVE; extrair percentual e preservar original"),
       "uso_do_benzonidazol_para_tratamento_da_dc":("tratamento_benzonidazol","iniciado","com_transformacao","normalizar booleano triestado"),
       "tratamento_pelo_ambulatorio":("tratamento_benzonidazol","tratamento_pelo_ambulatorio","com_transformacao","normalizar booleano triestado"),
-      "por_quanto_tempo_foi_usado":("tratamento_benzonidazol","duracao_cumprida_dias","com_transformacao","converter duração cumprida para dias"),
+      "por_quanto_tempo_foi_usado":("tratamento_benzonidazol","duracao_cumprida_dias","com_transformacao","aceitar inteiro positivo como dias, ou inteiro positivo seguido de dia/dias/semana/semanas; semana=7 dias; rejeitar demais representações; preservar original"),
       "em_qual_ano_tomou_a_medicacao_benzonidazol":("tratamento_benzonidazol","ano_uso_aproximado","com_transformacao","converter para ano sem inventar data"),
       "tem_indicacao_de_bzn":("tratamento_benzonidazol","tem_indicacao","com_transformacao","normalizar booleano triestado"),
       "prescricao_do_bzn_data":("tratamento_benzonidazol","data_prescricao","com_transformacao","converter dd/mm/aaaa para DATE"),
       "se_nao_descreva_o_motivo":("tratamento_benzonidazol","motivo_nao_indicacao","com_transformacao","aplicar ao indicador de indicação"),
       "teve_reacao_adversa":("tratamento_benzonidazol","teve_reacao_adversa","com_transformacao","normalizar booleano triestado"),
       "encaminhado_a_qual_projeto":("encaminhamento","projeto_estudo_id","com_transformacao","lookup restrito ao catálogo oficial"),
-      "paciente_com_contrarreferencia_realizada":("acompanhamento_cuidado","status_acompanhamento","parcial","representar estado consolidado; multiplicidade em backlog"),
+      "paciente_com_contrarreferencia_realizada":("acompanhamento_cuidado","status_acompanhamento","parcial","status atual não distingue fielmente resposta negativa e multiplicidade permanece indefinida; preservar no bruto sem promoção"),
       "paciente_notificado":("notificacao","paciente_notificado","com_transformacao","normalizar booleano triestado"),
       "numero_notificacao":("notificacao","numero_notificacao","direta","preservar texto"),
       "caso_nao_justifique":("notificacao","justificativa_nao_notificacao","com_transformacao","aplicar quando notificado=false"),
@@ -81,7 +152,18 @@ def target(key, header, block):
       "responsavel_pela_digitacao":("importacao_linha","responsavel_digitacao_original","com_transformacao","preservar legado sem associar usuário"),
     }
     if key == "localizado": return (None,None,"excluido","fora do estruturado no MVP; semântica indefinida")
-    if key == "idade": return ("importacao_linha","dados_brutos","parcial","não preservar idade como fato canônico; derivar de nascimento quando possível")
+    if key == "idade": return ("importacao_linha","dados_brutos","parcial","sem campo para idade original nem data de referência comprovada; preservar no bruto e derivar de nascimento e atendimento quando possível")
+    partial_reasons = {
+        "autorelato_diagnostico_de_chagas_do_participante_data": "não há campo que diferencie data de autorrelato de data de resultado laboratorial; preservar no bruto",
+        "familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas": "historico_familiar_chagas representa doença familiar, não realização de exame por parentes; preservar no bruto",
+        "paciente_trouxe_outros_exames_complementares": "indicador agregado sem tipo de ocorrência; paciente_exame_complementar exige um exame identificado; preservar no bruto",
+        "solicitado_exames_complementares": "indicador agregado sem tipo de ocorrência; paciente_exame_complementar exige um exame identificado; preservar no bruto",
+        "retorno_30_dias_de_tratamento": "valor e vínculo clínico do retorno não possuem semântica aprovada; não inferir comparecimento ou status; preservar no bruto",
+        "retorno_final_de_tratamento": "valor e vínculo clínico do retorno não possuem semântica aprovada; não inferir comparecimento ou status; preservar no bruto",
+        "retorno_anual_realizado": "valor e vínculo clínico do retorno não possuem semântica aprovada; não inferir comparecimento ou status; preservar no bruto",
+        "desfecho_do_retorno": "não está definido a qual retorno o desfecho pertence nem seu domínio; preservar no bruto",
+    }
+    if key in partial_reasons: return ("importacao_linha","dados_brutos","parcial",partial_reasons[key])
     if block in {"trazido","solicitado"} and key in {"eco","laboratoriais","de_imagem","holter","endoscopia","colonoscopia","teste_ergometrico","mapa","outros"}:
         return ("paciente_exame_complementar","resultado_texto","com_transformacao",f"criar ocorrência do tipo {key} no bloco {block}")
     if key.startswith("caso_seja_sorologia_metodo_"): return ("sorologia_chagas","metodo_sorologico","com_transformacao","criar ocorrência pelo número do método")
@@ -91,7 +173,7 @@ def target(key, header, block):
         return ("paciente_comorbidade","possui_comorbidade","com_transformacao","lookup de comorbidade e vínculo por paciente")
     if key in {"anti_hipertensivo","diureticos","anti_coagulantes","anti_arritmicos","anti_depressivos","ieca_bra","inra","alfa_betabloqueador","vasodilatador","hipoglicemiante","estatinas","bloqueador_de_calcio","outros_medicamentos"}:
         return ("atendimento_medicamento","uso_atual","com_transformacao","lookup do catálogo e vínculo ao atendimento")
-    if key.startswith("sami_trop") or key in {"parachute","parachute_falha","benbrasil","benbrasil_falha","ambulatorio_unicamente","ambulatorio_anexo_ao_projeto","epoca","epoca_falha","santa_casa_dica","santa_casa_renomica","santa_casa_archimedes","santa_casa_charm","lxe_novartis","lxe_novartis_falha"}:
+    if key.startswith("sami_trop") or key in {"parachute","parachute_falha","benbrasil","benbrasil_falha","epoca","epoca_falha","santa_casa_dica","santa_casa_renomica","santa_casa_archimedes","santa_casa_charm","lxe_novartis","lxe_novartis_falha"}:
         field = "possui_pendencia" if "pendencia" in key else "houve_falha" if "falha" in key else "participa"
         return ("paciente_projeto_estudo",field,"com_transformacao","lookup por projeto oficial; normalizar booleano triestado")
     return direct.get(key, raw)
@@ -132,7 +214,7 @@ def main():
             table,field,coverage,transform=target(key,clean,block); all_keys.add(key)
             columns.append({"layout_versao":"planilha_ambulatorio_v1","aba_nome":name,"posicao_fisica":position,"ordem":order,"cabecalho_original":header,"chave_semantica":key,"ocorrencia":seen[clean] if totals[clean]>1 or key=="eco" else None,"bloco_funcional":block or "geral","tipo_semantico":semantic_type(key,transform),"destino_atual":f"ambulatorio.{table}.{field}" if table else None,"tabela_destino":table,"campo_destino":field,"situacao_cobertura":coverage,"transformacao":transform,"alias_conhecido":key if slug(clean)!=key else None,"observacoes_tecnicas":"célula vazia significa não informado"})
         sheets.append({"aba_chave":"portadores" if sheet_order==1 else "nao_portadores","aba_nome_original":name,"aba_ordem":sheet_order,"condicao_chagas":"portador" if sheet_order==1 else "nao_portador","quantidade_colunas":len(columns),"columns":columns})
-    doc={"manifesto":"planilha_ambulatorio","layout_versao":"planilha_ambulatorio_v1","versao":"v1","fonte_local":"planejamento/Nova Planilha ambulatório.xlsx","escopo":{"abas_incluidas":[x["aba_nome_original"] for x in sheets],"abas_excluidas":["P Digitar","AIM3 incluidos sem ambulatorio","AIM3 sem ambulatorio"],"valor_vazio":"nao_informado","localizado":"excluido_do_estruturado"},"inventario":{"colunas_por_aba":{"portadores":142,"nao_portadores":136},"rotulos_semanticos_canonicos":136,"cabecalhos_compartilhados_deslocados":81,"complicacoes_exclusivas_portadores":4,"tipos_exame_repetidos":9},"sheets":sheets}
+    doc={"manifesto":"planilha_ambulatorio","layout_versao":"planilha_ambulatorio_v1","versao":"v1","fonte_local":"planejamento/Nova Planilha ambulatório.xlsx","escopo":{"abas_incluidas":[x["aba_nome_original"] for x in sheets],"abas_excluidas":["P Digitar","AIM3 incluidos sem ambulatorio","AIM3 sem ambulatorio"],"valor_vazio":"nao_informado","localizado":"excluido_do_estruturado"},"inventario":{"colunas_por_aba":{"portadores":142,"nao_portadores":136},"rotulos_semanticos_canonicos":136,"cabecalhos_compartilhados_deslocados":81,"complicacoes_exclusivas_portadores":4,"tipos_exame_repetidos":9},"aliases_versionados":ALIASES_VERSIONADOS,"sheets":sheets}
     if len(all_keys)!=133: raise SystemExit(f"esperadas 133 chaves após aliases dos 136 rótulos, encontradas {len(all_keys)}")
     OUTPUT.parent.mkdir(parents=True,exist_ok=True); OUTPUT.write_text(json.dumps(doc,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(f"OK: manifesto gerado com {len(all_keys)} chaves; abas: 142 e 136 colunas")

@@ -33,6 +33,11 @@ Cada entrada física contém versão, aba, coordenada, ordem, cabeçalho origina
 chave semântica, ocorrência, bloco, tipo, destino, tabela/campo, cobertura,
 transformação, alias e observação técnica segura.
 
+O bloco `aliases_versionados` contém somente equivalências aprovadas de
+booleanos, projetos, exames e medicamentos, além dos domínios efetivamente usados.
+Comorbidades e domínios sem variantes aprovadas possuem lista/mapa vazio; isso
+proíbe correspondência aproximada e criação automática de catálogo.
+
 ## Diferenças e repetições
 
 As quatro complicações de Chagas existem somente nos portadores. Outros 81
@@ -43,6 +48,15 @@ pelos blocos `trazido` e `solicitado`, além de aba e posição.
 
 Altura é declarada como número de origem em metros com transformação explícita
 `altura_cm = altura_m * 100`. Célula vazia significa `não informado`, nunca falso.
+
+Os dois indicadores de contexto do ambulatório apontam diretamente para
+`atendimento.ambulatorio_unicamente` e `atendimento.ambulatorio_anexo_projeto`;
+eles não são associações com `projeto_estudo`.
+
+Após a reconciliação final, 124 dos 136 rótulos têm cobertura estruturada plena:
+8 direta e 116 com transformação. Onze permanecem parciais por lacuna semântica
+ou de granularidade comprovada e `Localizado` permanece excluído. Cada parcial
+registra no próprio manifesto a razão específica e fica somente no JSONB bruto.
 
 ## Exclusões deliberadas
 

@@ -27,16 +27,13 @@ A fonte detalhada das decisões é
 As quatro evoluções mínimas do MVP estão implementadas. Evoluções posteriores
 continuarão incrementais e não alterarão scripts já aplicados.
 
-## 2. Resolver bloqueios delimitados da especificação do importador
+## 2. Contrato do importador sintético concluído
 
-O manifesto físico e as regras operacionais foram consolidados em
+O manifesto físico e as regras operacionais foram reconciliados em
 `manifestos/planilha_ambulatorio_v1.json` e
-`docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`. Antes da implementação completa,
-resta resolver os bloqueios classificados nessa especificação:
-
-1. Corrigir ou confirmar os dois destinos de contexto ambulatorial no manifesto.
-2. Fechar mapeamentos `parcial`, aliases de domínios e unidades textuais de BZN.
-3. Definir o fluxo humano de revisão antes de qualquer dado real.
+`docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`. Destinos de contexto, aliases e
+duração de BZN estão fechados. As onze coberturas parciais possuem regra
+determinística de preservação bruta e não bloqueiam o importador sintético.
 
 ## 3. Resolver bloqueios para dados reais
 
@@ -52,8 +49,8 @@ resta resolver os bloqueios classificados nessa especificação:
 
 ## 4. Implementar e homologar
 
-1. Implementar primeiro o importador sintético limitado aos mapeamentos fechados,
-   seguindo a especificação normativa v1 e recusando promoções pendentes.
+1. Implementar o importador sintético seguindo a especificação normativa v1 e
+   recusando promoção estruturada das onze chaves parciais.
 2. Criar planilha sintética para testar repetição de pacientes, conflitos de abas,
    múltiplos exames, falhas de projetos, tratamento e reprocessamento.
 3. Validar idempotência, retomada, rejeições e rastreabilidade.

@@ -26,6 +26,29 @@ Além deste arquivo, atualize quando necessário:
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
 
+## 2026-08-24 - Fechamento do contrato planilha para banco do MVP sintético
+
+Data: 2026-08-24
+
+Título da alteração: Reconciliação final de destinos, parciais, aliases e duração
+de BZN.
+
+Impacto:
+
+- contextos `ambulatorio_unicamente` e `ambulatorio_anexo_ao_projeto` corrigidos
+  para os campos existentes de `atendimento`;
+- sete rótulos promovidos de parcial para transformação por estruturas de exames
+  já aplicadas;
+- onze parciais reais mantidos somente no bruto com justificativa individual;
+- aliases aprovados de projetos, exames, medicamentos, booleanos e NYHA
+  versionados e validados; ausência deliberada de aliases clínicos registrada;
+- duração cumprida de BZN fechada para dias inteiros e semanas exatas;
+- cobertura recalculada em 124 plenas, 11 parciais e 1 excluída entre 136 rótulos;
+- nenhuma alteração de schema, migration, banco ou dados.
+
+Validação: `make manifest-check`, `make docs-check`,
+`make docker-project-check` e `git diff --check`.
+
 ## 2026-08-24 - Regras normativas do importador da planilha v1
 
 Data: 2026-08-24

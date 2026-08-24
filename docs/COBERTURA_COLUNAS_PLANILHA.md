@@ -1,6 +1,6 @@
 # Cobertura das Colunas da Planilha pelo Núcleo Físico
 
-Atualizado em: 2026-08-21
+Atualizado em: 2026-08-24
 
 ## Fonte e critério
 
@@ -23,19 +23,21 @@ O detalhamento por posição, aba e destino está no manifesto oficial
 
 | Classificação | Quantidade | Percentual |
 | --- | ---: | ---: |
-| Coberta diretamente | 6 | 4,41% |
-| Coberta com transformação | 125 | 91,91% |
-| Parcialmente coberta | 4 | 2,94% |
+| Coberta diretamente | 8 | 5,88% |
+| Coberta com transformação | 116 | 85,29% |
+| Parcialmente coberta | 11 | 8,09% |
 | Não coberta | 0 | 0,00% |
-| Dúvida pendente | 1 | 0,74% |
+| Excluída do estruturado | 1 | 0,74% |
 | Total | 136 | 100,00% |
 
-Cobertura plena atual: **131/136 (96,32%)**. Incluindo cobertura parcial:
+Cobertura plena atual: **124/136 (91,18%)**. Incluindo cobertura parcial:
 **135/136 (99,26%)**.
 
-A cobertura plena incorpora agora as cardinalidades confirmadas de projetos,
-exames e tratamento com BZN por paciente e o encaminhamento ampliado. As lacunas
-restantes pertencem aos quatro itens parciais e à dúvida semântica documentada.
+A contagem foi recalculada diretamente dos 136 rótulos físicos distintos do
+manifesto. Ela corrige a divergência anterior, que informava quatro parciais
+enquanto o artefato executável ainda continha dezoito. Sete foram promovidos com
+destino comprovado; onze permanecem parciais. `Localizado` é exclusão deliberada,
+não dúvida a ser inferida pelo importador.
 
 ## Alterações de classificação após confirmação humana
 
@@ -50,10 +52,11 @@ Passaram de dúvida para cobertura com transformação:
 Passaram de parcial para cobertura com transformação:
 
 - `Se não, descreva o motivo`, confirmado como motivo da não indicação de BZN;
-- `Paciente com contrarreferencia realizada?`, representável provisoriamente como
-  estado consolidado; múltiplas ocorrências permanecem no backlog.
+- `ECG` e `ECG solicitado`, consolidados na ocorrência de eletrocardiograma;
+- glicemia, HDL, LDL, triglicerídeos e data do colesterol, consolidados na
+  ocorrência laboratorial do atendimento.
 
-Continuam como dúvida:
+Continua excluído:
 
 - `Localizado`: o domínio sim/não foi confirmado, mas não o significado nem a
   entidade. Não será estruturado no MVP sem nova decisão.
@@ -68,10 +71,12 @@ adicionais.
 
 ## Impacto dos exames por paciente
 
-Os 21 cabeçalhos de valores laboratoriais, ECG/ECO/FEVE, indicadores de bloco e
-tipos repetidos passaram de cobertura parcial para cobertura com transformação.
-`paciente_exame_complementar` fornece paciente obrigatório, atendimento opcional,
-blocos independentes, tipos catalogados ou livres e resultado textual.
+Os tipos repetidos usam `paciente_exame_complementar`. ECG, resultado e data são
+consolidados em `atendimento_exame_complementar` do tipo
+`eletrocardiograma`. Glicemia, HDL, LDL e triglicerídeos usam
+`exame_complementar_resultado`, e a data de colesterol usa a ocorrência
+laboratorial do atendimento. Os indicadores agregados dos dois blocos continuam
+parciais porque não identificam uma ocorrência exigida pelo modelo canônico.
 
 ## Impacto do tratamento com benzonidazol
 
@@ -89,25 +94,32 @@ parcial para cobertura com transformação. `encaminhamento` agora preserva o
 booleano triestado, o projeto oficial opcional e os dois valores originais, sem
 criar projetos ou duplicar o vínculo com paciente.
 
-## Grupos parcialmente cobertos (4)
-
-### Demais parciais — 4
+## Grupos parcialmente cobertos (11)
 
 | Cabeçalho | Lacuna atual |
 | --- | --- |
-| `Idade` | não preserva idade original estruturada |
-| `Pendencias/Observação` | divisão entre texto e pendência segue ambígua |
-| `Autorelato diagnóstico de Chagas do participante (data)` | autorrelato não equivale a resultado laboratorial |
-| `Familiares diretos (mãe, pai, irmãos) realizaram o exame de Chagas?` | histórico familiar não representa exame realizado |
+| `Idade` | não há campo para idade original nem data de referência comprovada; a idade calculável deriva de nascimento e atendimento |
+| `Autorelato diagnóstico de Chagas do participante (data)` | não há campo que diferencie data de autorrelato de data de resultado laboratorial |
+| `Familiares diretos (mãe, pai, irmãos) realizaram o exame de Chagas?` | histórico familiar representa doença familiar, não realização de exame por parentes |
+| `Paciente trouxe outros exames complementares?` | indicador agregado sem tipo; a tabela canônica exige ocorrência de exame identificada |
+| `Solicitado exames complementares?` | indicador agregado sem tipo; a tabela canônica exige ocorrência de exame identificada |
+| `Retorno 30 dias de tratamento` | valor e vínculo clínico do retorno não possuem semântica aprovada |
+| `Retorno final de tratamento` | valor e vínculo clínico do retorno não possuem semântica aprovada |
+| `Retorno anual realizado` | valor e vínculo clínico do retorno não possuem semântica aprovada |
+| `Desfecho do retorno` | não está definido a qual retorno pertence nem seu domínio |
+| `Paciente com contrarreferencia realizada?` | estado triestado é conhecido, mas o modelo não distingue fielmente “não realizada” de seus vários status nem fecha multiplicidade |
+| `Pendencias/Observação` | o cabeçalho mistura pendência e observação sem regra segura de separação |
 
 ## Não coberta (0)
 
-Não há rótulo confirmado sem destino físico. Isso não elimina as quatro coberturas
-parciais nem a dúvida de `Localizado`.
+Não há rótulo confirmado sem possibilidade de preservação. Isso não transforma as
+onze lacunas reais em cobertura estruturada: elas ficam no JSONB bruto e geram
+pendência de linha. `Localizado` permanece deliberadamente excluído.
 
 ## Situação após as migrations mínimas
 
-As quatro migrations mínimas do MVP foram implementadas. Os quatro itens parciais
-restantes são backlog permitido, e `Localizado` não será promovido sem definição
+As quatro migrations mínimas do MVP foram implementadas. Os onze itens parciais
+possuem comportamento determinístico no contrato sintético e podem ficar no
+backlog sem promoção estruturada. `Localizado` não será promovido sem definição
 semântica. A implementação do encaminhamento está documentada em
 `docs/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`.

@@ -185,9 +185,11 @@ reprocessamento estão normatizados na especificação do importador v1.
 
 `encaminhamento` exige atendimento, o que é compatível. O indicador de documento
 apresentado e a FK para projeto foram adicionados pela última migration mínima do
-MVP. A contrarreferência pode permanecer
-no backlog como estado consolidado em `acompanhamento_cuidado` até sua
-multiplicidade ser decidida. Classes 1 e 3 para encaminhamento; classes 2 e 4 para
+MVP. Embora `acompanhamento_cuidado.status_acompanhamento` aceite um estado
+consolidado, ele não distingue fielmente a resposta negativa dos demais estados e
+a multiplicidade continua indefinida. No contrato sintético v1, a
+contrarreferência fica somente no bruto e a linha recebe pendência; não há
+promoção aproximada. Classes 1 e 3 para encaminhamento; classes 2 e 4 para
 contrarreferência.
 
 A evolução foi fechada em
@@ -279,8 +281,8 @@ altera a cobertura de colunas, mas é bloqueio de implantação real.
    exames por paciente, tratamento/reação adversa e encaminhamento ampliado.
 3. Usar o manifesto versionado concluído das duas abas clínicas como base da
    especificação do importador.
-4. Resolver os bloqueios explicitamente classificados na especificação normativa
-   do importador, sem promover colunas ainda parciais.
+4. Implementar o importador sintético conforme o contrato fechado, sem promover
+   as onze colunas ainda parciais.
 5. Definir retenção, autoridades, revisão, roles, privilégios e auditoria do JSONB.
 6. Implementar o importador e testes exclusivamente com planilha sintética.
 7. Preparar servidor seguro, segredos, backup/restauração e observabilidade.
