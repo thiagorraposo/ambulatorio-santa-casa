@@ -2,7 +2,8 @@
 
 Atualizado em: 2026-08-24
 
-Status: regras operacionais definidas; importador não implementado.
+Status: contrato revisado e pronto para implementação sintética; importador ainda
+não implementado e dados reais não autorizados.
 
 ## Finalidade, autoridade e escopo
 

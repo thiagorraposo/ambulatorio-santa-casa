@@ -220,7 +220,12 @@ Contexto: O schema anterior de 30 tabelas cobria plenamente 114 de 140 entradas.
 
 Decisão: Priorizar como próximo módulo incremental a infraestrutura de importação e proveniência, com lote por execução, linha bruta posicional em array JSONB, responsável legado em texto e associação genérica N:N `importacao_registro`. Reprocessamentos formam cadeia explícita pelo mesmo hash e layout. Não criar entidade `usuario` apenas a partir do nome informado na planilha e não usar FKs clínicas opcionais como substituto de proveniência.
 
-Consequências: A estrutura foi aplicada, mas o importador permanece bloqueado até existir manifesto físico seguro e regras operacionais. O vínculo genérico não possui FK para alvos heterogêneos; existência do alvo será validada transacionalmente e associações órfãs exigirão auditoria futura. Conteúdo bruto não terá purga automática até política institucional de retenção.
+Consequências: A estrutura foi aplicada. O bloqueio técnico original foi encerrado
+com o manifesto físico v1 e a especificação normativa do importador v1; o
+importador sintético pode ser implementado. O vínculo genérico não possui FK para
+alvos heterogêneos; existência do alvo será validada transacionalmente e
+associações órfãs exigirão auditoria futura. Conteúdo bruto não terá purga
+automática até política institucional de retenção, o que bloqueia dados reais.
 
 Alternativas rejeitadas: iniciar por campos clínicos isolados; tratar responsável legado como usuário autenticado; atribuir toda origem a atendimento; importar antes de definir rastreabilidade; adicionar FK de origem a todas as tabelas; usar triggers dinâmicas para simular FK genérica; guardar cabeçalhos duplicados em objeto JSON.
 

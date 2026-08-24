@@ -23,6 +23,10 @@ suíte automatizada da aplicação, CI ou aplicação executável versionados.
 
 ## Status Atual
 
+- A Semana 1 da camada de importação está formalmente encerrada: manifesto,
+  cobertura, transformações, identidade, conflitos, idempotência, retomada,
+  reprocessamento e proveniência foram reconciliados com o schema físico. Não há
+  bloqueio técnico para iniciar o importador sintético.
 - Scripts SQL existentes de `sql/00_criar_banco.sql` a `sql/16_encaminhamento_ampliado.sql`.
 - README e documentos antigos `docs/dicionario-dados.md` e `docs/decisoes-modelagem.md` existem, mas estão vazios.
 - A estrutura física real aplicada no PostgreSQL foi validada por evidência versionada em `docs/evidencias/schema_atual_ambulatorio.sql`.

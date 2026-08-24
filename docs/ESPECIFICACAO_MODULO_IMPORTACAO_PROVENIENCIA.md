@@ -2,15 +2,17 @@
 
 Atualizado em: 2026-08-24
 
-Status: implementada por migration incremental e validada; importador e importação de dados reais permanecem bloqueados.
+Status: implementada e validada; pronta para sustentar o importador sintético.
+Dados reais permanecem bloqueados pela governança institucional.
 
 ## Objetivo e fronteiras
 
 O módulo deve identificar cada execução de importação, preservar cada linha de origem sem perda, registrar o valor legado de `Responsavel pela digitacao` e relacionar uma linha aos registros estruturados gerados.
 
-Esta especificação não autoriza:
+Esta especificação estrutural, isoladamente, não autoriza:
 
-- implementar ou executar o importador;
+- desviar das regras operacionais de
+  `docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`;
 - acessar, copiar ou versionar planilhas ou dados clínicos reais;
 - tratar o responsável legado como usuário autenticado;
 - definir normalizações clínicas ainda pendentes;
@@ -18,14 +20,10 @@ Esta especificação não autoriza:
 
 ## Metadados canônicos seguros
 
-A fonte canônica disponível para os nomes semânticos é `planejamento/tabelas dicionário de dados/03_coluna_planilha_destino.csv`. Ela contém 140 nomes únicos usados pela cobertura, mas deriva de um fallback e não comprova nomes de abas, ordem física nem ocorrências repetidas. Portanto:
-
-- o inventário semântico v1 é canônico para nomes conhecidos e mapeamentos planejados;
-- não é um manifesto físico apto a dirigir importação;
-- os termos `portador de DC` e `não portador de DC` são grupos lógicos conhecidos, não nomes físicos de abas comprovados;
-- cabeçalhos repetidos como `ECO`, `Laboratoriais` e `Outros` não podem ser identificados apenas pelo nome.
-
-O manifesto físico seguro futuro deverá conter exclusivamente metadados, sem valores de células:
+A fonte executável atual é `manifestos/planilha_ambulatorio_v1.json`, gerada
+somente dos cabeçalhos das duas abas clínicas. O catálogo antigo de 140 nomes é
+histórico e não dirige importação. O manifesto contém exclusivamente metadados,
+sem valores de células:
 
 | Campo | Regra |
 | --- | --- |
@@ -38,7 +36,9 @@ O manifesto físico seguro futuro deverá conter exclusivamente metadados, sem v
 | `coluna_ordem` | posição física da coluna na aba |
 | `ocorrencia_cabecalho` | ordinal entre cabeçalhos iguais na mesma aba |
 
-A combinação `(layout_versao, aba_ordem, coluna_ordem)` e a `coluna_chave` dentro da versão deverão ser únicas. A criação desse manifesto é pré-requisito do importador, mas não da migration genérica deste módulo.
+A combinação `(layout_versao, aba_ordem, coluna_ordem)` e a chave semântica na
+versão são validadas por `make manifest-check`, inclusive para cabeçalhos
+repetidos, destinos, aliases e cobertura.
 
 ## Identificação e reprocessamento de lotes
 
@@ -51,7 +51,9 @@ Cada `importacao_lote` representa uma execução, não apenas um arquivo. A iden
 
 O primeiro processamento de cada par `(hash_arquivo_sha256, layout_versao)` não possui predecessor e é protegido por índice único parcial. Reprocessamentos criam novo lote e devem referenciar um lote anterior com o mesmo hash e layout por FK composta. Assim, tentativas permanecem auditáveis e o mesmo conteúdo não entra novamente como lote inicial por engano.
 
-Reprocessamento não altera nem reutiliza linhas de uma execução anterior. Ele cria novas `importacao_linha`. Idempotência clínica, comparação de resultados e retomada parcial pertencem ao futuro importador.
+Reprocessamento não altera nem reutiliza linhas de uma execução anterior. Ele cria
+novas `importacao_linha`. Idempotência clínica, comparação de resultados e
+retomada estão definidas na especificação normativa do importador v1.
 
 ## Estrutura proposta
 
@@ -199,4 +201,8 @@ O teste SQL sintético e transacional cobre:
 
 ## Prontidão
 
-As decisões necessárias para identidade, reprocessamento, formato bruto, status, responsável legado, vínculo genérico, cardinalidades, constraints, índices e deleção estão implementadas por `sql/12_modulo_importacao_proveniencia.sql`. `tests/sql/04_validar_modulo_importacao_proveniencia.sql` aprovou os cenários previstos e confirmou o `ROLLBACK`. O módulo físico está **implementado e validado**, mas não está pronto para importar dados reais nem autoriza implementar o importador.
+As decisões estruturais estão implementadas por
+`sql/12_modulo_importacao_proveniencia.sql`, e o teste SQL confirmou o `ROLLBACK`.
+Com o manifesto e a especificação normativa concluídos, o módulo físico está
+**implementado, validado e pronto para sustentar o importador sintético**. Isso
+não autoriza importar dados reais.

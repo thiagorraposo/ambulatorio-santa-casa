@@ -868,7 +868,7 @@ Finalidade: associação genérica N:N entre linhas e registros estruturados.
 
 ## Próxima fase técnica
 
-1. Manter o importador bloqueado até existir manifesto físico seguro e regras operacionais.
-2. Definir política de retenção e auditoria da associação genérica antes de dados reais.
-3. Implementar futuramente a associação paciente–projeto já especificada e
-   especificar as demais extensões mínimas a partir das lacunas de cobertura.
+1. Iniciar a implementação do importador exclusivamente com dados sintéticos,
+   usando o manifesto e a especificação normativa v1.
+2. Preservar em `dados_brutos` as onze chaves parciais, sem promoção aproximada.
+3. Definir retenção, autoridades, roles e auditoria antes de dados reais.

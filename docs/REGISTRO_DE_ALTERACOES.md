@@ -26,6 +26,29 @@ Além deste arquivo, atualize quando necessário:
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
 
+## 2026-08-24 - Encerramento formal da Semana 1 da camada de importação
+
+Data: 2026-08-24
+
+Título da alteração: Revisão integrada final e declaração de prontidão técnica.
+
+Impacto:
+
+- manifesto, cobertura, especificação normativa, proveniência e schema físico
+  revisados como um único contrato;
+- estados documentais antigos que ainda bloqueavam o importador por ausência de
+  manifesto ou regras operacionais foram atualizados;
+- `Localizado` confirmado como excluído, e onze parciais confirmados somente no
+  bruto com comportamento determinístico;
+- nenhuma pendência técnica bloqueante para o importador sintético;
+- governança, retenção, roles, auditoria e ambiente seguro mantidos como bloqueios
+  exclusivos para dados reais;
+- nenhuma alteração de schema, migration, banco, dados ou implementação do
+  importador.
+
+Validação: `make manifest-check`, `make docs-check`,
+`make docker-project-check` e `git diff --check`.
+
 ## 2026-08-24 - Fechamento do contrato planilha para banco do MVP sintético
 
 Data: 2026-08-24
