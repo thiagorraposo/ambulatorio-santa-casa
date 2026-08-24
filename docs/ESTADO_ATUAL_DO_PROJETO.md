@@ -6,10 +6,9 @@ Atualizado em: 2026-08-24
 
 O projeto `ambulatorio-santa-casa` define a base de dados PostgreSQL para organizar registros de pacientes, atendimentos ambulatoriais, diagnóstico de doença de Chagas, sorologias, condições clínicas, comorbidades, exames complementares, encaminhamentos, acompanhamentos, medicamentos, tratamentos e procedimentos clínicos.
 
-Até o momento, o repositório contém scripts SQL de criação de banco, schema,
-tabelas, índices, restrições, dados iniciais de catálogo e oito testes SQL
-transacionais reutilizáveis. Não há backend, frontend, scripts de importação,
-suíte automatizada da aplicação, CI ou aplicação executável versionados.
+O repositório contém scripts SQL, oito testes SQL transacionais e a primeira
+versão executável do importador sintético, com teste ponta a ponta isolado. Ainda
+não há backend, frontend, CI ou autorização para dados reais.
 
 ## Stack e Tecnologias Usadas
 
@@ -27,6 +26,9 @@ suíte automatizada da aplicação, CI ou aplicação executável versionados.
   cobertura, transformações, identidade, conflitos, idempotência, retomada,
   reprocessamento e proveniência foram reconciliados com o schema físico. Não há
   bloqueio técnico para iniciar o importador sintético.
+- O importador sintético v1 lê as duas abas, valida o manifesto, executa transação
+  por linha, concilia pacientes e importa atendimento, projetos, exames, BZN e
+  encaminhamento com proveniência e idempotência.
 - Scripts SQL existentes de `sql/00_criar_banco.sql` a `sql/16_encaminhamento_ampliado.sql`.
 - README e documentos antigos `docs/dicionario-dados.md` e `docs/decisoes-modelagem.md` existem, mas estão vazios.
 - A estrutura física real aplicada no PostgreSQL foi validada por evidência versionada em `docs/evidencias/schema_atual_ambulatorio.sql`.
@@ -185,7 +187,8 @@ Resumo da reconciliação:
 - Medicamentos e tratamentos: catálogo de medicamentos, medicamentos por atendimento, tratamento de Chagas e procedimentos clínicos.
 - Avaliação clínica por atendimento, eventos clínicos, dispositivos implantados e óbito, aplicada e validada no banco local.
 - Notificação consolidada por paciente, aplicada e validada no banco local.
-- Importação e proveniência com lote, linha bruta e associação genérica N:N, aplicada e validada no banco local; nenhum importador foi implementado.
+- Importação e proveniência com lote, linha bruta e associação genérica N:N,
+  agora exercitadas pelo importador sintético v1.
 - Associação consolidada paciente–projeto, independente de atendimento e com convivência preservada da associação antiga.
 - Tratamento canônico com BZN por paciente e reações adversas repetíveis, com
   atendimento opcional e convivência legada preservada.
@@ -193,6 +196,9 @@ Resumo da reconciliação:
   preservação integral da estrutura por atendimento.
 
 ## Módulos Ainda Pendentes
+
+- Completar handlers dos demais destinos estruturados do manifesto e o
+  reprocessamento explícito por novo lote encadeado.
 
 - Migrações formais com ferramenta de versionamento, se o projeto evoluir para aplicação.
 - Expansão incremental do modelo físico para cobrir as demais tabelas e campos planejados.

@@ -46,13 +46,11 @@ determinística de preservação bruta e não bloqueiam o importador sintético.
    backup/retenção e registro de acesso. O restore Docker validado cobre apenas
    desenvolvimento e não substitui esses controles de produção.
 
-## 4. Implementar e homologar
+## 4. Completar e homologar
 
-1. Implementar o importador sintético seguindo a especificação normativa v1 e
-   recusando promoção estruturada das onze chaves parciais.
-2. Criar planilha sintética para testar repetição de pacientes, conflitos de abas,
-   múltiplos exames, falhas de projetos, tratamento e reprocessamento.
-3. Validar idempotência, retomada, rejeições e rastreabilidade.
+1. Ampliar os handlers para os demais módulos estruturados já mapeados.
+2. Implementar reprocessamento intencional por novo lote encadeado.
+3. Homologar os 124 destinos plenamente cobertos com fixtures sintéticas.
 4. Homologar carga controlada em servidor seguro antes da carga real completa.
 
 ## 5. Backlog permitido

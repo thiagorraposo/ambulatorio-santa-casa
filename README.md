@@ -90,6 +90,9 @@ make db-check DB_ENV=docker
 | `make docker-restore-check` | Confirma estrutura e catálogos restaurados. | Não. |
 | `make docker-restore-test` | Executa os oito testes transacionais no restore. | Não persiste dados sintéticos. |
 | `make docker-destroy DESTROY_ENV=docker` | Remove containers, rede e volumes deste Compose. | **Destrutivo somente para o ambiente Docker.** |
+| `make importer-fixture` | Regera a planilha XLSX exclusivamente sintética. | Não altera banco. |
+| `make importer-test` | Testa o importador em banco Docker temporário. | Cria e remove somente o banco isolado. |
+| `make importer-run IMPORT_FILE=...` | Executa o importador v1; nesta fase, somente com arquivo sintético. | Sim. |
 
 Os alvos genéricos não aplicam migrations. `docker-migrate` aplica as migrations
 somente quando selecionado explicitamente, e `docker-destroy` exige a confirmação

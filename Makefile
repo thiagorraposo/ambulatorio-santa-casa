@@ -35,7 +35,7 @@ COMPOSE := docker compose --env-file .env
 	docker-stop docker-recreate docker-logs docker-migrate docker-db-check docker-db-test \
 	docker-schema-dump docker-project-check docker-destroy \
 	docker-backup docker-backup-list docker-restore docker-restore-check docker-restore-test \
-	manifest-check
+	manifest-check importer-fixture importer-run importer-test
 
 help:
 	@echo "Comandos disponíveis:"
@@ -45,6 +45,9 @@ help:
 	@echo "  make db-test         Executa todos os testes em tests/sql/"
 	@echo "  make docs-check      Verifica documentos obrigatórios e não vazios"
 	@echo "  make manifest-check  Valida o manifesto físico v1 e a fonte local"
+	@echo "  make importer-fixture Gera a planilha XLSX exclusivamente sintética"
+	@echo "  make importer-run IMPORT_FILE=... Executa o importador v1 no banco Docker"
+	@echo "  make importer-test   Executa o fluxo sintético ponta a ponta em banco isolado"
 	@echo "  make project-check   Executa todos os checks locais não destrutivos"
 	@echo "  make db-schema-dump  Atualiza somente o dump estrutural do schema $(DB_SCHEMA)"
 	@echo "  make docker-up       Sobe somente o PostgreSQL Docker"
@@ -119,6 +122,7 @@ docs-check:
 		docs/MODELO_FISICO_ATUAL.md \
 		docs/MANIFESTO_FISICO_PLANILHA_V1.md \
 		docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md \
+		docs/IMPORTADOR_SINTETICO_V1.md \
 		docs/RECUPERACAO_POSTGRESQL_DOCKER.md \
 		docs/SEGURANCA_DE_DADOS.md \
 		docs/WORKFLOW_DE_DESENVOLVIMENTO.md; do \
@@ -133,6 +137,20 @@ docs-check:
 
 manifest-check:
 	@python3 scripts/validar_manifesto_planilha.py --fonte
+
+importer-fixture:
+	@python3 tests/importador/gerar_planilha_sintetica.py
+
+importer-run: docker-wait
+	@test -n "$(IMPORT_FILE)" || { echo "Erro: informe IMPORT_FILE (somente dado sintético neste estágio)."; exit 1; }
+	@python3 scripts/importar_planilha.py "$(IMPORT_FILE)" \
+		--db-host "$(DB_HOST)" --db-port "$(DB_PORT)" --db-user "$(DB_USER)" \
+		--db-name "$(DB_NAME)"
+
+importer-test: docker-wait importer-fixture
+	@python3 -m unittest tests/importador/test_transformacoes.py
+	@DB_HOST="$(DB_HOST)" DB_PORT="$(DB_PORT)" DB_USER="$(DB_USER)" DB_NAME="$(DB_NAME)" \
+		PGPASSWORD="$(POSTGRES_PASSWORD)" bash tests/importador/test_e2e.sh
 
 project-check: docs-check db-test
 	@git diff --check

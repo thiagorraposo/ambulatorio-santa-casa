@@ -26,6 +26,28 @@ Além deste arquivo, atualize quando necessário:
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
 
+## 2026-08-24 - Primeira versão funcional do importador sintético
+
+Data: 2026-08-24
+
+Título da alteração: Fluxo executável planilha para banco com proveniência e
+transação por linha.
+
+Impacto:
+
+- leitor XLSX sem dependências externas e validação contra o manifesto;
+- lote, linha bruta e proveniência integrados à conciliação de pacientes e à
+  criação de um atendimento por linha válida;
+- handlers prioritários para projetos, exames, resultados laboratoriais, ECG,
+  BZN e encaminhamento;
+- conflitos e falhas de catálogo sem escrita clínica parcial;
+- reexecução idempotente e retomada de lote falho validadas;
+- fixture exclusivamente sintética, testes unitários e E2E em banco temporário;
+- nenhuma migration, schema físico ou dado real alterado.
+
+Validação prevista: `make manifest-check`, `make docs-check`,
+`make docker-project-check`, `make importer-test` e `git diff --check`.
+
 ## 2026-08-24 - Encerramento formal da Semana 1 da camada de importação
 
 Data: 2026-08-24

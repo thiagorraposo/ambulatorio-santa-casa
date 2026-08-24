@@ -1,6 +1,6 @@
 # Workflow de Desenvolvimento
 
-Atualizado em: 2026-08-19
+Atualizado em: 2026-08-24
 
 ## Comandos Oficiais
 
@@ -23,6 +23,9 @@ Use os alvos do `Makefile` como interface local padrão:
 | `make docker-restore ...` | Restaurar somente no serviço Docker controlado. |
 | `make docker-restore-check` / `docker-restore-test` | Validar catálogo e testes no banco restaurado. |
 | `make docker-destroy DESTROY_ENV=docker` | Remover explicitamente apenas o ambiente e os volumes Docker deste projeto. |
+| `make importer-fixture` | Gerar a fixture XLSX sintética versionada. |
+| `make importer-test` | Executar o E2E em banco Docker temporário e descartável. |
+| `make importer-run IMPORT_FILE=...` | Importar um arquivo sintético no Docker selecionado. |
 
 O ambiente padrão é `DB_ENV=docker`, com `.env` ignorado pelo Git e porta 5433.
 O ambiente local na porta 5432 permanece alternativa manual e só é selecionado
@@ -30,6 +33,8 @@ explicitamente com `DB_ENV=local`; nenhuma rotina de restore dá suporte a ele.
 Nunca inclua senha no prompt, em documentação ou em arquivos versionados.
 `make db-schema-dump` gera somente estrutura; `docker-schema-dump` escreve por
 padrão em `/tmp/schema_ambulatorio_docker.sql` e não substitui a evidência oficial.
+Enquanto a autorização institucional estiver pendente, `importer-run` deve
+receber exclusivamente fixtures sintéticas.
 
 ## Escolha explícita do PostgreSQL
 
