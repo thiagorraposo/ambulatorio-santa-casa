@@ -1,10 +1,10 @@
 # Manifesto Físico da Planilha — v1
 
-Atualizado em: 2026-08-21
+Atualizado em: 2026-08-24
 
 ## Fonte oficial
 
-O artefato executável oficial para a futura especificação do importador é
+O artefato executável oficial para a especificação normativa do importador é
 `manifestos/planilha_ambulatorio_v1.json`. Ele foi gerado exclusivamente a partir
 da linha 1 das duas abas clínicas do arquivo local ignorado
 `planejamento/Nova Planilha ambulatório.xlsx`. Nenhuma célula clínica ou linha de
@@ -64,5 +64,6 @@ ocorrências repetidas, chaves, blocos/tipos, formato e existência dos destinos
 schema versionado, ausência de padrões sensíveis e igualdade dos cabeçalhos com a
 fonte local. O validador não lê linhas de dados.
 
-O manifesto está pronto para orientar a **especificação** de um importador e sua
-planilha sintética. Não implementa o importador nem autoriza dados reais.
+O manifesto orienta `docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`, fonte das
+regras operacionais, e a futura planilha sintética. Não implementa o importador
+nem autoriza dados reais.

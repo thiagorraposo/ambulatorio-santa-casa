@@ -1,6 +1,6 @@
 # Especificação do Módulo de Importação e Proveniência
 
-Atualizado em: 2026-07-19
+Atualizado em: 2026-08-24
 
 Status: implementada por migration incremental e validada; importador e importação de dados reais permanecem bloqueados.
 
@@ -188,12 +188,13 @@ O teste SQL sintético e transacional cobre:
 ## Pendências delimitadas que não bloqueiam a migration
 
 1. O manifesto físico seguro existe em `manifestos/planilha_ambulatorio_v1.json`;
-   identificação, precedência, idempotência e tratamento de conflitos ainda devem
-   ser especificados antes do importador.
+   identificação, precedência, idempotência, retomada e conflitos estão definidos
+   em `docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`.
 2. Os valores reais de responsável não foram inventariados; serão preservados sem normalização.
 3. A política institucional de prazo de retenção ainda precisa ser aprovada; até lá não haverá purga automática.
 4. A associação genérica não possui FK ao registro heterogêneo; validação transacional e auditoria de órfãos pertencem ao importador/operação futura.
-5. Transições de status, retomada, idempotência clínica e tratamento de erro ainda serão implementados no importador.
+5. Transições, retomada, idempotência clínica e tratamento de erro estão
+   especificados, mas ainda serão implementados e testados no importador.
 6. Permissões específicas dependem da definição futura de roles operacionais.
 
 ## Prontidão

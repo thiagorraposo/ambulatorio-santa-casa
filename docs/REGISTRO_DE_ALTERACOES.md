@@ -1,6 +1,6 @@
 # Registro de Alterações
 
-Atualizado em: 2026-08-21
+Atualizado em: 2026-08-24
 
 ## Como Registrar Mudanças
 
@@ -25,6 +25,27 @@ Além deste arquivo, atualize quando necessário:
 - `docs/HISTORICO_DE_IMPLEMENTACAO.md`
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
+
+## 2026-08-24 - Regras normativas do importador da planilha v1
+
+Data: 2026-08-24
+
+Título da alteração: Especificação única de identidade, conciliação e execução do
+futuro importador.
+
+Impacto:
+
+- chave operacional conservadora por nome normalizado e nascimento;
+- precedência de portadores, um atendimento por linha válida e conflitos sem
+  sobrescrita silenciosa;
+- transformações fechadas, distinção de vazio/ausente/inválido e aliases oficiais;
+- idempotência por posição de origem, reprocessamento encadeado e retomada
+  transacional por linha;
+- estados, proveniência e revisão humana definidos de forma determinística;
+- bloqueios restantes classificados sem alterar schema, migration, banco ou dados.
+
+Validação: `make manifest-check`, `make docs-check`,
+`make docker-project-check` e `git diff --check`.
 
 ## 2026-08-21 - Manifesto físico versionado da nova planilha
 

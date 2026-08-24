@@ -1,6 +1,6 @@
 # Decisões Humanas para a Nova Planilha
 
-Atualizado em: 2026-08-21
+Atualizado em: 2026-08-24
 
 ## Finalidade e precedência
 
@@ -14,8 +14,10 @@ Nenhuma decisão deste documento altera o banco por si só. Mudanças físicas d
 ser especificadas e implementadas em migrations incrementais futuras.
 
 O layout físico que materializa estas decisões é
-`manifestos/planilha_ambulatorio_v1.json`, fonte oficial para a futura
-especificação do importador.
+`manifestos/planilha_ambulatorio_v1.json`. As regras operacionais determinísticas
+estão consolidadas em `docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`, fonte de
+verdade para a implementação do importador; este documento permanece como fonte
+da semântica humana aprovada.
 
 ## Legenda da classificação
 
@@ -87,8 +89,8 @@ A estrutura foi implementada conforme
 `docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`: associação consolidada
 `paciente_projeto_estudo`, única por paciente e projeto, sem atendimento e sem
 alteração retroativa de `atendimento_projeto_estudo`. A especificação está pronta
-para migration incremental; aliases, conflitos e consolidação entre linhas
-continuam como regras do futuro importador.
+para migration incremental; aliases, conflitos e consolidação entre linhas estão
+normatizados na especificação do importador v1.
 
 ## Condição e complicações de Chagas
 
@@ -126,7 +128,8 @@ A estrutura futura foi fechada em
 `paciente_exame_complementar`, com paciente obrigatório, atendimento opcional com
 consistência por FK composta, bloco único `trazido` ou `solicitado`, resultado
 livre e preservação das tabelas legadas sem backfill. O manifesto e a
-reconciliação de reprocessamentos continuam como regras do futuro importador.
+reconciliação de reprocessamentos estão normatizados na especificação do
+importador v1.
 
 ## Benzonidazol e reação adversa
 
@@ -169,7 +172,7 @@ ano aproximado, prescrição e motivos separados. Reações repetíveis usarão
 `reacao_adversa_benzonidazol`, sem domínio inventado de gravidade ou consequência.
 `tratamento_chagas` permaneceu intacta, sem backfill ou escrita dupla. A estrutura
 foi implementada por `sql/15_tratamento_benzonidazol.sql`; conversões, conflitos e
-reprocessamento continuam como regras do futuro importador.
+reprocessamento estão normatizados na especificação do importador v1.
 
 ## Encaminhamento e contrarreferência
 
@@ -228,8 +231,9 @@ deverá preservar o texto legado. Classes 1, 2 e 4.
 `importacao_linha` preserva cada linha em JSONB e `importacao_registro` rastreia os
 destinos estruturados. Reimportações devem criar nova execução encadeada, nunca
 sobrescrever o lote anterior; conflitos e decisões também precisam ser auditáveis.
-O suporte físico básico existe. Definir idempotência, retomada e auditoria de
-decisões é classe 1 e, antes de dados reais, classe 5.
+O suporte físico básico existe. Idempotência, retomada e auditoria de decisões
+estão definidas na especificação do importador v1; sua implementação é classe 1 e,
+antes de dados reais, classe 5.
 
 Dados brutos serão acessíveis somente com permissão; usuários sem permissão verão
 apenas dados estruturados; o JSONB será mantido para auditoria. Antes de importar
@@ -275,8 +279,8 @@ altera a cobertura de colunas, mas é bloqueio de implantação real.
    exames por paciente, tratamento/reação adversa e encaminhamento ampliado.
 3. Usar o manifesto versionado concluído das duas abas clínicas como base da
    especificação do importador.
-4. Especificar identificação, precedência entre abas, conflitos, idempotência,
-   retomada e cadeia de reprocessamento.
+4. Resolver os bloqueios explicitamente classificados na especificação normativa
+   do importador, sem promover colunas ainda parciais.
 5. Definir retenção, autoridades, revisão, roles, privilégios e auditoria do JSONB.
 6. Implementar o importador e testes exclusivamente com planilha sintética.
 7. Preparar servidor seguro, segredos, backup/restauração e observabilidade.

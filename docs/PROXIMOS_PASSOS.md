@@ -1,6 +1,6 @@
 # Próximos Passos
 
-Atualizado em: 2026-08-13
+Atualizado em: 2026-08-24
 
 ## Escopo confirmado do MVP
 
@@ -27,21 +27,16 @@ A fonte detalhada das decisões é
 As quatro evoluções mínimas do MVP estão implementadas. Evoluções posteriores
 continuarão incrementais e não alterarão scripts já aplicados.
 
-## 2. Especificar regras do importador a partir do manifesto v1
+## 2. Resolver bloqueios delimitados da especificação do importador
 
-O manifesto físico foi concluído em `manifestos/planilha_ambulatorio_v1.json`.
-Restam as regras operacionais abaixo antes de implementar o importador sintético:
+O manifesto físico e as regras operacionais foram consolidados em
+`manifestos/planilha_ambulatorio_v1.json` e
+`docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`. Antes da implementação completa,
+resta resolver os bloqueios classificados nessa especificação:
 
-1. Configuração distinta por aba, posição, ocorrência, bloco e tipo.
-2. Precedência de portadores em conflito entre abas.
-3. Coluna ausente e célula vazia como não informado.
-4. Normalização de booleanos, datas `dd/mm/aaaa`, anos e NYHA.
-5. Conversão documentada de altura: metros × 100 para centímetros.
-6. Identificação de paciente sem mesclar candidatos conflitantes.
-7. Criação de um atendimento por linha válida.
-8. Responsável pela digitação preservado como legado, sem vínculo automático.
-9. Campos ambíguos somente no JSONB bruto.
-10. Reprocessamentos como novos lotes encadeados, sem sobrescrever histórico.
+1. Corrigir ou confirmar os dois destinos de contexto ambulatorial no manifesto.
+2. Fechar mapeamentos `parcial`, aliases de domínios e unidades textuais de BZN.
+3. Definir o fluxo humano de revisão antes de qualquer dado real.
 
 ## 3. Resolver bloqueios para dados reais
 
@@ -57,8 +52,8 @@ Restam as regras operacionais abaixo antes de implementar o importador sintétic
 
 ## 4. Implementar e homologar
 
-1. Implementar o importador somente depois de especificar identificação,
-   conflitos, idempotência e retomada a partir do manifesto v1.
+1. Implementar primeiro o importador sintético limitado aos mapeamentos fechados,
+   seguindo a especificação normativa v1 e recusando promoções pendentes.
 2. Criar planilha sintética para testar repetição de pacientes, conflitos de abas,
    múltiplos exames, falhas de projetos, tratamento e reprocessamento.
 3. Validar idempotência, retomada, rejeições e rastreabilidade.

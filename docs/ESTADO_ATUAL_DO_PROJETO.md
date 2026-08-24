@@ -1,6 +1,6 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-08-13
+Atualizado em: 2026-08-24
 
 ## Objetivo Geral
 
@@ -207,12 +207,16 @@ Resumo da reconciliação:
 
 ## Próximos Passos Recomendados
 
-1. Especificar identificação, conflitos, idempotência e retomada do importador a partir do manifesto físico v1 concluído.
-2. Resolver os bloqueios operacionais e de segurança antes de usar dados reais.
+1. Resolver os bloqueios de mapeamento classificados na especificação normativa
+   do importador v1.
+2. Implementar e validar primeiro um importador limitado a dados sintéticos e aos
+   mapeamentos fechados.
+3. Resolver os bloqueios operacionais e de segurança antes de usar dados reais.
 
 ## Próxima fase técnica
 
-1. Não implementar o importador antes de fechar suas regras operacionais; o manifesto e as quatro migrations mínimas do MVP estão concluídos.
+1. Usar `docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md` como fonte de verdade e
+   recusar promoção de campos ainda pendentes.
 2. Manter dados reais bloqueados até existir governança, roles, auditoria, retenção e ambiente seguro.
 
 ## Regra Permanente de Documentação
