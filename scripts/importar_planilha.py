@@ -56,7 +56,10 @@ def bool_value(value: str | None, field: str):
 def number_value(value: str | None, field: str, integer=False):
     if value is None or not value.strip():
         return None
-    token = value.strip().replace("%", "").replace(",", ".")
+    token = value.strip()
+    if not re.fullmatch(r"[+-]?(?:[0-9]+(?:[.,][0-9]+)?|[.,][0-9]+)", token):
+        raise RowConflict(f"{field}: número inválido")
+    token = token.replace(",", ".")
     try:
         number = Decimal(token)
         if integer and number != number.to_integral_value():
@@ -91,8 +94,36 @@ def raw_payload(columns, values):
             for i, c in enumerate(columns)]
 
 
+def domain_value(value, field, accepted):
+    if value is None or not value.strip():
+        return None
+    token = normalized(value).replace(" ", "_")
+    if token not in accepted:
+        raise RowConflict(f"{field}: domínio inválido")
+    return token
+
+
+PK_FIELDS = {
+    "paciente_endereco": "endereco_id",
+    "paciente_contato": "contato_id",
+}
+
+# Tabelas que materializam os 124 rótulos físicos com cobertura plena. A
+# checagem é executada antes de qualquer escrita e impede regressão silenciosa.
+HANDLED_TABLES = {
+    "importacao_linha", "paciente", "paciente_endereco", "paciente_contato",
+    "atendimento", "paciente_projeto_estudo", "diagnostico_chagas",
+    "sorologia_chagas", "sorologia_solicitacao", "condicao_chagas",
+    "complicacao_chagas", "paciente_comorbidade", "atendimento_medicamento",
+    "paciente_exame_complementar", "atendimento_exame_complementar",
+    "exame_complementar_resultado", "tratamento_benzonidazol",
+    "encaminhamento", "dados_clinicos_atendimento", "evento_clinico",
+    "dispositivo_implantado", "notificacao", "obito",
+}
+
+
 class Importer:
-    def __init__(self, db, workbook_path, manifest, code):
+    def __init__(self, db, workbook_path, manifest, code, reprocess=False):
         self.db, self.path, self.manifest, self.code = db, workbook_path, manifest, code
         self.book = read_xlsx(workbook_path)
         self.hash = hashlib.sha256(workbook_path.read_bytes()).hexdigest()
@@ -101,8 +132,18 @@ class Importer:
         self.rejected = 0
         self.imported = 0
         self.portador_keys = set()
+        self.reprocess = reprocess
+        self.predecessor_id = None
 
     def validate_layout(self):
+        canonical = {}
+        for sheet in self.manifest["sheets"]:
+            for column in sheet["columns"]:
+                canonical.setdefault(column["cabecalho_original"].strip(), column)
+        full = [c for c in canonical.values() if c["situacao_cobertura"] in {"direta", "com_transformacao"}]
+        unsupported = sorted({c["tabela_destino"] for c in full} - HANDLED_TABLES)
+        if len(full) != 124 or unsupported:
+            raise SystemExit(f"Cobertura incompatível: plenos={len(full)}, tabelas sem handler={unsupported}")
         expected_names = [s["aba_nome_original"] for s in self.manifest["sheets"]]
         missing = [name for name in expected_names if name not in self.book]
         if missing:
@@ -120,14 +161,23 @@ class Importer:
         found = self.db.scalar(
             f"SELECT importacao_lote_id || '|' || status_lote FROM importacao_lote "
             f"WHERE hash_arquivo_sha256={literal(self.hash)} AND layout_versao={literal(version)} "
-            "AND lote_reprocessado_de_id IS NULL")
-        if found:
+            "ORDER BY importacao_lote_id DESC LIMIT 1")
+        if self.reprocess:
+            if not found:
+                raise SystemExit("Reprocessamento exige lote predecessor do mesmo conteúdo e layout")
+            predecessor, _ = found.split("|", 1)
+            self.predecessor_id = int(predecessor)
+            self.lot_id = int(self.db.scalar(
+                "INSERT INTO importacao_lote (codigo_lote,hash_arquivo_sha256,layout_versao,lote_reprocessado_de_id,status_lote) "
+                f"VALUES ({literal(self.code)},{literal(self.hash)},{literal(version)},{self.predecessor_id},'recebido') RETURNING importacao_lote_id"))
+            found = "created"
+        if found and found != "created":
             lot, status = found.split("|", 1)
             self.lot_id = int(lot)
             if status in {"concluido", "concluido_com_pendencias"}:
                 print(f"Lote {lot} já concluído; reexecução idempotente sem escrita.")
                 return False
-        else:
+        elif not found:
             self.lot_id = int(self.db.scalar(
                 "INSERT INTO importacao_lote (codigo_lote,hash_arquivo_sha256,layout_versao,status_lote) "
                 f"VALUES ({literal(self.code)},{literal(self.hash)},{literal(version)},'recebido') RETURNING importacao_lote_id"))
@@ -163,15 +213,40 @@ class Importer:
         return result
 
     def provenance(self, line_id, table, record_id, action="criado"):
+        if table not in HANDLED_TABLES:
+            raise RowConflict(f"proveniência: tabela não permitida: {table}")
+        pk = PK_FIELDS.get(table, table + "_id")
+        if not self.db.scalar(f"SELECT 1 FROM {table} WHERE {pk}={int(record_id)}"):
+            raise RowConflict(f"proveniência: alvo inexistente: {table}")
         self.db.run("INSERT INTO importacao_registro (importacao_linha_id,tabela_destino,registro_id,acao) "
-                    f"VALUES ({line_id},{literal(table)},{record_id},{literal(action)}) ON CONFLICT DO NOTHING")
+                    f"VALUES ({line_id},{literal(table)},{record_id},{literal(action)}) ON CONFLICT "
+                    "(importacao_linha_id,schema_destino,tabela_destino,registro_id) DO UPDATE SET acao=EXCLUDED.acao")
 
     def insert_returning(self, line_id, table, fields, action="criado"):
         names = ",".join(fields)
         values = ",".join(literal(v) for v in fields.values())
-        pk = table + "_id"
+        pk = PK_FIELDS.get(table, table + "_id")
         record_id = int(self.db.scalar(f"INSERT INTO {table} ({names}) VALUES ({values}) RETURNING {pk}"))
         self.provenance(line_id, table, record_id, action)
+        return record_id
+
+    def reconcile(self, line_id, table, record_id, incoming):
+        """Preenche apenas NULL; igualdade associa; divergência nunca sobrescreve."""
+        pk = PK_FIELDS.get(table, table + "_id")
+        changed = False
+        for field, value in incoming.items():
+            if value is None:
+                continue
+            current = self.db.scalar(f"SELECT COALESCE({field}::text,'__NULL__') FROM {table} WHERE {pk}={record_id}")
+            wanted = str(value).lower() if isinstance(value, bool) else str(value)
+            if current == "__NULL__":
+                self.db.run(f"UPDATE {table} SET {field}={literal(value)}, atualizado_em=CURRENT_TIMESTAMP WHERE {pk}={record_id}")
+                changed = True
+            elif field.startswith("valor_original_"):
+                continue
+            elif current != wanted and not (isinstance(value, bool) and current == ("t" if value else "f")):
+                raise RowConflict(f"{table}.{field}: divergência consolidada")
+        self.provenance(line_id, table, record_id, "atualizado" if changed else "associado")
         return record_id
 
     def patient(self, line_id, row, group):
@@ -190,16 +265,29 @@ class Importer:
             patient_id, _, existing_code = candidates[0]
             if source_code and existing_code and source_code != existing_code:
                 raise RowConflict("identidade: ID auxiliar conflitante")
-            self.provenance(line_id, "paciente", int(patient_id), "associado")
+            incoming = {"codigo_planilha": source_code, "grupo_origem_planilha": group}
+            sex = row.get("sexo")
+            if sex and sex.strip():
+                incoming["sexo"] = domain_value(sex, "sexo", {"feminino", "masculino", "outro", "nao_informado"})
+            community = row.get("pertence_a_comunidade_quilombola_ou_indigena")
+            if community and community.strip(): incoming["pertence_comunidade_tradicional"] = bool_value(community, "comunidade")
+            kind = row.get("qual_indigena_ou_quilombola")
+            if kind and kind.strip(): incoming["tipo_comunidade_tradicional"] = domain_value(kind, "tipo_comunidade", {"indigena", "quilombola"})
+            if row.get("raca") and row["raca"].strip(): incoming["raca"] = row["raca"].strip()
+            current_group=self.db.scalar(f"SELECT COALESCE(grupo_origem_planilha,'') FROM paciente WHERE paciente_id={int(patient_id)}")
+            promoted_group = False
+            if group == "portador_dc" and current_group == "nao_portador_dc":
+                self.db.run(f"UPDATE paciente SET grupo_origem_planilha='portador_dc',atualizado_em=CURRENT_TIMESTAMP WHERE paciente_id={int(patient_id)}")
+                incoming.pop("grupo_origem_planilha")
+                promoted_group = True
+            self.reconcile(line_id, "paciente", int(patient_id), incoming)
+            if promoted_group: self.provenance(line_id,"paciente",int(patient_id),"atualizado")
             return int(patient_id), identity
         fields = {"codigo_planilha": source_code, "nome": name, "data_nascimento": birth,
                   "grupo_origem_planilha": group}
         sex = row.get("sexo")
         if sex and sex.strip():
-            aliases = {"f": "feminino", "feminino": "feminino", "m": "masculino", "masculino": "masculino",
-                       "outro": "outro", "nao informado": "nao_informado"}
-            fields["sexo"] = aliases.get(normalized(sex))
-            if fields["sexo"] is None: raise RowConflict("sexo: domínio inválido")
+            fields["sexo"] = domain_value(sex, "sexo", {"feminino", "masculino", "outro", "nao_informado"})
         community = bool_value(row.get("pertence_a_comunidade_quilombola_ou_indigena"), "comunidade")
         fields["pertence_comunidade_tradicional"] = community
         kind = row.get("qual_indigena_ou_quilombola")
@@ -209,6 +297,15 @@ class Importer:
             fields["tipo_comunidade_tradicional"] = kind_n
         if row.get("raca") and row["raca"].strip(): fields["raca"] = row["raca"].strip()
         return self.insert_returning(line_id, "paciente", fields), identity
+
+    def address_contact(self, line_id, patient_id, row):
+        address = (row.get("endereco") or "").strip() or None
+        city = (row.get("cidade") or "").strip() or None
+        phone = (row.get("telefone_de_contato") or "").strip() or None
+        if address or city:
+            self.insert_returning(line_id, "paciente_endereco", {"paciente_id": patient_id, "endereco": address, "cidade": city})
+        if phone:
+            self.insert_returning(line_id, "paciente_contato", {"paciente_id": patient_id, "telefone": phone})
 
     def projects(self, line_id, patient_id, row):
         aliases = self.manifest["aliases_versionados"]["projetos"]
@@ -226,9 +323,80 @@ class Importer:
                 raise RowConflict(f"catálogo de projeto inexistente: {code}")
             existing = self.db.scalar(f"SELECT paciente_projeto_estudo_id FROM paciente_projeto_estudo WHERE paciente_id={patient_id} AND projeto_estudo_id={project}")
             if existing:
-                self.provenance(line_id, "paciente_projeto_estudo", int(existing), "associado")
+                self.reconcile(line_id, "paciente_projeto_estudo", int(existing), fields)
             else:
                 self.insert_returning(line_id, "paciente_projeto_estudo", {"paciente_id": patient_id, "projeto_estudo_id": int(project), **fields})
+
+    def diagnosis(self, line_id, attendance_id, row):
+        sources = ["diagnostico_da_dc_por_sorologia", "resultado_final_da_sorologia",
+                   "caso_seja_sorologia_metodo_1", "data_da_sorologia_01",
+                   "caso_seja_sorologia_metodo_2", "data_sorologia_2",
+                   "caso_seja_sorologia_metodo_3", "data_sorologia_3"]
+        if any(row.get(x) and row[x].strip() for x in sources):
+            fields = {"atendimento_id": attendance_id}
+            raw = row.get("diagnostico_da_dc_por_sorologia")
+            if raw and raw.strip():
+                fields.update(possui_diagnostico_chagas=bool_value(raw, "diagnostico_da_dc_por_sorologia"), valor_original_diagnostico=raw)
+            result = row.get("resultado_final_da_sorologia")
+            if result and result.strip():
+                fields.update(resultado_final=domain_value(result, "resultado_final_da_sorologia", {"positivo", "negativo", "inconclusivo", "indeterminado", "nao_informado"}), valor_original_resultado_final=result)
+            diagnosis_id = self.insert_returning(line_id, "diagnostico_chagas", fields)
+            for number, method_key, date_key in [(1,"caso_seja_sorologia_metodo_1","data_da_sorologia_01"),(2,"caso_seja_sorologia_metodo_2","data_sorologia_2"),(3,"caso_seja_sorologia_metodo_3","data_sorologia_3")]:
+                method, date = row.get(method_key), row.get(date_key)
+                if not ((method and method.strip()) or (date and date.strip())): continue
+                values = {"diagnostico_chagas_id": diagnosis_id, "numero_metodo_planilha": number}
+                if method and method.strip(): values.update(metodo_sorologico=method.strip(), valor_original_metodo=method)
+                if date and date.strip(): values.update(data_resultado=date_value(date,date_key), valor_original_data=date)
+                self.insert_returning(line_id, "sorologia_chagas", values)
+        requested, requested_date = row.get("ou_solicitado_sorologia"), row.get("se_sim_data_solicitada")
+        if (requested and requested.strip()) or (requested_date and requested_date.strip()):
+            values = {"atendimento_id": attendance_id}
+            if requested and requested.strip(): values.update(solicitada=bool_value(requested,"ou_solicitado_sorologia"),valor_original_solicitacao=requested)
+            if requested_date and requested_date.strip(): values["data_solicitacao"] = date_value(requested_date,"se_sim_data_solicitada")
+            self.insert_returning(line_id, "sorologia_solicitacao", values)
+
+    def chagas_condition(self, line_id, attendance_id, row):
+        form, classification = row.get("forma_da_dc"), row.get("classificacao_da_cardiopatia_chagasica")
+        if (form and form.strip()) or (classification and classification.strip()):
+            fields={"atendimento_id":attendance_id}
+            if form and form.strip():
+                fields.update(forma_clinica=domain_value(form,"forma_da_dc",{"indeterminada","cardiaca","digestiva","cardiodigestiva","aguda","cronica","nao_informado"}),valor_original_forma_clinica=form)
+            if classification and classification.strip(): fields.update(classificacao_clinica=classification.strip(),valor_original_classificacao=classification)
+            self.insert_returning(line_id,"condicao_chagas",fields)
+        overall=row.get("complicacoes_relacionadas_a_dc")
+        details=[("cardiaca","complicacoes_cardiacas_relacioadas_a_dc"),("digestiva","complicacoes_do_trato_digestivo_relacioadas_a_dc"),("outra","outras_complicacoes_relacionadas_a_dc_qual")]
+        if overall and overall.strip():
+            self.insert_returning(line_id,"complicacao_chagas",{"atendimento_id":attendance_id,"tipo_complicacao":"geral","possui_complicacao":bool_value(overall,"complicacoes_relacionadas_a_dc"),"valor_original_presenca":overall})
+        for kind,key in details:
+            value=row.get(key)
+            if value and value.strip(): self.insert_returning(line_id,"complicacao_chagas",{"atendimento_id":attendance_id,"tipo_complicacao":kind,"descricao":value.strip(),"valor_original_tipo":key})
+
+    def comorbidities(self, line_id, patient_id, attendance_id, row):
+        keys=["comorbidades_nao_relacionadas_a_dc","hipertensao_arterial","diabetes","doenca_renal","doencas_psicologicas","doencas_do_sistema_cardiovascular","doencas_do_sistema_respiratorio","doencas_do_sistema_digestorio","doencas_do_sistema_nervoso","doencas_do_sistema_endocrino","doencas_do_sistema_imunologico","doencas_do_sistema_tegumentar","outras_doencas"]
+        for key in keys:
+            value=row.get(key)
+            if not value or not value.strip(): continue
+            matches=self.db.run(f"SELECT comorbidade_id FROM comorbidade WHERE ativo AND lower(btrim(nome_comorbidade))={literal(key)} ORDER BY comorbidade_id")
+            if len(matches)!=1: raise RowConflict(f"comorbidade: catálogo não resolvido: {key}")
+            present=bool_value(value,key)
+            existing=self.db.scalar(f"SELECT paciente_comorbidade_id FROM paciente_comorbidade WHERE paciente_id={patient_id} AND comorbidade_id={int(matches[0])}")
+            fields={"possui_comorbidade":present,"valor_original_comorbidade":value}
+            if existing: self.reconcile(line_id,"paciente_comorbidade",int(existing),fields)
+            else: self.insert_returning(line_id,"paciente_comorbidade",{"paciente_id":patient_id,"comorbidade_id":int(matches[0]),"atendimento_id":attendance_id,**fields})
+
+    def medications(self, line_id, attendance_id, row):
+        keys=["anti_hipertensivo","diureticos","anti_arritmicos","alfa_betabloqueador","anti_coagulantes","anti_depressivos","bloqueador_de_calcio","estatinas","hipoglicemiante","ieca_bra","inra","vasodilatador","outros_medicamentos"]
+        aliases=self.manifest["aliases_versionados"]["medicamentos"]
+        for key in keys:
+            value=row.get(key)
+            if not value or not value.strip(): continue
+            fields={"atendimento_id":attendance_id,"tipo_registro":"registro_planilha","uso_atual":bool_value(value,key),"valor_original_medicamento":value}
+            if key in aliases:
+                found=self.db.scalar(f"SELECT medicamento_id FROM medicamento WHERE codigo_medicamento={literal(aliases[key])} AND ativo")
+                if not found: raise RowConflict(f"medicamento: catálogo inexistente: {aliases[key]}")
+                fields["medicamento_id"]=int(found)
+            else: fields["nome_medicamento_livre"]=key
+            self.insert_returning(line_id,"atendimento_medicamento",fields)
 
     def examination(self, line_id, patient_id, attendance_id, row):
         aliases = self.manifest["aliases_versionados"]["exames"]
@@ -264,6 +432,67 @@ class Importer:
             value=row.get(source)
             if value and value.strip():
                 self.insert_returning(line_id,"exame_complementar_resultado",{"atendimento_exame_complementar_id":lab,"nome_campo":name,"valor_numerico":number_value(value,source),"valor_original":value})
+        feve=row.get("feve")
+        if feve and feve.strip():
+            type_id=self.db.scalar("SELECT tipo_exame_complementar_id FROM tipo_exame_complementar WHERE codigo_exame='ecocardiograma' AND ativo")
+            if not type_id: raise RowConflict("catálogo de exame inexistente: ecocardiograma")
+            exam_id=self.insert_returning(line_id,"atendimento_exame_complementar",{"atendimento_id":attendance_id,"tipo_exame_complementar_id":int(type_id),"origem_exame":"registrado_planilha"})
+            token=feve.strip()
+            if token.endswith("%"): token=token[:-1].strip()
+            self.insert_returning(line_id,"exame_complementar_resultado",{"atendimento_exame_complementar_id":exam_id,"nome_campo":"FEVE","valor_numerico":number_value(token,"feve"),"unidade":"%","valor_original":feve})
+
+    def clinical_data(self, line_id, attendance_id, row):
+        mapping={"altura_cm":("altura",lambda v,f:number_value(v,f)*100),"peso_kg":("peso",number_value),"circunferencia_abdominal_cm":("circunferencia_abdominal",number_value),"frequencia_cardiaca_bpm":("frequencia_cardiaca",lambda v,f:number_value(v,f,True)),"pa_sistolica_mmhg":("pa_sistolica",lambda v,f:number_value(v,f,True)),"pa_diastolica_mmhg":("pa_diastolica",lambda v,f:number_value(v,f,True)),"nyha":("nyha",lambda v,f:domain_value(v,f,{"i","ii","iii","iv"}).upper())}
+        sat=row.get("saturacao")
+        fields={"atendimento_id":attendance_id}
+        for dest,(source,converter) in mapping.items():
+            value=row.get(source)
+            if value and value.strip():
+                fields[dest]=converter(value,source); fields["valor_original_"+source]=value
+        if sat and sat.strip():
+            token=sat.strip(); token=token[:-1].strip() if token.endswith("%") else token
+            fields.update(saturacao_percentual=number_value(token,"saturacao"),valor_original_saturacao=sat)
+        if len(fields)>1: self.insert_returning(line_id,"dados_clinicos_atendimento",fields)
+
+    def events_devices(self, line_id, patient_id, row):
+        avc, year=row.get("teve_avc"),row.get("ano_do_ultimo_avc")
+        if (avc and avc.strip()) or (year and year.strip()):
+            fields={"paciente_id":patient_id,"tipo_evento":"avc"}
+            if avc and avc.strip(): fields.update(ocorreu=bool_value(avc,"teve_avc"),valor_original_ocorrencia=avc)
+            if year and year.strip(): fields.update(ano_evento=year_value(year,"ano_do_ultimo_avc"),valor_original_data=year)
+            self.insert_returning(line_id,"evento_clinico",fields)
+        for key,kind in [("portador_de_cdi","cdi"),("portador_de_marcapasso","marcapasso")]:
+            value=row.get(key)
+            if not value or not value.strip(): continue
+            incoming={"possui_dispositivo":bool_value(value,key),"valor_original_presenca":value}
+            existing=self.db.scalar(f"SELECT dispositivo_implantado_id FROM dispositivo_implantado WHERE paciente_id={patient_id} AND tipo_dispositivo={literal(kind)}")
+            if existing: self.reconcile(line_id,"dispositivo_implantado",int(existing),incoming)
+            else: self.insert_returning(line_id,"dispositivo_implantado",{"paciente_id":patient_id,"tipo_dispositivo":kind,"valor_original_tipo":key,**incoming})
+
+    def notification_death(self, line_id, patient_id, row):
+        def consolidated(table, sources, fields):
+            if not any(row.get(x) and row[x].strip() for x in sources): return
+            existing=self.db.scalar(f"SELECT {table}_id FROM {table} WHERE paciente_id={patient_id}")
+            if existing: self.reconcile(line_id,table,int(existing),fields)
+            else: self.insert_returning(line_id,table,{"paciente_id":patient_id,**fields})
+        nfields={}
+        value=row.get("paciente_notificado")
+        if value and value.strip(): nfields.update(paciente_notificado=bool_value(value,"paciente_notificado"),valor_original_notificado=value)
+        number=row.get("numero_notificacao")
+        if number and number.strip(): nfields.update(numero_notificacao=number.strip(),valor_original_numero=number)
+        reason=row.get("caso_nao_justifique")
+        if reason and reason.strip():
+            if nfields.get("paciente_notificado") is not False: raise RowConflict("notificação: justificativa exige paciente_notificado=false")
+            nfields.update(justificativa_nao_notificacao=reason.strip(),valor_original_justificativa=reason)
+        consolidated("notificacao",["paciente_notificado","numero_notificacao","caso_nao_justifique"],nfields)
+        ofields={}
+        died=row.get("obito")
+        if died and died.strip(): ofields.update(houve_obito=bool_value(died,"obito"),valor_original_obito=died)
+        death_date=row.get("data_do_obito")
+        if death_date and death_date.strip(): ofields.update(data_obito=date_value(death_date,"data_do_obito"),valor_original_data=death_date)
+        cause=row.get("causa_do_obito")
+        if cause and cause.strip(): ofields.update(causa_obito=cause.strip(),valor_original_causa=cause)
+        consolidated("obito",["obito","data_do_obito","causa_do_obito"],ofields)
 
     def treatment(self, line_id, patient_id, attendance_id, row):
         sources = ["uso_do_benzonidazol_para_tratamento_da_dc","tratamento_pelo_ambulatorio","por_quanto_tempo_foi_usado",
@@ -307,6 +536,21 @@ class Importer:
             fields.update(projeto_estudo_id=int(project),valor_original_projeto=project_raw)
         self.insert_returning(line_id,"encaminhamento",fields)
 
+    def reuse_predecessor(self, line_id, sheet, line_no):
+        if not self.predecessor_id: return False
+        previous=self.db.scalar(f"SELECT importacao_linha_id || '|' || status_linha FROM importacao_linha WHERE importacao_lote_id={self.predecessor_id} AND aba_ordem={sheet['aba_ordem']} AND numero_linha={line_no}")
+        if not previous: return False
+        previous_line,status=previous.split("|",1)
+        if status not in {"importada","importada_com_pendencia"}: return False
+        links=self.db.run(f"SELECT tabela_destino || '|' || registro_id FROM importacao_registro WHERE importacao_linha_id={int(previous_line)} ORDER BY importacao_registro_id")
+        if not links: raise RowConflict("reprocessamento: predecessor importado sem proveniência")
+        for link in links:
+            table,record_id=link.split("|",1)
+            self.provenance(line_id,table,int(record_id),"associado")
+        message=f"reprocessamento: alvos reutilizados do lote predecessor {self.predecessor_id}"
+        self.db.run(f"UPDATE importacao_linha SET status_linha={literal(status)},mensagem_processamento={literal(message)},atualizado_em=CURRENT_TIMESTAMP WHERE importacao_linha_id={line_id}")
+        return True
+
     def process_row(self, sheet, line_no, values):
         line_id=int(self.db.scalar(f"SELECT importacao_linha_id FROM importacao_linha WHERE importacao_lote_id={self.lot_id} AND aba_ordem={sheet['aba_ordem']} AND numero_linha={line_no}"))
         status=self.db.scalar(f"SELECT status_linha FROM importacao_linha WHERE importacao_linha_id={line_id}")
@@ -314,15 +558,20 @@ class Importer:
         row=self.row_map(sheet["columns"], values)
         self.db.run(f"UPDATE importacao_linha SET status_linha='processando', atualizado_em=CURRENT_TIMESTAMP WHERE importacao_linha_id={line_id}")
         try:
-            attendance_date=date_value(row.get("data_do_atendimento"),"data_do_atendimento",True)
-            name=(row.get("nome") or "").strip(); birth=date_value(row.get("data_de_nascimento"),"data_de_nascimento",True)
+            name=(row.get("nome") or "").strip()
+            birth=date_value(row.get("data_de_nascimento"),"data_de_nascimento",True)
             identity=(normalized(name),birth)
+            self.db.run("BEGIN")
+            if self.reuse_predecessor(line_id,sheet,line_no):
+                self.db.run("COMMIT"); self.imported += 1
+                if sheet["aba_ordem"]==1: self.portador_keys.add(identity)
+                return
+            attendance_date=date_value(row.get("data_do_atendimento"),"data_do_atendimento",True)
             if sheet["aba_ordem"] == 2 and identity in self.portador_keys:
                 raise RowConflict("conflito entre abas: prevalece Pacientes portadores de DC")
             amb_only=bool_value(row.get("ambulatorio_unicamente"),"ambulatorio_unicamente")
             amb_project=bool_value(row.get("ambulatorio_anexo_ao_projeto"),"ambulatorio_anexo_ao_projeto")
             if amb_only is True and amb_project is True: raise RowConflict("contexto do atendimento conflitante")
-            self.db.run("BEGIN")
             patient_id, identity=self.patient(line_id,row,"portador_dc" if sheet["aba_ordem"]==1 else "nao_portador_dc")
             attendance_id=self.insert_returning(line_id,"atendimento",{"paciente_id":patient_id,"data_atendimento":attendance_date,
                 "localizacao_prontuario":(row.get("localizacao_do_prontuario") or "").strip() or None,
@@ -330,7 +579,15 @@ class Importer:
                 "origem_registro":"planilha_portador_dc" if sheet["aba_ordem"]==1 else "planilha_nao_portador_dc",
                 "observacoes":(row.get("observacao") or "").strip() or None})
             self.projects(line_id,patient_id,row)
+            self.address_contact(line_id,patient_id,row)
+            self.diagnosis(line_id,attendance_id,row)
+            self.chagas_condition(line_id,attendance_id,row)
+            self.comorbidities(line_id,patient_id,attendance_id,row)
+            self.medications(line_id,attendance_id,row)
             self.examination(line_id,patient_id,attendance_id,row)
+            self.clinical_data(line_id,attendance_id,row)
+            self.events_devices(line_id,patient_id,row)
+            self.notification_death(line_id,patient_id,row)
             self.treatment(line_id,patient_id,attendance_id,row)
             self.referral(line_id,attendance_id,row)
             partial=[c["chave_semantica"] for c in sheet["columns"] if c["situacao_cobertura"]=="parcial" and row.get(c["chave_semantica"]) and row[c["chave_semantica"]].strip()]
@@ -348,8 +605,9 @@ class Importer:
         except Exception as exc:
             try: self.db.run("ROLLBACK")
             except RuntimeError: pass
-            self.db.run(f"UPDATE importacao_linha SET status_linha='rejeitada',mensagem_processamento={literal('falha atômica: '+str(exc))},atualizado_em=CURRENT_TIMESTAMP WHERE importacao_linha_id={line_id}")
-            self.rejected += 1
+            self.db.run(f"UPDATE importacao_linha SET status_linha='pendente',mensagem_processamento='falha operacional; retomada necessária',atualizado_em=CURRENT_TIMESTAMP WHERE importacao_linha_id={line_id}")
+            self.db.run(f"UPDATE importacao_lote SET status_lote='falhou',mensagem_erro='falha operacional durante processamento de linha',atualizado_em=CURRENT_TIMESTAMP WHERE importacao_lote_id={self.lot_id}")
+            raise RuntimeError("falha operacional durante processamento de linha") from exc
 
     def run(self):
         self.validate_layout()
@@ -379,6 +637,7 @@ class Importer:
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("arquivo",type=Path); parser.add_argument("--codigo-lote")
+    parser.add_argument("--reprocessar",action="store_true",help="cria novo lote ligado à execução imediatamente anterior do mesmo conteúdo/layout")
     parser.add_argument("--manifesto",type=Path,default=MANIFEST)
     parser.add_argument("--db-host",default=os.getenv("DB_HOST","localhost")); parser.add_argument("--db-port",default=os.getenv("DB_PORT","5432"))
     parser.add_argument("--db-user",default=os.getenv("DB_USER")); parser.add_argument("--db-name",default=os.getenv("DB_NAME"))
@@ -387,7 +646,7 @@ def main():
     manifest=json.loads(args.manifesto.read_text())
     code=args.codigo_lote or f"xlsx-{hashlib.sha256(args.arquivo.read_bytes()).hexdigest()[:16]}"
     with Database(args.db_host,args.db_port,args.db_user,args.db_name,os.getenv("PGPASSWORD")) as db:
-        Importer(db,args.arquivo,manifest,code).run()
+        Importer(db,args.arquivo,manifest,code,args.reprocessar).run()
 
 
 if __name__ == "__main__": main()

@@ -1,6 +1,6 @@
 # Próximos Passos
 
-Atualizado em: 2026-08-24
+Atualizado em: 2026-08-25
 
 ## Escopo confirmado do MVP
 
@@ -46,12 +46,12 @@ determinística de preservação bruta e não bloqueiam o importador sintético.
    backup/retenção e registro de acesso. O restore Docker validado cobre apenas
    desenvolvimento e não substitui esses controles de produção.
 
-## 4. Completar e homologar
+## 4. Homologação sintética concluída
 
-1. Ampliar os handlers para os demais módulos estruturados já mapeados.
-2. Implementar reprocessamento intencional por novo lote encadeado.
-3. Homologar os 124 destinos plenamente cobertos com fixtures sintéticas.
-4. Homologar carga controlada em servidor seguro antes da carga real completa.
+Os handlers dos módulos estruturados, os 124 destinos plenos e dois elos de
+reprocessamento foram homologados com dados exclusivamente sintéticos. O próximo
+passo técnico-operacional é homologar carga controlada em servidor seguro, após
+resolver todos os bloqueios institucionais para dados reais.
 
 ## 5. Backlog permitido
 

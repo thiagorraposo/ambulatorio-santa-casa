@@ -1,13 +1,13 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-08-24
+Atualizado em: 2026-08-25
 
 ## Objetivo Geral
 
 O projeto `ambulatorio-santa-casa` define a base de dados PostgreSQL para organizar registros de pacientes, atendimentos ambulatoriais, diagnóstico de doença de Chagas, sorologias, condições clínicas, comorbidades, exames complementares, encaminhamentos, acompanhamentos, medicamentos, tratamentos e procedimentos clínicos.
 
 O repositório contém scripts SQL, oito testes SQL transacionais e a primeira
-versão executável do importador sintético, com teste ponta a ponta isolado. Ainda
+versão completa do importador sintético do MVP, com teste ponta a ponta isolado. Ainda
 não há backend, frontend, CI ou autorização para dados reais.
 
 ## Stack e Tecnologias Usadas
@@ -22,13 +22,12 @@ não há backend, frontend, CI ou autorização para dados reais.
 
 ## Status Atual
 
-- A Semana 1 da camada de importação está formalmente encerrada: manifesto,
-  cobertura, transformações, identidade, conflitos, idempotência, retomada,
-  reprocessamento e proveniência foram reconciliados com o schema físico. Não há
-  bloqueio técnico para iniciar o importador sintético.
-- O importador sintético v1 lê as duas abas, valida o manifesto, executa transação
-  por linha, concilia pacientes e importa atendimento, projetos, exames, BZN e
-  encaminhamento com proveniência e idempotência.
+- O importador sintético v1 homologa os 124 rótulos de cobertura plena nas 23
+  tabelas-destino do manifesto, mantendo onze parciais apenas no bruto e
+  `Localizado` excluído do estruturado.
+- O fluxo lê as duas abas, valida o manifesto, executa transação por linha,
+  concilia pacientes, registra proveniência e suporta idempotência do mesmo lote
+  e reprocessamento explícito por nova execução ligada ao predecessor imediato.
 - Scripts SQL existentes de `sql/00_criar_banco.sql` a `sql/16_encaminhamento_ampliado.sql`.
 - README e documentos antigos `docs/dicionario-dados.md` e `docs/decisoes-modelagem.md` existem, mas estão vazios.
 - A estrutura física real aplicada no PostgreSQL foi validada por evidência versionada em `docs/evidencias/schema_atual_ambulatorio.sql`.

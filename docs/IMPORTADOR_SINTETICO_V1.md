@@ -1,6 +1,6 @@
 # Importador Sintético v1
 
-Atualizado em: 2026-08-24
+Atualizado em: 2026-08-25
 
 ## Finalidade
 
@@ -32,8 +32,10 @@ do `psql`. O teste E2E cria um banco Docker isolado com sufixo
    exato, com ID de origem apenas auxiliar;
 5. abre uma transação por linha, cria/reutiliza paciente e cria exatamente um
    atendimento;
-6. grava paciente, atendimento, projetos, exames trazidos/solicitados, ECG,
-   resultados laboratoriais, BZN e encaminhamento;
+6. grava os 124 destinos plenos: dados demográficos, endereço/contato, projetos,
+   diagnóstico/sorologias/solicitação, condição e complicações de Chagas,
+   comorbidades, medicamentos, exames, avaliação clínica, eventos, dispositivos,
+   BZN, encaminhamento, notificação e óbito;
 7. registra todo alvo criado ou associado em `importacao_registro`;
 8. confirma a linha inteira ou executa rollback sem escrita clínica parcial.
 
@@ -41,25 +43,33 @@ Campos `parcial` nunca são promovidos. Quando preenchidos, deixam a linha
 `importada_com_pendencia` e permanecem em `dados_brutos`. `Localizado` permanece
 exclusivamente bruto e, isoladamente, não cria pendência.
 
-## Idempotência, retomada e conflitos
+## Idempotência, reprocessamento e conflitos
 
 O lote inicial é identificado por SHA-256 e versão do layout. Execução concluída
 é um no-op. Em lote `falhou`, somente linhas não terminais são retomadas; linhas
 já confirmadas ou rejeitadas não são repetidas. A posição da linha e os vínculos
 únicos de proveniência são barreiras adicionais contra duplicação.
 
+`--reprocessar` cria uma execução nova do mesmo hash/layout e liga
+`lote_reprocessado_de_id` ao lote imediatamente anterior. Linhas anteriormente
+importadas recebem novos vínculos `associado` para os mesmos alvos ainda válidos;
+nenhum atendimento ou dependência clínica é recriado. Linhas rejeitadas são
+avaliadas novamente. O E2E comprova dois elos consecutivos e preservação das
+execuções anteriores.
+
 Múltiplos candidatos, ID auxiliar divergente, duplicidade entre abas, contexto
 ambulatorial contraditório, valor inválido ou catálogo ausente rejeitam a linha.
 Projetos e exames nunca são criados automaticamente. O original e a mensagem do
 conflito permanecem auditáveis.
 
-## Limitações desta primeira versão
+## Cobertura e limites deliberados
 
-Os demais destinos estruturados do manifesto — endereço/contato, diagnóstico e
-sorologia, condição/complicações, comorbidades, medicamentos, avaliação clínica,
-evento/dispositivo, notificação e óbito — permanecem como incrementos da Semana
-2. A fixture não preenche esses campos. Antes de dados reais, cada handler deve
-ser implementado e homologado, além dos bloqueios institucionais já registrados.
+Os 124 rótulos com cobertura plena estão homologados por checagem executável
+contra o manifesto e por fixture sintética ampla. As onze chaves `parcial`
+continuam exclusivamente em `dados_brutos`; entre elas, a coluna sobre exames de
+familiares não autoriza criar `historico_familiar_chagas`, pois realização de
+exame por parente não equivale a histórico familiar da doença. `Localizado`
+continua excluído do estruturado.
 
-Reprocessamento intencional em novo lote encadeado também permanece pendente;
-esta versão cobre reexecução e retomada segura do lote inicial.
+Dados reais permanecem bloqueados pelas decisões institucionais de autoridade,
+acesso, retenção e revisão registradas na especificação normativa.

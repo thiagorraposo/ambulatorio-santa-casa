@@ -22,14 +22,23 @@ INSERT INTO paciente (codigo_planilha,nome,data_nascimento,grupo_origem_planilha
 ('DUP-A','Identidade Duplicada','1984-04-04','portador_dc'),
 ('DUP-B','IDENTIDADE DUPLICADA','1984-04-04','portador_dc');
 INSERT INTO projeto_estudo (codigo_projeto,nome_projeto) VALUES
-('sami_trop_aim3','SAMI-TROP AIM3'),('parachute','PARACHUTE')
+('sami_trop_aim3','SAMI-TROP AIM3'),('sami_trop_1_1','SAMI-TROP 1.1'),('parachute','PARACHUTE'),
+('benbrasil','BENBRASIL'),('epoca','EPOCA'),('santa_casa_dica','DICA'),('renomica','RENOMICA'),
+('archimedes','ARCHIMEDES'),('charm','CHARM'),('lxe_novartis','LXE NOVARTIS')
 ON CONFLICT (codigo_projeto) DO NOTHING;
-DELETE FROM projeto_estudo WHERE codigo_projeto='sami_trop_1_1';
 INSERT INTO tipo_exame_complementar (codigo_exame,nome_exame,categoria) VALUES
 ('eletrocardiograma','Eletrocardiograma','cardiologico'),
 ('laboratoriais','Laboratoriais','laboratorial'),
-('ecocardiograma','Ecocardiograma','cardiologico')
+('ecocardiograma','Ecocardiograma','cardiologico'),('imagem','Imagem','imagem'),('holter','Holter','cardiologico'),
+('endoscopia','Endoscopia','outro'),('colonoscopia','Colonoscopia','outro'),('teste_ergometrico','Teste ergométrico','cardiologico'),('mapa','MAPA','cardiologico'),('outro','Outro','outro')
 ON CONFLICT (codigo_exame) DO NOTHING;
+INSERT INTO medicamento (codigo_medicamento,nome_medicamento) VALUES
+('antihipertensivo_nao_especificado','Anti-hipertensivo sintético'),('diuretico_nao_especificado','Diurético sintético'),
+('antiarritmico_nao_especificado','Antiarrítmico sintético'),('betabloqueador_nao_especificado','Betabloqueador sintético')
+ON CONFLICT (codigo_medicamento) DO NOTHING;
+INSERT INTO comorbidade (nome_comorbidade)
+SELECT x FROM unnest(ARRAY['comorbidades_nao_relacionadas_a_dc','hipertensao_arterial','diabetes','doenca_renal','doencas_psicologicas','doencas_do_sistema_cardiovascular','doencas_do_sistema_respiratorio','doencas_do_sistema_digestorio','doencas_do_sistema_nervoso','doencas_do_sistema_endocrino','doencas_do_sistema_imunologico','doencas_do_sistema_tegumentar','outras_doencas']) x
+ON CONFLICT (nome_comorbidade) DO NOTHING;
 SQL
 
 python3 tests/importador/gerar_planilha_sintetica.py >/dev/null
@@ -46,6 +55,15 @@ test "$before" = "$after"
 python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-e2e-noop \
   --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$DB_USER" --db-name "$test_db"
 
+python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-e2e-reprocessado --reprocessar \
+  --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$DB_USER" --db-name "$test_db"
+after_reprocess="$(psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -c "SET search_path TO ambulatorio,public; SELECT count(*) FROM atendimento;")"
+test "$before" = "$after_reprocess"
+python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-e2e-reprocessado-2 --reprocessar \
+  --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$DB_USER" --db-name "$test_db"
+after_second_reprocess="$(psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -c "SET search_path TO ambulatorio,public; SELECT count(*) FROM atendimento;")"
+test "$before" = "$after_second_reprocess"
+
 psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" \
   -c "SET search_path TO ambulatorio,public; SELECT aba_ordem,numero_linha,status_linha,COALESCE(mensagem_processamento,'') FROM importacao_linha ORDER BY aba_ordem,numero_linha;"
 
@@ -54,22 +72,38 @@ SET search_path TO ambulatorio, public;
 DO $$
 DECLARE
   v_lote bigint;
+  v_reprocessado bigint;
+  v_reprocessado_2 bigint;
 BEGIN
   SELECT importacao_lote_id INTO v_lote FROM importacao_lote WHERE codigo_lote='sint-v1-e2e';
-  IF (SELECT count(*) FROM importacao_lote) <> 1 THEN RAISE EXCEPTION 'reexecução criou lote'; END IF;
+  SELECT importacao_lote_id INTO v_reprocessado FROM importacao_lote WHERE codigo_lote='sint-v1-e2e-reprocessado';
+  SELECT importacao_lote_id INTO v_reprocessado_2 FROM importacao_lote WHERE codigo_lote='sint-v1-e2e-reprocessado-2';
+  IF (SELECT count(*) FROM importacao_lote) <> 3 THEN RAISE EXCEPTION 'quantidade de lotes'; END IF;
+  IF (SELECT lote_reprocessado_de_id FROM importacao_lote WHERE importacao_lote_id=v_reprocessado) <> v_lote THEN RAISE EXCEPTION 'cadeia imediata'; END IF;
+  IF (SELECT lote_reprocessado_de_id FROM importacao_lote WHERE importacao_lote_id=v_reprocessado_2) <> v_reprocessado THEN RAISE EXCEPTION 'segundo elo imediato'; END IF;
   IF (SELECT status_lote FROM importacao_lote WHERE importacao_lote_id=v_lote) <> 'concluido_com_pendencias' THEN RAISE EXCEPTION 'status lote'; END IF;
-  IF (SELECT count(*) FROM importacao_linha WHERE importacao_lote_id=v_lote) <> 9 THEN RAISE EXCEPTION 'linhas brutas'; END IF;
-  IF (SELECT count(*) FROM importacao_linha WHERE importacao_lote_id=v_lote AND status_linha IN ('importada','importada_com_pendencia')) <> 5 THEN RAISE EXCEPTION 'linhas importadas'; END IF;
+  IF (SELECT count(*) FROM importacao_linha WHERE importacao_lote_id=v_lote) <> 10 THEN RAISE EXCEPTION 'linhas brutas'; END IF;
+  IF (SELECT count(*) FROM importacao_linha WHERE importacao_lote_id=v_lote AND status_linha IN ('importada','importada_com_pendencia')) <> 6 THEN RAISE EXCEPTION 'linhas importadas'; END IF;
   IF (SELECT count(*) FROM importacao_linha WHERE importacao_lote_id=v_lote AND status_linha='rejeitada') <> 4 THEN RAISE EXCEPTION 'linhas rejeitadas'; END IF;
-  IF (SELECT count(*) FROM atendimento) <> 5 THEN RAISE EXCEPTION 'um atendimento por linha válida'; END IF;
+  IF (SELECT count(*) FROM atendimento) <> 6 THEN RAISE EXCEPTION 'um atendimento por linha válida'; END IF;
   IF (SELECT count(*) FROM tratamento_benzonidazol WHERE duracao_cumprida_dias=56) <> 1 THEN RAISE EXCEPTION 'BZN'; END IF;
-  IF EXISTS (SELECT 1 FROM paciente WHERE nome='Catálogo Ausente') THEN RAISE EXCEPTION 'rollback da linha'; END IF;
-  IF (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_lote AND tabela_destino='atendimento') <> 5 THEN RAISE EXCEPTION 'proveniência'; END IF;
-  IF (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_lote) <> 31 THEN RAISE EXCEPTION 'total de vínculos de proveniência'; END IF;
+  IF EXISTS (SELECT 1 FROM paciente WHERE nome='Falha Atômica') THEN RAISE EXCEPTION 'rollback da linha'; END IF;
+  IF (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_lote AND tabela_destino='atendimento') <> 6 THEN RAISE EXCEPTION 'proveniência'; END IF;
+  IF (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_lote) < 100 THEN RAISE EXCEPTION 'cobertura de proveniência insuficiente'; END IF;
+  IF (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_reprocessado) <> (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_lote AND l.status_linha IN ('importada','importada_com_pendencia')) THEN RAISE EXCEPTION 'proveniência reprocessada'; END IF;
+  IF (SELECT count(DISTINCT tabela_destino) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_lote) <> 22 THEN RAISE EXCEPTION 'handlers/tabelas estruturadas'; END IF;
   IF NOT EXISTS (SELECT 1 FROM importacao_linha WHERE importacao_lote_id=v_lote AND dados_brutos @> '[{"chave":"localizado","valor":"sim"}]') THEN RAISE EXCEPTION 'Localizado bruto'; END IF;
   IF NOT EXISTS (SELECT 1 FROM importacao_linha WHERE importacao_lote_id=v_lote AND status_linha='rejeitada' AND mensagem_processamento LIKE 'conflito entre abas:%') THEN RAISE EXCEPTION 'precedência entre abas'; END IF;
   IF NOT EXISTS (SELECT 1 FROM importacao_linha WHERE importacao_lote_id=v_lote AND status_linha='importada_com_pendencia' AND dados_brutos @> '[{"chave":"pendencias_observacao","valor":"texto parcial preservado"}]') THEN RAISE EXCEPTION 'parcial bruto'; END IF;
+  IF (SELECT count(DISTINCT item->>'chave') FROM importacao_linha l CROSS JOIN LATERAL jsonb_array_elements(l.dados_brutos) item WHERE l.importacao_lote_id=v_lote AND l.aba_ordem=2 AND l.numero_linha=2 AND item->>'valor' IS NOT NULL AND item->>'chave' IN ('idade','autorelato_diagnostico_de_chagas_do_participante_data','familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas','paciente_trouxe_outros_exames_complementares','solicitado_exames_complementares','retorno_30_dias_de_tratamento','retorno_final_de_tratamento','retorno_anual_realizado','desfecho_do_retorno','paciente_com_contrarreferencia_realizada','pendencias_observacao')) <> 11 THEN RAISE EXCEPTION 'onze parciais no bruto'; END IF;
+  IF (SELECT count(*) FROM historico_familiar_chagas) <> 0 THEN RAISE EXCEPTION 'histórico familiar inventado a partir de exame de parentes'; END IF;
+  IF (SELECT count(*) FROM dados_clinicos_atendimento WHERE altura_cm=170 AND nyha='II') <> 1 THEN RAISE EXCEPTION 'dados clínicos'; END IF;
+  IF (SELECT count(*) FROM sorologia_chagas) <> 3 THEN RAISE EXCEPTION 'sorologias'; END IF;
+  IF (SELECT count(*) FROM atendimento_medicamento) <> 13 THEN RAISE EXCEPTION 'medicamentos'; END IF;
+  IF (SELECT count(*) FROM paciente_comorbidade) <> 13 THEN RAISE EXCEPTION 'comorbidades'; END IF;
+  IF (SELECT count(*) FROM dispositivo_implantado) <> 2 THEN RAISE EXCEPTION 'dispositivos'; END IF;
+  IF (SELECT count(*) FROM notificacao) <> 1 OR (SELECT count(*) FROM obito) <> 1 THEN RAISE EXCEPTION 'notificação/óbito'; END IF;
 END $$;
 SQL
 
-echo "OK: fluxo sintético do importador, proveniência, rollback e idempotência"
+echo "OK: 124 destinos, handlers, proveniência, rollback, idempotência e reprocessamento encadeado"

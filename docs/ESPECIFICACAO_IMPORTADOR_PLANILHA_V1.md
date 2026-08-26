@@ -2,8 +2,8 @@
 
 Atualizado em: 2026-08-24
 
-Status: contrato revisado e pronto para implementação sintética; importador ainda
-não implementado e dados reais não autorizados.
+Status: contrato implementado e homologado para execução sintética; dados reais
+continuam não autorizados.
 
 ## Finalidade, autoridade e escopo
 

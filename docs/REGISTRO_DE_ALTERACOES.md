@@ -1,6 +1,6 @@
 # Registro de Alterações
 
-Atualizado em: 2026-08-24
+Atualizado em: 2026-08-25
 
 ## Como Registrar Mudanças
 
@@ -25,6 +25,29 @@ Além deste arquivo, atualize quando necessário:
 - `docs/HISTORICO_DE_IMPLEMENTACAO.md`
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
+
+## 2026-08-25 - Conclusão do importador sintético v1 do MVP
+
+Data: 2026-08-25
+
+Título da alteração: Homologação dos 124 destinos plenos e reprocessamento
+encadeado explícito.
+
+Impacto:
+
+- handlers adicionados para endereço/contato, diagnóstico e sorologias,
+  solicitação, condição/complicações, comorbidades, medicamentos, avaliação
+  clínica, eventos, dispositivos, notificação e óbito;
+- cobertura executável impede regressão dos 124 rótulos plenos e preserva as
+  onze chaves parciais e `Localizado` conforme o contrato;
+- `--reprocessar` cria lote novo ligado ao predecessor imediato e reutiliza alvos
+  clínicos válidos com novos vínculos de proveniência, sem duplicação;
+- fixture e E2E ampliados com dados somente sintéticos, conflitos, rollback
+  atômico, idempotência e dois elos de reprocessamento;
+- nenhuma migration ou estrutura física foi alterada.
+
+Validação: `make manifest-check`, `make importer-test`, `make docs-check`,
+`make docker-project-check` e `git diff --check`.
 
 ## 2026-08-24 - Primeira versão funcional do importador sintético
 
