@@ -1,6 +1,20 @@
 # Especificação Normativa do Importador da Planilha — v1
 
-Atualizado em: 2026-08-24
+Atualizado em: 2026-08-26
+
+## Preflight, relatório e rastreabilidade
+
+`--dry-run` executa layout, staging, conciliação, transformações, classificação e
+promoção pelo mesmo código do modo aplicado. Uma transação externa transforma as
+transações por linha em savepoints e executa `ROLLBACK` ao final, sem persistir
+lote, linha, paciente, atendimento ou registro clínico.
+
+O JSON determinístico `ambulatorio.import-quality-report/v1` registra totais,
+válidas, importáveis, pendências, rejeições, conflitos de identidade/abas, valores
+inválidos, catálogos desconhecidos, outras causas, hashes e versões do arquivo,
+manifesto, importador e Git. O lote aplicado persiste hash do manifesto, versão
+do importador e revisão Git. Logs JSON permitem apenas eventos/metadados técnicos
+e contadores, nunca valores de células ou mensagens clínicas por linha.
 
 Status: contrato implementado e homologado para execução sintética; dados reais
 continuam não autorizados.

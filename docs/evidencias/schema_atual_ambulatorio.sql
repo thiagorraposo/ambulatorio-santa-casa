@@ -4,8 +4,8 @@
 
 \restrict xmwsfqkdisbiVimxy9koi5WeHnsHPr6cCc8HwZOpzKgOZdMcCrJHAyp6wtqLg2F
 
--- Dumped from database version 16.14 (Ubuntu 16.14-0ubuntu0.24.04.1)
--- Dumped by pg_dump version 16.14 (Ubuntu 16.14-0ubuntu0.24.04.1)
+-- Dumped from database version 16.15 (Debian 16.15-1.pgdg13+2)
+-- Dumped by pg_dump version 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1601,9 +1601,15 @@ CREATE TABLE ambulatorio.importacao_lote (
     observacoes text,
     criado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     atualizado_em timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    manifesto_sha256 character varying(64),
+    importador_versao character varying(40),
+    revisao_git character varying(40),
     CONSTRAINT chk_importacao_lote_hash_sha256 CHECK (((hash_arquivo_sha256)::text ~ '^[0-9a-f]{64}$'::text)),
+    CONSTRAINT chk_importacao_lote_importador_versao CHECK (((importador_versao IS NULL) OR (btrim((importador_versao)::text) <> ''::text))),
+    CONSTRAINT chk_importacao_lote_manifesto_sha256 CHECK (((manifesto_sha256 IS NULL) OR ((manifesto_sha256)::text ~ '^[0-9a-f]{64}$'::text))),
     CONSTRAINT chk_importacao_lote_periodo CHECK (((finalizado_em IS NULL) OR (iniciado_em IS NULL) OR (finalizado_em >= iniciado_em))),
     CONSTRAINT chk_importacao_lote_reprocessamento CHECK (((lote_reprocessado_de_id IS NULL) OR (lote_reprocessado_de_id <> importacao_lote_id))),
+    CONSTRAINT chk_importacao_lote_revisao_git CHECK (((revisao_git IS NULL) OR ((revisao_git)::text = 'unknown'::text) OR ((revisao_git)::text ~ '^[0-9a-f]{7,40}$'::text))),
     CONSTRAINT chk_importacao_lote_status CHECK (((status_lote)::text = ANY ((ARRAY['recebido'::character varying, 'validando'::character varying, 'pronto'::character varying, 'processando'::character varying, 'concluido'::character varying, 'concluido_com_pendencias'::character varying, 'falhou'::character varying, 'cancelado'::character varying])::text[])))
 );
 
@@ -1627,6 +1633,27 @@ COMMENT ON COLUMN ambulatorio.importacao_lote.hash_arquivo_sha256 IS 'SHA-256 he
 --
 
 COMMENT ON COLUMN ambulatorio.importacao_lote.lote_reprocessado_de_id IS 'Execucao anterior do mesmo conteudo e layout quando houver reprocessamento.';
+
+
+--
+-- Name: COLUMN importacao_lote.manifesto_sha256; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.importacao_lote.manifesto_sha256 IS 'SHA-256 da representacao canonica do manifesto usado na execucao.';
+
+
+--
+-- Name: COLUMN importacao_lote.importador_versao; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.importacao_lote.importador_versao IS 'Versao semantica declarada pelo importador.';
+
+
+--
+-- Name: COLUMN importacao_lote.revisao_git; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.importacao_lote.revisao_git IS 'Revisao Git do codigo executado, ou unknown quando indisponivel.';
 
 
 --

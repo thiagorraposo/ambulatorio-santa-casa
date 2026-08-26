@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import sys
 import unicodedata
 from datetime import datetime
@@ -20,10 +21,35 @@ from importador.xlsx import read as read_xlsx  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "manifestos/planilha_ambulatorio_v1.json"
+IMPORTER_VERSION = "1.1.0"
 
 
 class RowConflict(Exception):
     pass
+
+
+def git_revision() -> str:
+    revision = os.getenv("IMPORTER_GIT_REVISION")
+    if revision and re.fullmatch(r"[0-9a-f]{7,40}", revision):
+        return revision
+    try:
+        return subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, check=True,
+            capture_output=True, text=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return "unknown"
+
+
+def safe_log(event: str, **fields) -> None:
+    """Emite somente eventos e métricas de allowlist, nunca valores de células."""
+    allowed = {"event", "mode", "lot_code", "lot_id", "layout_version",
+               "manifest_version", "importer_version", "git_revision", "status",
+               "total_rows", "valid_rows", "importable_rows", "pending_rows",
+               "rejected_rows"}
+    payload = {"event": event, **fields}
+    print(json.dumps({k: v for k, v in payload.items() if k in allowed},
+                     ensure_ascii=True, sort_keys=True), file=sys.stderr)
 
 
 def normalized(value: str) -> str:
@@ -123,7 +149,7 @@ HANDLED_TABLES = {
 
 
 class Importer:
-    def __init__(self, db, workbook_path, manifest, code, reprocess=False):
+    def __init__(self, db, workbook_path, manifest, code, reprocess=False, dry_run=False):
         self.db, self.path, self.manifest, self.code = db, workbook_path, manifest, code
         self.book = read_xlsx(workbook_path)
         self.hash = hashlib.sha256(workbook_path.read_bytes()).hexdigest()
@@ -133,7 +159,13 @@ class Importer:
         self.imported = 0
         self.portador_keys = set()
         self.reprocess = reprocess
+        self.dry_run = dry_run
         self.predecessor_id = None
+        self.manifest_hash = hashlib.sha256(
+            json.dumps(manifest, ensure_ascii=False, sort_keys=True,
+                       separators=(",", ":")).encode()
+        ).hexdigest()
+        self.revision = git_revision()
 
     def validate_layout(self):
         canonical = {}
@@ -168,19 +200,22 @@ class Importer:
             predecessor, _ = found.split("|", 1)
             self.predecessor_id = int(predecessor)
             self.lot_id = int(self.db.scalar(
-                "INSERT INTO importacao_lote (codigo_lote,hash_arquivo_sha256,layout_versao,lote_reprocessado_de_id,status_lote) "
-                f"VALUES ({literal(self.code)},{literal(self.hash)},{literal(version)},{self.predecessor_id},'recebido') RETURNING importacao_lote_id"))
+                "INSERT INTO importacao_lote (codigo_lote,hash_arquivo_sha256,layout_versao,lote_reprocessado_de_id,status_lote,manifesto_sha256,importador_versao,revisao_git) "
+                f"VALUES ({literal(self.code)},{literal(self.hash)},{literal(version)},{self.predecessor_id},'recebido',{literal(self.manifest_hash)},{literal(IMPORTER_VERSION)},{literal(self.revision)}) RETURNING importacao_lote_id"))
             found = "created"
         if found and found != "created":
             lot, status = found.split("|", 1)
             self.lot_id = int(lot)
             if status in {"concluido", "concluido_com_pendencias"}:
-                print(f"Lote {lot} já concluído; reexecução idempotente sem escrita.")
+                safe_log("import_idempotent_noop", mode="dry-run" if self.dry_run else "apply",
+                         lot_code=self.code, lot_id=self.lot_id,
+                         layout_version=version, importer_version=IMPORTER_VERSION,
+                         git_revision=self.revision, status=status)
                 return False
         elif not found:
             self.lot_id = int(self.db.scalar(
-                "INSERT INTO importacao_lote (codigo_lote,hash_arquivo_sha256,layout_versao,status_lote) "
-                f"VALUES ({literal(self.code)},{literal(self.hash)},{literal(version)},'recebido') RETURNING importacao_lote_id"))
+                "INSERT INTO importacao_lote (codigo_lote,hash_arquivo_sha256,layout_versao,status_lote,manifesto_sha256,importador_versao,revisao_git) "
+                f"VALUES ({literal(self.code)},{literal(self.hash)},{literal(version)},'recebido',{literal(self.manifest_hash)},{literal(IMPORTER_VERSION)},{literal(self.revision)}) RETURNING importacao_lote_id"))
         self.db.run(f"UPDATE importacao_lote SET status_lote='validando', iniciado_em=COALESCE(iniciado_em,CURRENT_TIMESTAMP), "
                     f"mensagem_erro=NULL, atualizado_em=CURRENT_TIMESTAMP WHERE importacao_lote_id={self.lot_id}")
         return True
@@ -561,9 +596,9 @@ class Importer:
             name=(row.get("nome") or "").strip()
             birth=date_value(row.get("data_de_nascimento"),"data_de_nascimento",True)
             identity=(normalized(name),birth)
-            self.db.run("BEGIN")
+            self.db.transaction("BEGIN")
             if self.reuse_predecessor(line_id,sheet,line_no):
-                self.db.run("COMMIT"); self.imported += 1
+                self.db.transaction("COMMIT"); self.imported += 1
                 if sheet["aba_ordem"]==1: self.portador_keys.add(identity)
                 return
             attendance_date=date_value(row.get("data_do_atendimento"),"data_do_atendimento",True)
@@ -594,20 +629,55 @@ class Importer:
             final="importada_com_pendencia" if partial else "importada"
             message=("campos preservados apenas em dados_brutos: "+", ".join(sorted(set(partial)))) if partial else "linha importada"
             self.db.run(f"UPDATE importacao_linha SET status_linha={literal(final)},mensagem_processamento={literal(message)},atualizado_em=CURRENT_TIMESTAMP WHERE importacao_linha_id={line_id}")
-            self.db.run("COMMIT")
+            self.db.transaction("COMMIT")
             if sheet["aba_ordem"]==1: self.portador_keys.add(identity)
             self.pending += bool(partial); self.imported += 1
         except RowConflict as exc:
-            try: self.db.run("ROLLBACK")
+            try: self.db.transaction("ROLLBACK")
             except RuntimeError: pass
             self.db.run(f"UPDATE importacao_linha SET status_linha='rejeitada',mensagem_processamento={literal(str(exc))},atualizado_em=CURRENT_TIMESTAMP WHERE importacao_linha_id={line_id}")
             self.rejected += 1
         except Exception as exc:
-            try: self.db.run("ROLLBACK")
+            try: self.db.transaction("ROLLBACK")
             except RuntimeError: pass
             self.db.run(f"UPDATE importacao_linha SET status_linha='pendente',mensagem_processamento='falha operacional; retomada necessária',atualizado_em=CURRENT_TIMESTAMP WHERE importacao_linha_id={line_id}")
             self.db.run(f"UPDATE importacao_lote SET status_lote='falhou',mensagem_erro='falha operacional durante processamento de linha',atualizado_em=CURRENT_TIMESTAMP WHERE importacao_lote_id={self.lot_id}")
             raise RuntimeError("falha operacional durante processamento de linha") from exc
+
+    def quality_report(self):
+        rows = self.db.run(
+            "SELECT status_linha || '|' || COALESCE(mensagem_processamento,'') "
+            f"FROM importacao_linha WHERE importacao_lote_id={self.lot_id} "
+            "ORDER BY aba_ordem,numero_linha")
+        statuses = [row.split("|", 1) for row in rows]
+        messages = [message for _, message in statuses]
+        rejected = sum(status == "rejeitada" for status, _ in statuses)
+        pending = sum(status == "importada_com_pendencia" for status, _ in statuses)
+        imported = sum(status in {"importada", "importada_com_pendencia"} for status, _ in statuses)
+        invalid = sum(any(token in message for token in
+                          ("inválid", "ambígua", "obrigatório ausente")) for message in messages)
+        identity = sum(message.startswith("identidade:") for message in messages)
+        between_sheets = sum(message.startswith("conflito entre abas:") for message in messages)
+        catalogs = sum("catálogo" in message for message in messages)
+        other = max(0, rejected - invalid - identity - between_sheets - catalogs)
+        return {
+            "schema": "ambulatorio.import-quality-report/v1",
+            "mode": "dry-run" if self.dry_run else "apply",
+            "lot_code": self.code,
+            "file_sha256": self.hash,
+            "layout_version": self.manifest["layout_versao"],
+            "manifest_version": str(self.manifest.get("versao", "unknown")),
+            "manifest_sha256": self.manifest_hash,
+            "importer_version": IMPORTER_VERSION,
+            "git_revision": self.revision,
+            "metrics": {
+                "total_rows": len(statuses), "valid_rows": imported,
+                "importable_rows": imported, "pending_rows": pending,
+                "rejected_rows": rejected, "identity_conflicts": identity,
+                "between_sheet_conflicts": between_sheets, "invalid_values": invalid,
+                "unknown_catalogs": catalogs, "other_causes": other,
+            },
+        }
 
     def run(self):
         self.validate_layout()
@@ -631,22 +701,42 @@ class Importer:
         counts=self.db.scalar(f"SELECT count(*) FILTER (WHERE status_linha='rejeitada') || '|' || count(*) FILTER (WHERE status_linha='importada_com_pendencia') FROM importacao_linha WHERE importacao_lote_id={self.lot_id}")
         rejected,pending=map(int,counts.split("|")); status="concluido_com_pendencias" if rejected or pending else "concluido"
         self.db.run(f"UPDATE importacao_lote SET status_lote={literal(status)},finalizado_em=CURRENT_TIMESTAMP,atualizado_em=CURRENT_TIMESTAMP WHERE importacao_lote_id={self.lot_id}")
-        print(f"Lote {self.lot_id}: {status}; importadas={self.imported}, pendências={pending}, rejeitadas={rejected}")
+        report = self.quality_report()
+        safe_log("import_finished", mode=report["mode"], lot_code=self.code,
+                 lot_id=self.lot_id, layout_version=report["layout_version"],
+                 manifest_version=report["manifest_version"],
+                 importer_version=IMPORTER_VERSION, git_revision=self.revision,
+                 status=status, **{k: report["metrics"][k] for k in
+                 ("total_rows", "valid_rows", "importable_rows", "pending_rows", "rejected_rows")})
+        return report
 
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("arquivo",type=Path); parser.add_argument("--codigo-lote")
     parser.add_argument("--reprocessar",action="store_true",help="cria novo lote ligado à execução imediatamente anterior do mesmo conteúdo/layout")
+    parser.add_argument("--dry-run",action="store_true",help="executa o pipeline completo e desfaz todas as escritas")
+    parser.add_argument("--quality-report",type=Path,help="grava relatório JSON determinístico")
     parser.add_argument("--manifesto",type=Path,default=MANIFEST)
     parser.add_argument("--db-host",default=os.getenv("DB_HOST","localhost")); parser.add_argument("--db-port",default=os.getenv("DB_PORT","5432"))
     parser.add_argument("--db-user",default=os.getenv("DB_USER")); parser.add_argument("--db-name",default=os.getenv("DB_NAME"))
+    parser.add_argument("--db-role",default=os.getenv("DB_ROLE"),help="role sem login assumida após conectar")
     args=parser.parse_args()
     if not args.db_user or not args.db_name: parser.error("DB_USER e DB_NAME são obrigatórios")
     manifest=json.loads(args.manifesto.read_text())
     code=args.codigo_lote or f"xlsx-{hashlib.sha256(args.arquivo.read_bytes()).hexdigest()[:16]}"
-    with Database(args.db_host,args.db_port,args.db_user,args.db_name,os.getenv("PGPASSWORD")) as db:
-        Importer(db,args.arquivo,manifest,code,args.reprocessar).run()
+    safe_log("import_started", mode="dry-run" if args.dry_run else "apply",
+             lot_code=code, layout_version=manifest["layout_versao"],
+             manifest_version=str(manifest.get("versao", "unknown")),
+             importer_version=IMPORTER_VERSION, git_revision=git_revision())
+    with Database(args.db_host,args.db_port,args.db_user,args.db_name,
+                  os.getenv("PGPASSWORD"), rollback_only=args.dry_run,
+                  role=args.db_role) as db:
+        report=Importer(db,args.arquivo,manifest,code,args.reprocessar,args.dry_run).run()
+        if report:
+            rendered=json.dumps(report,ensure_ascii=True,indent=2,sort_keys=True)+"\n"
+            if args.quality_report: args.quality_report.write_text(rendered)
+            else: print(rendered,end="")
 
 
 if __name__ == "__main__": main()

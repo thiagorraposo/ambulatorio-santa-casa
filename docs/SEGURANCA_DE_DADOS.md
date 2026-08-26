@@ -1,6 +1,8 @@
 # Segurança de Dados
 
-Atualizado em: 2026-08-19
+Atualizado em: 2026-08-26
+
+O threat model técnico vigente está em `docs/THREAT_MODEL.md`; ele não autoriza dados reais.
 
 ## Por que Dados Clínicos São Sensíveis
 
@@ -76,6 +78,14 @@ pg_dump -h localhost -U ambulatorio_user -d ambulatorio_santa_casa --schema=ambu
 - Use diretórios locais ignorados pelo Git, como `planilhas_reais/`.
 - Não copie trechos de planilha real para documentação.
 - Para testes, crie amostras sintéticas.
+
+## Privilégios e logs do importador
+
+- `ambulatorio_user` permanece owner de manutenção e não é a identidade normal do processo;
+- `ambulatorio_importador` e `ambulatorio_aplicacao` são roles sem login assumidas por login gerenciado;
+- o importador não possui ownership, `CREATE` ou `DELETE`; a aplicação não lê as tabelas de importação;
+- logs são JSON de allowlist, sem nomes, telefones, endereços, conteúdo clínico, valores originais ou mensagens de linha;
+- quality reports contêm apenas hashes, versões, revisão Git e métricas agregadas e devem ser protegidos.
 
 ## Revisão Antes de Commit
 

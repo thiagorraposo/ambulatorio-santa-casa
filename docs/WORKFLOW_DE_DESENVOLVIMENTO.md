@@ -1,6 +1,17 @@
 # Workflow de Desenvolvimento
 
-Atualizado em: 2026-08-24
+Atualizado em: 2026-08-26
+
+O CI em `.github/workflows/validacoes.yml` usa credenciais sintéticas descartáveis,
+PostgreSQL 16.15 e executa migrations em banco limpo, manifesto, importador,
+testes SQL, documentação e `git diff --check`.
+
+`make db-migrate` é bootstrap de banco limpo. Em banco existente, migrations
+antigas não podem ser reaplicadas; use
+`make db-migrate-one MIGRATION_FILE=sql/NN_arquivo.sql`.
+
+O preflight pelo mesmo pipeline, sempre revertido, é executado com
+`make importer-dry-run IMPORT_FILE=...`.
 
 ## Comandos Oficiais
 

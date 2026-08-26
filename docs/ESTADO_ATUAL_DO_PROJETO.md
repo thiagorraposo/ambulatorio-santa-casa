@@ -67,6 +67,9 @@ não há backend, frontend, CI ou autorização para dados reais.
 - O workflow oficial está documentado em `docs/WORKFLOW_DE_DESENVOLVIMENTO.md`.
 - Regras de segurança de dados estão documentadas em `docs/SEGURANCA_DE_DADOS.md`.
 - Comandos locais reproduzíveis estão definidos no `Makefile`.
+- O hardening pré-dados reais está implementado pela migration 17, com roles
+  técnicas, metadados de execução, dry-run, quality report, logs estruturados,
+  CI e threat model, ainda exclusivamente para dados sintéticos.
 - Existe ambiente PostgreSQL Docker opcional e isolado, com imagem
   `postgres:16.15`, porta `127.0.0.1:5433`, healthcheck e volume persistente
   nomeado. O PostgreSQL local em 5432 permanece o padrão oficial.

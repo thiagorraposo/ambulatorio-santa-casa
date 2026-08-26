@@ -1,0 +1,39 @@
+name: Validacoes
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validacoes-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  project-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      POSTGRES_DB: ambulatorio_santa_casa
+      POSTGRES_USER: ambulatorio_ci
+      POSTGRES_PASSWORD: senha_exclusivamente_sintetica_ci
+      POSTGRES_PORT: "5433"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Criar configuracao local sintetica
+        run: |
+          umask 077
+          env | grep '^POSTGRES_' > .env
+      - name: Validar Compose e iniciar PostgreSQL
+        run: make docker-up docker-wait
+      - name: Aplicar migrations incrementais
+        run: make docker-migrate
+      - name: Validar manifesto, importador e projeto
+        run: make manifest-check importer-test docker-project-check
+      - name: Verificar whitespace do diff
+        run: git diff --check
+      - name: Diagnostico do PostgreSQL em falha
+        if: failure()
+        run: docker compose --env-file .env logs --no-color postgres

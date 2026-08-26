@@ -35,6 +35,14 @@ def sheet_xml(rows):
     return ''.join(output)
 
 
+def write_stable(archive, name, content):
+    """Elimina timestamps do ZIP para a fixture ser byte a byte reproduzível."""
+    info=zipfile.ZipInfo(name, date_time=(2026,1,1,0,0,0))
+    info.compress_type=zipfile.ZIP_DEFLATED
+    info.external_attr=0o100644 << 16
+    archive.writestr(info,content)
+
+
 def main():
     sheets=[]
     for spec in MANIFEST["sheets"]:
@@ -101,9 +109,9 @@ def main():
     rels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+''.join(f'<Relationship Id="rId{i}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet{i}.xml"/>' for i in range(1,len(sheets)+1))+'</Relationships>'
     rootrels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'
     with zipfile.ZipFile(OUTPUT,"w",zipfile.ZIP_DEFLATED) as archive:
-        archive.writestr('[Content_Types].xml',''.join(content_types)); archive.writestr('_rels/.rels',rootrels)
-        archive.writestr('xl/workbook.xml',workbook); archive.writestr('xl/_rels/workbook.xml.rels',rels)
-        for i,(_,xml) in enumerate(sheets,1): archive.writestr(f'xl/worksheets/sheet{i}.xml',xml)
+        write_stable(archive,'[Content_Types].xml',''.join(content_types)); write_stable(archive,'_rels/.rels',rootrels)
+        write_stable(archive,'xl/workbook.xml',workbook); write_stable(archive,'xl/_rels/workbook.xml.rels',rels)
+        for i,(_,xml) in enumerate(sheets,1): write_stable(archive,f'xl/worksheets/sheet{i}.xml',xml)
     print(OUTPUT)
 
 

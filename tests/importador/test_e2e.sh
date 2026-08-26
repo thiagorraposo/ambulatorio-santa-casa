@@ -3,17 +3,26 @@ set -euo pipefail
 
 test_db="${DB_NAME}_importador_test"
 fixture="tests/fixtures/planilha_importacao_v1_sintetica.xlsx"
+import_user="ambulatorio_importador_e2e"
+import_password="senha_exclusivamente_sintetica_e2e"
 
 cleanup() {
   dropdb -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" --if-exists "$test_db" >/dev/null
+  psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
+    -c "DROP ROLE IF EXISTS $import_user" >/dev/null
 }
 trap cleanup EXIT
 
 cleanup
 createdb -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" "$test_db"
+psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 \
+  -c "ALTER DATABASE $test_db SET search_path TO ambulatorio, public"
 for migration in sql/[0-1][0-9]_*.sql; do
   psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 -f "$migration"
 done
+
+psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 \
+  -c "CREATE ROLE $import_user LOGIN PASSWORD '$import_password'; GRANT ambulatorio_importador TO $import_user;"
 
 psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 <<'SQL'
 SET search_path TO ambulatorio, public;
@@ -41,26 +50,58 @@ SELECT x FROM unnest(ARRAY['comorbidades_nao_relacionadas_a_dc','hipertensao_art
 ON CONFLICT (nome_comorbidade) DO NOTHING;
 SQL
 
+role_check="$(PGPASSWORD="$import_password" psql -X -qAt -h "$DB_HOST" -p "$DB_PORT" \
+  -U "$import_user" -d "$test_db" -v ON_ERROR_STOP=1 \
+  -c "SELECT has_table_privilege('ambulatorio_importador','ambulatorio.paciente','SELECT');")"
+test "$role_check" = "t"
+
 python3 tests/importador/gerar_planilha_sintetica.py >/dev/null
-python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-e2e \
-  --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$DB_USER" --db-name "$test_db"
+snapshot_before="$(psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -c "SET search_path TO ambulatorio,public; SELECT (SELECT count(*) FROM paciente)||'|'||(SELECT count(*) FROM atendimento)||'|'||(SELECT count(*) FROM importacao_lote)||'|'||(SELECT count(*) FROM importacao_linha);")"
+PGPASSWORD="$import_password" python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-dry-run \
+  --dry-run --quality-report /tmp/ambulatorio-quality-1.json \
+  --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$import_user" --db-role ambulatorio_importador --db-name "$test_db" \
+  2>/tmp/ambulatorio-importador.log
+snapshot_after="$(psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -c "SET search_path TO ambulatorio,public; SELECT (SELECT count(*) FROM paciente)||'|'||(SELECT count(*) FROM atendimento)||'|'||(SELECT count(*) FROM importacao_lote)||'|'||(SELECT count(*) FROM importacao_linha);")"
+test "$snapshot_before" = "$snapshot_after"
+PGPASSWORD="$import_password" python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-dry-run \
+  --dry-run --quality-report /tmp/ambulatorio-quality-2.json \
+  --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$import_user" --db-role ambulatorio_importador --db-name "$test_db" \
+  2>>/tmp/ambulatorio-importador.log
+cmp /tmp/ambulatorio-quality-1.json /tmp/ambulatorio-quality-2.json
+python3 - <<'PY'
+import json
+r=json.load(open('/tmp/ambulatorio-quality-1.json'))
+assert r['schema']=='ambulatorio.import-quality-report/v1'
+assert r['mode']=='dry-run'
+assert r['metrics']=={'between_sheet_conflicts': 1, 'identity_conflicts': 1,
+ 'importable_rows': 6, 'invalid_values': 1, 'other_causes': 1,
+ 'pending_rows': 2, 'rejected_rows': 4, 'total_rows': 10,
+ 'unknown_catalogs': 0, 'valid_rows': 6}
+PY
+if rg -i 'Ana Sintética|Identidade Duplicada|telefone|texto parcial preservado' /tmp/ambulatorio-importador.log; then
+  echo "Erro: log estruturado contém dado sensível ou valor clínico" >&2
+  exit 1
+fi
+
+PGPASSWORD="$import_password" python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-e2e \
+  --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$import_user" --db-role ambulatorio_importador --db-name "$test_db"
 
 before="$(psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -c "SET search_path TO ambulatorio,public; SELECT count(*) FROM atendimento;")"
 psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" \
   -c "SET search_path TO ambulatorio,public; UPDATE importacao_lote SET status_lote='falhou',finalizado_em=NULL WHERE codigo_lote='sint-v1-e2e';"
-python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-e2e-reexec \
-  --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$DB_USER" --db-name "$test_db"
+PGPASSWORD="$import_password" python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-e2e-reexec \
+  --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$import_user" --db-role ambulatorio_importador --db-name "$test_db"
 after="$(psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -c "SET search_path TO ambulatorio,public; SELECT count(*) FROM atendimento;")"
 test "$before" = "$after"
-python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-e2e-noop \
-  --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$DB_USER" --db-name "$test_db"
+PGPASSWORD="$import_password" python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-e2e-noop \
+  --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$import_user" --db-role ambulatorio_importador --db-name "$test_db"
 
-python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-e2e-reprocessado --reprocessar \
-  --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$DB_USER" --db-name "$test_db"
+PGPASSWORD="$import_password" python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-e2e-reprocessado --reprocessar \
+  --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$import_user" --db-role ambulatorio_importador --db-name "$test_db"
 after_reprocess="$(psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -c "SET search_path TO ambulatorio,public; SELECT count(*) FROM atendimento;")"
 test "$before" = "$after_reprocess"
-python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-e2e-reprocessado-2 --reprocessar \
-  --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$DB_USER" --db-name "$test_db"
+PGPASSWORD="$import_password" python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-e2e-reprocessado-2 --reprocessar \
+  --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$import_user" --db-role ambulatorio_importador --db-name "$test_db"
 after_second_reprocess="$(psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -c "SET search_path TO ambulatorio,public; SELECT count(*) FROM atendimento;")"
 test "$before" = "$after_second_reprocess"
 

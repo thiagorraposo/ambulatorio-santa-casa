@@ -1,6 +1,12 @@
 # Importador Sintético v1
 
-Atualizado em: 2026-08-25
+Atualizado em: 2026-08-26
+
+O importador v1.1.0 acrescenta `--dry-run`, `--quality-report` e `--db-role`.
+Na fixture homologada, o preflight classificou 10 linhas: 6 válidas/importáveis,
+2 com pendência, 4 rejeitadas, 1 conflito de identidade, 1 entre abas, 1 valor
+inválido, 0 catálogos desconhecidos e 1 outra causa. Dois reports foram idênticos
+e as contagens clínicas e de importação antes/depois permaneceram iguais.
 
 ## Finalidade
 

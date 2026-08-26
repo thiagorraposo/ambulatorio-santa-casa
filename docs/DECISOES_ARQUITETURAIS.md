@@ -375,3 +375,22 @@ Documentos relacionados:
 `docs/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`,
 `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
 `docs/COBERTURA_COLUNAS_PLANILHA.md`.
+
+# ADR-016
+
+ID: ADR-016
+
+Título: Hardening operacional antes de dados reais
+
+Data: 2026-08-26
+
+Status: Aceita e implementada por `sql/17_hardening_operacional.sql`
+
+Decisão: manter owner apenas para manutenção; usar roles sem login para
+importador e aplicação; negar DDL/DELETE ao importador e conteúdo bruto à
+aplicação; executar preflight no pipeline real sob rollback; versionar
+manifesto/importador/Git; emitir logs JSON de allowlist; validar em CI sintético.
+
+Consequências: há menor privilégio, rastreabilidade e revisão antes da escrita,
+mas dados reais continuam bloqueados até decisões de ambiente protegido, TLS,
+segredos, retenção, backup, auditoria e responsáveis institucionais.

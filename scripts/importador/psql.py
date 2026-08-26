@@ -18,7 +18,8 @@ def literal(value) -> str:
 
 
 class Database:
-    def __init__(self, host: str, port: str, user: str, name: str, password: str | None):
+    def __init__(self, host: str, port: str, user: str, name: str, password: str | None,
+                 rollback_only: bool = False, role: str | None = None):
         env = os.environ.copy()
         if password:
             env["PGPASSWORD"] = password
@@ -28,7 +29,33 @@ class Database:
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             text=True, bufsize=1, env=env,
         )
+        self.rollback_only = rollback_only
+        self.savepoint_active = False
+        if role:
+            if not role.replace("_", "").isalnum():
+                raise ValueError("role PostgreSQL inválida")
+            self.run(f'SET ROLE "{role}"')
         self.run("SET search_path TO ambulatorio, public")
+        if rollback_only:
+            self.run("BEGIN")
+
+    def transaction(self, command: str) -> None:
+        """Mantém o caminho transacional por linha dentro do rollback do dry-run."""
+        if not self.rollback_only:
+            self.run(command)
+            return
+        if command == "BEGIN":
+            self.run("SAVEPOINT importador_linha")
+            self.savepoint_active = True
+        elif command == "COMMIT":
+            self.run("RELEASE SAVEPOINT importador_linha")
+            self.savepoint_active = False
+        elif command == "ROLLBACK" and self.savepoint_active:
+            self.run("ROLLBACK TO SAVEPOINT importador_linha")
+            self.run("RELEASE SAVEPOINT importador_linha")
+            self.savepoint_active = False
+        else:
+            self.run(command)
 
     def run(self, sql: str) -> list[str]:
         token = uuid.uuid4().hex
@@ -55,6 +82,8 @@ class Database:
 
     def close(self):
         if self.process.poll() is None:
+            if self.rollback_only:
+                self.run("ROLLBACK")
             self.process.stdin.write("\\q\n")
             self.process.stdin.flush()
             self.process.wait(timeout=5)

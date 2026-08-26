@@ -1436,3 +1436,12 @@ Pendências ou riscos:
 - `README.md` permanece vazio e deve ser preenchido em tarefa futura.
 - CI e hooks de validação ainda não foram configurados.
 - Comandos que acessam PostgreSQL dependem de ambiente local configurado.
+## 2026-08-26 - Hardening operacional pré-dados reais
+
+Implementada a migration incremental 17 com metadados de execução e roles sem
+login; dry-run pelo pipeline real sob rollback; quality report v1; logs JSON sem
+conteúdo clínico; CI; testes de menor privilégio, não persistência, determinismo
+e não vazamento; threat model inicial. Separados bootstrap limpo (`db-migrate`)
+e evolução existente (`db-migrate-one`), e corrigido o `search_path` do E2E.
+Validação: `make manifest-check importer-test docker-project-check` e
+`git diff --check`. Nenhum dado real, backend, frontend ou produção foi criado.

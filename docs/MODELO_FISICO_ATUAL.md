@@ -872,3 +872,9 @@ Finalidade: associação genérica N:N entre linhas e registros estruturados.
    usando o manifesto e a especificação normativa v1.
 2. Preservar em `dados_brutos` as onze chaves parciais, sem promoção aproximada.
 3. Definir retenção, autoridades, roles e auditoria antes de dados reais.
+## Hardening da proveniência
+
+A migration `sql/17_hardening_operacional.sql` adiciona a `importacao_lote`
+`manifesto_sha256`, `importador_versao` e `revisao_git`, com constraints de
+formato. Não cria tabelas, remove dados nem muda as 37 identidades existentes.
+As roles de importação e aplicação são objetos do cluster e não owners do schema.

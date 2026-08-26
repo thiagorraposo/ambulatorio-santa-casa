@@ -197,7 +197,8 @@ O teste SQL sintético e transacional cobre:
 4. A associação genérica não possui FK ao registro heterogêneo; validação transacional e auditoria de órfãos pertencem ao importador/operação futura.
 5. Transições, retomada, idempotência clínica e tratamento de erro estão
    especificados, mas ainda serão implementados e testados no importador.
-6. Permissões específicas dependem da definição futura de roles operacionais.
+6. As roles operacionais mínimas foram definidas pela migration 17; login,
+   segredo, auditoria institucional e política de acesso continuam por ambiente.
 
 ## Prontidão
 

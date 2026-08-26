@@ -40,8 +40,8 @@ determinística de preservação bruta e não bloqueiam o importador sintético.
 1. Prazo institucional de retenção.
 2. Responsável por autorizar importações.
 3. Responsável por revisar erros e contradições.
-4. Roles e privilégios operacionais.
-5. Política de auditoria e acesso ao JSONB.
+4. Provisionar logins e segredos do ambiente para as roles técnicas já definidas.
+5. Política institucional de auditoria e acesso ao JSONB; a role da futura aplicação já não o lê.
 6. Servidor protegido, transporte seguro, segredos, política institucional de
    backup/retenção e registro de acesso. O restore Docker validado cobre apenas
    desenvolvimento e não substitui esses controles de produção.

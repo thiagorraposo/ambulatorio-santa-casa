@@ -22,6 +22,7 @@ SCHEMA_DUMP ?= docs/evidencias/schema_atual_ambulatorio.sql
 DOCKER_SCHEMA_DUMP ?= /tmp/schema_ambulatorio_docker.sql
 BACKUP_DIR ?= backups_postgres
 BACKUP_FILE ?=
+MIGRATION_FILE ?=
 RESTORE_ENV ?=
 DESTROY_ENV ?=
 SQL_TESTS := $(sort $(wildcard tests/sql/*.sql))
@@ -30,12 +31,12 @@ COMPOSE := docker compose --env-file .env
 
 .DEFAULT_GOAL := help
 
-.PHONY: help git-status db-check db-test db-migrate docs-check project-check \
+.PHONY: help git-status db-check db-test db-migrate db-migrate-one docs-check project-check \
 	db-schema-dump docker-config-check docker-up docker-status docker-wait \
 	docker-stop docker-recreate docker-logs docker-migrate docker-db-check docker-db-test \
 	docker-schema-dump docker-project-check docker-destroy \
 	docker-backup docker-backup-list docker-restore docker-restore-check docker-restore-test \
-	manifest-check importer-fixture importer-run importer-test
+	manifest-check importer-fixture importer-run importer-dry-run importer-test
 
 help:
 	@echo "Comandos disponíveis:"
@@ -47,9 +48,11 @@ help:
 	@echo "  make manifest-check  Valida o manifesto físico v1 e a fonte local"
 	@echo "  make importer-fixture Gera a planilha XLSX exclusivamente sintética"
 	@echo "  make importer-run IMPORT_FILE=... Executa o importador v1 no banco Docker"
+	@echo "  make importer-dry-run IMPORT_FILE=... Executa preflight sem persistir escrita clínica"
 	@echo "  make importer-test   Executa o fluxo sintético ponta a ponta em banco isolado"
 	@echo "  make project-check   Executa todos os checks locais não destrutivos"
 	@echo "  make db-schema-dump  Atualiza somente o dump estrutural do schema $(DB_SCHEMA)"
+	@echo "  make db-migrate-one MIGRATION_FILE=sql/NN_arquivo.sql Aplica uma migration incremental"
 	@echo "  make docker-up       Sobe somente o PostgreSQL Docker"
 	@echo "  make docker-status   Exibe containers e health do PostgreSQL Docker"
 	@echo "  make docker-stop     Para o container sem remover o volume"
@@ -109,6 +112,12 @@ db-migrate:
 	done
 	@echo "OK: $(words $(SQL_MIGRATIONS)) migration(s) aplicada(s)"
 
+db-migrate-one: db-check
+	@test -n "$(MIGRATION_FILE)" -a -f "$(MIGRATION_FILE)" || { echo "Erro: informe MIGRATION_FILE existente."; exit 1; }
+	@psql -X -h "$(DB_HOST)" -p "$(DB_PORT)" -U "$(DB_USER)" -d "$(DB_NAME)" \
+		-v ON_ERROR_STOP=1 -f "$(MIGRATION_FILE)"
+	@echo "OK: migration incremental $(MIGRATION_FILE) aplicada"
+
 docs-check:
 	@missing=0; \
 	for file in \
@@ -125,6 +134,7 @@ docs-check:
 		docs/IMPORTADOR_SINTETICO_V1.md \
 		docs/RECUPERACAO_POSTGRESQL_DOCKER.md \
 		docs/SEGURANCA_DE_DADOS.md \
+		docs/THREAT_MODEL.md \
 		docs/WORKFLOW_DE_DESENVOLVIMENTO.md; do \
 		if [ ! -s "$$file" ]; then \
 			echo "Ausente ou vazio: $$file"; \
@@ -144,6 +154,12 @@ importer-fixture:
 importer-run: docker-wait
 	@test -n "$(IMPORT_FILE)" || { echo "Erro: informe IMPORT_FILE (somente dado sintético neste estágio)."; exit 1; }
 	@python3 scripts/importar_planilha.py "$(IMPORT_FILE)" \
+		--db-host "$(DB_HOST)" --db-port "$(DB_PORT)" --db-user "$(DB_USER)" \
+		--db-name "$(DB_NAME)"
+
+importer-dry-run: docker-wait
+	@test -n "$(IMPORT_FILE)" || { echo "Erro: informe IMPORT_FILE (somente dado sintético neste estágio)."; exit 1; }
+	@python3 scripts/importar_planilha.py "$(IMPORT_FILE)" --dry-run \
 		--db-host "$(DB_HOST)" --db-port "$(DB_PORT)" --db-user "$(DB_USER)" \
 		--db-name "$(DB_NAME)"
 
