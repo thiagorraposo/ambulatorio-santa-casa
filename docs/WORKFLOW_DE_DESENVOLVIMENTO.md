@@ -13,6 +13,18 @@ antigas não podem ser reaplicadas; use
 O preflight pelo mesmo pipeline, sempre revertido, é executado com
 `make importer-dry-run IMPORT_FILE=...`.
 
+## Backend Etapa 4A
+
+```bash
+make backend-install
+make backend-check
+make backend-up
+```
+
+`backend-db-setup` provisiona somente o login técnico e concede a role sem login;
+não altera schema. O backend nunca aplica migrations. No CI, o banco limpo recebe
+migrations primeiro e só depois executa build, testes unitários e integração.
+
 ## Comandos Oficiais
 
 Use os alvos do `Makefile` como interface local padrão:

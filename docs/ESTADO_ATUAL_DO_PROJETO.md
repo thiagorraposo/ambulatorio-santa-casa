@@ -1,19 +1,20 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-08-25
+Atualizado em: 2026-08-26
 
 ## Objetivo Geral
 
 O projeto `ambulatorio-santa-casa` define a base de dados PostgreSQL para organizar registros de pacientes, atendimentos ambulatoriais, diagnóstico de doença de Chagas, sorologias, condições clínicas, comorbidades, exames complementares, encaminhamentos, acompanhamentos, medicamentos, tratamentos e procedimentos clínicos.
 
-O repositório contém scripts SQL, oito testes SQL transacionais e a primeira
-versão completa do importador sintético do MVP, com teste ponta a ponta isolado. Ainda
-não há backend, frontend, CI ou autorização para dados reais.
+O repositório contém scripts SQL, nove testes SQL transacionais, importador
+sintético homologado, hardening, CI e a fundação NestJS da API. Não há frontend,
+autenticação, autorização ou autorização para dados reais.
 
 ## Stack e Tecnologias Usadas
 
 - Banco de dados: PostgreSQL.
-- Linguagem/artefatos implementados: SQL.
+- Linguagens implementadas: SQL, Python e TypeScript.
+- Backend: Node.js/NestJS, monólito modular e driver PostgreSQL `pg`.
 - Controle de versão: Git.
 - Organização atual: scripts numerados em `sql/` e documentação em `docs/`.
 - Schema principal: `ambulatorio`.
@@ -28,7 +29,7 @@ não há backend, frontend, CI ou autorização para dados reais.
 - O fluxo lê as duas abas, valida o manifesto, executa transação por linha,
   concilia pacientes, registra proveniência e suporta idempotência do mesmo lote
   e reprocessamento explícito por nova execução ligada ao predecessor imediato.
-- Scripts SQL existentes de `sql/00_criar_banco.sql` a `sql/16_encaminhamento_ampliado.sql`.
+- Scripts SQL existentes de `sql/00_criar_banco.sql` a `sql/17_hardening_operacional.sql`.
 - README e documentos antigos `docs/dicionario-dados.md` e `docs/decisoes-modelagem.md` existem, mas estão vazios.
 - A estrutura física real aplicada no PostgreSQL foi validada por evidência versionada em `docs/evidencias/schema_atual_ambulatorio.sql`.
 - O dump foi atualizado em 2026-08-13 e contém o schema `ambulatorio` com 37 tabelas aplicadas.
@@ -70,6 +71,11 @@ não há backend, frontend, CI ou autorização para dados reais.
 - O hardening pré-dados reais está implementado pela migration 17, com roles
   técnicas, metadados de execução, dry-run, quality report, logs estruturados,
   CI e threat model, ainda exclusivamente para dados sintéticos.
+- A Etapa 4A implementa backend NestJS/TypeScript em monólito modular, integrado
+  ao Compose, com configuração validada, `pg`, role limitada, healthcheck,
+  consulta read-only de pacientes, erros/logs seguros e testes unitários/integração.
+- Não existem autenticação, autorização, usuário da aplicação ou endpoint clínico
+  de escrita; esses itens permanecem explicitamente na Etapa 4B.
 - Existe ambiente PostgreSQL Docker opcional e isolado, com imagem
   `postgres:16.15`, porta `127.0.0.1:5433`, healthcheck e volume persistente
   nomeado. O PostgreSQL local em 5432 permanece o padrão oficial.
@@ -207,18 +213,18 @@ Resumo da reconciliação:
 - Cobertura integral dos 136 rótulos físicos distintos das abas principais, em fases posteriores e antes da importação completa.
 - Importação completa da planilha original, após expansão e validação do modelo.
 - Normalização e limpeza dos valores brutos da planilha.
-- Backend/API.
+- Ampliar a API além dos endpoints técnicos read-only da Etapa 4A.
 - Frontend React.
 - Autenticação, autorização e perfis de usuário.
 - Regras de negócio de cadastro, atendimento, diagnóstico e acompanhamento.
-- Suíte automatizada da futura aplicação e integração em CI; os oito testes SQL
-  transacionais atuais continuam sendo a validação do banco.
+- Ampliar a suíte da aplicação após a Etapa 4B; os nove testes SQL e os testes
+  atuais do backend continuam como baseline.
 - Rotinas adicionais de teste para futuras fases incrementais do modelo físico.
 - Estratégia de deploy e observabilidade; backup/restauração Docker de
   desenvolvimento já foi validado, sem constituir política de produção.
 - Política operacional de atualização da imagem PostgreSQL.
 - Documentação operacional de execução dos scripts e restauração de ambiente.
-- Automação futura de CI, se o projeto passar a ter colaboração recorrente, API ou frontend.
+- Evoluções futuras do CI para autenticação, autorização e frontend.
 
 ## Próximos Passos Recomendados
 

@@ -20,6 +20,14 @@ jobs:
       POSTGRES_USER: ambulatorio_ci
       POSTGRES_PASSWORD: senha_exclusivamente_sintetica_ci
       POSTGRES_PORT: "5433"
+      APP_DB_HOST: localhost
+      APP_DB_PORT: "5433"
+      APP_DB_NAME: ambulatorio_santa_casa
+      APP_DB_USER: ambulatorio_backend_ci
+      APP_DB_PASSWORD: senha_exclusivamente_sintetica_backend_ci
+      APP_DB_ROLE: ambulatorio_aplicacao
+      API_PORT: "3000"
+      NODE_ENV: test
     steps:
       - uses: actions/checkout@v4
       - name: Criar configuracao local sintetica
@@ -30,6 +38,8 @@ jobs:
         run: make docker-up docker-wait
       - name: Aplicar migrations incrementais
         run: make docker-migrate
+      - name: Instalar e validar backend
+        run: make backend-install backend-check
       - name: Validar manifesto, importador e projeto
         run: make manifest-check importer-test docker-project-check
       - name: Verificar whitespace do diff

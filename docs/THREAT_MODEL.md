@@ -52,3 +52,11 @@ autorizar lotes e revisar pendências e processo formal de resposta a incidentes
 
 Este documento deve ser revisto ao iniciar backend, mudar o formato de entrada,
 criar infraestrutura não local ou aprovar qualquer uso de dados reais.
+
+## Revisão da Etapa 4A
+
+O backend amplia a superfície local com HTTP e dependências Node. Controles atuais:
+bind em loopback, container não-root, dependências travadas por `package-lock`,
+validação de entrada, SQL parametrizado, DTO reduzido, erro sanitizado, logging sem
+body e role sem DDL/proveniência. Permanecem para a Etapa 4B autenticação,
+autorização, limitação por identidade, rate limiting e revisão formal de exposição.

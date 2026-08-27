@@ -48,7 +48,7 @@ Se somente o container principal foi perdido e o volume existe, execute
 
 1. Preserve o arquivo `.dump` escolhido fora do Git.
 2. Teste-o primeiro com o fluxo `postgres-restore` acima.
-3. Confirme o check de catálogo e os oito testes.
+3. Confirme o check de catálogo e os nove testes.
 4. A promoção para um novo volume principal é uma operação destrutiva distinta,
    não automatizada: deve ser autorizada explicitamente, com o ambiente Docker
    identificado e o PostgreSQL local fora de escopo.

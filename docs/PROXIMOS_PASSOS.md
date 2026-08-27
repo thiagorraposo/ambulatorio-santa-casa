@@ -65,6 +65,12 @@ resolver todos os bloqueios institucionais para dados reais.
 - aba operacional e fluxo AIM3;
 - API e frontend além do mínimo necessário à operação segura do servidor.
 
+## 6. Etapa 4B
+
+Com a fundação técnica da API validada somente com dados sintéticos, a próxima
+etapa pode tratar identidade, autenticação e autorização. Antes de qualquer dado
+real ainda permanecem todos os bloqueios institucionais da seção 3.
+
 ## Validação padrão
 
 Executar `make project-check`. Se o PostgreSQL estiver indisponível, registrar a

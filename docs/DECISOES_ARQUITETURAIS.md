@@ -394,3 +394,27 @@ manifesto/importador/Git; emitir logs JSON de allowlist; validar em CI sintétic
 Consequências: há menor privilégio, rastreabilidade e revisão antes da escrita,
 mas dados reais continuam bloqueados até decisões de ambiente protegido, TLS,
 segredos, retenção, backup, auditoria e responsáveis institucionais.
+
+## ADR-017
+
+ID: ADR-017
+
+Título: Fundação NestJS como monólito modular com SQL explícito
+
+Data: 2026-08-26
+
+Status: Aceita e implementada na Etapa 4A
+
+Decisão: estruturar o backend como monólito modular NestJS; separar controller,
+service, repository e DTO; usar `pg` com SQL parametrizado contra o schema
+existente; manter migrations exclusivamente fora da API; conectar por login
+técnico que assume obrigatoriamente `ambulatorio_aplicacao`.
+
+Consequências: o fluxo HTTP até PostgreSQL fica comprovado com baixo acoplamento
+e sem autoridade de schema duplicada. A aplicação ainda não possui identidade,
+autenticação, autorização ou endpoints de escrita, que pertencem à Etapa 4B.
+
+Alternativas rejeitadas: ORM com sincronização automática; microserviços antes
+de existirem fronteiras operacionais; uso do owner; SQL em controllers/services.
+
+Documento relacionado: `docs/ARQUITETURA_BACKEND.md`.

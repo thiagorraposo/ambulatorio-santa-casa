@@ -50,6 +50,9 @@ postgres_tmp/
 pg_tmp/
 __pycache__/
 *.py[cod]
+node_modules/
+backend/dist/
+backend/coverage/
 *.tmp
 *.temp
 *.swp

@@ -1445,3 +1445,13 @@ e não vazamento; threat model inicial. Separados bootstrap limpo (`db-migrate`)
 e evolução existente (`db-migrate-one`), e corrigido o `search_path` do E2E.
 Validação: `make manifest-check importer-test docker-project-check` e
 `git diff --check`. Nenhum dado real, backend, frontend ou produção foi criado.
+
+## 2026-08-26 - Fundação técnica do backend — Etapa 4A
+
+Criado backend NestJS/TypeScript como monólito modular com módulos health e
+pacientes, configuração centralizada, validação, filtro de erros, logging seguro,
+pool `pg`, repository SQL e DTO reduzido. Integrados login técnico que assume
+`ambulatorio_aplicacao`, Docker Compose, Makefile e CI. Testes unitários e de
+integração comprovam início, health, consulta sintética, role efetiva, bloqueio de
+DDL/proveniência e sanitização. Nenhuma migration, autenticação, autorização,
+usuário, escrita clínica, frontend ou dado real foi criado.

@@ -87,6 +87,15 @@ pg_dump -h localhost -U ambulatorio_user -d ambulatorio_santa_casa --schema=ambu
 - logs são JSON de allowlist, sem nomes, telefones, endereços, conteúdo clínico, valores originais ou mensagens de linha;
 - quality reports contêm apenas hashes, versões, revisão Git e métricas agregadas e devem ser protegidos.
 
+## Backend da Etapa 4A
+
+- o login técnico `NOINHERIT` assume explicitamente `ambulatorio_aplicacao`;
+- a configuração recusa uso de outra role, inclusive o owner;
+- a API não executa migrations, DDL, importação nem escrita clínica;
+- a consulta mínima expõe somente ID técnico e nome, exclusivamente sintéticos;
+- logs HTTP não incluem query string, body, dados de paciente, senha ou SQL;
+- respostas de erro nunca incluem stack trace ou detalhe PostgreSQL.
+
 ## Revisão Antes de Commit
 
 Antes de commitar:

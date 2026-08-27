@@ -1,0 +1,8 @@
+process.env.NODE_ENV ??= 'test';
+process.env.API_PORT ??= '3000';
+process.env.APP_DB_HOST ??= 'localhost';
+process.env.APP_DB_PORT ??= '5432';
+process.env.APP_DB_NAME ??= 'ambulatorio_test';
+process.env.APP_DB_USER ??= 'ambulatorio_backend_test';
+process.env.APP_DB_PASSWORD ??= 'senha_exclusivamente_sintetica';
+process.env.APP_DB_ROLE ??= 'ambulatorio_aplicacao';

@@ -36,7 +36,9 @@ COMPOSE := docker compose --env-file .env
 	docker-stop docker-recreate docker-logs docker-migrate docker-db-check docker-db-test \
 	docker-schema-dump docker-project-check docker-destroy \
 	docker-backup docker-backup-list docker-restore docker-restore-check docker-restore-test \
-	manifest-check importer-fixture importer-run importer-dry-run importer-test
+	manifest-check importer-fixture importer-run importer-dry-run importer-test \
+	backend-install backend-build backend-unit-test backend-db-setup backend-integration-test \
+	backend-check backend-up backend-logs backend-stop
 
 help:
 	@echo "Comandos disponíveis:"
@@ -50,6 +52,10 @@ help:
 	@echo "  make importer-run IMPORT_FILE=... Executa o importador v1 no banco Docker"
 	@echo "  make importer-dry-run IMPORT_FILE=... Executa preflight sem persistir escrita clínica"
 	@echo "  make importer-test   Executa o fluxo sintético ponta a ponta em banco isolado"
+	@echo "  make backend-install Instala dependências reproduzíveis com npm ci"
+	@echo "  make backend-check   Compila e executa testes unitários e integração"
+	@echo "  make backend-up      Provisiona login técnico e sobe o backend Docker"
+	@echo "  make backend-logs    Acompanha logs do backend"
 	@echo "  make project-check   Executa todos os checks locais não destrutivos"
 	@echo "  make db-schema-dump  Atualiza somente o dump estrutural do schema $(DB_SCHEMA)"
 	@echo "  make db-migrate-one MIGRATION_FILE=sql/NN_arquivo.sql Aplica uma migration incremental"
@@ -58,16 +64,16 @@ help:
 	@echo "  make docker-stop     Para o container sem remover o volume"
 	@echo "  make docker-recreate Recria o container preservando o volume"
 	@echo "  make docker-logs     Acompanha os logs do PostgreSQL Docker"
-	@echo "  make docker-migrate  Aplica sql/00 a sql/16 no PostgreSQL Docker"
+	@echo "  make docker-migrate  Aplica sql/00 a sql/17 em PostgreSQL Docker limpo"
 	@echo "  make docker-db-check Executa db-check explicitamente no Docker"
-	@echo "  make docker-db-test  Executa os oito testes SQL no Docker"
+	@echo "  make docker-db-test  Executa os nove testes SQL no Docker"
 	@echo "  make docker-schema-dump Gera dump estrutural Docker em $(DOCKER_SCHEMA_DUMP)"
 	@echo "  make docker-project-check Executa o project-check no Docker"
 	@echo "  make docker-backup    Cria backup lógico custom em $(BACKUP_DIR)/"
 	@echo "  make docker-backup-list Lista backups locais ignorados pelo Git"
 	@echo "  make docker-restore BACKUP_FILE=... RESTORE_ENV=docker-restore"
 	@echo "  make docker-restore-check Valida o banco Docker restaurado"
-	@echo "  make docker-restore-test Executa os oito testes no banco restaurado"
+	@echo "  make docker-restore-test Executa os nove testes no banco restaurado"
 	@echo "  make docker-destroy DESTROY_ENV=docker  DESTROI os volumes Docker do projeto"
 
 git-status:
@@ -135,6 +141,7 @@ docs-check:
 		docs/RECUPERACAO_POSTGRESQL_DOCKER.md \
 		docs/SEGURANCA_DE_DADOS.md \
 		docs/THREAT_MODEL.md \
+		docs/ARQUITETURA_BACKEND.md \
 		docs/WORKFLOW_DE_DESENVOLVIMENTO.md; do \
 		if [ ! -s "$$file" ]; then \
 			echo "Ausente ou vazio: $$file"; \
@@ -167,6 +174,40 @@ importer-test: docker-wait importer-fixture
 	@python3 -m unittest tests/importador/test_transformacoes.py
 	@DB_HOST="$(DB_HOST)" DB_PORT="$(DB_PORT)" DB_USER="$(DB_USER)" DB_NAME="$(DB_NAME)" \
 		PGPASSWORD="$(POSTGRES_PASSWORD)" bash tests/importador/test_e2e.sh
+
+backend-install:
+	@cd backend && npm ci
+
+backend-build:
+	@cd backend && npm run build
+
+backend-unit-test:
+	@cd backend && npm run test:unit
+
+backend-db-setup: docker-wait
+	@test -n "$(APP_DB_USER)" -a -n "$(APP_DB_PASSWORD)" || { echo "Erro: APP_DB_USER e APP_DB_PASSWORD são obrigatórios."; exit 1; }
+	@APP_DB_USER="$(APP_DB_USER)" APP_DB_PASSWORD="$(APP_DB_PASSWORD)" \
+		psql -X -q -h "$(DB_HOST)" -p "$(DB_PORT)" -U "$(DB_USER)" -d "$(DB_NAME)" \
+		-v ON_ERROR_STOP=1 -f scripts/configurar_login_aplicacao.sql
+	@echo "OK: login técnico configurado para assumir ambulatorio_aplicacao"
+
+backend-integration-test: backend-db-setup
+	@DB_HOST="$(DB_HOST)" DB_PORT="$(DB_PORT)" DB_USER="$(DB_USER)" DB_NAME="$(DB_NAME)" \
+		API_PORT="$(API_PORT)" APP_DB_HOST="$(APP_DB_HOST)" APP_DB_PORT="$(APP_DB_PORT)" \
+		APP_DB_NAME="$(APP_DB_NAME)" APP_DB_USER="$(APP_DB_USER)" APP_DB_PASSWORD="$(APP_DB_PASSWORD)" \
+		PGPASSWORD="$(POSTGRES_PASSWORD)" bash tests/backend/test_integration.sh
+
+backend-check: backend-build backend-unit-test backend-integration-test
+	@echo "OK: backend compilado e testado"
+
+backend-up: backend-db-setup
+	@$(COMPOSE) up -d --build backend
+
+backend-logs: docker-config-check
+	@$(COMPOSE) logs -f backend
+
+backend-stop: docker-config-check
+	@$(COMPOSE) stop backend
 
 project-check: docs-check db-test
 	@git diff --check
