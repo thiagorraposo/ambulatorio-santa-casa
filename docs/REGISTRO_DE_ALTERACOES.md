@@ -1455,3 +1455,11 @@ pool `pg`, repository SQL e DTO reduzido. Integrados login técnico que assume
 integração comprovam início, health, consulta sintética, role efetiva, bloqueio de
 DDL/proveniência e sanitização. Nenhuma migration, autenticação, autorização,
 usuário, escrita clínica, frontend ou dado real foi criado.
+
+## 2026-08-26 - Correção da validação de manifesto no CI
+
+Separada a validação reproduzível do manifesto versionado (`manifest-check`) da
+comparação opcional com a planilha local ignorada (`manifest-source-check`). O CI
+deixou de depender de `planejamento/Nova Planilha ambulatório.xlsx`, arquivo que
+corretamente não é versionado. Nenhuma regra do manifesto foi removida ou
+enfraquecida; somente a verificação da fonte local passou a alvo explícito.

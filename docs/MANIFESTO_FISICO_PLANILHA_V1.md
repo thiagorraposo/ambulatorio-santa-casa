@@ -73,6 +73,13 @@ estão registradas como fora do escopo e não possuem colunas no manifesto.
 make manifest-check
 ```
 
+Esse alvo valida somente artefatos versionados e é o usado no CI. Quando a fonte
+local ignorada estiver disponível, a comparação adicional dos cabeçalhos é:
+
+```bash
+make manifest-source-check
+```
+
 O alvo valida campos obrigatórios, versão, contagens, posições e ordens únicas,
 ocorrências repetidas, chaves, blocos/tipos, formato e existência dos destinos no
 schema versionado, ausência de padrões sensíveis e igualdade dos cabeçalhos com a

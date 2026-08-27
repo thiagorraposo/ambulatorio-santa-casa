@@ -6,6 +6,10 @@ O CI em `.github/workflows/validacoes.yml` usa credenciais sintéticas descartá
 PostgreSQL 16.15 e executa migrations em banco limpo, manifesto, importador,
 testes SQL, documentação e `git diff --check`.
 
+`make manifest-check` depende somente do manifesto e schema versionados. A
+comparação com a planilha local ignorada é deliberadamente separada em
+`make manifest-source-check`, pois essa fonte não existe no runner do CI.
+
 `make db-migrate` é bootstrap de banco limpo. Em banco existente, migrations
 antigas não podem ser reaplicadas; use
 `make db-migrate-one MIGRATION_FILE=sql/NN_arquivo.sql`.

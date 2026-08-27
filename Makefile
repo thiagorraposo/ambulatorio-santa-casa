@@ -36,7 +36,7 @@ COMPOSE := docker compose --env-file .env
 	docker-stop docker-recreate docker-logs docker-migrate docker-db-check docker-db-test \
 	docker-schema-dump docker-project-check docker-destroy \
 	docker-backup docker-backup-list docker-restore docker-restore-check docker-restore-test \
-	manifest-check importer-fixture importer-run importer-dry-run importer-test \
+	manifest-check manifest-source-check importer-fixture importer-run importer-dry-run importer-test \
 	backend-install backend-build backend-unit-test backend-db-setup backend-integration-test \
 	backend-check backend-up backend-logs backend-stop
 
@@ -47,7 +47,8 @@ help:
 	@echo "  make db-check        Valida conexão, banco, schema e usuário"
 	@echo "  make db-test         Executa todos os testes em tests/sql/"
 	@echo "  make docs-check      Verifica documentos obrigatórios e não vazios"
-	@echo "  make manifest-check  Valida o manifesto físico v1 e a fonte local"
+	@echo "  make manifest-check  Valida o manifesto físico v1 versionado"
+	@echo "  make manifest-source-check Compara manifesto com cabeçalhos da fonte local ignorada"
 	@echo "  make importer-fixture Gera a planilha XLSX exclusivamente sintética"
 	@echo "  make importer-run IMPORT_FILE=... Executa o importador v1 no banco Docker"
 	@echo "  make importer-dry-run IMPORT_FILE=... Executa preflight sem persistir escrita clínica"
@@ -153,6 +154,9 @@ docs-check:
 	exit $$missing
 
 manifest-check:
+	@python3 scripts/validar_manifesto_planilha.py
+
+manifest-source-check:
 	@python3 scripts/validar_manifesto_planilha.py --fonte
 
 importer-fixture:
