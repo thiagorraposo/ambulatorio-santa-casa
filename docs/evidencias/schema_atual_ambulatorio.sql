@@ -3368,6 +3368,54 @@ ALTER SEQUENCE ambulatorio.tratamento_chagas_tratamento_chagas_id_seq OWNED BY a
 
 
 --
+-- Name: usuario_aplicacao; Type: TABLE; Schema: ambulatorio; Owner: -
+--
+
+CREATE TABLE ambulatorio.usuario_aplicacao (
+    usuario_id bigint NOT NULL,
+    nome character varying(160) NOT NULL,
+    login character varying(254) NOT NULL,
+    senha_hash character varying(255) NOT NULL,
+    perfil character varying(20) NOT NULL,
+    ativo boolean DEFAULT true NOT NULL,
+    criado_em timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    atualizado_em timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT chk_usuario_aplicacao_login CHECK (((btrim((login)::text) <> ''::text) AND ((login)::text = lower((login)::text)))),
+    CONSTRAINT chk_usuario_aplicacao_nome CHECK ((btrim((nome)::text) <> ''::text)),
+    CONSTRAINT chk_usuario_aplicacao_perfil CHECK (((perfil)::text = ANY ((ARRAY['consulta'::character varying, 'edicao'::character varying, 'administracao'::character varying])::text[]))),
+    CONSTRAINT chk_usuario_aplicacao_senha_hash CHECK ((((senha_hash)::text ~~ '$2a$%'::text) OR ((senha_hash)::text ~~ '$2b$%'::text) OR ((senha_hash)::text ~~ '$2y$%'::text)))
+);
+
+
+--
+-- Name: TABLE usuario_aplicacao; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON TABLE ambulatorio.usuario_aplicacao IS 'Identidades funcionais autenticaveis da aplicacao; nao representa role PostgreSQL nem responsavel legado de planilha.';
+
+
+--
+-- Name: COLUMN usuario_aplicacao.senha_hash; Type: COMMENT; Schema: ambulatorio; Owner: -
+--
+
+COMMENT ON COLUMN ambulatorio.usuario_aplicacao.senha_hash IS 'Hash bcrypt da senha; senha em texto puro nunca deve ser persistida.';
+
+
+--
+-- Name: usuario_aplicacao_usuario_id_seq; Type: SEQUENCE; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ambulatorio.usuario_aplicacao ALTER COLUMN usuario_id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME ambulatorio.usuario_aplicacao_usuario_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
 -- Name: acompanhamento_cuidado acompanhamento_cuidado_id; Type: DEFAULT; Schema: ambulatorio; Owner: -
 --
 
@@ -4099,6 +4147,14 @@ ALTER TABLE ONLY ambulatorio.tratamento_benzonidazol
 
 
 --
+-- Name: usuario_aplicacao usuario_aplicacao_pkey; Type: CONSTRAINT; Schema: ambulatorio; Owner: -
+--
+
+ALTER TABLE ONLY ambulatorio.usuario_aplicacao
+    ADD CONSTRAINT usuario_aplicacao_pkey PRIMARY KEY (usuario_id);
+
+
+--
 -- Name: idx_acompanhamento_atendimento_id; Type: INDEX; Schema: ambulatorio; Owner: -
 --
 
@@ -4474,6 +4530,13 @@ CREATE INDEX idx_tratamento_chagas_status ON ambulatorio.tratamento_chagas USING
 --
 
 CREATE UNIQUE INDEX uq_importacao_lote_inicial ON ambulatorio.importacao_lote USING btree (hash_arquivo_sha256, layout_versao) WHERE (lote_reprocessado_de_id IS NULL);
+
+
+--
+-- Name: uq_usuario_aplicacao_login_normalizado; Type: INDEX; Schema: ambulatorio; Owner: -
+--
+
+CREATE UNIQUE INDEX uq_usuario_aplicacao_login_normalizado ON ambulatorio.usuario_aplicacao USING btree (lower((login)::text));
 
 
 --

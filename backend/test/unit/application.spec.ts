@@ -14,6 +14,8 @@ describe('Aplicação', () => {
       NODE_ENV: 'test', API_PORT: '3000', APP_DB_HOST: 'localhost', APP_DB_PORT: '5432',
       APP_DB_NAME: 'db', APP_DB_USER: 'login', APP_DB_PASSWORD: 'synthetic',
       APP_DB_ROLE: 'ambulatorio_aplicacao',
+      AUTH_JWT_SECRET: 'segredo-sintetico-com-mais-de-trinta-e-dois-caracteres',
+      AUTH_JWT_EXPIRES_IN_SECONDS: '900',
     });
     const module = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(DatabaseService).useValue(database).compile();
@@ -30,17 +32,17 @@ describe('Aplicação', () => {
       .expect({ status: 'ok', database: 'up' });
   });
 
-  it('valida a entrada antes da persistência', async () => {
-    await request(app.getHttpServer()).get('/pacientes?limit=0').expect(400)
-      .expect(({ body }) => expect(body).toMatchObject({ statusCode: 400, error: 'Bad Request' }));
+  it('protege endpoint de negócio por padrão', async () => {
+    await request(app.getHttpServer()).get('/pacientes?limit=0').expect(401)
+      .expect(({ body }) => expect(body).toMatchObject({ statusCode: 401, error: 'Unauthorized' }));
   });
 
   it('sanitiza falha de banco na resposta HTTP', async () => {
     database.query.mockRejectedValueOnce(new Error('password=secret SELECT * FROM paciente'));
-    await request(app.getHttpServer()).get('/pacientes').expect(503)
+    await request(app.getHttpServer()).get('/health').expect(503)
       .expect(({ body }) => {
         expect(body).toEqual({ statusCode: 503, error: 'Service Unavailable',
-          message: 'Serviço temporariamente indisponível' });
+          message: 'Banco de dados indisponível' });
         expect(JSON.stringify(body)).not.toContain('password');
         expect(JSON.stringify(body)).not.toContain('SELECT');
       });

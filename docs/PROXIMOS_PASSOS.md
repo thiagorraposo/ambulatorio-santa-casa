@@ -1,6 +1,6 @@
 # Próximos Passos
 
-Atualizado em: 2026-08-25
+Atualizado em: 2026-08-30
 
 ## Escopo confirmado do MVP
 
@@ -65,11 +65,12 @@ resolver todos os bloqueios institucionais para dados reais.
 - aba operacional e fluxo AIM3;
 - API e frontend além do mínimo necessário à operação segura do servidor.
 
-## 6. Etapa 4B
+## 6. Etapa 4C
 
-Com a fundação técnica da API validada somente com dados sintéticos, a próxima
-etapa pode tratar identidade, autenticação e autorização. Antes de qualquer dado
-real ainda permanecem todos os bloqueios institucionais da seção 3.
+Com a fundação técnica e a identidade/autorização mínimas validadas somente com
+dados sintéticos, a próxima etapa pode consolidar a arquitetura e revisar a
+integração. Antes de dados reais permanecem todos os bloqueios da seção 3, além
+de TLS, rotação de secrets, revogação individual e rate limit distribuído.
 
 ## Validação padrão
 

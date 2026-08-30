@@ -33,8 +33,8 @@ desse banco controlado e executa `pg_restore --exit-on-error`. Seu volume é
 `ambulatorio_santa_casa_postgres_restore_data`, separado do volume principal.
 Não há parâmetro de host ou rota de restore para `localhost:5432`.
 
-O check exige 37 tabelas, 147 constraints, 113 índices, 10 projetos, 16 tipos de
-exame, 9 tipos de encaminhamento e 8 medicamentos. O teste executa os oito
+O check exige 38 tabelas, 155 constraints, 115 índices, 10 projetos, 16 tipos de
+exame, 9 tipos de encaminhamento e 8 medicamentos. O teste executa os dez
 arquivos SQL com `ON_ERROR_STOP=1`; os testes confirmam `ROLLBACK` e ausência dos
 marcadores sintéticos.
 
@@ -48,7 +48,7 @@ Se somente o container principal foi perdido e o volume existe, execute
 
 1. Preserve o arquivo `.dump` escolhido fora do Git.
 2. Teste-o primeiro com o fluxo `postgres-restore` acima.
-3. Confirme o check de catálogo e os nove testes.
+3. Confirme o check de catálogo e os dez testes.
 4. A promoção para um novo volume principal é uma operação destrutiva distinta,
    não automatizada: deve ser autorizada explicitamente, com o ambiente Docker
    identificado e o PostgreSQL local fora de escopo.

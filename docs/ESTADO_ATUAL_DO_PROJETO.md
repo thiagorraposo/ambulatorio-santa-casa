@@ -1,14 +1,14 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-08-26
+Atualizado em: 2026-08-30
 
 ## Objetivo Geral
 
 O projeto `ambulatorio-santa-casa` define a base de dados PostgreSQL para organizar registros de pacientes, atendimentos ambulatoriais, diagnóstico de doença de Chagas, sorologias, condições clínicas, comorbidades, exames complementares, encaminhamentos, acompanhamentos, medicamentos, tratamentos e procedimentos clínicos.
 
-O repositório contém scripts SQL, nove testes SQL transacionais, importador
-sintético homologado, hardening, CI e a fundação NestJS da API. Não há frontend,
-autenticação, autorização ou autorização para dados reais.
+O repositório contém scripts SQL, dez testes SQL transacionais, importador
+sintético homologado, hardening, CI, fundação NestJS e autenticação/autorização
+mínima. Não há frontend nem autorização para dados reais.
 
 ## Stack e Tecnologias Usadas
 
@@ -29,11 +29,11 @@ autenticação, autorização ou autorização para dados reais.
 - O fluxo lê as duas abas, valida o manifesto, executa transação por linha,
   concilia pacientes, registra proveniência e suporta idempotência do mesmo lote
   e reprocessamento explícito por nova execução ligada ao predecessor imediato.
-- Scripts SQL existentes de `sql/00_criar_banco.sql` a `sql/17_hardening_operacional.sql`.
+- Scripts SQL existentes de `sql/00_criar_banco.sql` a `sql/20_isolar_identidade_do_importador.sql`.
 - README e documentos antigos `docs/dicionario-dados.md` e `docs/decisoes-modelagem.md` existem, mas estão vazios.
 - A estrutura física real aplicada no PostgreSQL foi validada por evidência versionada em `docs/evidencias/schema_atual_ambulatorio.sql`.
-- O dump foi atualizado em 2026-08-13 e contém o schema `ambulatorio` com 37 tabelas aplicadas.
-- As 37 tabelas físicas encontradas também estão cobertas pelos scripts SQL em `sql/`.
+- O dump foi atualizado em 2026-08-30 e contém o schema `ambulatorio` com 38 tabelas aplicadas.
+- As 38 tabelas físicas encontradas também estão cobertas pelos scripts SQL em `sql/`.
 - Não foi encontrada tabela física sem migration correspondente, nem tabela em migration ausente do dump analisado.
 - Existe uma rotina reutilizável de validação com dados de teste em `tests/sql/01_validar_nucleo_inicial.sql`.
 - A rotina de validação usa transação com `ROLLBACK`, não altera a estrutura física do banco e não deixa dados de teste persistidos quando executada com sucesso.
@@ -74,15 +74,19 @@ autenticação, autorização ou autorização para dados reais.
 - A Etapa 4A implementa backend NestJS/TypeScript em monólito modular, integrado
   ao Compose, com configuração validada, `pg`, role limitada, healthcheck,
   consulta read-only de pacientes, erros/logs seguros e testes unitários/integração.
-- Não existem autenticação, autorização, usuário da aplicação ou endpoint clínico
-  de escrita; esses itens permanecem explicitamente na Etapa 4B.
+- A Etapa 4B implementa identidade funcional independente, bcrypt, JWT expirável,
+  usuário ativo, perfis, guards globais, login, `/auth/me`, prova mínima de
+  autorização, rate limit e logging seguro. Não existe endpoint clínico de
+  escrita, gestão de usuários, frontend ou provisionamento de produção.
 - Existe ambiente PostgreSQL Docker opcional e isolado, com imagem
   `postgres:16.15`, porta `127.0.0.1:5433`, healthcheck e volume persistente
   nomeado. O PostgreSQL local em 5432 permanece o padrão oficial.
 
 ## Estratégia de Implementação Incremental
 
-O modelo físico está sendo construído por fases. As 25 tabelas do núcleo funcional inicial foram expandidas pelas quatro tabelas do módulo de avaliação clínica, pela tabela de notificação, pelas três tabelas de importação e proveniência, pela associação paciente–projeto, pelos exames por paciente e pelas duas tabelas de BZN, totalizando 37 tabelas validadas.
+O modelo físico está sendo construído por fases. As 37 tabelas clínicas e de
+proveniência validadas foram ampliadas pela identidade funcional mínima,
+totalizando 38 tabelas validadas.
 
 A ausência temporária das demais tabelas planejadas não deve ser tratada como falha, lacuna involuntária ou divergência crítica. As demais estruturas previstas serão implementadas posteriormente por migrations incrementais.
 
@@ -92,7 +96,7 @@ O objetivo da fase atual é validar funcionamento, integridade referencial, rest
 
 ## Tabelas Atualmente Existentes no Banco
 
-O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulatorio.sql`, possui atualmente 37 tabelas:
+O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulatorio.sql`, possui atualmente 38 tabelas:
 
 1. `paciente`
 2. `paciente_endereco`
@@ -131,6 +135,7 @@ O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulator
 35. `paciente_exame_complementar`
 36. `tratamento_benzonidazol`
 37. `reacao_adversa_benzonidazol`
+38. `usuario_aplicacao`
 
 ## Cobertura Banco x Migrations
 
@@ -173,10 +178,11 @@ O schema físico `ambulatorio`, conforme `docs/evidencias/schema_atual_ambulator
 | `tipo_exame_complementar` | Existe no banco e nas migrations |
 | `tratamento_chagas` | Existe no banco e nas migrations |
 | `tratamento_benzonidazol` | Existe no banco e nas migrations |
+| `usuario_aplicacao` | Existe no banco e nas migrations |
 
 Resumo da reconciliação:
 
-- Tabelas existentes tanto no banco quanto nas migrations: 37.
+- Tabelas existentes tanto no banco quanto nas migrations: 38.
 - Tabelas existentes no banco mas não cobertas pelas migrations: nenhuma identificada.
 - Tabelas existentes nas migrations mas ausentes no banco: nenhuma identificada.
 
@@ -215,16 +221,15 @@ Resumo da reconciliação:
 - Normalização e limpeza dos valores brutos da planilha.
 - Ampliar a API além dos endpoints técnicos read-only da Etapa 4A.
 - Frontend React.
-- Autenticação, autorização e perfis de usuário.
 - Regras de negócio de cadastro, atendimento, diagnóstico e acompanhamento.
-- Ampliar a suíte da aplicação após a Etapa 4B; os nove testes SQL e os testes
-  atuais do backend continuam como baseline.
+- Consolidar arquitetura e suíte integrada na Etapa 4C; os dez testes SQL e os
+  testes atuais do backend continuam como baseline.
 - Rotinas adicionais de teste para futuras fases incrementais do modelo físico.
 - Estratégia de deploy e observabilidade; backup/restauração Docker de
   desenvolvimento já foi validado, sem constituir política de produção.
 - Política operacional de atualização da imagem PostgreSQL.
 - Documentação operacional de execução dos scripts e restauração de ambiente.
-- Evoluções futuras do CI para autenticação, autorização e frontend.
+- Evoluções futuras do CI para frontend e infraestrutura de produção.
 
 ## Próximos Passos Recomendados
 

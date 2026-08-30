@@ -12,7 +12,7 @@ BEGIN
      WHERE n.nspname = 'ambulatorio';
     SELECT count(*) INTO v_indices FROM pg_indexes WHERE schemaname = 'ambulatorio';
 
-    IF v_tabelas <> 37 OR v_constraints <> 147 OR v_indices <> 113 THEN
+    IF v_tabelas <> 38 OR v_constraints <> 155 OR v_indices <> 115 THEN
         RAISE EXCEPTION 'catálogo divergente: tabelas=%, constraints=%, índices=%',
             v_tabelas, v_constraints, v_indices;
     END IF;
@@ -22,5 +22,5 @@ BEGIN
        OR (SELECT count(*) FROM ambulatorio.medicamento) <> 8 THEN
         RAISE EXCEPTION 'dados de catálogo divergentes após restore';
     END IF;
-    RAISE NOTICE 'OK: 37 tabelas, 147 constraints, 113 índices e catálogos esperados';
+    RAISE NOTICE 'OK: 38 tabelas, 155 constraints, 115 índices e catálogos esperados';
 END $$;

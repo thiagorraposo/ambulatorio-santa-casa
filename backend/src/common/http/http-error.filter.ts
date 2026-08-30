@@ -1,5 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { AuthenticatedUser } from '../../auth/auth.types';
 
 interface ErrorBody { statusCode: number; error: string; message: string | string[] }
 
@@ -13,8 +14,10 @@ export class HttpErrorFilter implements ExceptionFilter {
     const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.SERVICE_UNAVAILABLE;
     const body = this.body(exception, status);
     if (!(exception instanceof HttpException)) {
+      const user = (request as Request & { user?: AuthenticatedUser }).user;
       this.logger.error(JSON.stringify({ event: 'request_error', method: request.method,
-        path: request.path, status, errorType: exception instanceof Error ? exception.name : 'UnknownError' }));
+        path: request.path, status, errorType: exception instanceof Error ? exception.name : 'UnknownError',
+        ...(user ? { userId: user.usuarioId, perfil: user.perfil } : {}) }));
     }
     response.status(status).json(body);
   }

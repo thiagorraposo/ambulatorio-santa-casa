@@ -1,6 +1,6 @@
 # Segurança de Dados
 
-Atualizado em: 2026-08-26
+Atualizado em: 2026-08-30
 
 O threat model técnico vigente está em `docs/THREAT_MODEL.md`; ele não autoriza dados reais.
 
@@ -95,6 +95,18 @@ pg_dump -h localhost -U ambulatorio_user -d ambulatorio_santa_casa --schema=ambu
 - a consulta mínima expõe somente ID técnico e nome, exclusivamente sintéticos;
 - logs HTTP não incluem query string, body, dados de paciente, senha ou SQL;
 - respostas de erro nunca incluem stack trace ou detalhe PostgreSQL.
+
+## Revisão Antes de Commit
+
+## Identidade da aplicação — Etapa 4B
+
+- identidades funcionais não são roles PostgreSQL nem responsáveis legados;
+- senhas persistem somente como bcrypt e secrets JWT somente no ambiente;
+- JWT expira, não é persistido nem registrado; usuário ativo e perfil são relidos;
+- logs nunca incluem login completo, senha, hash, token, Authorization ou body;
+- fixtures de autenticação são sintéticas e não provisionam produção;
+- `ambulatorio_aplicacao` conserva ausência de ownership, DDL, proveniência bruta
+  e escrita na tabela de identidades.
 
 ## Revisão Antes de Commit
 

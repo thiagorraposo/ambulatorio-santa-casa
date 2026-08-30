@@ -9,6 +9,7 @@ export interface AppConfig {
     password: string;
     role: 'ambulatorio_aplicacao';
   };
+  auth: { jwtSecret: string; jwtExpiresInSeconds: number };
 }
 
 const required = (env: Record<string, unknown>, key: string): string => {
@@ -36,6 +37,14 @@ export function validateConfig(env: Record<string, unknown>): AppConfig {
   if (role !== 'ambulatorio_aplicacao') {
     throw new Error('Configuração inválida: APP_DB_ROLE');
   }
+  const jwtSecret = required(env, 'AUTH_JWT_SECRET');
+  if (jwtSecret.length < 32) {
+    throw new Error('Configuração inválida: AUTH_JWT_SECRET');
+  }
+  const jwtExpiresInSeconds = Number(required(env, 'AUTH_JWT_EXPIRES_IN_SECONDS'));
+  if (!Number.isInteger(jwtExpiresInSeconds) || jwtExpiresInSeconds < 60 || jwtExpiresInSeconds > 86400) {
+    throw new Error('Configuração inválida: AUTH_JWT_EXPIRES_IN_SECONDS');
+  }
   return {
     nodeEnv: nodeEnv as AppConfig['nodeEnv'],
     apiPort: port(env, 'API_PORT'),
@@ -47,5 +56,6 @@ export function validateConfig(env: Record<string, unknown>): AppConfig {
       password: required(env, 'APP_DB_PASSWORD'),
       role,
     },
+    auth: { jwtSecret, jwtExpiresInSeconds },
   };
 }

@@ -1,14 +1,16 @@
 # Modelo Físico Atual
 
-Atualizado em: 2026-08-13
+Atualizado em: 2026-08-30
 
 Este documento descreve a estrutura física real aplicada no schema `ambulatorio`, usando como fonte principal o dump `docs/evidencias/schema_atual_ambulatorio.sql`. Os scripts em `sql/` foram usados como fonte de reconciliação.
 
-O schema físico aplicado possui 37 tabelas. Todas as tabelas encontradas no dump existem nas migrations versionadas, e nenhuma tabela das migrations ficou ausente da evidência analisada.
+O schema físico aplicado possui 38 tabelas. Todas as tabelas encontradas no dump existem nas migrations versionadas, e nenhuma tabela das migrations ficou ausente da evidência analisada.
 
 ## Estratégia de Construção por Fases
 
-O modelo físico atual reúne as 25 tabelas do núcleo funcional inicial, as quatro tabelas do módulo de avaliação clínica, a tabela de notificação, as três tabelas de importação e proveniência, a associação consolidada paciente–projeto, os exames canônicos por paciente e as duas tabelas de BZN. Ainda não representa a cobertura completa e final da planilha original.
+O modelo físico atual reúne as 37 tabelas clínicas/de proveniência anteriores e
+a identidade funcional mínima `usuario_aplicacao`. Ela não representa role
+PostgreSQL nem responsável legado. O modelo ainda não representa a cobertura final.
 
 As demais tabelas previstas serão implementadas posteriormente por migrations incrementais. A ausência temporária dessas estruturas não representa falha, lacuna involuntária ou divergência crítica em relação ao plano do projeto.
 
@@ -876,5 +878,13 @@ Finalidade: associação genérica N:N entre linhas e registros estruturados.
 
 A migration `sql/17_hardening_operacional.sql` adiciona a `importacao_lote`
 `manifesto_sha256`, `importador_versao` e `revisao_git`, com constraints de
-formato. Não cria tabelas, remove dados nem muda as 37 identidades existentes.
+formato. Não cria tabelas, remove dados nem muda as 37 tabelas então existentes.
 As roles de importação e aplicação são objetos do cluster e não owners do schema.
+
+## Identidade funcional
+
+As migrations 18 a 20 criam `usuario_aplicacao`, corrigem incrementalmente sua
+constraint de hash. A tabela guarda ID interno, nome, login normalizado único,
+hash bcrypt, perfil (`consulta`, `edicao` ou `administracao`), estado ativo e
+timestamps e removem os privilégios padrão do importador. `ambulatorio_aplicacao` recebe somente `SELECT`; usuários funcionais
+jamais recebem login PostgreSQL.

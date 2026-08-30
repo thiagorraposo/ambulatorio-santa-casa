@@ -49,6 +49,8 @@ services:
       APP_DB_USER: ${APP_DB_USER}
       APP_DB_PASSWORD: ${APP_DB_PASSWORD}
       APP_DB_ROLE: ${APP_DB_ROLE:-ambulatorio_aplicacao}
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET}
+      AUTH_JWT_EXPIRES_IN_SECONDS: ${AUTH_JWT_EXPIRES_IN_SECONDS:-900}
     ports:
       - "127.0.0.1:${API_PORT:-3000}:3000"
     depends_on:

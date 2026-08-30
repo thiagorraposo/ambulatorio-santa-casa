@@ -1,13 +1,12 @@
 # Threat Model Pré-Dados Reais
 
-Atualizado em: 2026-08-26
+Atualizado em: 2026-08-30
 
 ## Escopo e premissas
 
 Este modelo cobre o PostgreSQL local/Docker, migrations, manifesto seguro,
-importador XLSX sintético e artefatos operacionais. Backend, frontend,
-autenticação da aplicação, produção, observabilidade completa e políticas
-institucionais ainda não aprovadas estão fora do escopo. O ambiente continua
+importador XLSX sintético, backend local e autenticação mínima. Frontend,
+produção, observabilidade completa e políticas institucionais estão fora do escopo. O ambiente continua
 autorizado exclusivamente para dados sintéticos.
 
 ## Ativos
@@ -42,6 +41,9 @@ manifesto e fixture sintética e cria credenciais descartáveis não institucion
 | Backup, volume ou planilha local expostos | vazamento em repouso | bind local, `.gitignore`, dumps fora do Git e proibição explícita de dados reais | criptografia, retenção, descarte, acesso institucional e backup de produção pendentes |
 | SQL malformado por conteúdo de origem | alteração/injeção | literais escapados pelo adaptador, domínios fechados e role sem DDL/DELETE | migrar futuramente para driver parametrizado é recomendável antes de produção |
 | Perda ou alteração de proveniência | auditoria incompleta | FKs `RESTRICT`, vínculos N:N, raw posicional e ausência de DELETE na role importadora | auditoria de acesso e detector de alvo polimórfico órfão pendentes |
+| Força bruta ou enumeração no login | comprometimento de conta | resposta uniforme, bcrypt inclusive para conta ausente e limite por IP/instância | contador distribuído, proxy confiável e bloqueio adaptativo pendentes |
+| Roubo ou reutilização de token | acesso até expiração | JWT curto, secret externo, token fora dos logs e usuário ativo relido | TLS, armazenamento frontend e revogação individual pendentes |
+| Escalada por perfil | acesso indevido | guards globais, negação por padrão, perfis explícitos e 401/403 separados | autorização por recurso/linha e auditoria institucional pendentes |
 
 ## Decisões de risco
 
@@ -53,10 +55,12 @@ autorizar lotes e revisar pendências e processo formal de resposta a incidentes
 Este documento deve ser revisto ao iniciar backend, mudar o formato de entrada,
 criar infraestrutura não local ou aprovar qualquer uso de dados reais.
 
-## Revisão da Etapa 4A
+## Revisão das Etapas 4A e 4B
 
 O backend amplia a superfície local com HTTP e dependências Node. Controles atuais:
 bind em loopback, container não-root, dependências travadas por `package-lock`,
 validação de entrada, SQL parametrizado, DTO reduzido, erro sanitizado, logging sem
-body e role sem DDL/proveniência. Permanecem para a Etapa 4B autenticação,
-autorização, limitação por identidade, rate limiting e revisão formal de exposição.
+body e role sem DDL/proveniência. A 4B adicionou identidade independente, bcrypt,
+JWT expirável, validação ativa por requisição, autorização global por perfil e
+limitação básica do login. TLS, rotação institucional de secrets, revogação
+individual e rate limit distribuído permanecem fora do ambiente sintético.

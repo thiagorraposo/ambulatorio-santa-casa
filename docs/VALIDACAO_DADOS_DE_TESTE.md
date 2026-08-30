@@ -143,8 +143,8 @@ Falhas:
 
 - Atualização automática de `atualizado_em`: não aplicável, pois não há trigger confirmada no schema atual.
 - Semântica clínica dos valores textuais: exige validação de negócio e comparação com a planilha original.
-- Autenticação e autorização HTTP: permanecem fora desta rotina e pertencem à Etapa 4B;
-  permissões técnicas do backend são testadas separadamente em `backend/test/integration/`.
+- Autenticação e autorização HTTP ficam fora desta rotina SQL e são testadas
+  separadamente em `backend/test/integration/` na Etapa 4B.
 - Cobertura integral da planilha original: será tratada em fases posteriores de expansão do modelo.
 - Integridade de dados de catálogo pré-existentes: o script cria catálogos temporários próprios e não depende de registros já existentes.
 

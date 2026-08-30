@@ -1,6 +1,6 @@
 # Decisões Arquiteturais
 
-Atualizado em: 2026-08-06
+Atualizado em: 2026-08-30
 
 Este documento registra decisões duradouras do projeto. Mudanças cronológicas continuam em `docs/REGISTRO_DE_ALTERACOES.md`.
 
@@ -411,10 +411,34 @@ existente; manter migrations exclusivamente fora da API; conectar por login
 técnico que assume obrigatoriamente `ambulatorio_aplicacao`.
 
 Consequências: o fluxo HTTP até PostgreSQL fica comprovado com baixo acoplamento
-e sem autoridade de schema duplicada. A aplicação ainda não possui identidade,
-autenticação, autorização ou endpoints de escrita, que pertencem à Etapa 4B.
+e sem autoridade de schema duplicada. Identidade e autorização foram adicionadas
+incrementalmente na Etapa 4B; endpoints clínicos de escrita continuam ausentes.
 
 Alternativas rejeitadas: ORM com sincronização automática; microserviços antes
 de existirem fronteiras operacionais; uso do owner; SQL em controllers/services.
+
+Documento relacionado: `docs/ARQUITETURA_BACKEND.md`.
+
+## ADR-018
+
+ID: ADR-018
+
+Título: JWT curto com identidade ativa relida e autorização global por perfil
+
+Data: 2026-08-30
+
+Status: Aceita e implementada na Etapa 4B
+
+Decisão: modelar usuário funcional independente; usar bcrypt para credenciais e
+JWT Bearer HS256 expirável com secret obrigatório do ambiente; não persistir
+tokens; reler usuário ativo e perfil em cada requisição; aplicar guards globais
+com negação por padrão e exceções públicas explícitas.
+
+Consequências: inativação e mudança de perfil são imediatas, e o backend pode ser
+consumido pelo futuro React sem impor armazenamento no navegador. Revogação
+individual antes da expiração, TLS e rate limit distribuído permanecem pendentes.
+
+Alternativas rejeitadas: sessão persistida prematuramente; mecanismo criptográfico
+próprio; perfil ligado a role PostgreSQL; autenticação opt-in por controller.
 
 Documento relacionado: `docs/ARQUITETURA_BACKEND.md`.

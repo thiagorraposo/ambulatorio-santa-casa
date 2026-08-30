@@ -5,14 +5,20 @@ import { RequestLoggerMiddleware } from './common/http/request-logger.middleware
 import { validateConfig } from './config/app.config';
 import { HealthModule } from './health/health.module';
 import { PacientesModule } from './pacientes/pacientes.module';
+import { AuthModule } from './auth/auth.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, cache: true, validate: validateConfig }),
     DatabaseModule,
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
+    AuthModule,
     HealthModule,
     PacientesModule,
   ],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {

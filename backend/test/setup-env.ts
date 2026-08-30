@@ -6,3 +6,5 @@ process.env.APP_DB_NAME ??= 'ambulatorio_test';
 process.env.APP_DB_USER ??= 'ambulatorio_backend_test';
 process.env.APP_DB_PASSWORD ??= 'senha_exclusivamente_sintetica';
 process.env.APP_DB_ROLE ??= 'ambulatorio_aplicacao';
+process.env.AUTH_JWT_SECRET ??= 'segredo-jwt-exclusivamente-sintetico-com-mais-de-32-caracteres';
+process.env.AUTH_JWT_EXPIRES_IN_SECONDS ??= '900';

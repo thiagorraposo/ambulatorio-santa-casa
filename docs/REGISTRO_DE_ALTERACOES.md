@@ -1463,3 +1463,14 @@ comparação opcional com a planilha local ignorada (`manifest-source-check`). O
 deixou de depender de `planejamento/Nova Planilha ambulatório.xlsx`, arquivo que
 corretamente não é versionado. Nenhuma regra do manifesto foi removida ou
 enfraquecida; somente a verificação da fonte local passou a alvo explícito.
+
+## 2026-08-30 - Identidade, autenticação e autorização do backend — Etapa 4B
+
+Criadas migrations incrementais 18 a 20 para identidade funcional independente,
+correção histórica da constraint bcrypt e isolamento do importador, sem alterar migrations aplicadas.
+Implementados bcrypt, JWT expirável com secret obrigatório, usuário ativo, perfis
+consulta/edição/administração, guards globais com negação por padrão, login,
+`/auth/me`, prova mínima de autorização, rate limit em memória e logging por
+allowlist. Testes sintéticos cobrem autenticação, autorização, configuração, logs
+e privilégios PostgreSQL; CI e workflow foram ampliados. Não foram criados CRUD
+clínico, frontend ou provisionamento de produção.

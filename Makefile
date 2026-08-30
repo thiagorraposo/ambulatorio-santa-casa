@@ -26,7 +26,7 @@ MIGRATION_FILE ?=
 RESTORE_ENV ?=
 DESTROY_ENV ?=
 SQL_TESTS := $(sort $(wildcard tests/sql/*.sql))
-SQL_MIGRATIONS := $(sort $(wildcard sql/[0-1][0-9]_*.sql))
+SQL_MIGRATIONS := $(sort $(wildcard sql/[0-9][0-9]_*.sql))
 COMPOSE := docker compose --env-file .env
 
 .DEFAULT_GOAL := help
@@ -65,16 +65,16 @@ help:
 	@echo "  make docker-stop     Para o container sem remover o volume"
 	@echo "  make docker-recreate Recria o container preservando o volume"
 	@echo "  make docker-logs     Acompanha os logs do PostgreSQL Docker"
-	@echo "  make docker-migrate  Aplica sql/00 a sql/17 em PostgreSQL Docker limpo"
+	@echo "  make docker-migrate  Aplica sql/00 a sql/20 em PostgreSQL Docker limpo"
 	@echo "  make docker-db-check Executa db-check explicitamente no Docker"
-	@echo "  make docker-db-test  Executa os nove testes SQL no Docker"
+	@echo "  make docker-db-test  Executa os dez testes SQL no Docker"
 	@echo "  make docker-schema-dump Gera dump estrutural Docker em $(DOCKER_SCHEMA_DUMP)"
 	@echo "  make docker-project-check Executa o project-check no Docker"
 	@echo "  make docker-backup    Cria backup lógico custom em $(BACKUP_DIR)/"
 	@echo "  make docker-backup-list Lista backups locais ignorados pelo Git"
 	@echo "  make docker-restore BACKUP_FILE=... RESTORE_ENV=docker-restore"
 	@echo "  make docker-restore-check Valida o banco Docker restaurado"
-	@echo "  make docker-restore-test Executa os nove testes no banco restaurado"
+	@echo "  make docker-restore-test Executa os dez testes no banco restaurado"
 	@echo "  make docker-destroy DESTROY_ENV=docker  DESTROI os volumes Docker do projeto"
 
 git-status:
@@ -196,9 +196,11 @@ backend-db-setup: docker-wait
 	@echo "OK: login técnico configurado para assumir ambulatorio_aplicacao"
 
 backend-integration-test: backend-db-setup
+	@test -n "$(AUTH_JWT_SECRET)" -a -n "$(AUTH_JWT_EXPIRES_IN_SECONDS)" || { echo "Erro: configuração de autenticação obrigatória ausente."; exit 1; }
 	@DB_HOST="$(DB_HOST)" DB_PORT="$(DB_PORT)" DB_USER="$(DB_USER)" DB_NAME="$(DB_NAME)" \
 		API_PORT="$(API_PORT)" APP_DB_HOST="$(APP_DB_HOST)" APP_DB_PORT="$(APP_DB_PORT)" \
 		APP_DB_NAME="$(APP_DB_NAME)" APP_DB_USER="$(APP_DB_USER)" APP_DB_PASSWORD="$(APP_DB_PASSWORD)" \
+		AUTH_JWT_SECRET="$(AUTH_JWT_SECRET)" AUTH_JWT_EXPIRES_IN_SECONDS="$(AUTH_JWT_EXPIRES_IN_SECONDS)" \
 		PGPASSWORD="$(POSTGRES_PASSWORD)" bash tests/backend/test_integration.sh
 
 backend-check: backend-build backend-unit-test backend-integration-test

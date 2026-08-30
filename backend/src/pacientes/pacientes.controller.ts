@@ -2,7 +2,9 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { ListarPacientesQuery } from './dto/listar-pacientes.query';
 import { PacienteResponse } from './dto/paciente.response';
 import { PacientesService } from './pacientes.service';
+import { Perfis } from '../auth/perfis.decorator';
 
+@Perfis('consulta', 'edicao', 'administracao')
 @Controller('pacientes')
 export class PacientesController {
   constructor(private readonly pacientes: PacientesService) {}

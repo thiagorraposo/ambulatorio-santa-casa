@@ -1,6 +1,6 @@
 # Workflow de Desenvolvimento
 
-Atualizado em: 2026-08-26
+Atualizado em: 2026-08-30
 
 O CI em `.github/workflows/validacoes.yml` usa credenciais sintéticas descartáveis,
 PostgreSQL 16.15 e executa migrations em banco limpo, manifesto, importador,
@@ -28,6 +28,11 @@ make backend-up
 `backend-db-setup` provisiona somente o login técnico e concede a role sem login;
 não altera schema. O backend nunca aplica migrations. No CI, o banco limpo recebe
 migrations primeiro e só depois executa build, testes unitários e integração.
+
+Na Etapa 4B, `AUTH_JWT_SECRET` e `AUTH_JWT_EXPIRES_IN_SECONDS` são obrigatórios.
+Os testes criam e removem identidades exclusivamente sintéticas pelo owner; isso
+não é provisionamento de produção. `make backend-check` cobre build, unitários,
+autenticação, autorização e integração.
 
 ## Comandos Oficiais
 
