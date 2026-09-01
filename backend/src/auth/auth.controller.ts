@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { AuthenticatedUser } from './auth.types';
 import { CurrentUser } from './current-user.decorator';
 import { LoginDto } from './dto/login.dto';
+import { LoginResponse } from './dto/login.response';
 import { Perfis } from './perfis.decorator';
 import { Public } from './public.decorator';
 
@@ -14,7 +15,9 @@ export class AuthController {
   @Public()
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post('login')
-  login(@Body() input: LoginDto) { return this.auth.login(input.login, input.senha); }
+  login(@Body() input: LoginDto): Promise<LoginResponse> {
+    return this.auth.login(input.login, input.senha);
+  }
 
   @Get('me')
   me(@CurrentUser() user: AuthenticatedUser): AuthenticatedUser { return user; }

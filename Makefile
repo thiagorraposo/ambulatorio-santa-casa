@@ -38,7 +38,7 @@ COMPOSE := docker compose --env-file .env
 	docker-backup docker-backup-list docker-restore docker-restore-check docker-restore-test \
 	manifest-check manifest-source-check importer-fixture importer-run importer-dry-run importer-test \
 	backend-install backend-build backend-unit-test backend-db-setup backend-integration-test \
-	backend-check backend-up backend-logs backend-stop
+	backend-foundation-e2e backend-check backend-up backend-container-check backend-logs backend-stop
 
 help:
 	@echo "Comandos disponíveis:"
@@ -55,7 +55,9 @@ help:
 	@echo "  make importer-test   Executa o fluxo sintético ponta a ponta em banco isolado"
 	@echo "  make backend-install Instala dependências reproduzíveis com npm ci"
 	@echo "  make backend-check   Compila e executa testes unitários e integração"
+	@echo "  make backend-foundation-e2e Executa o cenário integrado da fundação"
 	@echo "  make backend-up      Provisiona login técnico e sobe o backend Docker"
+	@echo "  make backend-container-check Constrói e valida health/usuário do container backend"
 	@echo "  make backend-logs    Acompanha logs do backend"
 	@echo "  make project-check   Executa todos os checks locais não destrutivos"
 	@echo "  make db-schema-dump  Atualiza somente o dump estrutural do schema $(DB_SCHEMA)"
@@ -143,6 +145,7 @@ docs-check:
 		docs/SEGURANCA_DE_DADOS.md \
 		docs/THREAT_MODEL.md \
 		docs/ARQUITETURA_BACKEND.md \
+		docs/VALIDACAO_ETAPA_4C.md \
 		docs/WORKFLOW_DE_DESENVOLVIMENTO.md; do \
 		if [ ! -s "$$file" ]; then \
 			echo "Ausente ou vazio: $$file"; \
@@ -203,11 +206,27 @@ backend-integration-test: backend-db-setup
 		AUTH_JWT_SECRET="$(AUTH_JWT_SECRET)" AUTH_JWT_EXPIRES_IN_SECONDS="$(AUTH_JWT_EXPIRES_IN_SECONDS)" \
 		PGPASSWORD="$(POSTGRES_PASSWORD)" bash tests/backend/test_integration.sh
 
-backend-check: backend-build backend-unit-test backend-integration-test
+backend-foundation-e2e: backend-integration-test
+	@echo "OK: cenário ponta a ponta da fundação aprovado"
+
+backend-check: backend-build backend-unit-test backend-foundation-e2e
 	@echo "OK: backend compilado e testado"
 
 backend-up: backend-db-setup
 	@$(COMPOSE) up -d --build backend
+
+backend-container-check: backend-up
+	@container_id="$$( $(COMPOSE) ps -q backend )"; \
+		test -n "$$container_id" || { echo "Erro: container backend ausente"; exit 1; }; \
+		for tentativa in $$(seq 1 30); do \
+			saude="$$(docker inspect --format '{{.State.Health.Status}}' "$$container_id")"; \
+			[ "$$saude" = healthy ] && break; \
+			[ "$$saude" = unhealthy ] && { echo "Erro: backend unhealthy"; exit 1; }; \
+			sleep 2; \
+		done; \
+		[ "$$(docker inspect --format '{{.State.Health.Status}}' "$$container_id")" = healthy ] || { echo "Erro: timeout no backend"; exit 1; }
+	@test "$$( $(COMPOSE) exec -T backend id -u )" != "0" || { echo "Erro: backend executa como root"; exit 1; }
+	@echo "OK: imagem backend construída, container healthy e usuário não-root"
 
 backend-logs: docker-config-check
 	@$(COMPOSE) logs -f backend

@@ -1,6 +1,6 @@
 # Segurança de Dados
 
-Atualizado em: 2026-08-30
+Atualizado em: 2026-08-31
 
 O threat model técnico vigente está em `docs/THREAT_MODEL.md`; ele não autoriza dados reais.
 
@@ -87,7 +87,7 @@ pg_dump -h localhost -U ambulatorio_user -d ambulatorio_santa_casa --schema=ambu
 - logs são JSON de allowlist, sem nomes, telefones, endereços, conteúdo clínico, valores originais ou mensagens de linha;
 - quality reports contêm apenas hashes, versões, revisão Git e métricas agregadas e devem ser protegidos.
 
-## Backend da Etapa 4A
+## Backend consolidado na Etapa 4C
 
 - o login técnico `NOINHERIT` assume explicitamente `ambulatorio_aplicacao`;
 - a configuração recusa uso de outra role, inclusive o owner;
@@ -95,6 +95,8 @@ pg_dump -h localhost -U ambulatorio_user -d ambulatorio_santa_casa --schema=ambu
 - a consulta mínima expõe somente ID técnico e nome, exclusivamente sintéticos;
 - logs HTTP não incluem query string, body, dados de paciente, senha ou SQL;
 - respostas de erro nunca incluem stack trace ou detalhe PostgreSQL.
+- role e `search_path` são locais à transação; falha de rollback elimina a
+  conexão do pool, impedindo reutilização com contexto residual.
 
 ## Revisão Antes de Commit
 

@@ -12,7 +12,10 @@ import { PerfisGuard } from './perfis.guard';
 @Module({
   imports: [JwtModule.registerAsync({ inject: [ConfigService], useFactory: (config: ConfigService<AppConfig, true>) => ({
     secret: config.get('auth.jwtSecret', { infer: true }),
-    signOptions: { expiresIn: config.get('auth.jwtExpiresInSeconds', { infer: true }) },
+    signOptions: {
+      algorithm: 'HS256',
+      expiresIn: config.get('auth.jwtExpiresInSeconds', { infer: true }),
+    },
   }) })],
   controllers: [AuthController],
   providers: [AuthRepository, AuthService,
@@ -21,4 +24,3 @@ import { PerfisGuard } from './perfis.guard';
   exports: [AuthService],
 })
 export class AuthModule {}
-

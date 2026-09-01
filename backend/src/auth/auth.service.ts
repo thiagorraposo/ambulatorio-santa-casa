@@ -5,6 +5,7 @@ import { compare } from 'bcryptjs';
 import { AppConfig } from '../config/app.config';
 import { AuthRepository } from './auth.repository';
 import { AuthenticatedUser, TokenPayload } from './auth.types';
+import { LoginResponse } from './dto/login.response';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +15,7 @@ export class AuthService {
   constructor(private readonly repository: AuthRepository, private readonly jwt: JwtService,
     private readonly config: ConfigService<AppConfig, true>) {}
 
-  async login(rawLogin: string, senha: string): Promise<{ accessToken: string; tokenType: 'Bearer'; expiresIn: number }> {
+  async login(rawLogin: string, senha: string): Promise<LoginResponse> {
     const login = rawLogin.trim().toLowerCase();
     const user = await this.repository.findByLogin(login);
     const validPassword = await compare(senha, user?.senha_hash ?? this.dummyHash);
@@ -34,4 +35,3 @@ export class AuthService {
     return user ? { usuarioId: user.usuario_id, nome: user.nome, perfil: user.perfil } : undefined;
   }
 }
-

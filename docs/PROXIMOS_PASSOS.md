@@ -1,6 +1,6 @@
 # Próximos Passos
 
-Atualizado em: 2026-08-30
+Atualizado em: 2026-08-31
 
 ## Escopo confirmado do MVP
 
@@ -65,12 +65,14 @@ resolver todos os bloqueios institucionais para dados reais.
 - aba operacional e fluxo AIM3;
 - API e frontend além do mínimo necessário à operação segura do servidor.
 
-## 6. Etapa 4C
+## 6. Etapa 4C concluída
 
-Com a fundação técnica e a identidade/autorização mínimas validadas somente com
-dados sintéticos, a próxima etapa pode consolidar a arquitetura e revisar a
-integração. Antes de dados reais permanecem todos os bloqueios da seção 3, além
-de TLS, rotação de secrets, revogação individual e rate limit distribuído.
+A arquitetura, identidade, autorização, pool, menor privilégio, contratos, logs,
+erros, Docker e CI foram consolidados. A Etapa 5 pode iniciar somente com dados
+sintéticos e sem converter pendências institucionais em funcionalidades
+prematuras. Antes do primeiro módulo clínico, definir sua matriz de operações e
+retomar autorização por recurso/linha. Antes de dados reais permanecem todos os
+bloqueios da seção 3, TLS, rotação institucional e rate limit distribuído.
 
 ## Validação padrão
 

@@ -1,6 +1,6 @@
 # Workflow de Desenvolvimento
 
-Atualizado em: 2026-08-30
+Atualizado em: 2026-08-31
 
 O CI em `.github/workflows/validacoes.yml` usa credenciais sintéticas descartáveis,
 PostgreSQL 16.15 e executa migrations em banco limpo, manifesto, importador,
@@ -17,11 +17,13 @@ antigas não podem ser reaplicadas; use
 O preflight pelo mesmo pipeline, sempre revertido, é executado com
 `make importer-dry-run IMPORT_FILE=...`.
 
-## Backend Etapa 4A
+## Backend — fundação consolidada na Etapa 4C
 
 ```bash
 make backend-install
 make backend-check
+make backend-foundation-e2e
+make backend-container-check
 make backend-up
 ```
 
@@ -32,7 +34,8 @@ migrations primeiro e só depois executa build, testes unitários e integração
 Na Etapa 4B, `AUTH_JWT_SECRET` e `AUTH_JWT_EXPIRES_IN_SECONDS` são obrigatórios.
 Os testes criam e removem identidades exclusivamente sintéticas pelo owner; isso
 não é provisionamento de produção. `make backend-check` cobre build, unitários,
-autenticação, autorização e integração.
+autenticação, autorização, isolamento do pool e integração. A matriz e as
+pendências deliberadas estão em `docs/VALIDACAO_ETAPA_4C.md`.
 
 ## Comandos Oficiais
 
@@ -47,7 +50,7 @@ Use os alvos do `Makefile` como interface local padrão:
 | `make db-schema-dump` | Atualizar a evidência estrutural após mudança física aplicada e autorizada. |
 | `make docker-up` / `docker-stop` | Subir ou parar o PostgreSQL Docker sem remover o volume. |
 | `make docker-status` / `docker-logs` | Inspecionar health, status e logs. |
-| `make docker-migrate` | Reconstruir um banco Docker vazio pelas migrations `00`–`16`. |
+| `make docker-migrate` | Reconstruir um banco Docker vazio pelas migrations versionadas. |
 | `make docker-db-check` / `docker-db-test` | Validar conexão e testes no Docker. |
 | `make docker-schema-dump` | Gerar evidência Docker temporária em `/tmp`. |
 | `make docker-recreate` | Recriar o container preservando o volume nomeado. |
@@ -57,6 +60,8 @@ Use os alvos do `Makefile` como interface local padrão:
 | `make docker-destroy DESTROY_ENV=docker` | Remover explicitamente apenas o ambiente e os volumes Docker deste projeto. |
 | `make importer-fixture` | Gerar a fixture XLSX sintética versionada. |
 | `make importer-test` | Executar o E2E em banco Docker temporário e descartável. |
+| `make backend-foundation-e2e` | Executar o cenário integrado da fundação NestJS/PostgreSQL. |
+| `make backend-container-check` | Construir e validar health e usuário não-root da imagem backend. |
 | `make importer-run IMPORT_FILE=...` | Importar um arquivo sintético no Docker selecionado. |
 
 O ambiente padrão é `DB_ENV=docker`, com `.env` ignorado pelo Git e porta 5433.

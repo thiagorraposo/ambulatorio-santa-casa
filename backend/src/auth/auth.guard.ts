@@ -19,7 +19,9 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Autenticação necessária');
     }
     try {
-      const payload = await this.jwt.verifyAsync<TokenPayload>(authorization.slice(7));
+      const payload = await this.jwt.verifyAsync<TokenPayload>(authorization.slice(7), {
+        algorithms: ['HS256'],
+      });
       const user = await this.auth.resolveIdentity(payload);
       if (!user) throw new Error('invalid identity');
       request.user = user;
@@ -29,4 +31,3 @@ export class AuthGuard implements CanActivate {
     }
   }
 }
-

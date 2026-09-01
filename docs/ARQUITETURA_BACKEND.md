@@ -1,105 +1,106 @@
-# Arquitetura do Backend — Etapas 4A e 4B
+# Arquitetura do Backend — Fundação consolidada na Etapa 4C
 
-Atualizado em: 2026-08-30
+Atualizado em: 2026-08-31
 
-Status: fundação e identidade mínima implementadas somente para dados sintéticos.
-A consolidação integrada pertence à Etapa 4C.
+Status: fundação pronta para os módulos clínicos da Etapa 5, ainda exclusivamente
+com dados sintéticos. Evidências: `docs/VALIDACAO_ETAPA_4C.md`.
 
-## Escopo
+## Escopo e fluxo
 
-O backend é um monólito modular NestJS/TypeScript com módulos `health`,
-`pacientes` e `auth`. Não há escrita clínica, gestão de usuários, importação via
-API ou frontend.
-
-## Identidade, autenticação e autorização — Etapa 4B
-
-`usuario_aplicacao` é independente de roles PostgreSQL e do responsável legado
-da planilha. Possui nome, login normalizado, hash bcrypt, perfil, estado ativo e
-timestamps. Não existe cadastro público nem provisionamento de produção.
-
-`POST /auth/login` não enumera contas e emite JWT Bearer HS256 com expiração entre
-60 segundos e 24 horas. O secret sem padrão vem de `AUTH_JWT_SECRET`. O token não
-é persistido. A cada requisição protegida, o guard valida assinatura/expiração e
-relê usuário ativo e perfil; inativação e troca de perfil têm efeito imediato.
-Revogação individual antes da expiração será reavaliada na Etapa 4C.
-
-Guards globais implementam negação por padrão. Somente `@Public` abre uma rota e
-`@Perfis` concede acesso funcional explícito. Perfis: `consulta`, `edicao` e
-`administracao`. Falha de autenticação retorna 401; perfil insuficiente, 403.
-
-Públicos: `GET /health` e `POST /auth/login`. Protegidos: `GET /auth/me`,
-`GET /pacientes` e `GET /auth/authorization-check`, a prova mínima restrita a
-edição/administração. `/auth/me` retorna somente `usuarioId`, `nome` e `perfil`.
-
-O login é limitado em memória a dez tentativas por minuto e IP. O controle é por
-instância; coordenação distribuída e configuração de proxy pertencem ao futuro.
-
-## Fluxo
+O backend é um monólito modular NestJS/TypeScript com módulos `health`, `auth` e
+`pacientes`. Não há escrita clínica, gestão de usuários, importação via API ou frontend.
 
 ```text
-HTTP -> controller -> service -> repository -> DatabaseService -> PostgreSQL
+HTTP -> autenticação -> autorização -> controller -> service -> repository
+     -> DatabaseService -> ambulatorio_aplicacao -> PostgreSQL
 ```
 
-Controllers tratam o contrato HTTP; services fazem orquestração; repositories
-contêm SQL; DTOs limitam entrada e saída; `common` contém somente infraestrutura
-já compartilhada. Não foram criadas abstrações antecipatórias vazias.
+Controllers limitam-se ao contrato HTTP; services coordenam comportamento;
+repositories contêm SQL parametrizado; DTOs separam entrada/saída do modelo
+físico. `common` contém somente banco e infraestrutura HTTP compartilhados. Não
+há dependências circulares nem abstrações antecipatórias.
 
-## Persistência
+## Autenticação e autorização
 
-Foi escolhido o driver `pg` com SQL explícito e parâmetros posicionais. O schema
-já possui migrations SQL como fonte de verdade; um ORM com sincronização ou
-geração paralela de schema adicionaria uma segunda autoridade sem benefício nesta
-fundação. O repository mantém o SQL isolado, tipado e testável. A API não contém
-executor de migrations, `synchronize`, DDL de bootstrap nem ferramenta de schema.
+`usuario_aplicacao` é independente de roles PostgreSQL e do responsável legado.
+Senhas persistem somente como bcrypt. `POST /auth/login` usa resposta uniforme e
+emite JWT Bearer HS256; algoritmo, expiração e secret externo são obrigatórios.
+A cada requisição protegida, assinatura/expiração são validadas e usuário ativo e
+perfil são relidos, dando efeito imediato à inativação e troca de perfil.
 
-Cada operação adquire uma conexão do pool, executa `SET ROLE
-ambulatorio_aplicacao`, fixa `search_path` e só então consulta. A configuração
-recusa qualquer outro `APP_DB_ROLE`. O login técnico é `NOINHERIT`, sem ownership,
-e recebe apenas associação à role sem login por
-`scripts/configurar_login_aplicacao.sql`. Esse script é uma operação local de
-provisionamento de role, não uma migration do schema.
+Não há revogação individual nem refresh token. A duração padrão é 900 segundos e
+o máximo aceito é 24 horas. O risco residual é uso de token roubado até expirar;
+revogação entra quando houver requisito de encerrar sessão específica antes disso.
+
+Guards globais separam autenticação de autorização: somente `@Public` abre rota;
+`@Perfis` concede operação a `consulta`, `edicao` ou `administracao`. Credencial
+ausente, inválida ou expirada produz 401; perfil insuficiente, 403. A matriz está
+em `docs/VALIDACAO_ETAPA_4C.md`.
+
+RBAC controla operações, não registros individuais. Sem regra institucional, a
+autorização por paciente/atendimento volta na Etapa 5 antes de endpoints clínicos
+e obrigatoriamente antes de dados reais.
+
+O login limita dez tentativas por IP em 60 segundos e então retorna 429. O
+contador é por processo. Coordenação distribuída e proxy/IP confiável pertencem
+à implantação futura com múltiplas instâncias.
+
+## Persistência e menor privilégio
+
+O driver `pg` usa SQL explícito e parâmetros posicionais. Migrations ficam fora
+da API; não há ORM sincronizando schema, DDL de bootstrap ou migration no startup.
+
+Cada operação abre transação, executa `SET LOCAL ROLE ambulatorio_aplicacao` e
+`SET LOCAL search_path`, e encerra com `COMMIT` ou `ROLLBACK`. Estado local não
+sobrevive à transação; falha de rollback destrói a conexão. `APP_DB_ROLE` recusa
+outra role. O login técnico é `NOINHERIT`, sem ownership, DDL ou capacidade de
+assumir owner/importador. Perfil funcional não altera a role efetiva.
+
+`ambulatorio_aplicacao` não acessa `importacao_lote`, `importacao_linha` ou
+`importacao_registro`, inclusive `dados_brutos`. O bloqueio está no PostgreSQL.
+O importador não acessa `usuario_aplicacao`.
 
 ## Contratos HTTP
 
-- `GET /health`: retorna `{ "status": "ok", "database": "up" }` somente após
-  consulta real ao PostgreSQL; indisponibilidade retorna HTTP 503 sanitizado.
-- `GET /pacientes?limit=20`: aceita limite inteiro entre 1 e 100 e retorna array
-  de `{ "pacienteId": "...", "nome": "..." }`. Não expõe código de planilha,
-  nascimento, contato, endereço, campos clínicos ou proveniência.
+- `GET /health`: público; retorna `{ "status": "ok", "database": "up" }` após
+  consulta real; banco indisponível retorna 503 sanitizado.
+- `POST /auth/login`: público; aceita somente `{ "login", "senha" }`; sucesso
+  201 retorna `{ "accessToken", "tokenType": "Bearer", "expiresIn" }`.
+- `GET /auth/me`: Bearer obrigatório; retorna somente `usuarioId`, `nome` e `perfil`.
+- `GET /pacientes?limit=20`: limite inteiro 1–100; retorna somente `pacienteId` e
+  `nome`. É prova read-only, não futuro CRUD.
+- `GET /auth/authorization-check`: prova técnica para `edicao` e `administracao`.
 
-O endpoint de pacientes é uma prova read-only e não define o futuro CRUD.
+Entrada inválida retorna 400. O filtro padroniza `statusCode`, `error` e
+`message`, sem stack, SQL, credenciais ou detalhes do schema. DTOs de saída
+impedem exposição automática de novas colunas físicas.
 
-## Configuração
+## Logs e configuração
 
-Variáveis obrigatórias: `NODE_ENV`, `API_PORT`, `APP_DB_HOST`, `APP_DB_PORT`,
-`APP_DB_NAME`, `APP_DB_USER`, `APP_DB_PASSWORD`, `APP_DB_ROLE`,
-`AUTH_JWT_SECRET` e `AUTH_JWT_EXPIRES_IN_SECONDS`. Segredos ficam
-somente no ambiente. Ausência, porta inválida, ambiente desconhecido ou role
-diferente de `ambulatorio_aplicacao` impedem a inicialização.
+`NODE_ENV`, `API_PORT`, `APP_DB_*`, `APP_DB_ROLE`, `AUTH_JWT_SECRET` e
+`AUTH_JWT_EXPIRES_IN_SECONDS` são obrigatórios; valor ausente/inseguro impede o
+startup. Segredos existem somente no ambiente.
 
-## Erros, validação e logs
+Logs usam allowlist técnica. Não registram body, login completo, senha, hash,
+JWT, Authorization, secret, connection string, SQL/valores, nome de paciente,
+telefone, endereço, conteúdo clínico ou JSONB bruto. Erros internos registram
+somente tipo sanitizado.
 
-`ValidationPipe` transforma e valida DTOs, usa allowlist e rejeita propriedades
-desconhecidas. O filtro global retorna `statusCode`, `error` e `message`; erros
-internos viram 503 genérico e nunca retornam SQL, stack ou credenciais.
+## Docker, healthcheck e futuro React
 
-O middleware registra JSON com evento, método, caminho sem query, status, tempo
-e, se autenticado, ID técnico e perfil. Login registra falha agregada ou sucesso
-com ID técnico. Senha, hash, token, Authorization e body não são registrados.
-Erros registram somente tipo sanitizado. Bodies, nomes, telefones, endereços,
-conteúdo clínico, JSONB, senha e connection string não são registrados.
+O backend depende somente do health do PostgreSQL, não executa migrations nem
+interfere no importador. A imagem roda como `node`, portas ficam em loopback e
+segredos são externos. `/health` funciona como prontidão de processo+banco; uma
+liveness separada só será criada se um orquestrador exigir outra semântica.
 
-## Docker e operação
-
-O serviço `backend` depende apenas do health do PostgreSQL. Antes de subi-lo, o
-operador executa `make backend-db-setup`; migrations continuam responsabilidade
-explícita do workflow do banco. `make backend-up` provisiona o login técnico e
-constrói/sobe a imagem. O container final roda como usuário `node` não-root.
+O futuro React deverá enviar `Authorization: Bearer <JWT>`, obter token no login
+e reler identidade em `/auth/me`. O backend não decide armazenamento do token,
+navegação ou estado da interface. CORS está desabilitado; uma origem distinta
+exigirá allowlist explícita por ambiente.
 
 ## Testes
 
-Testes unitários cobrem configuração, inicialização, autenticação, respostas
-uniformes, logging e sanitização. A integração cria paciente e usuários somente
-sintéticos, valida login, expiração, inativação, `/auth/me`, 401/403, perfis e
-rate limit contra PostgreSQL real. Também comprova a role efetiva e os bloqueios
-de DDL/proveniência; fixtures são removidas ao final pelo owner de teste.
+`make backend-foundation-e2e` cria/remove fixtures sintéticas e comprova fluxo
+HTTP–PostgreSQL, autenticação/RBAC, rate limit e menor privilégio. Unitários
+cobrem contratos, configuração, logs, erros e limpeza segura do pool. Testes SQL
+preservam as garantias das Etapas 1–4B.

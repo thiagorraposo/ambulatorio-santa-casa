@@ -1,6 +1,6 @@
 # Decisões Arquiteturais
 
-Atualizado em: 2026-08-30
+Atualizado em: 2026-08-31
 
 Este documento registra decisões duradouras do projeto. Mudanças cronológicas continuam em `docs/REGISTRO_DE_ALTERACOES.md`.
 
@@ -436,9 +436,33 @@ com negação por padrão e exceções públicas explícitas.
 
 Consequências: inativação e mudança de perfil são imediatas, e o backend pode ser
 consumido pelo futuro React sem impor armazenamento no navegador. Revogação
-individual antes da expiração, TLS e rate limit distribuído permanecem pendentes.
+individual fica adiada até existir encerramento antecipado de sessão como
+requisito; TLS e rate limit distribuído pertencem à implantação futura.
 
 Alternativas rejeitadas: sessão persistida prematuramente; mecanismo criptográfico
 próprio; perfil ligado a role PostgreSQL; autenticação opt-in por controller.
 
 Documento relacionado: `docs/ARQUITETURA_BACKEND.md`.
+
+## ADR-019
+
+ID: ADR-019
+
+Título: Isolamento transacional do contexto PostgreSQL da aplicação
+
+Data: 2026-08-31
+
+Status: Aceita e implementada na Etapa 4C
+
+Decisão: executar cada operação de repository em transação com `SET LOCAL ROLE
+ambulatorio_aplicacao` e `SET LOCAL search_path`; finalizar por `COMMIT` ou
+`ROLLBACK` e destruir a conexão se a limpeza falhar.
+
+Consequências: role e `search_path` não permanecem na sessão devolvida ao pool;
+falhas de consulta não permitem reutilizar conexão em estado transacional
+incerto. A API continua sem ownership, DDL, proveniência ou elevação.
+
+Alternativas rejeitadas: confiar apenas em `RESET ROLE` no `finally`, que não
+limpa todo estado de sessão e poderia devolver conexão após falha de limpeza.
+
+Documento relacionado: `docs/VALIDACAO_ETAPA_4C.md`.

@@ -17,7 +17,7 @@ cleanup
 createdb -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" "$test_db"
 psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 \
   -c "ALTER DATABASE $test_db SET search_path TO ambulatorio, public"
-for migration in sql/[0-1][0-9]_*.sql; do
+for migration in sql/[0-9][0-9]_*.sql; do
   psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 -f "$migration"
 done
 

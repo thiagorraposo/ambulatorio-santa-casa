@@ -12,6 +12,7 @@ describe('Backend com PostgreSQL real', () => {
   let jwt: JwtService;
   let consultaToken: string;
   let edicaoToken: string;
+  let administracaoToken: string;
 
   const login = (loginValue: string, senha: string) => request(app.getHttpServer())
     .post('/auth/login').send({ login: loginValue, senha });
@@ -50,6 +51,9 @@ describe('Backend com PostgreSQL real', () => {
 
   it('diferencia entrada inválida de falha de autenticação sem enumerar conta', async () => {
     await login('x', 'curta').expect(400);
+    await request(app.getHttpServer()).post('/auth/login')
+      .send({ login: 'valido@example.invalid', senha: 'SenhaSintetica123!', extra: 'proibido' })
+      .expect(400);
     const wrong = await login(process.env.TEST_LOGIN_CONSULTA!, 'SenhaIncorreta123!').expect(401);
     const missing = await login('ausente@example.invalid', 'SenhaIncorreta123!').expect(401);
     const inactive = await login(process.env.TEST_LOGIN_INATIVO!, 'SenhaInativa123!').expect(401);
@@ -63,6 +67,9 @@ describe('Backend com PostgreSQL real', () => {
     await request(app.getHttpServer()).get('/pacientes').set('Authorization', 'Bearer invalido').expect(401);
     const expired = await jwt.signAsync({ sub: '1', typ: 'access' }, { expiresIn: -1 });
     await request(app.getHttpServer()).get('/pacientes').set('Authorization', `Bearer ${expired}`).expect(401);
+    const wrongAlgorithm = await jwt.signAsync({ sub: '1', typ: 'access' }, { algorithm: 'HS384' });
+    await request(app.getHttpServer()).get('/pacientes')
+      .set('Authorization', `Bearer ${wrongAlgorithm}`).expect(401);
   });
 
   it('/auth/me expõe somente identidade autorizada e bloqueia usuário inativado', async () => {
@@ -86,6 +93,11 @@ describe('Backend com PostgreSQL real', () => {
     await request(app.getHttpServer()).get('/auth/authorization-check')
       .set('Authorization', `Bearer ${edicaoToken}`).expect(200)
       .expect({ authorized: true, perfil: 'edicao' });
+    const adminAuth = await login(process.env.TEST_LOGIN_ADMINISTRACAO!, 'SenhaAdministracao123!').expect(201);
+    administracaoToken = adminAuth.body.accessToken;
+    await request(app.getHttpServer()).get('/auth/authorization-check')
+      .set('Authorization', `Bearer ${administracaoToken}`).expect(200)
+      .expect({ authorized: true, perfil: 'administracao' });
   });
 
   it('limita tentativas excessivas de login sem depender de Redis', async () => {
@@ -97,8 +109,26 @@ describe('Backend com PostgreSQL real', () => {
     expect(limited).toBe(true);
   });
 
-  it('bloqueia DDL e acesso à proveniência bruta', async () => {
+  it('mantém perfil funcional separado da role PostgreSQL e bloqueia escalação, DDL e proveniência', async () => {
+    await request(app.getHttpServer()).get('/pacientes')
+      .set('Authorization', `Bearer ${administracaoToken}`).expect(200);
+    const boundaries = await database.query<{
+      current_user: string; session_user: string; owns_objects: boolean; can_create_schema: boolean;
+      can_set_importer: boolean; can_set_owner: boolean;
+    }>(`SELECT current_user, session_user,
+      EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+        WHERE n.nspname='ambulatorio' AND pg_get_userbyid(c.relowner)=current_user) AS owns_objects,
+      has_schema_privilege(current_user, 'ambulatorio', 'CREATE') AS can_create_schema,
+      pg_has_role(current_user, 'ambulatorio_importador', 'SET') AS can_set_importer,
+      pg_has_role(current_user, 'ambulatorio_user', 'SET') AS can_set_owner`);
+    expect(boundaries.rows[0]).toMatchObject({
+      current_user: 'ambulatorio_aplicacao', session_user: process.env.APP_DB_USER,
+      owns_objects: false, can_create_schema: false,
+      can_set_importer: false, can_set_owner: false,
+    });
     await expect(database.query('CREATE TABLE bloqueio_backend_teste (id integer)')).rejects.toMatchObject({ code: '42501' });
-    await expect(database.query('SELECT dados_brutos FROM importacao_linha LIMIT 1')).rejects.toMatchObject({ code: '42501' });
+    for (const relation of ['importacao_lote', 'importacao_linha', 'importacao_registro']) {
+      await expect(database.query(`SELECT 1 FROM ${relation} LIMIT 1`)).rejects.toMatchObject({ code: '42501' });
+    }
   });
 });

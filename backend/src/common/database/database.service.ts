@@ -25,16 +25,25 @@ export class DatabaseService implements OnModuleDestroy {
 
   async query<T extends QueryResultRow>(text: string, values: readonly unknown[] = []): Promise<QueryResult<T>> {
     const client = await this.pool.connect();
+    let discardConnection: Error | undefined;
     try {
-      await client.query(`SET ROLE ${this.role}`);
-      await client.query('SET search_path TO ambulatorio, public');
-      return await client.query<T>(text, [...values]);
-    } finally {
+      await client.query('BEGIN');
+      await client.query(`SET LOCAL ROLE ${this.role}`);
+      await client.query('SET LOCAL search_path TO ambulatorio, public');
+      const result = await client.query<T>(text, [...values]);
+      await client.query('COMMIT');
+      return result;
+    } catch (error) {
       try {
-        await client.query('RESET ROLE');
-      } finally {
-        client.release();
+        await client.query('ROLLBACK');
+      } catch (cleanupError) {
+        discardConnection = cleanupError instanceof Error
+          ? cleanupError
+          : new Error('Falha ao limpar conexão PostgreSQL');
       }
+      throw error;
+    } finally {
+      client.release(discardConnection);
     }
   }
 

@@ -14,8 +14,24 @@ BEGIN
     IF has_schema_privilege('ambulatorio_importador','ambulatorio','CREATE') THEN
         RAISE EXCEPTION 'importador pode criar objetos no schema';
     END IF;
-    IF has_table_privilege('ambulatorio_aplicacao','ambulatorio.importacao_linha','SELECT') THEN
-        RAISE EXCEPTION 'aplicacao pode ler conteudo bruto da importacao';
+    IF has_table_privilege('ambulatorio_aplicacao','ambulatorio.importacao_lote','SELECT')
+       OR has_table_privilege('ambulatorio_aplicacao','ambulatorio.importacao_linha','SELECT')
+       OR has_table_privilege('ambulatorio_aplicacao','ambulatorio.importacao_registro','SELECT') THEN
+        RAISE EXCEPTION 'aplicacao pode ler estruturas internas de proveniencia';
+    END IF;
+    IF has_schema_privilege('ambulatorio_aplicacao','ambulatorio','CREATE') THEN
+        RAISE EXCEPTION 'aplicacao pode criar objetos no schema';
+    END IF;
+    IF EXISTS (
+        SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE n.nspname = 'ambulatorio'
+          AND pg_get_userbyid(c.relowner) = 'ambulatorio_aplicacao'
+    ) THEN
+        RAISE EXCEPTION 'aplicacao possui objetos no schema';
+    END IF;
+    IF pg_has_role('ambulatorio_aplicacao','ambulatorio_importador','SET')
+       OR pg_has_role('ambulatorio_aplicacao',current_user,'SET') THEN
+        RAISE EXCEPTION 'aplicacao pode elevar privilegios para importador ou owner';
     END IF;
     IF has_table_privilege('ambulatorio_importador','ambulatorio.paciente','DELETE') THEN
         RAISE EXCEPTION 'importador pode excluir paciente';
@@ -24,7 +40,7 @@ BEGIN
        OR NOT has_table_privilege('ambulatorio_importador','ambulatorio.paciente','UPDATE') THEN
         RAISE EXCEPTION 'importador sem DML necessario';
     END IF;
-    RAISE NOTICE 'OK: roles sem login, sem ownership/DDL/delete validadas';
+    RAISE NOTICE 'OK: roles sem login, sem ownership/DDL/delete/escalacao e proveniencia isolada validadas';
 END
 $$;
 

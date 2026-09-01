@@ -1,6 +1,6 @@
 # Registro de Alterações
 
-Atualizado em: 2026-08-25
+Atualizado em: 2026-08-31
 
 ## Como Registrar Mudanças
 
@@ -25,6 +25,16 @@ Além deste arquivo, atualize quando necessário:
 - `docs/HISTORICO_DE_IMPLEMENTACAO.md`
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
+
+## 2026-08-31 - Consolidação da fundação do backend — Etapa 4C
+
+Revisados integralmente arquitetura NestJS, contratos HTTP, JWT/RBAC, pool,
+roles PostgreSQL, proveniência, logs, erros, Docker, testes e CI. Fixados HS256 e
+o contexto PostgreSQL transacional com descarte de conexão em falha de limpeza;
+ampliadas as provas sintéticas dos três perfis, menor privilégio, ausência de
+elevação/ownership e bloqueio das três tabelas de proveniência. Versionadas a
+matriz de permissões e as decisões adiadas. Nenhuma migration, CRUD clínico,
+frontend, dado real, commit ou push foi criado.
 
 ## 2026-08-25 - Conclusão do importador sintético v1 do MVP
 

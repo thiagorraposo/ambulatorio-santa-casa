@@ -1,6 +1,6 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-08-30
+Atualizado em: 2026-08-31
 
 ## Objetivo Geral
 
@@ -78,6 +78,11 @@ mínima. Não há frontend nem autorização para dados reais.
   usuário ativo, perfis, guards globais, login, `/auth/me`, prova mínima de
   autorização, rate limit e logging seguro. Não existe endpoint clínico de
   escrita, gestão de usuários, frontend ou provisionamento de produção.
+- A Etapa 4C consolidou contratos HTTP, algoritmo JWT explícito, matriz RBAC,
+  isolamento transacional de role/search path no pool, descarte em falha de
+  limpeza, menor privilégio/proveniência e cenário ponta a ponta da fundação.
+  A Etapa 4 está encerrada e a fundação aceita módulos clínicos sintéticos da
+  Etapa 5; dados reais continuam proibidos.
 - Existe ambiente PostgreSQL Docker opcional e isolado, com imagem
   `postgres:16.15`, porta `127.0.0.1:5433`, healthcheck e volume persistente
   nomeado. O PostgreSQL local em 5432 permanece o padrão oficial.
@@ -222,8 +227,8 @@ Resumo da reconciliação:
 - Ampliar a API além dos endpoints técnicos read-only da Etapa 4A.
 - Frontend React.
 - Regras de negócio de cadastro, atendimento, diagnóstico e acompanhamento.
-- Consolidar arquitetura e suíte integrada na Etapa 4C; os dez testes SQL e os
-  testes atuais do backend continuam como baseline.
+- Implementar módulos clínicos da Etapa 5 somente após definição de seus
+  contratos e da autorização por recurso aplicável.
 - Rotinas adicionais de teste para futuras fases incrementais do modelo físico.
 - Estratégia de deploy e observabilidade; backup/restauração Docker de
   desenvolvimento já foi validado, sem constituir política de produção.

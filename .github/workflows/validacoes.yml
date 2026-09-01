@@ -42,6 +42,8 @@ jobs:
         run: make docker-migrate
       - name: Instalar e validar backend
         run: make backend-install backend-check
+      - name: Validar imagem e container backend
+        run: make backend-container-check
       - name: Validar manifesto, importador e projeto
         run: make manifest-check importer-test docker-project-check
       - name: Verificar whitespace do diff

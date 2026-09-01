@@ -1,6 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { hash } from 'bcryptjs';
 import { AuthService } from '../../src/auth/auth.service';
 import { AuthRepository } from '../../src/auth/auth.repository';
@@ -33,5 +34,23 @@ describe('AuthService', () => {
     repository.findByLogin.mockResolvedValue(user);
     await expect(service.login('alguem@example.invalid', 'senha-errada'))
       .rejects.toEqual(new UnauthorizedException('Credenciais inválidas'));
+  });
+
+  it('não registra login, senha, hash ou token em sucesso e falha', async () => {
+    const log = jest.spyOn(Logger.prototype, 'log').mockImplementation();
+    const warn = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+    repository.findByLogin.mockResolvedValueOnce({ usuario_id: '7', nome: 'Sintetico',
+      login: 'sigiloso@example.invalid', senha_hash: await hash('SenhaSintetica123!', 4),
+      perfil: 'consulta', ativo: true });
+    await service.login('sigiloso@example.invalid', 'SenhaSintetica123!');
+    repository.findByLogin.mockResolvedValueOnce(undefined);
+    await expect(service.login('ausente@example.invalid', 'SenhaIncorreta123!')).rejects.toBeInstanceOf(UnauthorizedException);
+
+    const serialized = [...log.mock.calls, ...warn.mock.calls]
+      .map(([message]) => String(message)).join('\n');
+    expect(serialized).toContain('"userId":"7"');
+    expect(serialized).not.toMatch(/sigiloso|ausente|Senha|senha_hash|token-sintetico/);
+    log.mockRestore();
+    warn.mockRestore();
   });
 });

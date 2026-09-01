@@ -1,6 +1,6 @@
 # Threat Model Pré-Dados Reais
 
-Atualizado em: 2026-08-30
+Atualizado em: 2026-08-31
 
 ## Escopo e premissas
 
@@ -42,8 +42,9 @@ manifesto e fixture sintética e cria credenciais descartáveis não institucion
 | SQL malformado por conteúdo de origem | alteração/injeção | literais escapados pelo adaptador, domínios fechados e role sem DDL/DELETE | migrar futuramente para driver parametrizado é recomendável antes de produção |
 | Perda ou alteração de proveniência | auditoria incompleta | FKs `RESTRICT`, vínculos N:N, raw posicional e ausência de DELETE na role importadora | auditoria de acesso e detector de alvo polimórfico órfão pendentes |
 | Força bruta ou enumeração no login | comprometimento de conta | resposta uniforme, bcrypt inclusive para conta ausente e limite por IP/instância | contador distribuído, proxy confiável e bloqueio adaptativo pendentes |
-| Roubo ou reutilização de token | acesso até expiração | JWT curto, secret externo, token fora dos logs e usuário ativo relido | TLS, armazenamento frontend e revogação individual pendentes |
+| Roubo ou reutilização de token | acesso até expiração | JWT HS256 curto, secret externo, token fora dos logs e usuário ativo relido | TLS e armazenamento frontend pendentes; revogação individual somente quando houver requisito de encerrar sessão específica |
 | Escalada por perfil | acesso indevido | guards globais, negação por padrão, perfis explícitos e 401/403 separados | autorização por recurso/linha e auditoria institucional pendentes |
+| Estado privilegiado residual no pool | consulta posterior com contexto indevido | transação por operação, `SET LOCAL ROLE/search_path`, rollback e descarte se a limpeza falhar | revisar se futuras operações multiquery exigirem unidade transacional maior |
 
 ## Decisões de risco
 
@@ -63,4 +64,4 @@ validação de entrada, SQL parametrizado, DTO reduzido, erro sanitizado, loggin
 body e role sem DDL/proveniência. A 4B adicionou identidade independente, bcrypt,
 JWT expirável, validação ativa por requisição, autorização global por perfil e
 limitação básica do login. TLS, rotação institucional de secrets, revogação
-individual e rate limit distribuído permanecem fora do ambiente sintético.
+individual sem caso concreto e rate limit distribuído permanecem fora do ambiente sintético.
