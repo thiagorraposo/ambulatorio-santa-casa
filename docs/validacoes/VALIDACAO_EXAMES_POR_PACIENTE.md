@@ -11,7 +11,7 @@ composta criada por `sql/14_exames_por_paciente.sql`.
 ## Cobertura
 
 O teste cobre os 22 cenários aprovados em
-`docs/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`: paciente obrigatório,
+`docs/arquitetura/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`: paciente obrigatório,
 atendimento opcional e consistente, multiplicidade, blocos independentes, tipos
 catalogados e livres, textos originais, nulabilidade, FKs, regras `ON DELETE`,
 timestamps, catálogo físico, convivência legada, proveniência, ausência de

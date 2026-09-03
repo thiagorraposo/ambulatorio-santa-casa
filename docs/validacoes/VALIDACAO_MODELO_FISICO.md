@@ -1,5 +1,10 @@
 # Validação do Modelo Físico
 
+> Documento histórico. Registra a validação do núcleo de 25 tabelas em
+> 2026-07-01 e não representa o schema vigente. Consulte
+> [`../MODELO_FISICO_ATUAL.md`](../MODELO_FISICO_ATUAL.md) e
+> [`../evidencias/schema_atual_ambulatorio.sql`](../evidencias/schema_atual_ambulatorio.sql).
+
 Data da validação: 2026-07-01
 
 ## Fonte de Evidência
@@ -20,7 +25,7 @@ Fontes reconciliadas:
 - Scripts SQL em `sql/00_criar_banco.sql` a `sql/09_tabelas_medicamentos_tratamentos.sql`.
 - `docs/MODELO_FISICO_ATUAL.md`.
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`.
-- `docs/HISTORICO_DE_IMPLEMENTACAO.md`.
+- `docs/historico/HISTORICO_DE_IMPLEMENTACAO.md`.
 - `docs/PROXIMOS_PASSOS.md`.
 - `docs/REGISTRO_DE_ALTERACOES.md`.
 
@@ -283,7 +288,7 @@ Resumo:
 - A não cobertura integral da planilha original nesta fase é decisão arquitetural de implementação incremental, não divergência crítica.
 - Migrations que parecem já aplicadas: `sql/01_criar_schema.sql` a `sql/09_tabelas_medicamentos_tratamentos.sql`, considerando schema, tabelas, PKs, FKs, `UNIQUE`, `CHECK` e índices presentes no dump.
 - `sql/00_criar_banco.sql` cria role e banco, mas o dump de schema não evidencia role, owner ou criação do database; isso é esperado para o tipo de evidência analisada.
-- Modelo lógico/dicionário anterior: `docs/dicionario-dados.md` e `docs/decisoes-modelagem.md` estão vazios, portanto não há comparação lógica detalhada no repositório.
+- Modelo lógico/dicionário anterior: `docs/historico/dicionario-dados.md` e `docs/historico/decisoes-modelagem.md` estão vazios, portanto não há comparação lógica detalhada no repositório.
 - O dump confirma sequências e defaults equivalentes ao uso de `BIGSERIAL` nas migrations.
 - O dump analisado não mostra dados de catálogo via `COPY` ou `INSERT`; a validação aqui é estrutural, não de carga de dados.
 

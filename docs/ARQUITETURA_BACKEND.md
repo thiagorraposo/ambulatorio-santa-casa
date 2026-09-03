@@ -3,7 +3,7 @@
 Atualizado em: 2026-08-31
 
 Status: fundação pronta para os módulos clínicos da Etapa 5, ainda exclusivamente
-com dados sintéticos. Evidências: `docs/VALIDACAO_ETAPA_4C.md`.
+com dados sintéticos. Evidências: `docs/validacoes/VALIDACAO_ETAPA_4C.md`.
 
 ## Escopo e fluxo
 
@@ -35,7 +35,7 @@ revogação entra quando houver requisito de encerrar sessão específica antes 
 Guards globais separam autenticação de autorização: somente `@Public` abre rota;
 `@Perfis` concede operação a `consulta`, `edicao` ou `administracao`. Credencial
 ausente, inválida ou expirada produz 401; perfil insuficiente, 403. A matriz está
-em `docs/VALIDACAO_ETAPA_4C.md`.
+em `docs/validacoes/VALIDACAO_ETAPA_4C.md`.
 
 RBAC controla operações, não registros individuais. Sem regra institucional, a
 autorização por paciente/atendimento volta na Etapa 5 antes de endpoints clínicos

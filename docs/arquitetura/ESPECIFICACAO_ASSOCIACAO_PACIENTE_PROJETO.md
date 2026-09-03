@@ -7,7 +7,7 @@ Atualizado em: 2026-08-06
 Este documento especifica a associação incremental entre pacientes e o
 catálogo existente de projetos. É a fonte de verdade para a migration
 desse vínculo. As decisões semânticas permanecem em
-`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`, e o schema aplicado continua descrito
+`docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`, e o schema aplicado continua descrito
 em `docs/MODELO_FISICO_ATUAL.md` e evidenciado por
 `docs/evidencias/schema_atual_ambulatorio.sql`.
 

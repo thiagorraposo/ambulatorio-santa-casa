@@ -11,7 +11,7 @@ O módulo `notificacao` deve representar, sem perda do valor original, as entrad
 Fontes usadas, em ordem de precedência:
 
 1. `docs/evidencias/schema_atual_ambulatorio.sql`, como evidência do schema aplicado;
-2. `docs/COBERTURA_COLUNAS_PLANILHA.md` e decisões arquiteturais atuais;
+2. `docs/dados/COBERTURA_COLUNAS_PLANILHA.md` e decisões arquiteturais atuais;
 3. `planejamento/relação de cada tabela com cada coluna da planilha.md` e `planejamento/Dicionário de Dados Técnico.md`, como intenção de modelagem;
 4. o escopo desta especificação, que confirma `Caso não, justifique` como informação a ser suportada pelo módulo.
 

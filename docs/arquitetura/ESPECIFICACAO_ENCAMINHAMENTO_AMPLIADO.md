@@ -7,7 +7,7 @@ Atualizado em: 2026-08-13
 Este documento é a fonte de verdade técnica para a última evolução física mínima
 antes do MVP: ampliar o encaminhamento existente para registrar a apresentação do
 documento e, quando informado, o projeto oficial de destino. As decisões
-semânticas permanecem em `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`; o schema
+semânticas permanecem em `docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`; o schema
 aplicado continua evidenciado por
 `docs/evidencias/schema_atual_ambulatorio.sql`.
 

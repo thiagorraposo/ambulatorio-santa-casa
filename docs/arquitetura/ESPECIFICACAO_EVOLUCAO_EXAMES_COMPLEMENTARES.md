@@ -6,7 +6,7 @@ Atualizado em: 2026-08-06
 
 Este documento é a fonte de verdade técnica para a evolução incremental
 dos exames complementares do novo layout. As decisões semânticas permanecem em
-`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`; o schema aplicado continua evidenciado
+`docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`; o schema aplicado continua evidenciado
 por `docs/evidencias/schema_atual_ambulatorio.sql`.
 
 A estrutura foi implementada por `sql/14_exames_por_paciente.sql` e validada por

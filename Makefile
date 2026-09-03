@@ -145,7 +145,7 @@ docs-check:
 		docs/SEGURANCA_DE_DADOS.md \
 		docs/THREAT_MODEL.md \
 		docs/ARQUITETURA_BACKEND.md \
-		docs/VALIDACAO_ETAPA_4C.md \
+		docs/validacoes/VALIDACAO_ETAPA_4C.md \
 		docs/WORKFLOW_DE_DESENVOLVIMENTO.md; do \
 		if [ ! -s "$$file" ]; then \
 			echo "Ausente ou vazio: $$file"; \

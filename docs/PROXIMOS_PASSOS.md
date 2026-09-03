@@ -15,7 +15,7 @@ Atualizado em: 2026-08-31
 - manter `Localizado` apenas no conteúdo bruto enquanto sua semântica não existir.
 
 A fonte detalhada das decisões é
-`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`.
+`docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`.
 
 ## 1. Migrations mínimas concluídas
 

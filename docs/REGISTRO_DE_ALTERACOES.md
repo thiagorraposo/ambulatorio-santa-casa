@@ -1,6 +1,6 @@
 # Registro de Alterações
 
-Atualizado em: 2026-08-31
+Atualizado em: 2026-09-03
 
 ## Como Registrar Mudanças
 
@@ -22,9 +22,23 @@ Além deste arquivo, atualize quando necessário:
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
 - `docs/MODELO_FISICO_ATUAL.md`
 - `docs/PROXIMOS_PASSOS.md`
-- `docs/HISTORICO_DE_IMPLEMENTACAO.md`
+- `docs/historico/HISTORICO_DE_IMPLEMENTACAO.md`
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
+
+## 2026-09-03 - Reorganização da documentação
+
+Reorganizada exclusivamente a pasta `docs/`: criado índice principal, separadas
+especificações em `arquitetura/`, documentos de planilha em `dados/`, relatórios
+de aceite em `validacoes/` e fotografias substituídas em `historico/`. Todos os
+arquivos com conteúdo foram preservados; movimentações usaram `git mv` e os
+caminhos referenciados foram atualizados, inclusive no `Makefile`.
+
+`ESTADO_ATUAL_DO_PROJETO.md` passou a ser uma síntese e deixou detalhes do modelo,
+roadmap, importador, backend, segurança e workflow em suas fontes normativas. O
+inventário e a prova de preservação estão em
+`docs/historico/INVENTARIO_REORGANIZACAO_2026-09-03.md`. Não houve mudança em
+código, migrations, banco, Docker, CI ou comportamento do sistema.
 
 ## 2026-08-31 - Consolidação da fundação do backend — Etapa 4C
 
@@ -235,7 +249,7 @@ Arquivos principais:
 
 - `sql/16_encaminhamento_ampliado.sql`;
 - `tests/sql/08_validar_encaminhamento_ampliado.sql`;
-- `docs/VALIDACAO_ENCAMINHAMENTO_AMPLIADO.md`;
+- `docs/validacoes/VALIDACAO_ENCAMINHAMENTO_AMPLIADO.md`;
 - especificação, dump estrutural e documentos de estado, modelo, cobertura,
   decisões e próximos passos.
 
@@ -278,7 +292,7 @@ contrarreferência ainda indefinida.
 
 Arquivos criados ou modificados nesta especificação:
 
-- `docs/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`;
+- `docs/arquitetura/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`;
 - documentos de decisões humanas e arquiteturais, cobertura e próximos passos;
 - este registro cronológico.
 
@@ -320,7 +334,7 @@ Arquivos criados ou modificados:
 
 - `sql/15_tratamento_benzonidazol.sql`;
 - `tests/sql/07_validar_tratamento_benzonidazol.sql`;
-- `docs/VALIDACAO_TRATAMENTO_BENZONIDAZOL.md`;
+- `docs/validacoes/VALIDACAO_TRATAMENTO_BENZONIDAZOL.md`;
 - dump estrutural, especificação, README e documentos de estado, modelo,
   cobertura, decisões e próximos passos.
 
@@ -362,9 +376,9 @@ tabela legada por atendimento nem inventar regras clínicas ausentes da fonte.
 
 Arquivos criados ou modificados:
 
-- `docs/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md`;
-- `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`;
-- `docs/COBERTURA_COLUNAS_PLANILHA.md`;
+- `docs/arquitetura/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md`;
+- `docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`;
+- `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`;
 - `docs/DECISOES_ARQUITETURAIS.md`;
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`;
 - `docs/PROXIMOS_PASSOS.md`;
@@ -411,7 +425,7 @@ Arquivos criados ou modificados:
 
 - `sql/14_exames_por_paciente.sql`;
 - `tests/sql/06_validar_exames_por_paciente.sql`;
-- `docs/VALIDACAO_EXAMES_POR_PACIENTE.md`;
+- `docs/validacoes/VALIDACAO_EXAMES_POR_PACIENTE.md`;
 - dump estrutural, especificação e documentos de estado, modelo, cobertura,
   decisões, próximos passos e README.
 
@@ -447,10 +461,10 @@ do novo layout sem alterar o schema ou deduzir vínculos legados.
 
 Arquivos criados ou modificados:
 
-- `docs/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`;
-- `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`;
+- `docs/arquitetura/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`;
+- `docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`;
 - `docs/DECISOES_ARQUITETURAIS.md`;
-- `docs/COBERTURA_COLUNAS_PLANILHA.md`;
+- `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`;
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`;
 - `docs/PROXIMOS_PASSOS.md`;
 - `docs/REGISTRO_DE_ALTERACOES.md`.
@@ -490,7 +504,7 @@ Arquivos criados ou modificados:
 
 - `sql/13_associacao_paciente_projeto.sql`;
 - `tests/sql/05_validar_associacao_paciente_projeto.sql`;
-- `docs/VALIDACAO_ASSOCIACAO_PACIENTE_PROJETO.md`;
+- `docs/validacoes/VALIDACAO_ASSOCIACAO_PACIENTE_PROJETO.md`;
 - evidência estrutural, especificação e documentos de estado, modelo, cobertura,
   próximos passos e README.
 
@@ -524,8 +538,8 @@ da primeira migration mínima do MVP sem alterar o schema aplicado.
 
 Arquivos criados ou modificados:
 
-- `docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`
-- `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`
+- `docs/arquitetura/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`
+- `docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`
 - `docs/DECISOES_ARQUITETURAIS.md`
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
 - `docs/MODELO_FISICO_ATUAL.md`
@@ -568,9 +582,9 @@ fonte canônica local e recalcular a cobertura do schema atual.
 
 Arquivos modificados:
 
-- `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md`
-- `docs/METADADOS_SEGUROS_LAYOUT_PLANILHA.md`
-- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/historico/IMPACTO_NOVO_LAYOUT_PLANILHA.md`
+- `docs/dados/METADADOS_SEGUROS_LAYOUT_PLANILHA.md`
+- `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
 - `docs/PROXIMOS_PASSOS.md`
 - `docs/REGISTRO_DE_ALTERACOES.md`
@@ -617,10 +631,10 @@ segurança confirmados, reconciliando-os com as 33 tabelas atuais.
 
 Arquivos criados ou modificados:
 
-- `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`
-- `docs/COBERTURA_COLUNAS_PLANILHA.md`
-- `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md`
-- `docs/METADADOS_SEGUROS_LAYOUT_PLANILHA.md`
+- `docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`
+- `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/historico/IMPACTO_NOVO_LAYOUT_PLANILHA.md`
+- `docs/dados/METADADOS_SEGUROS_LAYOUT_PLANILHA.md`
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
 - `docs/PROXIMOS_PASSOS.md`
 - `docs/REGISTRO_DE_ALTERACOES.md`
@@ -664,11 +678,11 @@ Arquivos modificados:
 
 - `sql/12_modulo_importacao_proveniencia.sql`
 - `tests/sql/04_validar_modulo_importacao_proveniencia.sql`
-- `docs/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`
-- `docs/VALIDACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`
+- `docs/arquitetura/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`
+- `docs/validacoes/VALIDACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`
 - `docs/MODELO_FISICO_ATUAL.md`
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
-- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`
 - `docs/DECISOES_ARQUITETURAIS.md`
 - `docs/PROXIMOS_PASSOS.md`
 - `docs/REGISTRO_DE_ALTERACOES.md`
@@ -701,9 +715,9 @@ Motivo: fechar o desenho estrutural do próximo módulo sem acessar dados reais,
 
 Arquivos modificados:
 
-- `docs/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`
-- `docs/METADADOS_SEGUROS_LAYOUT_PLANILHA.md`
-- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/arquitetura/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`
+- `docs/dados/METADADOS_SEGUROS_LAYOUT_PLANILHA.md`
+- `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`
 - `docs/DECISOES_ARQUITETURAIS.md`
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
 - `docs/PROXIMOS_PASSOS.md`
@@ -742,8 +756,8 @@ Motivo: reavaliar as entradas parciais, não cobertas e duvidosas contra o schem
 
 Arquivos modificados:
 
-- `docs/COBERTURA_COLUNAS_PLANILHA.md`
-- `docs/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`
+- `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/arquitetura/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`
 - `docs/DECISOES_ARQUITETURAIS.md`
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
 - `docs/PROXIMOS_PASSOS.md`
@@ -783,11 +797,11 @@ Arquivos modificados:
 
 - `sql/11_modulo_notificacao.sql`
 - `tests/sql/03_validar_modulo_notificacao.sql`
-- `docs/ESPECIFICACAO_MODULO_NOTIFICACAO.md`
-- `docs/VALIDACAO_MODULO_NOTIFICACAO.md`
+- `docs/arquitetura/ESPECIFICACAO_MODULO_NOTIFICACAO.md`
+- `docs/validacoes/VALIDACAO_MODULO_NOTIFICACAO.md`
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
 - `docs/MODELO_FISICO_ATUAL.md`
-- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`
 - `docs/PROXIMOS_PASSOS.md`
 - `docs/REGISTRO_DE_ALTERACOES.md`
 - `docs/evidencias/schema_atual_ambulatorio.sql`
@@ -819,9 +833,9 @@ Motivo: preparar o próximo módulo incremental para `Paciente notificado?`, `N�
 
 Arquivos modificados:
 
-- `docs/ESPECIFICACAO_MODULO_NOTIFICACAO.md`
+- `docs/arquitetura/ESPECIFICACAO_MODULO_NOTIFICACAO.md`
 - `docs/DECISOES_ARQUITETURAIS.md`
-- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
 - `docs/PROXIMOS_PASSOS.md`
 - `docs/REGISTRO_DE_ALTERACOES.md`
@@ -858,7 +872,7 @@ Motivo: recalcular a cobertura contra o dump físico de 29 tabelas e orientar a 
 
 Arquivos modificados:
 
-- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
 - `docs/PROXIMOS_PASSOS.md`
 - `docs/REGISTRO_DE_ALTERACOES.md`
@@ -891,14 +905,14 @@ Data: 2026-07-18
 
 Título da alteração: Migration incremental de avaliação clínica, eventos, dispositivos e óbito.
 
-Motivo: implementar a estrutura aprovada em `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md` sem alterar migrations antigas nem antecipar regras de importação.
+Motivo: implementar a estrutura aprovada em `docs/arquitetura/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md` sem alterar migrations antigas nem antecipar regras de importação.
 
 Arquivos modificados:
 
 - `sql/10_modulo_avaliacao_clinica.sql`
 - `tests/sql/02_validar_modulo_avaliacao_clinica.sql`
-- `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`
-- `docs/VALIDACAO_MODULO_AVALIACAO_CLINICA.md`
+- `docs/arquitetura/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`
+- `docs/validacoes/VALIDACAO_MODULO_AVALIACAO_CLINICA.md`
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
 - `docs/MODELO_FISICO_ATUAL.md`
 - `docs/PROXIMOS_PASSOS.md`
@@ -981,7 +995,7 @@ Motivo: executar a Etapa 1 no PostgreSQL local e registrar evidências verificá
 
 Arquivos modificados:
 
-- `docs/VALIDACAO_DADOS_DE_TESTE.md`
+- `docs/validacoes/VALIDACAO_DADOS_DE_TESTE.md`
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
 - `docs/PROXIMOS_PASSOS.md`
 - `docs/REGISTRO_DE_ALTERACOES.md`
@@ -1009,7 +1023,7 @@ Como testar:
 
 Pendências ou riscos:
 
-- A cobertura permanece limitada às constraints e aos cenários descritos em `docs/VALIDACAO_DADOS_DE_TESTE.md`.
+- A cobertura permanece limitada às constraints e aos cenários descritos em `docs/validacoes/VALIDACAO_DADOS_DE_TESTE.md`.
 - O próximo módulo físico ainda precisa ser definido antes de uma nova migration incremental.
 
 ## 2026-07-16 - Reconciliação da cobertura da planilha
@@ -1022,7 +1036,7 @@ Motivo: identificar o que as 25 tabelas aplicadas já representam, separar lacun
 
 Arquivos modificados:
 
-- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
 - `docs/PROXIMOS_PASSOS.md`
 - `docs/REGISTRO_DE_ALTERACOES.md`
@@ -1063,9 +1077,9 @@ Motivo: definir campos, tipos, cardinalidades, constraints, índices, deleções
 
 Arquivos modificados:
 
-- `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`
+- `docs/arquitetura/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`
 - `docs/DECISOES_ARQUITETURAIS.md`
-- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
 - `docs/PROXIMOS_PASSOS.md`
 - `docs/REGISTRO_DE_ALTERACOES.md`
@@ -1149,9 +1163,9 @@ Motivo: separar decisões de estrutura física das regras de transformação que
 
 Arquivos modificados:
 
-- `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`
+- `docs/arquitetura/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`
 - `docs/DECISOES_ARQUITETURAIS.md`
-- `docs/COBERTURA_COLUNAS_PLANILHA.md`
+- `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
 - `docs/PROXIMOS_PASSOS.md`
 - `docs/REGISTRO_DE_ALTERACOES.md`
@@ -1192,7 +1206,7 @@ Motivo: consolidar o estado real do repositório, histórico Git, migrations SQL
 Arquivos modificados:
 
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
-- `docs/HISTORICO_DE_IMPLEMENTACAO.md`
+- `docs/historico/HISTORICO_DE_IMPLEMENTACAO.md`
 - `docs/MODELO_FISICO_ATUAL.md`
 - `docs/REGISTRO_DE_ALTERACOES.md`
 - `docs/PROXIMOS_PASSOS.md`
@@ -1220,7 +1234,7 @@ Como testar:
 Pendências ou riscos:
 
 - Pendência original superada em 2026-07-01 pela reconciliação com `docs/evidencias/schema_atual_ambulatorio.sql`.
-- Documentos antigos `README.md`, `docs/dicionario-dados.md` e `docs/decisoes-modelagem.md` permanecem vazios.
+- Documentos antigos `README.md`, `docs/historico/dicionario-dados.md` e `docs/historico/decisoes-modelagem.md` permanecem vazios.
 
 ## 2026-07-01 - Reconciliação documental com schema físico aplicado
 
@@ -1233,11 +1247,11 @@ Motivo: incorporar a evidência `docs/evidencias/schema_atual_ambulatorio.sql`, 
 Arquivos modificados:
 
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
-- `docs/HISTORICO_DE_IMPLEMENTACAO.md`
+- `docs/historico/HISTORICO_DE_IMPLEMENTACAO.md`
 - `docs/MODELO_FISICO_ATUAL.md`
 - `docs/REGISTRO_DE_ALTERACOES.md`
 - `docs/PROXIMOS_PASSOS.md`
-- `docs/VALIDACAO_MODELO_FISICO.md`
+- `docs/validacoes/VALIDACAO_MODELO_FISICO.md`
 
 Migrations envolvidas:
 
@@ -1257,7 +1271,7 @@ Impacto no sistema:
 Como testar:
 
 - Verificar que não houve alteração em `sql/`.
-- Comparar `docs/evidencias/schema_atual_ambulatorio.sql` com `docs/VALIDACAO_MODELO_FISICO.md`.
+- Comparar `docs/evidencias/schema_atual_ambulatorio.sql` com `docs/validacoes/VALIDACAO_MODELO_FISICO.md`.
 - Conferir que as 25 tabelas físicas estão listadas como existentes também nas migrations.
 
 Pendências ou riscos:
@@ -1282,7 +1296,7 @@ Arquivos modificados:
 - `docs/MODELO_FISICO_ATUAL.md`
 - `docs/PROXIMOS_PASSOS.md`
 - `docs/REGISTRO_DE_ALTERACOES.md`
-- `docs/VALIDACAO_MODELO_FISICO.md`
+- `docs/validacoes/VALIDACAO_MODELO_FISICO.md`
 
 Migrations envolvidas:
 
@@ -1360,7 +1374,7 @@ Motivo: criar uma rotina reutilizável para validar dados mínimos, relacionamen
 Arquivos modificados:
 
 - `tests/sql/01_validar_nucleo_inicial.sql`
-- `docs/VALIDACAO_DADOS_DE_TESTE.md`
+- `docs/validacoes/VALIDACAO_DADOS_DE_TESTE.md`
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
 - `docs/PROXIMOS_PASSOS.md`
 - `docs/REGISTRO_DE_ALTERACOES.md`

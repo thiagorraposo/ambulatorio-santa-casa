@@ -98,8 +98,6 @@ pg_dump -h localhost -U ambulatorio_user -d ambulatorio_santa_casa --schema=ambu
 - role e `search_path` são locais à transação; falha de rollback elimina a
   conexão do pool, impedindo reutilização com contexto residual.
 
-## Revisão Antes de Commit
-
 ## Identidade da aplicação — Etapa 4B
 
 - identidades funcionais não são roles PostgreSQL nem responsáveis legados;

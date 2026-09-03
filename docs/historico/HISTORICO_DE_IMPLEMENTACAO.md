@@ -1,5 +1,10 @@
 # Histórico de Implementação
 
+> Documento histórico. Não representa o estado vigente do sistema; sua
+> reconstrução termina em 2026-07-01. Consulte
+> [`../ESTADO_ATUAL_DO_PROJETO.md`](../ESTADO_ATUAL_DO_PROJETO.md) e
+> [`../REGISTRO_DE_ALTERACOES.md`](../REGISTRO_DE_ALTERACOES.md).
+
 Atualizado em: 2026-07-01
 
 Este histórico foi reconstruído a partir do log Git, dos scripts SQL versionados e da evidência física em `docs/evidencias/schema_atual_ambulatorio.sql`. O dump confirma 25 tabelas aplicadas no schema `ambulatorio`, todas cobertas pelas migrations existentes.
@@ -12,8 +17,8 @@ Arquivos envolvidos:
 
 - `.gitignore`
 - `README.md`
-- `docs/decisoes-modelagem.md`
-- `docs/dicionario-dados.md`
+- `docs/historico/decisoes-modelagem.md`
+- `docs/historico/dicionario-dados.md`
 - `sql/00_criar_banco.sql`
 - `sql/01_criar_schema.sql`
 
@@ -25,7 +30,7 @@ Impacto no modelo de dados: nenhum, pois os arquivos SQL foram criados vazios ne
 
 Observações:
 
-- `README.md`, `docs/decisoes-modelagem.md` e `docs/dicionario-dados.md` permanecem vazios na versão analisada.
+- `README.md`, `docs/historico/decisoes-modelagem.md` e `docs/historico/dicionario-dados.md` permanecem vazios na versão analisada.
 
 ## 2026-06-15 16:53:04 - Commit `26e727c`
 
@@ -320,7 +325,7 @@ Observações:
 Arquivos envolvidos:
 
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
-- `docs/HISTORICO_DE_IMPLEMENTACAO.md`
+- `docs/historico/HISTORICO_DE_IMPLEMENTACAO.md`
 - `docs/MODELO_FISICO_ATUAL.md`
 - `docs/REGISTRO_DE_ALTERACOES.md`
 - `docs/PROXIMOS_PASSOS.md`
@@ -342,9 +347,9 @@ Observações:
 Arquivos envolvidos:
 
 - `docs/evidencias/schema_atual_ambulatorio.sql`
-- `docs/VALIDACAO_MODELO_FISICO.md`
+- `docs/validacoes/VALIDACAO_MODELO_FISICO.md`
 - `docs/ESTADO_ATUAL_DO_PROJETO.md`
-- `docs/HISTORICO_DE_IMPLEMENTACAO.md`
+- `docs/historico/HISTORICO_DE_IMPLEMENTACAO.md`
 - `docs/MODELO_FISICO_ATUAL.md`
 - `docs/REGISTRO_DE_ALTERACOES.md`
 - `docs/PROXIMOS_PASSOS.md`

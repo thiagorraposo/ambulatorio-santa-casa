@@ -30,7 +30,7 @@ Em caso de divergência, aplica-se esta ordem:
 1. `manifestos/planilha_ambulatorio_v1.json` para aba, posição, ocorrência,
    bloco, tipo e destino físico de cada coluna;
 2. este documento para comportamento operacional do importador;
-3. `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md` para semântica clínica aprovada;
+3. `docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md` para semântica clínica aprovada;
 4. `docs/evidencias/schema_atual_ambulatorio.sql` para a estrutura aplicada.
 
 Uma incompatibilidade entre essas fontes bloqueia a promoção estruturada afetada;

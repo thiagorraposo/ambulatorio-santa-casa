@@ -22,7 +22,7 @@ Consequências: O núcleo atual pode ser validado antes de cobrir todos os campo
 
 Alternativas rejeitadas: Modelar toda a planilha de uma vez antes de validar o banco.
 
-Documentos relacionados: `docs/ESTADO_ATUAL_DO_PROJETO.md`, `docs/PROXIMOS_PASSOS.md`, `docs/VALIDACAO_MODELO_FISICO.md`.
+Documentos relacionados: `docs/ESTADO_ATUAL_DO_PROJETO.md`, `docs/PROXIMOS_PASSOS.md`, `docs/validacoes/VALIDACAO_MODELO_FISICO.md`.
 
 ## ADR-002
 
@@ -42,7 +42,7 @@ Consequências: O histórico permanece auditável e ambientes existentes podem e
 
 Alternativas rejeitadas: Corrigir scripts antigos diretamente depois de aplicados.
 
-Documentos relacionados: `AGENTS.md`, `sql/AGENTS.md`, `docs/VALIDACAO_MODELO_FISICO.md`.
+Documentos relacionados: `AGENTS.md`, `sql/AGENTS.md`, `docs/validacoes/VALIDACAO_MODELO_FISICO.md`.
 
 ## ADR-003
 
@@ -62,7 +62,7 @@ Consequências: Comparações futuras devem considerar esse dump estrutural como
 
 Alternativas rejeitadas: Inferir o estado físico somente pelas migrations.
 
-Documentos relacionados: `docs/evidencias/schema_atual_ambulatorio.sql`, `docs/MODELO_FISICO_ATUAL.md`, `docs/VALIDACAO_MODELO_FISICO.md`.
+Documentos relacionados: `docs/evidencias/schema_atual_ambulatorio.sql`, `docs/MODELO_FISICO_ATUAL.md`, `docs/validacoes/VALIDACAO_MODELO_FISICO.md`.
 
 ## ADR-004
 
@@ -82,7 +82,7 @@ Consequências: A validação pode ser repetida sem deixar registros de teste pe
 
 Alternativas rejeitadas: Inserir dados permanentes de validação no banco.
 
-Documentos relacionados: `tests/AGENTS.md`, `tests/sql/01_validar_nucleo_inicial.sql`, `docs/VALIDACAO_DADOS_DE_TESTE.md`.
+Documentos relacionados: `tests/AGENTS.md`, `tests/sql/01_validar_nucleo_inicial.sql`, `docs/validacoes/VALIDACAO_DADOS_DE_TESTE.md`.
 
 ## ADR-005
 
@@ -184,7 +184,7 @@ Delimitação adicional: incertezas de unidade, NYHA, formato do ano e semântic
 
 Alternativas rejeitadas: duplicar `paciente_id` em dados clínicos; tornar `atendimento_id` obrigatório para fatos históricos; adicionar FK opcional de atendimento sem garantia de pertencer ao mesmo paciente; duplicar reações do tratamento em evento clínico.
 
-Documentos relacionados: `docs/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`, `docs/COBERTURA_COLUNAS_PLANILHA.md`, `docs/MODELO_FISICO_ATUAL.md`.
+Documentos relacionados: `docs/arquitetura/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md`, `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`, `docs/MODELO_FISICO_ATUAL.md`.
 
 ## ADR-010
 
@@ -204,7 +204,7 @@ Consequências: O modelo cobre o estado consolidado disponível e evita uma prov
 
 Alternativas rejeitadas: uma linha por atendimento sem origem comprovada; múltiplas linhas sem temporalidade; número globalmente único; rejeição no banco de combinações incompletas; campos sanitários ou operacionais não presentes nas fontes.
 
-Documentos relacionados: `docs/ESPECIFICACAO_MODULO_NOTIFICACAO.md`, `docs/COBERTURA_COLUNAS_PLANILHA.md`, `docs/PROXIMOS_PASSOS.md`.
+Documentos relacionados: `docs/arquitetura/ESPECIFICACAO_MODULO_NOTIFICACAO.md`, `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`, `docs/PROXIMOS_PASSOS.md`.
 
 ## ADR-011
 
@@ -229,7 +229,7 @@ automática até política institucional de retenção, o que bloqueia dados rea
 
 Alternativas rejeitadas: iniciar por campos clínicos isolados; tratar responsável legado como usuário autenticado; atribuir toda origem a atendimento; importar antes de definir rastreabilidade; adicionar FK de origem a todas as tabelas; usar triggers dinâmicas para simular FK genérica; guardar cabeçalhos duplicados em objeto JSON.
 
-Documentos relacionados: `docs/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`, `docs/COBERTURA_COLUNAS_PLANILHA.md`, `docs/PROXIMOS_PASSOS.md`.
+Documentos relacionados: `docs/arquitetura/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md`, `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`, `docs/PROXIMOS_PASSOS.md`.
 
 ## ADR-012
 
@@ -262,8 +262,8 @@ duplicar BenBrasil/EPOCA em projetos específicos de falha; vincular a nova rela
 a um atendimento opcional; executar backfill sem regra de reconciliação.
 
 Documentos relacionados:
-`docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`,
-`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
+`docs/arquitetura/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`,
+`docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
 `docs/MODELO_FISICO_ATUAL.md`.
 
 ## ADR-013
@@ -297,9 +297,9 @@ sem verificar que atendimento pertence ao paciente; deduplicar paciente e tipo;
 criar tipos automaticamente a partir de texto livre.
 
 Documentos relacionados:
-`docs/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`,
-`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
-`docs/COBERTURA_COLUNAS_PLANILHA.md`.
+`docs/arquitetura/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`,
+`docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
+`docs/dados/COBERTURA_COLUNAS_PLANILHA.md`.
 
 ## ADR-014
 
@@ -336,9 +336,9 @@ indicação com motivo de não início; impor domínios de gravidade ou consequ�
 sem evidência.
 
 Documentos relacionados:
-`docs/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md`,
-`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
-`docs/COBERTURA_COLUNAS_PLANILHA.md`.
+`docs/arquitetura/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md`,
+`docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
+`docs/dados/COBERTURA_COLUNAS_PLANILHA.md`.
 
 ## ADR-015
 
@@ -372,9 +372,9 @@ existente; associação N:N para uma cardinalidade máxima de um projeto; adicio
 projeto de campos legados; criar projetos automaticamente.
 
 Documentos relacionados:
-`docs/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`,
-`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
-`docs/COBERTURA_COLUNAS_PLANILHA.md`.
+`docs/arquitetura/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`,
+`docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
+`docs/dados/COBERTURA_COLUNAS_PLANILHA.md`.
 
 # ADR-016
 
@@ -465,4 +465,4 @@ incerto. A API continua sem ownership, DDL, proveniência ou elevação.
 Alternativas rejeitadas: confiar apenas em `RESET ROLE` no `finally`, que não
 limpa todo estado de sessão e poderia devolver conexão após falha de limpeza.
 
-Documento relacionado: `docs/VALIDACAO_ETAPA_4C.md`.
+Documento relacionado: `docs/validacoes/VALIDACAO_ETAPA_4C.md`.

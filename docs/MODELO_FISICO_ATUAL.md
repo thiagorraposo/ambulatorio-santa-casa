@@ -855,8 +855,8 @@ Finalidade: associação genérica N:N entre linhas e registros estruturados.
 
 ## Diferenças em Relação ao Dicionário de Dados ou Modelo Lógico Anterior
 
-- `docs/dicionario-dados.md` está vazio.
-- `docs/decisoes-modelagem.md` está vazio.
+- `docs/historico/dicionario-dados.md` está vazio.
+- `docs/historico/decisoes-modelagem.md` está vazio.
 - Não há modelo lógico anterior preenchido no repositório para comparação detalhada.
 - A comparação com a planilha completa será feita em fases posteriores,
   considerando que o núcleo atual não pretende cobrir integralmente os 136

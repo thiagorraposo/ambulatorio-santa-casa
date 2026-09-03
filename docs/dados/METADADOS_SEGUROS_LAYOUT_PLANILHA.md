@@ -7,7 +7,7 @@ Atualizado em: 2026-08-21
 A fonte canônica do layout é o arquivo local, não versionado e ignorado pelo Git
 `planejamento/Nova Planilha ambulatório.xlsx`. Somente seus metadados estruturais
 podem orientar o planejamento. O relatório completo e a classificação das
-diferenças estão em `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md`, fonte de verdade desta
+diferenças estão em `docs/historico/IMPACTO_NOVO_LAYOUT_PLANILHA.md`, fonte de verdade desta
 análise.
 
 O catálogo antigo de 140 nomes deixa de ser canônico para o layout físico. Ele
@@ -45,4 +45,4 @@ auxiliares permanecem fora do manifesto de importação.
 - `Localizado` permanece sem semântica suficiente e fora do mapeamento estruturado;
 - a aba operacional e as duas abas AIM3 ficam fora do MVP.
 
-As regras completas estão em `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`.
+As regras completas estão em `docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`.

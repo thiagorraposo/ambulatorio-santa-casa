@@ -4,9 +4,11 @@ Atualizado em: 2026-08-24
 
 ## Fonte e critério
 
-A cobertura usa os 136 rótulos distintos das duas abas clínicas e o schema físico
-atual de 37 tabelas. As decisões humanas consolidadas em
-`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md` resolvem semânticas, mas não contam como
+A cobertura usa os 136 rótulos distintos das duas abas clínicas e as 37 tabelas
+clínicas/de proveniência do schema físico. A 38ª tabela,
+`usuario_aplicacao`, trata identidade funcional e não é destino da planilha. As
+decisões humanas consolidadas em
+`docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md` resolvem semânticas, mas não contam como
 cobertura física quando a cardinalidade ou obrigatoriedade do banco é incompatível.
 O detalhamento por posição, aba e destino está no manifesto oficial
 `manifestos/planilha_ambulatorio_v1.json`.
@@ -122,4 +124,4 @@ As quatro migrations mínimas do MVP foram implementadas. Os onze itens parciais
 possuem comportamento determinístico no contrato sintético e podem ficar no
 backlog sem promoção estruturada. `Localizado` não será promovido sem definição
 semântica. A implementação do encaminhamento está documentada em
-`docs/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`.
+`docs/arquitetura/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`.

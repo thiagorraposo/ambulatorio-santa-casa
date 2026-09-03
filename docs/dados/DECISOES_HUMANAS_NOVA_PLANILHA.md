@@ -6,9 +6,11 @@ Atualizado em: 2026-08-24
 
 Este documento consolida as decisões humanas confirmadas para o MVP da nova
 planilha. Ele é a fonte de verdade para semântica, cardinalidade e regras de
-importação. `docs/IMPACTO_NOVO_LAYOUT_PLANILHA.md` continua sendo a fonte da
+importação. `docs/historico/IMPACTO_NOVO_LAYOUT_PLANILHA.md` continua sendo a fonte da
 estrutura física observada e `docs/evidencias/schema_atual_ambulatorio.sql`, a
-fonte do schema aplicado de 37 tabelas.
+fonte das 37 tabelas clínicas/de proveniência então aplicadas. A tabela posterior
+`usuario_aplicacao` é alheia ao contrato da planilha; o total vigente de 38 está
+em `docs/MODELO_FISICO_ATUAL.md`.
 
 Nenhuma decisão deste documento altera o banco por si só. Mudanças físicas deverão
 ser especificadas e implementadas em migrations incrementais futuras.
@@ -86,7 +88,7 @@ atual não deve ser apagada nesta fase; sua transição e eventual obsolescênci
 precisam ser especificadas. Classes 1, 2 e 3.
 
 A estrutura foi implementada conforme
-`docs/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`: associação consolidada
+`docs/arquitetura/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`: associação consolidada
 `paciente_projeto_estudo`, única por paciente e projeto, sem atendimento e sem
 alteração retroativa de `atendimento_projeto_estudo`. A especificação está pronta
 para migration incremental; aliases, conflitos e consolidação entre linhas estão
@@ -124,7 +126,7 @@ que o atendimento pertença ao mesmo paciente. Não deve haver unicidade por tip
 pois múltiplas ocorrências são válidas. Classes 1, 2 e 3.
 
 A estrutura futura foi fechada em
-`docs/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`: nova tabela canônica
+`docs/arquitetura/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`: nova tabela canônica
 `paciente_exame_complementar`, com paciente obrigatório, atendimento opcional com
 consistência por FK composta, bloco único `trazido` ou `solicitado`, resultado
 livre e preservação das tabelas legadas sem backfill. O manifesto e a
@@ -165,7 +167,7 @@ Antes do MVP é necessária migration incremental para:
 Classes 1, 2 e 3. A duração é explicitamente indispensável ao MVP.
 
 A estrutura futura foi fechada em
-`docs/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md`: nova tabela canônica
+`docs/arquitetura/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md`: nova tabela canônica
 `tratamento_benzonidazol`, única por paciente, com atendimento opcional
 consistente, indicação, início, realização pelo ambulatório, duração cumprida,
 ano aproximado, prescrição e motivos separados. Reações repetíveis usarão
@@ -193,7 +195,7 @@ promoção aproximada. Classes 1 e 3 para encaminhamento; classes 2 e 4 para
 contrarreferência.
 
 A evolução foi fechada em
-`docs/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`: `encaminhamento` foi ampliada
+`docs/arquitetura/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`: `encaminhamento` foi ampliada
 por `sql/16_encaminhamento_ampliado.sql` com booleano anulável, projeto oficial opcional e valores
 originais separados. O atendimento obrigatório continuará determinando o
 paciente, sem FK redundante; não haverá nova tabela, backfill, escrita dupla,
@@ -293,4 +295,4 @@ altera a cobertura de colunas, mas é bloqueio de implantação real.
 
 `sql/16_encaminhamento_ampliado.sql` e seu teste transacional concluíram a última
 evolução mínima. A validação detalhada está em
-`docs/VALIDACAO_ENCAMINHAMENTO_AMPLIADO.md`.
+`docs/validacoes/VALIDACAO_ENCAMINHAMENTO_AMPLIADO.md`.

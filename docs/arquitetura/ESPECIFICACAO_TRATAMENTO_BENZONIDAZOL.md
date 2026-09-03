@@ -7,7 +7,7 @@ Atualizado em: 2026-08-13
 Este documento é a fonte de verdade técnica para a migration incremental
 do tratamento com benzonidazol (BZN) e de suas reações adversas no MVP. As
 decisões semânticas permanecem em
-`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`; o schema aplicado continua descrito em
+`docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`; o schema aplicado continua descrito em
 `docs/MODELO_FISICO_ATUAL.md` e evidenciado por
 `docs/evidencias/schema_atual_ambulatorio.sql`.
 

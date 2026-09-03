@@ -1,5 +1,11 @@
 # Impacto do Novo Layout da Planilha
 
+> Documento histórico. Registra a fotografia anterior às decisões semânticas e
+> às migrations posteriores. Consulte
+> [`../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`](../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md),
+> [`../dados/COBERTURA_COLUNAS_PLANILHA.md`](../dados/COBERTURA_COLUNAS_PLANILHA.md)
+> e [`../ESTADO_ATUAL_DO_PROJETO.md`](../ESTADO_ATUAL_DO_PROJETO.md).
+
 Atualizado em: 2026-07-20
 
 ## Escopo e segurança
@@ -16,7 +22,7 @@ ou registrado.
 
 Este documento é a fonte de verdade para a estrutura e o impacto físico do layout
 de 2026-07-20. As decisões semânticas posteriores estão consolidadas em
-`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`. A evidência do banco continua sendo
+`docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`. A evidência do banco continua sendo
 `docs/evidencias/schema_atual_ambulatorio.sql`.
 
 ## Estrutura física encontrada
@@ -129,7 +135,7 @@ Na aba `P Digitar`, `DN`, `Nome` e `D. Atend` se repetem nos blocos `A:C` e `J:L
 `Localizado` continua sem significado e entidade confirmados. `DN` e `D. Atend`
 ficam fora do MVP com a aba operacional. A grafia canônica de responsável,
 `observação`, os blocos de exames, notificação, tratamento, unidades e valores
-foram definidos posteriormente em `docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`.
+foram definidos posteriormente em `docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`.
 
 ## Cobertura histórica antes das decisões humanas
 
@@ -151,7 +157,7 @@ Cobertura plena: **110 de 136 (80,88%)**. Incluindo cobertura parcial:
 
 Esta era a fotografia anterior às decisões humanas. A cobertura corrente,
 rebaixada quando o schema tem cardinalidade incompatível, está em
-`docs/COBERTURA_COLUNAS_PLANILHA.md`: **88/136 (64,71%)** plena e
+`docs/dados/COBERTURA_COLUNAS_PLANILHA.md`: **88/136 (64,71%)** plena e
 **134/136 (98,53%)** incluindo parcial.
 
 ## Impacto nas 33 tabelas
@@ -206,14 +212,14 @@ alterada. O impacto é de revisão futura, não de mudança física imediata.
 ## Decisões anteriormente bloqueadoras
 
 A maior parte foi resolvida e incorporada em
-`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md`. Permanecem como bloqueios para dados
+`docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`. Permanecem como bloqueios para dados
 reais a governança operacional, retenção, roles, auditoria/acesso ao JSONB e a
 semântica de `Localizado` caso seja incluído no MVP.
 
 ## Sequência histórica
 
 A rota atual substitui esta sequência e está definida em
-`docs/DECISOES_HUMANAS_NOVA_PLANILHA.md` e `docs/PROXIMOS_PASSOS.md`.
+`docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md` e `docs/PROXIMOS_PASSOS.md`.
 
 ## Validação
 

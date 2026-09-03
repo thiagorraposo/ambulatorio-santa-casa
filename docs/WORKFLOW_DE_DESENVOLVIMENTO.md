@@ -35,7 +35,7 @@ Na Etapa 4B, `AUTH_JWT_SECRET` e `AUTH_JWT_EXPIRES_IN_SECONDS` são obrigatório
 Os testes criam e removem identidades exclusivamente sintéticas pelo owner; isso
 não é provisionamento de produção. `make backend-check` cobre build, unitários,
 autenticação, autorização, isolamento do pool e integração. A matriz e as
-pendências deliberadas estão em `docs/VALIDACAO_ETAPA_4C.md`.
+pendências deliberadas estão em `docs/validacoes/VALIDACAO_ETAPA_4C.md`.
 
 ## Comandos Oficiais
 
