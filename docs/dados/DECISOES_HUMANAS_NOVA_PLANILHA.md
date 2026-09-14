@@ -1,25 +1,68 @@
 # Decisões Humanas para a Nova Planilha
 
-Atualizado em: 2026-08-24
+Atualizado em: 2026-09-14
 
 ## Finalidade e precedência
 
-Este documento consolida as decisões humanas confirmadas para o MVP da nova
-planilha. Ele é a fonte de verdade para semântica, cardinalidade e regras de
-importação. `docs/historico/IMPACTO_NOVO_LAYOUT_PLANILHA.md` continua sendo a fonte da
-estrutura física observada e `docs/evidencias/schema_atual_ambulatorio.sql`, a
-fonte das 37 tabelas clínicas/de proveniência então aplicadas. A tabela posterior
-`usuario_aplicacao` é alheia ao contrato da planilha; o total vigente de 38 está
-em `docs/MODELO_FISICO_ATUAL.md`.
+Este documento consolida as decisões humanas confirmadas para a nova planilha
+e para a coleta no sistema. Ele é a fonte de verdade para semântica e
+cardinalidade. As 12 respostas de `docs/Perguntas pendentes.docx`, lidas
+integralmente em 2026-09-14, prevalecem sobre interpretações anteriores dos mesmos
+campos; seu conteúdo de negócio está consolidado abaixo para não depender da
+disponibilidade do DOCX local. O manifesto executável registra o layout físico;
+`docs/historico/IMPACTO_NOVO_LAYOUT_PLANILHA.md` preserva sua análise histórica.
+`docs/evidencias/schema_atual_ambulatorio.sql` evidencia as 38 tabelas aplicadas:
+37 clínicas/de proveniência e `usuario_aplicacao`, alheia ao contrato da planilha.
+A descrição vigente está em `docs/MODELO_FISICO_ATUAL.md`.
 
 Nenhuma decisão deste documento altera o banco por si só. Mudanças físicas deverão
 ser especificadas e implementadas em migrations incrementais futuras.
 
-O layout físico que materializa estas decisões é
-`manifestos/planilha_ambulatorio_v1.json`. As regras operacionais determinísticas
-estão consolidadas em `docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`, fonte de
-verdade para a implementação do importador; este documento permanece como fonte
-da semântica humana aprovada.
+O manifesto executável `manifestos/planilha_ambulatorio_v1.json` ainda representa
+o contrato anterior: 124 rótulos plenos, onze parciais e `Localizado` excluído.
+Esta atualização documental não altera seu comportamento nem promove campos.
+As regras operacionais e suas divergências de implementação estão em
+`docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md` e
+`docs/IMPORTADOR_SINTETICO_V1.md`. Incompatibilidades exigem evolução explícita
+do contrato, nunca interpretação silenciosa de dados.
+
+## Respostas da equipe incorporadas em 2026-09-14
+
+Os identificadores D1–D12 também são usados na matriz de impacto em
+[`COBERTURA_COLUNAS_PLANILHA.md`](COBERTURA_COLUNAS_PLANILHA.md). As prioridades
+de entrega são propostas técnicas do roadmap, não respostas adicionais da equipe.
+
+| ID | Decisão de negócio confirmada | Limites e incertezas restantes |
+| --- | --- | --- |
+| D1 | Idade deve ser calculada pelo sistema a partir da data de nascimento. | A data de referência não foi respondida. Idade atual no cadastro e idade na data da consulta são alternativas a definir; não criar idade manual independente. Preservação da célula original como proveniência continua possível. |
+| D2 | Data do autorrelato é quando o paciente descobriu que possui Chagas; pode diferir da data da sorologia. | Definir proprietário do dado: registro por atendimento ou fato consolidado do paciente. Não usar data de resultado como substituta nem inferir confirmação laboratorial. |
+| D3 | Registrar sim/não para familiares examinados; se sim, identificar o familiar e o resultado da sorologia. A data do exame do familiar não é necessária. | Não foi exigido cadastro civil de parentes nem definido domínio fechado de resultados. Escolher representação dos pares familiar–resultado; ausência legada não equivale a não. |
+| D4 | Identificar obrigatoriamente os exames complementares trazidos. | Indicador agregado sozinho não identifica exame. Detalhar tipos genéricos quando não identificarem o exame efetivo; não inventar interpretação de texto legado. |
+| D5 | Identificar obrigatoriamente os exames complementares solicitados. | Identificação não implica resultado disponível, realização ou data não informada. |
+| D6 | Retorno de 30 dias é sempre de BZN; registrar a data em que o paciente compareceu. | Não calcular comparecimento por prescrição mais 30 dias nem impor intervalo exato. A forma técnica do vínculo ao tratamento está aberta. |
+| D7 | Retorno final é o retorno após finalizar BZN; registrar a data efetiva desse comparecimento. | A menção a geralmente 60 dias não fixa duração nem data de retorno. Não confundir retorno final, fim do uso e duração cumprida. |
+| D8 | Manter um registro por retorno, inclusive o de rotina anual. Na planilha, o campo guarda o ano do último comparecimento e a linha do paciente é atualizada. | A fonte não contém necessariamente o histórico anterior. Não completar dia/mês nem tratar automaticamente toda alteração da linha como nova consulta. Os demais dados obrigatórios de cada retorno não foram detalhados. |
+| D9 | Desfecho refere-se ao último retorno e informa a data futura ou a orientação de voltar quando os exames estiverem prontos. | A exclusão do campo foi sugerida, não definitivamente aprovada. Confirmar retirada e destino da informação de planejamento; não descartar legado. |
+| D10 | Há múltiplas contrarreferências por paciente com Chagas, entregues após os retornos, com a conduta do ambulatório e a orientação à APS. Upload é importante. | A distinção completa entre não realizada, pendente, não se aplica e ausência não foi respondida. Definir representação documental e momento de entrega do upload; não inferir documento entregue de um retorno registrado. |
+| D11 | O campo misto pode ficar apenas como pendências, preferencialmente textuais, relativas principalmente a notificação ou solicitação de BZN. Segundo a equipe, as observações desse campo repetem informações do desfecho do retorno. | Não há resposta explícita sobre quantidade por atendimento nem autorização para classificar automaticamente todo texto antigo. A coluna separada `observação` e observações clínicas gerais não foram abolidas. |
+| D12 | `Localizado` pode ser excluído; indica se a equipe encontrou o prontuário físico. | Exclusão funcional não é purga da proveniência nem exclusão de `atendimento.localizacao_prontuario`, que é outro campo. |
+
+### Consequências técnicas propostas, ainda não implementadas
+
+- Reutilizar nascimento para idade; exames por paciente para D4/D5;
+  acompanhamento para datas/tipos de retorno; pendências existentes para D11.
+- Acrescentar representação própria da data de descoberta e do rastreio familiar
+  por migrations incrementais após definir seu contrato. Não reinterpretar
+  `historico_familiar_chagas.possui_historico_familiar` como exame realizado.
+- Acompanhamento já admite várias ocorrências. Multiplicidade de retornos ou
+  contrarreferências, isoladamente, não justifica novas tabelas. Uma FK direta
+  de BZN e uma entidade documental própria dependem de decisão técnica.
+- Se necessário expor o ano legado estruturadamente, avaliar
+  `evento_clinico.ano_evento` com tipo explícito e precisão anual. É uma opção,
+  não um destino já aprovado ou implementado para retorno anual.
+- Confirmar referência da idade, propriedade do autorrelato, representação dos
+  familiares, temporalidade da importação, substituição de desfecho e estados/
+  anexos da contrarreferência antes da implementação dependente.
 
 ## Legenda da classificação
 
@@ -30,14 +73,16 @@ da semântica humana aprovada.
 5. bloqueio para importação de dados reais.
 
 Uma decisão pode receber mais de uma classe quando, por exemplo, exige migration e
-também uma regra do importador.
+também uma regra do importador. A classe 3 nas decisões anteriores registra a
+necessidade estrutural original, já atendida onde indicado; não exige refazer
+migrations. Para D1–D12, usar a matriz de impacto específica vinculada acima.
 
 ## Escopo, linha e precedência
 
 | Decisão confirmada | Classes | Consequência |
 | --- | --- | --- |
 | As duas abas clínicas representam portadores e não portadores | 1, 2 | a aba define `atendimento.origem_registro` e a condição de Chagas |
-| Cada linha é um atendimento; o mesmo paciente pode ocupar várias linhas | 1 | criar um `atendimento` por linha válida, sem duplicar o paciente |
+| O contrato executável v1 cria um atendimento por linha válida | 1 | D8 exige revisar sua aplicação a linhas atualizadas e arquivos de conteúdo diferente; não deduzir histórico completo nem novo atendimento apenas pela mudança do arquivo |
 | Um paciente não deve existir nas duas abas; portadores prevalece | 1, 5 | detectar conflito antes da carga estruturada; não converter automaticamente uma linha conflitante em não portador |
 | Coluna ausente significa não coletado, nunca negativo | 1 | ausência estrutural e célula vazia geram `NULL`/sem registro, nunca `FALSE` |
 | O MVP importa somente as duas abas clínicas | 1, 2 | `P Digitar` e as duas abas AIM3 ficam fora do manifesto executável do MVP |
@@ -56,7 +101,8 @@ Regras obrigatórias do importador:
 - não mesclar automaticamente quando nome, nascimento, prontuário, ID de origem ou
   aba produzirem candidatos contraditórios;
 - encaminhar conflitos para revisão e manter a linha bruta e o motivo;
-- criar atendimentos distintos para linhas distintas do mesmo paciente;
+- o v1 cria atendimentos distintos para linhas distintas do mesmo paciente;
+  antes de importar atualizações, resolver a temporalidade descrita em D8;
 - não inventar datas de criação/atualização da origem; timestamps do banco
   representam processamento, não datas da planilha.
 
@@ -82,7 +128,7 @@ Decisões:
 Impacto: `projeto_estudo` e seus códigos atuais são reutilizáveis, e
 `atendimento_projeto_estudo.houve_falha` demonstra que a variante de falha já foi
 modelada. A associação, entretanto, possui `atendimento_id NOT NULL` e unicidade
-por atendimento. É necessária antes do MVP uma nova associação paciente–projeto,
+por atendimento. Essa lacuna motivou a associação paciente–projeto,
 com participação, pendência, falha, textos originais e proveniência. A tabela
 atual não deve ser apagada nesta fase; sua transição e eventual obsolescência
 precisam ser especificadas. Classes 1, 2 e 3.
@@ -90,8 +136,8 @@ precisam ser especificadas. Classes 1, 2 e 3.
 A estrutura foi implementada conforme
 `docs/arquitetura/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md`: associação consolidada
 `paciente_projeto_estudo`, única por paciente e projeto, sem atendimento e sem
-alteração retroativa de `atendimento_projeto_estudo`. A especificação está pronta
-para migration incremental; aliases, conflitos e consolidação entre linhas estão
+alteração retroativa de `atendimento_projeto_estudo`, aplicada por
+`sql/13_associacao_paciente_projeto.sql`. Aliases, conflitos e consolidação entre linhas estão
 normatizados na especificação do importador v1.
 
 ## Condição e complicações de Chagas
@@ -118,18 +164,20 @@ do mesmo tipo, resultados são textos livres e o exame não deve depender
 obrigatoriamente do atendimento em que foi digitado.
 
 O catálogo `tipo_exame_complementar` e os campos de origem, status e texto podem
-ser reutilizados. O conflito é estrutural:
+ser reutilizados. A lacuna estrutural anterior era:
 `atendimento_exame_complementar.atendimento_id` é obrigatório e o registro não
-possui `paciente_id`. Antes do MVP é necessária migration que torne o paciente o
-vínculo obrigatório e o atendimento opcional, assegurando, quando ambos existirem,
+possui `paciente_id`. A evolução já aplicada tornou o paciente o vínculo obrigatório
+e o atendimento opcional na nova tabela canônica, assegurando, quando ambos existirem,
 que o atendimento pertença ao mesmo paciente. Não deve haver unicidade por tipo,
 pois múltiplas ocorrências são válidas. Classes 1, 2 e 3.
 
-A estrutura futura foi fechada em
+A estrutura foi especificada em
 `docs/arquitetura/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md`: nova tabela canônica
 `paciente_exame_complementar`, com paciente obrigatório, atendimento opcional com
 consistência por FK composta, bloco único `trazido` ou `solicitado`, resultado
-livre e preservação das tabelas legadas sem backfill. O manifesto e a
+livre e preservação das tabelas legadas sem backfill, implementada por
+`sql/14_exames_por_paciente.sql`. D4/D5 exigem revisar identificação
+e validação funcional, não refazer essa migration. O manifesto e a
 reconciliação de reprocessamentos estão normatizados na especificação do
 importador v1.
 
@@ -152,7 +200,7 @@ paciente, não possui duração em dias, ano aproximado, data de prescrição ou
 indicador de tratamento pelo ambulatório. Seus campos de evento adverso não
 armazenam gravidade, data e consequência nem múltiplas ocorrências.
 
-Antes do MVP é necessária migration incremental para:
+A migration incremental 15 já implementou os requisitos estruturais de:
 
 - associar inequivocamente o tratamento ao paciente e impor no máximo um
   tratamento de BZN por paciente;
@@ -166,11 +214,11 @@ Antes do MVP é necessária migration incremental para:
 
 Classes 1, 2 e 3. A duração é explicitamente indispensável ao MVP.
 
-A estrutura futura foi fechada em
+A estrutura foi especificada em
 `docs/arquitetura/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md`: nova tabela canônica
 `tratamento_benzonidazol`, única por paciente, com atendimento opcional
 consistente, indicação, início, realização pelo ambulatório, duração cumprida,
-ano aproximado, prescrição e motivos separados. Reações repetíveis usarão
+ano aproximado, prescrição e motivos separados. Reações repetíveis usam
 `reacao_adversa_benzonidazol`, sem domínio inventado de gravidade ou consequência.
 `tratamento_chagas` permaneceu intacta, sem backfill ou escrita dupla. A estrutura
 foi implementada por `sql/15_tratamento_benzonidazol.sql`; conversões, conflitos e
@@ -183,16 +231,18 @@ reprocessamento estão normatizados na especificação do importador v1.
 - cada encaminhamento aponta para no máximo um projeto oficial;
 - contrarreferência é a devolução de informações ao serviço de origem e aceita
   `sim`, `não` ou sem dados;
-- a multiplicidade de contrarreferências continua indefinida.
+- D10 confirma múltiplas contrarreferências por paciente e a importância de
+  upload; os estados detalhados e a representação documental ainda precisam de
+  definição. Não há exclusividade por paciente aprovada.
 
 `encaminhamento` exige atendimento, o que é compatível. O indicador de documento
 apresentado e a FK para projeto foram adicionados pela última migration mínima do
 MVP. Embora `acompanhamento_cuidado.status_acompanhamento` aceite um estado
 consolidado, ele não distingue fielmente a resposta negativa dos demais estados e
-a multiplicidade continua indefinida. No contrato sintético v1, a
-contrarreferência fica somente no bruto e a linha recebe pendência; não há
-promoção aproximada. Classes 1 e 3 para encaminhamento; classes 2 e 4 para
-contrarreferência.
+a representação documental permanece pendente. No contrato executável v1, a
+contrarreferência ainda fica somente no bruto e a linha recebe pendência; não há
+promoção aproximada. A multiplicidade não é mais uma dúvida de negócio, e a
+prioridade proposta para registro/upload está em `docs/PROXIMOS_PASSOS.md`.
 
 A evolução foi fechada em
 `docs/arquitetura/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md`: `encaminhamento` foi ampliada
@@ -246,12 +296,15 @@ dados reais, são bloqueios classe 5:
 1. prazo institucional de retenção;
 2. responsável autorizado a aprovar importações;
 3. responsável por revisar erros e contradições;
-4. roles e privilégios operacionais;
+4. provisionamento institucional de logins/segredos para as roles e privilégios
+   técnicos já implementados;
 5. política de auditoria e acesso ao JSONB;
-6. semântica de `Localizado`, caso esse campo entre no MVP.
 
-Como a primeira versão será disponibilizada em servidor com dados reais, também
-devem estar operacionais antes da carga: ambiente protegido, transporte seguro,
+`Localizado` deixou de ser pendência semântica: D12 confirmou sua exclusão
+funcional. Isso não remove os demais bloqueios para dados reais.
+
+Uma disponibilização futura em servidor com dados reais exige, antes da carga,
+ambiente protegido, transporte seguro,
 backup/restauração testados, gestão de segredos e registro de acesso. Isso não
 altera a cobertura de colunas, mas é bloqueio de implantação real.
 
@@ -259,7 +312,7 @@ altera a cobertura de colunas, mas é bloqueio de implantação real.
 
 | Impacto | Classificação | Situação para o MVP |
 | --- | ---: | --- |
-| aba, linha=atendimento, precedência e vazio | 1 | obrigatório no manifesto/importador |
+| aba, precedência, vazio e temporalidade da linha | 1, 2 | regras existentes preservadas; D8 exige revisar linhas atualizadas antes de nova promoção |
 | identificação nome+nascimento e conflitos sem merge | 1, 5 | regra obrigatória; revisão humana precisa ter responsável |
 | prontuário permanente opcional | 4; futuramente 3 | não bloqueia enquanto ausente na fonte |
 | paciente–projeto e variante de falha | 3 | migration implementada e validada |
@@ -267,32 +320,27 @@ altera a cobertura de colunas, mas é bloqueio de implantação real.
 | exame por paciente com atendimento opcional | 3 | migration implementada e validada |
 | duração, cardinalidade e detalhes do tratamento BZN | 3 | migration implementada e validada |
 | documento apresentado e projeto do encaminhamento | 3 | migration implementada e validada |
-| múltiplas contrarreferências | 4 | backlog |
+| múltiplas contrarreferências | 1, 2 | confirmadas em D10; representação e prioridade de upload no roadmap |
 | conversões, datas, anos e booleanos | 1 | obrigatório no manifesto/importador |
 | responsável legado–usuário | 4 | sem associação automática no MVP |
 | cadeia histórica de reprocessamento | 1 | estrutura atual reutilizada |
 | governança e acesso ao bruto | 5 | bloqueia dados reais |
-| `Localizado` | 4 e 5 se incluído | excluir do estruturado no MVP ou definir semântica |
+| `Localizado` | 2 | exclusão funcional confirmada; preservar apenas proveniência |
 | `observação` genérica | 1, 2 | pode ir para `atendimento.observacoes`, preservando bruto |
 
-## Sequência recomendada até o MVP
+## Sequência de implementação
 
-1. Aprovar este consolidado e declarar `Localizado` fora do mapeamento estruturado
-   do MVP enquanto sua semântica não for definida.
-2. Considerar concluídas as quatro migrations mínimas do MVP: paciente–projeto,
-   exames por paciente, tratamento/reação adversa e encaminhamento ampliado.
-3. Usar o manifesto versionado concluído das duas abas clínicas como base da
-   especificação do importador.
-4. Implementar o importador sintético conforme o contrato fechado, sem promover
-   as onze colunas ainda parciais.
-5. Definir retenção, autoridades, revisão, roles, privilégios e auditoria do JSONB.
-6. Implementar o importador e testes exclusivamente com planilha sintética.
-7. Preparar servidor seguro, segredos, backup/restauração e observabilidade.
-8. Homologar uma carga controlada com revisão formal de erros antes da importação
-   real completa.
+O importador sintético e a fundação backend já existem. As quatro migrations
+mínimas anteriores estão aplicadas; não são trabalho a repetir. A sequência
+vigente, incluindo correções de importação, extensões justificadas, backend,
+frontend, integração e homologação, tem uma única fonte em
+[`../PROXIMOS_PASSOS.md`](../PROXIMOS_PASSOS.md).
 
 ## Validação desta atualização
 
-`sql/16_encaminhamento_ampliado.sql` e seu teste transacional concluíram a última
-evolução mínima. A validação detalhada está em
-`docs/validacoes/VALIDACAO_ENCAMINHAMENTO_AMPLIADO.md`.
+As 12 respostas foram conferidas com o DOCX, migrations, código, testes,
+manifesto e metadados físicos consultados somente em leitura na análise de
+2026-09-14. A edição é documental; as escolhas técnicas acima não foram aplicadas.
+Validação: `make docs-check`, `make manifest-check` e `git diff --check`.
+`make project-check` foi dispensado nesta tarefa para não executar escrita de
+testes no banco. Nenhum dado clínico real foi utilizado.

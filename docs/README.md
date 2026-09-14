@@ -8,6 +8,8 @@ fontes vigentes.
 | --- | --- |
 | Estado técnico vigente | [`ESTADO_ATUAL_DO_PROJETO.md`](ESTADO_ATUAL_DO_PROJETO.md) |
 | Próximo trabalho e bloqueios | [`PROXIMOS_PASSOS.md`](PROXIMOS_PASSOS.md) |
+| Regras de negócio, incluindo as 12 respostas da equipe | [`dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md) |
+| Matriz de impacto e cobertura funcional das decisões | [`dados/COBERTURA_COLUNAS_PLANILHA.md`](dados/COBERTURA_COLUNAS_PLANILHA.md) |
 | Decisões arquiteturais duradouras | [`DECISOES_ARQUITETURAIS.md`](DECISOES_ARQUITETURAIS.md) |
 | Histórico cronológico de mudanças | [`REGISTRO_DE_ALTERACOES.md`](REGISTRO_DE_ALTERACOES.md) |
 | Modelo físico PostgreSQL | [`MODELO_FISICO_ATUAL.md`](MODELO_FISICO_ATUAL.md) |
@@ -20,6 +22,11 @@ fontes vigentes.
 | Workflow e validação local | [`WORKFLOW_DE_DESENVOLVIMENTO.md`](WORKFLOW_DE_DESENVOLVIMENTO.md) |
 
 ## Coleções de apoio
+
+As respostas do DOCX local foram consolidadas na fonte de regras de negócio em
+2026-09-14. A revisão documental não promove campos no manifesto nem implementa
+funcionalidades. O estado atual e a matriz distinguem código existente, lacunas,
+recomendações e decisões ainda abertas; homologações antigas conservam seu escopo.
 
 - [`arquitetura/`](arquitetura/): especificações estruturais implementadas e
   decisões técnicas específicas de módulos.

@@ -1,6 +1,6 @@
 # Manifesto Físico da Planilha — v1
 
-Atualizado em: 2026-08-24
+Atualizado em: 2026-09-14
 
 ## Fonte oficial
 
@@ -53,16 +53,33 @@ Os dois indicadores de contexto do ambulatório apontam diretamente para
 `atendimento.ambulatorio_unicamente` e `atendimento.ambulatorio_anexo_projeto`;
 eles não são associações com `projeto_estudo`.
 
-Após a reconciliação final, 124 dos 136 rótulos têm cobertura estruturada plena:
-8 direta e 116 com transformação. Onze permanecem parciais por lacuna semântica
-ou de granularidade comprovada e `Localizado` permanece excluído. Cada parcial
-registra no próprio manifesto a razão específica e fica somente no JSONB bruto.
+O manifesto atual declara 124 dos 136 rótulos com cobertura estruturada plena:
+8 direta e 116 com transformação. Onze permanecem parciais e `Localizado`
+permanece excluído. Cada parcial registra uma razão no manifesto e fica somente
+no JSONB bruto. Essa classificação pertence ao contrato v1 anterior às novas
+respostas da equipe e não comprova sua cobertura funcional.
+
+## Divergências conhecidas após as respostas da equipe
+
+A fonte semântica vigente é
+[decisões humanas](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md), com avaliação na
+[matriz de impacto](dados/COBERTURA_COLUNAS_PLANILHA.md). Razões antigas de
+semântica indefinida para retornos, contrarreferência e `Localizado` ficaram
+superadas; destinos executáveis ainda não foram promovidos nesta revisão.
+
+O gerador infere tipo por trechos da transformação: idade aparece como `data`,
+enquanto retornos BZN e ano do retorno anual continuam `texto`. A revisão futura
+deve definir metadados explícitos coerentes com D1/D6/D7/D8, atualizar manifesto,
+gerador, validador, handlers e expectativas de testes conjuntamente. As contagens
+124/11 e as listas de parciais são fixadas nesses artefatos: aprovação do
+`manifest-check` atual não valida a nova semântica nem resolve essas lacunas.
 
 ## Exclusões deliberadas
 
 `Localizado` permanece no inventário físico, mas com cobertura `excluido`, sem
-tabela ou campo de destino. Seu valor poderá existir apenas no JSONB bruto quando
-o futuro importador for autorizado; não será promovido ao estruturado no MVP.
+tabela ou campo de destino. O importador sintético já o preserva somente no JSONB
+bruto. A equipe confirmou que indica prontuário físico localizado e pode sair do
+funcional; isso não autoriza purgar bruto nem remover `localizacao_prontuario`.
 
 As abas `P Digitar`, `AIM3 incluidos sem ambulatorio` e `AIM3 sem ambulatorio`
 estão registradas como fora do escopo e não possuem colunas no manifesto.
@@ -86,5 +103,5 @@ schema versionado, ausência de padrões sensíveis e igualdade dos cabeçalhos 
 fonte local. O validador não lê linhas de dados.
 
 O manifesto orienta `docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`, fonte das
-regras operacionais, e a futura planilha sintética. Não implementa o importador
+regras operacionais, e a fixture sintética já existente. Não implementa o importador
 nem autoriza dados reais.

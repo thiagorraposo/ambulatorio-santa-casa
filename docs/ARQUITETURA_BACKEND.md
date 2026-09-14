@@ -1,6 +1,6 @@
 # Arquitetura do Backend — Fundação consolidada na Etapa 4C
 
-Atualizado em: 2026-08-31
+Atualizado em: 2026-09-14
 
 Status: fundação pronta para os módulos clínicos da Etapa 5, ainda exclusivamente
 com dados sintéticos. Evidências: `docs/validacoes/VALIDACAO_ETAPA_4C.md`.
@@ -37,6 +37,11 @@ Guards globais separam autenticação de autorização: somente `@Public` abre r
 ausente, inválida ou expirada produz 401; perfil insuficiente, 403. A matriz está
 em `docs/validacoes/VALIDACAO_ETAPA_4C.md`.
 
+A negação por padrão é de autenticação, não de toda operação: `PerfisGuard`
+retorna autorização quando a rota não declara `@Perfis`. Antes de cada módulo
+clínico, exigir matriz explícita de operações e testes que detectem ausência de
+proteção esperada; a fundação atual não implementa autorização por recurso/linha.
+
 RBAC controla operações, não registros individuais. Sem regra institucional, a
 autorização por paciente/atendimento volta na Etapa 5 antes de endpoints clínicos
 e obrigatoriamente antes de dados reais.
@@ -50,11 +55,17 @@ contador é por processo. Coordenação distribuída e proxy/IP confiável perte
 O driver `pg` usa SQL explícito e parâmetros posicionais. Migrations ficam fora
 da API; não há ORM sincronizando schema, DDL de bootstrap ou migration no startup.
 
-Cada operação abre transação, executa `SET LOCAL ROLE ambulatorio_aplicacao` e
+Cada chamada de consulta ao `DatabaseService` abre transação, executa
+`SET LOCAL ROLE ambulatorio_aplicacao` e
 `SET LOCAL search_path`, e encerra com `COMMIT` ou `ROLLBACK`. Estado local não
 sobrevive à transação; falha de rollback destrói a conexão. `APP_DB_ROLE` recusa
 outra role. O login técnico é `NOINHERIT`, sem ownership, DDL ou capacidade de
 assumir owner/importador. Perfil funcional não altera a role efetiva.
+
+Consultas consecutivas do helper não compartilham automaticamente uma transação.
+Antes de escrita clínica composta, definir uma unidade transacional para todas
+as consultas da operação, preservando isolamento de role, rollback e descarte
+seguro. Não é necessária nova camada genérica antes de existir essa operação.
 
 `ambulatorio_aplicacao` não acessa `importacao_lote`, `importacao_linha` ou
 `importacao_registro`, inclusive `dados_brutos`. O bloqueio está no PostgreSQL.
@@ -104,3 +115,19 @@ exigirá allowlist explícita por ambiente.
 HTTP–PostgreSQL, autenticação/RBAC, rate limit e menor privilégio. Unitários
 cobrem contratos, configuração, logs, erros e limpeza segura do pool. Testes SQL
 preservam as garantias das Etapas 1–4B.
+
+## Contratos clínicos seguintes
+
+As respostas D1–D12 e os impactos constam nas
+[decisões humanas](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md) e na
+[matriz de impacto](dados/COBERTURA_COLUNAS_PLANILHA.md). Ainda não existem DTOs
+clínicos para esses campos: deverão ser criados conforme o contrato aprovado,
+sem expor automaticamente o schema ou o JSONB bruto. A listagem de pacientes
+atual não equivale a ficha, histórico ou CRUD clínico.
+
+O [roadmap](PROXIMOS_PASSOS.md) delimita módulos, dependências, validação e
+incertezas. Idade calculada, identificação dos exames, retornos repetíveis e
+pendências textuais podem aproveitar o banco atual; D2/D3 precisam de extensão
+mínima. A multiplicidade de contrarreferências está confirmada, mas representação
+documental e upload ainda dependem de contrato. Não foram adotadas aqui novas
+ADRs de armazenamento, RLS ou autenticação do frontend.

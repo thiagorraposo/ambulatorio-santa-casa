@@ -1,11 +1,11 @@
 # Especificação do Encaminhamento Ampliado
 
-Atualizado em: 2026-08-13
+Atualizado em: 2026-09-14
 
 ## Objetivo e escopo
 
-Este documento é a fonte de verdade técnica para a última evolução física mínima
-antes do MVP: ampliar o encaminhamento existente para registrar a apresentação do
+Este documento é a fonte de verdade técnica da migration 16, última das quatro
+evoluções físicas mínimas anteriormente planejadas: ampliar o encaminhamento para registrar a apresentação do
 documento e, quando informado, o projeto oficial de destino. As decisões
 semânticas permanecem em `docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`; o schema
 aplicado continua evidenciado por
@@ -13,8 +13,11 @@ aplicado continua evidenciado por
 
 A estrutura foi implementada por `sql/16_encaminhamento_ampliado.sql` e validada
 por `tests/sql/08_validar_encaminhamento_ampliado.sql`. Contrarreferência ficou
-fora da migration porque sua multiplicidade continua indefinida e ela não está
-inseparavelmente representada em `encaminhamento`.
+fora dessa migration. A indefinição de multiplicidade que motivou o adiamento
+foi superada por D10: são múltiplas por paciente. A representação documental e
+os estados detalhados continuam pendentes; não alterar a migration já aplicada.
+O diagnóstico abaixo descreve as lacunas anteriores à migration 16, não o schema
+atual após sua aplicação.
 
 ## Diagnóstico do modelo físico atual
 
@@ -37,7 +40,8 @@ preservação separada dos dois novos campos de origem.
 
 `acompanhamento_cuidado` pode apontar opcionalmente para um encaminhamento, mas
 descreve acompanhamento/retorno. Ele não estabelece uma representação
-inequívoca de contrarreferência nem resolve sua multiplicidade.
+inequívoca de documento de contrarreferência. A tabela admite ocorrências
+repetidas; multiplicidade isolada não exige nova tabela ou migration.
 
 ## Decisão estrutural
 
@@ -209,7 +213,11 @@ Nenhum bloqueio estrutural permaneceu. Tabela-alvo, campos, nulabilidade,
 cardinalidades, PK, FK, deleção, índice, valores originais, timestamps,
 convivência e fronteira de contrarreferência foram implementados e validados.
 
-### Regra futura do importador
+### Contrato do importador
+
+O handler de encaminhamento e seus destinos já existem no importador v1. A lista
+registra o contrato a preservar; o estado executável e os limites transversais
+de reprocessamento estão em [Importador Sintético v1](../IMPORTADOR_SINTETICO_V1.md).
 
 - mapear tokens confirmados de booleano sem converter vazio ou ambiguidade em
   `FALSE`;
@@ -223,9 +231,18 @@ convivência e fronteira de contrarreferência foram implementados e validados.
 
 Essas regras bloqueiam a carga estruturada real desse módulo, mas não a migration.
 
-### Item adiável para depois do MVP
+### Contrarreferência após D10
 
-- definir cardinalidade e estrutura própria de contrarreferência;
+Múltiplos documentos comunicam conduta e orientação à APS após os retornos. O
+registro múltiplo é P1 proposto; upload é P2 proposto, sujeito à confirmação da
+equipe. Definir representação, estados e vínculo antes de implementar, avaliando
+reutilização de acompanhamento. Não inferir emissão/entrega a partir do retorno,
+nem confundir com `documento_apresentado` do encaminhamento. A fonte semântica é
+[decisões humanas](../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md) e a sequência está no
+[roadmap](../PROXIMOS_PASSOS.md).
+
+### Itens adiáveis para depois do MVP
+
 - eventual vínculo direto de encaminhamento ao paciente se atendimento vier a se
   tornar opcional por requisito futuro;
 - histórico temporal de alterações do projeto ou do documento apresentado;

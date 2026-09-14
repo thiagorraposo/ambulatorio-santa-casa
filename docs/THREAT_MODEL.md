@@ -1,6 +1,6 @@
 # Threat Model Pré-Dados Reais
 
-Atualizado em: 2026-08-31
+Atualizado em: 2026-09-14
 
 ## Escopo e premissas
 
@@ -22,8 +22,8 @@ autorizado exclusivamente para dados sintéticos.
 
 O arquivo XLSX é entrada não confiável. O importador valida estrutura e valores
 antes de promover registros. PostgreSQL é a fronteira persistente. O operador de
-migrations conserva privilégios de owner; processos de importação e futura
-aplicação devem assumir roles sem ownership. GitHub Actions recebe somente código,
+migrations conserva privilégios de owner; importador e backend usam roles sem
+ownership. GitHub Actions recebe somente código,
 manifesto e fixture sintética e cria credenciais descartáveis não institucionais.
 
 ## Ameaças e controles atuais
@@ -33,18 +33,19 @@ manifesto e fixture sintética e cria credenciais descartáveis não institucion
 | Planilha adulterada ou layout divergente | interpretação errada e corrupção | SHA-256, manifesto versionado, validação exata de abas/cabeçalhos, transformações fechadas e dry-run | assinatura/autoria institucional da fonte não definida |
 | Identidade ambígua ou conflito entre abas | associação clínica indevida | conciliação determinística, rejeição de múltiplos candidatos, precedência documentada e métricas de conflito | revisão humana e responsável formal pendentes |
 | Privilégio excessivo ou comprometimento do importador | leitura/alteração ampla, DDL ou exclusão | role sem login, sem ownership/CREATE/DELETE; DML e sequências estritamente necessários | provisionamento de login/segredo e rotação dependem do ambiente protegido |
-| Aplicação futura acessando conteúdo bruto | exposição de dados sensíveis | role da aplicação sem privilégio sobre tabelas de importação | autorização por perfil/linha e API ainda não existem |
+| Aplicação acessando conteúdo bruto | exposição de dados sensíveis | role da aplicação sem privilégio sobre tabelas de importação; API mínima e RBAC já existem | autorização por recurso/linha e auditoria de acesso pendentes; não criar exposição genérica de JSONB |
 | Vazamento por logs ou CI | exposição de identificadores/conteúdo clínico | log JSON com allowlist, sem valores de célula; CI somente sintética e sem segredos reais | coleta, retenção e acesso a logs de produção não definidos |
 | Dry-run persistindo dados | criação clínica antes da revisão | pipeline real dentro de transação externa com rollback; teste compara contagens antes/depois | falhas de conexão abruptas são protegidas pela atomicidade do PostgreSQL |
-| Reprocessamento duplicando ocorrências | histórico clínico duplicado | hash/layout, predecessor encadeado, proveniência e reutilização idempotente | política operacional para autorizar reprocessamento pendente |
+| Reprocessamento duplicando ocorrências ou mantendo pendência resolvível | histórico duplicado ou desatualizado | hash/layout, predecessor encadeado, proveniência e reutilização no contrato v1 | novo hash não reconcilia atualização clínica; reutilização de linha pendente pula handlers; implementar política temporal e promoção controlada |
+| BZN repetido em linhas do mesmo paciente | violação de unicidade e interrupção do lote | unicidade física impede duplicar o tratamento consolidado | `treatment()` não reconcilia tratamento existente; corrigir importador, não relaxar a constraint |
 | Execução não reproduzível ou repudiável | auditoria inconclusiva | versão/hash do manifesto, versão do importador, revisão Git e hash do arquivo no lote/report | árvore Git suja não é persistida; releases assinados não definidos |
 | Backup, volume ou planilha local expostos | vazamento em repouso | bind local, `.gitignore`, dumps fora do Git e proibição explícita de dados reais | criptografia, retenção, descarte, acesso institucional e backup de produção pendentes |
 | SQL malformado por conteúdo de origem | alteração/injeção | literais escapados pelo adaptador, domínios fechados e role sem DDL/DELETE | migrar futuramente para driver parametrizado é recomendável antes de produção |
 | Perda ou alteração de proveniência | auditoria incompleta | FKs `RESTRICT`, vínculos N:N, raw posicional e ausência de DELETE na role importadora | auditoria de acesso e detector de alvo polimórfico órfão pendentes |
 | Força bruta ou enumeração no login | comprometimento de conta | resposta uniforme, bcrypt inclusive para conta ausente e limite por IP/instância | contador distribuído, proxy confiável e bloqueio adaptativo pendentes |
 | Roubo ou reutilização de token | acesso até expiração | JWT HS256 curto, secret externo, token fora dos logs e usuário ativo relido | TLS e armazenamento frontend pendentes; revogação individual somente quando houver requisito de encerrar sessão específica |
-| Escalada por perfil | acesso indevido | guards globais, negação por padrão, perfis explícitos e 401/403 separados | autorização por recurso/linha e auditoria institucional pendentes |
-| Estado privilegiado residual no pool | consulta posterior com contexto indevido | transação por operação, `SET LOCAL ROLE/search_path`, rollback e descarte se a limpeza falhar | revisar se futuras operações multiquery exigirem unidade transacional maior |
+| Escalada por perfil | acesso indevido | autenticação global, `@Perfis` nas operações delimitadas e 401/403 separados | sem `@Perfis`, o guard de perfis permite usuário autenticado; exigir matriz explícita nos módulos clínicos, autorização por recurso/linha e auditoria |
+| Estado privilegiado residual no pool | consulta posterior com contexto indevido | transação por chamada de consulta, `SET LOCAL ROLE/search_path`, rollback e descarte se a limpeza falhar | escrita clínica com várias consultas exige unidade transacional maior |
 
 ## Decisões de risco
 
@@ -53,8 +54,22 @@ autorização depende no mínimo de ambiente protegido, TLS, gestão de segredos
 backup/restore institucional, retenção, auditoria de acesso, responsáveis por
 autorizar lotes e revisar pendências e processo formal de resposta a incidentes.
 
-Este documento deve ser revisto ao iniciar backend, mudar o formato de entrada,
-criar infraestrutura não local ou aprovar qualquer uso de dados reais.
+Este documento deve ser revisto ao adicionar módulos clínicos, mudar o formato de
+entrada, introduzir upload, criar infraestrutura não local ou aprovar qualquer
+uso de dados reais.
+
+## Evolução de contrarreferência e arquivos
+
+D10 confirma multiplicidade e importância do upload, mas não define sua entrega
+no MVP nem a arquitetura de armazenamento. Ao especificar anexos, prever acesso
+privado e autorizado por recurso, limites de tamanho/tipo, tratamento seguro de
+conteúdo, auditoria e retenção/descarte institucionais. Não criar bucket público,
+expor caminhos internos ou incluir documentos reais em fixtures. São requisitos
+de análise da evolução, não controles de upload já implementados.
+
+A [matriz de impacto](dados/COBERTURA_COLUNAS_PLANILHA.md) e o
+[roadmap](PROXIMOS_PASSOS.md) registram os contratos ainda pendentes, inclusive
+preservação do histórico e proibição de inventar datas a partir do ano legado.
 
 ## Revisão das Etapas 4A e 4B
 

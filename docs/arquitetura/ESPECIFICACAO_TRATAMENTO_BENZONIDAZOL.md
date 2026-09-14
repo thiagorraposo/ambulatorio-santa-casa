@@ -1,6 +1,6 @@
 # Especificação do Tratamento com Benzonidazol
 
-Atualizado em: 2026-08-13
+Atualizado em: 2026-09-14
 
 ## Objetivo e escopo
 
@@ -16,6 +16,11 @@ pelos 27 cenários de `tests/sql/07_validar_tratamento_benzonidazol.sql`. A
 especificação não autoriza importação de dados reais e não
 define conduta clínica. Célula vazia continua significando informação ausente,
 nunca resposta negativa.
+
+Esta especificação preserva o desenho e o aceite da migration 15. O diagnóstico
+e a linguagem de criação abaixo descrevem sua motivação original, não uma etapa
+a refazer. As novas respostas D6/D7 ampliam o fluxo funcional, conforme a seção
+de retornos abaixo, sem autorizar alteração dessa migration já aplicada.
 
 ## Diagnóstico do modelo físico atual
 
@@ -262,13 +267,20 @@ não autoriza sobrescrever silenciosamente informação já consolidada.
 
 Nenhum. A migration foi implementada e validada.
 
-### Regras futuras do importador
+### Contrato do importador e lacunas atuais
+
+Manifesto, aliases, conversões e handler BZN já existem. A lista abaixo registra
+o contrato do módulo, não tarefas inteiramente por implementar. A análise de
+2026-09-14 verificou que `treatment()` ainda insere sem reconciliar BZN existente,
+apesar da unicidade por paciente; esse caminho requer regressão sintética e
+correção localizada no importador, não migration. Detalhes em
+[Importador Sintético v1](../IMPORTADOR_SINTETICO_V1.md).
 
 - manifestar posições, aliases e ocorrências dos cabeçalhos de BZN;
 - definir conversões aceitas para duração em dias, preservando o original;
 - converter datas e ano sem completar partes ausentes;
-- confirmar `Uso do benzonidazol para tratamento da DC?` como origem segura de
-  `iniciado`; caso contrário, gerar pendência;
+- preservar o mapeamento vigente de `Uso do benzonidazol para tratamento da DC?`
+  para `iniciado`, conforme manifesto e handler, sem converter vazio em negação;
 - manter `motivo_nao_inicio` nulo para `Se não, descreva o motivo`;
 - reconciliar várias linhas do mesmo paciente sem sobrescrita silenciosa;
 - tratar contradições entre indicação, início, duração, prescrição, realização
@@ -277,11 +289,25 @@ Nenhum. A migration foi implementada e validada.
   reprocessamentos;
 - registrar todos os destinos em `importacao_registro`.
 
+### Retornos de BZN após as respostas D6/D7
+
+Registrar a data do comparecimento efetivo no retorno de 30 dias e no retorno
+final após concluir BZN. Não calcular automaticamente 30 dias nem converter a
+menção a geralmente 60 dias em duração obrigatória. Retorno final e fim do uso
+do medicamento são fatos distintos.
+
+Esses retornos passam a P1 no [roadmap proposto](../PROXIMOS_PASSOS.md), não ao
+adiamento genérico. `acompanhamento_cuidado` já admite ocorrências repetidas,
+tipo textual e `data_realizada`, com paciente obtido pelo atendimento. Definir
+tipo/vínculo antes de implementar; FK direta ao BZN é escolha técnica opcional,
+não exigência automática de migration. Importador, API e interface ainda não
+implementam esse fluxo. A fonte integral está nas
+[decisões humanas](../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md).
+
 ### Itens adiáveis para depois do MVP
 
 - domínio institucional de gravidade;
 - domínio institucional de consequência;
-- retornos de 30 dias e final do tratamento;
 - adesão, suspensão, conclusão, dose e esquema terapêutico canônicos;
 - visão ou API unificada entre estruturas canônica e legada;
 - backfill auditado ou descontinuação de `tratamento_chagas`;

@@ -1,6 +1,6 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-09-03
+Atualizado em: 2026-09-14
 
 Esta é a síntese vigente do sistema. Detalhes normativos pertencem às fontes
 temáticas indicadas abaixo; decisões antigas e resultados de etapas permanecem
@@ -9,13 +9,15 @@ preservados em `historico/`, `validacoes/` e no registro cronológico.
 ## Escopo e estágio
 
 O projeto organiza registros do ambulatório em PostgreSQL e já contém migrations,
-dez testes SQL transacionais, importador sintético homologado, hardening, CI e
+dez testes SQL transacionais, importador com homologação sintética do contrato v1, hardening, CI e
 uma fundação NestJS com autenticação e autorização mínimas. Não há frontend,
 escrita clínica HTTP, gestão de usuários nem autorização para dados reais.
 
-A Etapa 4C está concluída. A próxima evolução é a Etapa 5, ainda exclusivamente
-com dados sintéticos e precedida pela definição do contrato e da autorização por
-recurso de cada módulo clínico.
+A Etapa 4C está concluída. As doze respostas de `Perguntas pendentes.docx` foram
+consolidadas documentalmente em 2026-09-14, mas ainda não incorporadas ao contrato
+executável. A Etapa 5 foi reorganizada para resolver lacunas do importador,
+complementar somente a modelagem indispensável e entregar API/interface clínicas,
+sempre com dados sintéticos e autorização definida por módulo.
 
 ## Componentes vigentes
 
@@ -26,8 +28,9 @@ recurso de cada módulo clínico.
   evidência física é
   [`evidencias/schema_atual_ambulatorio.sql`](evidencias/schema_atual_ambulatorio.sql).
 - Importador v1 em Python, homologado com fixture sintética nas duas abas
-  clínicas, 124 rótulos plenamente cobertos, onze preservados apenas no bruto e
-  `Localizado` excluído do estruturado. O contrato normativo está em
+  clínicas; o manifesto declara 124 rótulos plenos, onze preservados apenas no
+  bruto e `Localizado` excluído do estruturado. Esses números não comprovam
+  cobertura funcional das novas respostas. O contrato normativo está em
   [`ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`](ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md),
   a implementação em [`IMPORTADOR_SINTETICO_V1.md`](IMPORTADOR_SINTETICO_V1.md)
   e a reconciliação em
@@ -35,14 +38,17 @@ recurso de cada módulo clínico.
 - Backend Node.js/NestJS em monólito modular, com `health`, `auth` e `pacientes`,
   driver `pg`, JWT, RBAC, rate limit local, SQL parametrizado e menor privilégio.
   A fonte normativa é [`ARQUITETURA_BACKEND.md`](ARQUITETURA_BACKEND.md).
-- PostgreSQL Docker opcional em `127.0.0.1:5433`; o ambiente local em 5432 é
-  alternativa manual. Docker e CI usam somente dados sintéticos.
+- PostgreSQL Docker em `127.0.0.1:5433`, padrão do Makefile (`DB_ENV=docker`);
+  o ambiente local em 5432 é alternativa explícita. Docker e CI usam somente
+  dados sintéticos. A API atual expõe saúde, autenticação e listagem mínima de
+  pacientes (`pacienteId`, `nome`), não ficha clínica completa.
 
 ## Garantias atuais
 
 - O importador valida manifesto/layout, trabalha por linha em transação, concilia
-  pacientes, registra proveniência e suporta idempotência e reprocessamento
-  encadeado explícito.
+  pacientes e registra proveniência. Idempotência e reprocessamento encadeado
+  existem para o contrato v1; promoção de pendências e atualização de uma mesma
+  linha clínica em arquivo modificado têm limitações descritas abaixo.
 - As migrations antigas aplicadas permanecem imutáveis; evoluções usam novas
   migrations. A decisão completa está nas ADR-001 e ADR-002 de
   [`DECISOES_ARQUITETURAIS.md`](DECISOES_ARQUITETURAIS.md).
@@ -58,11 +64,31 @@ recurso de cada módulo clínico.
 
 ## Limites e pendências
 
+O modelo já permite idade derivada do nascimento, exames identificados por bloco,
+acompanhamentos repetíveis e pendências textuais. Faltam representação própria da
+data de descoberta de Chagas e do exame de familiares. A multiplicidade de
+contrarreferências foi confirmada; seu contrato documental e o momento do upload
+ainda precisam de decisão. A exclusão funcional de `Localizado` foi confirmada,
+sem remover o bruto nem confundir com localização do prontuário.
+
+O importador tenta inserir BZN novamente para o mesmo paciente; o caminho de
+reprocessamento reutiliza linhas com pendência antes de executar seus handlers;
+erros secundários também podem rejeitar a linha inteira. Um arquivo com novo hash
+não tem reconciliação de atualização clínica: pode gerar outro atendimento. A
+fonte legada guarda o último ano de retorno e é atualizada, portanto esse fluxo
+precisa de contrato temporal. A fixture antiga não cobre essas novas exigências.
+
+Não existem DTOs nem endpoints clínicos a corrigir: precisam ser implementados.
+O guard de perfis permite rota autenticada sem metadados `@Perfis`; autorização
+explícita por operação/recurso ainda é trabalho de cada novo módulo. O helper de
+banco faz transação por consulta, não por uma sequência clínica de várias consultas.
+
 Dados reais continuam bloqueados por governança institucional, ambiente
 protegido, TLS, gestão/rotação de segredos, backup e retenção, auditoria de acesso,
 responsáveis por autorizar lotes e revisar inconsistências e resposta a
-incidentes. Autorização por recurso/linha, rate limit distribuído e requisitos
-dos módulos clínicos também permanecem pendentes.
+incidentes. Autorização por recurso/linha e requisitos dos módulos clínicos
+permanecem pendentes; necessidade de rate limit distribuído depende da topologia
+de implantação e não é requisito para avançar com um MVP sintético local.
 
 O roadmap, a ordem do próximo trabalho e o backlog autorizado têm uma única fonte:
 [`PROXIMOS_PASSOS.md`](PROXIMOS_PASSOS.md).
@@ -79,3 +105,11 @@ O roadmap, a ordem do próximo trabalho e o backlog autorizado têm uma única f
 
 Mudanças relevantes atualizam o registro cronológico e somente as fontes
 temáticas realmente afetadas.
+
+Na análise de 2026-09-14 foram inspecionados código, migrations, dump, testes, CI e
+Docker, além de consultas somente de leitura ao schema/permissões do ambiente
+Docker. Passaram cinco testes Python, 17 testes unitários do backend, TypeScript
+sem emissão, verificações documental/manifesto e configuração Docker. Não foram
+reexecutados E2E, testes SQL, integração HTTP/SQL nem CI remoto; não houve nova
+homologação completa ou regeneração do dump. A atualização subsequente alterou
+somente documentação e tem validação delimitada no registro cronológico.

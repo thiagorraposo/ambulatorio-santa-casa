@@ -1,6 +1,6 @@
 # Metadados Seguros do Layout da Planilha
 
-Atualizado em: 2026-08-21
+Atualizado em: 2026-09-14
 
 ## Fonte canônica
 
@@ -37,12 +37,14 @@ auxiliares permanecem fora do manifesto de importação.
 ## Decisões aplicáveis ao MVP
 
 - somente as duas abas clínicas entram na primeira versão;
-- cada linha representa um atendimento e a aba determina a condição de Chagas;
+- o v1 cria um atendimento por linha e a aba determina a condição de Chagas;
+  linhas atualizadas exigem revisão de temporalidade conforme D8;
 - portadores prevalece em conflito de paciente entre abas;
 - coluna ausente ou célula vazia significa não informado, nunca resposta negativa;
 - os dois blocos de exames devem registrar bloco, posição, ocorrência e tipo;
 - o cabeçalho canônico é `Responsável pela digitação`;
-- `Localizado` permanece sem semântica suficiente e fora do mapeamento estruturado;
+- `Localizado` indica prontuário físico encontrado; D12 confirmou sua exclusão
+  funcional, mantendo apenas proveniência bruta;
 - a aba operacional e as duas abas AIM3 ficam fora do MVP.
 
 As regras completas estão em `docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`.

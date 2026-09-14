@@ -1,6 +1,6 @@
 # Especificação Normativa do Importador da Planilha — v1
 
-Atualizado em: 2026-08-26
+Atualizado em: 2026-09-14
 
 ## Preflight, relatório e rastreabilidade
 
@@ -16,22 +16,26 @@ manifesto, importador e Git. O lote aplicado persiste hash do manifesto, versão
 do importador e revisão Git. Logs JSON permitem apenas eventos/metadados técnicos
 e contadores, nunca valores de células ou mensagens clínicas por linha.
 
-Status: contrato implementado e homologado para execução sintética; dados reais
-continuam não autorizados.
+Status: contrato v1 com homologação sintética original e lacunas de implementação
+identificadas na análise de 2026-09-14. As novas respostas da equipe ainda não
+foram incorporadas ao manifesto/handlers; dados reais continuam não autorizados.
 
 ## Finalidade, autoridade e escopo
 
-Este documento é a fonte de verdade única para implementar o importador sintético
+Este documento é a fonte normativa operacional para implementar o importador sintético
 do layout `planilha_ambulatorio_v1`. Ele normatiza identificação, conciliação,
 transformação, conflitos, idempotência, retomada, reprocessamento e proveniência.
 
-Em caso de divergência, aplica-se esta ordem:
+As fontes têm responsabilidades distintas:
 
-1. `manifestos/planilha_ambulatorio_v1.json` para aba, posição, ocorrência,
-   bloco, tipo e destino físico de cada coluna;
-2. este documento para comportamento operacional do importador;
-3. `docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md` para semântica clínica aprovada;
-4. `docs/evidencias/schema_atual_ambulatorio.sql` para a estrutura aplicada.
+1. `docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md` determina a semântica de negócio,
+   incluindo as respostas D1–D12; texto antigo do manifesto não a sobrepõe;
+2. este documento define o comportamento operacional pretendido;
+3. `manifestos/planilha_ambulatorio_v1.json` descreve o contrato físico atualmente
+   consumido pelo importador: aba, posição, ocorrência, bloco, tipo e destino;
+4. código, migrations, testes e configuração executável comprovam o comportamento
+   implementado; `docs/evidencias/schema_atual_ambulatorio.sql` registra o schema
+   aplicado, sem substituir a verificação do ambiente.
 
 Uma incompatibilidade entre essas fontes bloqueia a promoção estruturada afetada;
 o importador não escolhe silenciosamente uma interpretação. Esta especificação
@@ -41,6 +45,26 @@ O MVP lê somente as abas `Pacientes portadores de DC` e
 `Pacientes não portadores de DC`. `P Digitar` e as abas AIM3 ficam fora do fluxo.
 `Localizado` é preservado apenas em `importacao_linha.dados_brutos`, com cobertura
 `excluido`, e nunca é promovido ao modelo estruturado do MVP.
+
+## Evolução confirmada e limites de implementação
+
+As [decisões humanas](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md) são a fonte integral
+das respostas; a [matriz de impacto](dados/COBERTURA_COLUNAS_PLANILHA.md) avalia
+destinos reutilizáveis, migrations justificadas e testes. Não mais considerar
+todos os onze campos parciais como pós-MVP nem a multiplicidade de contrarreferência
+indefinida. A exclusão funcional de `Localizado` foi confirmada.
+
+Até a revisão executável, campos `parcial` continuam exclusivamente brutos. Não
+promover dados por interpretação ad hoc. Referência da idade, representação do
+ano legado, contrato documental de contrarreferência e retirada do desfecho ainda
+exigem as decisões delimitadas na fonte de negócio. Atualização de uma linha da
+planilha não comprova nova visita e não permite reconstruir histórico perdido.
+
+Os achados em `treatment()`, `reuse_predecessor()` e `RowConflict` estão descritos
+no [estado da implementação](IMPORTADOR_SINTETICO_V1.md): a reconciliação BZN,
+promoção de pendências e política de erros secundários abaixo são requisitos
+normativos, não garantias plenamente implementadas. Esta revisão só documenta as
+divergências; não modifica código, manifesto, schema ou testes.
 
 ## Vocabulário operacional
 
@@ -55,6 +79,10 @@ O MVP lê somente as abas `Pacientes portadores de DC` e
 - **linha clínica válida:** linha de dados não vazia, de aba/layout aceitos, com
   nome, data de nascimento e data do atendimento válidos, identidade conciliada
   sem conflito e apta a gerar exatamente um atendimento.
+
+A associação linha → atendimento acima descreve o contrato v1. Antes de importar
+versões revisadas de uma planilha, aprovar a política temporal de D8; não estender
+essa regra automaticamente a toda atualização do registro de origem.
 
 Vazio e ausente resultam em `NULL` ou ausência de registro dependente, nunca em
 `FALSE`, zero, string vazia normalizada ou catálogo `nao_informado`. Inválido
@@ -419,18 +447,27 @@ PostgreSQL controlado, fora de logs, Git, APIs genéricas e dumps compartilhados
 
 ### 1. Bloqueiam o importador
 
-Nenhuma pendência técnica bloqueia o importador sintético do MVP. As onze chaves
-com cobertura `parcial` possuem comportamento fechado: ficam no bruto, não são
-promovidas e tornam uma linha clínica válida `importada_com_pendencia`. Elas só
-podem ganhar destino pleno após decisão humana específica e atualização
-versionada do contrato.
+O contrato sintético antigo pode ser exercitado em seu escopo homologado, mas
+não equivale a prontidão para o MVP revisado. Bloqueiam seus fluxos afetados:
 
-Autoridade de importação, responsável por revisão, roles, privilégios, retenção e
-auditoria de acesso continuam bloqueando exclusivamente dados reais.
+- reconciliar BZN quando duas linhas preenchidas referem o mesmo paciente;
+- permitir resolução controlada de pendências no reprocessamento;
+- fechar a política temporal antes de importar atualizações da mesma fonte;
+- escolher destinos/representações ainda pendentes antes de promover D2/D3 e
+  outros campos cujo contrato não esteja fechado.
+
+As onze chaves `parcial` continuam brutas e, quando preenchidas, tornam a linha
+`importada_com_pendencia`. As respostas já confirmadas dispensam rediscutir sua
+semântica, mas não dispensam atualização coordenada de manifesto, handlers e testes.
+
+Autoridade de importação, responsável por revisão, provisionamento institucional
+dos logins/segredos, retenção e auditoria de acesso continuam bloqueando dados
+reais. As roles e o isolamento técnico já existem; não são uma etapa a refazer.
 
 ### 2. Podem ser tratadas durante a implementação
 
-- códigos estáveis das mensagens técnicas e formato do relatório de execução;
+- revisão da política de erros críticos/não críticos e seus testes; relatório
+  estruturado e códigos técnicos já existem na v1.1.0;
 - mecanismo concreto de bloqueio exclusivo por lote e detecção de executor ativo;
 - lista de tabelas permitidas derivada do manifesto e verificação de alvos órfãos;
 - testes sintéticos de concorrência, queda e retomada;
@@ -442,7 +479,8 @@ Esses itens não autorizam alterar as regras normativas deste documento.
 
 - prontuário permanente e sua futura unicidade;
 - fluxo das abas operacional e AIM3;
-- multiplicidade de contrarreferência;
+- upload de contrarreferência, provisoriamente P2 e sujeito à confirmação da equipe;
+  registro múltiplo não integra mais o adiamento genérico;
 - histórico temporal de participação em projetos e backfills legados;
 - domínio clínico de gravidade/consequência de reação adversa;
 - associação do responsável legado a usuário;
@@ -452,9 +490,10 @@ Esses itens não autorizam alterar as regras normativas deste documento.
 
 ## Critério de prontidão
 
-Estas regras e o manifesto formam contrato fechado para implementar o importador
-sintético do MVP. “Fechado” inclui o tratamento determinístico das onze chaves
-parciais somente no bruto; não significa cobertura estruturada artificial. Dados
-reais continuam bloqueados pela governança institucional. Alterar uma regra
-normativa exige atualização explícita deste documento e, quando afetar
-layout/destino, revisão versionada do manifesto.
+A homologação anterior comprovou a fixture e o contrato v1, incluindo preservação
+determinística das onze chaves parciais. A prontidão para o MVP revisado depende
+dos critérios do [roadmap](PROXIMOS_PASSOS.md), regressões das lacunas conhecidas e
+cenários sintéticos das novas decisões; não decorre apenas da contagem de 124
+rótulos. Dados reais continuam bloqueados pela governança institucional. Alterar
+uma regra normativa exige revisão explícita deste documento e, quando afetar
+layout/destino, atualização coordenada e versionada do manifesto e implementação.

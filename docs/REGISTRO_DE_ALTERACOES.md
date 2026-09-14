@@ -1,6 +1,6 @@
 # Registro de Alterações
 
-Atualizado em: 2026-09-03
+Atualizado em: 2026-09-14
 
 ## Como Registrar Mudanças
 
@@ -25,6 +25,46 @@ Além deste arquivo, atualize quando necessário:
 - `docs/historico/HISTORICO_DE_IMPLEMENTACAO.md`
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
+
+## 2026-09-14 - Respostas da equipe, impacto e roadmap revisado
+
+Atualizadas somente fontes vigentes de `docs/` após leitura integral das doze
+respostas de `Perguntas pendentes.docx` e análise do estado real do repositório.
+
+- Consolidadas decisões D1–D12, sem transformar ambiguidade em regra clínica:
+  idade calculada, descoberta de Chagas, exame de familiares, identificação de
+  exames, datas de retornos BZN, histórico/ano legado, possível retirada do
+  desfecho, contrarreferências múltiplas/upload, pendências textuais e exclusão
+  funcional de `Localizado`.
+- Atualizada a matriz por camada, necessidade real de migration, prioridade e
+  testes. Registrado reaproveitamento do modelo e extensão mínima justificada
+  para descoberta/rastreio familiar, ainda dependente de contrato técnico.
+- Reorganizado o roadmap após a Etapa 4C, sem refazer as migrations mínimas nem
+  presumir que todos os campos brutos podem ficar no pós-MVP. A próxima tarefa
+  técnica proposta é somente reconciliar BZN repetido no importador.
+- Documentadas divergências em reconciliação BZN, promoção de pendências,
+  criticidade de erros, temporalidade de arquivos revisados e metadados do
+  manifesto. Os números 124/11 continuam descrevendo o contrato executável antigo,
+  não homologação das novas respostas.
+- Alinhados estado atual, índice, metadados seguros, contrato/implementação do
+  importador, manifesto físico, especificações de BZN/encaminhamento, backend e
+  riscos. Explicitados limites do guard de perfis e da transação por consulta.
+
+Fontes centrais: [decisões humanas](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md),
+[matriz de impacto](dados/COBERTURA_COLUNAS_PLANILHA.md) e
+[roadmap](PROXIMOS_PASSOS.md). Relatórios e registros históricos foram preservados;
+não houve nova ADR de solução ainda não escolhida.
+
+Validação desta edição: `make docs-check`, `make manifest-check`,
+`git diff --check`, conferência de links locais dos documentos alterados e revisão
+do escopo no Git. `make project-check` não foi executado porque inclui testes SQL
+com escrita, ainda que seguida de rollback. As verificações funcionais realizadas
+na análise anterior estão delimitadas no estado atual e não representam nova
+homologação E2E/CI.
+
+Não foram alterados código, migrations, manifesto JSON, testes, configuração,
+banco, dump estrutural ou o DOCX fornecido. Nenhum dado clínico real foi utilizado.
+Nenhum commit ou push foi realizado.
 
 ## 2026-09-03 - Reorganização da documentação
 
