@@ -1,6 +1,6 @@
 # Cobertura das Colunas da Planilha pelo Núcleo Físico
 
-Atualizado em: 2026-09-14
+Atualizado em: 2026-09-15
 
 ## Fonte e critério
 
@@ -135,8 +135,8 @@ P2 é importante, não bloqueante; P3 é pós-MVP. Prioridades são propostas t�
   validador e teste fixam contagens/allowlists antigas. A detecção de tipo por
   transformação classifica idade como data e deixa retornos/ano como texto. A
   promoção deve atualizar esses artefatos conjuntamente, não apenas a documentação.
-- **Integridade:** `treatment()` tenta inserir novo BZN sem reconciliar o existente;
-  `reuse_predecessor()` reutiliza também linhas com pendência antes dos handlers;
+- **Integridade:** a v1.1.1 corrige a reconciliação BZN com regressões sintéticas;
+  `reuse_predecessor()` ainda reutiliza linhas com pendência antes dos handlers;
   `RowConflict` rejeita toda a linha para erros que o contrato admite tratar como
   não críticos. Esses achados e seus limites estão no
   [estado do importador](../IMPORTADOR_SINTETICO_V1.md).
@@ -158,8 +158,9 @@ P2 é importante, não bloqueante; P3 é pós-MVP. Prioridades são propostas t�
   orientação futura não transformada em retorno realizado; preservar histórico.
 - D10/D11/D12: contrarreferências múltiplas, estados desconhecidos, pendência livre,
   observação clínica preservada e ausência funcional de `Localizado` com bruto intacto.
-- Transversais: BZN repetido compatível/conflitante, reprocessamento que resolve
-  pendência, proveniência, atomicidade e acesso negado por operação/recurso.
+- Transversais: BZN repetido compatível/conflitante, preenchimento de nulos e
+  atomicidade foram cobertos na v1.1.1. Ainda faltam reprocessamento que resolve
+  pendência e acesso negado por operação/recurso nos novos módulos clínicos.
 
 Não alterar os testes SQL históricos apenas por conterem o modelo anterior: o
 teste de encaminhamento que evita colunas específicas de contrarreferência só

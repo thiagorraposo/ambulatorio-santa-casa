@@ -1,6 +1,6 @@
 # Threat Model Pré-Dados Reais
 
-Atualizado em: 2026-09-14
+Atualizado em: 2026-09-15
 
 ## Escopo e premissas
 
@@ -37,7 +37,7 @@ manifesto e fixture sintética e cria credenciais descartáveis não institucion
 | Vazamento por logs ou CI | exposição de identificadores/conteúdo clínico | log JSON com allowlist, sem valores de célula; CI somente sintética e sem segredos reais | coleta, retenção e acesso a logs de produção não definidos |
 | Dry-run persistindo dados | criação clínica antes da revisão | pipeline real dentro de transação externa com rollback; teste compara contagens antes/depois | falhas de conexão abruptas são protegidas pela atomicidade do PostgreSQL |
 | Reprocessamento duplicando ocorrências ou mantendo pendência resolvível | histórico duplicado ou desatualizado | hash/layout, predecessor encadeado, proveniência e reutilização no contrato v1 | novo hash não reconcilia atualização clínica; reutilização de linha pendente pula handlers; implementar política temporal e promoção controlada |
-| BZN repetido em linhas do mesmo paciente | violação de unicidade e interrupção do lote | unicidade física impede duplicar o tratamento consolidado | `treatment()` não reconcilia tratamento existente; corrigir importador, não relaxar a constraint |
+| BZN repetido em linhas do mesmo paciente | violação de unicidade ou sobrescrita indevida | v1.1.1 consulta por paciente, bloqueia tratamento existente, reconcilia nulos/igualdades e rejeita divergências com rollback; unicidade física preservada | concorrência na primeira criação por executores distintos não homologada; promoção de pendências continua separada |
 | Execução não reproduzível ou repudiável | auditoria inconclusiva | versão/hash do manifesto, versão do importador, revisão Git e hash do arquivo no lote/report | árvore Git suja não é persistida; releases assinados não definidos |
 | Backup, volume ou planilha local expostos | vazamento em repouso | bind local, `.gitignore`, dumps fora do Git e proibição explícita de dados reais | criptografia, retenção, descarte, acesso institucional e backup de produção pendentes |
 | SQL malformado por conteúdo de origem | alteração/injeção | literais escapados pelo adaptador, domínios fechados e role sem DDL/DELETE | migrar futuramente para driver parametrizado é recomendável antes de produção |

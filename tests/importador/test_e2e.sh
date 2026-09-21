@@ -28,8 +28,12 @@ psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_S
 SET search_path TO ambulatorio, public;
 INSERT INTO paciente (codigo_planilha,nome,data_nascimento,grupo_origem_planilha) VALUES
 ('P-ANA','Ana Sintética','1980-02-10','portador_dc'),
+('P-NOVO','Carlos Sintético','1990-03-03','portador_dc'),
 ('DUP-A','Identidade Duplicada','1984-04-04','portador_dc'),
 ('DUP-B','IDENTIDADE DUPLICADA','1984-04-04','portador_dc');
+INSERT INTO tratamento_benzonidazol (paciente_id,tem_indicacao,teve_reacao_adversa,
+                                    valor_original_indicacao,valor_original_reacao_adversa)
+SELECT paciente_id,TRUE,FALSE,'sim','não' FROM paciente WHERE codigo_planilha='P-NOVO';
 INSERT INTO projeto_estudo (codigo_projeto,nome_projeto) VALUES
 ('sami_trop_aim3','SAMI-TROP AIM3'),('sami_trop_1_1','SAMI-TROP 1.1'),('parachute','PARACHUTE'),
 ('benbrasil','BENBRASIL'),('epoca','EPOCA'),('santa_casa_dica','DICA'),('renomica','RENOMICA'),
@@ -56,12 +60,12 @@ role_check="$(PGPASSWORD="$import_password" psql -X -qAt -h "$DB_HOST" -p "$DB_P
 test "$role_check" = "t"
 
 python3 tests/importador/gerar_planilha_sintetica.py >/dev/null
-snapshot_before="$(psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -c "SET search_path TO ambulatorio,public; SELECT (SELECT count(*) FROM paciente)||'|'||(SELECT count(*) FROM atendimento)||'|'||(SELECT count(*) FROM importacao_lote)||'|'||(SELECT count(*) FROM importacao_linha);")"
+snapshot_before="$(psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -c "SET search_path TO ambulatorio,public; SELECT (SELECT count(*) FROM paciente)||'|'||(SELECT count(*) FROM atendimento)||'|'||(SELECT count(*) FROM importacao_lote)||'|'||(SELECT count(*) FROM importacao_linha)||'|'||(SELECT jsonb_agg(to_jsonb(t) ORDER BY tratamento_benzonidazol_id)::text FROM tratamento_benzonidazol t);")"
 PGPASSWORD="$import_password" python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-dry-run \
   --dry-run --quality-report /tmp/ambulatorio-quality-1.json \
   --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$import_user" --db-role ambulatorio_importador --db-name "$test_db" \
   2>/tmp/ambulatorio-importador.log
-snapshot_after="$(psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -c "SET search_path TO ambulatorio,public; SELECT (SELECT count(*) FROM paciente)||'|'||(SELECT count(*) FROM atendimento)||'|'||(SELECT count(*) FROM importacao_lote)||'|'||(SELECT count(*) FROM importacao_linha);")"
+snapshot_after="$(psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -c "SET search_path TO ambulatorio,public; SELECT (SELECT count(*) FROM paciente)||'|'||(SELECT count(*) FROM atendimento)||'|'||(SELECT count(*) FROM importacao_lote)||'|'||(SELECT count(*) FROM importacao_linha)||'|'||(SELECT jsonb_agg(to_jsonb(t) ORDER BY tratamento_benzonidazol_id)::text FROM tratamento_benzonidazol t);")"
 test "$snapshot_before" = "$snapshot_after"
 PGPASSWORD="$import_password" python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-dry-run \
   --dry-run --quality-report /tmp/ambulatorio-quality-2.json \
@@ -74,9 +78,10 @@ r=json.load(open('/tmp/ambulatorio-quality-1.json'))
 assert r['schema']=='ambulatorio.import-quality-report/v1'
 assert r['mode']=='dry-run'
 assert r['metrics']=={'between_sheet_conflicts': 1, 'identity_conflicts': 1,
- 'importable_rows': 6, 'invalid_values': 1, 'other_causes': 1,
- 'pending_rows': 2, 'rejected_rows': 4, 'total_rows': 10,
- 'unknown_catalogs': 0, 'valid_rows': 6}
+ 'importable_rows': 8, 'invalid_values': 1, 'other_causes': 2,
+ 'pending_rows': 2, 'rejected_rows': 5, 'total_rows': 13,
+ 'unknown_catalogs': 0, 'valid_rows': 8}
+assert r['importer_version']=='1.1.1'
 PY
 if rg -i 'Ana Sintética|Identidade Duplicada|telefone|texto parcial preservado' /tmp/ambulatorio-importador.log; then
   echo "Erro: log estruturado contém dado sensível ou valor clínico" >&2
@@ -115,6 +120,8 @@ DECLARE
   v_lote bigint;
   v_reprocessado bigint;
   v_reprocessado_2 bigint;
+  v_bzn record;
+  v_acoes text[];
 BEGIN
   SELECT importacao_lote_id INTO v_lote FROM importacao_lote WHERE codigo_lote='sint-v1-e2e';
   SELECT importacao_lote_id INTO v_reprocessado FROM importacao_lote WHERE codigo_lote='sint-v1-e2e-reprocessado';
@@ -123,13 +130,13 @@ BEGIN
   IF (SELECT lote_reprocessado_de_id FROM importacao_lote WHERE importacao_lote_id=v_reprocessado) <> v_lote THEN RAISE EXCEPTION 'cadeia imediata'; END IF;
   IF (SELECT lote_reprocessado_de_id FROM importacao_lote WHERE importacao_lote_id=v_reprocessado_2) <> v_reprocessado THEN RAISE EXCEPTION 'segundo elo imediato'; END IF;
   IF (SELECT status_lote FROM importacao_lote WHERE importacao_lote_id=v_lote) <> 'concluido_com_pendencias' THEN RAISE EXCEPTION 'status lote'; END IF;
-  IF (SELECT count(*) FROM importacao_linha WHERE importacao_lote_id=v_lote) <> 10 THEN RAISE EXCEPTION 'linhas brutas'; END IF;
-  IF (SELECT count(*) FROM importacao_linha WHERE importacao_lote_id=v_lote AND status_linha IN ('importada','importada_com_pendencia')) <> 6 THEN RAISE EXCEPTION 'linhas importadas'; END IF;
-  IF (SELECT count(*) FROM importacao_linha WHERE importacao_lote_id=v_lote AND status_linha='rejeitada') <> 4 THEN RAISE EXCEPTION 'linhas rejeitadas'; END IF;
-  IF (SELECT count(*) FROM atendimento) <> 6 THEN RAISE EXCEPTION 'um atendimento por linha válida'; END IF;
+  IF (SELECT count(*) FROM importacao_linha WHERE importacao_lote_id=v_lote) <> 13 THEN RAISE EXCEPTION 'linhas brutas'; END IF;
+  IF (SELECT count(*) FROM importacao_linha WHERE importacao_lote_id=v_lote AND status_linha IN ('importada','importada_com_pendencia')) <> 8 THEN RAISE EXCEPTION 'linhas importadas'; END IF;
+  IF (SELECT count(*) FROM importacao_linha WHERE importacao_lote_id=v_lote AND status_linha='rejeitada') <> 5 THEN RAISE EXCEPTION 'linhas rejeitadas'; END IF;
+  IF (SELECT count(*) FROM atendimento) <> 8 THEN RAISE EXCEPTION 'um atendimento por linha válida'; END IF;
   IF (SELECT count(*) FROM tratamento_benzonidazol WHERE duracao_cumprida_dias=56) <> 1 THEN RAISE EXCEPTION 'BZN'; END IF;
   IF EXISTS (SELECT 1 FROM paciente WHERE nome='Falha Atômica') THEN RAISE EXCEPTION 'rollback da linha'; END IF;
-  IF (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_lote AND tabela_destino='atendimento') <> 6 THEN RAISE EXCEPTION 'proveniência'; END IF;
+  IF (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_lote AND tabela_destino='atendimento') <> 8 THEN RAISE EXCEPTION 'proveniência'; END IF;
   IF (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_lote) < 100 THEN RAISE EXCEPTION 'cobertura de proveniência insuficiente'; END IF;
   IF (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_reprocessado) <> (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_lote AND l.status_linha IN ('importada','importada_com_pendencia')) THEN RAISE EXCEPTION 'proveniência reprocessada'; END IF;
   IF (SELECT count(DISTINCT tabela_destino) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_lote) <> 22 THEN RAISE EXCEPTION 'handlers/tabelas estruturadas'; END IF;
@@ -144,6 +151,45 @@ BEGIN
   IF (SELECT count(*) FROM paciente_comorbidade) <> 13 THEN RAISE EXCEPTION 'comorbidades'; END IF;
   IF (SELECT count(*) FROM dispositivo_implantado) <> 2 THEN RAISE EXCEPTION 'dispositivos'; END IF;
   IF (SELECT count(*) FROM notificacao) <> 1 OR (SELECT count(*) FROM obito) <> 1 THEN RAISE EXCEPTION 'notificação/óbito'; END IF;
+
+  IF (SELECT count(*) FROM tratamento_benzonidazol) <> 2 THEN RAISE EXCEPTION 'BZN deve permanecer único por paciente'; END IF;
+  IF EXISTS (SELECT 1 FROM importacao_lote WHERE importador_versao IS DISTINCT FROM '1.1.1') THEN RAISE EXCEPTION 'versão do importador não rastreada'; END IF;
+  SELECT t.* INTO STRICT v_bzn FROM tratamento_benzonidazol t JOIN paciente p USING(paciente_id) WHERE p.codigo_planilha='P-ANA';
+  IF v_bzn.atendimento_id IS DISTINCT FROM (
+    SELECT r.registro_id FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id)
+    WHERE l.importacao_lote_id=v_lote AND l.aba_ordem=1 AND l.numero_linha=2 AND r.tabela_destino='atendimento'
+  ) THEN RAISE EXCEPTION 'BZN perdeu o vínculo original de atendimento'; END IF;
+  IF v_bzn.duracao_cumprida_dias IS DISTINCT FROM 56 OR v_bzn.valor_original_duracao IS DISTINCT FROM '8 semanas'
+     OR v_bzn.valor_original_inicio IS DISTINCT FROM 'sim' OR v_bzn.valor_original_reacao_adversa IS DISTINCT FROM 'não'
+     OR v_bzn.criado_em IS DISTINCT FROM v_bzn.atualizado_em THEN RAISE EXCEPTION 'BZN equivalente alterou valor original ou timestamp'; END IF;
+  SELECT array_agg(r.acao ORDER BY l.numero_linha) INTO v_acoes
+    FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id)
+    WHERE l.importacao_lote_id=v_lote AND r.tabela_destino='tratamento_benzonidazol' AND r.registro_id=v_bzn.tratamento_benzonidazol_id;
+  IF v_acoes IS DISTINCT FROM ARRAY['criado','associado']::text[] THEN RAISE EXCEPTION 'proveniência BZN criado/associado'; END IF;
+
+  SELECT t.* INTO STRICT v_bzn FROM tratamento_benzonidazol t JOIN paciente p USING(paciente_id) WHERE p.codigo_planilha='P-NOVO';
+  IF v_bzn.atendimento_id IS NOT NULL THEN RAISE EXCEPTION 'BZN pré-existente ganhou vínculo inferido'; END IF;
+  IF v_bzn.iniciado IS DISTINCT FROM TRUE OR v_bzn.duracao_cumprida_dias IS DISTINCT FROM 7
+     OR v_bzn.ano_uso_aproximado IS DISTINCT FROM 2025 OR v_bzn.valor_original_duracao IS DISTINCT FROM '7 dias'
+     OR v_bzn.valor_original_ano_uso IS DISTINCT FROM '2025'
+     OR v_bzn.teve_reacao_adversa IS DISTINCT FROM FALSE THEN RAISE EXCEPTION 'BZN não preencheu NULL ou perdeu valor consolidado'; END IF;
+  IF v_bzn.tratamento_pelo_ambulatorio IS NOT NULL OR v_bzn.valor_original_tratamento_ambulatorio IS NOT NULL
+     OR EXISTS (SELECT 1 FROM paciente_endereco WHERE paciente_id=v_bzn.paciente_id)
+     OR EXISTS (SELECT 1 FROM atendimento WHERE paciente_id=v_bzn.paciente_id AND data_atendimento='2026-08-11')
+     THEN RAISE EXCEPTION 'BZN conflitante persistiu escrita parcial'; END IF;
+  SELECT array_agg(r.acao ORDER BY l.numero_linha) INTO v_acoes
+    FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id)
+    WHERE l.importacao_lote_id=v_lote AND r.tabela_destino='tratamento_benzonidazol' AND r.registro_id=v_bzn.tratamento_benzonidazol_id;
+  IF v_acoes IS DISTINCT FROM ARRAY['associado','atualizado','associado']::text[] THEN RAISE EXCEPTION 'proveniência BZN preenchido e reutilizado'; END IF;
+  IF (SELECT count(*) FROM importacao_linha WHERE aba_ordem=1 AND numero_linha=11 AND status_linha='rejeitada'
+      AND mensagem_processamento='tratamento_benzonidazol.ano_uso_aproximado: divergência consolidada') <> 3
+     THEN RAISE EXCEPTION 'conflito BZN não rejeitado em cada execução'; END IF;
+  IF EXISTS (SELECT 1 FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id)
+             WHERE l.aba_ordem=1 AND l.numero_linha=11) THEN RAISE EXCEPTION 'linha BZN rejeitada deixou proveniência'; END IF;
+  IF (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id)
+      WHERE l.importacao_lote_id IN (v_reprocessado,v_reprocessado_2) AND r.tabela_destino='tratamento_benzonidazol'
+        AND r.acao='associado') <> 10 THEN RAISE EXCEPTION 'reprocessamento não reutilizou os BZN'; END IF;
+  RAISE NOTICE 'OK: BZN compatível, preenchimento de NULL, vínculo preservado, conflito atômico e reprocessamento';
 END $$;
 SQL
 

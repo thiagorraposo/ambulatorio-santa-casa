@@ -1,6 +1,6 @@
 # Especificação Normativa do Importador da Planilha — v1
 
-Atualizado em: 2026-09-14
+Atualizado em: 2026-09-15
 
 ## Preflight, relatório e rastreabilidade
 
@@ -60,11 +60,10 @@ ano legado, contrato documental de contrarreferência e retirada do desfecho ain
 exigem as decisões delimitadas na fonte de negócio. Atualização de uma linha da
 planilha não comprova nova visita e não permite reconstruir histórico perdido.
 
-Os achados em `treatment()`, `reuse_predecessor()` e `RowConflict` estão descritos
-no [estado da implementação](IMPORTADOR_SINTETICO_V1.md): a reconciliação BZN,
-promoção de pendências e política de erros secundários abaixo são requisitos
-normativos, não garantias plenamente implementadas. Esta revisão só documenta as
-divergências; não modifica código, manifesto, schema ou testes.
+O [estado da implementação](IMPORTADOR_SINTETICO_V1.md) registra a reconciliação
+BZN corrigida na v1.1.1 e as lacunas ainda presentes em `reuse_predecessor()` e na
+criticidade de `RowConflict`. Promoção de pendências e política de erros secundários
+ainda são requisitos normativos sem cobertura completa na implementação.
 
 ## Vocabulário operacional
 
@@ -332,6 +331,12 @@ Para entidades consolidadas únicas por paciente ou paciente–catálogo:
 - jamais converter ausência em negação ou usar a precedência de aba para apagar
   fato clínico já registrado.
 
+No BZN, a reconciliação compara os atributos clínicos, preservando o atendimento
+original, inclusive quando nulo. O atendimento da nova linha é rastreado por
+`importacao_registro`, sem substituir esse vínculo. A v1.1.1 implementa essa regra
+com bloqueio da linha de tratamento existente, proveniência e rollback de toda
+a linha de importação quando encontra divergência consolidada.
+
 Entidades de ocorrência, como atendimento, exame e reação, não são deduplicadas
 por paciente/tipo/data. A identidade de origem e a cadeia de proveniência impedem
 recriação no mesmo conteúdo; sem evidência de que duas ocorrências são a mesma,
@@ -450,7 +455,6 @@ PostgreSQL controlado, fora de logs, Git, APIs genéricas e dumps compartilhados
 O contrato sintético antigo pode ser exercitado em seu escopo homologado, mas
 não equivale a prontidão para o MVP revisado. Bloqueiam seus fluxos afetados:
 
-- reconciliar BZN quando duas linhas preenchidas referem o mesmo paciente;
 - permitir resolução controlada de pendências no reprocessamento;
 - fechar a política temporal antes de importar atualizações da mesma fonte;
 - escolher destinos/representações ainda pendentes antes de promover D2/D3 e

@@ -1,6 +1,6 @@
 # Registro de Alterações
 
-Atualizado em: 2026-09-14
+Atualizado em: 2026-09-15
 
 ## Como Registrar Mudanças
 
@@ -25,6 +25,39 @@ Além deste arquivo, atualize quando necessário:
 - `docs/historico/HISTORICO_DE_IMPLEMENTACAO.md`
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
+
+## 2026-09-15 - Reconciliação BZN no importador — primeiro incremento da Etapa 5B
+
+Corrigido `treatment()` no importador v1.1.1 para consultar o tratamento canônico
+por paciente e reutilizar a reconciliação existente. Valores equivalentes são
+associados; informações nulas são preenchidas; divergências clínicas rejeitam a
+linha com rollback. Preservados o atendimento original (inclusive nulo), os textos
+originais não nulos e a proveniência `criado`/`atualizado`/`associado`. O tratamento
+existente recebe bloqueio de linha durante a transação.
+
+A fixture sintética foi ampliada para 13 linhas: oito importáveis, das quais duas
+com pendência, e cinco rejeições esperadas. Dez testes unitários e o E2E cobrem
+equivalência entre aliases, BZN preexistente sem atendimento, preenchimento de
+nulos, conflito tardio com rollback das demais escritas, continuidade do lote,
+dry-run sem modificar tratamento existente e dois elos de reprocessamento.
+O teste reproduziu `uq_tratamento_bzn_paciente` antes da correção e passou depois.
+
+Workflow: referências de `origin` atualizadas; `main` e `origin/main` no mesmo
+commit; criada `fix/reconciliar-bzn-importador`, preservando as três alterações
+documentais preexistentes. Plano e critérios definidos antes da implementação;
+diff revisado; fontes afetadas e próxima tarefa atualizadas.
+
+Validação: `make project-check` antes/depois (dez testes SQL transacionais),
+`make importer-test` (dez unitários e E2E em banco descartável),
+`make manifest-check`, sintaxe dos testes shell e `git diff --check`. A sandbox
+impediu inicialmente a atualização das referências/branch e a conexão PostgreSQL;
+essas operações foram repetidas com autorização. CI remoto e concorrência entre
+executores na primeira criação de BZN não foram homologados.
+
+Nenhuma migration, constraint, dump, backend, frontend ou configuração foi alterada.
+Os dados usados foram exclusivamente sintéticos; o banco e o login temporários do
+E2E foram removidos pelo próprio teste. A Etapa 5B permanece aberta para as demais
+correções previstas; não houve commit ou push.
 
 ## 2026-09-14 - Respostas da equipe, impacto e roadmap revisado
 
@@ -65,6 +98,25 @@ homologação E2E/CI.
 Não foram alterados código, migrations, manifesto JSON, testes, configuração,
 banco, dump estrutural ou o DOCX fornecido. Nenhum dado clínico real foi utilizado.
 Nenhum commit ou push foi realizado.
+
+## 2026-09-14 - Reorganização do roadmap em dez etapas
+
+Recebida a estrutura original de dez etapas: etapas 1–4 concluídas e etapas 5–10
+pendentes. `docs/PROXIMOS_PASSOS.md` foi reorganizado para preservar essa
+numeração oficial. A Etapa 5 recebeu subetapas 5A–5E, separando contratos,
+correções do importador, modelagem indispensável e backend clínico. As Etapas 6–10
+foram detalhadas conforme frontend, fluxos clínicos, dashboard, produção e
+homologação/estabilização.
+
+O escopo congelado, marcos, dependências, critérios de aceite, validações e carga
+semanal recomendada foram registrados sem reabrir etapas concluídas. Nenhum código,
+migration, banco, teste executável ou configuração foi alterado.
+
+As Etapas 7, 9 e 10 também foram decompostas por complexidade: 7A–7D para
+cadastro, dados clínicos, tratamentos/encaminhamentos e integração; 9A–9D para
+implantação, segurança, continuidade e liberação; e 10A–10D para homologação,
+regressão, entrega reproduzível e release. A numeração principal 1–10 foi
+preservada.
 
 ## 2026-09-03 - Reorganização da documentação
 

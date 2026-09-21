@@ -1,6 +1,6 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-09-14
+Atualizado em: 2026-09-15
 
 Esta é a síntese vigente do sistema. Detalhes normativos pertencem às fontes
 temáticas indicadas abaixo; decisões antigas e resultados de etapas permanecem
@@ -15,9 +15,14 @@ escrita clínica HTTP, gestão de usuários nem autorização para dados reais.
 
 A Etapa 4C está concluída. As doze respostas de `Perguntas pendentes.docx` foram
 consolidadas documentalmente em 2026-09-14, mas ainda não incorporadas ao contrato
-executável. A Etapa 5 foi reorganizada para resolver lacunas do importador,
-complementar somente a modelagem indispensável e entregar API/interface clínicas,
-sempre com dados sintéticos e autorização definida por módulo.
+executável. O roadmap oficial mantém dez etapas: 1–4 concluídas e 5–10 restantes.
+A Etapa 5 foi subdividida para resolver lacunas do importador, complementar
+somente a modelagem indispensável e entregar o backend clínico; as Etapas 6–10
+cobrem frontend, fluxos, complementos, produção e homologação.
+
+Em 2026-09-15 foi entregue o primeiro incremento da Etapa 5B: reconciliação de
+BZN no importador v1.1.1, validada com dez testes unitários e E2E sintético.
+A Etapa 5B continua em andamento; os contratos pendentes da 5A não foram encerrados.
 
 ## Componentes vigentes
 
@@ -71,8 +76,9 @@ contrarreferências foi confirmada; seu contrato documental e o momento do uploa
 ainda precisam de decisão. A exclusão funcional de `Localizado` foi confirmada,
 sem remover o bruto nem confundir com localização do prontuário.
 
-O importador tenta inserir BZN novamente para o mesmo paciente; o caminho de
-reprocessamento reutiliza linhas com pendência antes de executar seus handlers;
+O importador já reconcilia BZN do mesmo paciente, preservando o vínculo original,
+preenchendo nulos e rejeitando divergências com rollback. O caminho de
+reprocessamento ainda reutiliza linhas com pendência antes de executar seus handlers;
 erros secundários também podem rejeitar a linha inteira. Um arquivo com novo hash
 não tem reconciliação de atualização clínica: pode gerar outro atendimento. A
 fonte legada guarda o último ano de retorno e é atualizada, portanto esse fluxo

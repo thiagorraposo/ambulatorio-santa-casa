@@ -21,7 +21,7 @@ from importador.xlsx import read as read_xlsx  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "manifestos/planilha_ambulatorio_v1.json"
-IMPORTER_VERSION = "1.1.0"
+IMPORTER_VERSION = "1.1.1"
 
 
 class RowConflict(Exception):
@@ -541,14 +541,24 @@ class Importer:
           "tem_indicacao": ("tem_indicacao_de_bzn", bool_value), "data_prescricao": ("prescricao_do_bzn_data", date_value),
           "motivo_nao_indicacao": ("se_nao_descreva_o_motivo", lambda v,f:v.strip()),
           "teve_reacao_adversa": ("teve_reacao_adversa", bool_value)}
-        fields={"paciente_id":patient_id,"atendimento_id":attendance_id}
+        fields={}
         for dest,(source,converter) in mapping.items():
             value=row.get(source)
             if value and value.strip():
                 fields[dest]=converter(value,source)
                 original="valor_original_"+{"iniciado":"inicio","tratamento_pelo_ambulatorio":"tratamento_ambulatorio","duracao_cumprida_dias":"duracao","ano_uso_aproximado":"ano_uso","tem_indicacao":"indicacao","data_prescricao":"data_prescricao","motivo_nao_indicacao":"motivo_nao_indicacao","teve_reacao_adversa":"reacao_adversa"}.get(dest,dest)
                 fields[original]=value
-        self.insert_returning(line_id,"tratamento_benzonidazol",fields)
+        existing = self.db.scalar(
+            "SELECT tratamento_benzonidazol_id FROM tratamento_benzonidazol "
+            f"WHERE paciente_id={patient_id} FOR UPDATE")
+        if existing:
+            # O vínculo ao atendimento original (inclusive NULL) é preservado;
+            # a nova linha aponta ao mesmo tratamento pela proveniência.
+            self.reconcile(line_id, "tratamento_benzonidazol", int(existing), fields)
+        else:
+            self.insert_returning(line_id, "tratamento_benzonidazol",
+                                  {"paciente_id": patient_id,
+                                   "atendimento_id": attendance_id, **fields})
 
     def referral(self, line_id, attendance_id, row):
         sources=["trouxe_encaminhamento","origem_encaminhamento","encaminhado_a_qual_projeto"]

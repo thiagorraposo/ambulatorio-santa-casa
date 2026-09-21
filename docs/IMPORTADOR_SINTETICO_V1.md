@@ -1,8 +1,9 @@
 # Importador Sintético v1
 
-Atualizado em: 2026-09-14
+Atualizado em: 2026-09-15
 
-O importador v1.1.0 acrescenta `--dry-run`, `--quality-report` e `--db-role`.
+O importador v1.1.1 corrige a reconciliação de BZN por paciente. Os recursos
+`--dry-run`, `--quality-report` e `--db-role` foram introduzidos na v1.1.0.
 Na fixture da homologação original, o preflight classificou 10 linhas: 6 válidas/importáveis,
 2 com pendência, 4 rejeitadas, 1 conflito de identidade, 1 entre abas, 1 valor
 inválido, 0 catálogos desconhecidos e 1 outra causa. Dois reports foram idênticos
@@ -70,24 +71,49 @@ Itens de catálogo de projetos/exames nunca são criados automaticamente; víncu
 e ocorrências clínicas são criados pelos handlers. O original e a mensagem do
 conflito permanecem auditáveis.
 
+## Reconciliação BZN — v1.1.1
+
+`treatment()` consulta o tratamento pelo paciente e bloqueia a linha existente
+com `FOR UPDATE` durante a transação. Quando não existe, cria o tratamento com
+o atendimento da origem. Quando existe, utiliza `reconcile()`: igualdade associa,
+campos nulos são preenchidos e valores clínicos divergentes geram `RowConflict`.
+O tratamento mantém o vínculo de atendimento já registrado, inclusive `NULL`;
+os atendimentos posteriores ficam rastreáveis pela proveniência de cada linha.
+
+Textos originais não nulos são preservados, mesmo quando outra grafia representa
+o mesmo valor, como `8 semanas` e `56 dias`. Os novos textos permanecem no bruto.
+Uma linha sem informações de BZN não cria nem associa tratamento. A proveniência
+registra `criado`, `atualizado` ou `associado` conforme a operação efetiva.
+
+Conflito rejeita a linha inteira e reverte também atualizações feitas antes dele,
+sem interromper o restante do lote. Não houve mudança de schema, unicidade ou
+regras clínicas. Concorrência entre executores criando o primeiro BZN do mesmo
+paciente não foi homologada; o bloqueio protege tratamentos já existentes.
+
+Validação em 2026-09-15: dez testes unitários e E2E com 13 linhas, oito importáveis
+(duas com pendência) e cinco rejeitadas esperadas. A regressão reproduziu a violação
+de unicidade antes da correção. Após a correção, comprovou aliases equivalentes,
+preenchimento de nulos, preservação do vínculo/originais, conflito tardio com
+rollback de tratamento/endereço/atendimento/proveniência, continuidade do lote,
+dry-run sem alterar BZN preexistente e dois elos de reprocessamento sem duplicação.
+
 ## Lacunas verificadas em 2026-09-14
 
 As respostas da equipe estão consolidadas nas
-[decisões humanas](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md). O código permanece
-v1.1.0; os ajustes abaixo são necessários ou dependem do contrato indicado, mas
-não foram implementados nesta revisão documental.
+[decisões humanas](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md). A reconciliação BZN
+foi corrigida na v1.1.1; as demais lacunas abaixo permanecem abertas.
 
 | Regra ou decisão | Implementação atual | Problema e alteração recomendada |
 | --- | --- | --- |
-| Um tratamento BZN consolidado por paciente | `treatment()` insere sem consultar/reconciliar tratamento existente | Duas linhas preenchidas do mesmo paciente podem violar a unicidade e interromper o lote; reconciliar valores compatíveis, preservar proveniência e rejeitar conflito sem sobrescrita. Não relaxar a constraint nem criar migration |
+| Um tratamento BZN consolidado por paciente | Corrigido na v1.1.1: consulta por paciente e reconcilia valores preservando o vínculo existente | Regressões unitárias e E2E cobrem associação, preenchimento de nulos e rejeição atômica de divergências; unicidade preservada |
 | Reprocessar para resolver pendências | `reuse_predecessor()` aceita `importada_com_pendencia` e retorna antes dos handlers | A simples promoção de um campo no manifesto não atualiza essa linha; permitir promoção controlada sem recriar alvos anteriores |
 | Campo secundário inválido pode gerar pendência, conforme contrato | `RowConflict` provoca rollback e rejeição da linha inteira | Delimitar erros críticos/não críticos e alinhar implementação, mensagens e testes ao contrato |
 | D8: planilha atualizada guarda último ano visitado | Novo hash/layout inicia outra identidade de lote; linha gera atendimento | Idempotência de arquivo não evita duplicar uma consulta em versões revisadas; definir e implementar política temporal antes de usar esse fluxo |
 | D4/D5: identificar o exame | Indicadores agregados permanecem brutos; categorias genéricas podem registrar `tipo_exame_original` como a chave, por exemplo `outros`, e o conteúdo como resultado | Validar identificação inequívoca sem exigir resultado da solicitação; não criar catálogo automaticamente |
 | D1–D12: semântica revisada | Onze campos continuam parciais; contagens/allowlists e razões de exclusão são fixadas por gerador, validador e testes | Atualizar contrato executável e handlers em conjunto, incluindo tipos semânticos; não declarar cobertura nova por mera mudança documental |
 
-A fixture E2E atual inclui uma segunda linha de paciente sem BZN preenchido e
-não cobre a inserção repetida de tratamento. Os cenários de reprocessamento
+A fixture anterior não preenchia BZN na segunda linha do mesmo paciente. A
+fixture atual cobre essa repetição e os casos da seção v1.1.1. Os cenários de reprocessamento
 comprovam reutilização de alvos, não a resolução de uma pendência. Os retornos
 BZN com `sim` e retorno anual com `não` também não comprovam importação de datas
 reais ou ano legado. Acrescentar casos sintéticos válidos e preservar casos
