@@ -15,6 +15,7 @@ fontes vigentes.
 | Modelo físico PostgreSQL | [`MODELO_FISICO_ATUAL.md`](MODELO_FISICO_ATUAL.md) |
 | Contrato físico da planilha | [`MANIFESTO_FISICO_PLANILHA_V1.md`](MANIFESTO_FISICO_PLANILHA_V1.md) e manifesto executável em [`../manifestos/planilha_ambulatorio_v1.json`](../manifestos/planilha_ambulatorio_v1.json) |
 | Regras do importador | [`ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`](ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md) |
+| Revisão de planilhas entre hashes (contrato ainda não implementado) | [`arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md`](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md) |
 | Implementação atual do importador | [`IMPORTADOR_SINTETICO_V1.md`](IMPORTADOR_SINTETICO_V1.md) |
 | Arquitetura do backend | [`ARQUITETURA_BACKEND.md`](ARQUITETURA_BACKEND.md) |
 | Segurança e política de dados | [`SEGURANCA_DE_DADOS.md`](SEGURANCA_DE_DADOS.md) |

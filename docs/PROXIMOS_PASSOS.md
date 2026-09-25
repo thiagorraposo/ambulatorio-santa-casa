@@ -1,6 +1,6 @@
 # Roadmap do Projeto
 
-Atualizado em: 2026-09-15
+Atualizado em: 2026-09-22
 
 Este é o roadmap oficial do projeto. A estrutura original possui dez etapas;
 as etapas 1–4 estão concluídas. As etapas 5, 7, 9 e 10 possuem subetapas porque
@@ -36,10 +36,12 @@ layout, lote/linha/proveniência, identificação de pacientes, atendimentos,
 transformações, erros, revisão, idempotência e reprocessamento encadeado.
 
 **Limite conhecido:** a homologação original não cobre integralmente as novas
-respostas D1–D12. A reconciliação BZN foi corrigida na v1.1.1. Antes do MVP
-revisado ainda é necessário corrigir a promoção de pendências, a política temporal de linhas
-atualizadas e a criticidade de erros secundários. Isso é evolução da etapa 5, não
-reabertura da etapa 2 concluída.
+respostas D1–D12. A reconciliação BZN foi corrigida na v1.1.1 e a promoção
+controlada de D11 foi entregue na v1.2.0. Antes do MVP revisado ainda é necessário
+tratar as demais chaves aprovadas, implementar o contrato temporal de linhas
+atualizadas e classificar individualmente os demais erros secundários. A primeira política não
+crítica foi entregue na v1.3.0. Isso é evolução da etapa 5, não reabertura da
+etapa 2 concluída.
 
 ## Etapa 3 — Fundação do backend — concluída
 
@@ -73,6 +75,12 @@ os recursos necessários para a interface.
 
 ### 5A — Fechar contratos funcionais e invariantes (P0/P1)
 
+**Avanço em 2026-09-22:** definido o
+[contrato temporal de revisão entre hashes](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md)
+(ADR-022), distinguindo correção, nova visita e atualização consolidada. A
+representação anual de D8 e os demais contratos clínicos abaixo continuam abertos;
+esta definição técnica não é implementação nem nova resposta da equipe.
+
 - **Objetivo:** congelar o escopo e resolver somente as ambiguidades que afetam implementação.
 - **Principais alterações:** decidir referência da idade; titularidade da data de descoberta de Chagas; representação mínima de familiares e sorologia; tipos/vínculos dos retornos BZN; política para o ano do último retorno; distinção entre atualização de linha e nova visita; representação de contrarreferência e momento do upload; confirmar o destino do planejamento hoje chamado de desfecho.
 - **Dependências:** respostas D1–D12 e inspeção do schema/código existentes.
@@ -82,10 +90,21 @@ os recursos necessários para a interface.
 ### 5B — Corrigir importador e reprocessamento (P0/P1)
 
 **Status:** em andamento. Reconciliação BZN entregue em 2026-09-15 (v1.1.1),
-com dez testes unitários e E2E de 13 linhas sintéticas. Foram comprovados
+com dez testes unitários e E2E de 13 linhas sintéticas. A promoção controlada de
+D11 foi entregue em 2026-09-21 (v1.2.0), elevando a cobertura para 125 rótulos
+plenos. Em 2026-09-22, a v1.3.0 introduziu criticidade conservadora e a primeira
+regra não crítica, para catálogo de projeto ausente, elevando os testes unitários
+para 19.
+Foram comprovados
 reutilização do tratamento, preenchimento de nulos, preservação do vínculo e dos
-originais, rejeição atômica de conflitos, dry-run e reprocessamento sem duplicação.
-Promoção de pendências, criticidade dos erros e política temporal seguem abertas.
+originais, rejeição atômica de conflitos, promoção parcial, preservação de edição
+manual ambígua, resolução seletiva de catálogo, dry-run e dois elos de
+reprocessamento sem duplicação. O contrato temporal entre hashes foi definido em
+2026-09-22, com 18 casos de aceite. A v1.4.0 implementa a barreira de finalidade,
+com recusa de revisão antes de escrita, 26 testes unitários e E2E sintético;
+T01 e a parte de T02 relativa à recusa estão cobertos. A reconciliação entre
+hashes, as demais promoções aprovadas e a classificação individual dos outros
+erros secundários seguem abertas.
 
 - **Objetivo:** eliminar duplicação e perda de promoção nos fluxos já suportados.
 - **Principais alterações:** reconciliar BZN consolidado por paciente; promover pendências resolvidas sem recriar alvos; separar erros críticos de não críticos; aplicar a política aprovada a arquivos revisados; atualizar metadados semânticos do gerador/manifesto/validador em conjunto.
@@ -294,20 +313,26 @@ importador e backend funcionais antes de iniciar as Etapas 6–8.
 
 ## Próxima tarefa isolada
 
-Definir o contrato técnico de promoção controlada de pendências no reprocessamento
-do mesmo arquivo/layout, antes de modificar `reuse_predecessor()`. Delimitar quais
-destinos podem ser acrescentados e como preservar alvos existentes, alterações
-manuais e proveniência. Essa tarefa prepara a continuidade de 5B sem fechar por
-inferência as regras clínicas pendentes de 5A.
+Especificar a extensão física mínima para linhagem entre hashes, mapeamento de
+linhas, decisão atribuível e histórico por campo, incluindo controle de acesso e
+revalidação concorrente. A barreira de finalidade já está implementada na v1.4.0;
+revisões continuam bloqueadas até existir aplicação auditável homologada.
+
+Delimitar entidades, invariantes, atomicidade, evidências e testes antes de criar
+a migration. Preservar a FK de mesmo hash/layout e o isolamento da identidade
+funcional; não escolher por inferência os destinos clínicos pendentes da 5A.
 
 Prompt pronto para a próxima tarefa:
 
-> Siga o workflow e leia os AGENTS.md relevantes. Defina somente o contrato de
-> promoção de pendências no reprocessamento do mesmo arquivo/layout, examinando
-> reuse_predecessor(), proveniência e testes. Especifique casos de aceite que
-> preservem alvos e alterações existentes sem duplicação, registre decisões
-> técnicas e incertezas nos documentos afetados. Não implemente código ou migration,
-> não use dados reais e não faça commit nem push. Valide a documentação.
+> Siga o workflow e leia os AGENTS.md relevantes. Especifique somente a extensão
+> mínima de linhagem, mapeamento, decisão e histórico por campo da ADR-022,
+> confrontando o contrato temporal com schema, proveniência e permissões atuais.
+> Defina invariantes, atomicidade, controle de acesso, concorrência e casos de
+> aceite sintéticos para orientar uma futura migration incremental. Preserve a
+> barreira v1.4.0, a FK do mesmo conteúdo e o isolamento de usuario_aplicacao.
+> Não implemente correções entre hashes, não crie migration, não use dados reais
+> e não faça commit nem push. Valide com make project-check antes e depois,
+> make manifest-check e git diff --check; atualize somente a documentação afetada.
 
 ## Validação da revisão documental de 2026-09-14
 

@@ -1,6 +1,6 @@
 # Registro de Alterações
 
-Atualizado em: 2026-09-15
+Atualizado em: 2026-09-25
 
 ## Como Registrar Mudanças
 
@@ -25,6 +25,173 @@ Além deste arquivo, atualize quando necessário:
 - `docs/historico/HISTORICO_DE_IMPLEMENTACAO.md`
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
+
+## 2026-09-25 - Workflow com contexto por escopo e validação compacta
+
+AGENTS.md, README e workflow passam a orientar consulta por assunto pelo índice
+documental e validação proporcional ao escopo. A matriz substitui a execução
+geral de `project-check` antes/depois de toda mudança; mantém validação inicial
+para schema/migrations, testes específicos do importador/backend e a cobertura
+completa do CI. Exemplos e prompts deixam de repetir suítes já incluídas em
+outros alvos. `docs-check` é descrito como verificação de presença e conteúdo
+não vazio, sem substituir revisão documental.
+
+O Makefile aceita `COMPACT=1` nas validações usuais, mantendo a saída original
+sem a opção. O auxiliar `scripts/check_compact.py` registra stdout/stderr
+filtrados em log privado em `/tmp`, informa comando/resultado/código/caminho e
+mostra trecho limitado em falha. Os alvos compartilham uma chamada interna ao
+Make; status Git permanece visível sem histórico de commits. Códigos de falha,
+dependências e execução paralela são preservados.
+
+Validação: `make project-check` inicial e `make project-check COMPACT=1` com os
+dez testes SQL transacionais aprovados. A tentativa inicial no sandbox não
+acessou o PostgreSQL; as execuções reais passaram fora dele. A nova suíte
+`make workflow-test` cobre os modos normal/compacto, stdout/stderr, permissões
+dos logs, filtragem de segredos do ambiente e do Make, limite do trecho em falha,
+códigos de erro/sinal, dependências compartilhadas com `-j2` e recusa de alvos
+operacionais. Os nove testes passaram, assim como `docs-check`,
+`manifest-check`, `docker-config-check` em modo compacto e `git diff --check`.
+
+Alterações preexistentes foram preservadas. Sem mudança de schema, migrations,
+regras clínicas, dados ou pipeline de CI; sem commit ou push nesta tarefa.
+
+## 2026-09-22 - Barreira de finalidade explícita no importador v1.4.0
+
+Implementado o primeiro incremento executável da ADR-022. A CLI exige
+`--finalidade` exatamente uma vez, com `carga_inicial`, `mesmo_conteudo` ou
+`revisao`. Ausência, valor inválido, repetição e revisão ainda não suportada são
+recusados antes de ler a fonte ou conectar ao banco, também em dry-run.
+`--reprocessar` exige `mesmo_conteudo`; hash/layout sem predecessor é recusado
+após consulta, antes de criar lote, staging ou dados clínicos.
+
+Carga inicial sintética declarada, idempotência, retomada e reprocessamento
+encadeado foram preservados. A finalidade aparece em logs/report como `purpose`;
+os alvos Make exigem `IMPORT_PURPOSE` sem padrão. Os chamadores e exemplos foram
+atualizados. A declaração não comprova nova ocorrência: classificar indevidamente
+uma revisão como carga inicial ainda pode duplicar atendimentos. Reconciliação
+entre hashes, mapeamento e história por campo continuam pendentes.
+
+Validação: 26 testes unitários e E2E sintético via `make importer-test`,
+`make project-check` antes/depois (dez testes SQL transacionais),
+`make manifest-check`, verificação dos chamadores Make e `git diff --check`.
+As recusas com hash desconhecido/conhecido, arquivo regravado e layout diferente
+preservam todas as tabelas, sequências e relatório preexistente, em aplicação e
+dry-run. Permanecem cobertos BZN, promoção D11, conflito manual, catálogo não
+crítico e dois elos de reprocessamento. A primeira execução E2E identificou uma
+asserção de versão ainda em 1.3.0; após atualizá-la para 1.4.0, a suíte passou.
+O acesso local ao PostgreSQL/Docker exigiu execução fora do sandbox.
+
+Alterações anteriores do worktree foram preservadas. Não houve migration,
+mudança de schema/dump/manifesto nem uso de dados reais, commit ou push neste
+incremento. O roadmap passa à especificação da extensão mínima de
+linhagem/decisão/história por campo; a Etapa 5B permanece em andamento.
+
+## 2026-09-22 - Contrato temporal para revisão da planilha entre hashes
+
+Definido o contrato técnico da ADR-022 em
+`docs/arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md`, como complemento da
+especificação normativa do importador. A decisão D8 continua sendo a fonte de
+negócio: atualização da linha e ano do último comparecimento não comprovam nova
+visita nem permitem reconstruir histórico ausente.
+
+O contrato separa conteúdo, paciente, linha, ocorrência e revisão; exige finalidade
+e mapeamento explícitos; distingue correção, nova visita e atualização consolidada.
+Define comparação entre base/atual/proposta, proteção de edições manuais,
+atomicidade, precisão anual, evidência por campo e revalidação concorrente. A FK
+de reprocessamento permanece exclusiva para o mesmo hash/layout. A futura revisão
+entre conteúdos exige extensão mínima de linhagem/decisão/histórico antes de
+autorizar correções, sem impor nova tabela clínica para cada retorno.
+
+Foram definidos 18 casos de aceite futuros, não executados nem adicionados à suíte
+nesta tarefa documental. Índice, estado, roadmap, especificação, limites da
+implementação, consequências técnicas das decisões humanas, cobertura e riscos
+foram alinhados. A próxima tarefa é implementar somente a barreira de finalidade,
+recusando revisão ainda não suportada antes de qualquer escrita.
+
+Validação: `make project-check` antes e depois (incluindo dez testes SQL
+transacionais sintéticos), `make manifest-check`, conferência dos links locais e
+`git diff --check`. A primeira tentativa de acesso ao PostgreSQL foi bloqueada
+pelo sandbox; a validação passou após execução autorizada com acesso local.
+Os testes do importador não foram reexecutados nesta tarefa sem alteração de código.
+Mudanças anteriores do worktree foram preservadas; não houve alteração de código,
+manifesto, fixture, migrations, schema ou dump, nem uso de dados reais, commit ou
+push neste incremento. A versão executável permanece 1.3.0, sem reconciliação
+entre hashes; a Etapa 5B continua em andamento.
+
+## 2026-09-22 - Criticidade explícita no importador v1.3.0
+
+Implementada a ADR-021 com política conservadora: `RowConflict` continua crítico
+por padrão e somente regras presentes em `NONCRITICAL_POLICY` podem preservar uma
+linha como `importada_com_pendencia`. A primeira entrada é
+`catalogo_projeto_ausente`, limitada a `projects()` e
+`paciente_projeto_estudo`.
+
+Quando o catálogo de um projeto não existe, o importador confirma paciente,
+atendimento e demais destinos, preserva o bruto, não cria catálogo nem vínculo
+substituto e grava somente código técnico na mensagem. Após correção do catálogo,
+o reprocessamento reutiliza o paciente da proveniência, tenta somente o projeto
+afetado, cria ou reconcilia o vínculo e permite que o elo seguinte apenas o
+associe. Erros de identidade, datas primárias, contexto, divergência consolidada,
+proveniência e operação permanecem críticos.
+
+O importador passou à versão 1.3.0. A fixture sintética reproduz catálogo ausente
+e sua correção posterior. Dezenove testes unitários e o E2E cobrem pendência sem
+rollback do atendimento, resolução seletiva, proveniência `criado`/`associado`,
+`dry-run` sem persistência, dois elos e as regressões críticas anteriores. O
+relatório distingue catálogo ainda ausente de pendência já resolvida.
+
+Validação: `make importer-test`, `make manifest-check`, `make docs-check`,
+`make project-check` e `git diff --check`. Nenhum dado real foi utilizado; não
+houve migration, alteração de schema, regeneração do dump, commit ou push.
+
+## 2026-09-21 - Promoção controlada de D11 no importador v1.2.0
+
+Implementado o contrato da ADR-020 no reprocessamento do mesmo hash e layout.
+Linhas `importada` continuam somente reutilizando a proveniência; linhas
+`importada_com_pendencia` agora resolvem as âncoras anteriores e executam apenas
+handlers presentes em um registro explícito, validado contra o manifesto. Novas
+escritas ficam em savepoint e conflitos preservam as associações anteriores.
+
+`pendencias_observacao` (D11) é a primeira chave habilitada. O handler cria uma
+pendência textual vinculada ao atendimento sem inferir tipo, status, responsável
+ou datas; associa um alvo equivalente já comprovado pela proveniência; e bloqueia
+a criação quando existe uma pendência manual não vinculada e indistinguível. O
+manifesto passou à versão v1.1, com 125 rótulos plenos, dez parciais e `Localizado`
+excluído. O importador passou à versão 1.2.0.
+
+A fixture e o E2E sintéticos cobrem promoção parcial, edição manual preservada,
+conflito sem proveniência parcial, `dry-run` sem persistência e dois elos de
+reprocessamento sem duplicação. A suíte unitária passou de dez para 13 casos. A
+documentação vigente, o validador e as contagens foram atualizados em conjunto.
+
+Validação: `make importer-test`, `make manifest-check`, `make docs-check`,
+`make project-check` e `git diff --check`. Nenhum dado real foi utilizado; não
+houve migration, alteração de schema, regeneração do dump, commit ou push.
+
+## 2026-09-21 - Contrato de promoção controlada de pendências
+
+Definido o contrato técnico para permitir que um reprocessamento do mesmo hash e
+layout promova campos antes mantidos no bruto sem recriar paciente, atendimento ou
+outros destinos da linha. A decisão foi registrada na ADR-020 e detalhada na
+especificação normativa do importador.
+
+O contrato exige registro versionado por chave semântica, correspondência com o
+manifesto, handler e destinos explícitos, âncoras obtidas da proveniência e
+reconciliação conservadora. Alvos antigos são associados; novas escritas ficam em
+savepoint; divergência, edição manual não distinguível e destino repetível sem
+identidade aprovada permanecem pendentes. Mensagens podem registrar chaves
+técnicas, nunca valores clínicos.
+
+Foram definidos casos de aceite para promoção total e parcial, dois elos sem
+duplicação, igualdade/preenchimento/conflito, preservação manual, proveniência
+órfã ou ambígua, atomicidade e dry-run. As onze chaves atuais permanecem parciais:
+esta decisão não escolhe destinos clínicos pendentes nem altera manifesto, código,
+testes, migration, schema ou dump.
+
+Validação planejada e executada nesta etapa documental: `make project-check` na
+baseline, `make docs-check`, `make manifest-check` e `git diff --check` após a
+edição, além de revisão do diff e do status Git. Nenhum dado real foi utilizado;
+não houve commit nem push.
 
 ## 2026-09-15 - Reconciliação BZN no importador — primeiro incremento da Etapa 5B
 

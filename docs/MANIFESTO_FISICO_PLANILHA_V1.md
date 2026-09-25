@@ -1,6 +1,6 @@
 # Manifesto Físico da Planilha — v1
 
-Atualizado em: 2026-09-14
+Atualizado em: 2026-09-21
 
 ## Fonte oficial
 
@@ -10,7 +10,7 @@ da linha 1 das duas abas clínicas do arquivo local ignorado
 `planejamento/Nova Planilha ambulatório.xlsx`. Nenhuma célula clínica ou linha de
 paciente foi lida para compor o manifesto.
 
-A versão explícita é `v1`, identificada tecnicamente como
+A versão explícita é `v1.1`, identificada tecnicamente como
 `planilha_ambulatorio_v1`. Ela descreve apenas o layout observado e não pressupõe
 versões históricas inexistentes.
 
@@ -53,11 +53,12 @@ Os dois indicadores de contexto do ambulatório apontam diretamente para
 `atendimento.ambulatorio_unicamente` e `atendimento.ambulatorio_anexo_projeto`;
 eles não são associações com `projeto_estudo`.
 
-O manifesto atual declara 124 dos 136 rótulos com cobertura estruturada plena:
-8 direta e 116 com transformação. Onze permanecem parciais e `Localizado`
+O manifesto atual declara 125 dos 136 rótulos com cobertura estruturada plena:
+8 direta e 117 com transformação. Dez permanecem parciais e `Localizado`
 permanece excluído. Cada parcial registra uma razão no manifesto e fica somente
-no JSONB bruto. Essa classificação pertence ao contrato v1 anterior às novas
-respostas da equipe e não comprova sua cobertura funcional.
+no JSONB bruto. D11 (`pendencias_observacao`) passou a destino pleno na v1.1 do
+manifesto e é promovida de forma controlada pelo importador v1.2.0. A contagem não
+comprova, isoladamente, cobertura funcional das demais respostas da equipe.
 
 ## Divergências conhecidas após as respostas da equipe
 
@@ -65,13 +66,13 @@ A fonte semântica vigente é
 [decisões humanas](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md), com avaliação na
 [matriz de impacto](dados/COBERTURA_COLUNAS_PLANILHA.md). Razões antigas de
 semântica indefinida para retornos, contrarreferência e `Localizado` ficaram
-superadas; destinos executáveis ainda não foram promovidos nesta revisão.
+superadas; somente D11 recebeu destino executável nesta revisão.
 
 O gerador infere tipo por trechos da transformação: idade aparece como `data`,
 enquanto retornos BZN e ano do retorno anual continuam `texto`. A revisão futura
 deve definir metadados explícitos coerentes com D1/D6/D7/D8, atualizar manifesto,
 gerador, validador, handlers e expectativas de testes conjuntamente. As contagens
-124/11 e as listas de parciais são fixadas nesses artefatos: aprovação do
+125/10 e as listas de parciais são fixadas nesses artefatos: aprovação do
 `manifest-check` atual não valida a nova semântica nem resolve essas lacunas.
 
 ## Exclusões deliberadas

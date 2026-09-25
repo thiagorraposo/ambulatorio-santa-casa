@@ -31,6 +31,28 @@ COMPOSE := docker compose --env-file .env
 
 .DEFAULT_GOAL := help
 
+COMPACT ?= 0
+# Uma chamada interna mantém o grafo de dependências e as opções do Make.
+COMPACT_GOALS := $(if $(filter 1,$(COMPACT)),$(if $(_COMPACT_RUNNING),,$(MAKECMDGOALS)))
+ifneq ($(strip $(COMPACT_GOALS)),)
+COMPACT_TARGETS := git-status docs-check manifest-check manifest-source-check \
+	db-check db-test project-check docker-config-check docker-db-check docker-db-test \
+	docker-project-check docker-restore-check docker-restore-test importer-test \
+	backend-build backend-unit-test backend-integration-test backend-foundation-e2e \
+	backend-check backend-container-check workflow-test
+ifneq ($(filter-out $(COMPACT_TARGETS),$(COMPACT_GOALS)),)
+$(error COMPACT=1 aceita somente alvos de validação ou git-status; consulte make help)
+endif
+# Disponibiliza ao filtro os segredos que o Make leu do .env, sem exibi-los.
+export POSTGRES_PASSWORD APP_DB_PASSWORD AUTH_JWT_SECRET
+.PHONY: $(COMPACT_TARGETS) _compact-run
+$(COMPACT_TARGETS): _compact-run ; @:
+_compact-run:
+	+@python3 scripts/check_compact.py --label "make $(COMPACT_GOALS) COMPACT=1" \
+		$(if $(filter project-check docker-project-check git-status,$(COMPACT_GOALS)),--git-status) \
+		-- $(MAKE) --no-print-directory _COMPACT_RUNNING=1 $(COMPACT_GOALS)
+else
+
 .PHONY: help git-status db-check db-test db-migrate db-migrate-one docs-check project-check \
 	db-schema-dump docker-config-check docker-up docker-status docker-wait \
 	docker-stop docker-recreate docker-logs docker-migrate docker-db-check docker-db-test \
@@ -38,7 +60,7 @@ COMPOSE := docker compose --env-file .env
 	docker-backup docker-backup-list docker-restore docker-restore-check docker-restore-test \
 	manifest-check manifest-source-check importer-fixture importer-run importer-dry-run importer-test \
 	backend-install backend-build backend-unit-test backend-db-setup backend-integration-test \
-	backend-foundation-e2e backend-check backend-up backend-container-check backend-logs backend-stop
+	backend-foundation-e2e backend-check backend-up backend-container-check backend-logs backend-stop workflow-test
 
 help:
 	@echo "Comandos disponíveis:"
@@ -50,8 +72,9 @@ help:
 	@echo "  make manifest-check  Valida o manifesto físico v1 versionado"
 	@echo "  make manifest-source-check Compara manifesto com cabeçalhos da fonte local ignorada"
 	@echo "  make importer-fixture Gera a planilha XLSX exclusivamente sintética"
-	@echo "  make importer-run IMPORT_FILE=... Executa o importador v1 no banco Docker"
-	@echo "  make importer-dry-run IMPORT_FILE=... Executa preflight sem persistir escrita clínica"
+	@echo "  make importer-run IMPORT_FILE=... IMPORT_PURPOSE=... Importa com finalidade explícita"
+	@echo "  make importer-dry-run IMPORT_FILE=... IMPORT_PURPOSE=... Executa preflight sem persistir escrita clínica"
+	@echo "    IMPORT_PURPOSE: carga_inicial ou mesmo_conteudo; revisao ainda bloqueada; sem padrão"
 	@echo "  make importer-test   Executa o fluxo sintético ponta a ponta em banco isolado"
 	@echo "  make backend-install Instala dependências reproduzíveis com npm ci"
 	@echo "  make backend-check   Compila e executa testes unitários e integração"
@@ -59,7 +82,13 @@ help:
 	@echo "  make backend-up      Provisiona login técnico e sobe o backend Docker"
 	@echo "  make backend-container-check Constrói e valida health/usuário do container backend"
 	@echo "  make backend-logs    Acompanha logs do backend"
-	@echo "  make project-check   Executa todos os checks locais não destrutivos"
+	@echo "  make project-check   Executa docs-check, testes SQL, diff e status Git"
+	@echo "  make workflow-test   Testa saída compacta e propagação de falhas com dados sintéticos"
+	@echo "  make <validação> COMPACT=1 Resume o resultado e guarda log filtrado em /tmp"
+	@echo "    Disponível para docs/manifest/db/project-check, db-test, importer-test,"
+	@echo "    backend-{build,unit-test,integration-test,foundation-e2e,check,container-check},"
+	@echo "    docker-{config-check,db-check,db-test,project-check,restore-check,restore-test},"
+	@echo "    manifest-source-check, workflow-test e git-status. Sem opção: saída habitual."
 	@echo "  make db-schema-dump  Atualiza somente o dump estrutural do schema $(DB_SCHEMA)"
 	@echo "  make db-migrate-one MIGRATION_FILE=sql/NN_arquivo.sql Aplica uma migration incremental"
 	@echo "  make docker-up       Sobe somente o PostgreSQL Docker"
@@ -80,9 +109,16 @@ help:
 	@echo "  make docker-destroy DESTROY_ENV=docker  DESTROI os volumes Docker do projeto"
 
 git-status:
+ifeq ($(COMPACT),1)
+	@git status --short
+else
 	@git status --short --branch
 	@echo ""
 	@git log --oneline --decorate -n 8
+endif
+
+workflow-test:
+	@python3 -m unittest discover -s tests/workflow -p 'test_*.py'
 
 db-check:
 	@command -v psql >/dev/null 2>&1 || { echo "Erro: psql não encontrado."; exit 1; }
@@ -167,13 +203,15 @@ importer-fixture:
 
 importer-run: docker-wait
 	@test -n "$(IMPORT_FILE)" || { echo "Erro: informe IMPORT_FILE (somente dado sintético neste estágio)."; exit 1; }
-	@python3 scripts/importar_planilha.py "$(IMPORT_FILE)" \
+	@test -n "$(IMPORT_PURPOSE)" || { echo "Erro: informe IMPORT_PURPOSE (carga_inicial, mesmo_conteudo ou revisao ainda bloqueada)."; exit 1; }
+	@python3 scripts/importar_planilha.py "$(IMPORT_FILE)" --finalidade "$(IMPORT_PURPOSE)" \
 		--db-host "$(DB_HOST)" --db-port "$(DB_PORT)" --db-user "$(DB_USER)" \
 		--db-name "$(DB_NAME)"
 
 importer-dry-run: docker-wait
 	@test -n "$(IMPORT_FILE)" || { echo "Erro: informe IMPORT_FILE (somente dado sintético neste estágio)."; exit 1; }
-	@python3 scripts/importar_planilha.py "$(IMPORT_FILE)" --dry-run \
+	@test -n "$(IMPORT_PURPOSE)" || { echo "Erro: informe IMPORT_PURPOSE (carga_inicial, mesmo_conteudo ou revisao ainda bloqueada)."; exit 1; }
+	@python3 scripts/importar_planilha.py "$(IMPORT_FILE)" --finalidade "$(IMPORT_PURPOSE)" --dry-run \
 		--db-host "$(DB_HOST)" --db-port "$(DB_PORT)" --db-user "$(DB_USER)" \
 		--db-name "$(DB_NAME)"
 
@@ -367,3 +405,5 @@ docker-destroy: docker-config-check
 	@test "$(DESTROY_ENV)" = "docker" || { echo "Erro: confirme DESTROY_ENV=docker; o PostgreSQL local não é suportado."; exit 1; }
 	@$(COMPOSE) down --volumes --remove-orphans
 	@echo "OK: somente containers, rede e volumes Docker deste projeto foram removidos"
+
+endif # COMPACT_GOALS

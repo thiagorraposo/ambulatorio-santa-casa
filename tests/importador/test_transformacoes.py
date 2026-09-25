@@ -1,12 +1,119 @@
 #!/usr/bin/env python3
 import json
+import io
 import sys
 import unittest
+from contextlib import redirect_stderr
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
-from importar_planilha import bzn_duration, bool_value, date_value, normalized, number_value, HANDLED_TABLES, Importer, RowConflict
+from importar_planilha import bzn_duration, bool_value, date_value, normalized, number_value, HANDLED_TABLES, Importer, NONCRITICAL_POLICY, PROMOTION_REGISTRY, RowConflict, main
+
+
+class FinalidadeImportacaoTest(unittest.TestCase):
+    def setUp(self):
+        self.root = Path(__file__).resolve().parents[2]
+        self.fixture = self.root / "tests/fixtures/planilha_importacao_v1_sintetica.xlsx"
+        self.manifest = json.loads((self.root / "manifestos/planilha_ambulatorio_v1.json").read_text())
+
+    def test_cli_recusa_antes_de_ler_arquivo_ou_conectar_inclusive_dry_run(self):
+        cases = [
+            ([], "finalidade_ausente"),
+            (["--finalidade", ""], "finalidade_ausente_ou_invalida"),
+            (["--finalidade", "valor_livre_sintetico"], "finalidade_ausente_ou_invalida"),
+            (["--finalidade", "revisao"], "revisao_nao_suportada"),
+            (["--finalidade", "revisao", "--reprocessar"], "revisao_nao_suportada"),
+            (["--finalidade", "carga_inicial", "--reprocessar"], "finalidade_incompativel"),
+            (["--reprocessar"], "finalidade_ausente"),
+            (["--finalidade", "revisao", "--finalidade", "carga_inicial"], "finalidade_ambigua"),
+            (["--finalidade", "carga_inicial", "--finalidade", "revisao"], "finalidade_ambigua"),
+            (["--finalidade", "carga_inicial", "--finalidade", "carga_inicial"], "finalidade_ambigua"),
+        ]
+        for flags, error in cases:
+            for mode in ([], ["--dry-run"]):
+                with self.subTest(flags=flags, mode=mode), patch("importar_planilha.Database") as db, \
+                        patch("importar_planilha.read_xlsx") as read_book, \
+                        patch.object(Path, "read_text") as read_text, \
+                        patch.object(Path, "read_bytes") as read_bytes, \
+                        patch.object(Path, "write_text") as write_text:
+                    output = io.StringIO()
+                    with redirect_stderr(output), self.assertRaises(SystemExit) as exc:
+                        main(["fonte_sintetica_inexistente.xlsx", *flags, *mode,
+                              "--quality-report", "relatorio_sintetico.json"])
+                    self.assertEqual(exc.exception.code, 2)
+                    self.assertIn(error, output.getvalue())
+                    self.assertNotIn("valor_livre_sintetico", output.getvalue())
+                    for operation in (db, read_book, read_text, read_bytes, write_text):
+                        operation.assert_not_called()
+
+    def test_chamada_direta_nao_contorna_barreira(self):
+        for purpose, reprocess in ((None, False), ("revisao", False), ("invalida", False),
+                                   ("carga_inicial", True)):
+            with self.subTest(purpose=purpose), patch("importar_planilha.read_xlsx") as read_book:
+                db = Mock()
+                with self.assertRaises(ValueError):
+                    Importer(db, self.fixture, self.manifest, "sintetico",
+                             reprocess=reprocess, purpose=purpose)
+                read_book.assert_not_called()
+                self.assertEqual(db.mock_calls, [])
+
+    def test_mesmo_conteudo_sem_hash_layout_existente_so_consulta(self):
+        for reprocess in (False, True):
+            for dry_run in (False, True):
+                with self.subTest(reprocess=reprocess, dry_run=dry_run):
+                    db = Mock()
+                    db.scalar.return_value = None
+                    importer = Importer(db, self.fixture, self.manifest, "sintetico",
+                                        reprocess, dry_run, purpose="mesmo_conteudo")
+                    with self.assertRaisesRegex(SystemExit, "mesmo_conteudo_sem_lote"):
+                        importer.run()
+                    db.scalar.assert_called_once()
+                    query = db.scalar.call_args.args[0]
+                    self.assertTrue(query.startswith("SELECT "))
+                    self.assertIn(importer.hash, query)
+                    self.assertIn(self.manifest["layout_versao"], query)
+                    db.run.assert_not_called()
+                    db.transaction.assert_not_called()
+
+    def test_carga_declarada_cria_lote_quando_hash_desconhecido(self):
+        db = Mock()
+        db.scalar.side_effect = [None, "42"]
+        importer = Importer(db, self.fixture, self.manifest, "sintetico", purpose="carga_inicial")
+        self.assertTrue(importer.prepare_lot())
+        self.assertEqual(importer.lot_id, 42)
+        self.assertTrue(db.scalar.call_args.args[0].startswith("INSERT INTO importacao_lote"))
+
+    def test_conteudo_concluido_e_idempotente_com_ambas_finalidades_permitidas(self):
+        for purpose in ("carga_inicial", "mesmo_conteudo"):
+            for status in ("concluido", "concluido_com_pendencias"):
+                with self.subTest(purpose=purpose, status=status):
+                    db = Mock()
+                    db.scalar.return_value = f"42|{status}"
+                    importer = Importer(db, self.fixture, self.manifest, "sintetico", purpose=purpose)
+                    with redirect_stderr(io.StringIO()):
+                        self.assertFalse(importer.prepare_lot())
+                    db.scalar.assert_called_once()
+                    db.run.assert_not_called()
+
+    def test_retomada_reutiliza_lote_existente(self):
+        db = Mock()
+        db.scalar.return_value = "42|falhou"
+        importer = Importer(db, self.fixture, self.manifest, "sintetico", purpose="mesmo_conteudo")
+        self.assertTrue(importer.prepare_lot())
+        self.assertEqual(importer.lot_id, 42)
+        db.scalar.assert_called_once()
+        self.assertTrue(db.run.call_args.args[0].startswith("UPDATE importacao_lote"))
+
+    def test_reprocessamento_mantem_predecessor_do_mesmo_conteudo(self):
+        db = Mock()
+        db.scalar.side_effect = ["42|concluido_com_pendencias", "43"]
+        importer = Importer(db, self.fixture, self.manifest, "sintetico",
+                            reprocess=True, purpose="mesmo_conteudo")
+        self.assertTrue(importer.prepare_lot())
+        self.assertEqual(importer.predecessor_id, 42)
+        self.assertEqual(importer.lot_id, 43)
+
 
 
 class TransformacoesTest(unittest.TestCase):
@@ -31,7 +138,7 @@ class TransformacoesTest(unittest.TestCase):
         self.assertEqual(bzn_duration("8 semanas"), 56)
         with self.assertRaises(RowConflict): bzn_duration("dois meses")
 
-    def test_os_124_rotulos_plenos_possuem_handler(self):
+    def test_os_125_rotulos_plenos_possuem_handler(self):
         root = Path(__file__).resolve().parents[2]
         manifest = json.loads((root / "manifestos/planilha_ambulatorio_v1.json").read_text())
         canonical = {}
@@ -39,10 +146,115 @@ class TransformacoesTest(unittest.TestCase):
             for column in sheet["columns"]:
                 canonical.setdefault(column["cabecalho_original"].strip(), column)
         full = [c for c in canonical.values() if c["situacao_cobertura"] in {"direta", "com_transformacao"}]
-        self.assertEqual(len(full), 124)
+        self.assertEqual(len(full), 125)
         self.assertEqual({c["tabela_destino"] for c in full} - HANDLED_TABLES, set())
-        self.assertEqual(len([c for c in canonical.values() if c["situacao_cobertura"] == "parcial"]), 11)
+        self.assertEqual(len([c for c in canonical.values() if c["situacao_cobertura"] == "parcial"]), 10)
         self.assertEqual([c["chave_semantica"] for c in canonical.values() if c["situacao_cobertura"] == "excluido"], ["localizado"])
+        self.assertEqual(set(PROMOTION_REGISTRY), {"pendencias_observacao"})
+        self.assertEqual(set(NONCRITICAL_POLICY), {"catalogo_projeto_ausente"})
+
+
+class CriticidadeErrosTest(unittest.TestCase):
+    def setUp(self):
+        self.importer = Importer.__new__(Importer)
+        self.importer.db = Mock()
+        self.importer.reconcile = Mock()
+        self.importer.insert_returning = Mock()
+        self.importer.manifest = {"aliases_versionados": {"projetos": {
+            "sami_trop_1_1": "sami_trop_1_1",
+        }}}
+
+    def test_catalogo_de_projeto_ausente_vira_pendencia_nao_critica(self):
+        self.importer.db.scalar.return_value = None
+        issues = self.importer.projects(
+            1, 2, {"sami_trop_1_1": "sim"})
+        self.assertEqual(
+            issues, ["catalogo_projeto_ausente:sami_trop_1_1"])
+        self.importer.insert_returning.assert_not_called()
+
+    def test_catalogo_de_outro_handler_continua_critico_por_padrao(self):
+        self.importer.manifest = {"aliases_versionados": {"medicamentos": {
+            "anti_hipertensivo": "antihipertensivo_nao_especificado",
+        }}}
+        self.importer.db.scalar.return_value = None
+        with self.assertRaisesRegex(RowConflict, "medicamento: catálogo inexistente"):
+            self.importer.medications(
+                1, 2, {"anti_hipertensivo": "sim"})
+        self.importer.insert_returning.assert_not_called()
+
+    def test_nova_tentativa_cria_vinculo_quando_catalogo_foi_corrigido(self):
+        self.importer.db.scalar.side_effect = ["7", None]
+        issues = self.importer.retry_project_catalog(
+            1, 2, {"sami_trop_1_1": "sim"}, "sami_trop_1_1")
+        self.assertEqual(issues, [])
+        self.importer.insert_returning.assert_called_once_with(
+            1, "paciente_projeto_estudo", {
+                "paciente_id": 2,
+                "projeto_estudo_id": 7,
+                "participa": True,
+                "valor_original_participacao": "sim",
+            })
+
+    def test_nova_tentativa_desconhecida_nao_e_encerrada_silenciosamente(self):
+        issues = self.importer.retry_project_catalog(
+            1, 2, {"sami_trop_1_1": "sim"}, "projeto_inexistente")
+        self.assertEqual(
+            issues, ["catalogo_projeto_ausente:projeto_inexistente"])
+        self.importer.db.scalar.assert_not_called()
+        self.importer.insert_returning.assert_not_called()
+
+    def test_mensagem_tecnica_recupera_somente_pendencias_nao_criticas(self):
+        issues = self.importer.noncritical_issues(
+            "campos preservados apenas em dados_brutos: idade; "
+            "nao_criticas=catalogo_projeto_ausente:sami_trop_1_1")
+        self.assertEqual(
+            issues, ["catalogo_projeto_ausente:sami_trop_1_1"])
+
+    def test_mensagem_adulterada_nao_reemite_conteudo_livre(self):
+        issues = self.importer.noncritical_issues(
+            "nao_criticas=catalogo_projeto_ausente:conteúdo livre sensível")
+        self.assertEqual(issues, ["integridade_politica_nao_critica"])
+
+
+class PromocaoPendenciasTest(unittest.TestCase):
+    def setUp(self):
+        self.importer = Importer.__new__(Importer)
+        self.importer.db = Mock()
+        self.importer.provenance = Mock()
+        self.importer.insert_returning = Mock()
+
+    def test_cria_pendencia_quando_destino_repetivel_ainda_nao_existe(self):
+        self.importer.db.run.return_value = []
+        self.importer.db.scalar.return_value = "0"
+        self.importer.pending_note(
+            1, 2, {"pendencias_observacao": "  pendência sintética  "},
+            promotion=True)
+        self.importer.insert_returning.assert_called_once_with(
+            1, "pendencia_atendimento", {
+                "atendimento_id": 2,
+                "descricao": "pendência sintética",
+                "valor_original_pendencia": "  pendência sintética  ",
+            })
+
+    def test_preserva_destino_repetivel_manual_ambiguo(self):
+        self.importer.db.run.return_value = []
+        self.importer.db.scalar.return_value = "1"
+        with self.assertRaisesRegex(RowConflict, "destino repetível ambíguo"):
+            self.importer.pending_note(
+                1, 2, {"pendencias_observacao": "pendência sintética"},
+                promotion=True)
+        self.importer.insert_returning.assert_not_called()
+
+    def test_alvo_promovido_equivalente_e_reutilizado(self):
+        self.importer.db.run.return_value = ["42"]
+        values = iter(["2", "pendência sintética", "pendência sintética"])
+        self.importer.db.scalar.side_effect = lambda _sql: next(values)
+        self.importer.pending_note(
+            1, 2, {"pendencias_observacao": "pendência sintética"},
+            promotion=True)
+        self.importer.provenance.assert_called_once_with(
+            1, "pendencia_atendimento", 42, "associado")
+        self.importer.insert_returning.assert_not_called()
 
 
 class ReconciliacaoBznTest(unittest.TestCase):

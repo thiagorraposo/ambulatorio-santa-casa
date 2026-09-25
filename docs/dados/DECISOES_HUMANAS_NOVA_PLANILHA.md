@@ -1,6 +1,6 @@
 # Decisões Humanas para a Nova Planilha
 
-Atualizado em: 2026-09-14
+Atualizado em: 2026-09-22
 
 ## Finalidade e precedência
 
@@ -18,9 +18,10 @@ A descrição vigente está em `docs/MODELO_FISICO_ATUAL.md`.
 Nenhuma decisão deste documento altera o banco por si só. Mudanças físicas deverão
 ser especificadas e implementadas em migrations incrementais futuras.
 
-O manifesto executável `manifestos/planilha_ambulatorio_v1.json` ainda representa
-o contrato anterior: 124 rótulos plenos, onze parciais e `Localizado` excluído.
-Esta atualização documental não altera seu comportamento nem promove campos.
+O manifesto executável `manifestos/planilha_ambulatorio_v1.json` representa agora
+125 rótulos plenos, dez parciais e `Localizado` excluído. D11 foi promovida na
+v1.2.0 do importador para `pendencia_atendimento`, sem classificação automática;
+as demais decisões continuam dependendo de evolução explícita.
 As regras operacionais e suas divergências de implementação estão em
 `docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md` e
 `docs/IMPORTADOR_SINTETICO_V1.md`. Incompatibilidades exigem evolução explícita
@@ -47,10 +48,11 @@ de entrega são propostas técnicas do roadmap, não respostas adicionais da equ
 | D11 | O campo misto pode ficar apenas como pendências, preferencialmente textuais, relativas principalmente a notificação ou solicitação de BZN. Segundo a equipe, as observações desse campo repetem informações do desfecho do retorno. | Não há resposta explícita sobre quantidade por atendimento nem autorização para classificar automaticamente todo texto antigo. A coluna separada `observação` e observações clínicas gerais não foram abolidas. |
 | D12 | `Localizado` pode ser excluído; indica se a equipe encontrou o prontuário físico. | Exclusão funcional não é purga da proveniência nem exclusão de `atendimento.localizacao_prontuario`, que é outro campo. |
 
-### Consequências técnicas propostas, ainda não implementadas
+### Consequências técnicas
 
-- Reutilizar nascimento para idade; exames por paciente para D4/D5;
-  acompanhamento para datas/tipos de retorno; pendências existentes para D11.
+- Reutilizar nascimento para idade; exames por paciente para D4/D5 e
+  acompanhamento para datas/tipos de retorno. D11 já reutiliza
+  `pendencia_atendimento` na promoção controlada do importador v1.2.0.
 - Acrescentar representação própria da data de descoberta e do rastreio familiar
   por migrations incrementais após definir seu contrato. Não reinterpretar
   `historico_familiar_chagas.possui_historico_familiar` como exame realizado.
@@ -60,8 +62,13 @@ de entrega são propostas técnicas do roadmap, não respostas adicionais da equ
 - Se necessário expor o ano legado estruturadamente, avaliar
   `evento_clinico.ano_evento` com tipo explícito e precisão anual. É uma opção,
   não um destino já aprovado ou implementado para retorno anual.
+- O [contrato temporal de revisão](../arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md)
+  foi definido tecnicamente na ADR-022, sem nova resposta clínica da equipe.
+  A v1.4.0 implementa somente a barreira de finalidade e recusa de revisões;
+  aplicação auditada segue pendente. Não escolhe a representação anual de D8
+  nem autoriza inferir visitas.
 - Confirmar referência da idade, propriedade do autorrelato, representação dos
-  familiares, temporalidade da importação, substituição de desfecho e estados/
+  familiares, representação do ano legado, substituição de desfecho e estados/
   anexos da contrarreferência antes da implementação dependente.
 
 ## Legenda da classificação
@@ -102,7 +109,8 @@ Regras obrigatórias do importador:
   aba produzirem candidatos contraditórios;
 - encaminhar conflitos para revisão e manter a linha bruta e o motivo;
 - o v1 cria atendimentos distintos para linhas distintas do mesmo paciente;
-  antes de importar atualizações, resolver a temporalidade descrita em D8;
+  antes de importar atualizações, implementar e homologar o contrato temporal
+  complementar; o fluxo revisado não herda automaticamente essa regra do v1;
 - não inventar datas de criação/atualização da origem; timestamps do banco
   representam processamento, não datas da planilha.
 

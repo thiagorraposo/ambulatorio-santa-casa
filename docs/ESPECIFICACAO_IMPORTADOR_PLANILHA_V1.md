@@ -1,6 +1,6 @@
 # Especificação Normativa do Importador da Planilha — v1
 
-Atualizado em: 2026-09-15
+Atualizado em: 2026-09-22
 
 ## Preflight, relatório e rastreabilidade
 
@@ -12,12 +12,16 @@ lote, linha, paciente, atendimento ou registro clínico.
 O JSON determinístico `ambulatorio.import-quality-report/v1` registra totais,
 válidas, importáveis, pendências, rejeições, conflitos de identidade/abas, valores
 inválidos, catálogos desconhecidos, outras causas, hashes e versões do arquivo,
-manifesto, importador e Git. O lote aplicado persiste hash do manifesto, versão
+manifesto, importador e Git, além da finalidade declarada (`purpose`, desde v1.4.0).
+O lote aplicado persiste hash do manifesto, versão
 do importador e revisão Git. Logs JSON permitem apenas eventos/metadados técnicos
 e contadores, nunca valores de células ou mensagens clínicas por linha.
 
-Status: contrato v1 com homologação sintética original e lacunas de implementação
-identificadas na análise de 2026-09-14. As novas respostas da equipe ainda não
+Status: contrato v1 com promoção controlada implementada na v1.2.0 para D11 e
+primeira política não crítica implementada na v1.3.0. O contrato de revisão entre
+hashes foi definido na ADR-022; a v1.4.0 implementa somente a barreira de finalidade
+e recusa integral de revisão. Lacunas remanescentes
+foram identificadas na análise de 2026-09-14. As demais respostas da equipe ainda não
 foram incorporadas ao manifesto/handlers; dados reais continuam não autorizados.
 
 ## Finalidade, autoridade e escopo
@@ -31,6 +35,8 @@ As fontes têm responsabilidades distintas:
 1. `docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md` determina a semântica de negócio,
    incluindo as respostas D1–D12; texto antigo do manifesto não a sobrepõe;
 2. este documento define o comportamento operacional pretendido;
+   arquivos revisados são detalhados no complemento normativo
+   [Contrato Temporal de Revisão da Planilha](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md);
 3. `manifestos/planilha_ambulatorio_v1.json` descreve o contrato físico atualmente
    consumido pelo importador: aba, posição, ocorrência, bloco, tipo e destino;
 4. código, migrations, testes e configuração executável comprovam o comportamento
@@ -51,19 +57,22 @@ O MVP lê somente as abas `Pacientes portadores de DC` e
 As [decisões humanas](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md) são a fonte integral
 das respostas; a [matriz de impacto](dados/COBERTURA_COLUNAS_PLANILHA.md) avalia
 destinos reutilizáveis, migrations justificadas e testes. Não mais considerar
-todos os onze campos parciais como pós-MVP nem a multiplicidade de contrarreferência
+os dez campos ainda parciais como pós-MVP nem a multiplicidade de contrarreferência
 indefinida. A exclusão funcional de `Localizado` foi confirmada.
 
-Até a revisão executável, campos `parcial` continuam exclusivamente brutos. Não
-promover dados por interpretação ad hoc. Referência da idade, representação do
-ano legado, contrato documental de contrarreferência e retirada do desfecho ainda
-exigem as decisões delimitadas na fonte de negócio. Atualização de uma linha da
-planilha não comprova nova visita e não permite reconstruir histórico perdido.
+Campos `parcial` continuam exclusivamente brutos. D11 deixou essa classificação
+na v1.2.0 e pode ser promovida somente pelo registro controlado descrito abaixo.
+Não promover os demais dados por interpretação ad hoc. Referência da idade,
+representação do ano legado, contrato documental de contrarreferência e retirada
+do desfecho ainda exigem as decisões delimitadas na fonte de negócio. Atualização
+de uma linha da planilha não comprova nova visita e não permite reconstruir
+histórico perdido.
 
 O [estado da implementação](IMPORTADOR_SINTETICO_V1.md) registra a reconciliação
-BZN corrigida na v1.1.1 e as lacunas ainda presentes em `reuse_predecessor()` e na
-criticidade de `RowConflict`. Promoção de pendências e política de erros secundários
-ainda são requisitos normativos sem cobertura completa na implementação.
+BZN corrigida na v1.1.1, a promoção controlada de D11 na v1.2.0 e a primeira
+política não crítica na v1.3.0. A temporalidade de arquivo revisado, a promoção
+das outras dez chaves e a classificação individual dos demais erros secundários
+ainda são requisitos sem cobertura completa na implementação.
 
 ## Vocabulário operacional
 
@@ -79,9 +88,10 @@ ainda são requisitos normativos sem cobertura completa na implementação.
   nome, data de nascimento e data do atendimento válidos, identidade conciliada
   sem conflito e apta a gerar exatamente um atendimento.
 
-A associação linha → atendimento acima descreve o contrato v1. Antes de importar
-versões revisadas de uma planilha, aprovar a política temporal de D8; não estender
-essa regra automaticamente a toda atualização do registro de origem.
+A associação linha → atendimento acima descreve o contrato v1. Para versões
+revisadas, aplicar o contrato temporal complementar somente após sua implementação
+e homologação; não estender essa regra automaticamente a toda atualização do
+registro de origem. A representação anual de D8 continua pendente.
 
 Vazio e ausente resultam em `NULL` ou ausência de registro dependente, nunca em
 `FALSE`, zero, string vazia normalizada ou catálogo `nao_informado`. Inválido
@@ -90,7 +100,15 @@ conforme a criticidade descrita abaixo.
 
 ## Validação do arquivo e materialização bruta
 
-Antes de qualquer escrita clínica, a execução deve:
+Antes de qualquer escrita, exigir `--finalidade` exatamente uma vez:
+`carga_inicial`, `mesmo_conteudo` ou `revisao`. Finalidade ausente, inválida,
+repetida ou revisão ainda não suportada bloqueia antes da leitura da fonte e da
+conexão. Reprocessar exige `mesmo_conteudo`, cujo hash/layout deve existir antes
+de qualquer escrita. A barreira vale também para dry-run e não autoriza criar
+relatório de sucesso. Carga inicial declarada de conteúdo conhecido preserva
+idempotência/retomada; de conteúdo desconhecido não comprova nova ocorrência clínica.
+
+Após validar a declaração, a execução deve:
 
 1. calcular o SHA-256 dos bytes do arquivo e identificar
    `layout_versao = planilha_ambulatorio_v1`;
@@ -351,6 +369,36 @@ registro usa `mensagem_processamento` com código técnico, campos envolvidos e
 ação necessária, sem copiar valores clínicos. Os valores permanecem somente em
 `dados_brutos` e campos `valor_original_*` autorizados.
 
+### Criticidade explícita dos erros
+
+A classificação é conservadora: todo erro de regra continua crítico e causa
+rollback da linha, salvo quando existir uma entrada explícita e versionada no
+registro de políticas não críticas do código. A entrada deve informar código
+técnico, handler, destino, âncora e estratégia de nova tentativa. Alterar somente
+uma mensagem ou capturar genericamente `RowConflict` não muda a criticidade.
+
+São críticos: falha de identidade; nome, nascimento ou data do atendimento
+inválidos; conflito entre abas; contexto do atendimento impossível; divergência
+de fato consolidado; proveniência inválida; layout/destino incompatível; e falha
+operacional. Valores opcionais inválidos e catálogos ausentes também permanecem
+críticos até aprovação individual, porque handlers distintos possuem efeitos e
+cardinalidades diferentes.
+
+A primeira regra não crítica é `catalogo_projeto_ausente`, restrita ao handler
+`projects()` e ao destino `paciente_projeto_estudo`. Paciente e atendimento são
+confirmados, os demais destinos continuam sendo processados e apenas a associação
+do projeto ausente deixa de ser criada. O catálogo não é criado nem substituído;
+o valor de origem permanece em `dados_brutos`; a linha termina
+`importada_com_pendencia`. O código da mensagem contém somente a regra e o código
+técnico do projeto, nunca o conteúdo da célula.
+
+No reprocessamento do mesmo conteúdo/layout, essa regra executa novamente somente
+o projeto registrado como pendente, usando o paciente da proveniência. Se o
+catálogo já existir, cria ou reconcilia o vínculo e remove a pendência; se ainda
+faltar, mantém o mesmo estado. Nenhum atendimento é criado. Conflito consolidado
+durante a nova tentativa não sobrescreve o vínculo e permanece pendente; erro de
+banco continua operacional e interrompe o lote.
+
 ## Idempotência e cadeia de reprocessamento
 
 ### Mesmo lote
@@ -386,6 +434,105 @@ linha, o processo percorre a cadeia do predecessor mais recente para trás:
 - qualquer resultado diferente é nova evidência auditável no novo lote;
 - alteração de bytes ou layout inicia outra identidade de conteúdo e não pode ser
   tratada como reprocessamento pela FK existente.
+
+### Promoção controlada de pendências
+
+A promoção é um modo restrito do reprocessamento do mesmo conteúdo e layout. Ela
+se aplica quando a linha válida mais recente da cadeia está
+`importada_com_pendencia` e uma versão posterior do contrato passou a suportar
+uma ou mais chaves antes preservadas somente no bruto. Ela não se aplica a arquivo
+com outro hash, não cria uma nova visita e não reexecuta o fluxo completo da linha.
+
+Cada chave promovível deve constar de um registro versionado no código, validado
+contra o manifesto, contendo: chave semântica, cobertura plena atual, handler
+específico, tabelas de destino permitidas, âncora (`paciente` ou `atendimento`) e
+política de reconciliação. Mudar apenas `situacao_cobertura` no manifesto não
+habilita promoção. A lista inicial da v1.2.0 contém somente
+`pendencias_observacao`, com handler `pending_note`, destino
+`pendencia_atendimento`, âncora `atendimento` e política
+`repeatable_by_provenance`. As outras dez chaves parciais continuam desabilitadas
+até aprovação e implementação individuais.
+
+O processamento deve seguir estas regras, na mesma transação da nova linha:
+
+1. localizar na cadeia a linha válida mais recente da mesma posição e validar
+   todos os alvos de sua proveniência;
+2. copiar os vínculos válidos para a nova linha com ação `associado` e resolver
+   exatamente um `paciente` e um `atendimento` já existentes como âncoras;
+3. para linha anterior `importada`, encerrar pela reutilização normal; para
+   `importada_com_pendencia`, calcular a interseção entre células não vazias,
+   chaves hoje plenas e o registro explícito de promoção;
+4. executar somente os handlers dessa interseção, sem chamar `patient()`, sem
+   criar outro atendimento e sem repetir os demais handlers;
+5. recalcular as chaves ainda parciais e concluir como `importada` apenas quando
+   nenhuma pendência permanecer; caso contrário, manter
+   `importada_com_pendencia`.
+
+Um handler de promoção pode criar um registro dependente ausente quando o contrato
+define uma identidade inequívoca e a âncora já validada. Em alvo consolidado já
+existente, igualdade apenas associa; valor não nulo divergente gera pendência e
+nunca é sobrescrito. Preencher `NULL` exige regra explícita por campo e evidência
+de que o importador possui esse campo. Sem histórico de campo capaz de distinguir
+ausência original de uma remoção manual, a promoção não atualiza esse alvo e o
+encaminha para revisão. Destino repetível sem chave de reconciliação aprovada
+também permanece pendente, pois coincidência textual não autoriza associação nem
+criação possivelmente duplicada.
+
+Para D11, a identidade segura é a proveniência do próprio alvo. Um registro
+equivalente já vinculado na cadeia é associado; se nenhum existir e o atendimento
+não tiver outra pendência, o handler cria uma nova ocorrência textual. Qualquer
+pendência já existente sem esse vínculo torna a situação ambígua: o registro
+manual fica intacto e a chave permanece pendente. O handler preserva o texto em
+`descricao` e `valor_original_pendencia` e não infere tipo, status, responsável,
+datas ou classificação clínica.
+
+As operações novas ficam em savepoint posterior à associação dos alvos antigos.
+Conflito ou ambiguidade desfaz tudo que o handler de promoção tentou gravar,
+preserva as associações válidas na nova linha e a encerra
+`importada_com_pendencia`. Alvo anterior inexistente, âncora ausente ou múltipla e
+tabela fora da lista permitida são inconsistências técnicas: nenhum substituto é
+criado e a linha permanece pendente para revisão. Uma falha operacional conserva
+o comportamento de retomada da seção seguinte.
+
+`importacao_registro` continua registrando a ação efetiva por alvo: `criado` para
+novo dependente, `atualizado` para preenchimento permitido e `associado` para alvo
+reutilizado ou equivalente. `mensagem_processamento` pode listar somente IDs de
+lote e chaves semânticas promovidas, remanescentes ou conflitantes; valores das
+células não podem aparecer. Esse nível de auditoria é suficiente para o MVP sem
+migration. Auditoria futura por campo exigirá contrato e estrutura próprios.
+
+Casos de aceite obrigatórios para a implementação:
+
+- reprocessar uma linha `importada` continua sem qualquer escrita clínica;
+- promover uma única chave cria ou reconcilia somente seu destino e reutiliza o
+  mesmo paciente e atendimento;
+- promover parte das chaves mantém as demais pendentes e expõe somente seus nomes
+  técnicos na mensagem;
+- dois elos consecutivos reutilizam o resultado promovido sem duplicação;
+- valor equivalente associa, `NULL` autorizado é preenchido e divergência não
+  sobrescreve o alvo;
+- edição manual não comprovadamente distinguível permanece intacta e exige revisão;
+- conflito tardio reverte todas as escritas novas do handler, mantendo os alvos
+  anteriores associados;
+- proveniência ausente, órfã ou ambígua não leva à criação de paciente,
+  atendimento ou substituto;
+- `--dry-run` exercita o mesmo caminho e reverte inclusive a promoção;
+- arquivo de hash diferente fica fora deste contrato e depende da política
+  temporal de arquivos revisados.
+
+## Arquivos revisados com novo hash
+
+O [contrato temporal complementar](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md)
+define identidade entre versões, correção da mesma ocorrência, nova visita,
+atualização consolidada, precedência, auditoria e casos de aceite. A v1.4.0
+implementa a barreira de finalidade e recusa revisões; reconciliação entre hashes
+continua pendente. Declarar carga inicial indevidamente ainda pode duplicar visitas. Não usar
+`--reprocessar` nem a FK de predecessor do mesmo hash para representar revisão.
+
+A aplicação futura exige finalidade explícita, mapeamento revisado e histórico
+por campo antes de qualquer correção. Sem evidência de ocorrência nova, não criar
+visita; sem identidade/proveniência inequívoca, preservar o bruto e bloquear a
+linha. Auditoria mínima por alvo da promoção D11 não basta para esse fluxo.
 
 ## Retomada após falha
 
@@ -455,12 +602,14 @@ PostgreSQL controlado, fora de logs, Git, APIs genéricas e dumps compartilhados
 O contrato sintético antigo pode ser exercitado em seu escopo homologado, mas
 não equivale a prontidão para o MVP revisado. Bloqueiam seus fluxos afetados:
 
-- permitir resolução controlada de pendências no reprocessamento;
-- fechar a política temporal antes de importar atualizações da mesma fonte;
+- expandir a promoção controlada somente para chaves com contrato, manifesto,
+  handler e testes aprovados; D11 já está implementada;
+- implementar e homologar o contrato temporal antes de importar atualizações da
+  mesma fonte; a barreira está implementada, mas linhagem e auditoria continuam pendentes;
 - escolher destinos/representações ainda pendentes antes de promover D2/D3 e
   outros campos cujo contrato não esteja fechado.
 
-As onze chaves `parcial` continuam brutas e, quando preenchidas, tornam a linha
+As dez chaves `parcial` continuam brutas e, quando preenchidas, tornam a linha
 `importada_com_pendencia`. As respostas já confirmadas dispensam rediscutir sua
 semântica, mas não dispensam atualização coordenada de manifesto, handlers e testes.
 
@@ -470,8 +619,8 @@ reais. As roles e o isolamento técnico já existem; não são uma etapa a refaz
 
 ### 2. Podem ser tratadas durante a implementação
 
-- revisão da política de erros críticos/não críticos e seus testes; relatório
-  estruturado e códigos técnicos já existem na v1.1.0;
+- ampliar a política de erros críticos/não críticos somente por handler e com
+  testes; `catalogo_projeto_ausente` é a primeira regra não crítica;
 - mecanismo concreto de bloqueio exclusivo por lote e detecção de executor ativo;
 - lista de tabelas permitidas derivada do manifesto e verificação de alvos órfãos;
 - testes sintéticos de concorrência, queda e retomada;
@@ -494,10 +643,11 @@ Esses itens não autorizam alterar as regras normativas deste documento.
 
 ## Critério de prontidão
 
-A homologação anterior comprovou a fixture e o contrato v1, incluindo preservação
-determinística das onze chaves parciais. A prontidão para o MVP revisado depende
+A homologação atual comprova 125 rótulos plenos, a preservação determinística das
+dez chaves parciais e a promoção controlada de D11. A prontidão para o MVP
+revisado depende
 dos critérios do [roadmap](PROXIMOS_PASSOS.md), regressões das lacunas conhecidas e
-cenários sintéticos das novas decisões; não decorre apenas da contagem de 124
+cenários sintéticos das novas decisões; não decorre apenas da contagem de 125
 rótulos. Dados reais continuam bloqueados pela governança institucional. Alterar
 uma regra normativa exige revisão explícita deste documento e, quando afetar
 layout/destino, atualização coordenada e versionada do manifesto e implementação.

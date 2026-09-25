@@ -1,6 +1,6 @@
 # Decisões Arquiteturais
 
-Atualizado em: 2026-08-31
+Atualizado em: 2026-09-22
 
 Este documento registra decisões duradouras do projeto. Mudanças cronológicas continuam em `docs/REGISTRO_DE_ALTERACOES.md`.
 
@@ -466,3 +466,113 @@ Alternativas rejeitadas: confiar apenas em `RESET ROLE` no `finally`, que não
 limpa todo estado de sessão e poderia devolver conexão após falha de limpeza.
 
 Documento relacionado: `docs/validacoes/VALIDACAO_ETAPA_4C.md`.
+
+## ADR-020
+
+ID: ADR-020
+
+Título: Promoção controlada de pendências por chave semântica
+
+Data: 2026-09-21
+
+Status: Aceita e implementada para D11 na v1.2.0
+
+Contexto: o reprocessamento do mesmo conteúdo e layout reutiliza corretamente os
+alvos de linhas importadas, mas também encerra `importada_com_pendencia` antes dos
+handlers. Assim, uma evolução aprovada do contrato não consegue promover campos
+antes preservados somente no bruto.
+
+Decisão: separar a reutilização integral de `importada` da promoção de
+`importada_com_pendencia`. Cada chave promovível terá registro versionado e
+validado contra o manifesto, handler específico, destinos permitidos, âncora e
+política de reconciliação. A promoção reutilizará paciente, atendimento e alvos
+da proveniência, executará somente esses handlers e isolará as novas escritas em
+savepoint. Valor divergente, edição manual não distinguível ou destino repetível
+sem identidade aprovada permanecerá pendente, sem sobrescrita ou duplicação.
+
+Consequências: evoluções do contrato podem completar uma linha do mesmo arquivo
+sem criar outra visita nem repetir seus demais destinos. Manifesto sozinho não
+habilita promoção. D11 é a primeira chave registrada e dez chaves continuam
+parciais até aprovação individual. A auditoria mínima usa proveniência por alvo e
+nomes técnicos em `mensagem_processamento`; auditoria por campo poderá exigir
+evolução futura.
+
+Alternativas rejeitadas: reexecutar todos os handlers; criar outro atendimento;
+habilitar automaticamente toda chave que mudar de cobertura; reconciliar destinos
+repetíveis por texto; sobrescrever valor clínico divergente.
+
+Documento relacionado: `docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`.
+
+## ADR-021
+
+ID: ADR-021
+
+Título: Criticidade conservadora e explícita por regra do importador
+
+Data: 2026-09-22
+
+Status: Aceita e implementada inicialmente na v1.3.0
+
+Contexto: `RowConflict` trata de forma idêntica falhas que invalidam a identidade
+da linha e ausências em destinos dependentes. O contrato já permite preservar um
+atendimento válido quando somente um destino secundário requer revisão, mas uma
+captura genérica poderia confirmar escrita parcial indevida.
+
+Decisão: erros são críticos por padrão. Uma falha somente pode gerar
+`importada_com_pendencia` quando constar de registro versionado com handler,
+destino, âncora e estratégia de nova tentativa. A primeira regra é
+`catalogo_projeto_ausente`: mantém paciente, atendimento e demais destinos, não
+cria catálogo e tenta novamente apenas a associação afetada no reprocessamento.
+
+Consequências: o comportamento não é flexibilizado em bloco; identidade, datas
+primárias, contexto, divergências consolidadas, proveniência e erros operacionais
+continuam causando rollback. Cada nova regra não crítica exige contrato e testes
+próprios. Mensagens persistem somente códigos técnicos; valores permanecem no
+bruto e fora dos logs.
+
+Alternativas rejeitadas: capturar qualquer `RowConflict` e continuar; classificar
+todos os catálogos ausentes da mesma forma; criar catálogo automaticamente; ou
+reexecutar a linha completa e gerar outro atendimento.
+
+Documento relacionado: `docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`.
+
+## ADR-022
+
+ID: ADR-022
+
+Título: Revisão entre hashes com identidade explícita e correção auditada
+
+Data: 2026-09-22
+
+Status: Barreira de finalidade implementada na v1.4.0; reconciliação pendente
+
+Contexto: D8 confirma que a planilha atualiza a linha do paciente e guarda apenas
+o último ano de comparecimento. A v1.3.0 identifica conteúdo por hash/layout e
+pode criar outra visita para um arquivo revisado; o predecessor existente aceita
+somente o mesmo hash/layout, e a proveniência por alvo não registra história de
+campo suficiente para autorizar correções.
+
+Decisão: separar finalidade do arquivo, identidade do paciente, ocorrência e
+revisão. Exigir relação com a base, mapeamento explícito e decisão auditada por
+campo; distinguir correção, nova visita e atualização consolidada. Novo hash,
+posição, nome/nascimento ou data isolada não autorizam criar ocorrência. Comparar
+base, estado atual e proposta, preservar edições manuais e bloquear ambiguidades.
+Manter a FK de reprocessamento inalterada e representar revisão entre conteúdos
+separadamente, com evolução incremental de auditoria antes de permitir correções.
+
+Consequências: a v1.4.0 exige finalidade explícita, recusa revisão antes de escrita
+e preserva carga sintética declarada, no-op, retomada e reprocessamento do mesmo
+hash/layout. A declaração não comprova nova ocorrência e não muda a cobertura do
+manifesto. A reconciliação depende de linhagem, decisões e
+histórico de campo persistentes. Ano legado continua bruto até contrato próprio,
+sem datas artificiais ou reconstrução de visitas. Governança de revisão e uso
+de dados reais permanecem pendentes.
+
+Alternativas rejeitadas: tratar novo hash como nova consulta; vincular versões por
+número de linha; impor unicidade por paciente/data; aplicar o arquivo mais recente
+por cima do banco; preencher `NULL` sem história de campo; inferir visitas de um
+intervalo de anos; usar a FK de mesmo conteúdo ou mensagem livre como auditoria de
+revisão entre hashes.
+
+Documento relacionado:
+[`arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md`](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md).

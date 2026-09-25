@@ -21,11 +21,21 @@ from importador.xlsx import read as read_xlsx  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "manifestos/planilha_ambulatorio_v1.json"
-IMPORTER_VERSION = "1.1.1"
+IMPORTER_VERSION = "1.4.0"
 
 
 class RowConflict(Exception):
     pass
+
+
+def validate_purpose(purpose, reprocess=False):
+    """Valida a declaração antes de ler a fonte, conectar ou escrever no banco."""
+    if purpose not in ("carga_inicial", "mesmo_conteudo", "revisao"):
+        raise ValueError("finalidade_ausente_ou_invalida: declare carga_inicial, mesmo_conteudo ou revisao")
+    if purpose == "revisao":
+        raise ValueError("revisao_nao_suportada: reconciliação entre conteúdos ainda não implementada")
+    if reprocess and purpose != "mesmo_conteudo":
+        raise ValueError("finalidade_incompativel: --reprocessar exige --finalidade mesmo_conteudo")
 
 
 def git_revision() -> str:
@@ -43,7 +53,7 @@ def git_revision() -> str:
 
 def safe_log(event: str, **fields) -> None:
     """Emite somente eventos e métricas de allowlist, nunca valores de células."""
-    allowed = {"event", "mode", "lot_code", "lot_id", "layout_version",
+    allowed = {"event", "mode", "purpose", "lot_code", "lot_id", "layout_version",
                "manifest_version", "importer_version", "git_revision", "status",
                "total_rows", "valid_rows", "importable_rows", "pending_rows",
                "rejected_rows"}
@@ -134,7 +144,25 @@ PK_FIELDS = {
     "paciente_contato": "contato_id",
 }
 
-# Tabelas que materializam os 124 rótulos físicos com cobertura plena. A
+PROMOTION_REGISTRY = {
+    "pendencias_observacao": {
+        "handler": "pending_note",
+        "tables": {"pendencia_atendimento"},
+        "anchor": "atendimento",
+        "policy": "repeatable_by_provenance",
+    },
+}
+
+NONCRITICAL_POLICY = {
+    "catalogo_projeto_ausente": {
+        "handler": "projects",
+        "retry_handler": "retry_project_catalog",
+        "table": "paciente_projeto_estudo",
+        "anchor": "paciente",
+    },
+}
+
+# Tabelas que materializam os 125 rótulos físicos com cobertura plena. A
 # checagem é executada antes de qualquer escrita e impede regressão silenciosa.
 HANDLED_TABLES = {
     "importacao_linha", "paciente", "paciente_endereco", "paciente_contato",
@@ -144,12 +172,15 @@ HANDLED_TABLES = {
     "paciente_exame_complementar", "atendimento_exame_complementar",
     "exame_complementar_resultado", "tratamento_benzonidazol",
     "encaminhamento", "dados_clinicos_atendimento", "evento_clinico",
-    "dispositivo_implantado", "notificacao", "obito",
+    "dispositivo_implantado", "notificacao", "obito", "pendencia_atendimento",
 }
 
 
 class Importer:
-    def __init__(self, db, workbook_path, manifest, code, reprocess=False, dry_run=False):
+    def __init__(self, db, workbook_path, manifest, code, reprocess=False, dry_run=False,
+                 *, purpose=None):
+        validate_purpose(purpose, reprocess)
+        self.purpose = purpose
         self.db, self.path, self.manifest, self.code = db, workbook_path, manifest, code
         self.book = read_xlsx(workbook_path)
         self.hash = hashlib.sha256(workbook_path.read_bytes()).hexdigest()
@@ -169,13 +200,30 @@ class Importer:
 
     def validate_layout(self):
         canonical = {}
+        by_key = {}
         for sheet in self.manifest["sheets"]:
             for column in sheet["columns"]:
                 canonical.setdefault(column["cabecalho_original"].strip(), column)
+                by_key.setdefault(column["chave_semantica"], []).append(column)
         full = [c for c in canonical.values() if c["situacao_cobertura"] in {"direta", "com_transformacao"}]
         unsupported = sorted({c["tabela_destino"] for c in full} - HANDLED_TABLES)
-        if len(full) != 124 or unsupported:
+        if len(full) != 125 or unsupported:
             raise SystemExit(f"Cobertura incompatível: plenos={len(full)}, tabelas sem handler={unsupported}")
+        for key, rule in PROMOTION_REGISTRY.items():
+            columns = by_key.get(key, [])
+            coverages = {c["situacao_cobertura"] for c in columns}
+            tables = {c["tabela_destino"] for c in columns}
+            if (not columns or not coverages <= {"direta", "com_transformacao"}
+                    or tables != rule["tables"] or rule["anchor"] not in {"paciente", "atendimento"}
+                    or rule["policy"] not in {"repeatable_by_provenance"}
+                    or not callable(getattr(self, rule["handler"], None))):
+                raise SystemExit(f"Registro de promoção incompatível: {key}")
+        for code, rule in NONCRITICAL_POLICY.items():
+            if (rule["table"] not in HANDLED_TABLES
+                    or rule["anchor"] not in {"paciente", "atendimento"}
+                    or not callable(getattr(self, rule["handler"], None))
+                    or not callable(getattr(self, rule["retry_handler"], None))):
+                raise SystemExit(f"Política não crítica incompatível: {code}")
         expected_names = [s["aba_nome_original"] for s in self.manifest["sheets"]]
         missing = [name for name in expected_names if name not in self.book]
         if missing:
@@ -194,6 +242,8 @@ class Importer:
             f"SELECT importacao_lote_id || '|' || status_lote FROM importacao_lote "
             f"WHERE hash_arquivo_sha256={literal(self.hash)} AND layout_versao={literal(version)} "
             "ORDER BY importacao_lote_id DESC LIMIT 1")
+        if self.purpose == "mesmo_conteudo" and not found:
+            raise SystemExit("mesmo_conteudo_sem_lote: exige lote existente do mesmo hash e layout")
         if self.reprocess:
             if not found:
                 raise SystemExit("Reprocessamento exige lote predecessor do mesmo conteúdo e layout")
@@ -208,6 +258,7 @@ class Importer:
             self.lot_id = int(lot)
             if status in {"concluido", "concluido_com_pendencias"}:
                 safe_log("import_idempotent_noop", mode="dry-run" if self.dry_run else "apply",
+                         purpose=self.purpose,
                          lot_code=self.code, lot_id=self.lot_id,
                          layout_version=version, importer_version=IMPORTER_VERSION,
                          git_revision=self.revision, status=status)
@@ -342,11 +393,20 @@ class Importer:
         if phone:
             self.insert_returning(line_id, "paciente_contato", {"paciente_id": patient_id, "telefone": phone})
 
-    def projects(self, line_id, patient_id, row):
+    @staticmethod
+    def noncritical_issue(code, subject):
+        if code not in NONCRITICAL_POLICY:
+            raise RowConflict(f"{code}: regra não classificada")
+        return f"{code}:{subject}"
+
+    def projects(self, line_id, patient_id, row, project_codes=None):
         aliases = self.manifest["aliases_versionados"]["projetos"]
         grouped = {}
+        pending = []
         suffix = {"participa": "valor_original_participacao", "possui_pendencia": "valor_original_pendencia", "houve_falha": "valor_original_falha"}
         for source, project_code in aliases.items():
+            if project_codes is not None and project_code not in project_codes:
+                continue
             value = row.get(source)
             if value is None or not value.strip(): continue
             field = "possui_pendencia" if source.endswith("_pendencia") else "houve_falha" if source.endswith("_falha") else "participa"
@@ -355,12 +415,25 @@ class Importer:
         for code, fields in grouped.items():
             project = self.db.scalar(f"SELECT projeto_estudo_id FROM projeto_estudo WHERE codigo_projeto={literal(code)} AND ativo")
             if not project:
-                raise RowConflict(f"catálogo de projeto inexistente: {code}")
+                pending.append(self.noncritical_issue(
+                    "catalogo_projeto_ausente", code))
+                continue
             existing = self.db.scalar(f"SELECT paciente_projeto_estudo_id FROM paciente_projeto_estudo WHERE paciente_id={patient_id} AND projeto_estudo_id={project}")
             if existing:
                 self.reconcile(line_id, "paciente_projeto_estudo", int(existing), fields)
             else:
                 self.insert_returning(line_id, "paciente_projeto_estudo", {"paciente_id": patient_id, "projeto_estudo_id": int(project), **fields})
+        return pending
+
+    def retry_project_catalog(self, line_id, patient_id, row, project_code):
+        aliases = self.manifest["aliases_versionados"]["projetos"]
+        if (project_code not in set(aliases.values())
+                or not any(code == project_code and row.get(source)
+                           and row[source].strip()
+                           for source, code in aliases.items())):
+            return [self.noncritical_issue(
+                "catalogo_projeto_ausente", project_code)]
+        return self.projects(line_id, patient_id, row, {project_code})
 
     def diagnosis(self, line_id, attendance_id, row):
         sources = ["diagnostico_da_dc_por_sorologia", "resultado_final_da_sorologia",
@@ -581,19 +654,192 @@ class Importer:
             fields.update(projeto_estudo_id=int(project),valor_original_projeto=project_raw)
         self.insert_returning(line_id,"encaminhamento",fields)
 
-    def reuse_predecessor(self, line_id, sheet, line_no):
-        if not self.predecessor_id: return False
-        previous=self.db.scalar(f"SELECT importacao_linha_id || '|' || status_linha FROM importacao_linha WHERE importacao_lote_id={self.predecessor_id} AND aba_ordem={sheet['aba_ordem']} AND numero_linha={line_no}")
-        if not previous: return False
-        previous_line,status=previous.split("|",1)
-        if status not in {"importada","importada_com_pendencia"}: return False
-        links=self.db.run(f"SELECT tabela_destino || '|' || registro_id FROM importacao_registro WHERE importacao_linha_id={int(previous_line)} ORDER BY importacao_registro_id")
-        if not links: raise RowConflict("reprocessamento: predecessor importado sem proveniência")
+    def pending_note(self, line_id, attendance_id, row, promotion=False):
+        original = row.get("pendencias_observacao")
+        if not original or not original.strip():
+            return
+        fields = {"atendimento_id": attendance_id,
+                  "descricao": original.strip(),
+                  "valor_original_pendencia": original}
+        if not promotion:
+            self.insert_returning(line_id, "pendencia_atendimento", fields)
+            return
+        linked = self.db.run(
+            "SELECT registro_id FROM importacao_registro "
+            f"WHERE importacao_linha_id={line_id} "
+            "AND tabela_destino='pendencia_atendimento' ORDER BY registro_id")
+        if len(linked) > 1:
+            raise RowConflict("promocao.pendencias_observacao: proveniência ambígua")
+        if linked:
+            record_id = int(linked[0])
+            for field, value in fields.items():
+                current = self.db.scalar(
+                    f"SELECT COALESCE({field}::text,'__NULL__') "
+                    "FROM pendencia_atendimento "
+                    f"WHERE pendencia_atendimento_id={record_id}")
+                if current == "__NULL__" or current != str(value):
+                    raise RowConflict(
+                        "promocao.pendencias_observacao: alvo existente divergente")
+            self.provenance(line_id, "pendencia_atendimento", record_id, "associado")
+            return
+        existing = int(self.db.scalar(
+            "SELECT count(*) FROM pendencia_atendimento "
+            f"WHERE atendimento_id={attendance_id}"))
+        if existing:
+            raise RowConflict(
+                "promocao.pendencias_observacao: destino repetível ambíguo")
+        self.insert_returning(line_id, "pendencia_atendimento", fields)
+
+    def predecessor_line(self, sheet, line_no):
+        lot_id = self.predecessor_id
+        visited = set()
+        while lot_id:
+            if lot_id in visited:
+                raise RowConflict("reprocessamento: ciclo na cadeia de lotes")
+            visited.add(lot_id)
+            previous = self.db.scalar(
+                "SELECT importacao_linha_id || E'\\t' || status_linha || E'\\t' || "
+                "COALESCE(mensagem_processamento,'') "
+                f"FROM importacao_linha WHERE importacao_lote_id={lot_id} "
+                f"AND aba_ordem={sheet['aba_ordem']} AND numero_linha={line_no}")
+            if previous:
+                previous_line, status, message = previous.split("\t", 2)
+                if status in {"importada", "importada_com_pendencia"}:
+                    return lot_id, int(previous_line), status, message
+            parent = self.db.scalar(
+                "SELECT lote_reprocessado_de_id FROM importacao_lote "
+                f"WHERE importacao_lote_id={lot_id}")
+            lot_id = int(parent) if parent else None
+        return None
+
+    @staticmethod
+    def pending_keys(sheet, row):
+        return sorted({c["chave_semantica"] for c in sheet["columns"]
+                       if c["situacao_cobertura"] == "parcial"
+                       and row.get(c["chave_semantica"])
+                       and row[c["chave_semantica"]].strip()})
+
+    @staticmethod
+    def noncritical_issues(message):
+        for part in message.split(";"):
+            key, separator, value = part.strip().partition("=")
+            if separator and key == "nao_criticas":
+                issues = set()
+                invalid = False
+                for item in value.split(","):
+                    code, item_separator, subject = item.partition(":")
+                    if (item_separator and code in NONCRITICAL_POLICY
+                            and re.fullmatch(r"[a-z0-9_]+", subject)):
+                        issues.add(item)
+                    elif item:
+                        invalid = True
+                if invalid:
+                    issues.add("integridade_politica_nao_critica")
+                return sorted(issues)
+        return []
+
+    def finish_reused(self, line_id, status, predecessor_id, promoted=(),
+                      pending=(), conflict=(), resolved=(), noncritical=()):
+        parts = [f"reprocessamento: predecessor={predecessor_id}"]
+        if promoted:
+            parts.append("promovidas=" + ",".join(sorted(promoted)))
+        if resolved:
+            parts.append("resolvidas=" + ",".join(sorted(resolved)))
+        if pending:
+            parts.append("pendentes=" + ",".join(sorted(pending)))
+        if noncritical:
+            parts.append("nao_criticas=" + ",".join(sorted(noncritical)))
+        if conflict:
+            parts.append("conflitos=" + ",".join(sorted(conflict)))
+        message = "; ".join(parts)
+        self.db.run(
+            f"UPDATE importacao_linha SET status_linha={literal(status)},"
+            f"mensagem_processamento={literal(message)},atualizado_em=CURRENT_TIMESTAMP "
+            f"WHERE importacao_linha_id={line_id}")
+
+    def reuse_predecessor(self, line_id, sheet, line_no, row):
+        if not self.predecessor_id:
+            return False
+        previous = self.predecessor_line(sheet, line_no)
+        if not previous:
+            return False
+        predecessor_id, previous_line, status, previous_message = previous
+        links = self.db.run(
+            "SELECT tabela_destino || '|' || registro_id FROM importacao_registro "
+            f"WHERE importacao_linha_id={previous_line} ORDER BY importacao_registro_id")
+        valid_links = []
+        anchors = {"paciente": set(), "atendimento": set()}
+        integrity_error = not links
         for link in links:
-            table,record_id=link.split("|",1)
-            self.provenance(line_id,table,int(record_id),"associado")
-        message=f"reprocessamento: alvos reutilizados do lote predecessor {self.predecessor_id}"
-        self.db.run(f"UPDATE importacao_linha SET status_linha={literal(status)},mensagem_processamento={literal(message)},atualizado_em=CURRENT_TIMESTAMP WHERE importacao_linha_id={line_id}")
+            table, record_id_raw = link.split("|", 1)
+            record_id = int(record_id_raw)
+            if table not in HANDLED_TABLES:
+                integrity_error = True
+                continue
+            pk = PK_FIELDS.get(table, table + "_id")
+            if not self.db.scalar(f"SELECT 1 FROM {table} WHERE {pk}={record_id}"):
+                integrity_error = True
+                continue
+            valid_links.append((table, record_id))
+            if table in anchors:
+                anchors[table].add(record_id)
+        for table, record_id in valid_links:
+            self.provenance(line_id, table, record_id, "associado")
+        if any(len(values) != 1 for values in anchors.values()):
+            integrity_error = True
+        if integrity_error:
+            self.finish_reused(line_id, "importada_com_pendencia", predecessor_id,
+                               pending=("integridade_proveniencia",))
+            return True
+        if status == "importada":
+            self.finish_reused(line_id, "importada", predecessor_id)
+            return True
+
+        promotable = sorted(key for key in PROMOTION_REGISTRY
+                            if row.get(key) and row[key].strip())
+        remaining = self.pending_keys(sheet, row)
+        retry_issues = self.noncritical_issues(previous_message)
+        if not promotable and not retry_issues:
+            self.finish_reused(line_id, "importada_com_pendencia", predecessor_id,
+                               pending=remaining)
+            return True
+
+        promoted = []
+        resolved = []
+        noncritical = []
+        conflict = []
+        self.db.run("SAVEPOINT resolucao_pendencias")
+        try:
+            for key in promotable:
+                rule = PROMOTION_REGISTRY[key]
+                anchor_id = next(iter(anchors[rule["anchor"]]))
+                getattr(self, rule["handler"])(line_id, anchor_id, row, promotion=True)
+                promoted.append(key)
+            for issue in retry_issues:
+                code, separator, subject = issue.partition(":")
+                rule = NONCRITICAL_POLICY.get(code)
+                if not separator or not subject or not rule:
+                    noncritical.append(issue)
+                    continue
+                anchor_id = next(iter(anchors[rule["anchor"]]))
+                retried = getattr(self, rule["retry_handler"])(
+                    line_id, anchor_id, row, subject)
+                if retried:
+                    noncritical.extend(retried)
+                else:
+                    resolved.append(issue)
+            self.db.run("RELEASE SAVEPOINT resolucao_pendencias")
+        except RowConflict:
+            self.db.run("ROLLBACK TO SAVEPOINT resolucao_pendencias")
+            self.db.run("RELEASE SAVEPOINT resolucao_pendencias")
+            conflict = sorted(set(promotable) | set(retry_issues))
+            promoted = []
+            resolved = []
+            noncritical = retry_issues
+        pending = sorted(set(remaining))
+        final = "importada_com_pendencia" if pending or noncritical or conflict else "importada"
+        self.finish_reused(line_id, final, predecessor_id, promoted, pending,
+                           conflict, resolved, noncritical)
         return True
 
     def process_row(self, sheet, line_no, values):
@@ -607,7 +853,7 @@ class Importer:
             birth=date_value(row.get("data_de_nascimento"),"data_de_nascimento",True)
             identity=(normalized(name),birth)
             self.db.transaction("BEGIN")
-            if self.reuse_predecessor(line_id,sheet,line_no):
+            if self.reuse_predecessor(line_id,sheet,line_no,row):
                 self.db.transaction("COMMIT"); self.imported += 1
                 if sheet["aba_ordem"]==1: self.portador_keys.add(identity)
                 return
@@ -623,7 +869,7 @@ class Importer:
                 "ambulatorio_unicamente":amb_only,"ambulatorio_anexo_projeto":amb_project,
                 "origem_registro":"planilha_portador_dc" if sheet["aba_ordem"]==1 else "planilha_nao_portador_dc",
                 "observacoes":(row.get("observacao") or "").strip() or None})
-            self.projects(line_id,patient_id,row)
+            noncritical=self.projects(line_id,patient_id,row)
             self.address_contact(line_id,patient_id,row)
             self.diagnosis(line_id,attendance_id,row)
             self.chagas_condition(line_id,attendance_id,row)
@@ -635,13 +881,19 @@ class Importer:
             self.notification_death(line_id,patient_id,row)
             self.treatment(line_id,patient_id,attendance_id,row)
             self.referral(line_id,attendance_id,row)
-            partial=[c["chave_semantica"] for c in sheet["columns"] if c["situacao_cobertura"]=="parcial" and row.get(c["chave_semantica"]) and row[c["chave_semantica"]].strip()]
-            final="importada_com_pendencia" if partial else "importada"
-            message=("campos preservados apenas em dados_brutos: "+", ".join(sorted(set(partial)))) if partial else "linha importada"
+            self.pending_note(line_id,attendance_id,row)
+            partial=self.pending_keys(sheet,row)
+            final="importada_com_pendencia" if partial or noncritical else "importada"
+            message_parts=[]
+            if partial:
+                message_parts.append("campos preservados apenas em dados_brutos: "+", ".join(sorted(set(partial))))
+            if noncritical:
+                message_parts.append("nao_criticas="+",".join(sorted(set(noncritical))))
+            message="; ".join(message_parts) if message_parts else "linha importada"
             self.db.run(f"UPDATE importacao_linha SET status_linha={literal(final)},mensagem_processamento={literal(message)},atualizado_em=CURRENT_TIMESTAMP WHERE importacao_linha_id={line_id}")
             self.db.transaction("COMMIT")
             if sheet["aba_ordem"]==1: self.portador_keys.add(identity)
-            self.pending += bool(partial); self.imported += 1
+            self.pending += bool(partial or noncritical); self.imported += 1
         except RowConflict as exc:
             try: self.db.transaction("ROLLBACK")
             except RuntimeError: pass
@@ -655,6 +907,12 @@ class Importer:
             raise RuntimeError("falha operacional durante processamento de linha") from exc
 
     def quality_report(self):
+        def catalog_issue(message):
+            return ("catálogo" in message or any(
+                part.strip().startswith("nao_criticas=")
+                and "catalogo_" in part
+                for part in message.split(";")))
+
         rows = self.db.run(
             "SELECT status_linha || '|' || COALESCE(mensagem_processamento,'') "
             f"FROM importacao_linha WHERE importacao_lote_id={self.lot_id} "
@@ -668,11 +926,18 @@ class Importer:
                           ("inválid", "ambígua", "obrigatório ausente")) for message in messages)
         identity = sum(message.startswith("identidade:") for message in messages)
         between_sheets = sum(message.startswith("conflito entre abas:") for message in messages)
-        catalogs = sum("catálogo" in message for message in messages)
-        other = max(0, rejected - invalid - identity - between_sheets - catalogs)
+        catalogs = sum(catalog_issue(message) for message in messages)
+        rejected_invalid = sum(status == "rejeitada" and any(
+            token in message for token in ("inválid", "ambígua", "obrigatório ausente"))
+            for status, message in statuses)
+        rejected_catalogs = sum(status == "rejeitada" and catalog_issue(message)
+            for status, message in statuses)
+        other = max(0, rejected - rejected_invalid - identity
+                    - between_sheets - rejected_catalogs)
         return {
             "schema": "ambulatorio.import-quality-report/v1",
             "mode": "dry-run" if self.dry_run else "apply",
+            "purpose": self.purpose,
             "lot_code": self.code,
             "file_sha256": self.hash,
             "layout_version": self.manifest["layout_versao"],
@@ -713,6 +978,7 @@ class Importer:
         self.db.run(f"UPDATE importacao_lote SET status_lote={literal(status)},finalizado_em=CURRENT_TIMESTAMP,atualizado_em=CURRENT_TIMESTAMP WHERE importacao_lote_id={self.lot_id}")
         report = self.quality_report()
         safe_log("import_finished", mode=report["mode"], lot_code=self.code,
+                 purpose=self.purpose,
                  lot_id=self.lot_id, layout_version=report["layout_version"],
                  manifest_version=report["manifest_version"],
                  importer_version=IMPORTER_VERSION, git_revision=self.revision,
@@ -721,9 +987,11 @@ class Importer:
         return report
 
 
-def main():
+def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("arquivo",type=Path); parser.add_argument("--codigo-lote")
+    parser.add_argument("--finalidade",action="append",metavar="FINALIDADE",
+                        help="obrigatória uma vez: carga_inicial, mesmo_conteudo ou revisao (ainda bloqueada)")
     parser.add_argument("--reprocessar",action="store_true",help="cria novo lote ligado à execução imediatamente anterior do mesmo conteúdo/layout")
     parser.add_argument("--dry-run",action="store_true",help="executa o pipeline completo e desfaz todas as escritas")
     parser.add_argument("--quality-report",type=Path,help="grava relatório JSON determinístico")
@@ -731,18 +999,29 @@ def main():
     parser.add_argument("--db-host",default=os.getenv("DB_HOST","localhost")); parser.add_argument("--db-port",default=os.getenv("DB_PORT","5432"))
     parser.add_argument("--db-user",default=os.getenv("DB_USER")); parser.add_argument("--db-name",default=os.getenv("DB_NAME"))
     parser.add_argument("--db-role",default=os.getenv("DB_ROLE"),help="role sem login assumida após conectar")
-    args=parser.parse_args()
+    args=parser.parse_args(argv)
+    if not args.finalidade:
+        parser.error("finalidade_ausente: informe --finalidade")
+    if len(args.finalidade) != 1:
+        parser.error("finalidade_ambigua: informe --finalidade apenas uma vez")
+    purpose=args.finalidade[0]
+    try:
+        validate_purpose(purpose,args.reprocessar)
+    except ValueError as exc:
+        parser.error(str(exc))
     if not args.db_user or not args.db_name: parser.error("DB_USER e DB_NAME são obrigatórios")
     manifest=json.loads(args.manifesto.read_text())
     code=args.codigo_lote or f"xlsx-{hashlib.sha256(args.arquivo.read_bytes()).hexdigest()[:16]}"
     safe_log("import_started", mode="dry-run" if args.dry_run else "apply",
+             purpose=purpose,
              lot_code=code, layout_version=manifest["layout_versao"],
              manifest_version=str(manifest.get("versao", "unknown")),
              importer_version=IMPORTER_VERSION, git_revision=git_revision())
     with Database(args.db_host,args.db_port,args.db_user,args.db_name,
                   os.getenv("PGPASSWORD"), rollback_only=args.dry_run,
                   role=args.db_role) as db:
-        report=Importer(db,args.arquivo,manifest,code,args.reprocessar,args.dry_run).run()
+        report=Importer(db,args.arquivo,manifest,code,args.reprocessar,args.dry_run,
+                        purpose=purpose).run()
         if report:
             rendered=json.dumps(report,ensure_ascii=True,indent=2,sort_keys=True)+"\n"
             if args.quality_report: args.quality_report.write_text(rendered)

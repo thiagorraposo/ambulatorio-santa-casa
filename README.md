@@ -95,7 +95,7 @@ make db-check DB_ENV=docker
 | `make docker-destroy DESTROY_ENV=docker` | Remove containers, rede e volumes deste Compose. | **Destrutivo somente para o ambiente Docker.** |
 | `make importer-fixture` | Regera a planilha XLSX exclusivamente sintética. | Não altera banco. |
 | `make importer-test` | Testa o importador em banco Docker temporário. | Cria e remove somente o banco isolado. |
-| `make importer-run IMPORT_FILE=...` | Executa o importador v1; nesta fase, somente com arquivo sintético. | Sim. |
+| `make importer-run IMPORT_FILE=... IMPORT_PURPOSE=...` | Exige finalidade explícita (`carga_inicial` ou `mesmo_conteudo`); somente arquivo sintético; `revisao` bloqueada. | Sim. |
 | `make backend-install` | Instala dependências exatamente pelo `package-lock`. | Não. |
 | `make backend-check` | Compila e testa integração, autenticação e autorização. | Insere e remove paciente e usuários sintéticos. |
 | `make backend-up` | Provisiona o login técnico e sobe o backend no Compose. | Altera somente a role de login; não altera schema. |
@@ -123,12 +123,12 @@ PostgreSQL local. Veja `docs/RECUPERACAO_POSTGRESQL_DOCKER.md`.
 
 ## Ordem segura para retomar o trabalho
 
-1. Ler `AGENTS.md`, `docs/ESTADO_ATUAL_DO_PROJETO.md` e `docs/PROXIMOS_PASSOS.md`.
-2. Executar `make project-check` e revisar qualquer falha antes de editar.
-3. Revisar `git status --short` e preservar mudanças existentes.
+1. Seguir `AGENTS.md` e consultar as fontes necessárias ao escopo pelo índice `docs/README.md`.
+2. Revisar `git status --short` e preservar mudanças existentes.
+3. Selecionar as verificações pela [matriz de validação](docs/WORKFLOW_DE_DESENVOLVIMENTO.md#validação-proporcional), incluindo validação inicial quando indicada.
 4. Para tarefa complexa, registrar um plano e o modo de validação.
 5. Implementar somente o escopo autorizado; evolução física usa nova migration incremental.
-6. Executar novamente `make project-check`.
+6. Executar as verificações aplicáveis; preferir `COMPACT=1` para obter resumo e log temporário, sem repetir suítes aprovadas sobre o mesmo estado.
 7. Se o schema tiver sido alterado e aplicado de forma controlada, executar `make db-schema-dump` e revisar o diff da evidência.
 8. Atualizar apenas a documentação afetada e `docs/REGISTRO_DE_ALTERACOES.md`.
 9. Revisar o diff e o status. Commit e push somente quando forem explicitamente solicitados.

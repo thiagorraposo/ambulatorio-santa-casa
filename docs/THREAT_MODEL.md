@@ -1,6 +1,6 @@
 # Threat Model Pré-Dados Reais
 
-Atualizado em: 2026-09-15
+Atualizado em: 2026-09-22
 
 ## Escopo e premissas
 
@@ -36,8 +36,10 @@ manifesto e fixture sintética e cria credenciais descartáveis não institucion
 | Aplicação acessando conteúdo bruto | exposição de dados sensíveis | role da aplicação sem privilégio sobre tabelas de importação; API mínima e RBAC já existem | autorização por recurso/linha e auditoria de acesso pendentes; não criar exposição genérica de JSONB |
 | Vazamento por logs ou CI | exposição de identificadores/conteúdo clínico | log JSON com allowlist, sem valores de célula; CI somente sintética e sem segredos reais | coleta, retenção e acesso a logs de produção não definidos |
 | Dry-run persistindo dados | criação clínica antes da revisão | pipeline real dentro de transação externa com rollback; teste compara contagens antes/depois | falhas de conexão abruptas são protegidas pela atomicidade do PostgreSQL |
-| Reprocessamento duplicando ocorrências ou mantendo pendência resolvível | histórico duplicado ou desatualizado | hash/layout, predecessor encadeado, proveniência e reutilização no contrato v1 | novo hash não reconcilia atualização clínica; reutilização de linha pendente pula handlers; implementar política temporal e promoção controlada |
-| BZN repetido em linhas do mesmo paciente | violação de unicidade ou sobrescrita indevida | v1.1.1 consulta por paciente, bloqueia tratamento existente, reconcilia nulos/igualdades e rejeita divergências com rollback; unicidade física preservada | concorrência na primeira criação por executores distintos não homologada; promoção de pendências continua separada |
+| Reprocessamento duplicando ocorrências ou mantendo pendência resolvível | histórico duplicado ou desatualizado | hash/layout, predecessor encadeado, proveniência, reutilização e promoção D11; v1.4.0 exige finalidade e lote do mesmo conteúdo para reprocessar | declaração indevida de carga inicial ainda pode duplicar visita; mapeamento e auditoria entre hashes não implementados; outras dez promoções pendentes |
+| Revisão da fonte sobrescrevendo edição manual ou usando decisão obsoleta | perda de histórico e alteração clínica indevida | v1.4.0 recusa revisão e finalidade ausente/ambígua antes de escrita, inclusive em dry-run; E2E compara todas as tabelas e sequências | declaração de finalidade não prova identidade clínica; implementar comparação base/atual/proposta, história por campo, decisão atribuível e proteção concorrente antes de habilitar revisões |
+| Erro secundário descartando atendimento válido ou confirmação parcial indevida | perda de dado válido ou inconsistência clínica | v1.3.0 mantém rollback como padrão; somente catálogo de projeto ausente está em allowlist não crítica, com bruto, mensagem técnica, proveniência e nova tentativa seletiva | demais handlers exigem classificação individual; falha operacional e divergência consolidada continuam críticas |
+| BZN repetido em linhas do mesmo paciente | violação de unicidade ou sobrescrita indevida | v1.1.1 consulta por paciente, bloqueia tratamento existente, reconcilia nulos/igualdades e rejeita divergências com rollback; unicidade física preservada | concorrência na primeira criação por executores distintos não homologada |
 | Execução não reproduzível ou repudiável | auditoria inconclusiva | versão/hash do manifesto, versão do importador, revisão Git e hash do arquivo no lote/report | árvore Git suja não é persistida; releases assinados não definidos |
 | Backup, volume ou planilha local expostos | vazamento em repouso | bind local, `.gitignore`, dumps fora do Git e proibição explícita de dados reais | criptografia, retenção, descarte, acesso institucional e backup de produção pendentes |
 | SQL malformado por conteúdo de origem | alteração/injeção | literais escapados pelo adaptador, domínios fechados e role sem DDL/DELETE | migrar futuramente para driver parametrizado é recomendável antes de produção |

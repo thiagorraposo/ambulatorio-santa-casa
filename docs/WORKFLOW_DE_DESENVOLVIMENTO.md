@@ -1,10 +1,26 @@
 # Workflow de Desenvolvimento
 
-Atualizado em: 2026-08-31
+Atualizado em: 2026-09-25
 
 O CI em `.github/workflows/validacoes.yml` usa credenciais sintéticas descartáveis,
 PostgreSQL 16.15 e executa migrations em banco limpo, manifesto, importador,
-testes SQL, documentação e `git diff --check`.
+testes SQL, backend (build, unitários, integração e container), documentação e
+`git diff --check`. A seleção local por escopo não reduz essa cobertura do CI.
+
+## Contexto por tarefa
+
+Use [o índice da documentação](README.md) para localizar a fonte principal do
+assunto afetado. Leia as regras aplicáveis e os trechos necessários do código e
+da documentação; amplie a leitura quando houver dependências ou dúvidas.
+Histórico, dump estrutural e documentos extensos são fontes de consulta por
+seção, tabela ou símbolo, sem exigir leitura integral a cada tarefa.
+
+Defina uma entrega com objetivo e critérios de aceite observáveis. Mantenha a
+mesma conversa durante essa entrega; ao mudar de assunto, um resumo curto de
+decisões, arquivos, validações e pendências permite retomar o trabalho. A resposta
+final deve informar resultado, verificações e limitações de forma breve.
+
+## Operações de importação e migrations
 
 `make manifest-check` depende somente do manifesto e schema versionados. A
 comparação com a planilha local ignorada é deliberadamente separada em
@@ -15,17 +31,24 @@ antigas não podem ser reaplicadas; use
 `make db-migrate-one MIGRATION_FILE=sql/NN_arquivo.sql`.
 
 O preflight pelo mesmo pipeline, sempre revertido, é executado com
-`make importer-dry-run IMPORT_FILE=...`.
+`make importer-dry-run IMPORT_FILE=... IMPORT_PURPOSE=carga_inicial`.
+`IMPORT_PURPOSE` não possui padrão: use `carga_inicial` para carga declarada e
+`mesmo_conteudo` para conteúdo/layout já existente. `revisao` é recusada na
+v1.4.0, inclusive em dry-run. Na CLI, reprocessamento exige
+`--finalidade mesmo_conteudo --reprocessar`. Detalhes e limites estão no
+[importador sintético](IMPORTADOR_SINTETICO_V1.md#barreira-de-finalidade--v140).
 
 ## Backend — fundação consolidada na Etapa 4C
 
 ```bash
 make backend-install
-make backend-check
-make backend-foundation-e2e
-make backend-container-check
-make backend-up
+make backend-check COMPACT=1
+make backend-container-check COMPACT=1
 ```
+
+Instale dependências ao preparar o ambiente ou quando o lockfile mudar.
+`backend-check` já inclui `backend-foundation-e2e`; `backend-container-check`
+inclui `backend-up` e é necessário quando a imagem ou infraestrutura for afetada.
 
 `backend-db-setup` provisiona somente o login técnico e concede a role sem login;
 não altera schema. O backend nunca aplica migrations. No CI, o banco limpo recebe
@@ -45,8 +68,9 @@ Use os alvos do `Makefile` como interface local padrão:
 | --- | --- |
 | `make db-check` | Confirmar conexão, banco, usuário e schema. |
 | `make db-test` | Executar todos os testes SQL versionados. |
-| `make docs-check` | Conferir documentação obrigatória. |
-| `make project-check` | Validação não destrutiva padrão antes e depois da tarefa. |
+| `make docs-check` | Conferir presença e conteúdo não vazio dos arquivos obrigatórios. |
+| `make project-check` | Executar docs-check, testes SQL, diff e status conforme a matriz abaixo. |
+| `make workflow-test` | Verificar saída compacta, logs e propagação de falhas com comandos sintéticos. |
 | `make db-schema-dump` | Atualizar a evidência estrutural após mudança física aplicada e autorizada. |
 | `make docker-up` / `docker-stop` | Subir ou parar o PostgreSQL Docker sem remover o volume. |
 | `make docker-status` / `docker-logs` | Inspecionar health, status e logs. |
@@ -62,7 +86,8 @@ Use os alvos do `Makefile` como interface local padrão:
 | `make importer-test` | Executar o E2E em banco Docker temporário e descartável. |
 | `make backend-foundation-e2e` | Executar o cenário integrado da fundação NestJS/PostgreSQL. |
 | `make backend-container-check` | Construir e validar health e usuário não-root da imagem backend. |
-| `make importer-run IMPORT_FILE=...` | Importar um arquivo sintético no Docker selecionado. |
+| `make importer-run IMPORT_FILE=... IMPORT_PURPOSE=...` | Importar um arquivo sintético com finalidade explícita no Docker selecionado. |
+| `make importer-dry-run IMPORT_FILE=... IMPORT_PURPOSE=...` | Validar a mesma finalidade e simular o pipeline sem persistir registros. |
 
 O ambiente padrão é `DB_ENV=docker`, com `.env` ignorado pelo Git e porta 5433.
 O ambiente local na porta 5432 permanece alternativa manual e só é selecionado
@@ -73,19 +98,79 @@ padrão em `/tmp/schema_ambulatorio_docker.sql` e não substitui a evidência of
 Enquanto a autorização institucional estiver pendente, `importer-run` deve
 receber exclusivamente fixtures sintéticas.
 
+## Validação proporcional
+
+| Escopo da mudança | Validação local |
+| --- | --- |
+| Exclusivamente textual | `make docs-check`, revisão do conteúdo e `git diff --check`. |
+| Importador ou manifesto | `make manifest-check importer-test project-check` ao finalizar. |
+| Backend | `make backend-check project-check` ao finalizar. |
+| Schema ou migration | `make project-check` inicial; aplicar migrations em banco limpo descartável e executar testes SQL; verificar diff, documentação e estado final com `project-check`, reaproveitando a execução final da suíte no ambiente validado. |
+| Docker ou infraestrutura | Verificações dos componentes afetados: configuração, conexão, imagem/container ou recuperação, conforme a mudança. Para o mecanismo de validação, `make workflow-test` e execuções representativas nos modos normal e compacto. |
+
+Acrescente `COMPACT=1` aos alvos compatíveis para reduzir a saída. Mudanças mistas
+combinam as verificações necessárias. Falhas, mudanças posteriores relevantes ou
+dúvidas concretas justificam novas execuções; não repita suítes já aprovadas sobre
+o mesmo estado e ambiente. Registre comandos, resultados e limitações reais.
+
+`docs-check` verifica somente arquivos obrigatórios presentes e não vazios: não
+valida a correção do conteúdo nem dos links. `project-check` inclui `docs-check`,
+`db-test` (que inclui `db-check`), `git diff --check` e status Git; não executa
+manifesto, importador ou backend. `docker-project-check` chama essa mesma suíte
+com `DB_ENV=docker`, acrescentando a espera pelo healthcheck. Escolha uma das
+duas entradas para a mesma validação. Não execute `backend-foundation-e2e`
+novamente após `backend-check` sem um motivo concreto.
+
+## Saída compacta
+
+No trabalho com Codex, prefira, por exemplo:
+
+```bash
+make docs-check COMPACT=1
+make manifest-check importer-test project-check COMPACT=1
+make backend-check project-check COMPACT=1
+```
+
+Cada exemplo corresponde a um escopo; não é uma sequência obrigatória.
+Sem `COMPACT=1`, os alvos mantêm a saída habitual. `make help` lista os alvos
+compatíveis, incluindo verificações SQL, importador, backend e Docker. Operações
+como migration, importação, backup, restore e destruição continuam sendo chamadas
+explicitamente pela interface habitual.
+
+O modo compacto executa todos os alvos solicitados em uma única chamada interna
+ao Make, mantendo o compartilhamento de dependências. Mostra comando, resultado,
+código de saída e caminho do log em `/tmp/ambulatorio-check-*/output.log`.
+Em falha, mostra também as últimas 30 linhas, limitadas a 6000 caracteres.
+`project-check`, `docker-project-check` e `git-status` exibem `git status --short`
+sem histórico de commits.
+
+O diretório do log tem permissão 0700 e o arquivo 0600. A saída completa de stdout
+e stderr é registrada com filtragem dos valores de variáveis de ambiente de
+senha, segredo, token, chave e credencial, além de senhas em URLs. Os segredos
+PostgreSQL/backend/JWT lidos pelo Make do `.env` também são disponibilizados ao
+filtro. Os logs ficam fora do repositório; consulte somente os trechos necessários.
+Essa filtragem não substitui a regra de nunca imprimir dados clínicos ou segredos
+arbitrários nos comandos de validação.
+
+O auxiliar preserva o código do processo executado; comandos terminados por sinal
+usam a convenção 128 + sinal. O Make mantém sua própria convenção: falha de receita
+resulta em código 2, tanto no modo normal quanto no compacto.
+
 ## Escolha explícita do PostgreSQL
 
 Docker, padrão:
 
 ```bash
-make project-check
-make docker-project-check
+make docker-project-check COMPACT=1
 ```
+
+Com o PostgreSQL já disponível, `make project-check COMPACT=1` é a alternativa
+sem a espera adicional; não execute ambos para validar o mesmo estado.
 
 Local, alternativa manual:
 
 ```bash
-make project-check DB_ENV=local
+make project-check DB_ENV=local COMPACT=1
 ```
 
 Docker:
@@ -94,7 +179,7 @@ Docker:
 cp .env.example .env
 make docker-up
 make docker-migrate  # somente em volume novo/vazio
-make docker-project-check
+make docker-project-check COMPACT=1
 ```
 
 Não execute `db-migrate` no PostgreSQL local já aplicado. `docker-destroy` exige
@@ -106,18 +191,16 @@ container ou volume está em `docs/RECUPERACAO_POSTGRESQL_DOCKER.md`.
 
 ## Fluxo Oficial
 
-1. Atualizar a branch local.
-2. Criar uma branch de tarefa.
-3. Pedir plano ao Codex para tarefas complexas.
-4. Definir objetivo, escopo, arquivos afetados, restrições e critérios de aceite.
+1. Revisar `git status --short` e preservar alterações existentes.
+2. Definir objetivo, escopo e critérios de aceite; consultar as fontes pertinentes.
+3. Para tarefas complexas, registrar plano curto antes de editar.
+4. Selecionar verificações pela matriz e executar validação inicial quando indicada.
 5. Implementar uma alteração pequena e isolada.
-6. Executar validação real, normalmente com `make project-check`.
-7. Revisar o diff.
-8. Atualizar a documentação necessária.
-9. Validar `git status`, já exibido por `make project-check`.
-10. Criar commit no padrão adotado.
-11. Enviar para o repositório remoto.
-12. Usar pull request quando API, frontend ou trabalho colaborativo começarem.
+6. Atualizar apenas a documentação afetada e o registro de alterações.
+7. Executar as verificações aplicáveis e corrigir falhas introduzidas pela mudança.
+8. Revisar diff e status; informar resultados e limitações de forma breve.
+9. Quando solicitado, criar commit no padrão adotado e enviar ao remoto; usar
+   branch de tarefa e pull request conforme a organização do trabalho.
 
 ## Checklist para Banco
 
@@ -170,20 +253,23 @@ Prefira prompts curtos que referenciem as regras e os comandos oficiais, acresce
 ### Prompt Mínimo Recomendado
 
 ```text
-Leia AGENTS.md e a documentação relacionada. Execute <objetivo>. Preserve mudanças existentes, não altere migrations antigas e valide com make project-check. Não faça commit nem push.
+Implemente <objetivo>. Comece por <arquivo/módulo> e amplie a leitura conforme necessário.
+Aceite: <comportamento observável>.
+Siga AGENTS.md, preserve alterações existentes e valide conforme o escopo, preferindo COMPACT=1.
+Conclua implementação e validação; informe resultado, testes e pendências brevemente. Sem commit/push.
 ```
 
 ### Planejamento de Mudança
 
 ```text
-Analise o projeto e proponha um plano antes de editar.
+Analise o escopo abaixo, registre um plano curto antes de editar e prossiga até concluir.
 Objetivo:
 Contexto:
 Arquivos relevantes:
 Restrições:
 Critérios de aceite:
 Validação esperada:
-Use os alvos aplicáveis do Makefile e finalize com make project-check.
+Use a matriz de validação do workflow e os alvos aplicáveis com COMPACT=1.
 ```
 
 ### Migration Incremental
@@ -195,7 +281,8 @@ Schema/tabelas envolvidos:
 Regras de integridade:
 Rollback ou reversão:
 Documentação a atualizar:
-Teste SQL esperado; execute com make db-test:
+Teste SQL esperado:
+Valide antes da mudança e em banco limpo descartável, conforme a matriz do workflow.
 ```
 
 ### Revisão de Diff
@@ -205,7 +292,8 @@ Revise o diff atual com foco em bugs, riscos e documentação.
 Contexto da mudança:
 Critérios de aceite:
 Pontos de atenção:
-Comandos de validação já executados; prefira make project-check:
+Comandos de validação já executados, estado/ambiente e resultados:
+Leia o diff e as dependências relevantes; execute novas verificações quando houver motivo concreto.
 ```
 
 ### Criação de Teste
@@ -229,4 +317,5 @@ Arquivos alterados:
 Decisões duradouras:
 Pendências:
 Registro de alterações necessário:
+Valide com docs-check, revisão do conteúdo e git diff --check se a mudança for exclusivamente textual.
 ```
