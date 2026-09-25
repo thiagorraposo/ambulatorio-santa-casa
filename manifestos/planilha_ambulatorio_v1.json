@@ -1,7 +1,7 @@
 {
   "manifesto": "planilha_ambulatorio",
   "layout_versao": "planilha_ambulatorio_v1",
-  "versao": "v1",
+  "versao": "v1.1",
   "fonte_local": "planejamento/Nova Planilha ambulatório.xlsx",
   "escopo": {
     "abas_incluidas": [
@@ -2554,8 +2554,8 @@
           "destino_atual": "ambulatorio.pendencia_atendimento.descricao",
           "tabela_destino": "pendencia_atendimento",
           "campo_destino": "descricao",
-          "situacao_cobertura": "parcial",
-          "transformacao": "separação entre pendência e observação permanece ambígua",
+          "situacao_cobertura": "com_transformacao",
+          "transformacao": "criar pendência textual vinculada ao atendimento sem inferir tipo, status, responsável ou datas",
           "alias_conhecido": null,
           "observacoes_tecnicas": "célula vazia significa não informado"
         },
@@ -5047,8 +5047,8 @@
           "destino_atual": "ambulatorio.pendencia_atendimento.descricao",
           "tabela_destino": "pendencia_atendimento",
           "campo_destino": "descricao",
-          "situacao_cobertura": "parcial",
-          "transformacao": "separação entre pendência e observação permanece ambígua",
+          "situacao_cobertura": "com_transformacao",
+          "transformacao": "criar pendência textual vinculada ao atendimento sem inferir tipo, status, responsável ou datas",
           "alias_conhecido": null,
           "observacoes_tecnicas": "célula vazia significa não informado"
         },

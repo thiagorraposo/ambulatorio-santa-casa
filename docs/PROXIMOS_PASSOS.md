@@ -1,179 +1,360 @@
-# Próximos Passos
+# Roadmap do Projeto
 
-Atualizado em: 2026-09-14
+Atualizado em: 2026-09-25
 
-## Ponto de partida e fontes
+Este é o roadmap oficial do projeto. A estrutura original possui dez etapas;
+as etapas 1–4 estão concluídas. As etapas 5, 7, 9 e 10 possuem subetapas porque
+contêm entregas independentes e dependências próprias. As letras identificam
+subetapas de execução e não criam uma nova numeração principal.
 
-Estão concluídos o núcleo físico e as evoluções até `sql/20`, as quatro migrations
-mínimas anteriormente planejadas, o importador v1 com sua homologação sintética
-original, a infraestrutura de testes/CI/Docker e a fundação backend da Etapa 4C.
-A consolidação documental das doze respostas da equipe também está concluída;
-ela não altera o contrato executável nem equivale a implementação das respostas.
-Não há frontend nem escrita clínica HTTP.
+As decisões de negócio vigentes estão em
+[`dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md),
+as lacunas por camada em
+[`dados/COBERTURA_COLUNAS_PLANILHA.md`](dados/COBERTURA_COLUNAS_PLANILHA.md) e o
+estado técnico em [`ESTADO_ATUAL_DO_PROJETO.md`](ESTADO_ATUAL_DO_PROJETO.md).
+Prioridades P0–P3 são recomendações técnicas: P0 bloqueia o fluxo afetado, P1 é
+necessária ao MVP, P2 é importante sem bloquear e P3 é pós-MVP.
 
-As [decisões humanas](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md) são a fonte da
-semântica. A [matriz de impacto](dados/COBERTURA_COLUNAS_PLANILHA.md) distingue
-reaproveitamento, lacunas e incertezas. O [estado atual](ESTADO_ATUAL_DO_PROJETO.md)
-descreve o que já existe. Este documento é a fonte única da sequência proposta.
+## Etapa 1 — Fechar a camada de dados — concluída
 
-P0 bloqueia a continuidade do fluxo afetado; P1 é necessário para o MVP; P2 é
-importante, mas não bloqueante; P3 é pós-MVP. A priorização abaixo é recomendação
-técnica, não uma nova decisão clínica. Permanecem apenas as duas abas clínicas
-no escopo inicial, sem dados reais e sem recriar etapas concluídas.
+**Objetivo:** chegar ao ponto em que a planilha possa ser interpretada
+deterministicamente.
 
-## 1. Etapa 5A — Fechar os contratos ainda ambíguos (P0 dos fluxos afetados)
+**Entrega realizada:** contrato físico `planilha → banco`, manifesto das duas
+abas clínicas, 136 chaves semânticas, aliases, blocos, posições, identificação
+de paciente, precedência entre abas, conflitos, idempotência, reprocessamento,
+regras de transformação e exclusão funcional de `Localizado`.
 
-- **Objetivo:** transformar as respostas confirmadas em contratos mínimos sem
-  inventar regras clínicas.
-- **Principais alterações:** decidir referência da idade; localização da data
-  de descoberta; representação mínima do exame de familiares; tipos dos retornos
-  e preservação do ano legado; distinguir atualização da planilha de nova visita;
-  escolher representação da contrarreferência, estados necessários e momento do
-  upload; confirmar se a intenção de retirar o desfecho será adotada.
-- **Dependências:** decisões D1–D12 já documentadas e inspeção do modelo existente.
-- **Critérios de aceite:** cada dúvida tem decisão explícita ou exclusão delimitada;
-  nenhuma data inventada, novo cadastro familiar obrigatório ou remoção de dados;
-  reutilização do modelo avaliada antes de propor tabela ou coluna.
-- **Validação:** revisão dos contratos com a equipe e checagem de coerência com
-  schema, manifesto e casos sintéticos; `make docs-check`.
+**Evidências:** manifesto executável, especificação normativa e decisões humanas.
 
-## 2. Etapa 5B — Corrigir integridade e reprocessamento do importador (P0/P1)
+## Etapa 2 — Importador — concluída no contrato v1 sintético
 
-- **Objetivo:** tornar seguros os caminhos necessários à evolução do contrato.
-- **Principais alterações:** reconciliar o BZN já existente por paciente; permitir
-  promoção controlada de pendências sem duplicar alvos; alinhar rejeição de campo
-  secundário ao contrato; implementar a política aprovada para linhas atualizadas.
-  Entregar essas correções em tarefas separadas.
-- **Dependências:** a reconciliação BZN depende apenas da unicidade já vigente;
-  mudanças temporais e de promoção dependem dos respectivos contratos da 5A.
-- **Critérios de aceite:** repetição compatível não viola unicidade nem duplica
-  tratamento; conflito não sobrescreve silenciosamente; reprocessamento conserva
-  proveniência e consegue resolver pendências; novo hash não é tratado como prova
-  de nova consulta.
-- **Validação:** regressões unitárias e E2E exclusivamente sintéticas, incluindo
-  BZN em duas linhas do mesmo paciente, conflitos e dois elos de reprocessamento.
+**Objetivo:** produzir registros estruturados a partir de uma planilha sintética.
 
-## 3. Etapa 5C — Completar somente a modelagem indispensável (P1)
+**Entrega realizada:** fixture sintética, leitura das duas abas, validação de
+layout, lote/linha/proveniência, identificação de pacientes, atendimentos,
+transformações, erros, revisão, idempotência e reprocessamento encadeado.
 
-- **Objetivo:** representar a data de descoberta e o exame de familiares sem
-  confundi-los com sorologia do paciente ou doença familiar.
-- **Principais alterações:** migration incremental mínima para as lacunas D2/D3,
-  após escolha de titularidade e formato; outras extensões somente se o contrato
-  aprovado demonstrar insuficiência das estruturas existentes. Não criar tabelas
-  de retorno, pendência ou contrarreferência apenas pelo nome da funcionalidade.
-- **Dependências:** contratos correspondentes da 5A; independe de reimplementar
-  as migrations anteriores.
-- **Critérios de aceite:** valores ausentes continuam distinguíveis de negativos;
-  não há exigências clínicas adicionais; integridade, permissões e histórico
-  preservados; migrations antigas intactas.
-- **Validação:** testes SQL sintéticos com rollback, aplicação incremental em
-  ambiente de teste, `make project-check` e nova evidência física só após mudança.
+**Limite conhecido:** a homologação original não cobre integralmente as novas
+respostas D1–D12. A reconciliação BZN foi corrigida na v1.1.1 e a promoção
+controlada de D11 foi entregue na v1.2.0. Antes do MVP revisado ainda é necessário
+tratar as demais chaves aprovadas, implementar o contrato temporal de linhas
+atualizadas e classificar individualmente os demais erros secundários. A primeira política não
+crítica foi entregue na v1.3.0. Isso é evolução da etapa 5, não reabertura da
+etapa 2 concluída.
 
-## 4. Etapa 5D — Incorporar as decisões ao contrato de importação (P1)
+## Etapa 3 — Fundação do backend — concluída
 
-- **Objetivo:** sair da preservação bruta para a cobertura funcional justificada.
-- **Principais alterações:** atualizar manifesto, gerador, validador e handlers
-  em conjunto; identificar exames; importar datas reais dos retornos BZN e ano
-  legado sem fabricar datas; registrar pendências textuais e contrarreferências
-  conforme contrato; incorporar D2/D3; manter `Localizado` fora do funcional.
-- **Dependências:** contratos da 5A, correções pertinentes da 5B e extensões
-  indispensáveis da 5C; funcionalidades com modelo suficiente não aguardam outras.
-- **Critérios de aceite:** contagens refletem destinos efetivamente implementados;
-  idade não depende do número legado; solicitação não exige resultado; familiares
-  não viram histórico de doença; registros desconhecidos permanecem rastreáveis.
-- **Validação:** testes de transformação, manifesto e E2E sintético com exemplos
-  positivos, negativos, ausentes e ambíguos, preservando idempotência/proveniência.
+**Objetivo:** deixar de manipular o banco diretamente.
 
-## 5. Etapa 5E — Entregar o backend clínico mínimo (P1)
+**Entrega realizada:** projeto NestJS, Docker, configuração por ambiente,
+camada SQL parametrizada, migrations fora da API, autenticação, usuários,
+perfis, erros padronizados, logging sem dados clínicos sensíveis e healthcheck.
 
-- **Objetivo:** permitir consulta e registro clínico controlados sobre o modelo.
-- **Principais alterações:** módulos pequenos para ficha/atendimentos, diagnósticos,
-  familiares, exames, retornos, pendências e contrarreferências; DTOs, consultas de
-  histórico, autorização explícita por operação/recurso e transações multicomando.
-- **Dependências:** contratos aprovados e schema necessário; não refazer login,
-  pool ou infraestrutura já entregues. Importação e API devem compartilhar semântica.
-- **Critérios de aceite:** acesso indevido negado, erros sem dados sensíveis,
-  validações de negócio testadas, gravações compostas atômicas e histórico não
-  sobrescrito; nenhuma API de importação ou gestão de usuários presumida no escopo.
-- **Validação:** testes unitários, integração HTTP/SQL sintética, contratos e
-  matriz de operações dos três perfis existentes.
+**Limites:** não há ainda escrita clínica HTTP, endpoint de importação ou
+autorização por paciente/atendimento. A fundação não deve ser refeita.
 
-## 6. Etapa 5F — Construir o frontend mínimo (P1)
+## Etapa 4 — CRUD clínico — concluída na camada física, não na API
 
-- **Objetivo:** viabilizar o fluxo de trabalho confirmado pela equipe.
-- **Principais alterações:** login, busca/lista, ficha, formulários e linha do
-  tempo; idade calculada com referência visível; identificação de exames trazidos
-  e solicitados; retornos e contrarreferências repetíveis; pendências livres;
-  ausência do campo funcional `Localizado`.
-- **Dependências:** contratos HTTP e autorização da 5E; decisão sobre apresentação
-  do desfecho sem perder informações de agendamento.
-- **Critérios de aceite:** estados ausente/negativo não se confundem; ano legado
-  não aparece como data exata; histórico preservado e operações respeitam perfil.
-- **Validação:** testes de componentes e fluxos sintéticos, revisão de usabilidade
-  com a equipe e tratamento de erro/autenticação expirada.
+**Objetivo original:** refletir os fluxos clínicos necessários, sem criar um
+endpoint por tabela.
 
-## 7. Etapa 5G — Integrar e homologar o MVP sintético (P1)
+**Entrega realizada:** núcleo físico e migrations até `sql/20`, incluindo
+pacientes, atendimentos, dados clínicos, projetos, exames, BZN, reações,
+encaminhamentos e notificações.
 
-- **Objetivo:** comprovar o fluxo importação → API → interface com as novas regras.
-- **Principais alterações:** cenários integrados D1–D12, revisão de documentação,
-  rastreabilidade, recuperação de falhas e roteiro de homologação da equipe.
-- **Dependências:** entregas correspondentes da 5B–5F.
-- **Critérios de aceite:** cada decisão tem evidência de atendimento ou ressalva
-  aceita; nenhuma duplicação clínica em reprocessamento; sem dados reais; pendências
-  técnicas e institucionais não apresentadas como funcionalidades concluídas.
-- **Validação:** `make project-check`, E2E de importação/backend/interface, CI e
-  aceite da equipe com fixture sintética; não reutilizar o aceite antigo como novo.
+**Esclarecimento de escopo:** a camada de dados necessária está concluída, mas
+os endpoints clínicos ainda não existem. A implementação HTTP desses fluxos
+ocorre na Etapa 5, conforme o estado real do código, e não será contada como
+conclusão fictícia da Etapa 4.
 
-## 8. Preparar operação segura e autorização institucional (P1 antes de dados reais)
+## Etapa 5 — Recursos funcionais e backend clínico do MVP
 
-- **Objetivo:** liberar implantação somente mediante controles e autorização próprios.
-- **Principais alterações:** ambiente protegido, TLS, logins e gestão/rotação de
-  segredos, auditoria, backup/restore, retenção, resposta a incidentes e responsáveis
-  por autorizar lotes/revisar inconsistências; avaliar limitação distribuída conforme
-  topologia de implantação. Governança pode avançar em paralelo ao MVP sintético.
-- **Dependências:** homologação sintética para liberação operacional e decisões
-  institucionais; esta documentação não autoriza carga real.
-- **Critérios de aceite:** controles verificados, responsáveis e políticas
-  aprovados; autorização explícita antes de qualquer tratamento de dados reais.
-- **Validação:** revisão de segurança, restore em ambiente isolado e checklist
-  institucional; o restore Docker de desenvolvimento não basta para produção.
+**Objetivo:** fechar o backend utilizável, incorporando as regras confirmadas e
+os recursos necessários para a interface.
 
-## 9. Evoluções não bloqueantes (P2/P3)
+### 5A — Fechar contratos funcionais e invariantes (P0/P1)
 
-- **Objetivo:** ampliar o sistema apenas após comprovar necessidade operacional.
-- **Principais alterações:** upload de contrarreferência (P2 proposto), com
-  armazenamento privado, autorização e política de arquivos; identificação
-  permanente de prontuário, vínculo do digitador legado ao usuário, refinamentos
-  clínicos aprovados, aba operacional e AIM3 (P3).
-- **Dependências:** confirmação do momento do upload pela equipe; se indispensável
-  à primeira operação, movê-lo para antes da homologação e rever schema/segurança.
-- **Critérios de aceite:** escopo aprovado por incremento, sem inferir regras
-  clínicas, sem anexos públicos e sem reconstruir histórico inexistente na fonte.
-- **Validação:** testes sintéticos próprios e revisão de segurança dos anexos
-  antes da liberação; documentação das decisões efetivamente adotadas.
+**Avanço em 2026-09-22:** definido o
+[contrato temporal de revisão entre hashes](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md)
+(ADR-022), distinguindo correção, nova visita e atualização consolidada. A
+representação anual de D8 e os demais contratos clínicos abaixo continuam abertos;
+esta definição técnica não é implementação nem nova resposta da equipe.
 
-## Única próxima tarefa técnica
+- **Objetivo:** congelar o escopo e resolver somente as ambiguidades que afetam implementação.
+- **Principais alterações:** decidir referência da idade; titularidade da data de descoberta de Chagas; representação mínima de familiares e sorologia; tipos/vínculos dos retornos BZN; política para o ano do último retorno; distinção entre atualização de linha e nova visita; representação de contrarreferência e momento do upload; confirmar o destino do planejamento hoje chamado de desfecho.
+- **Dependências:** respostas D1–D12 e inspeção do schema/código existentes.
+- **Critérios de aceite:** contratos decididos ou explicitamente adiados; nenhuma data inventada; nenhuma regra clínica inferida; modelo existente avaliado antes de propor migration.
+- **Validação:** revisão com a equipe, matriz de impacto atualizada e `make docs-check`.
 
-Corrigir somente a reconciliação de `tratamento_benzonidazol` no importador para
-duas linhas compatíveis do mesmo paciente. O modelo já determina um tratamento
-consolidado por paciente; não é necessário relaxar a unicidade nem criar migration.
-Incluir regressão sintética e preservar proveniência e rejeição segura de conflitos.
-As demais tarefas acima não fazem parte desse incremento.
+### 5B — Corrigir importador e reprocessamento (P0/P1)
 
-Prompt para executar somente essa tarefa:
+**Status:** em andamento. Reconciliação BZN entregue em 2026-09-15 (v1.1.1),
+com dez testes unitários e E2E de 13 linhas sintéticas. A promoção controlada de
+D11 foi entregue em 2026-09-21 (v1.2.0), elevando a cobertura para 125 rótulos
+plenos. Em 2026-09-22, a v1.3.0 introduziu criticidade conservadora e a primeira
+regra não crítica, para catálogo de projeto ausente, elevando os testes unitários
+para 19.
+Foram comprovados
+reutilização do tratamento, preenchimento de nulos, preservação do vínculo e dos
+originais, rejeição atômica de conflitos, promoção parcial, preservação de edição
+manual ambígua, resolução seletiva de catálogo, dry-run e dois elos de
+reprocessamento sem duplicação. O contrato temporal entre hashes foi definido em
+2026-09-22, com 18 casos de aceite. A v1.4.0 implementa a barreira de finalidade,
+com recusa de revisão antes de escrita, 26 testes unitários e E2E sintético;
+T01 e a parte de T02 relativa à recusa estão cobertos. A reconciliação entre
+hashes, as demais promoções aprovadas e a classificação individual dos outros
+erros secundários seguem abertas.
 
-> Leia os AGENTS.md relevantes e corrija apenas a reconciliação de BZN no
-> importador: duas linhas compatíveis do mesmo paciente, em atendimentos distintos,
-> devem reutilizar o tratamento consolidado, preservando vínculo existente e
-> proveniência; divergências não podem ser sobrescritas silenciosamente. Reutilize
-> o modelo e as regras atuais, acrescente regressões sintéticas e atualize somente
-> a documentação afetada. Não crie migrations, não altere backend/frontend, não
-> use dados reais e não faça commit. Execute as validações pertinentes e relate
-> eventuais limitações.
+Em 2026-09-25 foi especificada a extensão física mínima da ADR-022, com entidades,
+invariantes, autorização, histórico por campo e 16 casos de aceite F01–F16 por
+incremento. É entrega documental: a migration de armazenamento, a captura de
+todos os escritores e a aplicação auditada continuam pendentes.
 
-## Validação desta revisão documental
+- **Objetivo:** eliminar duplicação e perda de promoção nos fluxos já suportados.
+- **Principais alterações:** reconciliar BZN consolidado por paciente; promover pendências resolvidas sem recriar alvos; separar erros críticos de não críticos; aplicar a política aprovada a arquivos revisados; atualizar metadados semânticos do gerador/manifesto/validador em conjunto.
+- **Dependências:** a reconciliação BZN usa a unicidade existente; os demais itens dependem de 5A.
+- **Critérios de aceite:** duas linhas compatíveis não violam unicidade nem duplicam tratamento; conflitos não sobrescrevem fatos; proveniência permanece íntegra; novo hash não é tratado automaticamente como nova consulta.
+- **Validação:** testes unitários, fixture e E2E sintéticos com BZN repetido, conflito, pendência promovida e dois elos de reprocessamento.
 
-`make docs-check`, `make manifest-check` e `git diff --check`. A execução de
-`make project-check` foi deliberadamente excluída deste escopo documental por
-incluir testes SQL com escrita, ainda que transacional. Não houve aplicação de
-migrations, atualização do dump, carga de dados nem nova homologação funcional.
+### 5C — Completar modelagem indispensável (P1)
+
+- **Objetivo:** estruturar apenas fatos que o modelo atual não consegue representar.
+- **Principais alterações:** migration incremental mínima para data de descoberta de Chagas e rastreio familiar, após 5A; não criar tabelas próprias para retornos, pendências ou contrarreferências apenas pela existência dessas palavras.
+- **Dependências:** contratos de 5A; migrations antigas permanecem imutáveis.
+- **Critérios de aceite:** ausência, negativo e desconhecido distinguíveis; resultado de familiar não vira histórico de doença; FKs, permissões e histórico preservados; nenhuma alteração física sem justificativa documentada.
+- **Validação:** testes SQL sintéticos com `BEGIN`/`ROLLBACK`, `make db-test`, `make project-check` e dump somente se o schema mudar.
+
+### 5D — Implementar recursos de consulta e importação (P1)
+
+- **Objetivo:** entregar o backend funcional previsto na etapa original.
+- **Principais alterações:** busca e filtros de pacientes; histórico de atendimentos; consultas de exames, projetos, tratamento, notificações e pendências; endpoint de importação; acompanhamento de lote e erros; exportação CSV; DTOs clínicos; autorização explícita por operação e recurso; transações compostas quando uma operação fizer várias gravações.
+- **Dependências:** 5A–5C e fundação da Etapa 3. Não expor JSONB bruto nem criar API genérica de todas as tabelas.
+- **Critérios de aceite:** cadastrar/consultar paciente completo por fluxo de negócio; filtros respeitam autorização; erros não vazam dados clínicos; importação e API preservam proveniência e histórico.
+- **Validação:** testes unitários, contratos HTTP e integração API/SQL sintética, incluindo os três perfis existentes.
+
+### 5E — Encerrar o backend do MVP (P1)
+
+- **Objetivo:** consolidar a API antes do frontend.
+- **Principais alterações:** revisão de DTOs, paginação, erros, autorização por paciente/atendimento, observabilidade técnica e documentação de contratos; endpoint de importação e CSV estabilizados.
+- **Dependências:** 5D e decisões institucionais aplicáveis ao ambiente sintético.
+- **Critérios de aceite:** backend cobre os fluxos do MVP sem acesso direto ao banco; operações indevidas retornam 401/403; contratos versionados e testes passam em banco descartável.
+- **Validação:** `make backend-check`, integração HTTP/SQL, `make project-check` e revisão de diff.
+
+**Marco da Etapa 5:** backend do MVP praticamente fechado, com uma planilha sintética processada sem duplicações indevidas e paciente completo consultável.
+
+## Etapa 6 — Fundação do frontend
+
+- **Objetivo:** permitir login e navegação básica consumindo somente a API.
+- **Principais alterações:** React, rotas, sessão, comunicação autenticada, layout principal, navegação, erros, listagem, busca e página de paciente.
+- **Dependências:** Etapa 5E e contratos HTTP estáveis.
+- **Critérios de aceite:** usuário autenticado entra, navega, pesquisa e abre paciente; expiração de sessão e erros são tratados; nenhuma estética sofisticada bloqueia o fluxo.
+- **Validação:** build, testes de componentes/fluxos sintéticos, revisão manual de autenticação e `make project-check`.
+
+## Etapa 7 — Fluxos clínicos
+
+**Objetivo:** tornar utilizáveis as telas efetivamente usadas pela equipe.
+
+### 7A — Cadastro e atendimentos
+
+- **Objetivo:** permitir localizar pacientes e registrar atendimentos básicos.
+- **Principais alterações:** cadastro/edição de paciente, busca, atendimento,
+  dados demográficos, idade calculada com referência visível e histórico básico.
+- **Dependências:** Etapa 6, Etapa 5E e contratos de 5A.
+- **Critérios de aceite:** paciente pode ser consultado e editado conforme perfil;
+  idade não é digitada como fato independente; atendimento não é sobrescrito.
+- **Validação:** testes de componentes e integração sintética de paciente/atendimento.
+
+### 7B — Dados clínicos e exames
+
+- **Objetivo:** registrar os dados clínicos e exames necessários ao atendimento.
+- **Principais alterações:** dados clínicos, exames trazidos e solicitados,
+  identificação obrigatória, familiares examinados e resultados, preservação de
+  ausências e estados desconhecidos.
+- **Dependências:** contratos D2–D5 e eventual migration da Etapa 5C.
+- **Critérios de aceite:** exame solicitado não exige resultado; exame trazido é
+  identificado; familiar examinado não vira histórico de doença.
+- **Validação:** testes de formulário/API com casos positivos, negativos, vazios e
+  ambíguos, usando somente dados sintéticos.
+
+### 7C — Tratamento, retornos e encaminhamentos
+
+- **Objetivo:** implementar os fluxos clínicos de BZN e comunicação assistencial.
+- **Principais alterações:** BZN, reações, retorno de 30 dias, retorno final,
+  retornos anuais, histórico de ocorrências, encaminhamento, contrarreferências
+  repetíveis, notificação e pendências textuais.
+- **Dependências:** contrato temporal de D6–D11, importador/API da Etapa 5 e
+  decisão sobre representação de contrarreferência; não fabricar datas do ano legado.
+- **Critérios de aceite:** datas são comparecimentos efetivos; 30/60 dias não são
+  calculados automaticamente; histórico não é substituído; `Localizado` não
+  aparece funcionalmente.
+- **Validação:** testes de componentes e integração com múltiplos retornos,
+  contrarreferências e conflitos de autorização.
+
+### 7D — Integração do fluxo clínico
+
+- **Objetivo:** comprovar que os módulos formam um atendimento utilizável.
+- **Principais alterações:** navegação entre ficha, atendimento, exames, BZN,
+  encaminhamento, notificação e histórico; mensagens de erro e estados de carga.
+- **Dependências:** 7A–7C e contratos HTTP estabilizados.
+- **Critérios de aceite:** fluxo principal completo sem acesso direto ao banco;
+  dados permanecem rastreáveis e o usuário não perde alterações válidas.
+- **Validação:** fluxo end-to-end sintético, revisão de usabilidade com a equipe e
+  `make project-check`.
+
+## Etapa 8 — Dashboard e funcionalidades complementares
+
+- **Objetivo:** oferecer visão operacional pequena e útil.
+- **Principais alterações:** dashboard inicial, filtros e indicadores essenciais, CSV pela interface, importação, acompanhamento de lote, inconsistências, validações de formulário e ajustes de UX.
+- **Dependências:** Etapas 5–7 e métricas aprovadas; não iniciar plataforma analítica nem dashboard sofisticado.
+- **Critérios de aceite:** indicadores têm definição verificável e não exibem JSONB bruto; importação e inconsistências são compreensíveis; CSV respeita autorização e filtros.
+- **Validação:** testes de interface/API, revisão com dados sintéticos e análise de permissões/exportação.
+
+## Etapa 9 — Produção
+
+**Objetivo:** executar a aplicação fora do notebook com controles institucionais.
+
+### 9A — Ambiente e implantação
+
+- **Objetivo:** disponibilizar instalação reproduzível de produção.
+- **Principais alterações:** servidor, Docker Compose/configuração equivalente,
+  configuração por ambiente, roles PostgreSQL, permissões e healthchecks.
+- **Dependências:** Etapa 8 e arquitetura de implantação escolhida.
+- **Critérios de aceite:** aplicação sobe em ambiente controlado sem comandos
+  privados do autor; migrations seguem o procedimento correto.
+- **Validação:** `make docker-project-check` e teste de reinício/recuperação.
+
+### 9B — Segurança de transporte e segredos
+
+- **Objetivo:** proteger comunicação, credenciais e dados estruturados/brutos.
+- **Principais alterações:** HTTPS, gestão/rotação de segredos, roles mínimas,
+  permissões, proteção do JSONB e revisão da exposição da API/frontend.
+- **Dependências:** 9A e decisões institucionais de identidade e acesso.
+- **Critérios de aceite:** nenhum segredo versionado; transporte seguro; JSONB
+  não acessível por rotas genéricas; acesso indevido retorna 401/403.
+- **Validação:** checklist de segurança e testes de autorização isolados.
+
+### 9C — Continuidade e observabilidade
+
+- **Objetivo:** permitir recuperação e investigação de falhas.
+- **Principais alterações:** backup, restore, logs técnicos, auditoria mínima,
+  retenção, tratamento de falhas e alertas operacionais.
+- **Dependências:** 9A–9B e política institucional de retenção/auditoria.
+- **Critérios de aceite:** backup restaura em ambiente isolado; logs não contêm
+  dados clínicos sensíveis; falhas são rastreáveis.
+- **Validação:** backup/restore repetido, inspeção de logs e simulação de falha.
+
+### 9D — Liberação controlada
+
+- **Objetivo:** verificar que a operação está autorizada antes de dados reais.
+- **Principais alterações:** responsáveis por lotes, revisão de incidentes,
+  E2E sintético e decisão formal de liberação.
+- **Dependências:** 9A–9C e governança institucional aprovada.
+- **Critérios de aceite:** controles verificados, autorização explícita registrada
+  e nenhum dado real carregado prematuramente.
+- **Validação:** `make docker-project-check`, E2E, restore e revisão operacional.
+
+## Etapa 10 — Homologação e estabilização
+
+**Objetivo:** fechar o MVP sem adicionar funcionalidades grandes.
+
+### 10A — Homologação funcional
+
+- **Objetivo:** testar com usuários os fluxos definidos nas Etapas 5–8.
+- **Principais alterações:** roteiro de uso, importação completa autorizada,
+  pacientes, atendimentos, exames, BZN, retornos, encaminhamentos, dashboard e CSV.
+- **Dependências:** Etapas 5–9 e dados sintéticos ou autorizados conforme 9D.
+- **Critérios de aceite:** usuários completam o fluxo principal e registram
+  evidências sem acessar o banco diretamente.
+- **Validação:** sessões de homologação, E2E e registro de casos aceitos/rejeitados.
+
+### 10B — Correções e regressão
+
+- **Objetivo:** corrigir bugs sem ampliar o escopo congelado.
+- **Principais alterações:** duplicações, permissões, validações, backup/restore,
+  dashboard, CSV, mensagens e problemas encontrados em 10A.
+- **Dependências:** evidências da homologação e triagem de severidade.
+- **Critérios de aceite:** defeitos críticos resolvidos; nenhuma correção remove
+  histórico, enfraquece autorização ou inventa regra clínica.
+- **Validação:** regressão completa, testes focados e revisão do diff.
+
+### 10C — Entrega reproduzível
+
+- **Objetivo:** permitir que outra pessoa instale e opere o sistema.
+- **Principais alterações:** instalação reproduzível, configuração, backup/restore,
+  documentação operacional, roteiro de suporte e material de entrega.
+- **Dependências:** 10B, ambiente da Etapa 9 e documentação atualizada.
+- **Critérios de aceite:** instalação limpa e restauração executáveis por outra
+  pessoa sem comandos privados do autor.
+- **Validação:** execução por operador diferente, `make project-check` e revisão
+  documental.
+
+### 10D — Release do MVP
+
+- **Objetivo:** formalizar a versão entregue e seu estado conhecido.
+- **Principais alterações:** revisão final de segurança, changelog, tag/release,
+  lista de limitações e aceite formal da equipe.
+- **Dependências:** 10A–10C e aprovação institucional.
+- **Critérios de aceite:** versão identificada, documentação e limitações publicadas,
+  aceite registrado e nenhum trabalho fora do escopo apresentado como concluído.
+- **Validação:** regressão final, `make project-check`, checklist de release e
+  conferência de `git status` antes do commit/tag.
+
+## Congelamento de escopo do MVP
+
+Ficam fora das dez etapas do MVP: `Localizado` como funcionalidade, abas AIM3,
+aba operacional, migração das estruturas legadas, funcionalidades avançadas de
+contrarreferência, dashboards sofisticados, regras clínicas adicionais,
+otimizações prematuras, aplicativo mobile e refinamentos estéticos não essenciais.
+
+Upload de contrarreferência é P2 proposto e depende de decisão sobre representação,
+estado, armazenamento, retenção e momento de entrega. Se for indispensável ao
+primeiro uso, deve ser promovido explicitamente antes da Etapa 8, com revisão de
+segurança; não se presume essa promoção.
+
+Para compromisso de dez semanas, 24 horas semanais é a referência recomendada;
+20 horas é piso arriscado. O marco de risco é concluir a Etapa 5 com banco,
+importador e backend funcionais antes de iniciar as Etapas 6–8.
+
+## Próxima tarefa isolada
+
+A especificação física foi concluída em 2026-09-25 no
+[contrato temporal](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md#extensão-física-mínima-proposta).
+O próximo incremento é implementar somente seu armazenamento fechado: nova
+migration incremental, constraints, gatilhos de integridade das novas relações,
+permissões e testes SQL sintéticos. Não instalar ainda captura clínica, executor
+de revisão ou concessões institucionais. A barreira v1.4.0 permanece ativa.
+
+Cobrir F01–F07 e F16 nas partes verificáveis sem executor, distinguindo restrições
+estruturais de testes futuros de aprovação/aplicação. Validar banco limpo e
+atualização incremental em ambiente descartável. Preservar a FK de mesmo
+hash/layout, o isolamento funcional e a ausência de dados reais. A captura de
+todos os escritores e o fluxo auditado serão incrementos posteriores; não
+escolher destinos clínicos pendentes da 5A por inferência.
+
+Prompt pronto para a próxima tarefa:
+
+> Siga AGENTS.md e implemente apenas a migration de armazenamento fechado da
+> extensão física especificada no contrato temporal da ADR-022. Comece pela seção
+> “Extensão física mínima proposta”; consulte schema/permissões por trechos.
+> Planeje brevemente, crie nova migration e testes de integridade/permissões
+> F01–F07 e F16, delimitando a cobertura ainda dependente do executor. Revogue os
+> privilégios padrão indevidos nas novas relações/sequências; não conceda acesso à
+> identidade ao importador. Mantenha revisão bloqueada na v1.4.0 e não implemente
+> captura ou escrita clínica. Valide conforme a matriz do workflow para schema,
+> usando COMPACT=1 e bancos descartáveis limpo/atualizado; combine regressões
+> pertinentes sem repetir suítes sobre o mesmo estado. Não aplique no banco
+> persistente nem regenere sua evidência sem autorização específica. Preserve
+> alterações existentes, atualize somente a documentação afetada e registre a
+> mudança. Sem dados reais, subagentes, commit ou push. Informe resultado, testes,
+> limites e próximo incremento brevemente.
+
+## Validação da revisão documental de 2026-09-14
+
+Esta atualização altera somente documentação. Foram lidos os AGENTS.md relevantes,
+o workflow de desenvolvimento, as respostas integrais do DOCX e o estado executável
+do repositório. Validar com `make docs-check`, `make manifest-check` e
+`git diff --check`; `make project-check` não foi executado naquela revisão por
+incluir testes SQL com escrita transacional. No incremento BZN de 2026-09-15,
+`make project-check` foi executado antes e depois da implementação, além de
+`make importer-test` e `make manifest-check`.

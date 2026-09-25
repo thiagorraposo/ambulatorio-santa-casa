@@ -1,6 +1,6 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-09-14
+Atualizado em: 2026-09-25
 
 Esta é a síntese vigente do sistema. Detalhes normativos pertencem às fontes
 temáticas indicadas abaixo; decisões antigas e resultados de etapas permanecem
@@ -15,9 +15,29 @@ escrita clínica HTTP, gestão de usuários nem autorização para dados reais.
 
 A Etapa 4C está concluída. As doze respostas de `Perguntas pendentes.docx` foram
 consolidadas documentalmente em 2026-09-14, mas ainda não incorporadas ao contrato
-executável. A Etapa 5 foi reorganizada para resolver lacunas do importador,
-complementar somente a modelagem indispensável e entregar API/interface clínicas,
-sempre com dados sintéticos e autorização definida por módulo.
+executável. O roadmap oficial mantém dez etapas: 1–4 concluídas e 5–10 restantes.
+A Etapa 5 foi subdividida para resolver lacunas do importador, complementar
+somente a modelagem indispensável e entregar o backend clínico; as Etapas 6–10
+cobrem frontend, fluxos, complementos, produção e homologação.
+
+Em 2026-09-15 foi entregue o primeiro incremento da Etapa 5B: reconciliação de
+BZN no importador v1.1.1, validada com dez testes unitários e E2E sintético.
+Em 2026-09-21 o importador v1.2.0 implementou o contrato técnico de promoção
+controlada e habilitou D11 (`pendencias_observacao`). Em 2026-09-22, a v1.3.0
+acrescentou a classificação conservadora de erros e a primeira regra não crítica,
+`catalogo_projeto_ausente`, com nova tentativa seletiva no reprocessamento. A
+suíte possui 19 testes unitários e E2E sintético. Também em 2026-09-22 foi definido
+o [contrato temporal de revisão entre hashes](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md)
+(ADR-022). A v1.4.0 implementa sua primeira barreira: finalidade explícita,
+recusa de revisão antes de escrita e preservação do fluxo do mesmo hash/layout.
+A suíte agora possui 26 testes unitários e E2E sintético. Reconciliação entre
+hashes e as demais decisões clínicas da 5A continuam pendentes. A Etapa 5B
+permanece em andamento.
+
+Em 2026-09-25 foi concluída a especificação da extensão física de revisão temporal:
+linhagem, decisões atribuíveis, histórico por campo e controles de aplicação.
+É proposta documental da ADR-022; nenhuma das novas relações está aplicada.
+O próximo incremento de armazenamento fechado não habilitará revisões na v1.4.0.
 
 ## Componentes vigentes
 
@@ -28,7 +48,7 @@ sempre com dados sintéticos e autorização definida por módulo.
   evidência física é
   [`evidencias/schema_atual_ambulatorio.sql`](evidencias/schema_atual_ambulatorio.sql).
 - Importador v1 em Python, homologado com fixture sintética nas duas abas
-  clínicas; o manifesto declara 124 rótulos plenos, onze preservados apenas no
+  clínicas; o manifesto v1.1 declara 125 rótulos plenos, dez preservados apenas no
   bruto e `Localizado` excluído do estruturado. Esses números não comprovam
   cobertura funcional das novas respostas. O contrato normativo está em
   [`ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`](ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md),
@@ -47,8 +67,10 @@ sempre com dados sintéticos e autorização definida por módulo.
 
 - O importador valida manifesto/layout, trabalha por linha em transação, concilia
   pacientes e registra proveniência. Idempotência e reprocessamento encadeado
-  existem para o contrato v1; promoção de pendências e atualização de uma mesma
-  linha clínica em arquivo modificado têm limitações descritas abaixo.
+  existem para o contrato v1; a promoção controlada está habilitada para D11.
+  A v1.4.0 exige finalidade explícita e recusa revisões, inclusive em dry-run.
+  Atualização de uma mesma linha clínica em arquivo modificado e as demais
+  promoções têm limitações descritas abaixo.
 - As migrations antigas aplicadas permanecem imutáveis; evoluções usam novas
   migrations. A decisão completa está nas ADR-001 e ADR-002 de
   [`DECISOES_ARQUITETURAIS.md`](DECISOES_ARQUITETURAIS.md).
@@ -71,12 +93,23 @@ contrarreferências foi confirmada; seu contrato documental e o momento do uploa
 ainda precisam de decisão. A exclusão funcional de `Localizado` foi confirmada,
 sem remover o bruto nem confundir com localização do prontuário.
 
-O importador tenta inserir BZN novamente para o mesmo paciente; o caminho de
-reprocessamento reutiliza linhas com pendência antes de executar seus handlers;
-erros secundários também podem rejeitar a linha inteira. Um arquivo com novo hash
-não tem reconciliação de atualização clínica: pode gerar outro atendimento. A
-fonte legada guarda o último ano de retorno e é atualizada, portanto esse fluxo
-precisa de contrato temporal. A fixture antiga não cobre essas novas exigências.
+O importador já reconcilia BZN do mesmo paciente, preservando o vínculo original,
+preenchendo nulos e rejeitando divergências com rollback. O caminho de
+reprocessamento separa linhas concluídas das que ainda têm pendências e promove
+somente chaves registradas. Para D11, reutiliza as âncoras da proveniência, cria ou
+associa uma pendência textual sem inferir classificação e isola novas escritas em
+savepoint; edição manual ambígua permanece intacta e pendente. As outras dez chaves
+continuam somente no bruto. Erros são críticos por padrão; catálogo de projeto
+ausente é a primeira exceção explícita, preserva o atendimento e pode ser resolvida
+sem nova visita após correção do catálogo. Os demais erros secundários ainda podem
+rejeitar a linha inteira.
+Um arquivo com novo hash não tem reconciliação de atualização clínica. A v1.4.0
+recusa revisões e exige carga inicial declarada para iniciar novo conteúdo;
+declaração incorreta ainda pode gerar outro atendimento. O contrato temporal já
+distingue revisão de nova visita, mas linhagem entre hashes, mapeamento e auditoria
+por campo ainda precisam ser implementados antes de habilitar revisões.
+A representação estruturada do ano legado continua pendente; nenhum histórico
+ausente pode ser reconstruído automaticamente.
 
 Não existem DTOs nem endpoints clínicos a corrigir: precisam ser implementados.
 O guard de perfis permite rota autenticada sem metadados `@Perfis`; autorização

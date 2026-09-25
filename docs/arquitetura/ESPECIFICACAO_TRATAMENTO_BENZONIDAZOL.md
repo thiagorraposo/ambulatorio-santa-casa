@@ -1,6 +1,6 @@
 # Especificação do Tratamento com Benzonidazol
 
-Atualizado em: 2026-09-14
+Atualizado em: 2026-09-15
 
 ## Objetivo e escopo
 
@@ -270,10 +270,11 @@ Nenhum. A migration foi implementada e validada.
 ### Contrato do importador e lacunas atuais
 
 Manifesto, aliases, conversões e handler BZN já existem. A lista abaixo registra
-o contrato do módulo, não tarefas inteiramente por implementar. A análise de
-2026-09-14 verificou que `treatment()` ainda insere sem reconciliar BZN existente,
-apesar da unicidade por paciente; esse caminho requer regressão sintética e
-correção localizada no importador, não migration. Detalhes em
+o contrato do módulo, não tarefas inteiramente por implementar. O defeito de
+inserção repetida identificado em 2026-09-14 foi corrigido na v1.1.1: BZN existente
+é reconciliado por paciente, mantendo seu vínculo de atendimento (inclusive nulo),
+preenchendo nulos e rejeitando divergências com rollback e proveniência. A correção
+foi validada por testes unitários e E2E sintéticos sem migration. Detalhes em
 [Importador Sintético v1](../IMPORTADOR_SINTETICO_V1.md).
 
 - manifestar posições, aliases e ocorrências dos cabeçalhos de BZN;

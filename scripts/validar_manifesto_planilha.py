@@ -14,7 +14,7 @@ EXPECTED_ALIASES={
     "exames": {"ecg":"eletrocardiograma","ecg_solicitado":"eletrocardiograma","resultado_ecg":"eletrocardiograma","data_do_ecg":"eletrocardiograma","feve":"ecocardiograma","valor_da_glicemia":"laboratoriais","valor_de_colesterol_hdl":"laboratoriais","valor_de_colesterol_ldl":"laboratoriais","triglicerideos":"laboratoriais","data_do_exame_colesterol":"laboratoriais","eco":"ecocardiograma","laboratoriais":"laboratoriais","de_imagem":"imagem","holter":"holter","endoscopia":"endoscopia","colonoscopia":"colonoscopia","teste_ergometrico":"teste_ergometrico","mapa":"mapa","outros":"outro"},
     "medicamentos": {"anti_hipertensivo":"antihipertensivo_nao_especificado","diureticos":"diuretico_nao_especificado","anti_arritmicos":"antiarritmico_nao_especificado","alfa_betabloqueador":"betabloqueador_nao_especificado"},
 }
-EXPECTED_PARTIAL={"idade","autorelato_diagnostico_de_chagas_do_participante_data","familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas","paciente_trouxe_outros_exames_complementares","solicitado_exames_complementares","retorno_30_dias_de_tratamento","retorno_final_de_tratamento","retorno_anual_realizado","desfecho_do_retorno","paciente_com_contrarreferencia_realizada","pendencias_observacao"}
+EXPECTED_PARTIAL={"idade","autorelato_diagnostico_de_chagas_do_participante_data","familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas","paciente_trouxe_outros_exames_complementares","solicitado_exames_complementares","retorno_30_dias_de_tratamento","retorno_final_de_tratamento","retorno_anual_realizado","desfecho_do_retorno","paciente_com_contrarreferencia_realizada"}
 
 def schema_columns(text):
     result={}
@@ -26,7 +26,7 @@ def fail(errors,msg): errors.append(msg)
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument("--fonte",action="store_true",help="compara somente abas e linha de cabeçalho com o XLSX local"); args=ap.parse_args()
     data=json.loads(MANIFEST.read_text(encoding="utf-8")); db=schema_columns(SCHEMA.read_text(encoding="utf-8")); errors=[]
-    if data.get("layout_versao")!="planilha_ambulatorio_v1" or data.get("versao")!="v1": fail(errors,"versão obrigatória divergente")
+    if data.get("layout_versao")!="planilha_ambulatorio_v1" or data.get("versao")!="v1.1": fail(errors,"versão obrigatória divergente")
     aliases=data.get("aliases_versionados",{})
     for group,expected in EXPECTED_ALIASES.items():
         if aliases.get(group)!=expected: fail(errors,f"aliases versionados divergentes: {group}")
@@ -67,7 +67,7 @@ def main():
     unique_headers={}
     for c in all_columns: unique_headers.setdefault(c["cabecalho_original"].strip(),c)
     coverage=Counter(c["situacao_cobertura"] for c in unique_headers.values())
-    if coverage!={"direta":8,"com_transformacao":116,"parcial":11,"excluido":1}: fail(errors,f"cobertura final divergente: {dict(coverage)}")
+    if coverage!={"direta":8,"com_transformacao":117,"parcial":10,"excluido":1}: fail(errors,f"cobertura final divergente: {dict(coverage)}")
     partial={c["chave_semantica"] for c in unique_headers.values() if c["situacao_cobertura"]=="parcial"}
     if partial!=EXPECTED_PARTIAL: fail(errors,f"parciais divergentes: {sorted(partial)}")
     destinations={c["chave_semantica"]:c["destino_atual"] for c in all_columns}

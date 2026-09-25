@@ -1,6 +1,6 @@
 # Modelo Físico Atual
 
-Atualizado em: 2026-08-30
+Atualizado em: 2026-09-21
 
 Este documento descreve a estrutura física real aplicada no schema `ambulatorio`, usando como fonte principal o dump `docs/evidencias/schema_atual_ambulatorio.sql`. Os scripts em `sql/` foram usados como fonte de reconciliação.
 
@@ -870,9 +870,11 @@ Finalidade: associação genérica N:N entre linhas e registros estruturados.
 
 ## Próxima fase técnica
 
-1. Iniciar a implementação do importador exclusivamente com dados sintéticos,
+1. Continuar a evolução do importador exclusivamente com dados sintéticos,
    usando o manifesto e a especificação normativa v1.
-2. Preservar em `dados_brutos` as onze chaves parciais, sem promoção aproximada.
+2. Preservar em `dados_brutos` as dez chaves parciais e ampliar a promoção
+   controlada somente após contrato explícito; D11 já usa
+   `pendencia_atendimento` sem classificação inferida.
 3. Definir retenção, autoridades, roles e auditoria antes de dados reais.
 ## Hardening da proveniência
 
