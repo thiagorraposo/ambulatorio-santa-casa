@@ -26,6 +26,39 @@ Além deste arquivo, atualize quando necessário:
 
 Antes de finalizar qualquer tarefa futura, verifique se a documentação correspondente foi atualizada.
 
+## 2026-09-25 - Especificação da extensão física de revisão temporal
+
+Detalhada a ADR-022 na especificação temporal existente, confrontando o dump
+vigente, proveniência/transações do importador e migrations de permissões. A
+proposta define nove relações para fonte, revisão, autorização, decisão/mapeamento,
+campos, tentativas, alvos aplicados e catálogo/histórico de campos, com chaves,
+constraints, imutabilidade e limites de referências polimórficas.
+
+Definidos snapshots tipados, cobertura desde a base, proteção contra edição
+manual A→B→A, atomicidade por linha, revalidação concorrente e idempotência por
+decisão/conteúdo. Privilégios padrão da migration 17 devem ser revogados nas
+novas relações; a identidade funcional permanece isolada do importador. A
+aprovação exige serviço autenticado e autorização atribuível, sem inferir
+autoridade do perfil ou do responsável legado da planilha.
+
+Acrescentados 16 casos sintéticos F01–F16, separados entre armazenamento, captura
+e aplicação. Preservados T01–T18 e a recusa de revisão da v1.4.0. O próximo
+incremento no roadmap passa a ser migration de armazenamento fechado e testes
+estruturais/de permissões; captura e executor continuam posteriores. O prompt
+foi alinhado à matriz de validação proporcional, sem repetir a exigência geral
+antiga de `project-check` antes/depois. Estado atual, ADR e matriz de cobertura
+recebem apenas o alinhamento documental correspondente.
+
+Continuam pendentes a governança institucional de concessão/revisão, a
+representação anual de D8 e os destinos clínicos ainda abertos da 5A. A proposta
+não inventa história para bases legadas nem habilita correções sem captura de
+todos os escritores. Não houve código, migration, mudança de schema/dump/dados,
+concessão de privilégios, commit ou push.
+
+Validação documental: `make docs-check COMPACT=1`, `git diff --check` e revisão
+de consistência entre proposta, schema e contrato temporal. Casos F/T são
+critérios para implementação futura, não testes executados nesta tarefa.
+
 ## 2026-09-25 - Workflow com contexto por escopo e validação compacta
 
 AGENTS.md, README e workflow passam a orientar consulta por assunto pelo índice

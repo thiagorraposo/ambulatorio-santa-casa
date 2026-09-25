@@ -1,6 +1,6 @@
 # Cobertura das Colunas da Planilha pelo Núcleo Físico
 
-Atualizado em: 2026-09-22
+Atualizado em: 2026-09-25
 
 ## Fonte e critério
 
@@ -145,8 +145,9 @@ P2 é importante, não bloqueante; P3 é pós-MVP. Prioridades são propostas t�
 - **Temporalidade:** o [contrato complementar](../arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md)
   define revisão entre hashes e seus casos de aceite. A v1.4.0 implementa somente
   a barreira de finalidade e recusa revisões antes de escrita, inclusive em dry-run.
-  A proveniência atual não basta para autorizar correção por campo; especificar
-  extensão mínima de linhagem/decisão/histórico antes de habilitar esse fluxo.
+  A proveniência atual não basta para autorizar correção por campo; a extensão
+  mínima de linhagem/decisão/histórico foi especificada em 2026-09-25 no contrato
+  temporal. Implementação e homologação permanecem necessárias para habilitar o fluxo.
   Isso não altera cobertura de colunas nem justifica tabelas clínicas por retorno.
 - **Backend/frontend:** os campos não estão “errados” em DTOs ou telas clínicas
   existentes: eles ainda não existem. Implementar apenas os contratos aprovados,

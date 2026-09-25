@@ -1,6 +1,6 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-09-22
+Atualizado em: 2026-09-25
 
 Esta é a síntese vigente do sistema. Detalhes normativos pertencem às fontes
 temáticas indicadas abaixo; decisões antigas e resultados de etapas permanecem
@@ -33,6 +33,11 @@ recusa de revisão antes de escrita e preservação do fluxo do mesmo hash/layou
 A suíte agora possui 26 testes unitários e E2E sintético. Reconciliação entre
 hashes e as demais decisões clínicas da 5A continuam pendentes. A Etapa 5B
 permanece em andamento.
+
+Em 2026-09-25 foi concluída a especificação da extensão física de revisão temporal:
+linhagem, decisões atribuíveis, histórico por campo e controles de aplicação.
+É proposta documental da ADR-022; nenhuma das novas relações está aplicada.
+O próximo incremento de armazenamento fechado não habilitará revisões na v1.4.0.
 
 ## Componentes vigentes
 

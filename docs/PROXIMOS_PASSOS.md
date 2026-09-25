@@ -1,6 +1,6 @@
 # Roadmap do Projeto
 
-Atualizado em: 2026-09-22
+Atualizado em: 2026-09-25
 
 Este é o roadmap oficial do projeto. A estrutura original possui dez etapas;
 as etapas 1–4 estão concluídas. As etapas 5, 7, 9 e 10 possuem subetapas porque
@@ -105,6 +105,11 @@ com recusa de revisão antes de escrita, 26 testes unitários e E2E sintético;
 T01 e a parte de T02 relativa à recusa estão cobertos. A reconciliação entre
 hashes, as demais promoções aprovadas e a classificação individual dos outros
 erros secundários seguem abertas.
+
+Em 2026-09-25 foi especificada a extensão física mínima da ADR-022, com entidades,
+invariantes, autorização, histórico por campo e 16 casos de aceite F01–F16 por
+incremento. É entrega documental: a migration de armazenamento, a captura de
+todos os escritores e a aplicação auditada continuam pendentes.
 
 - **Objetivo:** eliminar duplicação e perda de promoção nos fluxos já suportados.
 - **Principais alterações:** reconciliar BZN consolidado por paciente; promover pendências resolvidas sem recriar alvos; separar erros críticos de não críticos; aplicar a política aprovada a arquivos revisados; atualizar metadados semânticos do gerador/manifesto/validador em conjunto.
@@ -313,26 +318,36 @@ importador e backend funcionais antes de iniciar as Etapas 6–8.
 
 ## Próxima tarefa isolada
 
-Especificar a extensão física mínima para linhagem entre hashes, mapeamento de
-linhas, decisão atribuível e histórico por campo, incluindo controle de acesso e
-revalidação concorrente. A barreira de finalidade já está implementada na v1.4.0;
-revisões continuam bloqueadas até existir aplicação auditável homologada.
+A especificação física foi concluída em 2026-09-25 no
+[contrato temporal](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md#extensão-física-mínima-proposta).
+O próximo incremento é implementar somente seu armazenamento fechado: nova
+migration incremental, constraints, gatilhos de integridade das novas relações,
+permissões e testes SQL sintéticos. Não instalar ainda captura clínica, executor
+de revisão ou concessões institucionais. A barreira v1.4.0 permanece ativa.
 
-Delimitar entidades, invariantes, atomicidade, evidências e testes antes de criar
-a migration. Preservar a FK de mesmo hash/layout e o isolamento da identidade
-funcional; não escolher por inferência os destinos clínicos pendentes da 5A.
+Cobrir F01–F07 e F16 nas partes verificáveis sem executor, distinguindo restrições
+estruturais de testes futuros de aprovação/aplicação. Validar banco limpo e
+atualização incremental em ambiente descartável. Preservar a FK de mesmo
+hash/layout, o isolamento funcional e a ausência de dados reais. A captura de
+todos os escritores e o fluxo auditado serão incrementos posteriores; não
+escolher destinos clínicos pendentes da 5A por inferência.
 
 Prompt pronto para a próxima tarefa:
 
-> Siga o workflow e leia os AGENTS.md relevantes. Especifique somente a extensão
-> mínima de linhagem, mapeamento, decisão e histórico por campo da ADR-022,
-> confrontando o contrato temporal com schema, proveniência e permissões atuais.
-> Defina invariantes, atomicidade, controle de acesso, concorrência e casos de
-> aceite sintéticos para orientar uma futura migration incremental. Preserve a
-> barreira v1.4.0, a FK do mesmo conteúdo e o isolamento de usuario_aplicacao.
-> Não implemente correções entre hashes, não crie migration, não use dados reais
-> e não faça commit nem push. Valide com make project-check antes e depois,
-> make manifest-check e git diff --check; atualize somente a documentação afetada.
+> Siga AGENTS.md e implemente apenas a migration de armazenamento fechado da
+> extensão física especificada no contrato temporal da ADR-022. Comece pela seção
+> “Extensão física mínima proposta”; consulte schema/permissões por trechos.
+> Planeje brevemente, crie nova migration e testes de integridade/permissões
+> F01–F07 e F16, delimitando a cobertura ainda dependente do executor. Revogue os
+> privilégios padrão indevidos nas novas relações/sequências; não conceda acesso à
+> identidade ao importador. Mantenha revisão bloqueada na v1.4.0 e não implemente
+> captura ou escrita clínica. Valide conforme a matriz do workflow para schema,
+> usando COMPACT=1 e bancos descartáveis limpo/atualizado; combine regressões
+> pertinentes sem repetir suítes sobre o mesmo estado. Não aplique no banco
+> persistente nem regenere sua evidência sem autorização específica. Preserve
+> alterações existentes, atualize somente a documentação afetada e registre a
+> mudança. Sem dados reais, subagentes, commit ou push. Informe resultado, testes,
+> limites e próximo incremento brevemente.
 
 ## Validação da revisão documental de 2026-09-14
 

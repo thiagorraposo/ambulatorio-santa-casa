@@ -1,6 +1,6 @@
 # Decisões Arquiteturais
 
-Atualizado em: 2026-09-22
+Atualizado em: 2026-09-25
 
 Este documento registra decisões duradouras do projeto. Mudanças cronológicas continuam em `docs/REGISTRO_DE_ALTERACOES.md`.
 
@@ -544,7 +544,8 @@ Título: Revisão entre hashes com identidade explícita e correção auditada
 
 Data: 2026-09-22
 
-Status: Barreira de finalidade implementada na v1.4.0; reconciliação pendente
+Status: Barreira de finalidade implementada na v1.4.0; extensão física
+especificada em 2026-09-25, ainda não aplicada; reconciliação pendente
 
 Contexto: D8 confirma que a planilha atualiza a linha do paciente e guarda apenas
 o último ano de comparecimento. A v1.3.0 identifica conteúdo por hash/layout e
@@ -559,6 +560,16 @@ posição, nome/nascimento ou data isolada não autorizam criar ocorrência. Com
 base, estado atual e proposta, preservar edições manuais e bloquear ambiguidades.
 Manter a FK de reprocessamento inalterada e representar revisão entre conteúdos
 separadamente, com evolução incremental de auditoria antes de permitir correções.
+
+Detalhamento de 2026-09-25: a especificação relacionada define nove relações
+para fonte, linhagem, autorização por fonte, decisão/mapeamento versionado,
+campos aprovados, tentativas, alvos resolvidos e catálogo/histórico de campos.
+Manter aprovação separada dos papéis de importação/aplicação, revogar privilégios
+padrão nas novas relações e revalidar autoria e estado sob bloqueio. Histórico
+deve cobrir todos os escritores; marco atual não reconstrói história legada nem
+permite sobrescrita por igualdade aparente. Entregar armazenamento fechado antes
+da captura e do executor. As entidades, invariantes e aceites têm uma única
+fonte na seção “Extensão física mínima proposta” do contrato temporal.
 
 Consequências: a v1.4.0 exige finalidade explícita, recusa revisão antes de escrita
 e preserva carga sintética declarada, no-op, retomada e reprocessamento do mesmo
