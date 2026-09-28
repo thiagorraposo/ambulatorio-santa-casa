@@ -853,6 +853,7 @@ class Importer:
             birth=date_value(row.get("data_de_nascimento"),"data_de_nascimento",True)
             identity=(normalized(name),birth)
             self.db.transaction("BEGIN")
+            self.db.run(f"SELECT auditoria_iniciar_importacao({line_id})")
             if self.reuse_predecessor(line_id,sheet,line_no,row):
                 self.db.transaction("COMMIT"); self.imported += 1
                 if sheet["aba_ordem"]==1: self.portador_keys.add(identity)

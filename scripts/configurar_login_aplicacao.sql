@@ -15,3 +15,6 @@ WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'app_login')
 \gexec
 SELECT format('ALTER ROLE %I PASSWORD %L', :'app_login', :'app_password') \gexec
 SELECT format('GRANT ambulatorio_aplicacao TO %I', :'app_login') \gexec
+SELECT format('GRANT ambulatorio_servico_autenticado TO %I', :'app_login')
+WHERE EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'ambulatorio_servico_autenticado')
+\gexec
