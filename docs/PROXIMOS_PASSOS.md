@@ -1,6 +1,6 @@
 # Roadmap do Projeto
 
-Atualizado em: 2026-09-25
+Atualizado em: 2026-09-28
 
 Este é o roadmap oficial do projeto. A estrutura original possui dez etapas;
 as etapas 1–4 estão concluídas. As etapas 5, 7, 9 e 10 possuem subetapas porque
@@ -108,8 +108,9 @@ erros secundários seguem abertas.
 
 Em 2026-09-25 foi especificada a extensão física mínima da ADR-022, com entidades,
 invariantes, autorização, histórico por campo e 16 casos de aceite F01–F16 por
-incremento. É entrega documental: a migration de armazenamento, a captura de
-todos os escritores e a aplicação auditada continuam pendentes.
+incremento. As migrations 21–24 agora cobrem armazenamento, integridade, captura
+e contexto de proveniência em banco descartável; aplicação seletiva, dry-run e
+revisão entre hashes continuam bloqueados.
 
 - **Objetivo:** eliminar duplicação e perda de promoção nos fluxos já suportados.
 - **Principais alterações:** reconciliar BZN consolidado por paciente; promover pendências resolvidas sem recriar alvos; separar erros críticos de não críticos; aplicar a política aprovada a arquivos revisados; atualizar metadados semânticos do gerador/manifesto/validador em conjunto.
@@ -119,6 +120,11 @@ todos os escritores e a aplicação auditada continuam pendentes.
 
 ### 5C — Completar modelagem indispensável (P1)
 
+**Status:** parcialmente implementada. A migration 25 modela rastreio familiar
+triestado e resultados repetíveis com trigger diferido e testes transacionais.
+Descoberta de Chagas permanece pendente de titularidade D2; nenhuma data foi
+inventada.
+
 - **Objetivo:** estruturar apenas fatos que o modelo atual não consegue representar.
 - **Principais alterações:** migration incremental mínima para data de descoberta de Chagas e rastreio familiar, após 5A; não criar tabelas próprias para retornos, pendências ou contrarreferências apenas pela existência dessas palavras.
 - **Dependências:** contratos de 5A; migrations antigas permanecem imutáveis.
@@ -127,6 +133,13 @@ todos os escritores e a aplicação auditada continuam pendentes.
 
 ### 5D — Implementar recursos de consulta e importação (P1)
 
+**Status:** parcialmente implementada. A API possui DTOs, ficha de paciente,
+criação/consulta de atendimentos, incluindo dados clínicos, exames, pendências e
+rastreio familiar, consulta detalhada, retornos BZN e controle de versão, com transações. A consulta sanitizada de
+lotes/linhas, importação HTTP multipart com role separada e um CSV protegido foram
+adicionados; o worker permanece desabilitado por padrão e dependente de configuração
+sintética explícita.
+
 - **Objetivo:** entregar o backend funcional previsto na etapa original.
 - **Principais alterações:** busca e filtros de pacientes; histórico de atendimentos; consultas de exames, projetos, tratamento, notificações e pendências; endpoint de importação; acompanhamento de lote e erros; exportação CSV; DTOs clínicos; autorização explícita por operação e recurso; transações compostas quando uma operação fizer várias gravações.
 - **Dependências:** 5A–5C e fundação da Etapa 3. Não expor JSONB bruto nem criar API genérica de todas as tabelas.
@@ -134,6 +147,11 @@ todos os escritores e a aplicação auditada continuam pendentes.
 - **Validação:** testes unitários, contratos HTTP e integração API/SQL sintética, incluindo os três perfis existentes.
 
 ### 5E — Encerrar o backend do MVP (P1)
+
+**Status:** em andamento. Validação, erros sanitizados, SQL parametrizado,
+observabilidade existente e controle de acesso configurável foram preservados;
+faltam contratos HTTP completos, cobertura dos três perfis para os novos fluxos,
+paginação/filtros e integração de importação/exportação.
 
 - **Objetivo:** consolidar a API antes do frontend.
 - **Principais alterações:** revisão de DTOs, paginação, erros, autorização por paciente/atendimento, observabilidade técnica e documentação de contratos; endpoint de importação e CSV estabilizados.

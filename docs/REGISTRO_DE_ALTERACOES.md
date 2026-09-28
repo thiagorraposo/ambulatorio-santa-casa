@@ -1,6 +1,22 @@
 # Registro de Alterações
 
-Atualizado em: 2026-09-25
+Atualizado em: 2026-09-28
+
+## 2026-09-28 - Incremento sintético da Etapa 5
+
+Preservada a migration preexistente `sql/21_armazenamento_revisao_temporal.sql`
+e criadas as migrations incrementais 22–27 para corrigir invariantes da ADR-022,
+capturar histórico clínico, registrar contexto de proveniência, modelar rastreio
+familiar e controlar vínculo explícito de acesso. O importador passa a iniciar
+contexto de auditoria por linha. A API ganhou DTOs e fluxos transacionais de
+ficha de paciente, atendimentos, retornos BZN, consulta sanitizada de lotes e
+importação HTTP multipart condicionada a worker/role separados, com controle de
+versão e erros sanitizados.
+As 14 suítes SQL, manifesto, importador ponta a ponta, build e testes unitários
+foram executados em ambiente sintético descartável. Revisões entre hashes,
+importação HTTP, CSV e decisões humanas D1, D2, D9 e D10 permanecem pendentes;
+a Etapa 5 não foi declarada concluída. O Makefile passou a respeitar `PGPASSWORD`
+fornecida pelo ambiente, permitindo `project-check` contra banco descartável.
 
 ## Como Registrar Mudanças
 
