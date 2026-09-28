@@ -45,6 +45,15 @@ export class ClinicalDataDto {
   @IsOptional() @IsString() @MaxLength(20) nyha?: string | null;
   @IsOptional() @IsString() @MaxLength(10000) observacoes?: string | null;
 }
+export class DiagnosisDto {
+  @IsOptional() @IsBoolean() possuiDiagnosticoChagas?: boolean | null;
+  @IsOptional() @IsIn(['confirmado', 'descartado', 'inconclusivo', 'suspeito', 'nao_informado']) statusDiagnostico?: string | null;
+  @IsOptional() @IsIn(['positivo', 'negativo', 'inconclusivo', 'indeterminado', 'nao_informado']) resultadoFinal?: string | null;
+  @IsOptional() @IsDateString({ strict: true }) @Matches(/^\d{4}-\d{2}-\d{2}$/) dataResultadoFinal?: string | null;
+  @IsOptional() @IsDateString({ strict: true }) @Matches(/^\d{4}-\d{2}-\d{2}$/) dataDescobertaAutorelato?: string | null;
+  @IsOptional() @IsString() @MaxLength(80) criterioConfirmacao?: string | null;
+  @IsOptional() @IsString() @MaxLength(10000) observacoes?: string | null;
+}
 export class ExamDto {
   @Matches(/^[1-9]\d{0,18}$/) tipoExameId!: string;
   @IsIn(['trazido', 'solicitado']) bloco!: 'trazido' | 'solicitado';
@@ -72,6 +81,7 @@ export class AttendanceCreateDto {
   @IsOptional() @IsBoolean() ambulatorioAnexoProjeto?: boolean | null;
   @IsOptional() @IsString() @MaxLength(10000) observacoes?: string | null;
   @IsOptional() @ValidateNested() @Type(() => ClinicalDataDto) dadosClinicos?: ClinicalDataDto;
+  @IsOptional() @ValidateNested() @Type(() => DiagnosisDto) diagnosticoChagas?: DiagnosisDto;
   @IsOptional() @IsArray() @ArrayMaxSize(30) @ValidateNested({ each: true }) @Type(() => ExamDto) exames?: ExamDto[];
   @IsOptional() @IsArray() @ArrayMaxSize(30) @ValidateNested({ each: true }) @Type(() => PendingDto) pendencias?: PendingDto[];
   @IsOptional() @ValidateNested() @Type(() => FamilyScreeningDto) rastreioFamiliar?: FamilyScreeningDto;

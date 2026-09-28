@@ -138,7 +138,7 @@ class TransformacoesTest(unittest.TestCase):
         self.assertEqual(bzn_duration("8 semanas"), 56)
         with self.assertRaises(RowConflict): bzn_duration("dois meses")
 
-    def test_os_125_rotulos_plenos_possuem_handler(self):
+    def test_os_126_rotulos_plenos_possuem_handler(self):
         root = Path(__file__).resolve().parents[2]
         manifest = json.loads((root / "manifestos/planilha_ambulatorio_v1.json").read_text())
         canonical = {}
@@ -146,9 +146,9 @@ class TransformacoesTest(unittest.TestCase):
             for column in sheet["columns"]:
                 canonical.setdefault(column["cabecalho_original"].strip(), column)
         full = [c for c in canonical.values() if c["situacao_cobertura"] in {"direta", "com_transformacao"}]
-        self.assertEqual(len(full), 125)
+        self.assertEqual(len(full), 126)
         self.assertEqual({c["tabela_destino"] for c in full} - HANDLED_TABLES, set())
-        self.assertEqual(len([c for c in canonical.values() if c["situacao_cobertura"] == "parcial"]), 10)
+        self.assertEqual(len([c for c in canonical.values() if c["situacao_cobertura"] == "parcial"]), 9)
         self.assertEqual([c["chave_semantica"] for c in canonical.values() if c["situacao_cobertura"] == "excluido"], ["localizado"])
         self.assertEqual(set(PROMOTION_REGISTRY), {"pendencias_observacao"})
         self.assertEqual(set(NONCRITICAL_POLICY), {"catalogo_projeto_ausente"})

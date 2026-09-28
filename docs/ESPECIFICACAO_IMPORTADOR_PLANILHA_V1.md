@@ -643,11 +643,21 @@ Esses itens não autorizam alterar as regras normativas deste documento.
 
 ## Critério de prontidão
 
-A homologação atual comprova 125 rótulos plenos, a preservação determinística das
-dez chaves parciais e a promoção controlada de D11. A prontidão para o MVP
+A homologação atual comprova 126 rótulos plenos, a preservação determinística das
+nove chaves parciais e a promoção controlada de D11. A prontidão para o MVP
 revisado depende
 dos critérios do [roadmap](PROXIMOS_PASSOS.md), regressões das lacunas conhecidas e
-cenários sintéticos das novas decisões; não decorre apenas da contagem de 125
+cenários sintéticos das novas decisões; não decorre apenas da contagem de 126
 rótulos. Dados reais continuam bloqueados pela governança institucional. Alterar
 uma regra normativa exige revisão explícita deste documento e, quando afetar
 layout/destino, atualização coordenada e versionada do manifesto e implementação.
+
+## Data de descoberta do paciente — v1.5.0 sintética
+
+A chave `autorelato_diagnostico_de_chagas_do_participante_data` é convertida
+explicitamente para `diagnostico_chagas.data_descoberta_autorelato`. A presença
+somente dessa data pode criar o registro de diagnóstico do atendimento, sem
+inferir resultado de sorologia ou confirmação da doença. O original permanece
+no bruto e o alvo é registrado na proveniência. A promoção de lotes antigos
+para esse novo campo ainda exige implementação e testes próprios; a barreira
+contra revisão entre hashes continua ativa.

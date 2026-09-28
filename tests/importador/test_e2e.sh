@@ -135,7 +135,7 @@ assert r['metrics']=={'between_sheet_conflicts': 1, 'identity_conflicts': 1,
  'importable_rows': 8, 'invalid_values': 1, 'other_causes': 2,
  'pending_rows': 3, 'rejected_rows': 5, 'total_rows': 13,
  'unknown_catalogs': 1, 'valid_rows': 8}
-assert r['importer_version']=='1.4.0'
+assert r['importer_version']=='1.5.0'
 PY
 if rg -i 'Ana Sintética|Identidade Duplicada|telefone|texto parcial preservado|pendência sintética conflitante' /tmp/ambulatorio-importador.log; then
   echo "Erro: log estruturado contém dado sensível ou valor clínico" >&2
@@ -247,7 +247,7 @@ import json
 r=json.load(open('/tmp/ambulatorio-quality-promocao.json'))
 assert r['metrics']['unknown_catalogs']==0
 assert r['metrics']['pending_rows']==3
-assert r['importer_version']=='1.4.0'
+assert r['importer_version']=='1.5.0'
 assert r['purpose']=='mesmo_conteudo'
 PY
 if rg -i 'Ana Sintética|Identidade Duplicada|telefone|texto parcial preservado|pendência sintética conflitante' /tmp/ambulatorio-importador.log; then
@@ -299,17 +299,19 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM importacao_linha WHERE importacao_lote_id=v_lote AND dados_brutos @> '[{"chave":"localizado","valor":"sim"}]') THEN RAISE EXCEPTION 'Localizado bruto'; END IF;
   IF NOT EXISTS (SELECT 1 FROM importacao_linha WHERE importacao_lote_id=v_lote AND status_linha='rejeitada' AND mensagem_processamento LIKE 'conflito entre abas:%') THEN RAISE EXCEPTION 'precedência entre abas'; END IF;
   IF NOT EXISTS (SELECT 1 FROM importacao_linha WHERE importacao_lote_id=v_lote AND status_linha='importada_com_pendencia' AND dados_brutos @> '[{"chave":"pendencias_observacao","valor":"texto parcial preservado"}]') THEN RAISE EXCEPTION 'parcial bruto'; END IF;
-  IF (SELECT count(DISTINCT item->>'chave') FROM importacao_linha l CROSS JOIN LATERAL jsonb_array_elements(l.dados_brutos) item WHERE l.importacao_lote_id=v_lote AND l.aba_ordem=2 AND l.numero_linha=2 AND item->>'valor' IS NOT NULL AND item->>'chave' IN ('idade','autorelato_diagnostico_de_chagas_do_participante_data','familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas','paciente_trouxe_outros_exames_complementares','solicitado_exames_complementares','retorno_30_dias_de_tratamento','retorno_final_de_tratamento','retorno_anual_realizado','desfecho_do_retorno','paciente_com_contrarreferencia_realizada')) <> 10 THEN RAISE EXCEPTION 'dez parciais no bruto'; END IF;
+  IF (SELECT count(DISTINCT item->>'chave') FROM importacao_linha l CROSS JOIN LATERAL jsonb_array_elements(l.dados_brutos) item WHERE l.importacao_lote_id=v_lote AND l.aba_ordem=2 AND l.numero_linha=2 AND item->>'valor' IS NOT NULL AND item->>'chave' IN ('idade','autorelato_diagnostico_de_chagas_do_participante_data','familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas','paciente_trouxe_outros_exames_complementares','solicitado_exames_complementares','retorno_30_dias_de_tratamento','retorno_final_de_tratamento','retorno_anual_realizado','desfecho_do_retorno','paciente_com_contrarreferencia_realizada')) <> 10 THEN RAISE EXCEPTION 'dez valores legados preservados no bruto'; END IF;
   IF (SELECT count(*) FROM historico_familiar_chagas) <> 0 THEN RAISE EXCEPTION 'histórico familiar inventado a partir de exame de parentes'; END IF;
   IF (SELECT count(*) FROM dados_clinicos_atendimento WHERE altura_cm=170 AND nyha='II') <> 1 THEN RAISE EXCEPTION 'dados clínicos'; END IF;
   IF (SELECT count(*) FROM sorologia_chagas) <> 3 THEN RAISE EXCEPTION 'sorologias'; END IF;
+  IF (SELECT count(*) FROM diagnostico_chagas WHERE data_descoberta_autorelato=DATE '2020-01-01') <> 1 THEN RAISE EXCEPTION 'data de descoberta do paciente'; END IF;
+  IF EXISTS (SELECT 1 FROM diagnostico_chagas d JOIN sorologia_chagas s USING(diagnostico_chagas_id) WHERE d.data_descoberta_autorelato=s.data_resultado) THEN RAISE EXCEPTION 'descoberta confundida com sorologia'; END IF;
   IF (SELECT count(*) FROM atendimento_medicamento) <> 13 THEN RAISE EXCEPTION 'medicamentos'; END IF;
   IF (SELECT count(*) FROM paciente_comorbidade) <> 13 THEN RAISE EXCEPTION 'comorbidades'; END IF;
   IF (SELECT count(*) FROM dispositivo_implantado) <> 2 THEN RAISE EXCEPTION 'dispositivos'; END IF;
   IF (SELECT count(*) FROM notificacao) <> 1 OR (SELECT count(*) FROM obito) <> 1 THEN RAISE EXCEPTION 'notificação/óbito'; END IF;
 
   IF (SELECT count(*) FROM tratamento_benzonidazol) <> 2 THEN RAISE EXCEPTION 'BZN deve permanecer único por paciente'; END IF;
-  IF EXISTS (SELECT 1 FROM importacao_lote WHERE importador_versao IS DISTINCT FROM '1.4.0') THEN RAISE EXCEPTION 'versão do importador não rastreada'; END IF;
+  IF EXISTS (SELECT 1 FROM importacao_lote WHERE importador_versao IS DISTINCT FROM '1.5.0') THEN RAISE EXCEPTION 'versão do importador não rastreada'; END IF;
   IF (SELECT count(*) FROM pendencia_atendimento) <> 2 THEN RAISE EXCEPTION 'promoção D11 duplicou ou apagou pendência manual'; END IF;
   IF NOT EXISTS (
     SELECT 1 FROM pendencia_atendimento p
@@ -422,4 +424,4 @@ BEGIN
 END $$;
 SQL
 
-echo "OK: finalidade explícita, recusas sem efeitos, 125 destinos, criticidade, promoção, proveniência, rollback e reprocessamento encadeado"
+echo "OK: finalidade explícita, recusas sem efeitos, 126 destinos, criticidade, promoção, proveniência, rollback e reprocessamento encadeado"

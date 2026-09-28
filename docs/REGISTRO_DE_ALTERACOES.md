@@ -2,6 +2,24 @@
 
 Atualizado em: 2026-09-28
 
+## 2026-09-28 - Descoberta de Chagas e autorização clínica HTTP
+
+Migration 28 adiciona data de descoberta informada pelo paciente ao diagnóstico
+por atendimento, separada da sorologia e sem backfill. O importador v1.5.0 e o
+manifesto v1.2 promovem essa data na carga inicial (126 rótulos plenos e nove
+parciais). O gerador preserva a promoção anterior de D11 e sua versão semântica;
+o validador comprova o destino incremental sem alterar o dump persistente.
+
+A API registra/consulta o diagnóstico, calcula idade com referência explícita,
+filtra listagem e CSV por vínculo, atribui ator nas transações clínicas e usa a
+role de serviço para concessão de acesso. Exames genéricos exigem identificação;
+retorno BZN exige tratamento do paciente. O novo alvo `backend-clinical-test`
+prova sete cenários HTTP em banco descartável, inclusive rollback e concorrência.
+Build/unitários, manifesto, importador E2E e 17 suítes SQL passaram. Instalação
+limpa e atualização incremental da migration foram comprovadas. Permanecem os
+requisitos restantes registrados em `validacoes/CONTINUIDADE_ETAPA_5.md`; o backend
+completo e a revisão temporal não são declarados concluídos.
+
 ## 2026-09-28 - Incremento sintético da Etapa 5
 
 Preservada a migration preexistente `sql/21_armazenamento_revisao_temporal.sql`

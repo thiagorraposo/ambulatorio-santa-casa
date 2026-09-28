@@ -7,6 +7,15 @@ representa novas respostas clínicas da equipe nem liberação para dados reais.
 
 ## Escolhas técnicas resolvidas
 
+- **D1:** a ficha calcula idade por nascimento na data atual do PostgreSQL e
+  retorna `idade` e `dataReferenciaIdade`. Essa referência é escolha técnica
+  explícita; não é uma resposta adicional da equipe nem um backfill de idade.
+- **D2:** o relato é um snapshot associado ao atendimento em
+  `diagnostico_chagas.data_descoberta_autorelato` (migration 28). O mesmo paciente
+  pode informar relatos diferentes em consultas distintas, sem consolidação
+  silenciosa. A carga inicial importa a data e registra proveniência; a promoção
+  em lotes antigos ainda precisa de implementação e aceite próprio.
+
 - **D3:** uma avaliação de rastreio familiar pertence ao paciente, com atendimento
   de registro opcional e consistente. É um snapshot explícito, preservando várias
   avaliações. `familiares_examinados` distingue verdadeiro, falso e desconhecido;
@@ -50,7 +59,7 @@ são a referência autoritativa para estes campos:
   como fato clínico independente.
 - **Autorelato de Chagas:** a data representa quando o paciente descobriu que tem
   a doença e pode ser diferente da data da sorologia. A distinção semântica está
-  resolvida; o campo físico específico ainda precisa ser implementado.
+  resolvida; a migration 28 e o DTO de diagnóstico fornecem campo próprio.
 - **Familiares diretos:** registra-se sim/não; quando sim, identificam-se o
   familiar e o resultado da sorologia. A data da sorologia do familiar não é
   necessária. O modelo triestado existente preserva também ausência/desconhecido.
@@ -61,8 +70,8 @@ são a referência autoritativa para estes campos:
   `retorno_bzn_30_dias`.
 
 Não há resposta humana pendente neste conjunto. Permanecem como trabalho técnico
-a representação física da data de descoberta de Chagas, o executor e a ativação
-controlada da revisão temporal. Upload de contrarreferência continua fora do
+a promoção de contratos nos lotes antigos, o executor e a ativação controlada
+da revisão temporal. Upload de contrarreferência continua fora do
 escopo desta entrega.
 
 ## Histórico e fonte física

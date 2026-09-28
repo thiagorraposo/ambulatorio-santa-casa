@@ -53,8 +53,8 @@ Os dois indicadores de contexto do ambulatório apontam diretamente para
 `atendimento.ambulatorio_unicamente` e `atendimento.ambulatorio_anexo_projeto`;
 eles não são associações com `projeto_estudo`.
 
-O manifesto atual declara 125 dos 136 rótulos com cobertura estruturada plena:
-8 direta e 117 com transformação. Dez permanecem parciais e `Localizado`
+O manifesto atual declara 126 dos 136 rótulos com cobertura estruturada plena:
+8 direta e 118 com transformação. Nove permanecem parciais e `Localizado`
 permanece excluído. Cada parcial registra uma razão no manifesto e fica somente
 no JSONB bruto. D11 (`pendencias_observacao`) passou a destino pleno na v1.1 do
 manifesto e é promovida de forma controlada pelo importador v1.2.0. A contagem não
@@ -66,13 +66,13 @@ A fonte semântica vigente é
 [decisões humanas](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md), com avaliação na
 [matriz de impacto](dados/COBERTURA_COLUNAS_PLANILHA.md). Razões antigas de
 semântica indefinida para retornos, contrarreferência e `Localizado` ficaram
-superadas; somente D11 recebeu destino executável nesta revisão.
+superadas; D11 e a data de descoberta do paciente possuem destinos executáveis; esta última exige a migration 28.
 
 O gerador infere tipo por trechos da transformação: idade aparece como `data`,
 enquanto retornos BZN e ano do retorno anual continuam `texto`. A revisão futura
 deve definir metadados explícitos coerentes com D1/D6/D7/D8, atualizar manifesto,
 gerador, validador, handlers e expectativas de testes conjuntamente. As contagens
-125/10 e as listas de parciais são fixadas nesses artefatos: aprovação do
+126/9 e as listas de parciais são fixadas nesses artefatos: aprovação do
 `manifest-check` atual não valida a nova semântica nem resolve essas lacunas.
 
 ## Exclusões deliberadas
@@ -106,3 +106,10 @@ fonte local. O validador não lê linhas de dados.
 O manifesto orienta `docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`, fonte das
 regras operacionais, e a fixture sintética já existente. Não implementa o importador
 nem autoriza dados reais.
+
+## Extensão sintética de descoberta de Chagas — manifesto v1.2
+
+O layout físico permanece v1; o contrato semântico do manifesto passou a v1.2.
+O validador verifica o destino `diagnostico_chagas.data_descoberta_autorelato`
+na migration 28, adicionalmente ao dump persistente até migration 20. Essa
+validação não afirma que a extensão está aplicada no banco persistente.

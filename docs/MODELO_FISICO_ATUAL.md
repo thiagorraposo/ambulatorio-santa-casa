@@ -890,3 +890,17 @@ constraint de hash. A tabela guarda ID interno, nome, login normalizado único,
 hash bcrypt, perfil (`consulta`, `edicao` ou `administracao`), estado ativo e
 timestamps e removem os privilégios padrão do importador. `ambulatorio_aplicacao` recebe somente `SELECT`; usuários funcionais
 jamais recebem login PostgreSQL.
+
+## Extensão sintética proposta e validada — migration 28
+
+A migration `28_data_descoberta_autorelato_chagas.sql` adiciona
+`diagnostico_chagas.data_descoberta_autorelato DATE`, como snapshot do relato do
+paciente registrado no atendimento. Não substitui `data_resultado_final` nem
+qualquer data de sorologia; não há backfill. Coluna opcional preserva ausência
+legada, sem inferir confirmação diagnóstica.
+
+Instalação limpa e atualização incremental foram validadas exclusivamente em
+bancos descartáveis. O dump em `evidencias/schema_atual_ambulatorio.sql` permanece
+a evidência do banco persistente até migration 20. Reversão deve usar nova
+migration restritiva preservando relatos e proveniência; nenhuma coluna com
+dados é removida automaticamente.

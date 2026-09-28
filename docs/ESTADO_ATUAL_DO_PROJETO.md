@@ -11,8 +11,8 @@ preservados em `historico/`, `validacoes/` e no registro cronológico.
 O projeto organiza registros do ambulatório em PostgreSQL e já contém migrations,
 dez testes SQL transacionais, importador com homologação sintética do contrato v1, hardening, CI e
 uma fundação NestJS com autenticação, autorização mínima e primeiros fluxos
-clínicos transacionais. Não há frontend, importação HTTP nem autorização para
-dados reais.
+clínicos transacionais. A importação HTTP existe sob ativação sintética explícita;
+não há frontend nem autorização para dados reais.
 
 A Etapa 4C está concluída. As respostas de [`Perguntas pendentes sobre campos e
 regras clínicas.md`](Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
@@ -58,7 +58,7 @@ controle de versão. A revisão entre hashes continua desabilitada.
   evidência física é
   [`evidencias/schema_atual_ambulatorio.sql`](evidencias/schema_atual_ambulatorio.sql).
 - Importador v1 em Python, homologado com fixture sintética nas duas abas
-  clínicas; o manifesto v1.1 declara 125 rótulos plenos, dez preservados apenas no
+  clínicas; o manifesto v1.2 declara 126 rótulos plenos, nove preservados apenas no
   bruto e `Localizado` excluído do estruturado. Esses números não comprovam
   cobertura funcional das novas respostas. O contrato normativo está em
   [`ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`](ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md),
@@ -87,7 +87,8 @@ controle de versão. A revisão entre hashes continua desabilitada.
   [`DECISOES_ARQUITETURAIS.md`](DECISOES_ARQUITETURAIS.md).
 - Testes SQL usam dados sintéticos e `ROLLBACK`. Resultados de aceite ficam em
   [`validacoes/`](validacoes/), sem competir com o estado vigente.
-- O backend não executa migrations, DDL, importação ou escrita clínica. A role da
+- O backend não executa migrations nem DDL; suas operações clínicas são
+  transacionais e o worker de importação utiliza credencial separada. A role da
   aplicação não lê as tabelas de proveniência; o importador não acessa a
   identidade funcional.
 - Dados reais, planilhas reais, backups, credenciais e exports clínicos não podem
@@ -100,7 +101,7 @@ controle de versão. A revisão entre hashes continua desabilitada.
 O modelo já permite idade derivada do nascimento, exames identificados por bloco,
 acompanhamentos repetíveis e pendências textuais, e possui o rastreio familiar
 mínimo com resultado. A semântica da data de descoberta de Chagas está resolvida,
-mas sua representação física própria ainda falta. A multiplicidade de
+e sua representação física foi adicionada pela migration 28 no ambiente descartável. A multiplicidade de
 contrarreferências e o upload avançado permanecem fora do escopo desta entrega,
 sem nova decisão humana presumida. A exclusão funcional de `Localizado` foi confirmada,
 sem remover o bruto nem confundir com localização do prontuário.
@@ -128,9 +129,10 @@ importação HTTP multipart com credenciais separadas. Retornos BZN, projetos,
 exames, notificação e tratamento já possuem consultas; contrarreferência e demais
 recursos ainda precisam ser integrados. A importação permanece desabilitada por
 padrão e em produção.
-O guard de perfis permite rota autenticada sem metadados `@Perfis`; autorização
-explícita por operação/recurso ainda é trabalho de cada novo módulo. O helper de
-banco faz transação por consulta, não por uma sequência clínica de várias consultas.
+O guard de perfis permite rota autenticada sem metadados `@Perfis`; a verificação
+da matriz explícita de cada operação continua necessária. As operações clínicas
+compostas compartilham transação e contexto atribuído ao ator. A listagem de
+pacientes usa o mesmo filtro por vínculo e paginação da exportação.
 
 Dados reais continuam bloqueados por governança institucional, ambiente
 protegido, TLS, gestão/rotação de segredos, backup e retenção, auditoria de acesso,

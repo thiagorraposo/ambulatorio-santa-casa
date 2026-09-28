@@ -125,8 +125,9 @@ revisão entre hashes continuam bloqueados.
 **Status:** parcialmente implementada. A migration 25 modela rastreio familiar
 triestado e resultados repetíveis com trigger diferido e testes transacionais.
 A semântica da descoberta de Chagas está resolvida: a data é a descoberta pelo
-paciente e pode diferir da sorologia. Ainda falta o campo físico específico;
-nenhuma data foi inventada.
+paciente e pode diferir da sorologia. A migration 28 acrescentou o campo próprio ao diagnóstico do atendimento;
+a API cria/consulta essa data e o importador a recebe na carga inicial. Nenhuma
+data foi inventada.
 
 - **Objetivo:** estruturar apenas fatos que o modelo atual não consegue representar.
 - **Principais alterações:** migration incremental mínima para data de descoberta de Chagas e rastreio familiar, após 5A; não criar tabelas próprias para retornos, pendências ou contrarreferências apenas pela existência dessas palavras.

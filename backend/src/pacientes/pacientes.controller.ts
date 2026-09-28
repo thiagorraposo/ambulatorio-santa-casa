@@ -13,8 +13,8 @@ import { AccessDto, AttendanceCreateDto, BznReturnDto, PatientCreateDto, Patient
 export class PacientesController {
   constructor(private readonly pacientes: PacientesService) {}
   @Get()
-  list(@Query() query: ListarPacientesQuery): Promise<PacienteResponse[]> {
-    return this.pacientes.list(query);
+  list(@Query() query: ListarPacientesQuery, @CurrentUser() user: AuthenticatedUser): Promise<PacienteResponse[]> {
+    return this.pacientes.list(query, user);
   }
   @Get('export.csv') @Header('Content-Type', 'text/csv; charset=utf-8')
   async exportCsv(@Query() query: ListarPacientesQuery, @CurrentUser() user: AuthenticatedUser): Promise<string> {
@@ -31,7 +31,7 @@ export class PacientesController {
   @Get(':id/retornos-bzn') bznReturns(@Param('id', ClinicalIdPipe) id: string, @CurrentUser() user: AuthenticatedUser): Promise<Record<string, unknown>[]> {
     return this.pacientes.bznReturns(user, id);
   }
-  @Post(':id/retornos-bzn') createBznReturn(@Param('id', ClinicalIdPipe) id: string, @Body() dto: BznReturnDto,
+  @Post(':id/retornos-bzn') @Perfis('edicao', 'administracao') createBznReturn(@Param('id', ClinicalIdPipe) id: string, @Body() dto: BznReturnDto,
     @CurrentUser() user: AuthenticatedUser): Promise<Record<string, string>> {
     return this.pacientes.createBznReturn(user, id, dto);
   }
@@ -56,14 +56,14 @@ export class PacientesController {
     @Param('atendimentoId', ClinicalIdPipe) atendimentoId: string, @CurrentUser() user: AuthenticatedUser): Promise<Record<string, unknown>> {
     return this.pacientes.attendance(user, id, atendimentoId);
   }
-  @Post(':id/atendimentos') createAttendance(@Param('id', ClinicalIdPipe) id: string, @Body() dto: AttendanceCreateDto,
+  @Post(':id/atendimentos') @Perfis('edicao', 'administracao') createAttendance(@Param('id', ClinicalIdPipe) id: string, @Body() dto: AttendanceCreateDto,
     @CurrentUser() user: AuthenticatedUser): Promise<Record<string, string>> {
     return this.pacientes.createAttendance(user, id, dto);
   }
-  @Post() create(@Body() dto: PatientCreateDto, @CurrentUser() user: AuthenticatedUser): Promise<Record<string, unknown>> {
+  @Post() @Perfis('edicao', 'administracao') create(@Body() dto: PatientCreateDto, @CurrentUser() user: AuthenticatedUser): Promise<Record<string, unknown>> {
     return this.pacientes.create(user, dto);
   }
-  @Patch(':id') update(@Param('id', ClinicalIdPipe) id: string, @Body() dto: PatientUpdateDto,
+  @Patch(':id') @Perfis('edicao', 'administracao') update(@Param('id', ClinicalIdPipe) id: string, @Body() dto: PatientUpdateDto,
     @CurrentUser() user: AuthenticatedUser): Promise<Record<string, string>> {
     return this.pacientes.update(user, id, dto);
   }

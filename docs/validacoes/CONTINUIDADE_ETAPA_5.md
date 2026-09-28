@@ -31,8 +31,8 @@ ao benznidazol, registrando a data do comparecimento.
 
 ## Pendências técnicas
 
-Não há decisão humana pendente nesse documento. Ainda faltam a representação
-física da data de descoberta de Chagas, o executor e a ativação controlada da
+Não há decisão humana pendente nesse documento. Ainda faltam o fluxo
+de promoção da descoberta em lotes antigos, o executor e a ativação controlada da
 revisão temporal, além do aceite integrado dos fluxos HTTP e de importação. A
 política de acesso sintética permanece explícita e desabilitada por padrão, sem
 liberar dados reais.
@@ -57,7 +57,7 @@ liberar dados reais.
   da tabela de acesso.
   transação, controle de versão e política de acesso configurável.
 - A Etapa 5 continua **não concluída**: revisão entre hashes, aplicação
-  seletiva/dry-run auditado, representação física da data de descoberta e aceite
+  seletiva/dry-run auditado, promoções restantes e aceite
   integrado ainda faltam. A importação HTTP
   foi implementada com upload temporário e worker/role separados, permanecendo
   desabilitada por padrão e em produção.
@@ -67,3 +67,33 @@ liberar dados reais.
 - A última execução do `project-check` passou com 16 suítes SQL; o backend também
   possui testes unitários para configuração, worker de importação, autorização,
   transação e exportação.
+
+## Retomada com respostas autoritativas — 2026-09-28
+
+Estado de trabalho após a interrupção: migration 28, importador v1.5.0 e manifesto
+v1.2, diagnóstico HTTP, cálculo de idade com referência, correção da listagem
+por vínculo/paginação e autoria transacional das escritas. A concessão de acesso
+assume a role de serviço somente durante a chamada à função administrativa.
+O retorno BZN exige tratamento do paciente; exames genéricos exigem identificação.
+
+Validações deste incremento:
+
+- `manifest-check`: destinos incluem a migration 28 sem regenerar o dump persistente.
+- `importer-test`: 26 unitários e E2E sintético, com data de descoberta distinta da
+  sorologia e preservação do bruto; instalação limpa em banco de teste.
+- `backend-build` e `backend-unit-test`: aprovados.
+- `backend-clinical-test`: sete cenários HTTP reais em banco descartável criado
+  com migrations 02–28, incluindo três perfis, acesso por recurso, paginação,
+  CSV, diagnóstico, filhos clínicos, rollback diferido, BZN e concorrência de versão.
+- Migration 28 aplicada incrementalmente somente no servidor descartável da tarefa;
+  17 suítes SQL passaram nesse ambiente. A evidência persistente até 20 foi preservada.
+- `project-check COMPACT=1` aprovado contra o banco descartável em 55457 após
+  revisão documental; `git diff --check` também aprovado. A suíte clínica foi
+  repetida após os ajustes de perfis e consultas sequenciais, com sete casos aprovados.
+
+Pendências obrigatórias mantidas: executor/autorizações/aprovação/dry-run da
+ADR-022 com F10–F15 e T03–T18; promoções clínicas restantes e sua reexecução em
+lotes antigos; recursos clínicos ainda sem mutação/DTO de saída; paginação das
+coleções clínicas; integração HTTP de importação e autorização operacional;
+revisão dos contratos e matriz de aceite integral. As sete provas HTTP acima
+não substituem os casos ainda ausentes. A Etapa 5 permanece em andamento.
