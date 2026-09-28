@@ -30,4 +30,15 @@ describe('validateConfig', () => {
     expect(() => validateConfig({ ...valid, AUTH_JWT_EXPIRES_IN_SECONDS: '0' }))
       .toThrow('Configuração inválida: AUTH_JWT_EXPIRES_IN_SECONDS');
   });
+
+  it('mantém importação HTTP desabilitada por padrão e exige role separada ao habilitar', () => {
+    expect(validateConfig(valid).importer.enabled).toBe(false);
+    const importer = validateConfig({ ...valid, NODE_ENV: 'development', CLINICAL_IMPORT_ENABLED: 'true',
+      IMPORT_DB_HOST: 'localhost', IMPORT_DB_PORT: '5432', IMPORT_DB_NAME: 'db',
+      IMPORT_DB_USER: 'importador', IMPORT_DB_PASSWORD: 'synthetic-importer' });
+    expect(importer.importer).toMatchObject({ enabled: true, role: 'ambulatorio_importador' });
+    expect(() => validateConfig({ ...valid, NODE_ENV: 'production', CLINICAL_IMPORT_ENABLED: 'true',
+      IMPORT_DB_HOST: 'localhost', IMPORT_DB_PORT: '5432', IMPORT_DB_NAME: 'db',
+      IMPORT_DB_USER: 'importador', IMPORT_DB_PASSWORD: 'synthetic-importer' })).toThrow('CLINICAL_IMPORT_ENABLED');
+  });
 });

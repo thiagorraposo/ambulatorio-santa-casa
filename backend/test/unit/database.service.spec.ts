@@ -51,4 +51,36 @@ describe('DatabaseService', () => {
     expect(query).toHaveBeenLastCalledWith('ROLLBACK');
     expect(release).toHaveBeenCalledWith(cleanupFailure);
   });
+
+  it('confirma varias escritas na mesma transacao somente depois da operacao completa', async () => {
+    const query = jest.fn().mockResolvedValue({ rows: [] });
+    const { service, release } = serviceWith(query);
+    await expect(service.transaction(async (tx) => {
+      await tx.query('INSERT primeiro', ['sintetico']);
+      await tx.query('INSERT segundo', [42]);
+      return 'concluido';
+    })).resolves.toBe('concluido');
+    expect(query.mock.calls.map(([sql]) => sql)).toEqual([
+      'BEGIN', 'SET LOCAL ROLE ambulatorio_aplicacao',
+      'SET LOCAL search_path TO ambulatorio, public',
+      'INSERT primeiro', 'INSERT segundo', 'COMMIT',
+    ]);
+    expect(release).toHaveBeenCalledTimes(1);
+  });
+
+  it('reverte a primeira escrita quando a segunda falha, preservando a falha original', async () => {
+    const failure = new Error('falha sintetica da segunda escrita');
+    const query = jest.fn().mockImplementation(async (sql: string) => {
+      if (sql === 'INSERT segundo') throw failure;
+      return { rows: [] };
+    });
+    const { service, release } = serviceWith(query);
+    await expect(service.transaction(async (tx) => {
+      await tx.query('INSERT primeiro');
+      await tx.query('INSERT segundo');
+    })).rejects.toBe(failure);
+    expect(query.mock.calls.map(([sql]) => sql)).not.toContain('COMMIT');
+    expect(query).toHaveBeenLastCalledWith('ROLLBACK');
+    expect(release).toHaveBeenCalledWith(undefined);
+  });
 });
