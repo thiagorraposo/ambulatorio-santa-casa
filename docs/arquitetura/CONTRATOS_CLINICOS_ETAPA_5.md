@@ -1,7 +1,8 @@
 # Contratos clínicos da Etapa 5
 
-Atualizado em: 2026-09-27. Escolhas técnicas desta execução, subordinadas às
-[decisões humanas](../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md). Este documento não
+Atualizado em: 2026-09-28. Escolhas técnicas desta execução, subordinadas às
+[respostas clínicas vigentes](../Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+e às [decisões humanas anteriores](../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md). Este documento não
 representa novas respostas clínicas da equipe nem liberação para dados reais.
 
 ## Escolhas técnicas resolvidas
@@ -39,15 +40,30 @@ identificadores operacionais, sem hash, JSON bruto ou mensagens de processamento
 O importador continua sendo o único escritor; a API oferece somente consulta de
 lotes e linhas.
 
-## Decisões humanas ainda pendentes
+## Decisões humanas incorporadas
 
-D1: referência da idade. D2: titularidade da descoberta de Chagas. D9: aprovação
-da representação do planejamento de retorno. D10: aceite da representação mínima
-dos estados de contrarreferência. Política de autorização sintética por recurso e
-concessão/revogação de revisão: pergunta enviada ao usuário. Funcionalidades
-dependentes permanecem sem ativação até resposta explícita.
+As respostas de [`Perguntas pendentes sobre campos e regras clínicas.md`](../Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+são a referência autoritativa para estes campos:
 
-Upload não foi promovido ao escopo desta entrega; sua posição no roadmap permanece.
+- **Idade:** é calculada pelo sistema a partir da data de nascimento. A API deve
+  deixar explícita a data de referência usada no cálculo; idade não é persistida
+  como fato clínico independente.
+- **Autorelato de Chagas:** a data representa quando o paciente descobriu que tem
+  a doença e pode ser diferente da data da sorologia. A distinção semântica está
+  resolvida; o campo físico específico ainda precisa ser implementado.
+- **Familiares diretos:** registra-se sim/não; quando sim, identificam-se o
+  familiar e o resultado da sorologia. A data da sorologia do familiar não é
+  necessária. O modelo triestado existente preserva também ausência/desconhecido.
+- **Exames trazidos e solicitados:** cada exame deve ser identificado, sem
+  substituir a lista por um indicador agregado.
+- **Retorno de 30 dias:** é sempre retorno do tratamento com benznidazol e
+  registra a data em que o paciente compareceu. O vínculo técnico existente usa
+  `retorno_bzn_30_dias`.
+
+Não há resposta humana pendente neste conjunto. Permanecem como trabalho técnico
+a representação física da data de descoberta de Chagas, o executor e a ativação
+controlada da revisão temporal. Upload de contrarreferência continua fora do
+escopo desta entrega.
 
 ## Histórico e fonte física
 

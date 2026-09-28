@@ -77,13 +77,15 @@ os recursos necessários para a interface.
 
 **Avanço em 2026-09-22:** definido o
 [contrato temporal de revisão entre hashes](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md)
-(ADR-022), distinguindo correção, nova visita e atualização consolidada. A
-representação anual de D8 e os demais contratos clínicos abaixo continuam abertos;
-esta definição técnica não é implementação nem nova resposta da equipe.
+(ADR-022), distinguindo correção, nova visita e atualização consolidada. Em
+2026-09-28, as respostas de [`Perguntas pendentes sobre campos e regras clínicas.md`](Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+foram incorporadas como referência autoritativa para idade, Chagas, familiares,
+exames e retorno de 30 dias. A implementação técnica desses contratos continua
+separada da decisão clínica.
 
 - **Objetivo:** congelar o escopo e resolver somente as ambiguidades que afetam implementação.
-- **Principais alterações:** decidir referência da idade; titularidade da data de descoberta de Chagas; representação mínima de familiares e sorologia; tipos/vínculos dos retornos BZN; política para o ano do último retorno; distinção entre atualização de linha e nova visita; representação de contrarreferência e momento do upload; confirmar o destino do planejamento hoje chamado de desfecho.
-- **Dependências:** respostas D1–D12 e inspeção do schema/código existentes.
+- **Principais alterações:** consolidar as respostas de idade, descoberta de Chagas, familiares, exames e retorno BZN; implementar as invariantes sem inferir fatos ausentes; manter ADR-022 e o backlog de contrarreferência nos limites aprovados.
+- **Dependências:** schema/código existentes, implementação física restante e aceite técnico da ADR-022.
 - **Critérios de aceite:** contratos decididos ou explicitamente adiados; nenhuma data inventada; nenhuma regra clínica inferida; modelo existente avaliado antes de propor migration.
 - **Validação:** revisão com a equipe, matriz de impacto atualizada e `make docs-check`.
 
@@ -122,8 +124,9 @@ revisão entre hashes continuam bloqueados.
 
 **Status:** parcialmente implementada. A migration 25 modela rastreio familiar
 triestado e resultados repetíveis com trigger diferido e testes transacionais.
-Descoberta de Chagas permanece pendente de titularidade D2; nenhuma data foi
-inventada.
+A semântica da descoberta de Chagas está resolvida: a data é a descoberta pelo
+paciente e pode diferir da sorologia. Ainda falta o campo físico específico;
+nenhuma data foi inventada.
 
 - **Objetivo:** estruturar apenas fatos que o modelo atual não consegue representar.
 - **Principais alterações:** migration incremental mínima para data de descoberta de Chagas e rastreio familiar, após 5A; não criar tabelas próprias para retornos, pendências ou contrarreferências apenas pela existência dessas palavras.
@@ -189,7 +192,8 @@ paginação/filtros e integração de importação/exportação.
 - **Principais alterações:** dados clínicos, exames trazidos e solicitados,
   identificação obrigatória, familiares examinados e resultados, preservação de
   ausências e estados desconhecidos.
-- **Dependências:** contratos D2–D5 e eventual migration da Etapa 5C.
+- **Dependências:** contratos incorporados de Chagas, exames e familiares, além da
+  migration física restante da Etapa 5C.
 - **Critérios de aceite:** exame solicitado não exige resultado; exame trazido é
   identificado; familiar examinado não vira histórico de doença.
 - **Validação:** testes de formulário/API com casos positivos, negativos, vazios e
@@ -201,8 +205,9 @@ paginação/filtros e integração de importação/exportação.
 - **Principais alterações:** BZN, reações, retorno de 30 dias, retorno final,
   retornos anuais, histórico de ocorrências, encaminhamento, contrarreferências
   repetíveis, notificação e pendências textuais.
-- **Dependências:** contrato temporal de D6–D11, importador/API da Etapa 5 e
-  decisão sobre representação de contrarreferência; não fabricar datas do ano legado.
+- **Dependências:** contrato temporal de D6–D11 e importador/API da Etapa 5; não
+  fabricar datas do ano legado. Contrarreferência avançada e upload permanecem
+  fora do escopo atual.
 - **Critérios de aceite:** datas são comparecimentos efetivos; 30/60 dias não são
   calculados automaticamente; histórico não é substituído; `Localizado` não
   aparece funcionalmente.

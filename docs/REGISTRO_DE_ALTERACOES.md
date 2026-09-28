@@ -14,8 +14,10 @@ importação HTTP multipart condicionada a worker/role separados, com controle d
 versão e erros sanitizados.
 As 14 suítes SQL, manifesto, importador ponta a ponta, build e testes unitários
 foram executados em ambiente sintético descartável. Revisões entre hashes,
-importação HTTP, CSV e decisões humanas D1, D2, D9 e D10 permanecem pendentes;
-a Etapa 5 não foi declarada concluída. O Makefile passou a respeitar `PGPASSWORD`
+importação HTTP e CSV permanecem tecnicamente condicionados; as seis respostas
+do documento `Perguntas pendentes sobre campos e regras clínicas.md` foram
+incorporadas como referência autoritativa. A Etapa 5 não foi declarada concluída.
+O Makefile passou a respeitar `PGPASSWORD`
 fornecida pelo ambiente, permitindo `project-check` contra banco descartável.
 
 ## Como Registrar Mudanças

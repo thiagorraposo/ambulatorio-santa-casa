@@ -14,18 +14,28 @@ o escopo permanece em [PROXIMOS_PASSOS.md](../PROXIMOS_PASSOS.md).
 
 | Subetapa | Estado inicial | Critério de conclusão |
 | --- | --- | --- |
-| 5A | Contrato temporal definido; contratos clínicos pendentes | Escolhas técnicas justificadas; decisões humanas atribuídas; nenhuma inferência clínica |
+| 5A | Respostas clínicas incorporadas e invariantes registradas | Escolhas técnicas justificadas; nenhuma inferência clínica; executor temporal permanece técnico |
 | 5B | Importador v1.4.0 com revisão bloqueada | Promoções autorizadas e revisão auditada validadas, preservando idempotência e proveniência |
-| 5C | Lacunas de descoberta de Chagas e rastreio familiar | Modelagem mínima com contrato resolvido, integridade e testes SQL |
+| 5C | Rastreio familiar implementado; semântica da descoberta de Chagas resolvida | Campo físico da descoberta, integridade e testes SQL |
 | 5D | Fundação HTTP e listagem mínima | Fluxos de paciente, atendimento, importação e CSV com autorização por recurso |
 | 5E | Pendente | Contratos documentados e testes HTTP/SQL, perfis e transações aprovados |
 
-## Decisões aguardadas
+## Decisões incorporadas
 
-Perguntas enviadas sobre referência da idade, titularidade da data de descoberta
-de Chagas, política de acesso/revisão exclusivamente sintética, representação de
-desfecho e contrarreferências. Nenhuma resposta é presumida. Decisões
-institucionais para dados reais permanecem fora do escopo.
+As seis respostas de [`Perguntas pendentes sobre campos e regras clínicas.md`](../Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+foram incorporadas em 2026-09-28: idade derivada da data de nascimento; data do
+autorelato de Chagas como descoberta pelo paciente, independente da sorologia;
+familiares com identificação e resultado, sem data de sorologia; identificação
+obrigatória dos exames trazidos e solicitados; e retorno de 30 dias sempre ligado
+ao benznidazol, registrando a data do comparecimento.
+
+## Pendências técnicas
+
+Não há decisão humana pendente nesse documento. Ainda faltam a representação
+física da data de descoberta de Chagas, o executor e a ativação controlada da
+revisão temporal, além do aceite integrado dos fluxos HTTP e de importação. A
+política de acesso sintética permanece explícita e desabilitada por padrão, sem
+liberar dados reais.
 
 ## Execução
 
@@ -46,9 +56,9 @@ institucionais para dados reais permanecem fora do escopo.
   função SQL restrita, com contexto transacional do ator; não há mutação direta
   da tabela de acesso.
   transação, controle de versão e política de acesso configurável.
-- A Etapa 5 continua **não concluída**: decisões D1, D2, D9, D10 e política
-  institucional de acesso não foram respondidas; revisão entre hashes, aplicação
-  seletiva/dry-run auditado e aceite integrado ainda faltam. A importação HTTP
+- A Etapa 5 continua **não concluída**: revisão entre hashes, aplicação
+  seletiva/dry-run auditado, representação física da data de descoberta e aceite
+  integrado ainda faltam. A importação HTTP
   foi implementada com upload temporário e worker/role separados, permanecendo
   desabilitada por padrão e em produção.
 - O Makefile passou a respeitar `PGPASSWORD` fornecida pelo ambiente; assim,

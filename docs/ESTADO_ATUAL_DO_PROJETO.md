@@ -14,9 +14,11 @@ uma fundação NestJS com autenticação, autorização mínima e primeiros flux
 clínicos transacionais. Não há frontend, importação HTTP nem autorização para
 dados reais.
 
-A Etapa 4C está concluída. As doze respostas de `Perguntas pendentes.docx` foram
-consolidadas documentalmente em 2026-09-14, mas ainda não incorporadas ao contrato
-executável. O roadmap oficial mantém dez etapas: 1–4 concluídas e 5–10 restantes.
+A Etapa 4C está concluída. As respostas de [`Perguntas pendentes sobre campos e
+regras clínicas.md`](Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+foram incorporadas como referência autoritativa em 2026-09-28: idade derivada,
+data de descoberta de Chagas, familiares, exames e retorno BZN. O roadmap oficial
+mantém dez etapas: 1–4 concluídas e 5–10 restantes.
 A Etapa 5 foi subdividida para resolver lacunas do importador, complementar
 somente a modelagem indispensável e entregar o backend clínico; as Etapas 6–10
 cobrem frontend, fluxos, complementos, produção e homologação.
@@ -32,8 +34,9 @@ o [contrato temporal de revisão entre hashes](arquitetura/ESPECIFICACAO_REVISAO
 (ADR-022). A v1.4.0 implementa sua primeira barreira: finalidade explícita,
 recusa de revisão antes de escrita e preservação do fluxo do mesmo hash/layout.
 A suíte agora possui 26 testes unitários e E2E sintético. Reconciliação entre
-hashes e as demais decisões clínicas da 5A continuam pendentes. A Etapa 5B
-permanece em andamento.
+hashes e a implementação física de alguns contratos da 5A continuam pendentes.
+As decisões humanas do documento de perguntas não estão mais pendentes. A Etapa
+5B permanece em andamento.
 
 Em 2026-09-25 foi concluída a especificação da extensão física de revisão temporal:
 linhagem, decisões atribuíveis, histórico por campo e controles de aplicação.
@@ -95,10 +98,11 @@ controle de versão. A revisão entre hashes continua desabilitada.
 ## Limites e pendências
 
 O modelo já permite idade derivada do nascimento, exames identificados por bloco,
-acompanhamentos repetíveis e pendências textuais. Faltam representação própria da
-data de descoberta de Chagas e do exame de familiares. A multiplicidade de
-contrarreferências foi confirmada; seu contrato documental e o momento do upload
-ainda precisam de decisão. A exclusão funcional de `Localizado` foi confirmada,
+acompanhamentos repetíveis e pendências textuais, e possui o rastreio familiar
+mínimo com resultado. A semântica da data de descoberta de Chagas está resolvida,
+mas sua representação física própria ainda falta. A multiplicidade de
+contrarreferências e o upload avançado permanecem fora do escopo desta entrega,
+sem nova decisão humana presumida. A exclusão funcional de `Localizado` foi confirmada,
 sem remover o bruto nem confundir com localização do prontuário.
 
 O importador já reconcilia BZN do mesmo paciente, preservando o vínculo original,
