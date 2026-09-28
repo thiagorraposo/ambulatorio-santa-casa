@@ -9,7 +9,9 @@ DB_NAME ?= $(POSTGRES_DB)
 DB_USER ?= $(POSTGRES_USER)
 DB_HOST ?= localhost
 DB_PORT ?= $(POSTGRES_PORT)
-export PGPASSWORD := $(POSTGRES_PASSWORD)
+# Permite apontar validações locais para um banco descartável sem substituir
+# explicitamente uma senha fornecida pelo ambiente; no Docker usa .env.
+export PGPASSWORD ?= $(POSTGRES_PASSWORD)
 else
 DB_NAME ?= ambulatorio_santa_casa
 DB_USER ?= ambulatorio_user
