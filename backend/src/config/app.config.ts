@@ -10,6 +10,8 @@ export interface AppConfig {
     role: 'ambulatorio_aplicacao';
   };
   auth: { jwtSecret: string; jwtExpiresInSeconds: number };
+  clinical: { accessPolicy: 'desabilitada' | 'vinculo_explicito' | 'todos_sinteticos' };
+  importer: { enabled: boolean; host?: string; port?: number; name?: string; user?: string; password?: string; role: 'ambulatorio_importador' };
 }
 
 const required = (env: Record<string, unknown>, key: string): string => {
@@ -26,6 +28,12 @@ const port = (env: Record<string, unknown>, key: string): number => {
     throw new Error(`Configuração inválida: ${key}`);
   }
   return value;
+};
+
+const flag = (env: Record<string, unknown>, key: string): boolean => {
+  const value = env[key] ?? 'false';
+  if (value !== 'true' && value !== 'false') throw new Error(`Configuração inválida: ${key}`);
+  return value === 'true';
 };
 
 export function validateConfig(env: Record<string, unknown>): AppConfig {
@@ -45,6 +53,18 @@ export function validateConfig(env: Record<string, unknown>): AppConfig {
   if (!Number.isInteger(jwtExpiresInSeconds) || jwtExpiresInSeconds < 60 || jwtExpiresInSeconds > 86400) {
     throw new Error('Configuração inválida: AUTH_JWT_EXPIRES_IN_SECONDS');
   }
+  const accessPolicy = env.CLINICAL_ACCESS_POLICY ?? 'desabilitada';
+  if (!['desabilitada', 'vinculo_explicito', 'todos_sinteticos'].includes(String(accessPolicy))
+      || (nodeEnv === 'production' && accessPolicy !== 'desabilitada')) {
+    throw new Error('Configuração inválida: CLINICAL_ACCESS_POLICY');
+  }
+  const importerEnabled = flag(env, 'CLINICAL_IMPORT_ENABLED');
+  if (importerEnabled && nodeEnv === 'production') throw new Error('Configuração inválida: CLINICAL_IMPORT_ENABLED');
+  const importer = importerEnabled ? {
+    enabled: true,
+    host: required(env, 'IMPORT_DB_HOST'), port: port(env, 'IMPORT_DB_PORT'), name: required(env, 'IMPORT_DB_NAME'),
+    user: required(env, 'IMPORT_DB_USER'), password: required(env, 'IMPORT_DB_PASSWORD'), role: 'ambulatorio_importador' as const,
+  } : { enabled: false, role: 'ambulatorio_importador' as const };
   return {
     nodeEnv: nodeEnv as AppConfig['nodeEnv'],
     apiPort: port(env, 'API_PORT'),
@@ -57,5 +77,7 @@ export function validateConfig(env: Record<string, unknown>): AppConfig {
       role,
     },
     auth: { jwtSecret, jwtExpiresInSeconds },
+    clinical: { accessPolicy: accessPolicy as AppConfig['clinical']['accessPolicy'] },
+    importer,
   };
 }
