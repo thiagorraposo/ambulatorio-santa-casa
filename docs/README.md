@@ -8,7 +8,7 @@ fontes vigentes.
 | --- | --- |
 | Estado técnico vigente | [`ESTADO_ATUAL_DO_PROJETO.md`](ESTADO_ATUAL_DO_PROJETO.md) |
 | Próximo trabalho e bloqueios | [`PROXIMOS_PASSOS.md`](PROXIMOS_PASSOS.md) |
-| Regras de negócio, incluindo as 12 respostas da equipe | [`dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md) |
+| Regras de negócio e respostas clínicas vigentes | [`Perguntas pendentes sobre campos e regras clínicas.md`](Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md) e [`dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md) |
 | Matriz de impacto e cobertura funcional das decisões | [`dados/COBERTURA_COLUNAS_PLANILHA.md`](dados/COBERTURA_COLUNAS_PLANILHA.md) |
 | Decisões arquiteturais duradouras | [`DECISOES_ARQUITETURAIS.md`](DECISOES_ARQUITETURAIS.md) |
 | Histórico cronológico de mudanças | [`REGISTRO_DE_ALTERACOES.md`](REGISTRO_DE_ALTERACOES.md) |
@@ -25,9 +25,10 @@ fontes vigentes.
 ## Coleções de apoio
 
 As respostas do DOCX local foram consolidadas na fonte de regras de negócio em
-2026-09-14. A revisão documental não promove campos no manifesto nem implementa
-funcionalidades. O estado atual e a matriz distinguem código existente, lacunas,
-recomendações e decisões ainda abertas; homologações antigas conservam seu escopo.
+2026-09-14. As seis respostas do documento de campos e regras clínicas foram
+incorporadas como referência autoritativa em 2026-09-28. A revisão documental não
+promove campos no manifesto nem implementa funcionalidades; o estado atual e a
+matriz distinguem código existente, lacunas e trabalho técnico restante.
 
 - [`arquitetura/`](arquitetura/): especificações estruturais implementadas e
   decisões técnicas específicas de módulos.

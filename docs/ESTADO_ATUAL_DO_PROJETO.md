@@ -1,6 +1,6 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-09-25
+Atualizado em: 2026-09-28
 
 Esta é a síntese vigente do sistema. Detalhes normativos pertencem às fontes
 temáticas indicadas abaixo; decisões antigas e resultados de etapas permanecem
@@ -10,12 +10,15 @@ preservados em `historico/`, `validacoes/` e no registro cronológico.
 
 O projeto organiza registros do ambulatório em PostgreSQL e já contém migrations,
 dez testes SQL transacionais, importador com homologação sintética do contrato v1, hardening, CI e
-uma fundação NestJS com autenticação e autorização mínimas. Não há frontend,
-escrita clínica HTTP, gestão de usuários nem autorização para dados reais.
+uma fundação NestJS com autenticação, autorização mínima e primeiros fluxos
+clínicos transacionais. Não há frontend, importação HTTP nem autorização para
+dados reais.
 
-A Etapa 4C está concluída. As doze respostas de `Perguntas pendentes.docx` foram
-consolidadas documentalmente em 2026-09-14, mas ainda não incorporadas ao contrato
-executável. O roadmap oficial mantém dez etapas: 1–4 concluídas e 5–10 restantes.
+A Etapa 4C está concluída. As respostas de [`Perguntas pendentes sobre campos e
+regras clínicas.md`](Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+foram incorporadas como referência autoritativa em 2026-09-28: idade derivada,
+data de descoberta de Chagas, familiares, exames e retorno BZN. O roadmap oficial
+mantém dez etapas: 1–4 concluídas e 5–10 restantes.
 A Etapa 5 foi subdividida para resolver lacunas do importador, complementar
 somente a modelagem indispensável e entregar o backend clínico; as Etapas 6–10
 cobrem frontend, fluxos, complementos, produção e homologação.
@@ -31,13 +34,20 @@ o [contrato temporal de revisão entre hashes](arquitetura/ESPECIFICACAO_REVISAO
 (ADR-022). A v1.4.0 implementa sua primeira barreira: finalidade explícita,
 recusa de revisão antes de escrita e preservação do fluxo do mesmo hash/layout.
 A suíte agora possui 26 testes unitários e E2E sintético. Reconciliação entre
-hashes e as demais decisões clínicas da 5A continuam pendentes. A Etapa 5B
-permanece em andamento.
+hashes e a implementação física de alguns contratos da 5A continuam pendentes.
+As decisões humanas do documento de perguntas não estão mais pendentes. A Etapa
+5B permanece em andamento.
 
 Em 2026-09-25 foi concluída a especificação da extensão física de revisão temporal:
 linhagem, decisões atribuíveis, histórico por campo e controles de aplicação.
 É proposta documental da ADR-022; nenhuma das novas relações está aplicada.
-O próximo incremento de armazenamento fechado não habilitará revisões na v1.4.0.
+Entre 2026-09-27 e 2026-09-28 foram aplicadas, somente em banco descartável, as
+migrations 21–27 para armazenamento e integridade da ADR-022, captura histórica,
+contexto de proveniência, rastreio familiar mínimo, vínculo explícito de acesso e
+views sanitizadas de acompanhamento de lotes.
+Foram adicionados testes SQL transacionais e a API ganhou ficha de paciente e
+criação/consulta de atendimentos com DTOs, SQL parametrizado, transação e
+controle de versão. A revisão entre hashes continua desabilitada.
 
 ## Componentes vigentes
 
@@ -60,8 +70,9 @@ O próximo incremento de armazenamento fechado não habilitará revisões na v1.
   A fonte normativa é [`ARQUITETURA_BACKEND.md`](ARQUITETURA_BACKEND.md).
 - PostgreSQL Docker em `127.0.0.1:5433`, padrão do Makefile (`DB_ENV=docker`);
   o ambiente local em 5432 é alternativa explícita. Docker e CI usam somente
-  dados sintéticos. A API atual expõe saúde, autenticação e listagem mínima de
-  pacientes (`pacienteId`, `nome`), não ficha clínica completa.
+  dados sintéticos. A API expõe saúde, autenticação, listagem, ficha de paciente
+  e atendimentos; os novos fluxos permanecem desabilitados por padrão até a
+  política de acesso.
 
 ## Garantias atuais
 
@@ -87,10 +98,11 @@ O próximo incremento de armazenamento fechado não habilitará revisões na v1.
 ## Limites e pendências
 
 O modelo já permite idade derivada do nascimento, exames identificados por bloco,
-acompanhamentos repetíveis e pendências textuais. Faltam representação própria da
-data de descoberta de Chagas e do exame de familiares. A multiplicidade de
-contrarreferências foi confirmada; seu contrato documental e o momento do upload
-ainda precisam de decisão. A exclusão funcional de `Localizado` foi confirmada,
+acompanhamentos repetíveis e pendências textuais, e possui o rastreio familiar
+mínimo com resultado. A semântica da data de descoberta de Chagas está resolvida,
+mas sua representação física própria ainda falta. A multiplicidade de
+contrarreferências e o upload avançado permanecem fora do escopo desta entrega,
+sem nova decisão humana presumida. A exclusão funcional de `Localizado` foi confirmada,
 sem remover o bruto nem confundir com localização do prontuário.
 
 O importador já reconcilia BZN do mesmo paciente, preservando o vínculo original,
@@ -111,7 +123,11 @@ por campo ainda precisam ser implementados antes de habilitar revisões.
 A representação estruturada do ano legado continua pendente; nenhum histórico
 ausente pode ser reconstruído automaticamente.
 
-Não existem DTOs nem endpoints clínicos a corrigir: precisam ser implementados.
+Existem DTOs e endpoints para paciente, atendimento, consulta de lotes e
+importação HTTP multipart com credenciais separadas. Retornos BZN, projetos,
+exames, notificação e tratamento já possuem consultas; contrarreferência e demais
+recursos ainda precisam ser integrados. A importação permanece desabilitada por
+padrão e em produção.
 O guard de perfis permite rota autenticada sem metadados `@Perfis`; autorização
 explícita por operação/recurso ainda é trabalho de cada novo módulo. O helper de
 banco faz transação por consulta, não por uma sequência clínica de várias consultas.

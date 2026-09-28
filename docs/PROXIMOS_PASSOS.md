@@ -1,6 +1,6 @@
 # Roadmap do Projeto
 
-Atualizado em: 2026-09-25
+Atualizado em: 2026-09-28
 
 Este é o roadmap oficial do projeto. A estrutura original possui dez etapas;
 as etapas 1–4 estão concluídas. As etapas 5, 7, 9 e 10 possuem subetapas porque
@@ -77,13 +77,15 @@ os recursos necessários para a interface.
 
 **Avanço em 2026-09-22:** definido o
 [contrato temporal de revisão entre hashes](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md)
-(ADR-022), distinguindo correção, nova visita e atualização consolidada. A
-representação anual de D8 e os demais contratos clínicos abaixo continuam abertos;
-esta definição técnica não é implementação nem nova resposta da equipe.
+(ADR-022), distinguindo correção, nova visita e atualização consolidada. Em
+2026-09-28, as respostas de [`Perguntas pendentes sobre campos e regras clínicas.md`](Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+foram incorporadas como referência autoritativa para idade, Chagas, familiares,
+exames e retorno de 30 dias. A implementação técnica desses contratos continua
+separada da decisão clínica.
 
 - **Objetivo:** congelar o escopo e resolver somente as ambiguidades que afetam implementação.
-- **Principais alterações:** decidir referência da idade; titularidade da data de descoberta de Chagas; representação mínima de familiares e sorologia; tipos/vínculos dos retornos BZN; política para o ano do último retorno; distinção entre atualização de linha e nova visita; representação de contrarreferência e momento do upload; confirmar o destino do planejamento hoje chamado de desfecho.
-- **Dependências:** respostas D1–D12 e inspeção do schema/código existentes.
+- **Principais alterações:** consolidar as respostas de idade, descoberta de Chagas, familiares, exames e retorno BZN; implementar as invariantes sem inferir fatos ausentes; manter ADR-022 e o backlog de contrarreferência nos limites aprovados.
+- **Dependências:** schema/código existentes, implementação física restante e aceite técnico da ADR-022.
 - **Critérios de aceite:** contratos decididos ou explicitamente adiados; nenhuma data inventada; nenhuma regra clínica inferida; modelo existente avaliado antes de propor migration.
 - **Validação:** revisão com a equipe, matriz de impacto atualizada e `make docs-check`.
 
@@ -108,8 +110,9 @@ erros secundários seguem abertas.
 
 Em 2026-09-25 foi especificada a extensão física mínima da ADR-022, com entidades,
 invariantes, autorização, histórico por campo e 16 casos de aceite F01–F16 por
-incremento. É entrega documental: a migration de armazenamento, a captura de
-todos os escritores e a aplicação auditada continuam pendentes.
+incremento. As migrations 21–24 agora cobrem armazenamento, integridade, captura
+e contexto de proveniência em banco descartável; aplicação seletiva, dry-run e
+revisão entre hashes continuam bloqueados.
 
 - **Objetivo:** eliminar duplicação e perda de promoção nos fluxos já suportados.
 - **Principais alterações:** reconciliar BZN consolidado por paciente; promover pendências resolvidas sem recriar alvos; separar erros críticos de não críticos; aplicar a política aprovada a arquivos revisados; atualizar metadados semânticos do gerador/manifesto/validador em conjunto.
@@ -119,6 +122,12 @@ todos os escritores e a aplicação auditada continuam pendentes.
 
 ### 5C — Completar modelagem indispensável (P1)
 
+**Status:** parcialmente implementada. A migration 25 modela rastreio familiar
+triestado e resultados repetíveis com trigger diferido e testes transacionais.
+A semântica da descoberta de Chagas está resolvida: a data é a descoberta pelo
+paciente e pode diferir da sorologia. Ainda falta o campo físico específico;
+nenhuma data foi inventada.
+
 - **Objetivo:** estruturar apenas fatos que o modelo atual não consegue representar.
 - **Principais alterações:** migration incremental mínima para data de descoberta de Chagas e rastreio familiar, após 5A; não criar tabelas próprias para retornos, pendências ou contrarreferências apenas pela existência dessas palavras.
 - **Dependências:** contratos de 5A; migrations antigas permanecem imutáveis.
@@ -127,6 +136,13 @@ todos os escritores e a aplicação auditada continuam pendentes.
 
 ### 5D — Implementar recursos de consulta e importação (P1)
 
+**Status:** parcialmente implementada. A API possui DTOs, ficha de paciente,
+criação/consulta de atendimentos, incluindo dados clínicos, exames, pendências e
+rastreio familiar, consulta detalhada, retornos BZN e controle de versão, com transações. A consulta sanitizada de
+lotes/linhas, importação HTTP multipart com role separada e um CSV protegido foram
+adicionados; o worker permanece desabilitado por padrão e dependente de configuração
+sintética explícita.
+
 - **Objetivo:** entregar o backend funcional previsto na etapa original.
 - **Principais alterações:** busca e filtros de pacientes; histórico de atendimentos; consultas de exames, projetos, tratamento, notificações e pendências; endpoint de importação; acompanhamento de lote e erros; exportação CSV; DTOs clínicos; autorização explícita por operação e recurso; transações compostas quando uma operação fizer várias gravações.
 - **Dependências:** 5A–5C e fundação da Etapa 3. Não expor JSONB bruto nem criar API genérica de todas as tabelas.
@@ -134,6 +150,11 @@ todos os escritores e a aplicação auditada continuam pendentes.
 - **Validação:** testes unitários, contratos HTTP e integração API/SQL sintética, incluindo os três perfis existentes.
 
 ### 5E — Encerrar o backend do MVP (P1)
+
+**Status:** em andamento. Validação, erros sanitizados, SQL parametrizado,
+observabilidade existente e controle de acesso configurável foram preservados;
+faltam contratos HTTP completos, cobertura dos três perfis para os novos fluxos,
+paginação/filtros e integração de importação/exportação.
 
 - **Objetivo:** consolidar a API antes do frontend.
 - **Principais alterações:** revisão de DTOs, paginação, erros, autorização por paciente/atendimento, observabilidade técnica e documentação de contratos; endpoint de importação e CSV estabilizados.
@@ -171,7 +192,8 @@ todos os escritores e a aplicação auditada continuam pendentes.
 - **Principais alterações:** dados clínicos, exames trazidos e solicitados,
   identificação obrigatória, familiares examinados e resultados, preservação de
   ausências e estados desconhecidos.
-- **Dependências:** contratos D2–D5 e eventual migration da Etapa 5C.
+- **Dependências:** contratos incorporados de Chagas, exames e familiares, além da
+  migration física restante da Etapa 5C.
 - **Critérios de aceite:** exame solicitado não exige resultado; exame trazido é
   identificado; familiar examinado não vira histórico de doença.
 - **Validação:** testes de formulário/API com casos positivos, negativos, vazios e
@@ -183,8 +205,9 @@ todos os escritores e a aplicação auditada continuam pendentes.
 - **Principais alterações:** BZN, reações, retorno de 30 dias, retorno final,
   retornos anuais, histórico de ocorrências, encaminhamento, contrarreferências
   repetíveis, notificação e pendências textuais.
-- **Dependências:** contrato temporal de D6–D11, importador/API da Etapa 5 e
-  decisão sobre representação de contrarreferência; não fabricar datas do ano legado.
+- **Dependências:** contrato temporal de D6–D11 e importador/API da Etapa 5; não
+  fabricar datas do ano legado. Contrarreferência avançada e upload permanecem
+  fora do escopo atual.
 - **Critérios de aceite:** datas são comparecimentos efetivos; 30/60 dias não são
   calculados automaticamente; histórico não é substituído; `Localizado` não
   aparece funcionalmente.
