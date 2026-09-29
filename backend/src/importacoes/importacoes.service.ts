@@ -38,14 +38,29 @@ export class ImportacoesService {
         '--db-host', importer.host!, '--db-port', String(importer.port), '--db-user', importer.user!,
         '--db-role', importer.role, '--db-name', importer.name!];
       if (dryRun) args.push('--dry-run');
+      let executedLotId: string | null = null;
       try {
-        await execFileAsync('python3', args, { env: { ...process.env, PGPASSWORD: importer.password }, maxBuffer: 1024 * 1024 });
+        const { stderr } = await execFileAsync('python3', args, { env: {
+          PATH: process.env.PATH, LANG: process.env.LANG, LC_ALL: process.env.LC_ALL,
+          PGPASSWORD: importer.password,
+        }, maxBuffer: 1024 * 1024 });
+        // Only the worker's technical completion events identify the effective lot.
+        // The requested code can differ on an idempotent no-op of the same content.
+        for (const line of stderr.split('\n')) {
+          try {
+            const event: { event?: string; lot_id?: unknown } = JSON.parse(line);
+            const id = String(event.lot_id ?? '');
+            if (['import_finished', 'import_idempotent_noop'].includes(event.event ?? '') && /^[1-9]\d{0,18}$/.test(id)) executedLotId = id;
+          } catch { /* Ignore non-event diagnostics; never expose worker output. */ }
+        }
       } catch {
         throw new BadRequestException('Importação recusada; consulte o lote e os erros sanitizados');
       }
-      const lot = await this.database.query<{ importacao_lote_id: string; status_lote: string }>(
-        'SELECT importacao_lote_id::text,status_lote FROM importacao_lote_consulta WHERE codigo_lote=$1', [lotCode]);
-      return { codigoLote: lotCode, dryRun, loteId: lot.rows[0]?.importacao_lote_id ?? null, status: lot.rows[0]?.status_lote ?? 'dry_run_concluido' };
+      const lot = await this.database.query<{ importacao_lote_id: string; codigo_lote: string; status_lote: string }>(
+        'SELECT importacao_lote_id::text,codigo_lote,status_lote FROM importacao_lote_consulta WHERE importacao_lote_id=$1::bigint', [executedLotId]);
+      if (!dryRun && !lot.rows[0]) throw new ServiceUnavailableException('Resultado da importação indisponível');
+      return { codigoLote: lot.rows[0]?.codigo_lote ?? lotCode, codigoLoteSolicitado: lotCode, dryRun,
+        loteId: lot.rows[0]?.importacao_lote_id ?? null, status: lot.rows[0]?.status_lote ?? 'dry_run_concluido' };
     } finally {
       await fs.rm(temporary, { recursive: true, force: true });
     }
@@ -64,7 +79,7 @@ export class ImportacoesService {
       linhasRejeitadas: Number(row.linhas_rejeitadas) }));
   }
 
-  async get(id: string): Promise<Record<string, unknown> | undefined> {
+  async get(id: string, limit = 20, offset = 0): Promise<Record<string, unknown> | undefined> {
     const lot = await this.database.query<LoteRow>(`SELECT importacao_lote_id::text,codigo_lote,layout_versao,
       status_lote,lote_reprocessado_de_id::text,iniciado_em::text,finalizado_em::text,criado_em::text,
       atualizado_em::text,possui_erro,total_linhas::text,linhas_importadas::text,linhas_com_pendencia::text,
@@ -72,12 +87,12 @@ export class ImportacoesService {
     if (!lot.rows[0]) return undefined;
     const lines = await this.database.query(`SELECT importacao_linha_id::text,aba_nome_original,aba_ordem,
       numero_linha,status_linha,possui_erro,criado_em::text,atualizado_em::text FROM importacao_linha_consulta
-      WHERE importacao_lote_id=$1 ORDER BY aba_ordem,numero_linha`, [id]);
+      WHERE importacao_lote_id=$1 ORDER BY aba_ordem,numero_linha,importacao_linha_id LIMIT $2 OFFSET $3`, [id, limit, offset]);
     const row = lot.rows[0];
     return { loteId: row.importacao_lote_id, codigo: row.codigo_lote, layout: row.layout_versao,
       status: row.status_lote, possuiErro: row.possui_erro, totalLinhas: Number(row.total_linhas),
       linhasImportadas: Number(row.linhas_importadas), linhasComPendencia: Number(row.linhas_com_pendencia),
-      linhasRejeitadas: Number(row.linhas_rejeitadas), linhas: lines.rows.map((line: Record<string, unknown>) => ({
+      linhasRejeitadas: Number(row.linhas_rejeitadas), paginacaoLinhas: { limit, offset }, linhas: lines.rows.map((line: Record<string, unknown>) => ({
         linhaId: line.importacao_linha_id, aba: line.aba_nome_original, abaOrdem: line.aba_ordem,
         numero: line.numero_linha, status: line.status_linha, possuiErro: line.possui_erro,
         criadoEm: line.criado_em, atualizadoEm: line.atualizado_em })) };
