@@ -65,9 +65,11 @@ de entrega são propostas técnicas do roadmap, não respostas adicionais da equ
 - Acompanhamento já admite várias ocorrências. Multiplicidade de retornos ou
   contrarreferências, isoladamente, não justifica novas tabelas. Uma FK direta
   de BZN e uma entidade documental própria dependem de decisão técnica.
-- Se necessário expor o ano legado estruturadamente, avaliar
-  `evento_clinico.ano_evento` com tipo explícito e precisão anual. É uma opção,
-  não um destino já aprovado ou implementado para retorno anual.
+- Escolha técnica documentada nos
+  [contratos da Etapa 5](../arquitetura/CONTRATOS_CLINICOS_ETAPA_5.md): reutilizar
+  `evento_clinico.ano_evento` com tipo `ultimo_comparecimento_ano_informado` e
+  precisão anual. A implementação permanece pendente; isso não é nova resposta
+  clínica nem autoriza criar uma visita a partir do ano.
 - O [contrato temporal de revisão](../arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md)
   foi definido tecnicamente na ADR-022, sem nova resposta clínica da equipe.
   A v1.4.0 implementa somente a barreira de finalidade e recusa de revisões;

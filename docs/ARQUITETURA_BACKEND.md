@@ -1,6 +1,6 @@
 # Arquitetura do Backend — Fundação e incrementos clínicos sintéticos
 
-Atualizado em: 2026-09-28
+Atualizado em: 2026-09-29
 
 Status: fundação pronta para os módulos clínicos da Etapa 5, ainda exclusivamente
 com dados sintéticos. Evidências: `docs/validacoes/VALIDACAO_ETAPA_4C.md`.
@@ -76,6 +76,28 @@ Falhas, inclusive constraints diferidas no commit, revertem a operação inteira
 `importacao_registro`, inclusive `dados_brutos`. O bloqueio está no PostgreSQL.
 O importador não acessa `usuario_aplicacao`.
 
+As funções temporais das migrations 29–30 são separadas do backend clínico:
+`ambulatorio_revisao_gestor` recebe somente EXECUTE para registrar fonte e
+conceder/revogar autorizações. A camada autenticadora deve estabelecer o contexto
+do ator na mesma transação; a função lê o ledger do XID real. Nenhum papel
+operacional herda gestão temporal, nenhum perfil clínico recebe autorização
+automática e não há rota HTTP de revisão habilitada. O serviço de revisão
+permanece sem EXECUTE do executor privado; a validação diferida tem dono técnico restrito.
+O serviço recebe EXECUTE da publicação de metadados (31–34), sem acesso direto
+a tabelas ou à função interna. O wrapper fecha/normaliza a entrada, e o servidor
+observa valores e tokens e calcula o hash. A função verifica autorização, versão,
+âncoras e metadados. As migrations 35–39 vinculam o plano a arquivos técnicos
+imutáveis recuperáveis por bytes/hash, verificam todos os campos alterados e
+transformações fechadas, e permitem aprovação de correção apenas com prova
+atribuível desde a importação da linha-base. Não expõem bruto ou arquivos por
+HTTP; recuperação restrita exige autorização da mesma fonte. Migrations 40–42 fornecem avaliação de decisão existente em READ ONLY e executor
+privado de alvos existentes, sem rota HTTP ou EXECUTE para operadores. A identidade
+do dry-run entra exclusivamente pela camada autenticadora confiável, com papel
+separado e autorização da fonte, evitando escrita no ledger; a aplicação usa o
+ledger e revalida sob locks. Correções/proveniência/eventos/avanço da fonte têm
+transação única. Criação/fechamento, cobertura através de revisões aplicadas,
+simulação de arquivo sem staging e aceite integrado continuam pendentes.
+
 ## Contratos HTTP
 
 - `GET /health`: público; retorna `{ "status": "ok", "database": "up" }` após
@@ -87,19 +109,37 @@ O importador não acessa `usuario_aplicacao`.
   escopo por vínculo; retorna DTO com `pacienteId` e `nome`.
 - `GET /pacientes/:id`: ficha e idade derivada com `dataReferenciaIdade`.
 - `POST /pacientes` e `PATCH /pacientes/:id`: cadastro e alteração versionada.
+  A edição inclui comunidade, endereço e `telefonesAdicionar`; preserva contatos
+  existentes e endereços anteriores. Campos omitidos permanecem inalterados.
 - `POST /pacientes/:id/atendimentos`: grava atendimento, diagnóstico, dados
   clínicos, exames, rastreio e pendências numa transação; consulta por ID pertence
   obrigatoriamente ao mesmo paciente.
+- `PATCH /pacientes/:id/atendimentos/:atendimentoId`: edita dados do atendimento
+  com `versao` obrigatória e vínculo ao paciente; conflito de versão retorna 409.
+- `GET /pacientes/:id/atendimentos`, `/exames`, `/projetos`, `/retornos-bzn` e
+  `/pendencias`: arrays paginados por `limit` (1–100, padrão 20) e `offset`
+  (0–100000, padrão 0), com ordenação estável. Pendências aceita filtro `status`.
 - `POST /pacientes/:id/retornos-bzn`: exige tratamento do paciente e data real.
+- `POST /pacientes/:id/tratamento-bzn`: registra tratamento canônico e reações;
+  vínculo de atendimento é conferido e duplicação retorna 409 sem sobrescrita.
 - `PUT /pacientes/:id/acesso/:usuarioId`: administração com contexto do ator.
 - `GET /pacientes/export.csv`: exportação paginada sob o mesmo escopo de vínculo.
-- `GET /importacoes/lotes` e `GET /importacoes/lotes/:id`: views sanitizadas.
+- `GET /importacoes/lotes` e `GET /importacoes/lotes/:id`: views sanitizadas;
+  `limit`/`offset` do detalhe paginam linhas e retornam `paginacaoLinhas`.
 - `POST /importacoes`: worker sintético condicional, desabilitado por padrão.
+  Retorna lote efetivo também em reenvio idempotente com outro código solicitado;
+  diferencia `codigoLote` e `codigoLoteSolicitado`. `dryRun` aceita booleano ou
+  os textos multipart `true`/`false`; outros valores retornam 400.
+  O subprocesso recebe ambiente restrito às variáveis de execução e à senha do
+  importador, sem credenciais da aplicação/identidade nem segredo JWT.
 - `GET /auth/authorization-check`: prova técnica para `edicao` e `administracao`.
 
 Entrada inválida retorna 400. O filtro padroniza `statusCode`, `error` e
-`message`, sem stack, SQL, credenciais ou detalhes do schema. DTOs de saída
-impedem exposição automática de novas colunas físicas.
+`message`, sem stack, SQL, credenciais ou detalhes do schema. DTOs e seleções
+explícitas limitam os campos retornados. A consolidação da tipagem dos demais
+recursos clínicos permanece no aceite de 5E.
+Rotas privadas sem política `@Perfis` são recusadas com 403. Somente `@Public`
+permite acesso público; políticas da operação prevalecem sobre as da classe.
 
 ## Logs e configuração
 

@@ -904,3 +904,101 @@ bancos descartáveis. O dump em `evidencias/schema_atual_ambulatorio.sql` perman
 a evidência do banco persistente até migration 20. Reversão deve usar nova
 migration restritiva preservando relatos e proveniência; nenhuma coluna com
 dados é removida automaticamente.
+
+## Gestão temporal sintética — migrations 29–30
+
+`29_gestao_autorizacao_revisao.sql` adiciona funções restritas para registrar uma
+fonte com âncoras de proveniência conferidas e conceder/revogar autorização por
+fonte. Cria papéis NOLOGIN de gestor, serviço de revisão e dono técnico, sem
+associá-los a logins existentes. A identidade é lida do ledger confiável do XID;
+não há ator livre na assinatura nem autorização automática por perfil clínico.
+Concessões não são editadas; revogação é irreversível e nova concessão tem outro ID.
+
+`30_validacao_diferida_revisao_restrita.sql` executa a validação de integridade
+como SECURITY DEFINER sob `ambulatorio_auditoria_owner`, com privilégios limitados,
+para permitir commit com papéis operacionais sem acesso às tabelas restritas.
+Mantém as invariantes e a ausência de acesso a credenciais. Não modifica destinos
+clínicos, não habilita captura automaticamente e não implementa o executor.
+
+Instalação limpa e atualização incremental foram comprovadas apenas no servidor
+descartável da tarefa. O dump persistente até 20 permanece intacto. Reversão usa
+revogação de EXECUTE em nova migration, preservando fontes e concessões.
+
+## Publicação de metadados temporais — migrations 31–34
+
+`31_publicacao_decisao_temporal.sql` publica cabeçalho e campos em uma operação,
+com ator do ledger, autorização da fonte revalidada, versionamento por linha,
+locks de fonte/revisão/autorização e hash calculado no servidor. Os valores
+atuais e tokens são lidos do banco, sem aceitar snapshot/histórico do cliente.
+`32_normalizacao_plano_temporal.sql` canoniza IDs/ocorrência e fecha a entrada;
+o serviço recebe somente EXECUTE do wrapper, sem acesso à função interna.
+`33_corrigir_ancora_publicacao_temporal.sql` corrige a referência do parâmetro
+no lock, e `34_privilegios_validacao_plano_temporal.sql` permite o CHECK de
+envelopes apenas ao owner NOLOGIN. Migrations anteriores foram preservadas.
+
+Somente metadados são escritos. Correção/anulação sem cobertura homologada
+continua recusada. Esses objetos não implementam executor, avanço da fonte,
+criação clínica de alvos ou dry-run de revisão. Não há membros automáticos nem
+autorização para dados reais. Instalação limpa e atualização incremental até 34
+foram comprovadas em bancos descartáveis; o dump persistente permanece até 20.
+Reversão usa revogação de EXECUTE em nova migration, preservando planos e hashes.
+
+
+## Preparação e prova da base — migrations 35–39
+
+`revisao_artefato` preserva manifesto e receita de transformações em texto UTF-8,
+com SHA-256 calculado sobre os bytes. Versão de receita tem unicidade; os arquivos
+são imutáveis. `importacao_revisao_preparacao` vincula cada revisão aos três
+arquivos, ator autenticado e autorização da fonte. São extensões técnicas da
+ADR-022, adicionais às nove relações originais; não recebem DML de papéis
+operacionais. O serviço obtém apenas as funções restritas.
+
+A preparação confere metadados e todas as células/posições semânticas do bruto.
+Comparação somente de leitura distingue linha ausente, coluna ausente, vazio e
+valor; não deduz vínculo pela posição. A aprovação aplica transformações fechadas
+e exige todos os campos alterados/destinos derivados, recusando omissão silenciosa.
+A migration 36 corrige o estado real de staging e serializa INSERT de linhas com
+o congelamento do lote. A 38 prova cobertura pela importação e proveniência da
+base; a 39 vincula a linha original pela cadeia do mesmo conteúdo e exige contexto
+no login herdado do importador, mesmo sem SET ROLE.
+
+Instalação limpa e incremental até 39 foram validadas somente em bancos
+descartáveis. A captura de nome e data do atendimento foi habilitada apenas nas
+fixtures desses testes. Não há ativação automática de catálogo ou papéis, executor
+clínico, avanço da fonte ou dry-run de revisão. Prova histórica através de futuras
+revisões aplicadas ainda é obrigatória. Reversão preserva arquivos, planos e
+histórico, restringindo novas operações por migration. O dump persistente até 20
+permanece intacto.
+
+
+## Avaliação de leitura e executor privado — migrations 40–42
+
+`revisao_simular_decisao` avalia um plano já publicado em snapshot READ ONLY,
+com ator fornecido exclusivamente pela camada autenticadora confiável e grant da
+fonte. Não chama `pg_current_xact_id`, escreve ledger ou consome sequências.
+`revisao_avaliar_decisao` é privada e compara autorização, fonte, decisão efetiva,
+artefatos, mapeamento, snapshot/token e cobertura. Valores clínicos não integram
+sua resposta técnica. A migration 41 concede somente SELECT da aplicação ao
+owner NOLOGIN, corrigindo o privilégio faltante encontrado no teste restrito.
+
+A 42 instala `revisao_aplicar_decisao_interna`, sem EXECUTE de qualquer papel
+operacional. Ela aplica apenas alvos existentes, com bloqueios de fonte, revisão,
+autorizações, identidades, decisão e registros em ordem definida. UPDATE de coluna
+de identidade no owner serve exclusivamente ao lock de leitura, não à alteração
+de usuários; importador continua sem identidade. SQL usa identificadores do
+catálogo protegido e valores parametrizados/populados com o tipo da tabela.
+
+Sucesso, alvos, proveniência, eventos reais, estado da linha e avanço da fonte
+confirmam juntos. O ledger atribuível passa à origem revisão somente dentro dessa
+operação privada. Captura rejeita mudanças em campos não aprovados. Verificação de
+sucesso usa evidências históricas, sem restaurar valor antigo após edição legítima.
+Falha SQL de integridade sai como código sanitizado e reverte a transação; registro
+de diagnóstico em outra transação ainda depende do fluxo completo. A versão
+operacional do cadastro foi excluída do catálogo clínico.
+
+Instalação limpa e incremental até 42 comprovadas apenas em bancos descartáveis.
+Rollback após a primeira escrita, dois executores com sucesso único, retomada e
+simulação sem mudar todas as tabelas/sequências foram testados. O executor está
+privado, sem ativação HTTP/CLI ou criação de visitas/dependentes. Fechamento,
+continuidade histórica por revisões e dry-run de arquivo sem staging continuam
+requisitos obrigatórios. O schema persistente e seu dump não foram modificados.

@@ -1,9 +1,11 @@
 # Contrato Temporal de Revisão da Planilha
 
-Atualizado em: 2026-09-25
+Atualizado em: 2026-09-29
 
-Status: barreira de finalidade implementada na v1.4.0; extensão física especificada,
-ainda sem migration ou aplicação de revisões.
+Status: armazenamento, captura, gestão e preparação/aprovação implementados
+parcialmente em migrations 21–42 no ambiente sintético, com avaliação de decisão
+somente de leitura e executor privado de alvos existentes. Revisões continuam
+bloqueadas até completar criação/fechamento, dry-run de arquivo e aceite integrado.
 
 ## Autoridade e limite
 
@@ -567,23 +569,49 @@ não implementa reconciliação nem prova que a declaração de carga inicial é
 
 Especificação física concluída em 2026-09-25: nove relações, invariantes,
 fronteiras de autorização, histórico e protocolo de aplicação definidos acima.
-São proposta normativa para os próximos incrementos, ainda sem objetos aplicados.
+Estado sintético em 2026-09-29: migrations 21–24 implementam armazenamento
+fechado, integridade, captura e contexto/precedência; 29–30 fornecem gestão de
+fonte e autorização atribuível, sem papéis associados automaticamente. A suíte
+SQL 18 valida gestão e commit com papel restrito; não prova o aceite integral de
+F06, que inclui aprovação/aplicação. Migrations 31–34 e suíte SQL 19 implementam
+publicação atômica de metadados com hash canônico e snapshots do servidor;
+correções/anulações sem cobertura comprovada permanecem recusadas. Migrations
+35–39 acrescentam arquivos imutáveis recuperáveis pelos bytes/hash, vínculo da
+preparação, conferência integral do bruto/manifesto, transformações fechadas e
+exigência de todos os campos alterados/destinos derivados. A suíte SQL 20 cobre
+preparação, estados distintos, recuperação restrita e ausência de efeitos da
+comparação. O teste clínico prova aprovação de nome/data somente com captura
+ativa desde a importação e proveniência da linha-base, sem mudar fatos clínicos;
+A→B→A mantém a decisão e altera seu token observado. A prova atual alcança a
+base inicial e reprocessamentos do mesmo conteúdo, não futuras revisões aplicadas.
+O login operacional do importador exige contexto também sem SET ROLE, e o E2E
+captura nome/data usando o escritor Python real. Esses objetos foram aplicados somente em
+bancos descartáveis; a evidência física persistente permanece até migration 20.
+Migrations 40–42 avaliam decisão publicada em READ ONLY, com identidade restrita
+à camada autenticadora confiável e autorização da fonte; não gravam ledger,
+staging, tentativas ou sequências. O executor privado aplica somente alvos
+existentes, revalida sob locks, resolve proveniência/eventos e avança a fonte
+atomicamente. Falha após o primeiro alvo reverte todas as escritas, e duas sessões
+produzem um sucesso. Não há EXECUTE do executor para operadores. Isso não prova
+criação de visitas/dependentes, fechamento, concorrência de revisão/edição/revogação,
+continuidade histórica entre revisões ou dry-run de arquivo antes do staging.
+O catálogo não é habilitado automaticamente e o importador continua recusando
+revisões, inclusive em dry-run. Não inferir linhagem ou autoria de dados antigos.
+Reversão usa migration restritiva que preserve evidências.
 
-Próximo incremento: migration incremental de armazenamento fechado e testes de
-integridade/permissões F01–F07 e F16, cobrindo as partes verificáveis sem executor.
-Incluir chaves compostas auxiliares e gatilhos de integridade necessários, sem
-habilitar revisão, conceder autorização institucional ou instalar escrita clínica.
-O catálogo nasce sem captura ativa. Não popular a extensão inferindo linhagem ou
-autoria de dados antigos. Registrar reversão por nova migration que desabilite o
-fluxo e preserve evidências; não prever DROP CASCADE de histórico como rollback.
-
-Depois, implementar captura/precedência em todos os escritores dos destinos
-homologados e testar F08/F09/F13. Só então implementar autenticação/autorização,
-aprovação, aplicação seletiva e dry-run, comprovando F10–F15 e os casos T01–T18.
+Ainda é obrigatório comprovar captura/precedência em todos os escritores dos
+destinos habilitados e o aceite integrado F08/F09/F13 antes da ativação. O aceite
+dos demais planos clínicos e da identidade de ocorrências, continuidade da prova
+através de revisões aplicadas, criação de visitas/dependentes, fechamento e dry-run
+de proposta/arquivo sem staging permanecem pendentes. F10 e parte de F11 foram
+comprovados pelo executor privado; isso não conclui F10–F15 ou T01–T18 como conjuntos.
 Revisões permanecem bloqueadas até esse aceite integrado; criar tabelas não
 conclui a Etapa 5B. A validação documental atual não substitui testes executáveis.
 
-Permanecem em aberto: responsável institucional pela revisão, representação anual
-de D8, tipos/vínculos D6/D7 e demais contratos clínicos ainda não resolvidos em 5A.
-Essas decisões não impedem implementar a barreira conservadora, mas impedem
-habilitar os fluxos clínicos dependentes. A Etapa 5B não está concluída.
+As respostas clínicas vigentes estão em
+[`Perguntas pendentes sobre campos e regras clínicas.md`](../Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+e nos contratos de 5A; não há resposta humana pendente nesse conjunto. Papéis
+sintéticos não definem responsabilidade institucional de produção nem autorizam
+dados reais. As pendências deste executor são técnicas e de aceite, registradas
+em [CONTINUIDADE_ETAPA_5.md](../validacoes/CONTINUIDADE_ETAPA_5.md).
+A Etapa 5B não está concluída.

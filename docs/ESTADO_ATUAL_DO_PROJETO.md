@@ -1,6 +1,6 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-09-28
+Atualizado em: 2026-09-29
 
 Esta é a síntese vigente do sistema. Detalhes normativos pertencem às fontes
 temáticas indicadas abaixo; decisões antigas e resultados de etapas permanecem
@@ -9,7 +9,7 @@ preservados em `historico/`, `validacoes/` e no registro cronológico.
 ## Escopo e estágio
 
 O projeto organiza registros do ambulatório em PostgreSQL e já contém migrations,
-dez testes SQL transacionais, importador com homologação sintética do contrato v1, hardening, CI e
+20 testes SQL transacionais, importador com homologação sintética do contrato v1, hardening, CI e
 uma fundação NestJS com autenticação, autorização mínima e primeiros fluxos
 clínicos transacionais. A importação HTTP existe sob ativação sintética explícita;
 não há frontend nem autorização para dados reais.
@@ -40,7 +40,9 @@ As decisões humanas do documento de perguntas não estão mais pendentes. A Eta
 
 Em 2026-09-25 foi concluída a especificação da extensão física de revisão temporal:
 linhagem, decisões atribuíveis, histórico por campo e controles de aplicação.
-É proposta documental da ADR-022; nenhuma das novas relações está aplicada.
+Naquela data, tratava-se de proposta documental da ADR-022, sem aplicação das
+novas relações. A implementação sintética posterior está descrita a seguir;
+ela não representa atualização do banco persistente.
 Entre 2026-09-27 e 2026-09-28 foram aplicadas, somente em banco descartável, as
 migrations 21–27 para armazenamento e integridade da ADR-022, captura histórica,
 contexto de proveniência, rastreio familiar mínimo, vínculo explícito de acesso e
@@ -101,9 +103,10 @@ controle de versão. A revisão entre hashes continua desabilitada.
 O modelo já permite idade derivada do nascimento, exames identificados por bloco,
 acompanhamentos repetíveis e pendências textuais, e possui o rastreio familiar
 mínimo com resultado. A semântica da data de descoberta de Chagas está resolvida,
-e sua representação física foi adicionada pela migration 28 no ambiente descartável. A multiplicidade de
-contrarreferências e o upload avançado permanecem fora do escopo desta entrega,
-sem nova decisão humana presumida. A exclusão funcional de `Localizado` foi confirmada,
+e sua representação física foi adicionada pela migration 28 no ambiente descartável.
+O registro de contrarreferências múltiplas permanece pendente no escopo clínico
+da Etapa 5; o upload avançado continua no backlog posterior. Não há nova decisão
+humana presumida. A exclusão funcional de `Localizado` foi confirmada,
 sem remover o bruto nem confundir com localização do prontuário.
 
 O importador já reconcilia BZN do mesmo paciente, preservando o vínculo original,
@@ -129,10 +132,49 @@ importação HTTP multipart com credenciais separadas. Retornos BZN, projetos,
 exames, notificação e tratamento já possuem consultas; contrarreferência e demais
 recursos ainda precisam ser integrados. A importação permanece desabilitada por
 padrão e em produção.
-O guard de perfis permite rota autenticada sem metadados `@Perfis`; a verificação
-da matriz explícita de cada operação continua necessária. As operações clínicas
+O guard recusa rota privada sem metadados `@Perfis`; somente `@Public` permite
+acesso público. A matriz explícita de cada operação usa política da classe ou
+da operação. As operações clínicas
 compostas compartilham transação e contexto atribuído ao ator. A listagem de
 pacientes usa o mesmo filtro por vínculo e paginação da exportação.
+O PATCH do paciente agora abrange comunidade, snapshot de endereço e adição
+de telefones, mantendo dados anteriores. O PATCH do atendimento exige versão
+e vínculo ao paciente. Atendimentos, exames, projetos, retornos BZN e pendências
+possuem paginação; pendências possui filtro por status e DTO explícito de saída.
+Dezoito cenários HTTP/SQL clínicos foram aprovados em instalação descartável 02–42,
+incluindo três perfis, edição composta, rollback e concorrência de versões.
+Coleções clínicas aninhadas ainda precisam de paginação integrada. Linhas de lote
+possuem `limit`/`offset`, com metadados de página. A importação HTTP foi testada com
+worker Python real e credenciais separadas: dry-run, carga inicial, idempotência,
+consulta sanitizada de lote com os três perfis e recusa de revisão temporal.
+O cadastro BZN pela API grava o tratamento canônico e suas reações, preserva ano
+isolado sem inventar data e recusa duplicações concorrentes. O retorno BZN já
+pode ser percorrido sem inserir o tratamento diretamente no banco. A edição de
+tratamento existente e outros recursos clínicos ainda precisam de contrato HTTP.
+Migrations 29–30, validadas em bancos descartáveis, fornecem funções restritas
+de registro de fonte e gestão de autorização temporal. O ator vem do ledger do
+XID; papéis NOLOGIN separados não possuem membros automáticos. A integridade
+diferida usa dono técnico com privilégios limitados. Migrations 31–34 publicam
+decisão/plano atomicamente, com hash canônico calculado pelo servidor e snapshots
+observados no banco. Autorização, versão efetiva e metadados técnicos são
+revalidados. Migrations 35–39 acrescentam arquivos técnicos recuperáveis pelos bytes e SHA-256,
+preparação com bruto/manifesto conferidos, transformações determinísticas fechadas
+e exigência de representação de todos os campos alterados e destinos derivados.
+Correção/anulação exige captura atribuível desde a importação da linha-base,
+com proveniência do alvo; marco legado e igualdade aparente não bastam. A prova
+atual cobre a base inicial e sua cadeia do mesmo conteúdo; a continuidade por
+revisões aplicadas ainda depende do executor. O login herdado do importador
+agora também exige contexto, mesmo sem SET ROLE. Há aprovação sintética de nome
+e data do atendimento sem mudança clínica, além de captura pelo escritor Python
+real. Migrations 40–42 avaliam decisão publicada em READ ONLY e fornecem executor
+privado para alvos existentes: correção/associação, eventos/proveniência, avanço
+atômico da fonte, rollback e retomada sem duplicação. A simulação passou sem
+alterações em todas as tabelas e sequências; dois executores produziram um único
+sucesso. Criação de visitas/dependentes, fechamento, prova através das revisões
+aplicadas e simulação de proposta/arquivo sem staging continuam pendentes. O
+aceite integral F01–F16/T01–T18 e as demais transformações clínicas permanecem
+obrigatórios; o executor não tem EXECUTE concedido a operadores.
+O importador continua recusando revisão.
 
 Dados reais continuam bloqueados por governança institucional, ambiente
 protegido, TLS, gestão/rotação de segredos, backup e retenção, auditoria de acesso,

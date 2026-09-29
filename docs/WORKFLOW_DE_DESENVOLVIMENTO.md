@@ -333,3 +333,10 @@ Esse alvo cobre os novos fluxos clínicos HTTP; `backend-foundation-e2e` continu
 sendo uma prova da fundação. Rode os dois quando o escopo afetar ambos. A política
 `todos_sinteticos` do teste da fundação e `vinculo_explicito` dos testes clínicos
 são configurações exclusivas de teste, sem alterar a ativação padrão da API.
+
+O runner clínico também cria um login exclusivo de importador e uma fixture
+mínima em `/tmp`, executando upload HTTP e worker Python real. Usa somente
+dados sintéticos e remove seu banco, logins e arquivo ao terminar. O subprocesso
+não recebe credenciais da aplicação nem segredo JWT. Os alvos `importer-test` e
+`backend-integration-test` respeitam `PGPASSWORD` fornecida, permitindo direcionar
+as verificações ao servidor descartável com `DB_HOST`/`DB_PORT` explícitos.

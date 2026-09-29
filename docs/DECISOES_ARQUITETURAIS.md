@@ -585,5 +585,34 @@ por cima do banco; preencher `NULL` sem história de campo; inferir visitas de u
 intervalo de anos; usar a FK de mesmo conteúdo ou mensagem livre como auditoria de
 revisão entre hashes.
 
+Implementação sintética incremental: migrations 29–30 separam gestão de
+autorização em papel NOLOGIN sem membros automáticos. O ator é obtido do ledger
+autenticado da transação, não de parâmetro do gestor. A integridade diferida usa
+dono técnico restrito para validar commits sem expor tabelas aos operadores;
+privilégios de identidade excluem `senha_hash`. Esse mecanismo não atribui
+responsabilidade institucional por perfil nem habilita revisão clínica. Concessão
+de papéis e aceite integrado continuam portas distintas da implementação.
+Migrations 31–34 publicam plano/decisão atomicamente, com hash canônico do
+servidor, snapshots/tokens observados e entrada normalizada. Mantêm as barreiras
+de correção/anulação até haver prova de cobertura, sem habilitar executor.
+Migrations 35–39 acrescentam `revisao_artefato` e
+`importacao_revisao_preparacao`: os bytes originais são preservados, não apenas
+um hash impossível de recuperar. Versão de transformação é única e imutável,
+para impedir executáveis diferentes sob o mesmo identificador. Um catálogo
+fechado de transformações verifica os envelopes e todos os destinos derivados
+dos campos alterados; não interpreta SQL fornecido por operadores. A prova desde
+a base exige evento inicial de importação e proveniência da linha/registro; um
+marco posterior permanece insuficiente. Essas escolhas são técnicas, compatíveis
+com a ADR-022, e não são novas respostas humanas. Ainda faltam aplicação integral,
+continuidade da prova através das revisões aplicadas e aceite de todos os casos.
+
+Migrations 40–42 compartilham a avaliação de decisão com o executor privado.
+A simulação recebe identidade apenas da camada autenticadora confiável em vez
+de escrever contexto, permitindo READ ONLY sem consumo de sequências. Aplicação
+usa o ledger real e revalida sob bloqueios. EXECUTE do executor não é concedido
+antes do aceite integrado; testes do mantenedor em fixtures não ativam revisão
+para os papéis operacionais. Resolução de alvos existentes não homologa criação,
+fechamento ou simulação de arquivo novo. Trata-se de escolha técnica, não clínica.
+
 Documento relacionado:
 [`arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md`](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md).
