@@ -14,6 +14,7 @@ DECLARE ator bigint; outro bigint; paciente_id_teste bigint; atendimento_id_test
   lb bigint; ln bigint; ib bigint; inovo bigint; fonte bigint; au bigint; auoutro bigint; revisao bigint;
   rawb jsonb; rawn jsonb; mb jsonb; mn jsonb; hb text; hn text; ht text; transformacoes text;
   comparacao jsonb; papel text; q text; antes bigint; seq_antes bigint; seq_depois bigint; campo bigint; envelope jsonb; plano jsonb;
+  cancelamento text; cancelamento_repetido text;
 BEGIN
   INSERT INTO usuario_aplicacao(nome,login,senha_hash,perfil) VALUES
     ('Preparador sintetico','preparador@example.invalid',
@@ -137,12 +138,24 @@ BEGIN
       RAISE EXCEPTION 'Artefato ou rotina privada exposta';
     END IF;
   END LOOP;
+  PERFORM pg_temp.recusar_preparacao(format('SELECT revisao_terminar_interna(%s,%s,''encerrar'')',revisao,au),
+    '23514','revisao_sem_aplicacao_corrente');
+  -- A leitura da evidencia usa um comando posterior aos efeitos da funcao VOLATILE.
+  cancelamento:=revisao_terminar_interna(revisao,au,'cancelar');
+  cancelamento_repetido:=revisao_terminar_interna(revisao,au,'cancelar');
+  IF cancelamento<>'cancelada' OR cancelamento_repetido<>'cancelada'
+    OR NOT EXISTS(SELECT 1 FROM importacao_revisao_encerramento e JOIN importacao_revisao r USING(revisao_id)
+      WHERE e.revisao_id=revisao AND e.encerrada_por_usuario_id=ator AND e.autorizacao_id=au
+        AND e.estado=r.estado AND e.encerrada_em=r.encerrada_em)
+    OR EXISTS(SELECT 1 FROM importacao_fonte f WHERE f.fonte_id=fonte AND f.versao_controle<>0) THEN
+    RAISE EXCEPTION 'Cancelamento perdeu autoria/instante ou avancou a fonte'; END IF;
+  PERFORM pg_temp.recusar_preparacao(format('UPDATE importacao_revisao_encerramento SET estado=''concluida'' WHERE revisao_id=%s',revisao));
   SET LOCAL ROLE ambulatorio_revisao_gestor;
   PERFORM revisao_revogar_autorizacao(au);
   SET LOCAL ROLE ambulatorio_revisao_servico;
   PERFORM pg_temp.recusar_preparacao(format('SELECT * FROM revisao_comparar_linhas(%s,%s,%s,%s)',revisao,ib,inovo,au));
   RESET ROLE;
-  RAISE NOTICE 'OK: artefatos exatos, autoria, autorizacao, bruto completo, diff exaustivo, imutabilidade e isolamento';
+  RAISE NOTICE 'OK: artefatos exatos, autoria, autorizacao, bruto completo, diff, cancelamento atribuivel, imutabilidade e isolamento';
 END $$;
 SET CONSTRAINTS ALL IMMEDIATE;
 ROLLBACK;

@@ -626,6 +626,87 @@ suite('Fluxos clínicos HTTP em banco descartável', () => {
     }
   }, 30000);
 
+  it('encerra revisão atribuível, corrige a mesma ocorrência pela base seguinte e preserva o sucesso histórico', async () => {
+    const session = await owner.connect();
+    const begin = async () => {
+      await session.query('BEGIN');
+      await session.query('SET LOCAL ROLE ambulatorio_servico_autenticado');
+      await session.query('SELECT ambulatorio.auditoria_iniciar_aplicacao($1)', [ids.administracao]);
+      await session.query('RESET ROLE');
+    };
+    try {
+      await begin();
+      await session.query('SAVEPOINT cancelamento_negado');
+      await expect(session.query("SELECT ambulatorio.revisao_terminar_interna($1,$2,'cancelar')",
+        [temporal.revision,temporal.authorization])).rejects.toMatchObject({ code: '23514', message: 'revisao_com_efeito_nao_cancelavel' });
+      await session.query('ROLLBACK TO SAVEPOINT cancelamento_negado');
+      expect((await session.query("SELECT ambulatorio.revisao_terminar_interna($1,$2,'encerrar') AS estado",
+        [temporal.revision,temporal.authorization])).rows[0].estado).toBe('concluida');
+      await session.query('COMMIT');
+      expect((await owner.query(`SELECT e.encerrada_por_usuario_id::text AS ator,e.autorizacao_id::text AS autorizacao,
+        e.encerrada_em=r.encerrada_em AS mesmo_instante,l.status_lote
+        FROM ambulatorio.importacao_revisao_encerramento e JOIN ambulatorio.importacao_revisao r USING(revisao_id)
+        JOIN ambulatorio.importacao_lote l ON l.importacao_lote_id=r.lote_revisado_id WHERE e.revisao_id=$1`, [temporal.revision])).rows[0])
+        .toEqual({ ator: ids.administracao, autorizacao: temporal.authorization, mesmo_instante: true, status_lote: 'concluido' });
+      await begin();
+      expect((await session.query("SELECT ambulatorio.revisao_terminar_interna($1,$2,'encerrar') AS estado",
+        [temporal.revision,temporal.authorization])).rows[0].estado).toBe('concluida');
+      const previous = (await session.query(`SELECT r.lote_revisado_id,r.layout_revisado,r.manifesto_revisado_sha256,
+        p.transformacoes_sha256 FROM ambulatorio.importacao_revisao r JOIN ambulatorio.importacao_revisao_preparacao p USING(revisao_id)
+        WHERE r.revisao_id=$1`, [temporal.revision])).rows[0];
+      const raw = (await session.query('SELECT dados_brutos FROM ambulatorio.importacao_linha WHERE importacao_linha_id=$1',
+        [temporal.revisedLine])).rows[0].dados_brutos as { chave: string; valor: string }[];
+      const nextName = 'Paciente segunda correcao sintetica';
+      const nextRaw = raw.map(cell => ({ ...cell, valor: cell.chave === 'nome' ? nextName : '03/01/2026' }));
+      const lot = (await session.query(`INSERT INTO ambulatorio.importacao_lote
+        (codigo_lote,hash_arquivo_sha256,layout_versao,status_lote,manifesto_sha256,importador_versao,revisao_git)
+        VALUES('segunda-revisao-sintetica',$1,$2,'pronto',$3,'1.5.0','abcdef0') RETURNING importacao_lote_id`,
+      [sha256(canonicalJson(nextRaw)),previous.layout_revisado,previous.manifesto_revisado_sha256])).rows[0].importacao_lote_id;
+      const line = (await session.query(`INSERT INTO ambulatorio.importacao_linha
+        (importacao_lote_id,aba_nome_original,aba_ordem,numero_linha,dados_brutos)
+        VALUES($1,'Sintetica',1,59,$2::jsonb) RETURNING importacao_linha_id`, [lot,JSON.stringify(nextRaw)])).rows[0].importacao_linha_id;
+      const fields = (await session.query(`SELECT jsonb_agg(jsonb_build_object(
+        'campoId',campo_id,'registroId',registro_id,'alvoChave',alvo_chave,'chaveSemantica',chave_semantica,
+        'blocoFuncional',bloco_funcional,'ocorrencia',ocorrencia,'categoria',categoria,'operacao',operacao,'base',proposto,'proposto',proposto)) AS plano
+        FROM ambulatorio.importacao_revisao_campo WHERE decisao_id=$1`, [temporal.successor])).rows[0].plano as {
+          chaveSemantica: string; proposto: { valor: string }; base: unknown;
+        }[];
+      for (const field of fields) field.proposto = { ...field.proposto,
+        valor: field.chaveSemantica === 'nome' ? nextName : '2026-01-03' };
+      await session.query('SET LOCAL ROLE ambulatorio_revisao_servico');
+      const revision = (await session.query('SELECT ambulatorio.revisao_preparar($1,$2,$3,$4,$5)::text AS id',
+        [temporal.source,previous.lote_revisado_id,lot,previous.transformacoes_sha256,temporal.authorization])).rows[0].id;
+      const decision = (await session.query(`SELECT ambulatorio.revisao_publicar_decisao
+        ($1,$2,$3,$4,$5,$6,'autorizar','Mesma ocorrencia conciliada pela base revisada',$7::jsonb)::text AS id`,
+      [revision,line,temporal.revisedLine,temporal.target,temporal.attendance,temporal.authorization,JSON.stringify(fields)])).rows[0].id;
+      await session.query('COMMIT');
+      expect((await owner.query(`SELECT cobertura_historica FROM ambulatorio.importacao_revisao_campo WHERE decisao_id=$1`,
+        [decision])).rows.map(row => row.cobertura_historica)).toEqual(['desde_base','desde_base']);
+      const attendanceCount = (await owner.query('SELECT count(*)::int AS n FROM ambulatorio.atendimento')).rows[0].n;
+      await begin();
+      expect((await session.query('SELECT ambulatorio.revisao_aplicar_decisao_interna($1,$2) AS resultado',
+        [decision,temporal.authorization])).rows[0].resultado.resultado).toBe('aplicada');
+      await session.query('COMMIT');
+      await begin();
+      expect((await session.query("SELECT ambulatorio.revisao_terminar_interna($1,$2,'encerrar') AS estado",
+        [revision,temporal.authorization])).rows[0].estado).toBe('concluida');
+      await session.query('COMMIT');
+      expect((await owner.query('SELECT count(*)::int AS n FROM ambulatorio.atendimento')).rows[0].n).toBe(attendanceCount);
+      expect((await owner.query('SELECT versao_controle::text AS versao FROM ambulatorio.importacao_fonte WHERE fonte_id=$1',
+        [temporal.source])).rows[0].versao).toBe('2');
+      const events = (await owner.query('SELECT count(*)::int AS n FROM ambulatorio.auditoria_campo_evento')).rows[0].n;
+      await begin();
+      expect((await session.query('SELECT ambulatorio.revisao_aplicar_decisao_interna($1,$2) AS resultado',
+        [temporal.successor,temporal.authorization])).rows[0].resultado.resultado).toBe('ja_aplicada');
+      await session.query('COMMIT');
+      expect((await owner.query('SELECT count(*)::int AS n FROM ambulatorio.auditoria_campo_evento')).rows[0].n).toBe(events);
+      expect((await owner.query('SELECT nome FROM ambulatorio.paciente WHERE paciente_id=$1', [temporal.target])).rows[0].nome).toBe(nextName);
+      expect((await owner.query('SELECT data_atendimento::text AS data FROM ambulatorio.atendimento WHERE atendimento_id=$1',
+        [temporal.attendance])).rows[0].data).toBe('2026-01-03');
+    } catch (error) { await session.query('ROLLBACK'); throw error; }
+    finally { session.release(); }
+  }, 30000);
+
   it('exige contexto de importação também no login operacional sem SET ROLE', async () => {
     const importer = new Pool({ host: process.env.IMPORT_DB_HOST, port: Number(process.env.IMPORT_DB_PORT),
       user: process.env.IMPORT_DB_USER, password: process.env.IMPORT_DB_PASSWORD, database: process.env.TEST_CLINICAL_DB });
