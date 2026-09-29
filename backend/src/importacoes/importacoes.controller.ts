@@ -10,7 +10,7 @@ import { ImportacoesService } from './importacoes.service';
 class ImportarArquivoDto {
   @IsString() @IsIn(['carga_inicial', 'mesmo_conteudo', 'revisao']) finalidade!: string;
   @IsString() codigoLote!: string;
-  @IsOptional() @Transform(({ value }) => value === true || value === 'true') @IsBoolean() dryRun = false;
+  @IsOptional() @Transform(({ value }) => value === 'true' ? true : value === 'false' ? false : value) @IsBoolean() dryRun = false;
 }
 
 @Perfis('consulta', 'edicao', 'administracao')
@@ -30,8 +30,8 @@ export class ImportacoesController {
     return this.importacoes.list(query.limit, query.offset);
   }
 
-  @Get('lotes/:id') async get(@Param('id', ClinicalIdPipe) id: string): Promise<Record<string, unknown>> {
-    const result = await this.importacoes.get(id);
+  @Get('lotes/:id') async get(@Param('id', ClinicalIdPipe) id: string, @Query() query: PageQuery): Promise<Record<string, unknown>> {
+    const result = await this.importacoes.get(id, query.limit, query.offset);
     if (!result) throw new NotFoundException('Lote não encontrado');
     return result;
   }

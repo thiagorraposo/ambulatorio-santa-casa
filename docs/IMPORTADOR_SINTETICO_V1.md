@@ -1,8 +1,9 @@
 # Importador Sintético v1
 
-Atualizado em: 2026-09-22
+Atualizado em: 2026-09-28
 
-O importador v1.4.0 exige finalidade explícita e recusa revisões de conteúdo antes
+O importador v1.5.0 incorpora a data de descoberta do paciente pela migration 28,
+com manifesto semântico v1.2. Mantém a barreira da v1.4.0: exige finalidade explícita e recusa revisões de conteúdo antes
 de qualquer escrita, inclusive em dry-run. A v1.3.0 classifica erros de forma conservadora e implementa a primeira
 regra não crítica para catálogo de projeto ausente. A v1.2.0 implementou a
 promoção controlada de D11 (`pendencias_observacao`) e a v1.1.1 corrigiu a
@@ -67,14 +68,14 @@ hashes depende da futura linhagem, decisão e história por campo da ADR-022.
    exato, com ID de origem apenas auxiliar;
 5. abre uma transação por linha, cria/reutiliza paciente e cria exatamente um
    atendimento;
-6. grava os 125 destinos plenos: dados demográficos, endereço/contato, projetos,
+6. grava os 126 destinos plenos: dados demográficos, endereço/contato, projetos,
    diagnóstico/sorologias/solicitação, condição e complicações de Chagas,
    comorbidades, medicamentos, exames, avaliação clínica, eventos, dispositivos,
    BZN, encaminhamento, notificação e óbito;
 7. registra todo alvo criado ou associado em `importacao_registro`;
 8. confirma a linha inteira ou executa rollback sem escrita clínica parcial.
 
-Os dez campos `parcial`, quando preenchidos, deixam a linha
+Os nove campos `parcial`, quando preenchidos, deixam a linha
 `importada_com_pendencia` e permanecem em `dados_brutos`. D11 agora é destino
 pleno e cria uma pendência textual vinculada ao atendimento, sem inferir tipo,
 status, responsável ou datas. `Localizado` permanece exclusivamente bruto e,
@@ -188,7 +189,7 @@ inválidos como regressão, conforme a
 
 ## Cobertura e limites deliberados
 
-Os 125 rótulos declarados plenos são verificados contra o manifesto e a fixture
+Os 126 rótulos declarados plenos são verificados contra o manifesto e a fixture
 sintética. Isso não garante todos os caminhos de conflito nem atendimento das
 novas respostas. As dez chaves `parcial` continuam exclusivamente em
 `dados_brutos`; entre elas, a coluna sobre exames de

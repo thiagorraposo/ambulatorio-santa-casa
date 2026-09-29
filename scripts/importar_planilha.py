@@ -21,7 +21,7 @@ from importador.xlsx import read as read_xlsx  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "manifestos/planilha_ambulatorio_v1.json"
-IMPORTER_VERSION = "1.4.0"
+IMPORTER_VERSION = "1.5.0"
 
 
 class RowConflict(Exception):
@@ -162,7 +162,7 @@ NONCRITICAL_POLICY = {
     },
 }
 
-# Tabelas que materializam os 125 rótulos físicos com cobertura plena. A
+# Tabelas que materializam os 126 rótulos físicos com cobertura plena. A
 # checagem é executada antes de qualquer escrita e impede regressão silenciosa.
 HANDLED_TABLES = {
     "importacao_linha", "paciente", "paciente_endereco", "paciente_contato",
@@ -207,7 +207,7 @@ class Importer:
                 by_key.setdefault(column["chave_semantica"], []).append(column)
         full = [c for c in canonical.values() if c["situacao_cobertura"] in {"direta", "com_transformacao"}]
         unsupported = sorted({c["tabela_destino"] for c in full} - HANDLED_TABLES)
-        if len(full) != 125 or unsupported:
+        if len(full) != 126 or unsupported:
             raise SystemExit(f"Cobertura incompatível: plenos={len(full)}, tabelas sem handler={unsupported}")
         for key, rule in PROMOTION_REGISTRY.items():
             columns = by_key.get(key, [])
@@ -437,6 +437,7 @@ class Importer:
 
     def diagnosis(self, line_id, attendance_id, row):
         sources = ["diagnostico_da_dc_por_sorologia", "resultado_final_da_sorologia",
+                   "autorelato_diagnostico_de_chagas_do_participante_data",
                    "caso_seja_sorologia_metodo_1", "data_da_sorologia_01",
                    "caso_seja_sorologia_metodo_2", "data_sorologia_2",
                    "caso_seja_sorologia_metodo_3", "data_sorologia_3"]
@@ -448,6 +449,9 @@ class Importer:
             result = row.get("resultado_final_da_sorologia")
             if result and result.strip():
                 fields.update(resultado_final=domain_value(result, "resultado_final_da_sorologia", {"positivo", "negativo", "inconclusivo", "indeterminado", "nao_informado"}), valor_original_resultado_final=result)
+            discovery = row.get("autorelato_diagnostico_de_chagas_do_participante_data")
+            if discovery and discovery.strip():
+                fields["data_descoberta_autorelato"] = date_value(discovery, "autorelato_diagnostico_de_chagas_do_participante_data")
             diagnosis_id = self.insert_returning(line_id, "diagnostico_chagas", fields)
             for number, method_key, date_key in [(1,"caso_seja_sorologia_metodo_1","data_da_sorologia_01"),(2,"caso_seja_sorologia_metodo_2","data_sorologia_2"),(3,"caso_seja_sorologia_metodo_3","data_sorologia_3")]:
                 method, date = row.get(method_key), row.get(date_key)

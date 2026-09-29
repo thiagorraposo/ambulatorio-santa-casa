@@ -319,3 +319,24 @@ Pendências:
 Registro de alterações necessário:
 Valide com docs-check, revisão do conteúdo e git diff --check se a mudança for exclusivamente textual.
 ```
+
+## Integração clínica descartável da Etapa 5
+
+`make backend-clinical-test COMPACT=1` cria um banco de nome exclusivo no servidor
+sintético indicado por `SYNTHETIC_PG_HOST`, `SYNTHETIC_PG_PORT` e
+`SYNTHETIC_PG_USER`, com senha via `PGPASSWORD`. O padrão local é porta 55457,
+reservada ao container descartável da tarefa. O alvo instala migrations em banco
+limpo e remove exclusivamente o banco/login que criou. Não use o servidor
+persistente para esse alvo. Nenhuma evidência física persistente é regenerada.
+
+Esse alvo cobre os novos fluxos clínicos HTTP; `backend-foundation-e2e` continua
+sendo uma prova da fundação. Rode os dois quando o escopo afetar ambos. A política
+`todos_sinteticos` do teste da fundação e `vinculo_explicito` dos testes clínicos
+são configurações exclusivas de teste, sem alterar a ativação padrão da API.
+
+O runner clínico também cria um login exclusivo de importador e uma fixture
+mínima em `/tmp`, executando upload HTTP e worker Python real. Usa somente
+dados sintéticos e remove seu banco, logins e arquivo ao terminar. O subprocesso
+não recebe credenciais da aplicação nem segredo JWT. Os alvos `importer-test` e
+`backend-integration-test` respeitam `PGPASSWORD` fornecida, permitindo direcionar
+as verificações ao servidor descartável com `DB_HOST`/`DB_PORT` explícitos.

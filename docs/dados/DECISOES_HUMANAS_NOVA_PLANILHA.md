@@ -1,6 +1,6 @@
 # Decisões Humanas para a Nova Planilha
 
-Atualizado em: 2026-09-22
+Atualizado em: 2026-09-28
 
 ## Finalidade e precedência
 
@@ -15,11 +15,17 @@ disponibilidade do DOCX local. O manifesto executável registra o layout físico
 37 clínicas/de proveniência e `usuario_aplicacao`, alheia ao contrato da planilha.
 A descrição vigente está em `docs/MODELO_FISICO_ATUAL.md`.
 
+As seis respostas de [Perguntas pendentes sobre campos e regras clínicas](../Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+são a referência autoritativa desde 2026-09-28. D1–D6 estão confirmadas nesse
+arquivo; as decisões anteriores de D7–D12 continuam preservadas. A escolha de
+data de referência e das estruturas físicas é técnica e deve ser explícita,
+sem apresentar novas respostas da equipe.
+
 Nenhuma decisão deste documento altera o banco por si só. Mudanças físicas deverão
 ser especificadas e implementadas em migrations incrementais futuras.
 
 O manifesto executável `manifestos/planilha_ambulatorio_v1.json` representa agora
-125 rótulos plenos, dez parciais e `Localizado` excluído. D11 foi promovida na
+126 rótulos plenos, nove parciais e `Localizado` excluído. D11 foi promovida na
 v1.2.0 do importador para `pendencia_atendimento`, sem classificação automática;
 as demais decisões continuam dependendo de evolução explícita.
 As regras operacionais e suas divergências de implementação estão em
@@ -35,12 +41,12 @@ de entrega são propostas técnicas do roadmap, não respostas adicionais da equ
 
 | ID | Decisão de negócio confirmada | Limites e incertezas restantes |
 | --- | --- | --- |
-| D1 | Idade deve ser calculada pelo sistema a partir da data de nascimento. | A data de referência não foi respondida. Idade atual no cadastro e idade na data da consulta são alternativas a definir; não criar idade manual independente. Preservação da célula original como proveniência continua possível. |
-| D2 | Data do autorrelato é quando o paciente descobriu que possui Chagas; pode diferir da data da sorologia. | Definir proprietário do dado: registro por atendimento ou fato consolidado do paciente. Não usar data de resultado como substituta nem inferir confirmação laboratorial. |
-| D3 | Registrar sim/não para familiares examinados; se sim, identificar o familiar e o resultado da sorologia. A data do exame do familiar não é necessária. | Não foi exigido cadastro civil de parentes nem definido domínio fechado de resultados. Escolher representação dos pares familiar–resultado; ausência legada não equivale a não. |
+| D1 | Idade deve ser calculada pelo sistema a partir da data de nascimento. | A ficha calcula a idade na data atual do banco e expõe essa referência como escolha técnica; não criar idade manual independente. Preservação da célula original como proveniência continua possível. |
+| D2 | Data do autorrelato é quando o paciente descobriu que possui Chagas; pode diferir da data da sorologia. | Escolha técnica: snapshot por atendimento em `diagnostico_chagas.data_descoberta_autorelato` (migration 28), sem consolidar relatos divergentes silenciosamente. Não usar data de resultado como substituta nem inferir confirmação laboratorial. |
+| D3 | Registrar sim/não para familiares examinados; se sim, identificar o familiar e o resultado da sorologia. A data do exame do familiar não é necessária. | Não foi exigido cadastro civil de parentes nem definido domínio fechado de resultados. A migration 25 registra avaliações e pares familiar–resultado; ausência legada não equivale a não. |
 | D4 | Identificar obrigatoriamente os exames complementares trazidos. | Indicador agregado sozinho não identifica exame. Detalhar tipos genéricos quando não identificarem o exame efetivo; não inventar interpretação de texto legado. |
 | D5 | Identificar obrigatoriamente os exames complementares solicitados. | Identificação não implica resultado disponível, realização ou data não informada. |
-| D6 | Retorno de 30 dias é sempre de BZN; registrar a data em que o paciente compareceu. | Não calcular comparecimento por prescrição mais 30 dias nem impor intervalo exato. A forma técnica do vínculo ao tratamento está aberta. |
+| D6 | Retorno de 30 dias é sempre de BZN; registrar a data em que o paciente compareceu. | Não calcular comparecimento por prescrição mais 30 dias nem impor intervalo exato. A API usa acompanhamento vinculado ao atendimento e confere a existência do tratamento canônico do paciente. |
 | D7 | Retorno final é o retorno após finalizar BZN; registrar a data efetiva desse comparecimento. | A menção a geralmente 60 dias não fixa duração nem data de retorno. Não confundir retorno final, fim do uso e duração cumprida. |
 | D8 | Manter um registro por retorno, inclusive o de rotina anual. Na planilha, o campo guarda o ano do último comparecimento e a linha do paciente é atualizada. | A fonte não contém necessariamente o histórico anterior. Não completar dia/mês nem tratar automaticamente toda alteração da linha como nova consulta. Os demais dados obrigatórios de cada retorno não foram detalhados. |
 | D9 | Desfecho refere-se ao último retorno e informa a data futura ou a orientação de voltar quando os exames estiverem prontos. | A exclusão do campo foi sugerida, não definitivamente aprovada. Confirmar retirada e destino da informação de planejamento; não descartar legado. |
@@ -59,17 +65,19 @@ de entrega são propostas técnicas do roadmap, não respostas adicionais da equ
 - Acompanhamento já admite várias ocorrências. Multiplicidade de retornos ou
   contrarreferências, isoladamente, não justifica novas tabelas. Uma FK direta
   de BZN e uma entidade documental própria dependem de decisão técnica.
-- Se necessário expor o ano legado estruturadamente, avaliar
-  `evento_clinico.ano_evento` com tipo explícito e precisão anual. É uma opção,
-  não um destino já aprovado ou implementado para retorno anual.
+- Escolha técnica documentada nos
+  [contratos da Etapa 5](../arquitetura/CONTRATOS_CLINICOS_ETAPA_5.md): reutilizar
+  `evento_clinico.ano_evento` com tipo `ultimo_comparecimento_ano_informado` e
+  precisão anual. A implementação permanece pendente; isso não é nova resposta
+  clínica nem autoriza criar uma visita a partir do ano.
 - O [contrato temporal de revisão](../arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md)
   foi definido tecnicamente na ADR-022, sem nova resposta clínica da equipe.
   A v1.4.0 implementa somente a barreira de finalidade e recusa de revisões;
   aplicação auditada segue pendente. Não escolhe a representação anual de D8
   nem autoriza inferir visitas.
-- Confirmar referência da idade, propriedade do autorrelato, representação dos
-  familiares, representação do ano legado, substituição de desfecho e estados/
-  anexos da contrarreferência antes da implementação dependente.
+- As escolhas técnicas de referência da idade, autorrelato e familiares estão
+  registradas em `arquitetura/CONTRATOS_CLINICOS_ETAPA_5.md`. Preservar o legado
+  nas demais promoções até haver implementação e aceite técnico.
 
 ## Legenda da classificação
 

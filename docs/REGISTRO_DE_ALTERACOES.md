@@ -1,6 +1,165 @@
 # Registro de Alterações
 
-Atualizado em: 2026-09-28
+## 2026-09-29 — Organização das alterações pendentes em commits
+
+Por solicitação explícita do usuário, o trabalho acumulado foi separado por tipo
+e contexto, preservando a sequência das migrations 29–42. Gestão/publicação,
+preparação/cobertura, simulação e executor privado têm commits próprios; migrations
+corretivas permanecem distintas das funcionalidades. Seguem as correções do
+workflow e da autorização/importação, a ampliação clínica, testes e documentação.
+Nenhuma migration antiga ou alteração preexistente foi descartada; não houve push.
+
+As evidências existentes de SQL, instalação limpa, integração clínica, importador,
+unitários e manifesto foram conferidas. Diff, sintaxe bash e documentação foram
+verificados para esta organização. Nenhuma nova implementação ou ativação temporal
+foi incluída apenas para commitar. A Etapa 5 continua incompleta e seu goal sem
+limite de tempo mantém os requisitos registrados no roadmap e na continuidade.
+
+## 2026-09-29 — Simulação de decisão e executor seletivo privado
+
+Migrations 40–42 acrescentam avaliação somente de leitura de decisão publicada
+e executor privado para correção/associação em alvos existentes. A simulação
+valida identidade na camada autenticadora confiável e autorização da fonte,
+sem gravar ledger ou consumir sequências. O primeiro teste restrito expôs falta
+de SELECT da aplicação no owner; a correção está na 41, sem alterar a 40 aplicada.
+
+A aplicação usa o ledger, locks ordenados e uma transação para clínica, alvos,
+proveniência, eventos e avanço da fonte. Teste de falha após alterar o atendimento
+reverte também seu evento, todos os vínculos e o sucesso. Duas sessões coordenadas
+produzem um sucesso e um resultado histórico, sem reaplicar. O executor não tem
+EXECUTE de operadores nem ativação HTTP/CLI. Criação de visitas/dependentes,
+fechamento, continuidade histórica, registro separado de falha e simulação de
+proposta/arquivo sem staging continuam obrigatórios; não houve conclusão de 5B.
+
+Evidências: 20 suítes SQL em `/tmp/ambulatorio-check-acp0v80e/output.log`;
+instalação limpa até 42 e 18 cenários clínicos em
+`/tmp/ambulatorio-check-hgxkaa49/output.log`; 26 unitários e E2E do importador em
+`/tmp/ambulatorio-check-jvj_bwwc/output.log`. A simulação compara hashes de todas
+as tabelas e estado de todas as sequências antes/depois. O goal segue ativo sem
+limite de tempo. Sem commit/push ou alteração do banco/dump persistente.
+
+## 2026-09-29 — Preparação conferida e aprovação com prova da base
+
+Migrations 35–39 implementam arquivos técnicos imutáveis recuperáveis pelos bytes
+UTF-8/SHA-256, preparação vinculada ao ator/autorização, conferência integral de
+bruto/manifesto e transformações determinísticas fechadas. Aprovação recusa campos
+alterados ou destinos derivados omitidos. Correção exige captura desde a importação
+da linha-base e proveniência do registro, sem transformar marco legado em história.
+O congelamento de lote serializa INSERT concorrente; o importador também precisa
+de contexto quando usa os privilégios herdados do login, sem SET ROLE.
+
+SQL 19 foi adaptado ao fluxo real e SQL 20 cobre preparação/arquivos/completude.
+Instalação limpa 02–39 e dezesseis cenários HTTP/SQL passaram em
+`/tmp/ambulatorio-check-497049me/output.log`. Importador: 26 unitários e E2E limpo
+até 39, incluindo captura ativa pelo escritor Python real de nome/data e
+proveniência, em `/tmp/ambulatorio-check-pmkpbg9e/output.log`.
+
+O usuário retirou o limite de tempo: o goal segue ativo para todo 5A–5E. Executor,
+dry-run, continuidade entre revisões aplicadas, promoções legadas e recursos/DTOs
+restantes continuam obrigatórios. Nenhuma nova resposta humana foi criada;
+nenhuma revisão foi habilitada, migration antiga alterada, commit/push feito ou
+evidência persistente regenerada. Detalhes em `validacoes/CONTINUIDADE_ETAPA_5.md`.
+
+## 2026-09-28 — Revisão final da entrega parcial da Etapa 5
+
+- Reforçado o teste SQL 19: contagens de cabeçalhos e campos são capturadas antes
+  das recusas e conferidas depois da falha tardia, comprovando ausência de
+  metadados parciais. Isso não substitui rollback do futuro executor clínico.
+- Corrigida a próxima tarefa desatualizada, que ainda solicitava armazenamento
+  já implementado. A sequência agora parte da preparação/aprovação completa e
+  mantém executor, dry-run e aceite integrado como requisitos obrigatórios.
+- Alinhados índice, estado e matriz de cobertura com a implementação parcial,
+  incluindo pendências da API, nove rótulos parciais e contrarreferências múltiplas
+  ainda obrigatórias na Etapa 5. Nenhuma nova resposta humana foi presumida.
+- D6 e D8 na matriz agora distinguem contratos técnicos já definidos de trabalho
+  ainda não implementado; a consolidação das decisões remete ao contrato anual
+  sem atribuí-lo como nova resposta clínica.
+- `project-check COMPACT=1` aprovado no banco descartável 55457 com seleção do
+  teste SQL 19 alterado; as demais suítes preservam as evidências anteriores.
+  Registro detalhado em `validacoes/CONTINUIDADE_ETAPA_5.md`. Etapa 5 incompleta;
+  sem commit, push, alteração do banco persistente ou regeneração de seu dump.
+
+Atualizado em: 2026-09-29
+
+## 2026-09-28 - Publicação canônica de decisões temporais
+
+Migrations 31–34 publicam decisão e campos atomicamente, com identidade do
+ledger, autorização por fonte, versão efetiva sob lock e hash calculado no
+servidor. A entrada normaliza IDs e rejeita snapshot/token fornecido pelo cliente;
+os valores atuais são observados no banco. Correção/anulação sem cobertura
+homologada continua recusada e nenhum fato clínico é aplicado. Ajustes de
+parâmetro e privilégio de CHECK foram feitos em novas migrations, preservando
+as anteriores aplicadas no servidor descartável.
+
+Dezenove suítes SQL passaram, incluindo rollback de falha tardia, canonização,
+sucessão, expiração/revogação e imutabilidade. Instalação limpa até 34, regressões
+do importador e treze cenários clínicos passaram. Duas sessões publicando a
+mesma versão produziram uma decisão e uma recusa; a API capturou A→B→A com dois
+eventos atribuídos e preservou cobertura desconhecida da base. Essa captura foi
+habilitada somente no banco descartável do teste. Executor, avanço da fonte,
+aplicação seletiva, dry-run e aceite integral F/T permanecem pendentes.
+
+## 2026-09-28 - Importação HTTP integrada e cadastro BZN
+
+O worker real da importação HTTP foi testado com login/credenciais separados em
+banco descartável: dry-run, carga inicial, idempotência com outro código,
+proveniência, paginação de linhas e consulta sanitizada pelos três perfis. A API
+identifica o lote efetivo por eventos técnicos do worker e restringe seu ambiente,
+sem repassar credenciais da aplicação ou segredo JWT. Corrigida a validação do
+booleano multipart e paginadas as linhas de lote. Rotas privadas sem política
+de perfis agora são recusadas; a fundação HTTP passou em banco descartável.
+
+Adicionado cadastro BZN transacional com reações, indicadores triestado e vínculo
+opcional ao atendimento do paciente. Tratamento existente não é sobrescrito;
+cadastros concorrentes produzem somente um tratamento. Ano aproximado não cria
+data nem atendimento. O teste de retorno BZN usa a API para criar sua âncora,
+sem inserção direta no banco. Edição do tratamento, executor temporal e aceite
+integral dos demais recursos continuam pendentes.
+Na revisão, corrigida a associação de familiares a múltiplos snapshots de
+rastreio no mesmo atendimento: cada avaliação retorna somente seus filhos,
+sem escolher implicitamente um snapshot. Doze cenários HTTP passaram, além de
+28 unitários, build e oito cenários da fundação em banco descartável.
+
+## 2026-09-28 - Gestão restrita de autorização temporal
+
+Migrations 29–30 implementam registro de fonte com proveniência de âncoras,
+concessão explícita por fonte e revogação irreversível, com ator extraído do
+contexto autenticado do XID. Papéis novos não recebem membros automaticamente;
+gestor e serviço não leem tabelas restritas. A integridade diferida passa a usar
+dono técnico limitado, mantendo as invariantes e sem acesso a senha/hash.
+Validados atualização incremental, instalação limpa, 18 suítes SQL, dez cenários
+HTTP e regressões do importador. Executor, aprovação e dry-run permanecem pendentes.
+Os alvos E2E do Makefile respeitam `PGPASSWORD` externa, corrigindo a sobrescrita
+pela senha do ambiente Docker durante validações no servidor descartável.
+
+## 2026-09-28 - Edição composta e paginação clínica
+
+A edição versionada de paciente inclui comunidade, novo snapshot de endereço e
+adição de contatos sem remover dados legados. O atendimento possui rota PATCH
+com versão e autorização pelo paciente. As transações recebem o ator e rejeitam
+versões concorrentes desatualizadas. Coleções de atendimentos, exames, projetos
+e retornos BZN foram paginadas; adicionada consulta de pendências com filtro de
+status e DTO de saída explícito. Novos cenários HTTP cobrem esses contratos no
+banco descartável. A Etapa 5 permanece em andamento, especialmente o executor
+temporal e as promoções em lotes antigos.
+
+## 2026-09-28 - Descoberta de Chagas e autorização clínica HTTP
+
+Migration 28 adiciona data de descoberta informada pelo paciente ao diagnóstico
+por atendimento, separada da sorologia e sem backfill. O importador v1.5.0 e o
+manifesto v1.2 promovem essa data na carga inicial (126 rótulos plenos e nove
+parciais). O gerador preserva a promoção anterior de D11 e sua versão semântica;
+o validador comprova o destino incremental sem alterar o dump persistente.
+
+A API registra/consulta o diagnóstico, calcula idade com referência explícita,
+filtra listagem e CSV por vínculo, atribui ator nas transações clínicas e usa a
+role de serviço para concessão de acesso. Exames genéricos exigem identificação;
+retorno BZN exige tratamento do paciente. O novo alvo `backend-clinical-test`
+prova sete cenários HTTP em banco descartável, inclusive rollback e concorrência.
+Build/unitários, manifesto, importador E2E e 17 suítes SQL passaram. Instalação
+limpa e atualização incremental da migration foram comprovadas. Permanecem os
+requisitos restantes registrados em `validacoes/CONTINUIDADE_ETAPA_5.md`; o backend
+completo e a revisão temporal não são declarados concluídos.
 
 ## 2026-09-28 - Incremento sintético da Etapa 5
 

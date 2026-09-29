@@ -1,6 +1,6 @@
 # Roadmap do Projeto
 
-Atualizado em: 2026-09-28
+Atualizado em: 2026-09-29
 
 Este é o roadmap oficial do projeto. A estrutura original possui dez etapas;
 as etapas 1–4 estão concluídas. As etapas 5, 7, 9 e 10 possuem subetapas porque
@@ -113,6 +113,16 @@ invariantes, autorização, histórico por campo e 16 casos de aceite F01–F16 
 incremento. As migrations 21–24 agora cobrem armazenamento, integridade, captura
 e contexto de proveniência em banco descartável; aplicação seletiva, dry-run e
 revisão entre hashes continuam bloqueados.
+Migrations 29–30 fornecem gestão restrita de fonte e autorização; 31–34 publicam
+metadados de decisão/plano com hash canônico e snapshots do servidor. Migrations
+35–39 implementam preparação conferida, arquivos recuperáveis por bytes/hash,
+transformações fechadas e completude dos campos alterados. A aprovação de
+correção exige prova desde a importação da linha-base; legado desconhecido continua
+preservado. Migrations 40–42 acrescentam simulação somente de leitura de decisão existente
+e executor privado de alvos existentes, com prova de rollback e duas sessões
+produzindo um sucesso. Criação/fechamento, continuidade entre revisões aplicadas,
+dry-run de proposta/arquivo sem staging e aceite integrado permanecem pendentes,
+sem associação automática de papéis a logins nem ativação de revisões clínicas.
 
 - **Objetivo:** eliminar duplicação e perda de promoção nos fluxos já suportados.
 - **Principais alterações:** reconciliar BZN consolidado por paciente; promover pendências resolvidas sem recriar alvos; separar erros críticos de não críticos; aplicar a política aprovada a arquivos revisados; atualizar metadados semânticos do gerador/manifesto/validador em conjunto.
@@ -125,8 +135,9 @@ revisão entre hashes continuam bloqueados.
 **Status:** parcialmente implementada. A migration 25 modela rastreio familiar
 triestado e resultados repetíveis com trigger diferido e testes transacionais.
 A semântica da descoberta de Chagas está resolvida: a data é a descoberta pelo
-paciente e pode diferir da sorologia. Ainda falta o campo físico específico;
-nenhuma data foi inventada.
+paciente e pode diferir da sorologia. A migration 28 acrescentou o campo próprio ao diagnóstico do atendimento;
+a API cria/consulta essa data e o importador a recebe na carga inicial. Nenhuma
+data foi inventada.
 
 - **Objetivo:** estruturar apenas fatos que o modelo atual não consegue representar.
 - **Principais alterações:** migration incremental mínima para data de descoberta de Chagas e rastreio familiar, após 5A; não criar tabelas próprias para retornos, pendências ou contrarreferências apenas pela existência dessas palavras.
@@ -138,10 +149,13 @@ nenhuma data foi inventada.
 
 **Status:** parcialmente implementada. A API possui DTOs, ficha de paciente,
 criação/consulta de atendimentos, incluindo dados clínicos, exames, pendências e
-rastreio familiar, consulta detalhada, retornos BZN e controle de versão, com transações. A consulta sanitizada de
+rastreio familiar, edição composta do paciente, edição versionada de atendimento,
+consulta detalhada e retornos BZN, com transações. Coleções clínicas possuem
+paginação e consulta de pendências por status. A consulta sanitizada de
 lotes/linhas, importação HTTP multipart com role separada e um CSV protegido foram
 adicionados; o worker permanece desabilitado por padrão e dependente de configuração
-sintética explícita.
+sintética explícita. O fluxo HTTP foi validado com worker real, credenciais
+separadas, dry-run, idempotência e consulta paginada/sanitizada de lotes.
 
 - **Objetivo:** entregar o backend funcional previsto na etapa original.
 - **Principais alterações:** busca e filtros de pacientes; histórico de atendimentos; consultas de exames, projetos, tratamento, notificações e pendências; endpoint de importação; acompanhamento de lote e erros; exportação CSV; DTOs clínicos; autorização explícita por operação e recurso; transações compostas quando uma operação fizer várias gravações.
@@ -153,8 +167,9 @@ sintética explícita.
 
 **Status:** em andamento. Validação, erros sanitizados, SQL parametrizado,
 observabilidade existente e controle de acesso configurável foram preservados;
-faltam contratos HTTP completos, cobertura dos três perfis para os novos fluxos,
-paginação/filtros e integração de importação/exportação.
+faltam contratos HTTP completos, cobertura integral dos novos fluxos,
+paginação de coleções aninhadas e o aceite integral dos recursos restantes.
+Linhas de lote são paginadas e rotas privadas exigem política explícita de perfis.
 
 - **Objetivo:** consolidar a API antes do frontend.
 - **Principais alterações:** revisão de DTOs, paginação, erros, autorização por paciente/atendimento, observabilidade técnica e documentação de contratos; endpoint de importação e CSV estabilizados.
@@ -341,36 +356,53 @@ importador e backend funcionais antes de iniciar as Etapas 6–8.
 
 ## Próxima tarefa isolada
 
-A especificação física foi concluída em 2026-09-25 no
-[contrato temporal](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md#extensão-física-mínima-proposta).
-O próximo incremento é implementar somente seu armazenamento fechado: nova
-migration incremental, constraints, gatilhos de integridade das novas relações,
-permissões e testes SQL sintéticos. Não instalar ainda captura clínica, executor
-de revisão ou concessões institucionais. A barreira v1.4.0 permanece ativa.
+O armazenamento fechado já existe nas migrations 21–24; a gestão de autorização
+e a preparação/publicação de planos estão nas migrations 29–39. Migrations 40–42
+avaliam planos existentes sem escrita e aplicam alvos existentes por função
+privada; não repetir esses incrementos. O próximo trabalho é completar o fluxo executável do
+[contrato temporal](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md),
+preservando a ordem de dependências e a barreira de ativação:
 
-Cobrir F01–F07 e F16 nas partes verificáveis sem executor, distinguindo restrições
-estruturais de testes futuros de aprovação/aplicação. Validar banco limpo e
-atualização incremental em ambiente descartável. Preservar a FK de mesmo
-hash/layout, o isolamento funcional e a ausência de dados reais. A captura de
-todos os escritores e o fluxo auditado serão incrementos posteriores; não
-escolher destinos clínicos pendentes da 5A por inferência.
+1. Ampliar os planos clínicos a partir da preparação/aprovação existente:
+   identidade explícita de ocorrências e todas as transformações/destinos do
+   escopo. Arquivos recuperáveis, conferência do bruto e exigência de completude
+   já existem; o aceite integrado ainda precisa demonstrar os fluxos restantes.
+2. Comprovar captura/precedência em todos os escritores dos destinos habilitados,
+   incluindo legado com histórico desconhecido e sequência A→B→A.
+3. Completar o executor privado com resolução única de visitas/dependentes,
+   fechamento e cobertura histórica através de revisões aplicadas. Aplicação de
+   alvos existentes, avanço da fonte, rollback e executores concorrentes já foram
+   comprovados; concorrência de revisões/edição/revogação ainda requer aceite.
+4. Completar dry-run de proposta/arquivo sem staging, a partir da avaliação
+   somente de leitura de decisão existente, e integrar reprocessamento/promoção
+   de origens antigas sem restaurar fatos superados.
+5. Comprovar F01–F16 e T01–T18 no escopo de cada caso antes de habilitar revisões.
+
+As respostas clínicas estão na fonte autoritativa de campos e regras clínicas;
+não há nova resposta humana pendente nesse conjunto. Lacunas técnicas não devem
+ser apresentadas como decisões da equipe. O escopo completo da Etapa 5 continua
+incluindo as promoções e os recursos/contratos da API que faltam em 5B/5D/5E.
+O registro de evidências e limites está em
+[`CONTINUIDADE_ETAPA_5.md`](validacoes/CONTINUIDADE_ETAPA_5.md).
 
 Prompt pronto para a próxima tarefa:
 
-> Siga AGENTS.md e implemente apenas a migration de armazenamento fechado da
-> extensão física especificada no contrato temporal da ADR-022. Comece pela seção
-> “Extensão física mínima proposta”; consulte schema/permissões por trechos.
-> Planeje brevemente, crie nova migration e testes de integridade/permissões
-> F01–F07 e F16, delimitando a cobertura ainda dependente do executor. Revogue os
-> privilégios padrão indevidos nas novas relações/sequências; não conceda acesso à
-> identidade ao importador. Mantenha revisão bloqueada na v1.4.0 e não implemente
-> captura ou escrita clínica. Valide conforme a matriz do workflow para schema,
-> usando COMPACT=1 e bancos descartáveis limpo/atualizado; combine regressões
-> pertinentes sem repetir suítes sobre o mesmo estado. Não aplique no banco
-> persistente nem regenere sua evidência sem autorização específica. Preserve
-> alterações existentes, atualize somente a documentação afetada e registre a
-> mudança. Sem dados reais, subagentes, commit ou push. Informe resultado, testes,
-> limites e próximo incremento brevemente.
+> Siga AGENTS.md e complete o fluxo de revisão temporal da ADR-022 no ambiente
+> sintético, a partir do worktree atual. Leia o registro de continuidade e
+> confronte cada caso F01–F16/T01–T18 com código e testes antes de planejar.
+> Amplie os planos clínicos preparados e comprove captura/precedência, executor seletivo
+> transacional, concorrência, retomada e dry-run sem consumo de sequências, nessa
+> ordem de dependências. Preserve BZN, idempotência, reprocessamento encadeado e
+> dados legados. Nenhuma igualdade aparente ou NULL prova ausência de edição.
+> Não habilite revisões antes do aceite integrado e das autorizações exigidas.
+> Use as respostas clínicas já fornecidas; resolva escolhas técnicas compatíveis
+> sem inventar respostas humanas. Migrations somente incrementais, aplicadas em
+> bancos descartáveis limpo/atualizado; preserve o banco persistente e seu dump.
+> Valide conforme a matriz do workflow com COMPACT=1, reaproveitando evidências
+> ainda válidas. Atualize fontes afetadas e continuidade, preservando alterações
+> preexistentes. Sem dados reais, frontend, Etapas 6–10, subagentes, commit ou
+> push. Informe aceite por caso e lacunas restantes da Etapa 5, sem confundir
+> conclusão deste fluxo com conclusão de 5A–5E.
 
 ## Validação da revisão documental de 2026-09-14
 

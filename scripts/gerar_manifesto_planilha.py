@@ -103,6 +103,7 @@ def target(key, header, block):
       "origem_encaminhamento":("encaminhamento","origem_encaminhamento","com_transformacao","lookup do domínio e preservar original"),
       "diagnostico_da_dc_por_sorologia":("diagnostico_chagas","possui_diagnostico_chagas","com_transformacao","normalizar estado diagnóstico"),
       "resultado_final_da_sorologia":("diagnostico_chagas","resultado_final","com_transformacao","normalizar resultado"),
+      "autorelato_diagnostico_de_chagas_do_participante_data":("diagnostico_chagas","data_descoberta_autorelato","com_transformacao","converter dd/mm/aaaa para DATE; data de descoberta informada pelo paciente, distinta da sorologia"),
       "ou_solicitado_sorologia":("sorologia_solicitacao","solicitada","com_transformacao","normalizar booleano triestado"),
       "se_sim_data_solicitada":("sorologia_solicitacao","data_solicitacao","com_transformacao","converter dd/mm/aaaa para DATE"),
       "forma_da_dc":("condicao_chagas","forma_clinica","com_transformacao","normalizar domínio"),
@@ -147,14 +148,13 @@ def target(key, header, block):
       "pa_diastolica":("dados_clinicos_atendimento","pa_diastolica_mmhg","com_transformacao","converter inteiro em mmHg"),
       "nyha":("dados_clinicos_atendimento","nyha","com_transformacao","aceitar somente I, II, III ou IV"),
       "obito":("obito","houve_obito","com_transformacao","normalizar booleano triestado"), "data_do_obito":("obito","data_obito","com_transformacao","converter dd/mm/aaaa para DATE"),
-      "causa_do_obito":("obito","causa_obito","direta","preservar texto"), "pendencias_observacao":("pendencia_atendimento","descricao","parcial","separação entre pendência e observação permanece ambígua"),
+      "causa_do_obito":("obito","causa_obito","direta","preservar texto"), "pendencias_observacao":("pendencia_atendimento","descricao","com_transformacao","criar pendência textual vinculada ao atendimento sem inferir tipo, status, responsável ou datas"),
       "observacao":("atendimento","observacoes","com_transformacao","preservar texto livre"),
       "responsavel_pela_digitacao":("importacao_linha","responsavel_digitacao_original","com_transformacao","preservar legado sem associar usuário"),
     }
     if key == "localizado": return (None,None,"excluido","fora do estruturado no MVP; semântica indefinida")
     if key == "idade": return ("importacao_linha","dados_brutos","parcial","sem campo para idade original nem data de referência comprovada; preservar no bruto e derivar de nascimento e atendimento quando possível")
     partial_reasons = {
-        "autorelato_diagnostico_de_chagas_do_participante_data": "não há campo que diferencie data de autorrelato de data de resultado laboratorial; preservar no bruto",
         "familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas": "historico_familiar_chagas representa doença familiar, não realização de exame por parentes; preservar no bruto",
         "paciente_trouxe_outros_exames_complementares": "indicador agregado sem tipo de ocorrência; paciente_exame_complementar exige um exame identificado; preservar no bruto",
         "solicitado_exames_complementares": "indicador agregado sem tipo de ocorrência; paciente_exame_complementar exige um exame identificado; preservar no bruto",
@@ -214,7 +214,7 @@ def main():
             table,field,coverage,transform=target(key,clean,block); all_keys.add(key)
             columns.append({"layout_versao":"planilha_ambulatorio_v1","aba_nome":name,"posicao_fisica":position,"ordem":order,"cabecalho_original":header,"chave_semantica":key,"ocorrencia":seen[clean] if totals[clean]>1 or key=="eco" else None,"bloco_funcional":block or "geral","tipo_semantico":semantic_type(key,transform),"destino_atual":f"ambulatorio.{table}.{field}" if table else None,"tabela_destino":table,"campo_destino":field,"situacao_cobertura":coverage,"transformacao":transform,"alias_conhecido":key if slug(clean)!=key else None,"observacoes_tecnicas":"célula vazia significa não informado"})
         sheets.append({"aba_chave":"portadores" if sheet_order==1 else "nao_portadores","aba_nome_original":name,"aba_ordem":sheet_order,"condicao_chagas":"portador" if sheet_order==1 else "nao_portador","quantidade_colunas":len(columns),"columns":columns})
-    doc={"manifesto":"planilha_ambulatorio","layout_versao":"planilha_ambulatorio_v1","versao":"v1","fonte_local":"planejamento/Nova Planilha ambulatório.xlsx","escopo":{"abas_incluidas":[x["aba_nome_original"] for x in sheets],"abas_excluidas":["P Digitar","AIM3 incluidos sem ambulatorio","AIM3 sem ambulatorio"],"valor_vazio":"nao_informado","localizado":"excluido_do_estruturado"},"inventario":{"colunas_por_aba":{"portadores":142,"nao_portadores":136},"rotulos_semanticos_canonicos":136,"cabecalhos_compartilhados_deslocados":81,"complicacoes_exclusivas_portadores":4,"tipos_exame_repetidos":9},"aliases_versionados":ALIASES_VERSIONADOS,"sheets":sheets}
+    doc={"manifesto":"planilha_ambulatorio","layout_versao":"planilha_ambulatorio_v1","versao":"v1.2","fonte_local":"planejamento/Nova Planilha ambulatório.xlsx","escopo":{"abas_incluidas":[x["aba_nome_original"] for x in sheets],"abas_excluidas":["P Digitar","AIM3 incluidos sem ambulatorio","AIM3 sem ambulatorio"],"valor_vazio":"nao_informado","localizado":"excluido_do_estruturado"},"inventario":{"colunas_por_aba":{"portadores":142,"nao_portadores":136},"rotulos_semanticos_canonicos":136,"cabecalhos_compartilhados_deslocados":81,"complicacoes_exclusivas_portadores":4,"tipos_exame_repetidos":9},"aliases_versionados":ALIASES_VERSIONADOS,"sheets":sheets}
     if len(all_keys)!=133: raise SystemExit(f"esperadas 133 chaves após aliases dos 136 rótulos, encontradas {len(all_keys)}")
     OUTPUT.parent.mkdir(parents=True,exist_ok=True); OUTPUT.write_text(json.dumps(doc,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(f"OK: manifesto gerado com {len(all_keys)} chaves; abas: 142 e 136 colunas")

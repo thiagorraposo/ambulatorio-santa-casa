@@ -1,25 +1,25 @@
-import { ConflictException, Injectable, NotFoundException, Optional } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { DatabaseService } from '../common/database/database.service';
 import { ClinicalAccessService } from '../common/security/clinical-access.service';
 import { databaseConflict } from '../clinico/clinical-validation';
-import { AccessDto, AttendanceCreateDto, BznReturnDto, PatientCreateDto, PatientUpdateDto } from '../clinico/dto/clinico.dto';
+import { AccessDto, AttendanceCreateDto, AttendanceUpdateDto, BznReturnDto, BznTreatmentCreateDto, PageQuery, PendingQuery, PatientCreateDto, PatientUpdateDto } from '../clinico/dto/clinico.dto';
 import { PacienteResponse } from './dto/paciente.response';
 import { PacientesRepository } from './pacientes.repository';
 import { ListarPacientesQuery } from './dto/listar-pacientes.query';
+import { PendenciaResponse } from '../clinico/dto/pendencia.response';
 
 @Injectable()
 export class PacientesService {
   constructor(private readonly repository: PacientesRepository, @Optional() private readonly database?: DatabaseService,
     @Optional() private readonly access?: ClinicalAccessService) {}
-  async list(query: number | ListarPacientesQuery): Promise<PacienteResponse[]> {
-    const result = typeof query === 'number'
-      ? await this.repository.list(query)
-      : await this.repository.list(query.limit, query.nome, query.sexo);
-    return result.map((row) => ({
-      pacienteId: row.paciente_id,
-      nome: row.nome,
-    }));
+  async list(query: ListarPacientesQuery, user: AuthenticatedUser): Promise<PacienteResponse[]> {
+    if (!this.database || !this.access) throw new Error('Dependências clínicas indisponíveis');
+    const result = await this.database.transaction(async (tx) => {
+      await this.access!.identity(tx, user);
+      return this.repository.listScoped(tx, query, user, this.access!);
+    });
+    return result.map((row) => ({ pacienteId: row.paciente_id, nome: row.nome }));
   }
 
   async exportCsv(user: AuthenticatedUser, query: ListarPacientesQuery): Promise<PacienteResponse[]> {
@@ -46,12 +46,13 @@ export class PacientesService {
       await this.access!.patient(tx, user, id);
       const row = await this.repository.find(tx, id);
       if (!row) throw new NotFoundException('Paciente não encontrado');
-      const [address, contacts, attendances] = await Promise.all([
-        tx.query('SELECT endereco,cidade FROM paciente_endereco WHERE paciente_id=$1 ORDER BY endereco_id DESC LIMIT 1', [id]),
-        tx.query<{ telefone: string | null }>('SELECT telefone FROM paciente_contato WHERE paciente_id=$1 ORDER BY contato_id', [id]),
-        tx.query('SELECT atendimento_id::text,data_atendimento::text,observacoes,versao_registro::text FROM atendimento WHERE paciente_id=$1 ORDER BY data_atendimento DESC NULLS LAST, atendimento_id DESC', [id]),
-      ]);
+      const [address, contacts, attendances] = [
+        await tx.query('SELECT endereco,cidade FROM paciente_endereco WHERE paciente_id=$1 ORDER BY endereco_id DESC LIMIT 1', [id]),
+        await tx.query<{ telefone: string | null }>('SELECT telefone FROM paciente_contato WHERE paciente_id=$1 ORDER BY contato_id', [id]),
+        await tx.query('SELECT atendimento_id::text,data_atendimento::text,observacoes,versao_registro::text FROM atendimento WHERE paciente_id=$1 ORDER BY data_atendimento DESC NULLS LAST, atendimento_id DESC', [id]),
+      ];
       return { pacienteId: row.paciente_id, nome: row.nome, dataNascimento: row.data_nascimento, sexo: row.sexo,
+        idade: row.idade, dataReferenciaIdade: row.data_referencia_idade,
         raca: row.raca, pertenceComunidadeTradicional: row.pertence_comunidade_tradicional,
         tipoComunidadeTradicional: row.tipo_comunidade_tradicional, versao: row.versao_registro,
         endereco: address.rows[0] ?? null, telefones: contacts.rows.map((x) => x.telefone),
@@ -76,7 +77,7 @@ export class PacientesService {
         for (const telefone of dto.telefones ?? []) await tx.query('INSERT INTO paciente_contato(paciente_id,telefone) VALUES($1,$2)', [id,telefone]);
         return { pacienteId: id };
       } catch (error) { return databaseConflict(error); }
-    });
+    }, user.usuarioId);
   }
 
   async update(user: AuthenticatedUser, id: string, dto: PatientUpdateDto): Promise<Record<string, string>> {
@@ -84,24 +85,60 @@ export class PacientesService {
     return this.database.transaction(async (tx) => {
       await this.access!.patient(tx, user, id, true);
       const fields: string[] = []; const values: unknown[] = [];
-      for (const [column, value] of [['nome', dto.nome], ['data_nascimento', dto.dataNascimento], ['sexo', dto.sexo], ['raca', dto.raca]] as const) {
+      for (const [column, value] of [['nome', dto.nome], ['data_nascimento', dto.dataNascimento], ['sexo', dto.sexo], ['raca', dto.raca],
+        ['pertence_comunidade_tradicional', dto.pertenceComunidadeTradicional], ['tipo_comunidade_tradicional', dto.tipoComunidadeTradicional]] as const) {
         if (value !== undefined) { values.push(value); fields.push(`${column}=$${values.length}`); }
       }
-      if (!fields.length) throw new ConflictException('Nenhuma alteração informada');
+      if (!fields.length && !dto.endereco && !dto.telefonesAdicionar) throw new BadRequestException('Nenhuma alteração informada');
+      // Parent update serializes composite edits and advances their shared version.
+      if (!fields.length) fields.push('nome=nome');
       values.push(id, dto.versao);
       const r = await tx.query<{ versao_registro: string }>(`UPDATE paciente SET ${fields.join(',')} WHERE paciente_id=$${values.length-1} AND versao_registro=$${values.length} RETURNING versao_registro::text`, values);
       if (!r.rowCount) throw new ConflictException('Versão do paciente está desatualizada');
+      if (dto.endereco) {
+        const previous = await tx.query<{ endereco: string | null; cidade: string | null }>(
+          'SELECT endereco,cidade FROM paciente_endereco WHERE paciente_id=$1 ORDER BY endereco_id DESC LIMIT 1', [id]);
+        await tx.query('INSERT INTO paciente_endereco(paciente_id,endereco,cidade) VALUES($1,$2,$3)', [id,
+          dto.endereco.endereco === undefined ? previous.rows[0]?.endereco ?? null : dto.endereco.endereco,
+          dto.endereco.cidade === undefined ? previous.rows[0]?.cidade ?? null : dto.endereco.cidade]);
+      }
+      for (const telefone of new Set(dto.telefonesAdicionar ?? [])) await tx.query(`INSERT INTO paciente_contato(paciente_id,telefone)
+        SELECT $1::bigint,$2::varchar(30) WHERE NOT EXISTS (SELECT 1 FROM paciente_contato WHERE paciente_id=$1 AND telefone=$2)`, [id, telefone]);
       return { pacienteId: id, versao: r.rows[0].versao_registro };
-    });
+    }, user.usuarioId).catch(databaseConflict);
   }
 
-  async attendances(user: AuthenticatedUser, patientId: string): Promise<Record<string, unknown>[]> {
+  async updateAttendance(user: AuthenticatedUser, patientId: string, attendanceId: string,
+    dto: AttendanceUpdateDto): Promise<{ atendimentoId: string; versao: string }> {
+    if (!this.database || !this.access) throw new Error('Dependências clínicas indisponíveis');
+    return this.database.transaction(async (tx) => {
+      await this.access!.patient(tx, user, patientId, true);
+      const current = await tx.query('SELECT 1 FROM atendimento WHERE atendimento_id=$1 AND paciente_id=$2', [attendanceId, patientId]);
+      if (!current.rowCount) throw new NotFoundException('Atendimento não encontrado');
+      const fields: string[] = []; const values: unknown[] = [];
+      for (const [column, value] of [['data_atendimento', dto.dataAtendimento], ['observacoes', dto.observacoes],
+        ['localizacao_prontuario', dto.localizacaoProntuario], ['ambulatorio_unicamente', dto.ambulatorioUnicamente],
+        ['ambulatorio_anexo_projeto', dto.ambulatorioAnexoProjeto]] as const) {
+        if (value !== undefined) { values.push(value); fields.push(`${column}=$${values.length}`); }
+      }
+      if (!fields.length) throw new BadRequestException('Nenhuma alteração informada');
+      values.push(attendanceId, patientId, dto.versao);
+      const result = await tx.query<{ versao_registro: string }>(`UPDATE atendimento SET ${fields.join(',')}
+        WHERE atendimento_id=$${values.length - 2} AND paciente_id=$${values.length - 1} AND versao_registro=$${values.length}
+        RETURNING versao_registro::text`, values);
+      if (!result.rowCount) throw new ConflictException('Versão do atendimento está desatualizada');
+      return { atendimentoId: attendanceId, versao: result.rows[0].versao_registro };
+    }, user.usuarioId).catch(databaseConflict);
+  }
+
+  async attendances(user: AuthenticatedUser, patientId: string, query = new PageQuery()): Promise<Record<string, unknown>[]> {
     if (!this.database || !this.access) throw new Error('Dependências clínicas indisponíveis');
     return this.database.transaction(async (tx) => {
       await this.access!.patient(tx, user, patientId);
       const result = await tx.query(`SELECT atendimento_id::text,data_atendimento::text,localizacao_prontuario,
         ambulatorio_unicamente,ambulatorio_anexo_projeto,observacoes,versao_registro::text
-        FROM atendimento WHERE paciente_id=$1 ORDER BY data_atendimento DESC NULLS LAST,atendimento_id DESC`, [patientId]);
+        FROM atendimento WHERE paciente_id=$1 ORDER BY data_atendimento DESC NULLS LAST,atendimento_id DESC
+        LIMIT $2 OFFSET $3`, [patientId, query.limit, query.offset]);
       return result.rows.map((x: Record<string, unknown>) => ({ atendimentoId: x.atendimento_id,
         dataAtendimento: x.data_atendimento, localizacaoProntuario: x.localizacao_prontuario,
         ambulatorioUnicamente: x.ambulatorio_unicamente, ambulatorioAnexoProjeto: x.ambulatorio_anexo_projeto,
@@ -124,9 +161,24 @@ export class PacientesService {
           frequencia_cardiaca_bpm,saturacao_percentual,pa_sistolica_mmhg,pa_diastolica_mmhg,nyha,observacoes)
           VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`, [id,c.alturaCm ?? null,c.pesoKg ?? null,c.circunferenciaAbdominalCm ?? null,
           c.frequenciaCardiacaBpm ?? null,c.saturacaoPercentual ?? null,c.paSistolicaMmhg ?? null,c.paDiastolicaMmhg ?? null,c.nyha ?? null,c.observacoes ?? null]);
-        for (const e of dto.exames ?? []) await tx.query(`INSERT INTO paciente_exame_complementar
+        const d = dto.diagnosticoChagas;
+        if (d) await tx.query(`INSERT INTO diagnostico_chagas
+          (atendimento_id,possui_diagnostico_chagas,status_diagnostico,resultado_final,data_resultado_final,
+           data_descoberta_autorelato,criterio_confirmacao,observacoes)
+          VALUES($1,$2,$3,$4,$5,$6,$7,$8)`, [id,d.possuiDiagnosticoChagas ?? null,d.statusDiagnostico ?? null,
+          d.resultadoFinal ?? null,d.dataResultadoFinal ?? null,d.dataDescobertaAutorelato ?? null,
+          d.criterioConfirmacao ?? null,d.observacoes ?? null]);
+        for (const e of dto.exames ?? []) {
+          const catalog = await tx.query<{ codigo_exame: string }>(
+            'SELECT codigo_exame FROM tipo_exame_complementar WHERE tipo_exame_complementar_id=$1 AND ativo FOR SHARE', [e.tipoExameId]);
+          const code = catalog.rows[0]?.codigo_exame;
+          if (!code || (['laboratoriais', 'imagem', 'outro', 'nao_informado'].includes(code) && !e.identificacao?.trim())) {
+            throw new BadRequestException('Exame deve possuir identificação inequívoca e tipo ativo');
+          }
+          await tx.query(`INSERT INTO paciente_exame_complementar
           (paciente_id,atendimento_id,tipo_exame_complementar_id,bloco_origem,tipo_exame_original,resultado_texto,observacoes)
           VALUES($1,$2,$3,$4,$5,$6,$7)`, [patientId,e.atendimentoId ?? id,e.tipoExameId,e.bloco,e.identificacao ?? null,e.resultado ?? null,e.observacoes ?? null]);
+        }
         for (const p of dto.pendencias ?? []) await tx.query(`INSERT INTO pendencia_atendimento
           (atendimento_id,descricao,status_pendencia,data_identificacao) VALUES($1,$2,$3,$4)`, [id,p.descricao,p.status ?? 'aberta',dto.dataAtendimento]);
         if (dto.rastreioFamiliar) {
@@ -138,7 +190,7 @@ export class PacientesService {
         }
         return { atendimentoId: id };
       } catch (error) { return databaseConflict(error); }
-    });
+    }, user.usuarioId).catch(databaseConflict);
   }
 
   async attendance(user: AuthenticatedUser, patientId: string, attendanceId: string): Promise<Record<string, unknown>> {
@@ -149,30 +201,38 @@ export class PacientesService {
         ambulatorio_unicamente,ambulatorio_anexo_projeto,observacoes,versao_registro::text
         FROM atendimento WHERE atendimento_id=$1 AND paciente_id=$2`, [attendanceId, patientId]);
       if (!attendance.rows[0]) throw new NotFoundException('Atendimento não encontrado');
-      const [clinical, exams, pending, family, familyResults] = await Promise.all([
-        tx.query(`SELECT altura_cm,peso_kg,circunferencia_abdominal_cm,frequencia_cardiaca_bpm,saturacao_percentual,
+      const [clinical, diagnosis, exams, pending, family, familyResults] = [
+        await tx.query(`SELECT altura_cm,peso_kg,circunferencia_abdominal_cm,frequencia_cardiaca_bpm,saturacao_percentual,
           pa_sistolica_mmhg,pa_diastolica_mmhg,nyha,observacoes FROM dados_clinicos_atendimento WHERE atendimento_id=$1`, [attendanceId]),
-        tx.query(`SELECT e.paciente_exame_complementar_id::text,e.bloco_origem,e.tipo_exame_original,
+        await tx.query(`SELECT possui_diagnostico_chagas,status_diagnostico,resultado_final,data_resultado_final::text,
+          data_descoberta_autorelato::text,criterio_confirmacao,observacoes
+          FROM diagnostico_chagas WHERE atendimento_id=$1`, [attendanceId]),
+        await tx.query(`SELECT e.paciente_exame_complementar_id::text,e.bloco_origem,e.tipo_exame_original,
           e.resultado_texto,e.observacoes,t.codigo_exame,t.nome_exame FROM paciente_exame_complementar e
           JOIN tipo_exame_complementar t ON t.tipo_exame_complementar_id=e.tipo_exame_complementar_id
           WHERE e.paciente_id=$1 AND e.atendimento_id=$2 ORDER BY e.paciente_exame_complementar_id`, [patientId, attendanceId]),
-        tx.query(`SELECT pendencia_atendimento_id::text,descricao,status_pendencia,data_identificacao::text
+        await tx.query(`SELECT pendencia_atendimento_id::text,descricao,status_pendencia,data_identificacao::text
           FROM pendencia_atendimento WHERE atendimento_id=$1 ORDER BY pendencia_atendimento_id`, [attendanceId]),
-        tx.query(`SELECT rastreio_familiar_id::text,familiares_examinados FROM rastreio_familiar WHERE paciente_id=$1 AND atendimento_id=$2`, [patientId, attendanceId]),
-        tx.query(`SELECT r.rastreio_familiar_id::text,identificacao_familiar,resultado_sorologia
+        await tx.query(`SELECT rastreio_familiar_id::text,familiares_examinados FROM rastreio_familiar
+          WHERE paciente_id=$1 AND atendimento_id=$2 ORDER BY rastreio_familiar_id`, [patientId, attendanceId]),
+        await tx.query(`SELECT r.rastreio_familiar_id::text,identificacao_familiar,resultado_sorologia
           FROM rastreio_familiar_resultado r JOIN rastreio_familiar f USING(rastreio_familiar_id)
           WHERE f.paciente_id=$1 AND f.atendimento_id=$2 ORDER BY r.rastreio_familiar_resultado_id`, [patientId, attendanceId]),
-      ]);
+      ];
       const a = attendance.rows[0] as Record<string, unknown>;
+      const screenings = family.rows.map((snapshot: Record<string, unknown>) => ({ ...snapshot,
+        familiares: familyResults.rows.filter((result: Record<string, unknown>) => result.rastreio_familiar_id === snapshot.rastreio_familiar_id) }));
       return { atendimentoId: a.atendimento_id, dataAtendimento: a.data_atendimento,
         localizacaoProntuario: a.localizacao_prontuario, ambulatorioUnicamente: a.ambulatorio_unicamente,
         ambulatorioAnexoProjeto: a.ambulatorio_anexo_projeto, observacoes: a.observacoes, versao: a.versao_registro,
-        dadosClinicos: clinical.rows[0] ?? null, exames: exams.rows, pendencias: pending.rows,
-        rastreioFamiliar: family.rows[0] ? { ...family.rows[0], familiares: familyResults.rows } : null };
+        dadosClinicos: clinical.rows[0] ?? null, diagnosticoChagas: diagnosis.rows[0] ?? null,
+        exames: exams.rows, pendencias: pending.rows,
+        rastreioFamiliar: screenings.length === 1 ? screenings[0] : null,
+        rastreiosFamiliares: screenings };
     });
   }
 
-  async bznReturns(user: AuthenticatedUser, patientId: string): Promise<Record<string, unknown>[]> {
+  async bznReturns(user: AuthenticatedUser, patientId: string, query = new PageQuery()): Promise<Record<string, unknown>[]> {
     if (!this.database || !this.access) throw new Error('Dependências clínicas indisponíveis');
     return this.database.transaction(async (tx) => {
       await this.access!.patient(tx, user, patientId);
@@ -180,7 +240,8 @@ export class PacientesService {
         c.data_realizada::text,c.tipo_acompanhamento,c.resumo_acompanhamento,c.status_acompanhamento
         FROM acompanhamento_cuidado c JOIN atendimento a USING(atendimento_id)
         WHERE a.paciente_id=$1 AND c.tipo_acompanhamento IN ('retorno_bzn_30_dias','retorno_bzn_final')
-        ORDER BY c.data_realizada DESC NULLS LAST,c.acompanhamento_cuidado_id DESC`, [patientId]);
+        ORDER BY c.data_realizada DESC NULLS LAST,c.acompanhamento_cuidado_id DESC
+        LIMIT $2 OFFSET $3`, [patientId, query.limit, query.offset]);
       return result.rows.map((r: Record<string, unknown>) => ({ retornoId: r.acompanhamento_cuidado_id,
         atendimentoId: r.atendimento_id, dataRealizada: r.data_realizada, tipo: r.tipo_acompanhamento,
         resumo: r.resumo_acompanhamento, status: r.status_acompanhamento }));
@@ -194,12 +255,46 @@ export class PacientesService {
       try {
         const attendance = await tx.query('SELECT 1 FROM atendimento WHERE atendimento_id=$1 AND paciente_id=$2', [dto.atendimentoId, patientId]);
         if (!attendance.rowCount) throw new ConflictException('Atendimento não pertence ao paciente');
+        const treatment = await tx.query('SELECT 1 FROM tratamento_benzonidazol WHERE paciente_id=$1 FOR SHARE', [patientId]);
+        if (!treatment.rowCount) throw new ConflictException('Retorno exige tratamento BZN do paciente');
         const result = await tx.query<{ acompanhamento_cuidado_id: string }>(`INSERT INTO acompanhamento_cuidado
           (atendimento_id,data_realizada,retorno_programado,compareceu,status_acompanhamento,tipo_acompanhamento,resumo_acompanhamento)
           VALUES($1,$2,false,true,'concluido',$3,$4) RETURNING acompanhamento_cuidado_id::text`,
           [dto.atendimentoId,dto.dataRealizada,dto.tipo,dto.resumo ?? null]);
         return { retornoId: result.rows[0].acompanhamento_cuidado_id };
       } catch (error) { return databaseConflict(error); }
+    }, user.usuarioId);
+  }
+
+  async createBznTreatment(user: AuthenticatedUser, patientId: string, dto: BznTreatmentCreateDto): Promise<{ tratamentoId: string }> {
+    if (!this.database || !this.access) throw new Error('Dependências clínicas indisponíveis');
+    return this.database.transaction(async tx => {
+      await this.access!.patient(tx, user, patientId, true);
+      const patient = await tx.query('SELECT 1 FROM paciente WHERE paciente_id=$1 FOR UPDATE', [patientId]);
+      if (!patient.rowCount) throw new NotFoundException('Paciente não encontrado');
+      if (dto.atendimentoId) {
+        const attendance = await tx.query('SELECT 1 FROM atendimento WHERE atendimento_id=$1 AND paciente_id=$2 FOR SHARE', [dto.atendimentoId, patientId]);
+        if (!attendance.rowCount) throw new BadRequestException('Atendimento não pertence ao paciente');
+      }
+      const existing = await tx.query('SELECT 1 FROM tratamento_benzonidazol WHERE paciente_id=$1', [patientId]);
+      if (existing.rowCount) throw new ConflictException('Paciente já possui tratamento BZN canônico');
+      const treatment = await tx.query<{ tratamento_benzonidazol_id: string }>(`INSERT INTO tratamento_benzonidazol
+        (paciente_id,atendimento_id,tem_indicacao,iniciado,tratamento_pelo_ambulatorio,duracao_cumprida_dias,ano_uso_aproximado,
+         data_prescricao,motivo_nao_indicacao,motivo_nao_inicio,teve_reacao_adversa,observacoes)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING tratamento_benzonidazol_id::text`,
+      [patientId,dto.atendimentoId ?? null,dto.temIndicacao ?? null,dto.iniciado ?? null,dto.tratamentoPeloAmbulatorio ?? null,
+        dto.duracaoCumpridaDias ?? null,dto.anoUsoAproximado ?? null,dto.dataPrescricao ?? null,dto.motivoNaoIndicacao ?? null,
+        dto.motivoNaoInicio ?? null,dto.teveReacaoAdversa ?? null,dto.observacoes ?? null]);
+      const id = treatment.rows[0].tratamento_benzonidazol_id;
+      for (const reaction of dto.reacoes ?? []) await tx.query(`INSERT INTO reacao_adversa_benzonidazol
+        (tratamento_benzonidazol_id,descricao,gravidade,data_reacao,consequencia,observacoes) VALUES($1,$2,$3,$4,$5,$6)`,
+      [id,reaction.descricao,reaction.gravidade ?? null,reaction.dataReacao ?? null,reaction.consequencia ?? null,reaction.observacoes ?? null]);
+      return { tratamentoId: id };
+    }, user.usuarioId).catch(error => {
+      if (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505') {
+        throw new ConflictException('Paciente já possui tratamento BZN canônico');
+      }
+      return databaseConflict(error);
     });
   }
 
@@ -219,27 +314,45 @@ export class PacientesService {
     });
   }
 
-  async projects(user: AuthenticatedUser, patientId: string): Promise<Record<string, unknown>[]> {
+  async projects(user: AuthenticatedUser, patientId: string, query = new PageQuery()): Promise<Record<string, unknown>[]> {
     if (!this.database || !this.access) throw new Error('Dependências clínicas indisponíveis');
     return this.database.transaction(async (tx) => {
       await this.access!.patient(tx, user, patientId);
       const result = await tx.query(`SELECT p.paciente_projeto_estudo_id::text,pr.codigo_projeto,pr.nome_projeto,
         p.participa,p.possui_pendencia,p.descricao_pendencia,p.houve_falha,p.descricao_falha,p.observacoes
         FROM paciente_projeto_estudo p JOIN projeto_estudo pr USING(projeto_estudo_id)
-        WHERE p.paciente_id=$1 ORDER BY pr.nome_projeto,p.paciente_projeto_estudo_id`, [patientId]);
+        WHERE p.paciente_id=$1 ORDER BY pr.nome_projeto,p.paciente_projeto_estudo_id
+        LIMIT $2 OFFSET $3`, [patientId, query.limit, query.offset]);
       return result.rows;
     });
   }
 
-  async exams(user: AuthenticatedUser, patientId: string): Promise<Record<string, unknown>[]> {
+  async exams(user: AuthenticatedUser, patientId: string, query = new PageQuery()): Promise<Record<string, unknown>[]> {
     if (!this.database || !this.access) throw new Error('Dependências clínicas indisponíveis');
     return this.database.transaction(async (tx) => {
       await this.access!.patient(tx, user, patientId);
       const result = await tx.query(`SELECT e.paciente_exame_complementar_id::text,e.atendimento_id::text,
         e.bloco_origem,e.tipo_exame_original,e.resultado_texto,e.observacoes,t.codigo_exame,t.nome_exame
         FROM paciente_exame_complementar e JOIN tipo_exame_complementar t USING(tipo_exame_complementar_id)
-        WHERE e.paciente_id=$1 ORDER BY e.criado_em DESC,e.paciente_exame_complementar_id DESC`, [patientId]);
+        WHERE e.paciente_id=$1 ORDER BY e.criado_em DESC,e.paciente_exame_complementar_id DESC
+        LIMIT $2 OFFSET $3`, [patientId, query.limit, query.offset]);
       return result.rows;
+    });
+  }
+
+  async pending(user: AuthenticatedUser, patientId: string, query: PendingQuery): Promise<PendenciaResponse[]> {
+    if (!this.database || !this.access) throw new Error('Dependências clínicas indisponíveis');
+    return this.database.transaction(async (tx) => {
+      await this.access!.patient(tx, user, patientId);
+      const result = await tx.query<{ pendencia_id: string; atendimento_id: string; descricao: string;
+        status_pendencia: string | null; data_identificacao: string | null }>(`SELECT p.pendencia_atendimento_id::text AS pendencia_id,
+        p.atendimento_id::text,p.descricao,p.status_pendencia,p.data_identificacao::text
+        FROM pendencia_atendimento p JOIN atendimento a USING(atendimento_id)
+        WHERE a.paciente_id=$1 AND ($2::text IS NULL OR p.status_pendencia=$2)
+        ORDER BY p.data_identificacao DESC NULLS LAST,p.pendencia_atendimento_id DESC LIMIT $3 OFFSET $4`,
+      [patientId, query.status ?? null, query.limit, query.offset]);
+      return result.rows.map(row => ({ pendenciaId: row.pendencia_id, atendimentoId: row.atendimento_id,
+        descricao: row.descricao, status: row.status_pendencia, dataIdentificacao: row.data_identificacao }));
     });
   }
 
@@ -258,8 +371,10 @@ export class PacientesService {
     if (user.perfil !== 'administracao') throw new ConflictException('Somente administração pode alterar vínculos');
     return this.database.transaction(async (tx) => {
       await this.access!.identity(tx, user, true);
+      await tx.query('SET LOCAL ROLE ambulatorio_servico_autenticado');
       await tx.query('SELECT definir_acesso_paciente($1::bigint,$2::bigint,$3::boolean,$4::boolean)',
         [patientId, targetUserId, dto.podeEditar, dto.ativo]);
+      await tx.query('SET LOCAL ROLE ambulatorio_aplicacao');
       return { pacienteId: patientId, usuarioId: targetUserId, ativo: dto.ativo, podeEditar: dto.podeEditar };
     }, user.usuarioId);
   }
