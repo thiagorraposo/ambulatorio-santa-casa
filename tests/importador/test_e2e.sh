@@ -5,13 +5,18 @@ test_db="${DB_NAME}_importador_test"
 fixture="tests/fixtures/planilha_importacao_v1_sintetica.xlsx"
 import_user="ambulatorio_importador_e2e"
 import_password="senha_exclusivamente_sintetica_e2e"
+capture_fixture="$(mktemp /tmp/ambulatorio-captura-XXXXXX.xlsx)"
 
 cleanup() {
   dropdb -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" --if-exists "$test_db" >/dev/null
   psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
     -c "DROP ROLE IF EXISTS $import_user" >/dev/null
 }
-trap cleanup EXIT
+cleanup_final() {
+  cleanup
+  rm -f "$capture_fixture"
+}
+trap cleanup_final EXIT
 
 cleanup
 createdb -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" "$test_db"
@@ -424,4 +429,39 @@ BEGIN
 END $$;
 SQL
 
-echo "OK: finalidade explícita, recusas sem efeitos, 126 destinos, criticidade, promoção, proveniência, rollback e reprocessamento encadeado"
+# O cenario legado acima foi preparado antes de qualquer captura, como exige
+# sua simulacao. Um novo conteudo comprova agora o escritor Python real ativo.
+psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 <<'SQL'
+BEGIN;
+SET search_path TO ambulatorio, public;
+INSERT INTO auditoria_campo(tabela_destino,coluna_destino,coluna_pk,tipo_sql,serializacao_versao,captura_desde) VALUES
+('paciente','nome','paciente_id','character varying(255)','v1',clock_timestamp()),
+('atendimento','data_atendimento','atendimento_id','date','v1',clock_timestamp());
+COMMIT;
+SQL
+python3 tests/backend/gerar_planilha_http_sintetica.py "$capture_fixture"
+PGPASSWORD="$import_password" python3 scripts/importar_planilha.py "$capture_fixture" \
+  --codigo-lote sint-captura-ativa --finalidade carga_inicial \
+  --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$import_user" --db-name "$test_db"
+psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 <<'SQL'
+SET search_path TO ambulatorio, public;
+DO $$ DECLARE destino text;
+BEGIN
+  FOREACH destino IN ARRAY ARRAY['paciente','atendimento'] LOOP
+    IF (SELECT count(*) FROM auditoria_campo_evento e JOIN auditoria_campo c USING(campo_id)
+      JOIN importacao_linha i USING(importacao_linha_id) JOIN importacao_lote l USING(importacao_lote_id)
+      WHERE l.codigo_lote='sint-captura-ativa' AND c.tabela_destino=destino AND e.origem='importacao'
+        AND e.antes->>'estado'='alvo_ausente' AND e.versao_campo=1 AND e.ator_usuario_id IS NULL)<>2 THEN
+      RAISE EXCEPTION 'Importador real nao capturou origem e valores para %',destino;
+    END IF;
+  END LOOP;
+  IF EXISTS(SELECT 1 FROM auditoria_campo_evento e JOIN auditoria_campo c USING(campo_id)
+    WHERE e.origem='importacao' AND NOT EXISTS(SELECT 1 FROM importacao_registro p
+      WHERE p.importacao_linha_id=e.importacao_linha_id AND p.tabela_destino=c.tabela_destino AND p.registro_id=e.registro_id)) THEN
+    RAISE EXCEPTION 'Importador real deixou evento sem proveniencia';
+  END IF;
+  RAISE NOTICE 'OK: escritor Python real, captura ativa, origem importacao e proveniencia conferida';
+END $$;
+SQL
+
+echo "OK: finalidade explícita, recusas sem efeitos, 126 destinos, criticidade, promoção, proveniência, rollback, reprocessamento e captura ativa"
