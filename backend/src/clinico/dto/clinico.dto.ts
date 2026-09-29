@@ -10,6 +10,9 @@ export class PatientQuery extends PageQuery {
   @IsOptional() @IsString() @Length(1, 120) nome?: string;
   @IsOptional() @IsIn(['feminino', 'masculino', 'outro', 'nao_informado']) sexo?: string;
 }
+export class PendingQuery extends PageQuery {
+  @IsOptional() @IsIn(['aberta', 'em_andamento', 'resolvida', 'cancelada', 'nao_informado']) status?: string;
+}
 export class AddressDto {
   @IsOptional() @IsString() @MaxLength(2000) endereco?: string | null;
   @IsOptional() @IsString() @MaxLength(120) cidade?: string | null;
@@ -33,6 +36,10 @@ export class PatientUpdateDto {
   @IsOptional() @IsDateString({ strict: true }) @Matches(/^\d{4}-\d{2}-\d{2}$/) dataNascimento?: string | null;
   @IsOptional() @IsIn(['feminino', 'masculino', 'outro', 'nao_informado']) sexo?: string | null;
   @IsOptional() @IsString() @MaxLength(50) raca?: string | null;
+  @IsOptional() @IsBoolean() pertenceComunidadeTradicional?: boolean | null;
+  @IsOptional() @IsIn(['indigena', 'quilombola']) tipoComunidadeTradicional?: string | null;
+  @IsOptional() @ValidateNested() @Type(() => AddressDto) endereco?: AddressDto;
+  @IsOptional() @IsArray() @ArrayMinSize(1) @ArrayMaxSize(10) @IsString({ each: true }) @Length(1, 30, { each: true }) telefonesAdicionar?: string[];
 }
 export class ClinicalDataDto {
   @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) alturaCm?: number | null;
@@ -88,7 +95,11 @@ export class AttendanceCreateDto {
 }
 export class AttendanceUpdateDto {
   @Matches(/^[1-9]\d{0,18}$/) versao!: string;
-  @IsOptional() @IsDateString({ strict: true }) @Matches(/^\d{4}-\d{2}-\d{2}$/) dataAtendimento?: string;
+  @ValidateIf((_o: unknown, value: unknown) => value !== undefined)
+  @IsDateString({ strict: true }) @Matches(/^\d{4}-\d{2}-\d{2}$/) dataAtendimento?: string;
+  @IsOptional() @IsString() @MaxLength(120) localizacaoProntuario?: string | null;
+  @IsOptional() @IsBoolean() ambulatorioUnicamente?: boolean | null;
+  @IsOptional() @IsBoolean() ambulatorioAnexoProjeto?: boolean | null;
   @IsOptional() @IsString() @MaxLength(10000) observacoes?: string | null;
 }
 export class AccessDto {
@@ -100,6 +111,27 @@ export class BznReturnDto {
   @IsIn(['retorno_bzn_30_dias', 'retorno_bzn_final']) tipo!: string;
   @IsDateString({ strict: true }) @Matches(/^\d{4}-\d{2}-\d{2}$/) dataRealizada!: string;
   @IsOptional() @IsString() @MaxLength(10000) resumo?: string;
+}
+export class BznReactionDto {
+  @IsString() @Length(1, 10000) descricao!: string;
+  @IsOptional() @IsString() @MaxLength(1000) gravidade?: string | null;
+  @IsOptional() @IsDateString({ strict: true }) @Matches(/^\d{4}-\d{2}-\d{2}$/) dataReacao?: string | null;
+  @IsOptional() @IsString() @MaxLength(10000) consequencia?: string | null;
+  @IsOptional() @IsString() @MaxLength(10000) observacoes?: string | null;
+}
+export class BznTreatmentCreateDto {
+  @IsOptional() @Matches(/^[1-9]\d{0,18}$/) atendimentoId?: string;
+  @IsOptional() @IsBoolean() temIndicacao?: boolean | null;
+  @IsOptional() @IsBoolean() iniciado?: boolean | null;
+  @IsOptional() @IsBoolean() tratamentoPeloAmbulatorio?: boolean | null;
+  @IsOptional() @IsInt() @Min(1) @Max(2147483647) duracaoCumpridaDias?: number | null;
+  @IsOptional() @IsInt() @Min(1) @Max(9999) anoUsoAproximado?: number | null;
+  @IsOptional() @IsDateString({ strict: true }) @Matches(/^\d{4}-\d{2}-\d{2}$/) dataPrescricao?: string | null;
+  @IsOptional() @IsString() @MaxLength(10000) motivoNaoIndicacao?: string | null;
+  @IsOptional() @IsString() @MaxLength(10000) motivoNaoInicio?: string | null;
+  @IsOptional() @IsBoolean() teveReacaoAdversa?: boolean | null;
+  @IsOptional() @IsString() @MaxLength(10000) observacoes?: string | null;
+  @IsOptional() @IsArray() @ArrayMaxSize(30) @ValidateNested({ each: true }) @Type(() => BznReactionDto) reacoes?: BznReactionDto[];
 }
 export class AnnualFactDto {
   @IsInt() @Min(1) @Max(9999) ano!: number;
