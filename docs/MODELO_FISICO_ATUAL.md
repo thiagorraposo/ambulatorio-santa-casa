@@ -1002,3 +1002,25 @@ simulação sem mudar todas as tabelas/sequências foram testados. O executor es
 privado, sem ativação HTTP/CLI ou criação de visitas/dependentes. Fechamento,
 continuidade histórica por revisões e dry-run de arquivo sem staging continuam
 requisitos obrigatórios. O schema persistente e seu dump não foram modificados.
+
+## Encerramento e continuidade histórica — migrations 43–44
+
+A 43 acrescenta `importacao_revisao_encerramento`, registro imutável de estado,
+ator, autorização e instante. `revisao_terminar_interna` permanece privada:
+cancelamento exige ausência de efeitos; fechamento exige fonte corrente e todas
+as linhas contabilizadas por decisão efetiva, com sucesso conferido ou bloqueio
+sem proveniência. Fechamento com bloqueios resulta em pendências; repetir a mesma
+ação terminal preserva a autoria original. Revisão, lote e metadado confirmam na
+mesma transação. Cancelar uma proposta obsoleta não avança a fonte.
+
+A 44 preserva a prova inicial da importação em `revisao_cobertura_importacao` e
+compõe `revisao_cobertura_base` com a cadeia de aplicações confirmadas de revisões
+encerradas. Exige mesma linha, alvo, paciente, valor de base e evidências históricas;
+igualdade isolada e marco legado continuam insuficientes. A cadeia recusa ciclos.
+Também preserva no cabeçalho o instante registrado no cancelamento atribuível.
+
+Instalação limpa até 44 e duas revisões sucessivas sobre a mesma ocorrência foram
+validadas em banco descartável. A retomada do sucesso antigo não restaura valores
+anteriores nem cria atendimentos ou eventos. O executor segue sem acesso
+operacional: criação de visitas/dependentes, simulação de arquivo sem staging e
+aceite integrado continuam pendentes. O dump persistente permanece intacto.

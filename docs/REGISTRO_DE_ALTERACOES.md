@@ -1,5 +1,22 @@
 # Registro de Alterações
 
+## 2026-09-29 — Encerramento atribuível e prova entre revisões
+
+Migrations 43–44 acrescentam encerramento/cancelamento privado com autoria,
+autorização e instante imutáveis, contabilização de linhas e continuidade da
+prova histórica entre revisões encerradas. Não habilitam o executor operacional.
+O cenário clínico encadeia duas correções da mesma ocorrência, confirma o avanço
+da fonte e demonstra retomada histórica sem restaurar valores ou duplicar efeitos.
+
+Instalação limpa até 44 e 19 cenários clínicos passaram em
+`/tmp/ambulatorio-check-uol6ogb7/output.log`. A primeira execução SQL revelou que
+o teste consultava evidência na mesma expressão que chamava a função VOLATILE.
+As chamadas foram separadas da leitura, mantendo todas as invariantes; SQL 20
+passou em `/tmp/ambulatorio-check-25wpdsmh/output.log`. Migrations já aplicadas
+foram preservadas. Validações finais e limitações constam na continuidade.
+Por solicitação do usuário, este incremento é organizado em commits de
+funcionalidades, testes e documentação, sem push. A Etapa 5 segue incompleta.
+
 ## 2026-09-29 — Organização das alterações pendentes em commits
 
 Por solicitação explícita do usuário, o trabalho acumulado foi separado por tipo

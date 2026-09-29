@@ -383,3 +383,37 @@ backend e manifesto, nos logs indicados acima. Verificações desta organizaçã
 Migration 21 mantém seu SHA-256; banco persistente e dump continuam preservados.
 A Etapa 5 ainda exige as implementações e o aceite integral já listados. Organizar
 commits não habilita o executor privado nem conclui qualquer requisito ausente.
+
+## Encerramento e cadeia histórica; organização em commits — 2026-09-29
+
+Após a organização anterior, quatro arquivos ficaram pendentes: migrations 43–44,
+SQL 20 e o novo cenário clínico. A revisão atual preservou esses arquivos e
+separou as chamadas de cancelamento da leitura de evidência no SQL 20: funções
+VOLATILE e a subconsulta na mesma expressão usavam snapshots diferentes. A
+conferência mantém estado, autoria, autorização, instante, idempotência,
+imutabilidade e ausência de avanço da fonte.
+
+A 43 fecha somente revisões com linhas contabilizadas e cancela propostas sem
+efeitos; a 44 encadeia provas de aplicações anteriores encerradas, preservando a
+exigência de evidência desde a base. Ambas foram aplicadas incrementalmente no
+banco descartável e instaladas em banco limpo pelo runner clínico. Dezenove
+cenários passaram em `/tmp/ambulatorio-check-uol6ogb7/output.log`, incluindo duas
+revisões sucessivas da mesma ocorrência e retomada do sucesso antigo sem
+restaurar valores ou criar efeitos. SQL 20 isolado passou em
+`/tmp/ambulatorio-check-25wpdsmh/output.log` após a correção do teste.
+
+Validações finais: `make project-check COMPACT=1`, com as 20 suítes SQL no banco
+descartável, aprovado em `/tmp/ambulatorio-check-t8_ripic/output.log`;
+`make manifest-check importer-test COMPACT=1`, com 26 unitários e E2E em nova
+instalação limpa até 44, aprovado em `/tmp/ambulatorio-check-sf2tj342/output.log`.
+O código de aplicação/backend não mudou neste incremento; build, unitários e
+fundação mantêm as evidências anteriores. Os 19 cenários clínicos, incluindo o
+novo caso encadeado, foram conferidos sem repetir a suíte aprovada no mesmo estado.
+
+O agrupamento solicitado segue as dependências: funcionalidade de encerramento,
+continuidade histórica, testes e documentação. Não houve edição de migration
+aplicada, descarte de alteração, push, acesso ao banco persistente ou atualização
+de seu dump. Os testes novos não cobrem ainda fechamento com linhas bloqueadas
+ou incompletas, criação de visitas/dependentes, concorrência entre revisões e
+revogação durante execução. Esses casos e os demais requisitos do roadmap
+continuam obrigatórios; nenhum aceite integral da Etapa 5 foi anunciado.
