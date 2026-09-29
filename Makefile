@@ -221,7 +221,7 @@ importer-dry-run: docker-wait
 importer-test: docker-wait importer-fixture
 	@python3 -m unittest tests/importador/test_transformacoes.py
 	@DB_HOST="$(DB_HOST)" DB_PORT="$(DB_PORT)" DB_USER="$(DB_USER)" DB_NAME="$(DB_NAME)" \
-		PGPASSWORD="$(POSTGRES_PASSWORD)" bash tests/importador/test_e2e.sh
+		PGPASSWORD="$(PGPASSWORD)" bash tests/importador/test_e2e.sh
 
 backend-install:
 	@cd backend && npm ci
@@ -246,7 +246,7 @@ backend-integration-test: backend-db-setup
 		APP_DB_NAME="$(APP_DB_NAME)" APP_DB_USER="$(APP_DB_USER)" APP_DB_PASSWORD="$(APP_DB_PASSWORD)" \
 		CLINICAL_ACCESS_POLICY=todos_sinteticos \
 		AUTH_JWT_SECRET="$(AUTH_JWT_SECRET)" AUTH_JWT_EXPIRES_IN_SECONDS="$(AUTH_JWT_EXPIRES_IN_SECONDS)" \
-		PGPASSWORD="$(POSTGRES_PASSWORD)" bash tests/backend/test_integration.sh
+		PGPASSWORD="$(PGPASSWORD)" bash tests/backend/test_integration.sh
 
 backend-clinical-test:
 	@bash tests/backend/test_clinical_integration.sh
