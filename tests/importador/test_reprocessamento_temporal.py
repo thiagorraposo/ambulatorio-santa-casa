@@ -96,7 +96,8 @@ def main():
                 f"WHERE importacao_linha_id={base_line} AND tabela_destino='paciente'"))
             db.run("INSERT INTO revisao_artefato(sha256,tipo,versao,conteudo) VALUES "
                    f"({literal(sha(manifest_bytes))},'manifesto',{literal(MANIFEST['versao'])},{literal(manifest_bytes)}),"
-                   f"({literal(sha(transform_bytes))},'transformacoes','f13-v1',{literal(transform_bytes)})")
+                   f"({literal(sha(transform_bytes))},'transformacoes','f13-v1',{literal(transform_bytes)}) "
+                   "ON CONFLICT (sha256) DO NOTHING")
             revised = int(db.scalar("INSERT INTO importacao_lote "
                 "(codigo_lote,hash_arquivo_sha256,layout_versao,status_lote,manifesto_sha256,importador_versao,revisao_git) "
                 f"VALUES ('f13-revisado',{literal(hashlib.sha256(revised_path.read_bytes()).hexdigest())},"

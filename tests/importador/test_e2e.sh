@@ -26,9 +26,9 @@ for migration in sql/[0-9][0-9]_*.sql; do
   # 00/01 operam no banco nominal. Seu equivalente isolado foi criado acima;
   # nenhuma configuração do banco persistente deve mudar durante o E2E.
   if [[ "$migration" == sql/00_* || "$migration" == sql/01_* ]]; then continue; fi
-  # O primeiro cenário reproduz lotes legados anteriores à captura do atendimento.
-  # A migration 60 será aplicada antes do cenário de captura com o escritor real.
-  if [[ "$migration" == sql/60_* ]]; then continue; fi
+  # O primeiro cenário reproduz lotes legados anteriores à captura do atendimento
+  # e da descoberta. A sequência 60+ será aplicada antes dos escritores ativos reais.
+  if [[ "${migration:4:2}" > "59" ]]; then continue; fi
   psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 -f "$migration"
 done
 
@@ -449,10 +449,16 @@ SQL
 D3_DB_NAME="$test_db" D3_IMPORT_USER="$import_user" D3_IMPORT_PASSWORD="$import_password" \
   python3 tests/importador/test_rastreio_familiar.py
 
+D2_DB_NAME="$test_db" D2_IMPORT_USER="$import_user" D2_IMPORT_PASSWORD="$import_password" \
+  python3 tests/importador/test_descoberta_chagas.py seed-legacy
+
 # Os lotes legados acima precedem a captura do atendimento. Atualizar o banco
 # mantém seu histórico desconhecido; novo conteúdo comprova o escritor real ativo.
-psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 \
-  -f sql/60_captura_data_observacao_atendimento.sql
+for migration in sql/[0-9][0-9]_*.sql; do
+  if [[ "${migration:4:2}" > "59" ]]; then
+    psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 -f "$migration"
+  fi
+done
 psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 <<'SQL'
 BEGIN;
 SET search_path TO ambulatorio, public;
@@ -498,6 +504,15 @@ SQL
 
 F13_DB_NAME="$test_db" F13_IMPORT_USER="$import_user" F13_IMPORT_PASSWORD="$import_password" \
   python3 tests/importador/test_reprocessamento_temporal.py
+
+F13_DB_NAME="$test_db" F13_IMPORT_USER="$import_user" F13_IMPORT_PASSWORD="$import_password" \
+  python3 tests/importador/test_precedencia_atendimento.py
+
+D2_DB_NAME="$test_db" D2_IMPORT_USER="$import_user" D2_IMPORT_PASSWORD="$import_password" \
+  python3 tests/importador/test_descoberta_chagas.py verify
+
+D2_DB_NAME="$test_db" D2_IMPORT_USER="$import_user" D2_IMPORT_PASSWORD="$import_password" \
+  python3 tests/importador/test_concorrencia_promocao_d2.py
 
 D8_DB_NAME="$test_db" D8_IMPORT_USER="$import_user" D8_IMPORT_PASSWORD="$import_password" \
   python3 tests/importador/test_ultimo_comparecimento_ano.py
