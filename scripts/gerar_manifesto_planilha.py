@@ -154,16 +154,21 @@ def target(key, header, block):
     }
     if key == "localizado": return (None,None,"excluido","fora do estruturado no MVP; semântica indefinida")
     if key == "idade": return ("importacao_linha","dados_brutos","parcial","sem campo para idade original nem data de referência comprovada; preservar no bruto e derivar de nascimento e atendimento quando possível")
+    if key == "familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas":
+        return ("rastreio_familiar", "familiares_examinados", "parcial",
+                "somente negativa booleana inequívoca vira avaliação sem resultados; afirmativa exige familiar e resultado, e texto ambíguo permanece no bruto")
+    if key == "retorno_anual_realizado":
+        return ("evento_clinico", "ano_evento", "parcial",
+                "somente ano de quatro dígitos vira snapshot do último comparecimento informado; texto ambíguo permanece no bruto; não criar visita ou data")
     partial_reasons = {
-        "familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas": "historico_familiar_chagas representa doença familiar, não realização de exame por parentes; preservar no bruto",
         "paciente_trouxe_outros_exames_complementares": "indicador agregado sem tipo de ocorrência; paciente_exame_complementar exige um exame identificado; preservar no bruto",
         "solicitado_exames_complementares": "indicador agregado sem tipo de ocorrência; paciente_exame_complementar exige um exame identificado; preservar no bruto",
-        "retorno_30_dias_de_tratamento": "valor e vínculo clínico do retorno não possuem semântica aprovada; não inferir comparecimento ou status; preservar no bruto",
-        "retorno_final_de_tratamento": "valor e vínculo clínico do retorno não possuem semântica aprovada; não inferir comparecimento ou status; preservar no bruto",
-        "retorno_anual_realizado": "valor e vínculo clínico do retorno não possuem semântica aprovada; não inferir comparecimento ou status; preservar no bruto",
         "desfecho_do_retorno": "não está definido a qual retorno o desfecho pertence nem seu domínio; preservar no bruto",
     }
     if key in partial_reasons: return ("importacao_linha","dados_brutos","parcial",partial_reasons[key])
+    if key in {"retorno_30_dias_de_tratamento", "retorno_final_de_tratamento"}:
+        return ("acompanhamento_cuidado","data_realizada","parcial",
+                "somente data real dd/mm/aaaa com tratamento BZN canônico vira comparecimento; sim/não ou texto permanecem no bruto")
     if block in {"trazido","solicitado"} and key in {"eco","laboratoriais","de_imagem","holter","endoscopia","colonoscopia","teste_ergometrico","mapa","outros"}:
         return ("paciente_exame_complementar","resultado_texto","com_transformacao",f"criar ocorrência do tipo {key} no bloco {block}")
     if key.startswith("caso_seja_sorologia_metodo_"): return ("sorologia_chagas","metodo_sorologico","com_transformacao","criar ocorrência pelo número do método")
@@ -179,6 +184,9 @@ def target(key, header, block):
     return direct.get(key, raw)
 
 def semantic_type(key, transformation):
+    if key in {"retorno_30_dias_de_tratamento", "retorno_final_de_tratamento",
+               "familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas",
+               "retorno_anual_realizado"}: return "texto"
     if "boolean" in transformation or key.startswith(("teve_","portador_","paciente_","uso_","tem_")): return "booleano_triestado"
     if "data" in transformation: return "data"
     if "ano" in transformation: return "ano"
@@ -214,7 +222,7 @@ def main():
             table,field,coverage,transform=target(key,clean,block); all_keys.add(key)
             columns.append({"layout_versao":"planilha_ambulatorio_v1","aba_nome":name,"posicao_fisica":position,"ordem":order,"cabecalho_original":header,"chave_semantica":key,"ocorrencia":seen[clean] if totals[clean]>1 or key=="eco" else None,"bloco_funcional":block or "geral","tipo_semantico":semantic_type(key,transform),"destino_atual":f"ambulatorio.{table}.{field}" if table else None,"tabela_destino":table,"campo_destino":field,"situacao_cobertura":coverage,"transformacao":transform,"alias_conhecido":key if slug(clean)!=key else None,"observacoes_tecnicas":"célula vazia significa não informado"})
         sheets.append({"aba_chave":"portadores" if sheet_order==1 else "nao_portadores","aba_nome_original":name,"aba_ordem":sheet_order,"condicao_chagas":"portador" if sheet_order==1 else "nao_portador","quantidade_colunas":len(columns),"columns":columns})
-    doc={"manifesto":"planilha_ambulatorio","layout_versao":"planilha_ambulatorio_v1","versao":"v1.2","fonte_local":"planejamento/Nova Planilha ambulatório.xlsx","escopo":{"abas_incluidas":[x["aba_nome_original"] for x in sheets],"abas_excluidas":["P Digitar","AIM3 incluidos sem ambulatorio","AIM3 sem ambulatorio"],"valor_vazio":"nao_informado","localizado":"excluido_do_estruturado"},"inventario":{"colunas_por_aba":{"portadores":142,"nao_portadores":136},"rotulos_semanticos_canonicos":136,"cabecalhos_compartilhados_deslocados":81,"complicacoes_exclusivas_portadores":4,"tipos_exame_repetidos":9},"aliases_versionados":ALIASES_VERSIONADOS,"sheets":sheets}
+    doc={"manifesto":"planilha_ambulatorio","layout_versao":"planilha_ambulatorio_v1","versao":"v1.4","fonte_local":"planejamento/Nova Planilha ambulatório.xlsx","escopo":{"abas_incluidas":[x["aba_nome_original"] for x in sheets],"abas_excluidas":["P Digitar","AIM3 incluidos sem ambulatorio","AIM3 sem ambulatorio"],"valor_vazio":"nao_informado","localizado":"excluido_do_estruturado"},"inventario":{"colunas_por_aba":{"portadores":142,"nao_portadores":136},"rotulos_semanticos_canonicos":136,"cabecalhos_compartilhados_deslocados":81,"complicacoes_exclusivas_portadores":4,"tipos_exame_repetidos":9},"aliases_versionados":ALIASES_VERSIONADOS,"sheets":sheets}
     if len(all_keys)!=133: raise SystemExit(f"esperadas 133 chaves após aliases dos 136 rótulos, encontradas {len(all_keys)}")
     OUTPUT.parent.mkdir(parents=True,exist_ok=True); OUTPUT.write_text(json.dumps(doc,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(f"OK: manifesto gerado com {len(all_keys)} chaves; abas: 142 e 136 colunas")

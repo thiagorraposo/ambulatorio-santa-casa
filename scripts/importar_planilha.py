@@ -21,7 +21,7 @@ from importador.xlsx import read as read_xlsx  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "manifestos/planilha_ambulatorio_v1.json"
-IMPORTER_VERSION = "1.5.0"
+IMPORTER_VERSION = "1.7.0"
 
 
 class RowConflict(Exception):
@@ -145,10 +145,40 @@ PK_FIELDS = {
 }
 
 PROMOTION_REGISTRY = {
+    "familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas": {
+        "handler": "family_screening",
+        "tables": {"rastreio_familiar"},
+        "anchor": "atendimento",
+        "policy": "repeatable_by_provenance",
+    },
+    "autorelato_diagnostico_de_chagas_do_participante_data": {
+        "handler": "promote_discovery",
+        "tables": {"diagnostico_chagas"},
+        "anchor": "atendimento",
+        "policy": "single_by_attendance",
+    },
     "pendencias_observacao": {
         "handler": "pending_note",
         "tables": {"pendencia_atendimento"},
         "anchor": "atendimento",
+        "policy": "repeatable_by_provenance",
+    },
+    "retorno_30_dias_de_tratamento": {
+        "handler": "bzn_return",
+        "tables": {"acompanhamento_cuidado"},
+        "anchor": "atendimento",
+        "policy": "repeatable_by_provenance",
+    },
+    "retorno_final_de_tratamento": {
+        "handler": "bzn_return",
+        "tables": {"acompanhamento_cuidado"},
+        "anchor": "atendimento",
+        "policy": "repeatable_by_provenance",
+    },
+    "retorno_anual_realizado": {
+        "handler": "last_attendance_year",
+        "tables": {"evento_clinico"},
+        "anchor": "paciente",
         "policy": "repeatable_by_provenance",
     },
 }
@@ -173,6 +203,8 @@ HANDLED_TABLES = {
     "exame_complementar_resultado", "tratamento_benzonidazol",
     "encaminhamento", "dados_clinicos_atendimento", "evento_clinico",
     "dispositivo_implantado", "notificacao", "obito", "pendencia_atendimento",
+    "acompanhamento_cuidado",
+    "rastreio_familiar",
 }
 
 
@@ -213,9 +245,16 @@ class Importer:
             columns = by_key.get(key, [])
             coverages = {c["situacao_cobertura"] for c in columns}
             tables = {c["tabela_destino"] for c in columns}
-            if (not columns or not coverages <= {"direta", "com_transformacao"}
-                    or tables != rule["tables"] or rule["anchor"] not in {"paciente", "atendimento"}
-                    or rule["policy"] not in {"repeatable_by_provenance"}
+            expected_coverages = ({"parcial"} if key in {
+                "familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas",
+                "retorno_30_dias_de_tratamento", "retorno_final_de_tratamento",
+                "retorno_anual_realizado"}
+                else {"direta", "com_transformacao"})
+            if (not columns or not coverages <= expected_coverages
+                    or tables != rule.get("source_tables", rule["tables"])
+                    or not rule["tables"] <= HANDLED_TABLES
+                    or rule["anchor"] not in {"paciente", "atendimento"}
+                    or rule["policy"] not in {"repeatable_by_provenance", "single_by_attendance"}
                     or not callable(getattr(self, rule["handler"], None))):
                 raise SystemExit(f"Registro de promoção incompatível: {key}")
         for code, rule in NONCRITICAL_POLICY.items():
@@ -466,6 +505,165 @@ class Importer:
             if requested and requested.strip(): values.update(solicitada=bool_value(requested,"ou_solicitado_sorologia"),valor_original_solicitacao=requested)
             if requested_date and requested_date.strip(): values["data_solicitacao"] = date_value(requested_date,"se_sim_data_solicitada")
             self.insert_returning(line_id, "sorologia_solicitacao", values)
+
+    def promote_discovery(self, line_id, attendance_id, row, promotion=False):
+        """Só associa valor já comprovado; NULL legado não demonstra ausência de edição."""
+        original = row.get("autorelato_diagnostico_de_chagas_do_participante_data")
+        if not original or not original.strip():
+            return False
+        wanted = date_value(original, "autorelato_diagnostico_de_chagas_do_participante_data")
+        found = self.db.run("SELECT diagnostico_chagas_id || '|' || "
+            "COALESCE(data_descoberta_autorelato::text,'') FROM diagnostico_chagas "
+            f"WHERE atendimento_id={attendance_id}")
+        if len(found) != 1:
+            raise RowConflict("promocao.autorelato: diagnóstico sem âncora única")
+        record_id, current = found[0].split("|", 1)
+        if current != wanted:
+            raise RowConflict("promocao.autorelato: história do campo insuficiente ou divergente")
+        self.provenance(line_id, "diagnostico_chagas", int(record_id), "associado")
+        return "associado"
+
+    def bzn_return(self, line_id, attendance_id, row, source=None, promotion=False):
+        """Materializa somente data efetiva de comparecimento com BZN canônico."""
+        if source is None:
+            raise ValueError("origem do retorno BZN obrigatória")
+        original = row.get(source)
+        if not original or not original.strip():
+            return False
+        try:
+            actual_date = date_value(original, source)
+        except RowConflict:
+            return False  # Sim/não e texto legado ficam somente no bruto.
+        patient_id = self.db.scalar(f"SELECT paciente_id FROM atendimento WHERE atendimento_id={attendance_id}")
+        if not patient_id or not self.db.scalar(
+                f"SELECT 1 FROM tratamento_benzonidazol WHERE paciente_id={patient_id}"):
+            return False
+        kind = {"retorno_30_dias_de_tratamento": "retorno_bzn_30_dias",
+                "retorno_final_de_tratamento": "retorno_bzn_final"}[source]
+        linked = self.db.run("SELECT a.acompanhamento_cuidado_id || '|' || "
+            "COALESCE(a.data_realizada::text,'') FROM acompanhamento_cuidado a "
+            "JOIN importacao_registro r ON r.tabela_destino='acompanhamento_cuidado' "
+            "AND r.registro_id=a.acompanhamento_cuidado_id "
+            f"WHERE r.importacao_linha_id={line_id} AND a.atendimento_id={attendance_id} "
+            f"AND a.tipo_acompanhamento={literal(kind)}")
+        if len(linked) > 1:
+            raise RowConflict(f"promocao.{source}: proveniência ambígua")
+        if linked:
+            record_id, current = linked[0].split("|", 1)
+            if current != actual_date:
+                raise RowConflict(f"promocao.{source}: alvo divergente")
+            self.provenance(line_id, "acompanhamento_cuidado", int(record_id), "associado")
+            return "associado"
+        if self.db.scalar("SELECT 1 FROM acompanhamento_cuidado "
+                f"WHERE atendimento_id={attendance_id} AND tipo_acompanhamento={literal(kind)} LIMIT 1"):
+            raise RowConflict(f"promocao.{source}: ocorrência existente sem proveniência")
+        self.insert_returning(line_id, "acompanhamento_cuidado", {
+            "atendimento_id": attendance_id, "data_realizada": actual_date,
+            "compareceu": True, "status_acompanhamento": "concluido",
+            "tipo_acompanhamento": kind, "valor_original_acompanhamento": original,
+        })
+        return True
+
+    def family_screening(self, line_id, attendance_id, row, promotion=False):
+        """Só materializa negativa explícita; afirmativa exige familiar e resultado."""
+        source = "familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas"
+        original = row.get(source)
+        if not original or not original.strip():
+            return False
+        try:
+            examined = bool_value(original, source)
+        except RowConflict:
+            return False  # Texto legado não identifica avaliação inequívoca.
+        if examined is not False:
+            return False  # A planilha não fornece o par familiar/resultado obrigatório.
+        patient_id = self.db.scalar(
+            f"SELECT paciente_id FROM atendimento WHERE atendimento_id={attendance_id}")
+        if not patient_id:
+            raise RowConflict("promocao.rastreio_familiar: atendimento sem paciente")
+        linked = self.db.run(
+            "SELECT f.rastreio_familiar_id || '|' || f.paciente_id || '|' || "
+            "f.atendimento_id || '|' || COALESCE(f.valor_original_examinados,'') "
+            "FROM rastreio_familiar f JOIN importacao_registro r "
+            "ON r.tabela_destino='rastreio_familiar' AND r.registro_id=f.rastreio_familiar_id "
+            f"WHERE r.importacao_linha_id={line_id}")
+        if len(linked) > 1:
+            raise RowConflict("promocao.rastreio_familiar: proveniência ambígua")
+        if linked:
+            record_id, current_patient, current_attendance, current_original = linked[0].split("|", 3)
+            if (int(current_patient) != int(patient_id)
+                    or int(current_attendance) != attendance_id
+                    or current_original != original
+                    or self.db.scalar("SELECT familiares_examinados::text "
+                        f"FROM rastreio_familiar WHERE rastreio_familiar_id={record_id}") != "false"):
+                raise RowConflict("promocao.rastreio_familiar: alvo divergente")
+            self.provenance(line_id, "rastreio_familiar", int(record_id), "associado")
+            return "associado"
+        if self.db.scalar("SELECT 1 FROM rastreio_familiar "
+                f"WHERE atendimento_id={attendance_id} LIMIT 1"):
+            return False  # Avaliação manual sem proveniência não autoriza associação.
+        self.insert_returning(line_id, "rastreio_familiar", {
+            "paciente_id": int(patient_id), "atendimento_id": attendance_id,
+            "familiares_examinados": False, "valor_original_examinados": original,
+        })
+        return True
+
+    def last_attendance_year(self, line_id, patient_id, row, promotion=False):
+        """Registra só o ano informado, sem transformar o snapshot em visita."""
+        source = "retorno_anual_realizado"
+        original = row.get(source)
+        if not original or not original.strip():
+            return False
+        try:
+            year = year_value(original, source)
+        except RowConflict:
+            return False  # Texto livre não prova ano; permanece no bruto.
+        kind = "ultimo_comparecimento_ano_informado"
+        linked = self.db.run(
+            "SELECT e.evento_clinico_id || '|' || e.paciente_id || '|' || "
+            "e.ano_evento || '|' || COALESCE(e.valor_original_data,'') "
+            "FROM evento_clinico e JOIN importacao_registro r "
+            "ON r.tabela_destino='evento_clinico' AND r.registro_id=e.evento_clinico_id "
+            f"WHERE r.importacao_linha_id={line_id} AND e.tipo_evento={literal(kind)}")
+        if len(linked) > 1:
+            raise RowConflict("promocao.retorno_anual_realizado: proveniência ambígua")
+        if linked:
+            record_id, current_patient, current_year, current_original = linked[0].split("|", 3)
+            if (int(current_patient) != patient_id or int(current_year) != year
+                    or current_original != original):
+                raise RowConflict("promocao.retorno_anual_realizado: alvo divergente")
+            self.provenance(line_id, "evento_clinico", int(record_id), "associado")
+            return "associado"
+
+        # Um alvo prévio só pode ser associado se a própria fonte (hash/layout)
+        # já o comprovou. Valor igual em outro arquivo ou edição manual não
+        # estabelece precedência nem autoriza deduplicação silenciosa.
+        candidates = self.db.run(
+            "SELECT evento_clinico_id FROM evento_clinico "
+            f"WHERE paciente_id={patient_id} AND tipo_evento={literal(kind)} "
+            f"AND ano_evento={year} ORDER BY evento_clinico_id")
+        if candidates:
+            if len(candidates) != 1:
+                return False
+            record_id = int(candidates[0])
+            same_source = self.db.scalar(
+                "SELECT 1 FROM importacao_registro r "
+                "JOIN importacao_linha origem ON origem.importacao_linha_id=r.importacao_linha_id "
+                "JOIN importacao_lote fonte ON fonte.importacao_lote_id=origem.importacao_lote_id "
+                "JOIN importacao_linha atual ON atual.importacao_linha_id=" + str(line_id) + " "
+                "JOIN importacao_lote corrente ON corrente.importacao_lote_id=atual.importacao_lote_id "
+                "WHERE r.tabela_destino='evento_clinico' "
+                f"AND r.registro_id={record_id} "
+                "AND fonte.hash_arquivo_sha256=corrente.hash_arquivo_sha256 "
+                "AND fonte.layout_versao=corrente.layout_versao LIMIT 1")
+            if not same_source:
+                return False
+            self.provenance(line_id, "evento_clinico", record_id, "associado")
+            return "associado"
+        self.insert_returning(line_id, "evento_clinico", {
+            "paciente_id": patient_id, "tipo_evento": kind,
+            "ano_evento": year, "valor_original_data": original,
+        })
+        return True
 
     def chagas_condition(self, line_id, attendance_id, row):
         form, classification = row.get("forma_da_dc"), row.get("classificacao_da_cardiopatia_chagasica")
@@ -809,6 +1007,7 @@ class Importer:
             return True
 
         promoted = []
+        handled = []
         resolved = []
         noncritical = []
         conflict = []
@@ -817,8 +1016,14 @@ class Importer:
             for key in promotable:
                 rule = PROMOTION_REGISTRY[key]
                 anchor_id = next(iter(anchors[rule["anchor"]]))
-                getattr(self, rule["handler"])(line_id, anchor_id, row, promotion=True)
-                promoted.append(key)
+                handler = getattr(self, rule["handler"])
+                result = (handler(line_id, anchor_id, row, source=key, promotion=True)
+                          if key in {"retorno_30_dias_de_tratamento", "retorno_final_de_tratamento"} else
+                          handler(line_id, anchor_id, row, promotion=True))
+                if result is not False:
+                    handled.append(key)
+                if result is True or result is None:
+                    promoted.append(key)
             for issue in retry_issues:
                 code, separator, subject = issue.partition(":")
                 rule = NONCRITICAL_POLICY.get(code)
@@ -838,9 +1043,10 @@ class Importer:
             self.db.run("RELEASE SAVEPOINT resolucao_pendencias")
             conflict = sorted(set(promotable) | set(retry_issues))
             promoted = []
+            handled = []
             resolved = []
             noncritical = retry_issues
-        pending = sorted(set(remaining))
+        pending = sorted(set(remaining) - set(handled))
         final = "importada_com_pendencia" if pending or noncritical or conflict else "importada"
         self.finish_reused(line_id, final, predecessor_id, promoted, pending,
                            conflict, resolved, noncritical)
@@ -885,9 +1091,17 @@ class Importer:
             self.events_devices(line_id,patient_id,row)
             self.notification_death(line_id,patient_id,row)
             self.treatment(line_id,patient_id,attendance_id,row)
+            mapped_family = self.family_screening(line_id, attendance_id, row)
+            mapped_returns = {key for key in ("retorno_30_dias_de_tratamento", "retorno_final_de_tratamento")
+                              if self.bzn_return(line_id, attendance_id, row, source=key)}
+            mapped_year = self.last_attendance_year(line_id, patient_id, row)
             self.referral(line_id,attendance_id,row)
             self.pending_note(line_id,attendance_id,row)
-            partial=self.pending_keys(sheet,row)
+            mapped = (mapped_returns
+                      | ({"retorno_anual_realizado"} if mapped_year else set())
+                      | ({"familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas"}
+                         if mapped_family else set()))
+            partial=sorted(set(self.pending_keys(sheet,row)) - mapped)
             final="importada_com_pendencia" if partial or noncritical else "importada"
             message_parts=[]
             if partial:

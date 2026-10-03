@@ -16,8 +16,10 @@ EXPECTED_ALIASES={
 }
 EXPECTED_PARTIAL={"idade","familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas","paciente_trouxe_outros_exames_complementares","solicitado_exames_complementares","retorno_30_dias_de_tratamento","retorno_final_de_tratamento","retorno_anual_realizado","desfecho_do_retorno","paciente_com_contrarreferencia_realizada"}
 # Destino incremental validado pela migration, sem alterar o dump persistente.
-EXTENSION_COLUMNS={"diagnostico_chagas": {"data_descoberta_autorelato"}}
+EXTENSION_COLUMNS={"diagnostico_chagas": {"data_descoberta_autorelato"},
+                   "rastreio_familiar": {"familiares_examinados"}}
 EXTENSION_MIGRATION=ROOT/"sql/28_data_descoberta_autorelato_chagas.sql"
+FAMILY_MIGRATION=ROOT/"sql/25_rastreio_familiar.sql"
 
 def schema_columns(text):
     result={}
@@ -29,10 +31,13 @@ def fail(errors,msg): errors.append(msg)
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument("--fonte",action="store_true",help="compara somente abas e linha de cabeçalho com o XLSX local"); args=ap.parse_args()
     data=json.loads(MANIFEST.read_text(encoding="utf-8")); db=schema_columns(SCHEMA.read_text(encoding="utf-8")); errors=[]
-    if data.get("layout_versao")!="planilha_ambulatorio_v1" or data.get("versao")!="v1.2": fail(errors,"versão obrigatória divergente")
+    if data.get("layout_versao")!="planilha_ambulatorio_v1" or data.get("versao")!="v1.4": fail(errors,"versão obrigatória divergente")
     extension = EXTENSION_MIGRATION.read_text(encoding="utf-8") if EXTENSION_MIGRATION.is_file() else ""
     if not re.search(r"ALTER\s+TABLE\s+diagnostico_chagas\s+ADD\s+COLUMN\s+data_descoberta_autorelato\s+DATE\s*;", extension, re.I):
         fail(errors,"migration do destino incremental ausente ou incompatível")
+    family_extension = FAMILY_MIGRATION.read_text(encoding="utf-8") if FAMILY_MIGRATION.is_file() else ""
+    if not re.search(r"CREATE\s+TABLE\s+rastreio_familiar\s*\([\s\S]*?familiares_examinados\s+boolean", family_extension, re.I):
+        fail(errors,"migration D3 do rastreio familiar ausente ou incompatível")
     aliases=data.get("aliases_versionados",{})
     for group,expected in EXPECTED_ALIASES.items():
         if aliases.get(group)!=expected: fail(errors,f"aliases versionados divergentes: {group}")
@@ -61,7 +66,7 @@ def main():
             table,field=c.get("tabela_destino"),c.get("campo_destino")
             if c.get("situacao_cobertura")=="excluido":
                 if table or field or c.get("destino_atual"): fail(errors,f"{key}/{c.get('ordem')}: excluído com destino")
-            elif table not in db or (field not in db.get(table,set()) and field not in EXTENSION_COLUMNS.get(table,set())): fail(errors,f"{key}/{c.get('ordem')}: destino inexistente {table}.{field}")
+            elif (table not in db and table not in EXTENSION_COLUMNS) or (field not in db.get(table,set()) and field not in EXTENSION_COLUMNS.get(table,set())): fail(errors,f"{key}/{c.get('ordem')}: destino inexistente {table}.{field}")
             if table and c.get("destino_atual")!=f"ambulatorio.{table}.{field}": fail(errors,f"{key}/{c.get('ordem')}: destino malformado")
         for sem,items in by_sem.items():
             if len(items)>1 and sem!="eco" and len({x["cabecalho_original"].strip() for x in items})==len(items): fail(errors,f"{key}: chave semântica duplicada indevida {sem}")
@@ -79,6 +84,15 @@ def main():
     destinations={c["chave_semantica"]:c["destino_atual"] for c in all_columns}
     if destinations.get("ambulatorio_unicamente")!="ambulatorio.atendimento.ambulatorio_unicamente": fail(errors,"destino inválido para ambulatorio_unicamente")
     if destinations.get("ambulatorio_anexo_ao_projeto")!="ambulatorio.atendimento.ambulatorio_anexo_projeto": fail(errors,"destino inválido para ambulatorio_anexo_ao_projeto")
+    for key in ("retorno_30_dias_de_tratamento", "retorno_final_de_tratamento"):
+        if destinations.get(key)!="ambulatorio.acompanhamento_cuidado.data_realizada": fail(errors,f"destino inválido para {key}")
+    for key, destination in {
+        "familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas": "ambulatorio.rastreio_familiar.familiares_examinados",
+        "retorno_anual_realizado": "ambulatorio.evento_clinico.ano_evento",
+    }.items():
+        if destinations.get(key)!=destination: fail(errors,f"destino inválido para {key}")
+        if any(c["tipo_semantico"]!="texto" or c["situacao_cobertura"]!="parcial" for c in by_sem[key]):
+            fail(errors,f"cobertura parcial de texto legado inválida para {key}")
     dumped=json.dumps(data,ensure_ascii=False)
     if re.search(r"\b\d{3}\.\d{3}\.\d{3}-\d{2}\b|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|\b\d{8,}\b",dumped): fail(errors,"possível dado sensível encontrado")
     exam={"eco","laboratoriais","de_imagem","holter","endoscopia","colonoscopia","teste_ergometrico","mapa","outros"}
