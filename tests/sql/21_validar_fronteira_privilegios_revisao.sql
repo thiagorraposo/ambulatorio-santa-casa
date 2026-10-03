@@ -5,6 +5,7 @@ SET search_path TO ambulatorio, public;
 
 DO $$
 DECLARE objeto text; papel text; coluna record; sequencia text; rotina text;
+  permitido boolean;
 BEGIN
   FOREACH objeto IN ARRAY ARRAY[
     'importacao_fonte', 'importacao_revisao', 'importacao_revisao_autorizacao',
@@ -88,8 +89,13 @@ BEGIN
       'ambulatorio_servico_autenticado', 'ambulatorio_revisao_servico',
       'ambulatorio_revisao_gestor'
     ] LOOP
-      IF has_function_privilege(papel,'ambulatorio.' || rotina,'EXECUTE') THEN
-        RAISE EXCEPTION 'EXECUTE indevido: % em %', papel, rotina;
+      permitido:=rotina IN (
+        'revisao_aplicar_aprovada(bigint,bigint)',
+        'revisao_finalizar_aprovada(bigint,bigint,text)',
+        'revisao_diagnosticar_falha(bigint,bigint,text)'
+      ) AND papel='ambulatorio_revisao_servico';
+      IF has_function_privilege(papel,'ambulatorio.' || rotina,'EXECUTE') IS DISTINCT FROM permitido THEN
+        RAISE EXCEPTION 'EXECUTE incompatível com allowlist: % em % (esperado=%)', papel, rotina, permitido;
       END IF;
     END LOOP;
   END LOOP;

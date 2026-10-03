@@ -58,9 +58,7 @@ export IMPORT_DB_USER="$task_import_login" IMPORT_DB_PASSWORD=senha_exclusivamen
 export TEST_REVIEW_DB_USER="$task_review_login" TEST_REVIEW_DB_PASSWORD=senha_exclusivamente_sintetica_revisao_http
 export REVISION_HTTP_ENABLED=true REVISION_SYNTHETIC_MODE=true
 export REVISION_STAGING_HTTP_ENABLED=true REVISION_GIT=abcdef0
-# Homologação de endpoints em banco descartável; migration 57 mantém as entradas
-# privadas até o aceite integrado e não concede nenhuma dessas permissões.
-psql -X -q -d "$task_db" -v ON_ERROR_STOP=1 -c "GRANT EXECUTE ON FUNCTION ambulatorio.revisao_aplicar_aprovada(bigint,bigint), ambulatorio.revisao_finalizar_aprovada(bigint,bigint,text), ambulatorio.revisao_diagnosticar_falha(bigint,bigint,text) TO ambulatorio_revisao_servico"
+# A migration 63 concede somente os wrappers operacionais à role dedicada.
 export REVISION_EXECUTION_HTTP_ENABLED=true
 export REVISION_DB_HOST="$PGHOST" REVISION_DB_PORT="$PGPORT" REVISION_DB_NAME="$task_db"
 export REVISION_DB_USER="$task_review_login" REVISION_DB_PASSWORD=senha_exclusivamente_sintetica_revisao_http

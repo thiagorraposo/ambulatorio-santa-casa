@@ -60,6 +60,7 @@ describe('validateConfig', () => {
 
   it('exige ativação sintética e revisão Git explícitas para staging', () => {
     expect(validateConfig(valid).revisions.stagingEnabled).toBe(false);
+    expect(validateConfig(valid).revisions.executionEnabled).toBe(false);
     expect(() => validateConfig({ ...valid, REVISION_STAGING_HTTP_ENABLED: 'true' }))
       .toThrow('staging exige revisão sintética habilitada');
     const revision = { ...valid, REVISION_HTTP_ENABLED: 'true', REVISION_SYNTHETIC_MODE: 'true',
@@ -70,8 +71,15 @@ describe('validateConfig', () => {
     expect(() => validateConfig({ ...revision, REVISION_GIT: 'versão desconhecida' })).toThrow('REVISION_GIT');
     expect(validateConfig({ ...revision, REVISION_GIT: 'abcdef0' }).revisions)
       .toMatchObject({ stagingEnabled: true, gitRevision: 'abcdef0' });
-    expect(() => validateConfig({ ...revision, NODE_ENV: 'development', REVISION_GIT: 'abcdef0',
-      REVISION_EXECUTION_HTTP_ENABLED: 'true' })).toThrow('homologação em teste');
+    const development = { ...revision, NODE_ENV: 'development', REVISION_GIT: 'abcdef0',
+      REVISION_EXECUTION_HTTP_ENABLED: 'true' };
+    expect(validateConfig(development).revisions)
+      .toMatchObject({ executionEnabled: true, syntheticMode: true, stagingEnabled: true });
+    expect(() => validateConfig({ ...development, REVISION_SYNTHETIC_MODE: 'false' }))
+      .toThrow('revisão HTTP exige ambiente sintético');
+    expect(() => validateConfig({ ...development, REVISION_STAGING_HTTP_ENABLED: 'false' }))
+      .toThrow('ambiente sintético e staging habilitado');
+    expect(() => validateConfig({ ...development, NODE_ENV: 'production' })).toThrow();
     expect(validateConfig({ ...revision, REVISION_GIT: 'abcdef0', REVISION_EXECUTION_HTTP_ENABLED: 'true' }).revisions)
       .toMatchObject({ executionEnabled: true });
   });

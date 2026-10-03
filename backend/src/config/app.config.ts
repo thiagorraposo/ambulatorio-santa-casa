@@ -90,8 +90,9 @@ export function validateConfig(env: Record<string, unknown>): AppConfig {
     throw new Error('Configuração inválida: REVISION_GIT');
   }
   const revisionExecutionEnabled = flag(env, 'REVISION_EXECUTION_HTTP_ENABLED');
-  if (revisionExecutionEnabled && (nodeEnv !== 'test' || !revisionStagingEnabled)) {
-    throw new Error('Configuração inválida: execução de revisão exige homologação em teste com staging habilitado');
+  if (revisionExecutionEnabled && (!['test', 'development'].includes(nodeEnv)
+      || !revisionSyntheticMode || !revisionStagingEnabled)) {
+    throw new Error('Configuração inválida: execução de revisão exige ambiente sintético e staging habilitado fora de produção');
   }
   const revisions = revisionsEnabled ? {
     enabled: true, syntheticMode: revisionSyntheticMode,
