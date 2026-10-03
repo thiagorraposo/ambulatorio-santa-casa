@@ -21,8 +21,14 @@ trap cleanup_final EXIT
 cleanup
 createdb -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" "$test_db"
 psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 \
-  -c "ALTER DATABASE $test_db SET search_path TO ambulatorio, public"
+  -c "CREATE SCHEMA ambulatorio AUTHORIZATION ambulatorio_user; ALTER DATABASE $test_db SET search_path TO ambulatorio, public"
 for migration in sql/[0-9][0-9]_*.sql; do
+  # 00/01 operam no banco nominal. Seu equivalente isolado foi criado acima;
+  # nenhuma configuração do banco persistente deve mudar durante o E2E.
+  if [[ "$migration" == sql/00_* || "$migration" == sql/01_* ]]; then continue; fi
+  # O primeiro cenário reproduz lotes legados anteriores à captura do atendimento.
+  # A migration 60 será aplicada antes do cenário de captura com o escritor real.
+  if [[ "$migration" == sql/60_* ]]; then continue; fi
   psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 -f "$migration"
 done
 
@@ -140,7 +146,7 @@ assert r['metrics']=={'between_sheet_conflicts': 1, 'identity_conflicts': 1,
  'importable_rows': 8, 'invalid_values': 1, 'other_causes': 2,
  'pending_rows': 3, 'rejected_rows': 5, 'total_rows': 13,
  'unknown_catalogs': 1, 'valid_rows': 8}
-assert r['importer_version']=='1.5.0'
+assert r['importer_version']=='1.7.0'
 PY
 if rg -i 'Ana Sintética|Identidade Duplicada|telefone|texto parcial preservado|pendência sintética conflitante' /tmp/ambulatorio-importador.log; then
   echo "Erro: log estruturado contém dado sensível ou valor clínico" >&2
@@ -240,19 +246,19 @@ WHERE l.importacao_lote_id=b.importacao_lote_id
   AND ((l.aba_ordem=2 AND l.numero_linha=2) OR (l.aba_ordem=1 AND l.numero_linha=3));
 SQL
 
-promotion_snapshot_before="$(psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -c "SET search_path TO ambulatorio,public; SELECT (SELECT count(*) FROM importacao_lote)||'|'||(SELECT count(*) FROM importacao_linha)||'|'||(SELECT count(*) FROM pendencia_atendimento)||'|'||(SELECT count(*) FROM paciente_projeto_estudo)||'|'||(SELECT count(*) FROM importacao_registro);")"
+promotion_snapshot_before="$(psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -c "SET search_path TO ambulatorio,public; SELECT (SELECT count(*) FROM importacao_lote)||'|'||(SELECT count(*) FROM importacao_linha)||'|'||(SELECT count(*) FROM pendencia_atendimento)||'|'||(SELECT count(*) FROM acompanhamento_cuidado)||'|'||(SELECT count(*) FROM paciente_projeto_estudo)||'|'||(SELECT count(*) FROM importacao_registro);")"
 PGPASSWORD="$import_password" python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-promocao-dry-run --finalidade mesmo_conteudo \
   --reprocessar --dry-run --quality-report /tmp/ambulatorio-quality-promocao.json \
   --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$import_user" --db-role ambulatorio_importador --db-name "$test_db" \
   2>>/tmp/ambulatorio-importador.log
-promotion_snapshot_after="$(psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -c "SET search_path TO ambulatorio,public; SELECT (SELECT count(*) FROM importacao_lote)||'|'||(SELECT count(*) FROM importacao_linha)||'|'||(SELECT count(*) FROM pendencia_atendimento)||'|'||(SELECT count(*) FROM paciente_projeto_estudo)||'|'||(SELECT count(*) FROM importacao_registro);")"
+promotion_snapshot_after="$(psql -X -At -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -c "SET search_path TO ambulatorio,public; SELECT (SELECT count(*) FROM importacao_lote)||'|'||(SELECT count(*) FROM importacao_linha)||'|'||(SELECT count(*) FROM pendencia_atendimento)||'|'||(SELECT count(*) FROM acompanhamento_cuidado)||'|'||(SELECT count(*) FROM paciente_projeto_estudo)||'|'||(SELECT count(*) FROM importacao_registro);")"
 test "$promotion_snapshot_before" = "$promotion_snapshot_after"
 python3 - <<'PY'
 import json
 r=json.load(open('/tmp/ambulatorio-quality-promocao.json'))
 assert r['metrics']['unknown_catalogs']==0
 assert r['metrics']['pending_rows']==3
-assert r['importer_version']=='1.5.0'
+assert r['importer_version']=='1.7.0'
 assert r['purpose']=='mesmo_conteudo'
 PY
 if rg -i 'Ana Sintética|Identidade Duplicada|telefone|texto parcial preservado|pendência sintética conflitante' /tmp/ambulatorio-importador.log; then
@@ -300,7 +306,18 @@ BEGIN
   IF (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_lote) < 100 THEN RAISE EXCEPTION 'cobertura de proveniência insuficiente'; END IF;
   IF (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_reprocessado) <> 2 + (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_lote AND l.status_linha IN ('importada','importada_com_pendencia')) THEN RAISE EXCEPTION 'proveniência promovida ou pendência resolvida'; END IF;
   IF (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_reprocessado_2) <> (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_reprocessado) THEN RAISE EXCEPTION 'proveniência do segundo elo'; END IF;
-  IF (SELECT count(DISTINCT tabela_destino) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_lote) <> 22 THEN RAISE EXCEPTION 'handlers/tabelas estruturadas'; END IF;
+  IF (SELECT count(DISTINCT tabela_destino) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id) WHERE l.importacao_lote_id=v_lote) <> 23 THEN RAISE EXCEPTION 'handlers/tabelas estruturadas'; END IF;
+  IF (SELECT count(*) FROM acompanhamento_cuidado a JOIN atendimento at USING(atendimento_id)
+      JOIN paciente p USING(paciente_id) WHERE p.codigo_planilha='P-ANA'
+      AND ((a.tipo_acompanhamento='retorno_bzn_30_dias' AND a.data_realizada='2025-07-15')
+        OR (a.tipo_acompanhamento='retorno_bzn_final' AND a.data_realizada='2025-08-30'))
+      AND a.compareceu AND a.status_acompanhamento='concluido') <> 2
+  THEN RAISE EXCEPTION 'retornos BZN datados não foram preservados uma vez'; END IF;
+  IF (SELECT count(*) FROM acompanhamento_cuidado) <> 2 THEN RAISE EXCEPTION 'retorno sem data/BZN inferido'; END IF;
+  IF (SELECT count(*) FROM importacao_registro r JOIN importacao_linha l USING(importacao_linha_id)
+      WHERE l.importacao_lote_id IN (v_lote,v_reprocessado,v_reprocessado_2)
+        AND r.tabela_destino='acompanhamento_cuidado') <> 6
+  THEN RAISE EXCEPTION 'retornos BZN duplicados ou sem proveniência encadeada'; END IF;
   IF NOT EXISTS (SELECT 1 FROM importacao_linha WHERE importacao_lote_id=v_lote AND dados_brutos @> '[{"chave":"localizado","valor":"sim"}]') THEN RAISE EXCEPTION 'Localizado bruto'; END IF;
   IF NOT EXISTS (SELECT 1 FROM importacao_linha WHERE importacao_lote_id=v_lote AND status_linha='rejeitada' AND mensagem_processamento LIKE 'conflito entre abas:%') THEN RAISE EXCEPTION 'precedência entre abas'; END IF;
   IF NOT EXISTS (SELECT 1 FROM importacao_linha WHERE importacao_lote_id=v_lote AND status_linha='importada_com_pendencia' AND dados_brutos @> '[{"chave":"pendencias_observacao","valor":"texto parcial preservado"}]') THEN RAISE EXCEPTION 'parcial bruto'; END IF;
@@ -316,7 +333,7 @@ BEGIN
   IF (SELECT count(*) FROM notificacao) <> 1 OR (SELECT count(*) FROM obito) <> 1 THEN RAISE EXCEPTION 'notificação/óbito'; END IF;
 
   IF (SELECT count(*) FROM tratamento_benzonidazol) <> 2 THEN RAISE EXCEPTION 'BZN deve permanecer único por paciente'; END IF;
-  IF EXISTS (SELECT 1 FROM importacao_lote WHERE importador_versao IS DISTINCT FROM '1.5.0') THEN RAISE EXCEPTION 'versão do importador não rastreada'; END IF;
+  IF EXISTS (SELECT 1 FROM importacao_lote WHERE importador_versao IS DISTINCT FROM '1.7.0') THEN RAISE EXCEPTION 'versão do importador não rastreada'; END IF;
   IF (SELECT count(*) FROM pendencia_atendimento) <> 2 THEN RAISE EXCEPTION 'promoção D11 duplicou ou apagou pendência manual'; END IF;
   IF NOT EXISTS (
     SELECT 1 FROM pendencia_atendimento p
@@ -337,7 +354,7 @@ BEGIN
       WHERE importacao_lote_id IN (v_reprocessado,v_reprocessado_2)
         AND aba_ordem=2 AND numero_linha=2
         AND status_linha='importada_com_pendencia'
-        AND mensagem_processamento LIKE '%promovidas=pendencias_observacao%') <> 2
+        AND mensagem_processamento LIKE '%promovidas=%pendencias_observacao%') <> 2
   THEN RAISE EXCEPTION 'estado ou mensagem segura da promoção D11'; END IF;
   IF (SELECT count(*) FROM pendencia_atendimento p
       JOIN importacao_registro a ON a.tabela_destino='atendimento' AND a.registro_id=p.atendimento_id
@@ -429,14 +446,27 @@ BEGIN
 END $$;
 SQL
 
-# O cenario legado acima foi preparado antes de qualquer captura, como exige
-# sua simulacao. Um novo conteudo comprova agora o escritor Python real ativo.
+D3_DB_NAME="$test_db" D3_IMPORT_USER="$import_user" D3_IMPORT_PASSWORD="$import_password" \
+  python3 tests/importador/test_rastreio_familiar.py
+
+# Os lotes legados acima precedem a captura do atendimento. Atualizar o banco
+# mantém seu histórico desconhecido; novo conteúdo comprova o escritor real ativo.
+psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 \
+  -f sql/60_captura_data_observacao_atendimento.sql
 psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 <<'SQL'
 BEGIN;
 SET search_path TO ambulatorio, public;
 INSERT INTO auditoria_campo(tabela_destino,coluna_destino,coluna_pk,tipo_sql,serializacao_versao,captura_desde) VALUES
 ('paciente','nome','paciente_id','character varying(255)','v1',clock_timestamp()),
-('atendimento','data_atendimento','atendimento_id','date','v1',clock_timestamp());
+('atendimento','data_atendimento','atendimento_id','date','v1',clock_timestamp())
+ON CONFLICT(tabela_destino,coluna_destino) DO NOTHING;
+DO $$ BEGIN
+  IF NOT EXISTS(SELECT 1 FROM auditoria_campo WHERE tabela_destino='atendimento'
+    AND coluna_destino='data_atendimento' AND coluna_pk='atendimento_id'
+    AND tipo_sql='date' AND serializacao_versao='v1' AND captura_desde IS NOT NULL) THEN
+    RAISE EXCEPTION 'Contrato de captura da data do atendimento incompatível';
+  END IF;
+END $$;
 COMMIT;
 SQL
 python3 tests/backend/gerar_planilha_http_sintetica.py "$capture_fixture"
@@ -445,14 +475,16 @@ PGPASSWORD="$import_password" python3 scripts/importar_planilha.py "$capture_fix
   --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$import_user" --db-name "$test_db"
 psql -X -q -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 <<'SQL'
 SET search_path TO ambulatorio, public;
-DO $$ DECLARE destino text;
+DO $$ DECLARE destino record;
 BEGIN
-  FOREACH destino IN ARRAY ARRAY['paciente','atendimento'] LOOP
+  FOR destino IN SELECT * FROM (VALUES ('paciente','nome'),
+    ('atendimento','data_atendimento'),('atendimento','observacoes')) AS campos(tabela,coluna) LOOP
     IF (SELECT count(*) FROM auditoria_campo_evento e JOIN auditoria_campo c USING(campo_id)
       JOIN importacao_linha i USING(importacao_linha_id) JOIN importacao_lote l USING(importacao_lote_id)
-      WHERE l.codigo_lote='sint-captura-ativa' AND c.tabela_destino=destino AND e.origem='importacao'
+      WHERE l.codigo_lote='sint-captura-ativa' AND c.tabela_destino=destino.tabela
+        AND c.coluna_destino=destino.coluna AND e.origem='importacao'
         AND e.antes->>'estado'='alvo_ausente' AND e.versao_campo=1 AND e.ator_usuario_id IS NULL)<>2 THEN
-      RAISE EXCEPTION 'Importador real nao capturou origem e valores para %',destino;
+      RAISE EXCEPTION 'Importador real nao capturou origem e valores para %.%',destino.tabela,destino.coluna;
     END IF;
   END LOOP;
   IF EXISTS(SELECT 1 FROM auditoria_campo_evento e JOIN auditoria_campo c USING(campo_id)
@@ -463,5 +495,11 @@ BEGIN
   RAISE NOTICE 'OK: escritor Python real, captura ativa, origem importacao e proveniencia conferida';
 END $$;
 SQL
+
+F13_DB_NAME="$test_db" F13_IMPORT_USER="$import_user" F13_IMPORT_PASSWORD="$import_password" \
+  python3 tests/importador/test_reprocessamento_temporal.py
+
+D8_DB_NAME="$test_db" D8_IMPORT_USER="$import_user" D8_IMPORT_PASSWORD="$import_password" \
+  python3 tests/importador/test_ultimo_comparecimento_ano.py
 
 echo "OK: finalidade explícita, recusas sem efeitos, 126 destinos, criticidade, promoção, proveniência, rollback, reprocessamento e captura ativa"
