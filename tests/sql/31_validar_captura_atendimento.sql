@@ -18,9 +18,8 @@ BEGIN
   SELECT campo_id INTO campo_ano FROM auditoria_campo WHERE tabela_destino='evento_clinico'
     AND coluna_destino='ano_evento' AND coluna_pk='evento_clinico_id'
     AND tipo_sql='integer' AND serializacao_versao='v1' AND captura_desde IS NOT NULL;
-  IF campo_data IS NULL OR campo_obs IS NULL OR campo_ano IS NULL
-    OR (SELECT count(*) FROM auditoria_campo WHERE captura_desde IS NOT NULL)<>3 THEN
-    RAISE EXCEPTION 'Catálogo ativo deve conter somente D8, data e observações do atendimento';
+  IF campo_data IS NULL OR campo_obs IS NULL OR campo_ano IS NULL THEN
+    RAISE EXCEPTION 'Catálogo deve habilitar os contratos de D8, data e observações do atendimento';
   END IF;
 
   INSERT INTO usuario_aplicacao(nome,login,senha_hash,perfil)

@@ -506,20 +506,47 @@ class Importer:
             if requested_date and requested_date.strip(): values["data_solicitacao"] = date_value(requested_date,"se_sim_data_solicitada")
             self.insert_returning(line_id, "sorologia_solicitacao", values)
 
-    def promote_discovery(self, line_id, attendance_id, row, promotion=False):
-        """Só associa valor já comprovado; NULL legado não demonstra ausência de edição."""
+    def promote_discovery(self, line_id, attendance_id, row, promotion=False,
+                          base_line_id=None):
+        """Promove D2 só quando a linha-base prova NULL capturado sem edição posterior."""
         original = row.get("autorelato_diagnostico_de_chagas_do_participante_data")
         if not original or not original.strip():
             return False
         wanted = date_value(original, "autorelato_diagnostico_de_chagas_do_participante_data")
         found = self.db.run("SELECT diagnostico_chagas_id || '|' || "
-            "COALESCE(data_descoberta_autorelato::text,'') FROM diagnostico_chagas "
-            f"WHERE atendimento_id={attendance_id}")
+            "COALESCE(data_descoberta_autorelato::text,'__NULL__') FROM diagnostico_chagas "
+            f"WHERE atendimento_id={attendance_id} FOR UPDATE")
         if len(found) != 1:
             raise RowConflict("promocao.autorelato: diagnóstico sem âncora única")
         record_id, current = found[0].split("|", 1)
+        mapped = self.db.scalar("SELECT 1 FROM importacao_registro "
+            f"WHERE importacao_linha_id={int(base_line_id or 0)} "
+            "AND tabela_destino='diagnostico_chagas' "
+            f"AND registro_id={int(record_id)}")
+        if not mapped:
+            raise RowConflict("promocao.autorelato: diagnóstico sem proveniência na linha-base")
+        if current == "__NULL__":
+            if not base_line_id:
+                raise RowConflict("promocao.autorelato: NULL legado sem linha-base capturada")
+            proven = self.db.scalar("SELECT auditoria_d2_null_captura_comprovada("
+                f"{int(line_id)},{int(base_line_id)},{int(record_id)})")
+            if proven != "t":
+                raise RowConflict("promocao.autorelato: NULL legado sem captura comprovada desde a base")
+            updated = self.db.scalar("UPDATE diagnostico_chagas SET data_descoberta_autorelato="
+                f"{literal(wanted)}, atualizado_em=CURRENT_TIMESTAMP WHERE diagnostico_chagas_id={int(record_id)} "
+                "AND data_descoberta_autorelato IS NULL RETURNING diagnostico_chagas_id")
+            if updated:
+                # reuse_predecessor already linked this target to the current line.
+                # Updating that protected provenance action after the audit event
+                # would violate F01; the existing association remains sufficient.
+                return True
+            current = self.db.scalar("SELECT COALESCE(data_descoberta_autorelato::text,'__NULL__') "
+                f"FROM diagnostico_chagas WHERE diagnostico_chagas_id={int(record_id)}")
+            if current == wanted:
+                return "associado"
+            raise RowConflict("promocao.autorelato: valor mudou durante promoção concorrente")
         if current != wanted:
-            raise RowConflict("promocao.autorelato: história do campo insuficiente ou divergente")
+            raise RowConflict("promocao.autorelato: valor divergente; revisão temporal necessária")
         self.provenance(line_id, "diagnostico_chagas", int(record_id), "associado")
         return "associado"
 
@@ -1017,9 +1044,13 @@ class Importer:
                 rule = PROMOTION_REGISTRY[key]
                 anchor_id = next(iter(anchors[rule["anchor"]]))
                 handler = getattr(self, rule["handler"])
-                result = (handler(line_id, anchor_id, row, source=key, promotion=True)
-                          if key in {"retorno_30_dias_de_tratamento", "retorno_final_de_tratamento"} else
-                          handler(line_id, anchor_id, row, promotion=True))
+                if key in {"retorno_30_dias_de_tratamento", "retorno_final_de_tratamento"}:
+                    result = handler(line_id, anchor_id, row, source=key, promotion=True)
+                elif key == "autorelato_diagnostico_de_chagas_do_participante_data":
+                    result = handler(line_id, anchor_id, row, promotion=True,
+                                     base_line_id=previous_line)
+                else:
+                    result = handler(line_id, anchor_id, row, promotion=True)
                 if result is not False:
                     handled.append(key)
                 if result is True or result is None:

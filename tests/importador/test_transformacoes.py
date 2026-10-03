@@ -169,13 +169,40 @@ class CriticidadeErrosTest(unittest.TestCase):
         }}}
 
     def test_promocao_autorelato_nao_preenche_null_sem_historia(self):
-        self.importer.db.run.return_value = ["42|"]
-        with self.assertRaisesRegex(RowConflict, "história do campo insuficiente"):
-            self.importer.promote_discovery(1, 2, {
-                "autorelato_diagnostico_de_chagas_do_participante_data": "01/01/2020"},
-                promotion=True)
+        self.importer.db.run.return_value = ["42|__NULL__"]
+        for proof_result in (None, "f", "false", "0"):
+            with self.subTest(proof_result=proof_result):
+                self.importer.db.reset_mock()
+                self.importer.db.run.return_value = ["42|__NULL__"]
+                self.importer.db.scalar.side_effect = ["1", proof_result]
+                with self.assertRaisesRegex(RowConflict, "NULL legado sem captura comprovada"):
+                    self.importer.promote_discovery(1, 2, {
+                        "autorelato_diagnostico_de_chagas_do_participante_data": "01/01/2020"},
+                        promotion=True, base_line_id=9)
+                self.importer.db.run.assert_called_once()
+                self.importer.insert_returning.assert_not_called()
+
+    def test_promocao_autorelato_preenche_null_capturado_na_linha_base(self):
+        self.importer.db.run.return_value = ["42|__NULL__"]
+        self.importer.db.scalar.side_effect = ["1", "t", "42"]
+        self.importer.reconcile = Mock()
+        result = self.importer.promote_discovery(8, 2, {
+            "autorelato_diagnostico_de_chagas_do_participante_data": "01/01/2020"},
+            promotion=True, base_line_id=9)
+        self.assertIs(result, True)
         self.importer.db.run.assert_called_once()
+        self.assertIn("data_descoberta_autorelato='2020-01-01'", self.importer.db.scalar.call_args_list[-1].args[0])
+        self.importer.reconcile.assert_not_called()
+
+    def test_promocao_autorelato_associa_data_equivalente_sem_alterar(self):
+        self.importer.db.run.return_value = ["42|2020-01-01"]
+        self.importer.db.scalar.return_value = "1"
+        result = self.importer.promote_discovery(8, 2, {
+            "autorelato_diagnostico_de_chagas_do_participante_data": "01/01/2020"},
+            promotion=True, base_line_id=9)
+        self.assertEqual(result, "associado")
         self.importer.insert_returning.assert_not_called()
+        self.assertEqual(self.importer.db.run.call_count, 2)
 
     def test_retorno_bzn_exige_data_real_e_tratamento(self):
         source = "retorno_30_dias_de_tratamento"
