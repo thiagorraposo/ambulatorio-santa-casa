@@ -182,24 +182,34 @@ BEGIN
         RAISE NOTICE 'OK: NOT NULL de tipo_dispositivo bloqueou valor nulo';
     END;
 
-    DELETE FROM atendimento WHERE atendimento_id = v_atendimento_id;
+    BEGIN
+        DELETE FROM atendimento WHERE atendimento_id = v_atendimento_id;
+        RAISE EXCEPTION 'DELETE de atendimento com histórico temporal foi aceito';
+    EXCEPTION WHEN check_violation THEN
+        RAISE NOTICE 'OK: histórico temporal protege atendimento e dependentes';
+    END;
 
-    IF EXISTS (
+    IF NOT EXISTS (
         SELECT 1 FROM dados_clinicos_atendimento
          WHERE atendimento_id = v_atendimento_id
     ) THEN
-        RAISE EXCEPTION 'ON DELETE CASCADE de dados clinicos nao removeu o registro';
+        RAISE EXCEPTION 'Recusa do DELETE removeu dados clínicos do atendimento';
     END IF;
 
-    DELETE FROM paciente WHERE paciente_id = v_paciente_id;
+    BEGIN
+        DELETE FROM paciente WHERE paciente_id = v_paciente_id;
+        RAISE EXCEPTION 'DELETE do paciente com evento temporal protegido foi aceito';
+    EXCEPTION WHEN check_violation OR foreign_key_violation THEN
+        RAISE NOTICE 'OK: histórico/FK do atendimento impediu exclusão destrutiva do paciente';
+    END;
 
-    IF EXISTS (SELECT 1 FROM evento_clinico WHERE paciente_id = v_paciente_id)
-       OR EXISTS (SELECT 1 FROM dispositivo_implantado WHERE paciente_id = v_paciente_id)
-       OR EXISTS (SELECT 1 FROM obito WHERE paciente_id = v_paciente_id) THEN
-        RAISE EXCEPTION 'ON DELETE CASCADE das tabelas por paciente nao removeu os registros';
+    IF NOT EXISTS (SELECT 1 FROM evento_clinico WHERE paciente_id = v_paciente_id)
+       OR NOT EXISTS (SELECT 1 FROM dispositivo_implantado WHERE paciente_id = v_paciente_id)
+       OR NOT EXISTS (SELECT 1 FROM obito WHERE paciente_id = v_paciente_id) THEN
+        RAISE EXCEPTION 'A recusa do cascade removeu parte dos registros do paciente';
     END IF;
 
-    RAISE NOTICE 'OK: ON DELETE CASCADE validado para atendimento e paciente';
+    RAISE NOTICE 'OK: CASCADE clinico e protecao da historia temporal validados';
 END
 $$;
 

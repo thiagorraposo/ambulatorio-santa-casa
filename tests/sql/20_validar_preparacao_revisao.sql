@@ -60,6 +60,8 @@ BEGIN
     VALUES(ib,'paciente',paciente_id_teste,'criado'),(ib,'atendimento',atendimento_id_teste,'criado');
   SET LOCAL ROLE ambulatorio_servico_autenticado;
   PERFORM auditoria_iniciar_aplicacao(ator);
+  RESET ROLE;
+  INSERT INTO importacao_revisao_gestor(usuario_id) VALUES(ator);
   SET LOCAL ROLE ambulatorio_revisao_gestor;
   fonte:=revisao_registrar_fonte('preparacao-fonte',lb);
   au:=revisao_conceder_autorizacao(fonte,ator); auoutro:=revisao_conceder_autorizacao(fonte,outro);

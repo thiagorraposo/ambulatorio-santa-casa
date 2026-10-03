@@ -30,6 +30,15 @@ BEGIN
   SET LOCAL ROLE ambulatorio_servico_autenticado;
   PERFORM auditoria_iniciar_aplicacao(gestor);
   RESET ROLE;
+  -- Identidade ativa não basta: a competência nominal precisa estar provisionada.
+  BEGIN
+    SET LOCAL ROLE ambulatorio_revisao_gestor;
+    PERFORM revisao_registrar_fonte('sem-entitlement',lote);
+    RAISE EXCEPTION 'Gestor sem entitlement registrou fonte';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
+  RESET ROLE;
+  INSERT INTO importacao_revisao_gestor(usuario_id) VALUES(gestor);
   BEGIN
     SET LOCAL ROLE ambulatorio_revisao_gestor;
     PERFORM revisao_registrar_fonte('sem-proveniencia',lote);

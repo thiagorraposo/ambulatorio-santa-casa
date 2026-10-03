@@ -56,6 +56,8 @@ BEGIN
     VALUES('paciente','sexo','paciente_id','character varying(30)','v1') RETURNING campo_id INTO campo2;
   SET LOCAL ROLE ambulatorio_servico_autenticado;
   PERFORM auditoria_iniciar_aplicacao(u);
+  RESET ROLE;
+  INSERT INTO importacao_revisao_gestor(usuario_id) VALUES(u);
   SET LOCAL ROLE ambulatorio_revisao_gestor;
   fonte:=revisao_registrar_fonte('fonte-publicacao',la);
   au:=revisao_conceder_autorizacao(fonte,u);

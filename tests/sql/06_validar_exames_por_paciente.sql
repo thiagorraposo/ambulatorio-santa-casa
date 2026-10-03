@@ -220,13 +220,17 @@ BEGIN
         paciente_id, atendimento_id, tipo_exame_complementar_id, bloco_origem
     ) VALUES (v_paciente_1, v_atendimento_remover, v_endoscopia, 'solicitado')
     RETURNING paciente_exame_complementar_id INTO v_exame_preservado;
-    DELETE FROM atendimento WHERE atendimento_id = v_atendimento_remover;
+    BEGIN
+        DELETE FROM atendimento WHERE atendimento_id = v_atendimento_remover;
+        RAISE EXCEPTION 'cenario 15: exclusão de atendimento auditado foi aceita';
+    EXCEPTION WHEN check_violation THEN NULL;
+    END;
     IF NOT EXISTS (
         SELECT 1 FROM paciente_exame_complementar
          WHERE paciente_exame_complementar_id = v_exame_preservado
-           AND paciente_id = v_paciente_1 AND atendimento_id IS NULL
+           AND paciente_id = v_paciente_1 AND atendimento_id = v_atendimento_remover
     ) THEN
-        RAISE EXCEPTION 'cenario 15: exclusao do atendimento nao preservou exame e paciente';
+        RAISE EXCEPTION 'cenario 15: recusa da exclusão não preservou exame, paciente e vínculo';
     END IF;
 
     BEGIN
