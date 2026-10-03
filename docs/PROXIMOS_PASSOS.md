@@ -1,6 +1,6 @@
 # Roadmap do Projeto
 
-Atualizado em: 2026-09-28
+Atualizado em: 2026-10-03
 
 Este é o roadmap oficial do projeto. A estrutura original possui dez etapas;
 as etapas 1–4 estão concluídas. As etapas 5, 7, 9 e 10 possuem subetapas porque
@@ -83,6 +83,16 @@ foram incorporadas como referência autoritativa para idade, Chagas, familiares,
 exames e retorno de 30 dias. A implementação técnica desses contratos continua
 separada da decisão clínica.
 
+**Situação de aceite:** concluída para o ambiente sintético em 2026-10-03.
+Respostas clínicas D1–D6, invariantes da ADR-022 e impactos foram conferidos
+contra as fontes autoritativas e documentados. Por delegação expressa do
+responsável, a competência de gestão foi definida como entitlement explícito por
+usuário, provisionado externamente e independente do perfil `administração`;
+gerir não concede autorização clínica por fonte. Migration 55, rotas e testes
+sintéticos implementam e comprovam essa regra. Não resta decisão humana para
+desbloquear a implementação sintética. Designar pessoas em ambiente real pertence
+ao processo institucional de implantação e não habilita a revisão nesta etapa.
+
 - **Objetivo:** congelar o escopo e resolver somente as ambiguidades que afetam implementação.
 - **Principais alterações:** consolidar as respostas de idade, descoberta de Chagas, familiares, exames e retorno BZN; implementar as invariantes sem inferir fatos ausentes; manter ADR-022 e o backlog de contrarreferência nos limites aprovados.
 - **Dependências:** schema/código existentes, implementação física restante e aceite técnico da ADR-022.
@@ -104,15 +114,37 @@ manual ambígua, resolução seletiva de catálogo, dry-run e dois elos de
 reprocessamento sem duplicação. O contrato temporal entre hashes foi definido em
 2026-09-22, com 18 casos de aceite. A v1.4.0 implementa a barreira de finalidade,
 com recusa de revisão antes de escrita, 26 testes unitários e E2E sintético;
-T01 e a parte de T02 relativa à recusa estão cobertos. A reconciliação entre
-hashes, as demais promoções aprovadas e a classificação individual dos outros
-erros secundários seguem abertas.
+T01 e a parte de T02 relativa à recusa estão cobertos. A v1.6.0 acrescenta prova
+F13 com o escritor Python real: reprocessar origem
+antiga não restaura a correção posterior no cenário validado. O aceite D8 passou
+no cenário sintético 2023→2022 com evento anual sem visita inventada e texto
+ambíguo preservado no bruto. O importador v1.7.0 e manifesto v1.4 passaram
+32 testes unitários e E2E, incluindo promoção D3 negativa inequívoca e F13.
+D6/D7 e D11/D12 têm handlers seletivos; valores sem identificação suficiente
+seguem pendentes. A reconciliação operacional entre hashes e o aceite F01–F16/
+T01–T18 permanecem obrigatórios.
 
 Em 2026-09-25 foi especificada a extensão física mínima da ADR-022, com entidades,
 invariantes, autorização, histórico por campo e 16 casos de aceite F01–F16 por
 incremento. As migrations 21–24 agora cobrem armazenamento, integridade, captura
 e contexto de proveniência em banco descartável; aplicação seletiva, dry-run e
 revisão entre hashes continuam bloqueados.
+Migrations 29–30 fornecem gestão restrita de fonte e autorização; 31–34 publicam
+metadados de decisão/plano com hash canônico e snapshots do servidor. Migrations
+35–39 implementam preparação conferida, arquivos recuperáveis por bytes/hash,
+transformações fechadas e completude dos campos alterados. A aprovação de
+correção exige prova desde a importação da linha-base; legado desconhecido continua
+preservado. Migrations 40–42 acrescentam simulação somente de leitura de decisão existente
+e executor privado de alvos existentes, com prova de rollback e duas sessões
+produzindo um sucesso. Migrations 43–49 acrescentam criação única de visitas e
+dependentes, continuidade histórica, fechamento e diagnóstico após rollback,
+validados em ambiente sintético. Migrations 50–51 acrescentam dry-run de proposta
+antes do staging e guarda T18 na criação de exame/pendência; SQL 21–22 e 28
+cenários clínicos passaram em instalação limpa até 51. O aceite integral de
+concorrência entre revisões/edição/revogação, destinos clínicos e ativação segue pendente,
+sem associação automática de papéis a logins nem ativação de revisões clínicas.
+A migration 52 ativa a captura de `evento_clinico.ano_evento` para novos fatos;
+SQL 24 prova A→B→A sem conferir cobertura retroativa ao legado.
 
 - **Objetivo:** eliminar duplicação e perda de promoção nos fluxos já suportados.
 - **Principais alterações:** reconciliar BZN consolidado por paciente; promover pendências resolvidas sem recriar alvos; separar erros críticos de não críticos; aplicar a política aprovada a arquivos revisados; atualizar metadados semânticos do gerador/manifesto/validador em conjunto.
@@ -125,8 +157,9 @@ revisão entre hashes continuam bloqueados.
 **Status:** parcialmente implementada. A migration 25 modela rastreio familiar
 triestado e resultados repetíveis com trigger diferido e testes transacionais.
 A semântica da descoberta de Chagas está resolvida: a data é a descoberta pelo
-paciente e pode diferir da sorologia. Ainda falta o campo físico específico;
-nenhuma data foi inventada.
+paciente e pode diferir da sorologia. A migration 28 acrescentou o campo próprio ao diagnóstico do atendimento;
+a API cria/consulta essa data e o importador a recebe na carga inicial. Nenhuma
+data foi inventada.
 
 - **Objetivo:** estruturar apenas fatos que o modelo atual não consegue representar.
 - **Principais alterações:** migration incremental mínima para data de descoberta de Chagas e rastreio familiar, após 5A; não criar tabelas próprias para retornos, pendências ou contrarreferências apenas pela existência dessas palavras.
@@ -138,10 +171,19 @@ nenhuma data foi inventada.
 
 **Status:** parcialmente implementada. A API possui DTOs, ficha de paciente,
 criação/consulta de atendimentos, incluindo dados clínicos, exames, pendências e
-rastreio familiar, consulta detalhada, retornos BZN e controle de versão, com transações. A consulta sanitizada de
+rastreio familiar, edição composta do paciente, edição versionada de atendimento,
+consulta detalhada e retornos BZN, com transações. Há escrita/consulta de
+projetos, notificação, encaminhamentos e contrarreferências múltiplas,
+ocorrências anuais, retornos anuais e pendências. Coleções clínicas, inclusive as
+aninhadas, possuem paginação; pendências aceitam filtro por status. A consulta
+sanitizada de
 lotes/linhas, importação HTTP multipart com role separada e um CSV protegido foram
 adicionados; o worker permanece desabilitado por padrão e dependente de configuração
-sintética explícita.
+sintética explícita. O fluxo HTTP foi validado com worker real, credenciais
+separadas, dry-run, idempotência e consulta paginada/sanitizada de lotes.
+O fluxo temporal HTTP também recebe XLSX sintético completo, confere manifesto e
+proposta, e prepara staging idempotente numa transação. Artefatos técnicos são
+registrados previamente por mantenedor; não são gravados pela rota.
 
 - **Objetivo:** entregar o backend funcional previsto na etapa original.
 - **Principais alterações:** busca e filtros de pacientes; histórico de atendimentos; consultas de exames, projetos, tratamento, notificações e pendências; endpoint de importação; acompanhamento de lote e erros; exportação CSV; DTOs clínicos; autorização explícita por operação e recurso; transações compostas quando uma operação fizer várias gravações.
@@ -153,8 +195,17 @@ sintética explícita.
 
 **Status:** em andamento. Validação, erros sanitizados, SQL parametrizado,
 observabilidade existente e controle de acesso configurável foram preservados;
-faltam contratos HTTP completos, cobertura dos três perfis para os novos fluxos,
-paginação/filtros e integração de importação/exportação.
+faltam aceite integral dos novos fluxos e uniformização dos DTOs dos recursos
+preexistentes. Os 36 cenários clínicos aprovados cobrem os novos recursos no
+escopo sintético, sem concluir o aceite global de 5D/5E.
+Linhas de lote são paginadas e rotas privadas exigem política explícita de perfis.
+Aplicação/finalização HTTP da revisão temporal só são habilitadas com
+`NODE_ENV=test` e staging sintético. O runner concede EXECUTE aos wrappers
+somente no banco descartável; isso não equivale a ativação operacional. A rodada
+HTTP específica de staging passou 2/2; a rodada ampla até 60 passou com sete
+suítes/36 testes. O contrato HTTP está versionado em `/v1` com aliases compatíveis.
+A migration 58 filtra lotes antes da paginação pelos vínculos clínicos; metadados
+ordinários globais são administrativos e lotes revisados ficam fora dessa consulta.
 
 - **Objetivo:** consolidar a API antes do frontend.
 - **Principais alterações:** revisão de DTOs, paginação, erros, autorização por paciente/atendimento, observabilidade técnica e documentação de contratos; endpoint de importação e CSV estabilizados.
@@ -341,36 +392,74 @@ importador e backend funcionais antes de iniciar as Etapas 6–8.
 
 ## Próxima tarefa isolada
 
-A especificação física foi concluída em 2026-09-25 no
-[contrato temporal](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md#extensão-física-mínima-proposta).
-O próximo incremento é implementar somente seu armazenamento fechado: nova
-migration incremental, constraints, gatilhos de integridade das novas relações,
-permissões e testes SQL sintéticos. Não instalar ainda captura clínica, executor
-de revisão ou concessões institucionais. A barreira v1.4.0 permanece ativa.
+O armazenamento fechado já existe nas migrations 21–24; a gestão de autorização
+e a preparação/publicação de planos estão nas migrations 29–39. Migrations 40–42
+avaliam planos existentes sem escrita e aplicam alvos existentes por função
+privada. Migrations 43–49 resolvem criação, sucessão, fechamento e diagnóstico
+posterior ao rollback. Migrations 50–57 incluem simulação pré-staging, guarda
+T18, captura anual, classificação de erros, correção de integridade, recebimento
+idempotente do XLSX com preparação atômica e wrappers privados de
+execução/finalização/diagnóstico. O staging HTTP e a execução foram validados em
+teste sintético com banco descartável; os wrappers não recebem EXECUTE operacional
+e o runner os concede somente no banco isolado. SQL27 e SQL28 passaram, com
+captura ativa para `evento_clinico.ano_evento` e, pela SQL60,
+`atendimento.data_atendimento`/`observacoes`. SQL31 valida a captura do
+atendimento e o teste clínico aplica correção data/texto; SQL59/teste de staging
+comprovam reenvio autorizado após fechamento. Não repetir esses
+incrementos. O próximo trabalho é completar o fluxo executável do
+[contrato temporal](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md),
+preservando a ordem de dependências e a barreira de ativação:
 
-Cobrir F01–F07 e F16 nas partes verificáveis sem executor, distinguindo restrições
-estruturais de testes futuros de aprovação/aplicação. Validar banco limpo e
-atualização incremental em ambiente descartável. Preservar a FK de mesmo
-hash/layout, o isolamento funcional e a ausência de dados reais. A captura de
-todos os escritores e o fluxo auditado serão incrementos posteriores; não
-escolher destinos clínicos pendentes da 5A por inferência.
+1. Ampliar os planos clínicos a partir da preparação/aprovação existente:
+   identidade explícita de ocorrências em todos os destinos repetíveis e todas
+   as transformações/destinos do escopo. Arquivos recuperáveis, conferência do
+   bruto, exigência de completude e guarda T18 para exame/pendência já existem;
+   o aceite integrado ainda precisa demonstrar os fluxos restantes.
+2. Comprovar captura/precedência em todos os escritores dos destinos habilitados,
+   incluindo legado com histórico desconhecido e sequência A→B→A.
+3. Completar o aceite do executor privado para os demais planos clínicos e
+   concorrência de revisões/edição/revogação além dos cenários F12 já testados.
+   Resolução única de visitas e dependentes, fechamento, cobertura através de
+   revisões aplicadas, rollback,
+   diagnóstico posterior e dois executores foram comprovados no cenário sintético;
+   isso não substitui a cobertura de todos os destinos e transformações.
+4. Completar o aceite do staging e das rotas já implementadas de recebimento,
+   aprovação, aplicação e encerramento sob a barreira de ativação. Validar
+   formatos/transformações permitidos sem efeitos
+   indevidos. Ampliar F13 da origem antiga aos destinos restantes e concluir
+   promoções legadas. D8 foi aceito somente no cenário sintético anual; ampliar
+   a cobertura para todos os fluxos antes da ativação.
+5. Comprovar F01–F16 e T01–T18 no escopo de cada caso antes de habilitar revisões.
+
+As respostas clínicas estão na fonte autoritativa de campos e regras clínicas;
+não há nova resposta humana pendente nesse conjunto. Lacunas técnicas não devem
+ser apresentadas como decisões da equipe. O escopo completo da Etapa 5 continua
+incluindo as promoções e os recursos/contratos da API que faltam em 5B/5D/5E.
+O registro de evidências e limites está em
+[`CONTINUIDADE_ETAPA_5.md`](validacoes/CONTINUIDADE_ETAPA_5.md).
 
 Prompt pronto para a próxima tarefa:
 
-> Siga AGENTS.md e implemente apenas a migration de armazenamento fechado da
-> extensão física especificada no contrato temporal da ADR-022. Comece pela seção
-> “Extensão física mínima proposta”; consulte schema/permissões por trechos.
-> Planeje brevemente, crie nova migration e testes de integridade/permissões
-> F01–F07 e F16, delimitando a cobertura ainda dependente do executor. Revogue os
-> privilégios padrão indevidos nas novas relações/sequências; não conceda acesso à
-> identidade ao importador. Mantenha revisão bloqueada na v1.4.0 e não implemente
-> captura ou escrita clínica. Valide conforme a matriz do workflow para schema,
-> usando COMPACT=1 e bancos descartáveis limpo/atualizado; combine regressões
-> pertinentes sem repetir suítes sobre o mesmo estado. Não aplique no banco
-> persistente nem regenere sua evidência sem autorização específica. Preserve
-> alterações existentes, atualize somente a documentação afetada e registre a
-> mudança. Sem dados reais, subagentes, commit ou push. Informe resultado, testes,
-> limites e próximo incremento brevemente.
+> Siga AGENTS.md e complete o fluxo de revisão temporal da ADR-022 no ambiente
+> sintético, a partir do worktree atual. Leia o registro de continuidade e
+> confronte cada caso F01–F16/T01–T18 com código e testes antes de planejar.
+> A rota XLSX→dry-run SQL50 read-only já existe; avance para staging restrito,
+> gestão atribuível de fonte/autorizações, aprovação, aplicação seletiva e
+> encerramento, comprovando captura/precedência, concorrência, retomada e
+> rollback na ordem das dependências. Preserve BZN, idempotência,
+> reprocessamento encadeado e dados legados. Nenhuma igualdade aparente ou NULL
+> prova ausência de edição. Não habilite revisões antes do aceite integrado e
+> das autorizações exigidas.
+> Use as respostas clínicas já fornecidas; resolva escolhas técnicas compatíveis
+> sem inventar respostas humanas. Migrations somente incrementais, aplicadas em
+> bancos descartáveis limpo/atualizado; preserve o banco persistente e seu dump.
+> Valide conforme a matriz do workflow com COMPACT=1, reaproveitando evidências
+> ainda válidas. Atualize fontes afetadas e continuidade, preservando alterações
+> preexistentes. Use agentes em paralelo para auditorias independentes quando
+> houver capacidade, integrando e validando as mudanças no worktree principal.
+> Sem dados reais, frontend, Etapas 6–10, commit ou push. Informe aceite por caso
+> e lacunas restantes da Etapa 5, sem confundir
+> conclusão deste fluxo com conclusão de 5A–5E.
 
 ## Validação da revisão documental de 2026-09-14
 

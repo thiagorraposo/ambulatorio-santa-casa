@@ -41,7 +41,7 @@ COMPACT_TARGETS := git-status docs-check manifest-check manifest-source-check \
 	db-check db-test project-check docker-config-check docker-db-check docker-db-test \
 	docker-project-check docker-restore-check docker-restore-test importer-test \
 	backend-build backend-unit-test backend-integration-test backend-foundation-e2e \
-	backend-check backend-container-check workflow-test
+	backend-check backend-container-check backend-clinical-test workflow-test
 ifneq ($(filter-out $(COMPACT_TARGETS),$(COMPACT_GOALS)),)
 $(error COMPACT=1 aceita somente alvos de validação ou git-status; consulte make help)
 endif
@@ -62,7 +62,7 @@ else
 	docker-backup docker-backup-list docker-restore docker-restore-check docker-restore-test \
 	manifest-check manifest-source-check importer-fixture importer-run importer-dry-run importer-test \
 	backend-install backend-build backend-unit-test backend-db-setup backend-integration-test \
-	backend-foundation-e2e backend-check backend-up backend-container-check backend-logs backend-stop workflow-test
+	backend-foundation-e2e backend-clinical-test backend-check backend-up backend-container-check backend-logs backend-stop workflow-test
 
 help:
 	@echo "Comandos disponíveis:"
@@ -81,6 +81,7 @@ help:
 	@echo "  make backend-install Instala dependências reproduzíveis com npm ci"
 	@echo "  make backend-check   Compila e executa testes unitários e integração"
 	@echo "  make backend-foundation-e2e Executa o cenário integrado da fundação"
+	@echo "  make backend-clinical-test Executa os novos fluxos HTTP em banco descartável (SYNTHETIC_PG_*)"
 	@echo "  make backend-up      Provisiona login técnico e sobe o backend Docker"
 	@echo "  make backend-container-check Constrói e valida health/usuário do container backend"
 	@echo "  make backend-logs    Acompanha logs do backend"
@@ -220,7 +221,7 @@ importer-dry-run: docker-wait
 importer-test: docker-wait importer-fixture
 	@python3 -m unittest tests/importador/test_transformacoes.py
 	@DB_HOST="$(DB_HOST)" DB_PORT="$(DB_PORT)" DB_USER="$(DB_USER)" DB_NAME="$(DB_NAME)" \
-		PGPASSWORD="$(POSTGRES_PASSWORD)" bash tests/importador/test_e2e.sh
+		PGPASSWORD="$(PGPASSWORD)" bash tests/importador/test_e2e.sh
 
 backend-install:
 	@cd backend && npm ci
@@ -243,8 +244,12 @@ backend-integration-test: backend-db-setup
 	@DB_HOST="$(DB_HOST)" DB_PORT="$(DB_PORT)" DB_USER="$(DB_USER)" DB_NAME="$(DB_NAME)" \
 		API_PORT="$(API_PORT)" APP_DB_HOST="$(APP_DB_HOST)" APP_DB_PORT="$(APP_DB_PORT)" \
 		APP_DB_NAME="$(APP_DB_NAME)" APP_DB_USER="$(APP_DB_USER)" APP_DB_PASSWORD="$(APP_DB_PASSWORD)" \
+		CLINICAL_ACCESS_POLICY=todos_sinteticos \
 		AUTH_JWT_SECRET="$(AUTH_JWT_SECRET)" AUTH_JWT_EXPIRES_IN_SECONDS="$(AUTH_JWT_EXPIRES_IN_SECONDS)" \
-		PGPASSWORD="$(POSTGRES_PASSWORD)" bash tests/backend/test_integration.sh
+		PGPASSWORD="$(PGPASSWORD)" bash tests/backend/test_integration.sh
+
+backend-clinical-test:
+	@bash tests/backend/test_clinical_integration.sh
 
 backend-foundation-e2e: backend-integration-test
 	@echo "OK: cenário ponta a ponta da fundação aprovado"

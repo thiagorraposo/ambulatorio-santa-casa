@@ -1,8 +1,12 @@
 # Modelo Físico Atual
 
-Atualizado em: 2026-09-21
+Atualizado em: 2026-10-01
 
-Este documento descreve a estrutura física real aplicada no schema `ambulatorio`, usando como fonte principal o dump `docs/evidencias/schema_atual_ambulatorio.sql`. Os scripts em `sql/` foram usados como fonte de reconciliação.
+As seções iniciais descrevem a estrutura física aplicada no schema `ambulatorio`,
+usando como fonte principal o dump `docs/evidencias/schema_atual_ambulatorio.sql`.
+As seções posteriores distinguem migrations testadas somente em bancos
+descartáveis. Os scripts em `sql/` são fonte de reconciliação; o dump persistente
+não foi atualizado nesta Etapa 5.
 
 O schema físico aplicado possui 38 tabelas. Todas as tabelas encontradas no dump existem nas migrations versionadas, e nenhuma tabela das migrations ficou ausente da evidência analisada.
 
@@ -890,3 +894,244 @@ constraint de hash. A tabela guarda ID interno, nome, login normalizado único,
 hash bcrypt, perfil (`consulta`, `edicao` ou `administracao`), estado ativo e
 timestamps e removem os privilégios padrão do importador. `ambulatorio_aplicacao` recebe somente `SELECT`; usuários funcionais
 jamais recebem login PostgreSQL.
+
+## Extensão sintética proposta e validada — migration 28
+
+A migration `28_data_descoberta_autorelato_chagas.sql` adiciona
+`diagnostico_chagas.data_descoberta_autorelato DATE`, como snapshot do relato do
+paciente registrado no atendimento. Não substitui `data_resultado_final` nem
+qualquer data de sorologia; não há backfill. Coluna opcional preserva ausência
+legada, sem inferir confirmação diagnóstica.
+
+Instalação limpa e atualização incremental foram validadas exclusivamente em
+bancos descartáveis. O dump em `evidencias/schema_atual_ambulatorio.sql` permanece
+a evidência do banco persistente até migration 20. Reversão deve usar nova
+migration restritiva preservando relatos e proveniência; nenhuma coluna com
+dados é removida automaticamente.
+
+## Gestão temporal sintética — migrations 29–30
+
+`29_gestao_autorizacao_revisao.sql` adiciona funções restritas para registrar uma
+fonte com âncoras de proveniência conferidas e conceder/revogar autorização por
+fonte. Cria papéis NOLOGIN de gestor, serviço de revisão e dono técnico, sem
+associá-los a logins existentes. A identidade é lida do ledger confiável do XID;
+não há ator livre na assinatura nem autorização automática por perfil clínico.
+Concessões não são editadas; revogação é irreversível e nova concessão tem outro ID.
+
+`30_validacao_diferida_revisao_restrita.sql` executa a validação de integridade
+como SECURITY DEFINER sob `ambulatorio_auditoria_owner`, com privilégios limitados,
+para permitir commit com papéis operacionais sem acesso às tabelas restritas.
+Mantém as invariantes e a ausência de acesso a credenciais. Não modifica destinos
+clínicos, não habilita captura automaticamente e não implementa o executor.
+
+Instalação limpa e atualização incremental foram comprovadas apenas no servidor
+descartável da tarefa. O dump persistente até 20 permanece intacto. Reversão usa
+revogação de EXECUTE em nova migration, preservando fontes e concessões.
+
+## Publicação de metadados temporais — migrations 31–34
+
+`31_publicacao_decisao_temporal.sql` publica cabeçalho e campos em uma operação,
+com ator do ledger, autorização da fonte revalidada, versionamento por linha,
+locks de fonte/revisão/autorização e hash calculado no servidor. Os valores
+atuais e tokens são lidos do banco, sem aceitar snapshot/histórico do cliente.
+`32_normalizacao_plano_temporal.sql` canoniza IDs/ocorrência e fecha a entrada;
+o serviço recebe somente EXECUTE do wrapper, sem acesso à função interna.
+`33_corrigir_ancora_publicacao_temporal.sql` corrige a referência do parâmetro
+no lock, e `34_privilegios_validacao_plano_temporal.sql` permite o CHECK de
+envelopes apenas ao owner NOLOGIN. Migrations anteriores foram preservadas.
+
+Somente metadados são escritos. Correção/anulação sem cobertura homologada
+continua recusada. Esses objetos não implementam executor, avanço da fonte,
+criação clínica de alvos ou dry-run de revisão. Não há membros automáticos nem
+autorização para dados reais. Instalação limpa e atualização incremental até 34
+foram comprovadas em bancos descartáveis; o dump persistente permanece até 20.
+Reversão usa revogação de EXECUTE em nova migration, preservando planos e hashes.
+
+
+## Preparação e prova da base — migrations 35–39
+
+`revisao_artefato` preserva manifesto e receita de transformações em texto UTF-8,
+com SHA-256 calculado sobre os bytes. Versão de receita tem unicidade; os arquivos
+são imutáveis. `importacao_revisao_preparacao` vincula cada revisão aos três
+arquivos, ator autenticado e autorização da fonte. São extensões técnicas da
+ADR-022, adicionais às nove relações originais; não recebem DML de papéis
+operacionais. O serviço obtém apenas as funções restritas.
+
+A preparação confere metadados e todas as células/posições semânticas do bruto.
+Comparação somente de leitura distingue linha ausente, coluna ausente, vazio e
+valor; não deduz vínculo pela posição. A aprovação aplica transformações fechadas
+e exige todos os campos alterados/destinos derivados, recusando omissão silenciosa.
+A migration 36 corrige o estado real de staging e serializa INSERT de linhas com
+o congelamento do lote. A 38 prova cobertura pela importação e proveniência da
+base; a 39 vincula a linha original pela cadeia do mesmo conteúdo e exige contexto
+no login herdado do importador, mesmo sem SET ROLE.
+
+Instalação limpa e incremental até 39 foram validadas somente em bancos
+descartáveis. A captura de nome e data do atendimento foi habilitada apenas nas
+fixtures desses testes. Não há ativação automática de catálogo ou papéis, executor
+clínico, avanço da fonte ou dry-run de revisão. Prova histórica através de futuras
+revisões aplicadas ainda é obrigatória. Reversão preserva arquivos, planos e
+histórico, restringindo novas operações por migration. O dump persistente até 20
+permanece intacto.
+
+
+## Avaliação de leitura e executor privado — migrations 40–42
+
+`revisao_simular_decisao` avalia um plano já publicado em snapshot READ ONLY,
+com ator fornecido exclusivamente pela camada autenticadora confiável e grant da
+fonte. Não chama `pg_current_xact_id`, escreve ledger ou consome sequências.
+`revisao_avaliar_decisao` é privada e compara autorização, fonte, decisão efetiva,
+artefatos, mapeamento, snapshot/token e cobertura. Valores clínicos não integram
+sua resposta técnica. A migration 41 concede somente SELECT da aplicação ao
+owner NOLOGIN, corrigindo o privilégio faltante encontrado no teste restrito.
+
+A 42 instala `revisao_aplicar_decisao_interna`, sem EXECUTE de qualquer papel
+operacional. Ela aplica apenas alvos existentes, com bloqueios de fonte, revisão,
+autorizações, identidades, decisão e registros em ordem definida. UPDATE de coluna
+de identidade no owner serve exclusivamente ao lock de leitura, não à alteração
+de usuários; importador continua sem identidade. SQL usa identificadores do
+catálogo protegido e valores parametrizados/populados com o tipo da tabela.
+
+Sucesso, alvos, proveniência, eventos reais, estado da linha e avanço da fonte
+confirmam juntos. O ledger atribuível passa à origem revisão somente dentro dessa
+operação privada. Captura rejeita mudanças em campos não aprovados. Verificação de
+sucesso usa evidências históricas, sem restaurar valor antigo após edição legítima.
+Falha SQL de integridade sai como código sanitizado e reverte a transação; registro
+de diagnóstico em outra transação ainda depende do fluxo completo. A versão
+operacional do cadastro foi excluída do catálogo clínico.
+
+Instalação limpa e incremental até 42 comprovadas apenas em bancos descartáveis.
+Rollback após a primeira escrita, dois executores com sucesso único, retomada e
+simulação sem mudar todas as tabelas/sequências foram testados. O executor está
+privado, sem ativação HTTP/CLI ou criação de visitas/dependentes. Fechamento,
+continuidade histórica por revisões e dry-run de arquivo sem staging continuam
+requisitos obrigatórios. O schema persistente e seu dump não foram modificados.
+
+## Encerramento e continuidade histórica — migrations 43–44
+
+A 43 acrescenta `importacao_revisao_encerramento`, registro imutável de estado,
+ator, autorização e instante. `revisao_terminar_interna` permanece privada:
+cancelamento exige ausência de efeitos; fechamento exige fonte corrente e todas
+as linhas contabilizadas por decisão efetiva, com sucesso conferido ou bloqueio
+sem proveniência. Fechamento com bloqueios resulta em pendências; repetir a mesma
+ação terminal preserva a autoria original. Revisão, lote e metadado confirmam na
+mesma transação. Cancelar uma proposta obsoleta não avança a fonte.
+
+A 44 preserva a prova inicial da importação em `revisao_cobertura_importacao` e
+compõe `revisao_cobertura_base` com a cadeia de aplicações confirmadas de revisões
+encerradas. Exige mesma linha, alvo, paciente, valor de base e evidências históricas;
+igualdade isolada e marco legado continuam insuficientes. A cadeia recusa ciclos.
+Também preserva no cabeçalho o instante registrado no cancelamento atribuível.
+
+Instalação limpa até 44 e duas revisões sucessivas sobre a mesma ocorrência foram
+validadas em banco descartável. A retomada do sucesso antigo não restaura valores
+anteriores nem cria atendimentos ou eventos. O executor segue sem acesso
+operacional: criação de visitas/dependentes, simulação de arquivo sem staging e
+aceite integrado continuam pendentes. O dump persistente permanece intacto.
+
+## Criação resolvida e diagnóstico — migrations 45–49
+
+A 45 resolve alvos virtuais somente na aplicação, reservando IDs das sequências
+físicas antes de gravar proveniência, alvos e INSERTs clínicos na mesma transação.
+A FK de `atendimento_criado_id` é diferível para permitir essa ordem. Paciente
+é conciliado e nunca criado por esse fluxo. Visita nova exige data completa;
+dependentes recebem sua âncora resolvida, sem copiar registros anteriores.
+
+Criação exige plano para todos os campos com captura ativa, inclusive nulos
+iniciais: vazio/ausência conservam seus estados no plano e resultam em SQL NULL
+somente para coluna anulável do alvo novo. As regras continuam arquivadas e
+conferidas. Simulação usa os mesmos verificadores sem reservar IDs ou escrever.
+
+As migrations 46–47 corrigem a reutilização do vínculo único de proveniência e
+a conferência de sucesso predecessor. A ação original de `importacao_registro`
+permanece imutável; cada `importacao_revisao_alvo` registra a ação da aplicação
+atual, comprovando seu vínculo com um sucesso anterior quando reutilizado.
+A 49 recusa troca de paciente e renomeação que duplicaria alvo já criado.
+
+A 48 fornece `revisao_registrar_falha_interna`, privada, para transação posterior
+ao rollback. Aceita somente SQLSTATE de lista fechada e grava código técnico,
+decisão e hash do plano; autoria vem do ledger ligado por `publicacao_xid`.
+Não recebe mensagem livre, valores clínicos ou snapshots. Um sucesso existente
+é devolvido como resultado histórico e nunca substituído por falha.
+
+Instalação limpa até 49 e atualização incremental de 44 a 49 foram executadas
+apenas no servidor descartável da tarefa. Os novos testes cobrem criação de
+visitas distintas na mesma data, concorrência, reutilização por versão sucessora,
+rollback de falha no dependente, diagnóstico separado e fechamento com bloqueios.
+Funções executoras/resolvedoras continuam privadas; aceite integrado e transporte
+operacional permanecem pendentes. Schema e evidência do persistente preservados.
+
+## Simulação pré-staging e identidade da criação — migrations 50–51
+
+A 50 instala `revisao_simular_proposta`, função privada que compara bruto base e
+proposta, confere manifesto, transformações, autorização, fonte e snapshots de
+campos sem criar lote, linha, decisão ou staging. O retorno informa somente
+estados e códigos técnicos. A prova SQL 22 executa a simulação em transação
+somente de leitura e compara tabelas e sequências antes/depois, inclusive numa
+proposta de nova visita com dependente. A função não aplica a proposta.
+
+A 51 envolve `revisao_conferir_criacao` para recusar a criação de exame ou
+pendência copiado do bruto base sem identidade de ocorrência alterada no bruto
+revisado. A mesma guarda passa pelas verificações de publicação e aplicação;
+SQL 22 comprova a recusa T18 no cenário sintético. O alvo e suas funções seguem
+privados, sem ativação de revisão pelo importador.
+
+Migrations 50–51 e SQL 21–22 passaram em instalação limpa descartável até 51,
+junto com a suíte clínica de 28 cenários. O dump do banco persistente continua
+representando somente as migrations aplicadas nele, até 20; não foi regenerado.
+
+## Captura do ano informado D8 — migration 52
+
+A 52 insere `evento_clinico.ano_evento` no catálogo ativo `auditoria_campo`
+com tipo `integer` e serialização v1, preservando o instante `captura_desde`.
+Novos INSERTs/UPDATEs atribuíveis ao importador ou à aplicação privada podem
+fornecer eventos de antes/depois para a precisão anual. Registros anteriores a
+essa ativação continuam sem prova de cobertura histórica; a migration não cria
+eventos retroativos nem visitas.
+
+SQL 24 testou INSERT e A→B→A transacionais com `ROLLBACK`. Instalação limpa
+até 52 e atualização incremental 49→50→51→52 passaram apenas em bancos
+descartáveis. O banco persistente e seu dump não foram alterados.
+
+## Recebimento de arquivo e wrappers privados — migrations 56–57
+
+A migration 56 cria `importacao_revisao_recebimento` como ledger imutável de
+recebimentos. A função recebe o XLSX já lido pela aplicação, confere autorização
+e identidade idempotente e registra hash dos bytes, representação bruta, lote,
+linhas e preparação na mesma transação. O staging não aplica dados clínicos.
+Manifesto e transformações são artefatos técnicos registrados previamente por
+mantenedor fora da rota HTTP.
+
+A migration 57 cria wrappers distintos para aplicação aprovada, finalização e
+diagnóstico pós-rollback. Ela não concede `EXECUTE` aos papéis operacionais. O
+runner HTTP de homologação concede esses direitos apenas no banco descartável e
+requer modo de teste/staging. SQL27–28 e o teste HTTP específico são evidências
+de bancos descartáveis; não alteram a descrição do schema persistente acima nem
+justificam regenerar seu dump.
+
+## Escopo de consulta de lotes — migration 58
+
+A 58 acrescenta duas funções, sem novas tabelas: um resolvedor privado dos
+destinos de proveniência permitidos e uma autorização booleana derivada da
+identidade ativa no ledger da transação. Somente a aplicação recebe execução da
+autorização; não recebe leitura direta da proveniência. A política por perfil e
+vínculo e a exclusão dos lotes revisados estão em `ARQUITETURA_BACKEND.md`.
+SQL30 validou concessões, revogação e recusa de identidade forjada; instalação
+limpa 02–58 e atualização incremental 57→58 passaram somente em descartáveis.
+
+## Recebimento histórico e captura do atendimento — migrations 59–60
+
+A 59 acrescenta consulta restrita do ledger de recebimentos. A mesma identidade
+fonte/base/arquivo/artefatos e o mesmo bruto retornam IDs históricos sem novas
+gravações, mesmo após avanço/fechamento. A função confere novamente ator e
+autorização sob locks; não libera dados nem aplicação clínica por perfil.
+
+A 60 habilita somente `atendimento.data_atendimento` (`date`) e
+`atendimento.observacoes` (`text`), com PK `atendimento_id` e serialização v1.
+Os triggers existentes capturam INSERT/UPDATE e protegem os alvos auditados.
+Não há backfill: legado não ganha cobertura desde a base. Uma criação temporal
+exige plano explícito para ambos os campos, inclusive observação vazia/ausente;
+visita nova exige data completa. D8 permanece ativo, sem ampliar o catálogo aos
+demais destinos. SQL31 e os testes clínicos validam captura e correção aplicada;
+instalação limpa 02–60 e atualização incremental 58→59→60 passaram em bancos
+descartáveis. A evidência do schema persistente permanece inalterada.

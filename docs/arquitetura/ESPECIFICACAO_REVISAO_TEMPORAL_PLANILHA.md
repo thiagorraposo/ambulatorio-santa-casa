@@ -1,11 +1,24 @@
 # Contrato Temporal de Revisão da Planilha
 
-Atualizado em: 2026-09-25
+Atualizado em: 2026-10-03
 
-Status: barreira de finalidade implementada na v1.4.0; extensão física especificada,
-ainda sem migration ou aplicação de revisões.
+Status: armazenamento, captura, gestão e preparação/aprovação implementados
+parcialmente em migrations 21–57 no ambiente sintético, com avaliação de decisão
+somente de leitura, simulação de proposta antes do staging, executor privado de
+alvos existentes/novos, fechamento e diagnóstico após rollback. Revisões continuam
+bloqueadas até completar os planos clínicos e o aceite integrado.
 
 ## Autoridade e limite
+
+### Competência para gerir autorizações
+
+Por delegação expressa do responsável do projeto em 2026-10-03, registrar fontes
+e conceder/revogar autorizações exige entitlement ativo explícito por usuário,
+independente do perfil funcional. O entitlement é provisionado/revogado fora da
+API por operador de banco designado e auditado; `administração` não concede essa
+competência automaticamente. Essa capacidade não substitui a autorização clínica
+específica por fonte. A migration 55 impõe a regra no banco; o provisionamento de
+pessoas reais segue sujeito ao processo institucional do ambiente de implantação.
 
 Este documento complementa a
 [especificação normativa do importador](../ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md)
@@ -147,9 +160,10 @@ da regra automática de escolher o maior valor.
 
 ## Precisão temporal e histórico ausente
 
-O ano do último comparecimento não é a data de um novo atendimento. Mantê-lo no
-bruto até aprovar a representação anual de D8; `evento_clinico.ano_evento` continua
-sendo apenas uma possibilidade. Mudar de 2023 para 2025 não prova dois retornos,
+O ano do último comparecimento não é a data de um novo atendimento. Preservá-lo
+no bruto; quando inequívoco, registrar também `evento_clinico.ano_evento` com
+tipo `ultimo_comparecimento_ano_informado` e precisão anual. Mudar de 2023 para
+2025 não prova dois retornos,
 um retorno em 2024 nem a data exata de qualquer visita. Ano inalterado também não
 exclui vários comparecimentos no mesmo ano.
 
@@ -290,9 +304,11 @@ incompleto no commit. A nulabilidade de cada referência é condicionada à sua
 operação/origem; não basta todas as FKs isoladas serem válidas.
 
 1. A fonte inicial é cadastrada explicitamente a partir de lote terminal e
-   proveniência conferida. O cadastrador institucional ainda precisa ser definido;
-   usuário de teste não representa autorização de produção. Não inferir a fonte
-   pelo hash, nome de arquivo ou identificador legado.
+   proveniência conferida. A gestão exige entitlement ativo explícito por usuário,
+   conforme a decisão 5A registrada acima; perfis funcionais e usuários de teste
+   não representam autorização de produção. A designação de pessoas reais fica
+   para o processo institucional de implantação. Não inferir a fonte pelo hash,
+   nome de arquivo ou identificador legado.
 2. Uma revisão sem `revisao_base_id` parte do conteúdo inicial da fonte. As demais
    partem do conteúdo de uma revisão terminal da mesma fonte. O lote-base escolhido
    deve ser terminal e pertencer à cadeia comprovada de mesmo hash/layout desse
@@ -356,7 +372,8 @@ No snapshot do banco e nos eventos, estados
 são `valor`, `nulo`, `alvo_ausente`, `desconhecido`. `valor` exige valor JSON do
 tipo esperado; os demais exigem JSON null. O envelope inteiro nunca é SQL NULL.
 Precisão pode ser `nao_temporal`, `data_completa`, `ano`, `instante` ou
-`desconhecida`; registrar `ano` não habilita o destino de D8. Nomes de tipos e
+`desconhecida`; registrar `ano` exige o catálogo de captura ativo desde a origem
+para autorizar correção posterior. Nomes de tipos e
 regras de serialização vêm do catálogo, não de conversão arbitrária fornecida pelo
 cliente. Ausência, vazio e nulo não se tornam iguais por normalização. Contrato
 de catálogo já referenciado não pode ser reinterpretado em lugar; evolução exige
@@ -369,6 +386,14 @@ lógicos não podem disfarçar alteração duplicada do mesmo campo físico. `an
 exige coluna anulável, decisão explícita e contrato do destino. `conservar` ou
 `associar` não escreve no campo. `revisao_necessaria` só admite conservação e
 decisão bloqueada.
+
+Para campo anulável de um alvo novo, `criar` também admite `celula_vazia` ou
+`coluna_ausente`: o registro nasce com SQL NULL, preservando o envelope da fonte.
+Isso não autoriza anulação de registro existente. Todo campo com captura ativa
+no destino precisa constar do plano de criação. Uma regra técnica arquivada pode
+declarar coluna ausente nos dois manifestos; a aprovação confere essa ausência,
+sem convertê-la em valor ou em operação `anular`. Esta é uma regra técnica de
+materialização e captura, sem nova resposta clínica atribuída à equipe.
 
 Histórico completo exige captura transacional de todo INSERT/UPDATE/DELETE
 relevante, inclusive importador, aplicação e manutenção técnica. A captura deve
@@ -508,8 +533,8 @@ de etapa distingue o que a migration de armazenamento precisa provar do que
 continua obrigatório antes de habilitar o fluxo completo. Testes SQL de integridade
 devem usar `BEGIN`/`ROLLBACK`; concorrência exige duas sessões coordenadas e limpeza
 no banco descartável. Testes de constraints adiadas devem forçar sua verificação
-antes do rollback, para não omitir o erro que ocorreria no commit. Nenhum caso foi
-executado nesta tarefa documental.
+antes do rollback, para não omitir o erro que ocorreria no commit. A cobertura
+executada por caso e seus limites constam da continuidade da Etapa 5.
 
 | Caso | Cenário e resultado exigido | Etapa |
 | --- | --- | --- |
@@ -528,14 +553,15 @@ executado nesta tarefa documental.
 | F13 | Reprocessar/promover origem antiga depois de correção não restaura valor superado; linha removida/vazia não exclui nem anula dados. | Integração v1/revisão |
 | F14 | Alvo novo recebe ID uma vez, todos os campos/vínculos apontam a ele; auditoria e proveniência não podem referenciar outro paciente ou campo. | Aplicação |
 | F15 | Dry-run de revisão não muda tabelas/sequências; aplicação posterior revalida. Logs/erros não contêm valores clínicos, hashes de senha ou snapshots restritos. | Aplicação |
-| F16 | Aplicar a migration em banco limpo e atualizado mantém os dez testes SQL, manifesto e regressões do importador/backend, inclusive recusa v1.4.0 de revisão. Reversão não elimina evidências existentes. | Armazenamento |
+| F16 | Aplicar as migrations em banco limpo e atualizado mantém a suíte SQL vigente, manifesto e regressões do importador/backend, inclusive recusa de revisão operacional. Reversão não elimina evidências existentes. | Armazenamento |
 
 ## Casos de aceite sintéticos obrigatórios
 
 Esta matriz define o aceite completo do contrato. A v1.4.0 cobre T01 e a parte
 de T02 relativa à finalidade ausente/ambígua e à recusa integral de revisão, em
-execução normal e dry-run. Os demais fluxos continuam futuros; as regressões de
-retomada/reprocessamento do mesmo conteúdo não homologam revisão entre hashes.
+execução normal e dry-run. Migrations posteriores têm provas parciais de T03–T18,
+incluindo T18 no SQL 22; as regressões de retomada/reprocessamento do mesmo
+conteúdo não homologam revisão operacional entre hashes.
 
 | Caso | Entrada/cenário sintético | Resultado exigido |
 | --- | --- | --- |
@@ -547,7 +573,7 @@ retomada/reprocessamento do mesmo conteúdo não homologam revisão entre hashes
 | T06 | Comparecimento distinto com paciente existente e data completa | Exatamente um novo atendimento; anteriores intactos; não copiar dependentes antigos |
 | T07 | Dois comparecimentos distintos comprovados na mesma data | Não fundir por paciente/data; exigir decisões distintas |
 | T08 | Apenas fato consolidado mudou | Nenhum novo atendimento/BZN; reconciliar o alvo específico ou bloquear divergência |
-| T09 | Último ano 2023 passa a 2025, permanece igual ou diminui | Não fabricar data nem quantidade de visitas; ano permanece bruto enquanto não mapeado |
+| T09 | Último ano 2023 passa a 2025, permanece igual ou diminui | Não fabricar data nem quantidade de visitas; bruto preservado e ano inequívoco mapeado com precisão anual |
 | T10 | Célula esvaziada, coluna não coletada ou linha removida | Preservar os dados anteriores; nenhuma exclusão ou nulificação implícita |
 | T11 | Edição manual divergente, `NULL` sem histórico ou alteração revertida | Não sobrescrever/preencher pela igualdade aparente; exigir revisão com histórico |
 | T12 | Nome/nascimento conflitante, troca de aba ou proveniência órfã | Não criar substituto, mesclar paciente ou reverter diagnóstico |
@@ -567,23 +593,89 @@ não implementa reconciliação nem prova que a declaração de carga inicial é
 
 Especificação física concluída em 2026-09-25: nove relações, invariantes,
 fronteiras de autorização, histórico e protocolo de aplicação definidos acima.
-São proposta normativa para os próximos incrementos, ainda sem objetos aplicados.
+Estado sintético em 2026-09-29: migrations 21–24 implementam armazenamento
+fechado, integridade, captura e contexto/precedência; 29–30 fornecem gestão de
+fonte e autorização atribuível, sem papéis associados automaticamente. A suíte
+SQL 18 valida gestão e commit com papel restrito; não prova o aceite integral de
+F06, que inclui aprovação/aplicação. Migrations 31–34 e suíte SQL 19 implementam
+publicação atômica de metadados com hash canônico e snapshots do servidor;
+correções/anulações sem cobertura comprovada permanecem recusadas. Migrations
+35–39 acrescentam arquivos imutáveis recuperáveis pelos bytes/hash, vínculo da
+preparação, conferência integral do bruto/manifesto, transformações fechadas e
+exigência de todos os campos alterados/destinos derivados. A suíte SQL 20 cobre
+preparação, estados distintos, recuperação restrita e ausência de efeitos da
+comparação. O teste clínico prova aprovação de nome/data somente com captura
+ativa desde a importação e proveniência da linha-base, sem mudar fatos clínicos;
+A→B→A mantém a decisão e altera seu token observado. A prova atual alcança a
+base inicial e reprocessamentos do mesmo conteúdo, não futuras revisões aplicadas.
+O login operacional do importador exige contexto também sem SET ROLE, e o E2E
+captura nome/data usando o escritor Python real. Esses objetos foram aplicados somente em
+bancos descartáveis; a evidência física persistente permanece até migration 20.
+Migrations 40–42 avaliam decisão publicada em READ ONLY, com identidade restrita
+à camada autenticadora confiável e autorização da fonte; não gravam ledger,
+staging, tentativas ou sequências. O executor privado aplica somente alvos
+existentes, revalida sob locks, resolve proveniência/eventos e avança a fonte
+atomicamente. Falha após o primeiro alvo reverte todas as escritas, e duas sessões
+produzem um sucesso. Não há EXECUTE do executor para operadores. Isso não prova
+criação de visitas/dependentes, fechamento, concorrência de revisão/edição/revogação,
+continuidade histórica entre revisões ou dry-run de arquivo antes do staging.
+O catálogo não é habilitado automaticamente e o importador continua recusando
+revisões, inclusive em dry-run. Não inferir linhagem ou autoria de dados antigos.
+Reversão usa migration restritiva que preserve evidências.
 
-Próximo incremento: migration incremental de armazenamento fechado e testes de
-integridade/permissões F01–F07 e F16, cobrindo as partes verificáveis sem executor.
-Incluir chaves compostas auxiliares e gatilhos de integridade necessários, sem
-habilitar revisão, conceder autorização institucional ou instalar escrita clínica.
-O catálogo nasce sem captura ativa. Não popular a extensão inferindo linhagem ou
-autoria de dados antigos. Registrar reversão por nova migration que desabilite o
-fluxo e preserve evidências; não prever DROP CASCADE de histórico como rollback.
+Ainda é obrigatório comprovar captura/precedência em todos os escritores dos
+destinos habilitados e o aceite integrado F08/F09/F13 antes da ativação. O aceite
+dos demais planos clínicos e da identidade de ocorrências além de exame/pendência,
+bem como as combinações restantes de concorrência, permanecem pendentes.
+Migrations 43–49 e vinte cenários clínicos comprovam continuidade por
+revisões encerradas, criação de visitas/dependentes, sucessão sem duplicação,
+fechamento com pendências e diagnóstico sanitizado após rollback. F10/F11/F14 e
+T06/T07 possuem essas evidências executáveis, ainda restritas aos destinos do
+cenário. Migrations 50–51 acrescentam simulação privada de proposta/arquivo
+antes do staging e guarda T18 durante publicação/aplicação. SQL 21–22 passou em
+instalação limpa até 51; a suíte clínica conjunta passou com 28 cenários,
+incluindo concorrência F12 e dry-run F15. O importador v1.6.0, testado com manifesto v1.3,
+comprovou F13 para reprocessamento de origem antiga pelo escritor Python real.
+O E2E D8 aprovou ano 2023 na carga, correção privada para 2022 e recusa da origem
+superada, sem criar visita; SQL 24 valida captura A→B→A após a migration 52.
+O manifesto semântico vigente passou a v1.4 com destinos parciais seletivos D3/D8;
+sua regressão integrada ainda está em execução.
+Cada prova cobre seu cenário, sem concluir F01–F16/T01–T18 como conjuntos.
+O aceite D8 cobre esse cenário sintético. Revisões permanecem bloqueadas
+até o aceite integrado; criar tabelas não conclui a Etapa 5B.
 
-Depois, implementar captura/precedência em todos os escritores dos destinos
-homologados e testar F08/F09/F13. Só então implementar autenticação/autorização,
-aprovação, aplicação seletiva e dry-run, comprovando F10–F15 e os casos T01–T18.
-Revisões permanecem bloqueadas até esse aceite integrado; criar tabelas não
-conclui a Etapa 5B. A validação documental atual não substitui testes executáveis.
+As respostas clínicas vigentes estão em
+[`Perguntas pendentes sobre campos e regras clínicas.md`](../Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+e nos contratos de 5A; não há resposta humana pendente nesse conjunto. Papéis
+sintéticos não definem responsabilidade institucional de produção nem autorizam
+dados reais. As pendências deste executor são técnicas e de aceite, registradas
+em [CONTINUIDADE_ETAPA_5.md](../validacoes/CONTINUIDADE_ETAPA_5.md).
+A Etapa 5B não está concluída.
 
-Permanecem em aberto: responsável institucional pela revisão, representação anual
-de D8, tipos/vínculos D6/D7 e demais contratos clínicos ainda não resolvidos em 5A.
-Essas decisões não impedem implementar a barreira conservadora, mas impedem
-habilitar os fluxos clínicos dependentes. A Etapa 5B não está concluída.
+## Estado de staging e execução HTTP — 2026-10-03
+
+As migrations 56–57 e o backend acrescentam o recebimento do XLSX inteiro e
+staging/preparação atômicos, mais wrappers privados para aplicação, finalização
+e diagnóstico após rollback. O endpoint não cadastra manifesto nem
+transformações: um mantenedor os registra previamente. O ledger de recebimento
+é idempotente para a mesma fonte/base/arquivo/artefatos, compara hash dos bytes e
+bruto e não produz efeitos clínicos. Os wrappers não têm `EXECUTE` concedido aos
+papéis operacionais; somente o runner de teste concede acesso no banco
+descartável. Execução HTTP exige `NODE_ENV=test` e staging sintético.
+
+O teste HTTP específico passou 2/2 cenários, cobrindo perfis, revogação,
+recebimentos e executores concorrentes, rollback tardio com diagnóstico
+posterior, fechamento com pendências e repetição de histórico após
+edição manual. Isso demonstra o fluxo exercitado, não o aceite integral F01–F16
+ou T01–T18. SQL27–30 passaram; SQL28 cobre D8 com sequência A–B–A, legado
+de cobertura desconhecida e casos iguais/NULL sem cobertura. SQL60 habilita
+`atendimento.data_atendimento` e `atendimento.observacoes`, além de
+`evento_clinico.ano_evento`; SQL31 valida captura, autoria, A→B→A, rollback e
+proteção de exclusão. SQL29 comprova associação
+equivalente aplicada sem mudança clínica/histórica e preservação de edição
+manual na repetição. SQL59 retorna recebimentos históricos após fechamento
+antes da simulação, sem nova preparação e mantendo a autorização vigente.
+A rodada ampla até 60 passou com sete suítes/36 testes, incluindo correção
+aplicada de data/texto ao mesmo atendimento e reenvio após fechamento;
+nenhuma aplicação de revisão está habilitada fora do ambiente sintético de
+teste e os demais destinos/casos continuam pendentes.

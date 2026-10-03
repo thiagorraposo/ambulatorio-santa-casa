@@ -576,8 +576,18 @@ e preserva carga sintética declarada, no-op, retomada e reprocessamento do mesm
 hash/layout. A declaração não comprova nova ocorrência e não muda a cobertura do
 manifesto. A reconciliação depende de linhagem, decisões e
 histórico de campo persistentes. Ano legado continua bruto até contrato próprio,
-sem datas artificiais ou reconstrução de visitas. Governança de revisão e uso
-de dados reais permanecem pendentes.
+sem datas artificiais ou reconstrução de visitas.
+
+Decisão de governança, 2026-10-03, delegada pelo responsável do projeto para
+fechar a 5A: competência para registrar fontes e conceder/revogar autorizações
+será um entitlement nominal separado do perfil funcional. O perfil
+`administração` não concede gestão por si só. O entitlement será provisionado e
+revogado fora da API por operador de banco designado; toda concessão/revogação
+preserva principal e instante. Ser gestor não concede automaticamente
+autorização clínica por fonte: essa continua explícita, atribuível e revogável.
+Não foi definida uma lista de pessoas nem uma concessão para dados reais.
+O mecanismo se aplica aos testes e à operação sintética; qualquer provisionamento
+real continua sujeito ao processo institucional de implantação.
 
 Alternativas rejeitadas: tratar novo hash como nova consulta; vincular versões por
 número de linha; impor unicidade por paciente/data; aplicar o arquivo mais recente
@@ -585,5 +595,57 @@ por cima do banco; preencher `NULL` sem história de campo; inferir visitas de u
 intervalo de anos; usar a FK de mesmo conteúdo ou mensagem livre como auditoria de
 revisão entre hashes.
 
+Implementação sintética incremental: migrations 29–30 separam gestão de
+autorização em papel NOLOGIN sem membros automáticos. O ator é obtido do ledger
+autenticado da transação, não de parâmetro do gestor. A integridade diferida usa
+dono técnico restrito para validar commits sem expor tabelas aos operadores;
+privilégios de identidade excluem `senha_hash`. Esse mecanismo não atribui
+responsabilidade institucional por perfil nem habilita revisão clínica. Concessão
+de papéis e aceite integrado continuam portas distintas da implementação.
+Migrations 31–34 publicam plano/decisão atomicamente, com hash canônico do
+servidor, snapshots/tokens observados e entrada normalizada. Mantêm as barreiras
+de correção/anulação até haver prova de cobertura, sem habilitar executor.
+Migrations 35–39 acrescentam `revisao_artefato` e
+`importacao_revisao_preparacao`: os bytes originais são preservados, não apenas
+um hash impossível de recuperar. Versão de transformação é única e imutável,
+para impedir executáveis diferentes sob o mesmo identificador. Um catálogo
+fechado de transformações verifica os envelopes e todos os destinos derivados
+dos campos alterados; não interpreta SQL fornecido por operadores. A prova desde
+a base exige evento inicial de importação e proveniência da linha/registro; um
+marco posterior permanece insuficiente. Essas escolhas são técnicas, compatíveis
+com a ADR-022, e não são novas respostas humanas. Ainda faltam aplicação integral,
+continuidade da prova através das revisões aplicadas e aceite de todos os casos.
+
+Migrations 40–42 compartilham a avaliação de decisão com o executor privado.
+A simulação recebe identidade apenas da camada autenticadora confiável em vez
+de escrever contexto, permitindo READ ONLY sem consumo de sequências. Aplicação
+usa o ledger real e revalida sob bloqueios. EXECUTE do executor não é concedido
+antes do aceite integrado; testes do mantenedor em fixtures não ativam revisão
+para os papéis operacionais. Resolução de alvos existentes não homologa criação,
+fechamento ou simulação de arquivo novo. Trata-se de escolha técnica, não clínica.
+
 Documento relacionado:
 [`arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md`](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md).
+
+## ADR-023
+
+Data: 2026-10-03
+
+Decisão: versionar os contratos HTTP em `/v1`, mantendo as rotas atuais como
+aliases dos mesmos controllers/DTOs/guards. O monitoramento de lotes reutiliza
+os vínculos clínicos existentes, sem criar uma ACL concorrente à de pacientes:
+administração lê metadados sanitizados ordinários; consulta/edição exigem
+proveniência íntegra e vínculo ativo com todos os pacientes do lote. Lotes
+revisados são excluídos da consulta ordinária. A política de paciente
+`todos_sinteticos` não amplia o escopo dos lotes.
+
+Justificativa: manter compatibilidade dos clientes e aplicar autorização por
+recurso antes da paginação. Cabeçalho/linhas são projetados em uma consulta SQL
+para preservar o mesmo snapshot. O resolvedor privado usa destinos permitidos;
+o ator vem do ledger autenticado, sem leitura operacional direta da proveniência.
+São escolhas técnicas para 5D/5E, sem nova resposta clínica ou designação real.
+
+Consequências: versões não publicadas retornam 404; lote existente fora do
+escopo retorna 403. Linhas sem âncora suficiente, lote misto inacessível e
+vínculo revogado impedem o acesso ao lote inteiro para consulta/edição.
+Lotes com erro sem proveniência permanecem consultáveis pela administração.

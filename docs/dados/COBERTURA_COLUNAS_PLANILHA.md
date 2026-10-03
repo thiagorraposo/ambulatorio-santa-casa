@@ -1,6 +1,6 @@
 # Cobertura das Colunas da Planilha pelo Núcleo Físico
 
-Atualizado em: 2026-09-25
+Atualizado em: 2026-10-03
 
 ## Fonte e critério
 
@@ -21,29 +21,30 @@ O detalhamento por posição, aba e destino está no manifesto oficial
 - **Não coberta:** não existe destino para a informação normalizada exigida.
 - **Dúvida:** a semântica ainda não foi confirmada.
 
-## Classificação declarada no manifesto executável v1.1
+## Classificação declarada no manifesto executável v1.4
 
 | Classificação | Quantidade | Percentual |
 | --- | ---: | ---: |
 | Coberta diretamente | 8 | 5,88% |
-| Coberta com transformação | 117 | 86,03% |
-| Parcialmente coberta | 10 | 7,35% |
+| Coberta com transformação | 118 | 86,76% |
+| Parcialmente coberta | 9 | 6,62% |
 | Não coberta | 0 | 0,00% |
 | Excluída do estruturado | 1 | 0,74% |
 | Total | 136 | 100,00% |
 
-Cobertura plena declarada: **125/136 (91,91%)**. Incluindo cobertura parcial:
+Cobertura plena declarada: **126/136 (92,65%)**. Incluindo cobertura parcial:
 **135/136 (99,26%)**.
 
-Esses números descrevem o manifesto e a homologação sintética atuais, não o
+Esses números descrevem o manifesto e a homologação sintética por rótulo, não o
 atendimento integral das respostas incorporadas em 2026-09-14. D11 foi promovida
-na v1.2.0 do importador; preservação em JSONB não equivale a cobertura funcional,
+na v1.2.0 do importador; D8 pode estruturar seletivamente um ano inequívoco mesmo
+classificado como `parcial`. Preservação em JSONB não equivale a cobertura funcional,
 e a matriz abaixo continua sendo a avaliação vigente das novas decisões.
 
 A contagem foi recalculada diretamente dos 136 rótulos físicos distintos do
 manifesto. Ela corrige a divergência anterior, que informava quatro parciais
 enquanto o artefato executável ainda continha dezoito. Oito foram promovidos com
-destino comprovado; dez permanecem parciais. `Localizado` é exclusão deliberada,
+destino comprovado; a migration 28 acrescenta descoberta do paciente e nove permanecem parciais. `Localizado` é exclusão deliberada,
 não dúvida a ser inferida pelo importador.
 
 ## Alterações de classificação após confirmação humana
@@ -106,35 +107,35 @@ criar projetos ou duplicar o vínculo com paciente.
 
 Fonte de negócio: [decisões humanas](DECISOES_HUMANAS_NOVA_PLANILHA.md). As
 classificações avaliam o sistema completo: um destino físico disponível não
-significa importador ou API implementados. Não há frontend nem DTOs clínicos
-dessas funcionalidades. P0 bloqueia o fluxo afetado; P1 é necessário ao MVP;
+significa importador ou API implementados. Não há frontend; a API já possui DTOs de entrada para diagnóstico, exames e rastreio familiar. P0 bloqueia o fluxo afetado; P1 é necessário ao MVP;
 P2 é importante, não bloqueante; P3 é pós-MVP. Prioridades são propostas técnicas.
 
 | Decisão | Situação atual | Banco | Importador | Backend | Frontend | Migration? | Prioridade |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| D1 — idade por nascimento | Parcialmente atendida; referência temporal precisa de decisão | `paciente.data_nascimento` já basta | Idade legada continua bruta; corrigir metadado semântico e não usá-la como valor atual | Calcular com referência aprovada | Exibir idade e referência | Não | P1 |
-| D2 — data de descoberta de Chagas | Não atendida | Falta data própria; `data_resultado_final` é outra informação | Novo destino/transformação após contrato | Validar e expor data sem derivar da sorologia | Campo próprio | Sim, incremental após definir titularidade | P1 |
-| D3 — familiares examinados, quais e resultado | Não atendida | Histórico de doença familiar não representa rastreio; extensão mínima a definir | Preservar flag, identificação e resultado sem inventar detalhes | Contrato mínimo; não exigir data ou cadastro civil completo | Flag e detalhes dos examinados | Sim, incremental; formato ainda não decidido | P1 |
+| D1 — idade por nascimento | Semântica incorporada; data de referência da consulta deve ficar explícita | `paciente.data_nascimento` já basta | Idade legada permanece bruta e não é usada como valor atual | Calcular com referência explícita | Exibir idade e referência | Não | P1 |
+| D2 — data de descoberta de Chagas | Implementada no contrato e na migration 28 | `diagnostico_chagas.data_descoberta_autorelato`, distinta da sorologia | Conversão na carga inicial; promoção de lotes antigos ainda pendente | Campo na criação/consulta do atendimento | Campo próprio | Sim, migration 28 | P1 |
+| D3 — familiares examinados, quais e resultado | Contrato/migration 25 implementados; negativa legada seletiva em teste | Rastreio triestado e resultados repetíveis | Negativa inequívoca pode criar `familiares_examinados = false`; afirmativa sem parente/resultado e texto ambíguo ficam brutos | DTO de rastreio familiar | Flag e detalhes dos examinados | Sim, migration 25 | P1 |
 | D4 — identificar exames trazidos | Parcialmente atendida | `paciente_exame_complementar` e catálogo suportam ocorrências | Indicador agregado está bruto; categoria genérica precisa de identificação textual inequívoca | Exigir identificação quando afirmativo | Seleção/descrição do exame | Não; reutilizar modelo | P1 |
 | D5 — identificar exames solicitados | Parcialmente atendida | Bloco `solicitado` já existe; resultado pode faltar | Associar solicitação ao exame, sem exigir resultado | Validar identificação, não resultado | Formulário próprio de solicitação | Não | P1 |
-| D6 — data efetiva do retorno de 30 dias BZN | Parcialmente atendida | `acompanhamento_cuidado.data_realizada` reutilizável; vínculo via atendimento/paciente | Coluna apenas bruta; criar mapeamento após decidir tipo/vínculo | Registrar retorno efetivo, não somar 30 dias | Data real e contexto BZN | Não para o mínimo; FK direta ao BZN é escolha técnica opcional | P1 |
-| D7 — data efetiva do retorno final BZN | Parcialmente atendida | Mesma estrutura de acompanhamento | Importar data real, sem confundir com fim do medicamento | Não impor 60 dias de duração | Retorno final distinto do fim do tratamento | Não para o mínimo | P1 |
-| D8 — histórico de retornos; legado contém último ano | Parcialmente atendida; barreira de finalidade da ADR-022 implementada na v1.4.0 | Acompanhamento é repetível; `evento_clinico.ano_evento` é opção para ano legado, ainda não adotada | Revisões bloqueadas; implementar linhagem, mapeamento e auditoria; não fabricar dia/mês nem converter atualização em nova visita | Histórico por ocorrência; ano aproximado explicitado | Linha do tempo sem precisão falsa | Ano: decidir representação; revisão entre hashes exige extensão incremental de auditoria | P1; implementação temporal P0 do fluxo de atualização |
-| D9 — possível retirada do desfecho | Precisa de decisão técnica e confirmação da intenção de retirada | Não existe coluna dedicada a eliminar; data prevista/texto já têm destinos possíveis | Preservar legado até aprovar mapeamento de agendamento/instrução | Separar visita realizada de orientação futura | Não definir remoção definitiva sem confirmação | Não para retirar campo inexistente; eventual extensão depende do contrato | P2; preservar informação no MVP |
-| D10 — múltiplas contrarreferências e upload | Parcialmente atendida; representação e momento do upload precisam de decisão | Acompanhamento/encaminhamento permitem repetição; documento não tem representação canônica definida | Indicador legado bruto; não criar documentos/eventos inexistentes | Registrar múltiplos episódios; anexos são fluxo futuro próprio | Histórico; upload somente após contrato | Não pela multiplicidade isolada; possível para documento/metadados de anexos | P1 registro; P2 upload proposto, a confirmar |
-| D11 — pendências textuais, sobretudo notificação/BZN | Atendida no contrato executável v1.2.0 | `pendencia_atendimento.descricao` e cardinalidade múltipla atendem | Cria ou associa pendência textual por proveniência, sem classificar automaticamente o texto legado | Operações de pendência textual ainda não existem na API | Texto livre; não substituir observação clínica geral | Não | P1 |
+| D6 — data efetiva do retorno de 30 dias BZN | Mapeamento seletivo implementado e validado | `acompanhamento_cuidado.data_realizada`, tipo `retorno_bzn_30_dias`, vínculo via atendimento/paciente e tratamento canônico conferido | Data válida cria ocorrência com proveniência; valores sem data permanecem no bruto | Registra data efetiva, sem somar 30 dias | Data real e contexto BZN | Não para o mínimo; estrutura existente reutilizada | P1 |
+| D7 — data efetiva do retorno final BZN | Mapeamento seletivo implementado e validado | Mesma estrutura de acompanhamento | Data efetiva permanece distinta do fim do medicamento e não duplica reprocessamentos | Não impor 60 dias de duração | Retorno final distinto do fim do tratamento | Não para o mínimo | P1 |
+| D8 — histórico de retornos; legado contém último ano | Ano inequívoco validado em E2E com manifesto v1.4; revisão operacional segue bloqueada | `evento_clinico.ano_evento` com tipo `ultimo_comparecimento_ano_informado` e original; migration 52 captura novos fatos, sem conferir cobertura retroativa | Handler seletivo preserva texto ambíguo no bruto e usa proveniência; E2E cobriu no-op, reprocessamento e fonte superada | Ocorrência anual com precisão explícita; revisão entre hashes ainda privada | Linha do tempo sem precisão falsa | Não para representar o ano; auditoria temporal possui extensão própria | P1; implementação temporal P0 do fluxo de atualização |
+| D9 — possível retirada do desfecho | Fora das seis respostas; legado preservado sem inferência | Não existe coluna dedicada a eliminar; dados existentes permanecem | Preservar legado até contrato técnico de destino | Separar visita realizada de orientação futura | Não remover informação sem contrato | Não | P2; preservar informação no MVP |
+| D10 — múltiplas contrarreferências e upload | Registro múltiplo HTTP implementado; upload segue backlog técnico | Acompanhamento/encaminhamento permitem repetição; documento não tem representação canônica | Indicador legado bruto; não criar documentos/eventos inexistentes | Cria e lista episódios distintos ligados ao encaminhamento do paciente | Histórico; upload é fluxo futuro | Não pela multiplicidade isolada | P1 registro; P2 upload |
+| D11 — pendências textuais, sobretudo notificação/BZN | Importador e operações HTTP sintéticas implementados | `pendencia_atendimento.descricao` e cardinalidade múltipla atendem | Cria ou associa pendência textual por proveniência, sem classificar automaticamente o texto legado | Criação, consulta paginada e atualização de status/resolução por vínculo implementadas | Texto livre; não substituir observação clínica geral | Não | P1 |
 | D12 — excluir funcionalmente `Localizado` | Já atendida quanto à exclusão estruturada; não aplicável às telas ainda inexistentes | Não criar campo nem remover localização do prontuário | Já excluído; razão textual no gerador está desatualizada | Não incluir nos novos contratos | Não incluir nas novas telas | Não | P2 alinhamento documental/metadados |
 
 ## Impactos transversais e conflitos executáveis
 
-- **Banco/modelagem:** somente D2/D3 justificam lacunas estruturais certas; formato
-  mínimo ainda depende de contrato. D6–D11 exigem avaliar estruturas já disponíveis,
+- **Banco/modelagem:** D2 e D3 agora têm extensões físicas incrementais; D6–D11
+  exigem avaliar estruturas já disponíveis,
   não criar automaticamente uma tabela por pergunta. Todas as mudanças futuras
   devem ser incrementais; as quatro migrations mínimas antigas estão concluídas.
-- **Importador:** o manifesto v1.1 declara dez parciais; gerador, validador e
+- **Importador:** o manifesto v1.4 declara nove parciais; gerador, validador e
   testes fixam conjuntamente as contagens e allowlists. A detecção de tipo por
-  transformação ainda classifica idade como data e deixa retornos/ano como texto.
-  Cada nova promoção deve atualizar esses artefatos em conjunto.
+  transformação ainda classifica idade como data e mantém D3/D8 como texto
+  parcial. Handlers convertem seletivamente datas BZN, ano e negativa familiar
+  inequívocos; o manifesto v1.4 mantém valores ambíguos fora da estrutura clínica.
 - **Integridade:** a v1.1.1 corrige a reconciliação BZN com regressões sintéticas;
   a v1.2.0 implementa registro explícito de promoção, âncoras da proveniência,
   handlers seletivos e rollback das novas escritas para D11. A v1.3.0 mantém
@@ -143,15 +144,15 @@ P2 é importante, não bloqueante; P3 é pós-MVP. Prioridades são propostas t�
   exigem classificação individual. Esses limites estão no
   [estado do importador](../IMPORTADOR_SINTETICO_V1.md).
 - **Temporalidade:** o [contrato complementar](../arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md)
-  define revisão entre hashes e seus casos de aceite. A v1.4.0 implementa somente
-  a barreira de finalidade e recusa revisões antes de escrita, inclusive em dry-run.
-  A proveniência atual não basta para autorizar correção por campo; a extensão
-  mínima de linhagem/decisão/histórico foi especificada em 2026-09-25 no contrato
-  temporal. Implementação e homologação permanecem necessárias para habilitar o fluxo.
+  define revisão entre hashes e seus casos de aceite. A CLI mantém a barreira de
+  finalidade e recusa revisões, inclusive em dry-run. Migrations e funções privadas
+  acrescentaram linhagem, decisão, captura e executor parciais; D8/F13 foi provado
+  em cenário sintético, sem habilitar o fluxo operacional. Aceite integral ainda
+  é necessário para ativação.
   Isso não altera cobertura de colunas nem justifica tabelas clínicas por retorno.
-- **Backend/frontend:** os campos não estão “errados” em DTOs ou telas clínicas
-  existentes: eles ainda não existem. Implementar apenas os contratos aprovados,
-  com autorização por operação/recurso e transações de escrita compostas.
+- **Backend/frontend:** DTOs de entrada e fluxos clínicos já existem para parte
+  dos contratos, com autorização e transações compostas. Faltam a consolidação
+  dos DTOs de saída e os recursos restantes descritos no roadmap. Não há frontend.
 
 ## Testes necessários
 
@@ -166,7 +167,8 @@ P2 é importante, não bloqueante; P3 é pós-MVP. Prioridades são propostas t�
 - D8/D9: ano sem dia/mês, várias visitas, planilha atualizada sem nova visita e
   orientação futura não transformada em retorno realizado; preservar histórico.
   A matriz T01–T18 do contrato temporal detalha revisão, precedência, concorrência
-  e auditoria. T01 e a recusa de T02 estão cobertos na v1.4.0; o restante é futuro.
+  e auditoria. T01 e a recusa de T02 estão cobertos na v1.4.0; D8/F13 tem prova
+  privada específica, sem aceite da matriz temporal integral.
 - D10/D11/D12: contrarreferências múltiplas, estados desconhecidos, pendência livre,
   observação clínica preservada e ausência funcional de `Localizado` com bruto intacto.
 - Transversais: BZN repetido compatível/conflitante, preenchimento de nulos e
@@ -182,6 +184,16 @@ regressões sintéticas às garantias existentes; nunca usar dados clínicos rea
 
 ## Documentação e evidências
 
+### Impacto da decisão de governança da 5A
+
+Em 2026-10-03, por delegação expressa do responsável, foi decidido que gestão
+de fonte e de autorizações temporais exige entitlement nominal separado do
+perfil funcional, provisionado fora da API. Isso não altera a classificação
+semântica ou física das 136 colunas da planilha e não concede autorização clínica
+por fonte. O impacto está na fronteira de segurança da ADR-022: migration 55 e
+rotas específicas aplicam a regra; a ativação permanece condicionada ao aceite
+integrado F01–F16/T01–T18.
+
 As referências vigentes afetadas são as decisões humanas, este mapa, o estado
 atual, o roadmap, a especificação/implementação do importador, o manifesto físico,
 as especificações de BZN/encaminhamento e os limites do backend/segurança. Os
@@ -191,6 +203,7 @@ sobrepõem código, schema nem respostas confirmadas da equipe.
 
 O número “não coberta = 0” no manifesto significa sua classificação de
 rótulos com preservação possível, não ausência de lacunas funcionais. As onze
-parciais originais não podem mais ser relegadas em bloco ao pós-MVP; dez continuam
-nessa classificação após a promoção de D11. A ordem vigente é o
+parciais originais não podem mais ser relegadas em bloco ao pós-MVP; nove continuam
+nessa classificação após D11 e a carga inicial de D2. Isso não comprova promoção
+de D2 em lotes antigos. A ordem vigente é o
 [roadmap](../PROXIMOS_PASSOS.md), sem recalcular cobertura antes da implementação.

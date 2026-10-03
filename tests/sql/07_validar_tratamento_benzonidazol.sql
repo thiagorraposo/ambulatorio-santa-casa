@@ -216,13 +216,17 @@ BEGIN
     RETURNING atendimento_id INTO v_atendimento_remover;
     UPDATE tratamento_benzonidazol SET atendimento_id = v_atendimento_remover
      WHERE tratamento_benzonidazol_id = v_tratamento_2;
-    DELETE FROM atendimento WHERE atendimento_id = v_atendimento_remover;
+    BEGIN
+        DELETE FROM atendimento WHERE atendimento_id = v_atendimento_remover;
+        RAISE EXCEPTION 'cenario 15: exclusão de atendimento auditado foi aceita';
+    EXCEPTION WHEN check_violation THEN NULL;
+    END;
     IF NOT EXISTS (
         SELECT 1 FROM tratamento_benzonidazol
          WHERE tratamento_benzonidazol_id = v_tratamento_2
-           AND paciente_id = v_paciente_2 AND atendimento_id IS NULL
+           AND paciente_id = v_paciente_2 AND atendimento_id = v_atendimento_remover
     ) THEN
-        RAISE EXCEPTION 'cenario 15: SET NULL nao preservou tratamento e paciente';
+        RAISE EXCEPTION 'cenario 15: recusa da exclusão não preservou tratamento, paciente e vínculo';
     END IF;
 
     INSERT INTO paciente (codigo_planilha, nome)

@@ -13,7 +13,7 @@ export class ClinicalAccessService {
   }
 
   requireEnabled(): void {
-    if (this.policy === 'desabilitada') throw new ServiceUnavailableException('Fluxo clínico aguardando definição de acesso');
+    if (this.policy === 'desabilitada') throw new ServiceUnavailableException('Fluxo clínico desabilitado neste ambiente');
   }
 
   async identity(tx: Transaction, user: AuthenticatedUser, write = false): Promise<void> {

@@ -154,9 +154,14 @@ BEGIN
     INSERT INTO encaminhamento (atendimento_id, documento_apresentado)
     VALUES (v_atendimento_cascade, TRUE)
     RETURNING encaminhamento_id INTO v_enc_cascade;
-    DELETE FROM atendimento WHERE atendimento_id = v_atendimento_cascade;
-    IF EXISTS (SELECT 1 FROM encaminhamento WHERE encaminhamento_id = v_enc_cascade) THEN
-        RAISE EXCEPTION 'cenario 14: CASCADE do atendimento nao foi preservado';
+    BEGIN
+        DELETE FROM atendimento WHERE atendimento_id = v_atendimento_cascade;
+        RAISE EXCEPTION 'cenario 14: exclusão de atendimento auditado foi aceita';
+    EXCEPTION WHEN check_violation THEN NULL;
+    END;
+    IF NOT EXISTS (SELECT 1 FROM encaminhamento WHERE encaminhamento_id = v_enc_cascade
+                   AND atendimento_id = v_atendimento_cascade) THEN
+        RAISE EXCEPTION 'cenario 14: recusa da exclusão não preservou encaminhamento e vínculo';
     END IF;
 
     IF EXISTS (

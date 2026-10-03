@@ -12,6 +12,13 @@ export interface AppConfig {
   auth: { jwtSecret: string; jwtExpiresInSeconds: number };
   clinical: { accessPolicy: 'desabilitada' | 'vinculo_explicito' | 'todos_sinteticos' };
   importer: { enabled: boolean; host?: string; port?: number; name?: string; user?: string; password?: string; role: 'ambulatorio_importador' };
+  revisions: {
+    enabled: boolean; syntheticMode: boolean; host?: string; port?: number; name?: string; user?: string; password?: string;
+    role: 'ambulatorio_revisao_servico';
+    stagingEnabled: boolean; executionEnabled: boolean; gitRevision?: string;
+    manager: { enabled: boolean; host?: string; port?: number; name?: string; user?: string; password?: string;
+      role: 'ambulatorio_revisao_gestor' };
+  };
 }
 
 const required = (env: Record<string, unknown>, key: string): string => {
@@ -65,6 +72,39 @@ export function validateConfig(env: Record<string, unknown>): AppConfig {
     host: required(env, 'IMPORT_DB_HOST'), port: port(env, 'IMPORT_DB_PORT'), name: required(env, 'IMPORT_DB_NAME'),
     user: required(env, 'IMPORT_DB_USER'), password: required(env, 'IMPORT_DB_PASSWORD'), role: 'ambulatorio_importador' as const,
   } : { enabled: false, role: 'ambulatorio_importador' as const };
+  const revisionsEnabled = flag(env, 'REVISION_HTTP_ENABLED');
+  const revisionSyntheticMode = flag(env, 'REVISION_SYNTHETIC_MODE');
+  if (revisionsEnabled && (nodeEnv === 'production' || !revisionSyntheticMode)) {
+    throw new Error('Configuração inválida: revisão HTTP exige ambiente sintético fora de produção');
+  }
+  const revisionManagerEnabled = flag(env, 'REVISION_MANAGER_HTTP_ENABLED');
+  if (revisionManagerEnabled && (!revisionsEnabled || nodeEnv === 'production' || !revisionSyntheticMode)) {
+    throw new Error('Configuração inválida: gestão de revisão exige revisão sintética habilitada fora de produção');
+  }
+  const revisionStagingEnabled = flag(env, 'REVISION_STAGING_HTTP_ENABLED');
+  if (revisionStagingEnabled && !revisionsEnabled) {
+    throw new Error('Configuração inválida: staging exige revisão sintética habilitada');
+  }
+  const revisionGit = revisionStagingEnabled ? required(env, 'REVISION_GIT') : undefined;
+  if (revisionGit && !/^[0-9a-f]{7,40}$/.test(revisionGit)) {
+    throw new Error('Configuração inválida: REVISION_GIT');
+  }
+  const revisionExecutionEnabled = flag(env, 'REVISION_EXECUTION_HTTP_ENABLED');
+  if (revisionExecutionEnabled && (nodeEnv !== 'test' || !revisionStagingEnabled)) {
+    throw new Error('Configuração inválida: execução de revisão exige homologação em teste com staging habilitado');
+  }
+  const revisions = revisionsEnabled ? {
+    enabled: true, syntheticMode: revisionSyntheticMode,
+    stagingEnabled: revisionStagingEnabled, executionEnabled: revisionExecutionEnabled, gitRevision: revisionGit,
+    host: required(env, 'REVISION_DB_HOST'), port: port(env, 'REVISION_DB_PORT'), name: required(env, 'REVISION_DB_NAME'),
+    user: required(env, 'REVISION_DB_USER'), password: required(env, 'REVISION_DB_PASSWORD'), role: 'ambulatorio_revisao_servico' as const,
+    manager: revisionManagerEnabled ? { enabled: true, host: required(env, 'REVISION_MANAGER_DB_HOST'),
+      port: port(env, 'REVISION_MANAGER_DB_PORT'), name: required(env, 'REVISION_MANAGER_DB_NAME'),
+      user: required(env, 'REVISION_MANAGER_DB_USER'), password: required(env, 'REVISION_MANAGER_DB_PASSWORD'),
+      role: 'ambulatorio_revisao_gestor' as const } : { enabled: false, role: 'ambulatorio_revisao_gestor' as const },
+  } : { enabled: false, syntheticMode: revisionSyntheticMode, role: 'ambulatorio_revisao_servico' as const,
+    stagingEnabled: false, executionEnabled: false,
+    manager: { enabled: false, role: 'ambulatorio_revisao_gestor' as const } };
   return {
     nodeEnv: nodeEnv as AppConfig['nodeEnv'],
     apiPort: port(env, 'API_PORT'),
@@ -79,5 +119,6 @@ export function validateConfig(env: Record<string, unknown>): AppConfig {
     auth: { jwtSecret, jwtExpiresInSeconds },
     clinical: { accessPolicy: accessPolicy as AppConfig['clinical']['accessPolicy'] },
     importer,
+    revisions,
   };
 }

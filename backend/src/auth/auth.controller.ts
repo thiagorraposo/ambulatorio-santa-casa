@@ -20,6 +20,7 @@ export class AuthController {
   }
 
   @Get('me')
+  @Perfis('consulta', 'edicao', 'administracao')
   me(@CurrentUser() user: AuthenticatedUser): AuthenticatedUser { return user; }
 
   @Perfis('edicao', 'administracao')

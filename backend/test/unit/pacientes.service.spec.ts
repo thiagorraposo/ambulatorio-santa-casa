@@ -3,14 +3,19 @@ import { PacientesService } from '../../src/pacientes/pacientes.service';
 import { ServiceUnavailableException } from '@nestjs/common';
 
 describe('PacientesService', () => {
-  it('mapeia somente os campos públicos do DTO', async () => {
-    const repository = { list: jest.fn().mockResolvedValue([
+  it('lista somente pelo escopo autenticado, incluindo paginação', async () => {
+    const tx = { query: jest.fn() };
+    const database = { transaction: jest.fn(async (operation: (value: unknown) => Promise<unknown>) => operation(tx)) } as never;
+    const access = { identity: jest.fn().mockResolvedValue(undefined) } as never;
+    const repository = { listScoped: jest.fn().mockResolvedValue([
       { paciente_id: '42', nome: 'Paciente Sintético', codigo_planilha: 'interno' },
     ]) } as unknown as PacientesRepository;
-    await expect(new PacientesService(repository).list(10)).resolves.toEqual([
+    const user = { usuarioId: '1', nome: 'Consulta', perfil: 'consulta' as const };
+    const query = { limit: 10, offset: 20 };
+    await expect(new PacientesService(repository, database, access).list(query, user)).resolves.toEqual([
       { pacienteId: '42', nome: 'Paciente Sintético' },
     ]);
-    expect(repository.list).toHaveBeenCalledWith(10);
+    expect(repository.listScoped).toHaveBeenCalledWith(tx, query, user, access);
   });
 
   it('bloqueia exportação CSV quando a política clínica está desabilitada', async () => {

@@ -1,8 +1,11 @@
 # Importador Sintético v1
 
-Atualizado em: 2026-09-22
+Atualizado em: 2026-10-01
 
-O importador v1.4.0 exige finalidade explícita e recusa revisões de conteúdo antes
+O importador v1.7.0 usa o manifesto semântico v1.4, registra o ano inequívoco do
+último comparecimento (D8) como evento anual e preserva correções temporais ao
+reprocessar origem antiga no cenário F13. A v1.5.0 incorporou a data de descoberta
+do paciente pela migration 28. Mantém a barreira da v1.4.0: exige finalidade explícita e recusa revisões de conteúdo antes
 de qualquer escrita, inclusive em dry-run. A v1.3.0 classifica erros de forma conservadora e implementa a primeira
 regra não crítica para catálogo de projeto ausente. A v1.2.0 implementou a
 promoção controlada de D11 (`pendencias_observacao`) e a v1.1.1 corrigiu a
@@ -67,15 +70,17 @@ hashes depende da futura linhagem, decisão e história por campo da ADR-022.
    exato, com ID de origem apenas auxiliar;
 5. abre uma transação por linha, cria/reutiliza paciente e cria exatamente um
    atendimento;
-6. grava os 125 destinos plenos: dados demográficos, endereço/contato, projetos,
+6. grava os 126 destinos plenos: dados demográficos, endereço/contato, projetos,
    diagnóstico/sorologias/solicitação, condição e complicações de Chagas,
    comorbidades, medicamentos, exames, avaliação clínica, eventos, dispositivos,
    BZN, encaminhamento, notificação e óbito;
 7. registra todo alvo criado ou associado em `importacao_registro`;
 8. confirma a linha inteira ou executa rollback sem escrita clínica parcial.
 
-Os dez campos `parcial`, quando preenchidos, deixam a linha
-`importada_com_pendencia` e permanecem em `dados_brutos`. D11 agora é destino
+Os nove rótulos `parcial` permanecem no manifesto e no bruto. Valores que não
+passam por handler explícito deixam a linha `importada_com_pendencia`; retornos
+BZN com data real e D8 com ano inequívoco podem ser mapeados seletivamente, sem
+alterar a contagem declarada do manifesto. D11 agora é destino
 pleno e cria uma pendência textual vinculada ao atendimento, sem inferir tipo,
 status, responsável ou datas. `Localizado` permanece exclusivamente bruto e,
 isoladamente, não cria pendência.
@@ -100,14 +105,45 @@ anteriores, executa somente handlers registrados por chave, usa savepoint para a
 novas escritas e recalcula as pendências. D11 é a primeira entrada do registro.
 No destino repetível, uma pendência equivalente já vinculada por proveniência é
 associada; ausência cria o registro; outra pendência preexistente sem proveniência
-é tratada como edição manual ambígua e permanece intacta para revisão. As outras
-dez chaves dependem do respectivo contrato clínico, manifesto, handler e testes.
+é tratada como edição manual ambígua e permanece intacta para revisão. O registro
+também inclui data de descoberta, retornos BZN com data real e ano D8. As demais
+chaves ainda dependem de contrato clínico, manifesto, handler e testes próprios.
 
 Múltiplos candidatos, ID auxiliar divergente, duplicidade entre abas, contexto
 ambulatorial contraditório e valor inválido rejeitam a linha. Catálogos ausentes
 também são críticos, salvo a regra explícita de projeto descrita abaixo. Itens de
 catálogo nunca são criados automaticamente; vínculos e ocorrências clínicas são
 criados pelos handlers. O original e a mensagem do conflito permanecem auditáveis.
+
+## Ano do último comparecimento — D8 na v1.6.0
+
+`retorno_anual_realizado` continua classificado como `parcial` no manifesto v1.4.
+O handler aceita somente um ano inequívoco e registra
+`evento_clinico.ano_evento` do tipo `ultimo_comparecimento_ano_informado`, com
+`valor_original_data`, vínculo ao paciente e proveniência. Não cria atendimento,
+retorno realizado nem dia/mês. Texto como `sim`, data completa ou ano ambíguo
+permanece apenas no bruto, com pendência. A associação de evento existente exige
+proveniência da mesma fonte/hash e layout; igualdade de ano em outro arquivo ou
+edição manual não autoriza associação silenciosa.
+
+O E2E em banco descartável testou ano 2023 na carga inicial, no-op e
+reprocessamento do mesmo hash sem duplicação. Depois, uma revisão sintética
+privada corrigiu a mesma ocorrência para 2022; tentar reprocessar a origem
+superada foi recusado e preservou o evento corrigido (F13). O teste também
+comprovou bruto original, captura atribuível e ausência de visita inventada.
+`make manifest-check importer-test COMPACT=1` passou com 32 testes unitários e
+E2E usando manifesto v1.4 em `/tmp/ambulatorio-check-lvoqpa3u/output.log`.
+A CLI ainda recusa revisão entre hashes; o E2E não a habilita operacionalmente.
+
+## Negativa inequívoca de exame familiar — D3
+
+O manifesto v1.4 aponta o rótulo legado para
+`rastreio_familiar.familiares_examinados`, mantendo cobertura `parcial` e tipo
+`texto`. O handler implementado aceita somente negativa inequívoca e registra
+`familiares_examinados = false` com original e proveniência; afirmativa sem
+identificação/resultado e texto ambíguo ficam brutos e pendentes. A regressão
+integrada passou em banco descartável, cobrindo carga, proveniência, promoção de
+lote anterior e reprocessamento sem duplicação.
 
 ## Criticidade de erros — v1.3.0
 
@@ -161,14 +197,15 @@ foi corrigida na v1.1.1; as demais lacunas abaixo permanecem abertas.
 | Um tratamento BZN consolidado por paciente | Corrigido na v1.1.1: consulta por paciente e reconcilia valores preservando o vínculo existente | Regressões unitárias e E2E cobrem associação, preenchimento de nulos e rejeição atômica de divergências; unicidade preservada |
 | Reprocessar para resolver pendências | Corrigido na v1.2.0 para D11: registro explícito por chave, âncoras vindas da proveniência, handler seletivo, savepoint e reconciliação conservadora | E2E cobre promoção parcial, edição manual ambígua, rollback, dry-run e dois elos; expandir somente após aprovar cada contrato |
 | Campo secundário inválido pode gerar pendência, conforme contrato | v1.3.0 mantém rollback como padrão e permite apenas `catalogo_projeto_ausente` na allowlist não crítica | Expandir somente por handler, com contrato de efeitos, nova tentativa e testes; demais `RowConflict` continuam críticos |
-| D8: planilha atualizada guarda último ano visitado | v1.4.0 exige finalidade e bloqueia revisão; novo hash somente inicia lote com carga inicial declarada | Declaração não comprova nova ocorrência; mapeamento, linhagem e auditoria da ADR-022 ainda não implementados |
+| D8: planilha atualizada guarda último ano visitado | v1.6.0 mapeia ano inequívoco com proveniência; v1.7.0 foi validada com manifesto v1.4 e captura SQL52 | Texto ambíguo permanece bruto; a CLI ainda bloqueia revisão operacional e o aceite global T01–T18 segue pendente |
 | D4/D5: identificar o exame | Indicadores agregados permanecem brutos; categorias genéricas podem registrar `tipo_exame_original` como a chave, por exemplo `outros`, e o conteúdo como resultado | Validar identificação inequívoca sem exigir resultado da solicitação; não criar catálogo automaticamente |
-| D1–D12: semântica revisada | D11 foi promovida; dez campos continuam parciais e suas contagens/allowlists são fixadas por gerador, validador e testes | Atualizar contrato executável e handlers em conjunto, incluindo tipos semânticos; não declarar cobertura nova por mera mudança documental |
+| D1–D12: semântica revisada | D11 foi promovida; nove rótulos continuam parciais no manifesto v1.4, alguns com tratamento seletivo no código | Atualizar contrato executável e handlers em conjunto, incluindo tipos semânticos; não declarar cobertura plena por tratamento seletivo |
 
 O [contrato de revisão entre hashes](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md)
-tem somente a barreira inicial implementada. T01 e a parte de T02 relativa à
-recusa de finalidade/revisão estão cobertos; os demais fluxos de revisão ainda
-dependem de implementação. A cobertura do manifesto permanece igual.
+tem barreira da CLI, armazenamento e executor privados parciais. T01 e a parte
+de T02 relativa à recusa de finalidade/revisão estão cobertos; D8/F13 tem prova
+privada específica, sem aceite global de T01–T18. A cobertura declarada do
+manifesto permanece 126 plenos, nove parciais e um excluído.
 
 Validação da v1.4.0: 26 testes unitários e E2E sintético com recusas em execução
 normal e dry-run, ausência de efeitos em todas as tabelas e sequências, relatório
@@ -188,10 +225,11 @@ inválidos como regressão, conforme a
 
 ## Cobertura e limites deliberados
 
-Os 125 rótulos declarados plenos são verificados contra o manifesto e a fixture
+Os 126 rótulos declarados plenos são verificados contra o manifesto e a fixture
 sintética. Isso não garante todos os caminhos de conflito nem atendimento das
-novas respostas. As dez chaves `parcial` continuam exclusivamente em
-`dados_brutos`; entre elas, a coluna sobre exames de
+novas respostas. Os nove rótulos `parcial` preservam o bruto; somente valores
+aceitos pelos handlers explícitos também geram destino estruturado. Entre eles,
+a coluna sobre exames de
 familiares não autoriza criar `historico_familiar_chagas`, pois realização de
 exame por parente não equivale a histórico familiar da doença. `Localizado`
 continua excluído do estruturado, agora também com semântica e exclusão funcional

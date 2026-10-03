@@ -138,7 +138,7 @@ class TransformacoesTest(unittest.TestCase):
         self.assertEqual(bzn_duration("8 semanas"), 56)
         with self.assertRaises(RowConflict): bzn_duration("dois meses")
 
-    def test_os_125_rotulos_plenos_possuem_handler(self):
+    def test_os_126_rotulos_plenos_possuem_handler(self):
         root = Path(__file__).resolve().parents[2]
         manifest = json.loads((root / "manifestos/planilha_ambulatorio_v1.json").read_text())
         canonical = {}
@@ -146,11 +146,15 @@ class TransformacoesTest(unittest.TestCase):
             for column in sheet["columns"]:
                 canonical.setdefault(column["cabecalho_original"].strip(), column)
         full = [c for c in canonical.values() if c["situacao_cobertura"] in {"direta", "com_transformacao"}]
-        self.assertEqual(len(full), 125)
+        self.assertEqual(len(full), 126)
         self.assertEqual({c["tabela_destino"] for c in full} - HANDLED_TABLES, set())
-        self.assertEqual(len([c for c in canonical.values() if c["situacao_cobertura"] == "parcial"]), 10)
+        self.assertEqual(len([c for c in canonical.values() if c["situacao_cobertura"] == "parcial"]), 9)
         self.assertEqual([c["chave_semantica"] for c in canonical.values() if c["situacao_cobertura"] == "excluido"], ["localizado"])
-        self.assertEqual(set(PROMOTION_REGISTRY), {"pendencias_observacao"})
+        self.assertEqual(set(PROMOTION_REGISTRY), {
+            "autorelato_diagnostico_de_chagas_do_participante_data",
+            "familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas",
+            "pendencias_observacao", "retorno_30_dias_de_tratamento",
+            "retorno_final_de_tratamento", "retorno_anual_realizado"})
         self.assertEqual(set(NONCRITICAL_POLICY), {"catalogo_projeto_ausente"})
 
 
@@ -163,6 +167,67 @@ class CriticidadeErrosTest(unittest.TestCase):
         self.importer.manifest = {"aliases_versionados": {"projetos": {
             "sami_trop_1_1": "sami_trop_1_1",
         }}}
+
+    def test_promocao_autorelato_nao_preenche_null_sem_historia(self):
+        self.importer.db.run.return_value = ["42|"]
+        with self.assertRaisesRegex(RowConflict, "história do campo insuficiente"):
+            self.importer.promote_discovery(1, 2, {
+                "autorelato_diagnostico_de_chagas_do_participante_data": "01/01/2020"},
+                promotion=True)
+        self.importer.db.run.assert_called_once()
+        self.importer.insert_returning.assert_not_called()
+
+    def test_retorno_bzn_exige_data_real_e_tratamento(self):
+        source = "retorno_30_dias_de_tratamento"
+        for value in ("sim", "30 dias", "31/02/2025"):
+            with self.subTest(value=value):
+                self.assertFalse(self.importer.bzn_return(1, 2, {source: value}, source=source))
+        self.importer.db.scalar.side_effect = ["3", None]
+        self.assertFalse(self.importer.bzn_return(1, 2, {source: "01/07/2025"}, source=source))
+        self.importer.insert_returning.assert_not_called()
+
+    def test_retorno_bzn_datado_cria_ocorrencia_sem_inferir_prazo(self):
+        source = "retorno_final_de_tratamento"
+        self.importer.db.scalar.side_effect = ["3", "1", None]
+        self.importer.db.run.return_value = []
+        self.assertTrue(self.importer.bzn_return(1, 2, {source: "17/08/2025"}, source=source))
+        self.importer.insert_returning.assert_called_once_with(1, "acompanhamento_cuidado", {
+            "atendimento_id": 2, "data_realizada": "2025-08-17", "compareceu": True,
+            "status_acompanhamento": "concluido", "tipo_acompanhamento": "retorno_bzn_final",
+            "valor_original_acompanhamento": "17/08/2025",
+        })
+
+    def test_ano_de_ultimo_comparecimento_cria_apenas_evento_anual(self):
+        self.importer.db.run.return_value = []
+        self.importer.db.scalar.return_value = None
+        self.assertTrue(self.importer.last_attendance_year(
+            1, 2, {"retorno_anual_realizado": " 2023 "}))
+        self.importer.insert_returning.assert_called_once_with(1, "evento_clinico", {
+            "paciente_id": 2, "tipo_evento": "ultimo_comparecimento_ano_informado",
+            "ano_evento": 2023, "valor_original_data": " 2023 ",
+        })
+
+    def test_texto_ambiguo_nao_cria_evento_ou_data(self):
+        for value in ("sim", "2023 ou 2024", "01/01/2023", "2023?"):
+            with self.subTest(value=value):
+                self.assertFalse(self.importer.last_attendance_year(
+                    1, 2, {"retorno_anual_realizado": value}))
+        self.importer.db.run.assert_not_called()
+        self.importer.insert_returning.assert_not_called()
+
+    def test_rastreio_familiar_so_promove_negativa_inequivoca(self):
+        source = "familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas"
+        for value in ("sim", "mãe positivo", "talvez"):
+            with self.subTest(value=value):
+                self.assertFalse(self.importer.family_screening(1, 2, {source: value}))
+        self.importer.db.scalar.return_value = None
+        self.importer.db.scalar.side_effect = ["3", None]
+        self.importer.db.run.return_value = []
+        self.assertTrue(self.importer.family_screening(1, 2, {source: "não"}))
+        self.importer.insert_returning.assert_called_once_with(1, "rastreio_familiar", {
+            "paciente_id": 3, "atendimento_id": 2,
+            "familiares_examinados": False, "valor_original_examinados": "não",
+        })
 
     def test_catalogo_de_projeto_ausente_vira_pendencia_nao_critica(self):
         self.importer.db.scalar.return_value = None
