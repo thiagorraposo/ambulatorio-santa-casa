@@ -41,4 +41,38 @@ describe('validateConfig', () => {
       IMPORT_DB_HOST: 'localhost', IMPORT_DB_PORT: '5432', IMPORT_DB_NAME: 'db',
       IMPORT_DB_USER: 'importador', IMPORT_DB_PASSWORD: 'synthetic-importer' })).toThrow('CLINICAL_IMPORT_ENABLED');
   });
+
+  it('mantém gestão temporal desligada por padrão e exige pools distintos em modo sintético', () => {
+    expect(validateConfig(valid).revisions.manager.enabled).toBe(false);
+    expect(() => validateConfig({ ...valid, REVISION_MANAGER_HTTP_ENABLED: 'true' }))
+      .toThrow('gestão de revisão exige revisão sintética habilitada');
+    const config = validateConfig({ ...valid, REVISION_HTTP_ENABLED: 'true', REVISION_SYNTHETIC_MODE: 'true',
+      REVISION_DB_HOST: 'localhost', REVISION_DB_PORT: '5432', REVISION_DB_NAME: 'db',
+      REVISION_DB_USER: 'revision_service', REVISION_DB_PASSWORD: 'synthetic-service',
+      REVISION_MANAGER_HTTP_ENABLED: 'true', REVISION_MANAGER_DB_HOST: 'localhost', REVISION_MANAGER_DB_PORT: '5432',
+      REVISION_MANAGER_DB_NAME: 'db', REVISION_MANAGER_DB_USER: 'revision_manager',
+      REVISION_MANAGER_DB_PASSWORD: 'synthetic-manager' });
+    expect(config.revisions).toMatchObject({ enabled: true, manager: { enabled: true, role: 'ambulatorio_revisao_gestor' } });
+    expect(() => validateConfig({ ...valid, NODE_ENV: 'production', REVISION_HTTP_ENABLED: 'true',
+      REVISION_SYNTHETIC_MODE: 'true', REVISION_MANAGER_HTTP_ENABLED: 'true' }))
+      .toThrow('revisão HTTP exige ambiente sintético fora de produção');
+  });
+
+  it('exige ativação sintética e revisão Git explícitas para staging', () => {
+    expect(validateConfig(valid).revisions.stagingEnabled).toBe(false);
+    expect(() => validateConfig({ ...valid, REVISION_STAGING_HTTP_ENABLED: 'true' }))
+      .toThrow('staging exige revisão sintética habilitada');
+    const revision = { ...valid, REVISION_HTTP_ENABLED: 'true', REVISION_SYNTHETIC_MODE: 'true',
+      REVISION_DB_HOST: 'localhost', REVISION_DB_PORT: '5432', REVISION_DB_NAME: 'db',
+      REVISION_DB_USER: 'revision_service', REVISION_DB_PASSWORD: 'synthetic-service',
+      REVISION_STAGING_HTTP_ENABLED: 'true' };
+    expect(() => validateConfig(revision)).toThrow('REVISION_GIT');
+    expect(() => validateConfig({ ...revision, REVISION_GIT: 'versão desconhecida' })).toThrow('REVISION_GIT');
+    expect(validateConfig({ ...revision, REVISION_GIT: 'abcdef0' }).revisions)
+      .toMatchObject({ stagingEnabled: true, gitRevision: 'abcdef0' });
+    expect(() => validateConfig({ ...revision, NODE_ENV: 'development', REVISION_GIT: 'abcdef0',
+      REVISION_EXECUTION_HTTP_ENABLED: 'true' })).toThrow('homologação em teste');
+    expect(validateConfig({ ...revision, REVISION_GIT: 'abcdef0', REVISION_EXECUTION_HTTP_ENABLED: 'true' }).revisions)
+      .toMatchObject({ executionEnabled: true });
+  });
 });
