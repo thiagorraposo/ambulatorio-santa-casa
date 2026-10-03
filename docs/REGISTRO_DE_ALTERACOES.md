@@ -1,5 +1,24 @@
 # Registro de Alterações
 
+## 2026-10-03 — versionamento da referência e organização do planejamento
+
+Revisadas as 49 alterações pendentes com status, diffs e histórico recente.
+Organização autorizada em dois contextos, nesta ordem: `chore` para versionar os
+40 arquivos do protótipo em `referencias/frontend/figma-make-prototipo/`; `docs`
+para consolidar os nove documentos de referência, análise, arquitetura e roadmap.
+O registro acompanha os contextos correspondentes.
+
+O material gerado mantém conteúdo e estrutura originais, com dados e acessos
+demonstrativos; não passa a ser o frontend de aplicação. Todas as alterações
+preexistentes foram preservadas. Não houve alteração de backend, banco,
+contratos ou regras clínicas, nem push.
+
+Validação: revisão do material e dos diffs staged, `make docs-check COMPACT=1`,
+referências locais/âncoras, `git diff --check`, JSON/JSON com comentários, TOML
+e sintaxe dos sete scripts Bash. Nenhum script de instalação/deploy foi executado.
+Build e homologação visual do protótipo continuam fora desta organização de
+commits; o runtime será validado na implementação futura.
+
 ## 2026-10-03 — organização autorizada dos commits do aceite final
 
 As 36 alterações pendentes foram revisadas contra status, diff e histórico e
