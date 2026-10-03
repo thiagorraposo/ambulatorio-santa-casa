@@ -576,8 +576,18 @@ e preserva carga sintética declarada, no-op, retomada e reprocessamento do mesm
 hash/layout. A declaração não comprova nova ocorrência e não muda a cobertura do
 manifesto. A reconciliação depende de linhagem, decisões e
 histórico de campo persistentes. Ano legado continua bruto até contrato próprio,
-sem datas artificiais ou reconstrução de visitas. Governança de revisão e uso
-de dados reais permanecem pendentes.
+sem datas artificiais ou reconstrução de visitas.
+
+Decisão de governança, 2026-10-03, delegada pelo responsável do projeto para
+fechar a 5A: competência para registrar fontes e conceder/revogar autorizações
+será um entitlement nominal separado do perfil funcional. O perfil
+`administração` não concede gestão por si só. O entitlement será provisionado e
+revogado fora da API por operador de banco designado; toda concessão/revogação
+preserva principal e instante. Ser gestor não concede automaticamente
+autorização clínica por fonte: essa continua explícita, atribuível e revogável.
+Não foi definida uma lista de pessoas nem uma concessão para dados reais.
+O mecanismo se aplica aos testes e à operação sintética; qualquer provisionamento
+real continua sujeito ao processo institucional de implantação.
 
 Alternativas rejeitadas: tratar novo hash como nova consulta; vincular versões por
 número de linha; impor unicidade por paciente/data; aplicar o arquivo mais recente
@@ -616,3 +626,26 @@ fechamento ou simulação de arquivo novo. Trata-se de escolha técnica, não cl
 
 Documento relacionado:
 [`arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md`](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md).
+
+## ADR-023
+
+Data: 2026-10-03
+
+Decisão: versionar os contratos HTTP em `/v1`, mantendo as rotas atuais como
+aliases dos mesmos controllers/DTOs/guards. O monitoramento de lotes reutiliza
+os vínculos clínicos existentes, sem criar uma ACL concorrente à de pacientes:
+administração lê metadados sanitizados ordinários; consulta/edição exigem
+proveniência íntegra e vínculo ativo com todos os pacientes do lote. Lotes
+revisados são excluídos da consulta ordinária. A política de paciente
+`todos_sinteticos` não amplia o escopo dos lotes.
+
+Justificativa: manter compatibilidade dos clientes e aplicar autorização por
+recurso antes da paginação. Cabeçalho/linhas são projetados em uma consulta SQL
+para preservar o mesmo snapshot. O resolvedor privado usa destinos permitidos;
+o ator vem do ledger autenticado, sem leitura operacional direta da proveniência.
+São escolhas técnicas para 5D/5E, sem nova resposta clínica ou designação real.
+
+Consequências: versões não publicadas retornam 404; lote existente fora do
+escopo retorna 403. Linhas sem âncora suficiente, lote misto inacessível e
+vínculo revogado impedem o acesso ao lote inteiro para consulta/edição.
+Lotes com erro sem proveniência permanecem consultáveis pela administração.

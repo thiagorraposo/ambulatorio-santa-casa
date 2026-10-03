@@ -1,6 +1,6 @@
 # Especificação Normativa do Importador da Planilha — v1
 
-Atualizado em: 2026-09-22
+Atualizado em: 2026-10-01
 
 ## Preflight, relatório e rastreabilidade
 
@@ -17,12 +17,14 @@ O lote aplicado persiste hash do manifesto, versão
 do importador e revisão Git. Logs JSON permitem apenas eventos/metadados técnicos
 e contadores, nunca valores de células ou mensagens clínicas por linha.
 
-Status: contrato v1 com promoção controlada implementada na v1.2.0 para D11 e
-primeira política não crítica implementada na v1.3.0. O contrato de revisão entre
-hashes foi definido na ADR-022; a v1.4.0 implementa somente a barreira de finalidade
-e recusa integral de revisão. Lacunas remanescentes
-foram identificadas na análise de 2026-09-14. As demais respostas da equipe ainda não
-foram incorporadas ao manifesto/handlers; dados reais continuam não autorizados.
+Status: importador v1.7.0 com promoção controlada de D11 e mapeamento seletivo
+de datas reais dos retornos BZN, ano inequívoco de D8 e negativa inequívoca de
+exame familiar D3. O manifesto semântico vigente é v1.4; 32 testes unitários e
+E2E da versão passaram em banco descartável. A primeira política
+não crítica foi implementada na v1.3.0. A ADR-022 define revisão entre hashes;
+a CLI mantém a barreira da v1.4.0 e recusa sua aplicação operacional. Há prova
+sintética privada de D8/F13, sem aceite global de revisão. Lacunas técnicas
+remanescentes constam da matriz e do roadmap; dados reais não estão autorizados.
 
 ## Finalidade, autoridade e escopo
 
@@ -60,19 +62,20 @@ destinos reutilizáveis, migrations justificadas e testes. Não mais considerar
 os dez campos ainda parciais como pós-MVP nem a multiplicidade de contrarreferência
 indefinida. A exclusão funcional de `Localizado` foi confirmada.
 
-Campos `parcial` continuam exclusivamente brutos. D11 deixou essa classificação
-na v1.2.0 e pode ser promovida somente pelo registro controlado descrito abaixo.
-Não promover os demais dados por interpretação ad hoc. Referência da idade,
-representação do ano legado, contrato documental de contrarreferência e retirada
-do desfecho ainda exigem as decisões delimitadas na fonte de negócio. Atualização
+Rótulos `parcial` continuam preservados no bruto. D11 deixou essa classificação
+na v1.2.0; D8 mantém classificação parcial, mas ano inequívoco pode gerar evento
+anual pelo handler explícito. Datas reais de retorno BZN também têm handlers
+seletivos. Não promover os demais dados por interpretação ad hoc. As respostas
+humanas já foram incorporadas; cobertura funcional restante exige implementação
+e aceite técnico. Atualização
 de uma linha da planilha não comprova nova visita e não permite reconstruir
 histórico perdido.
 
 O [estado da implementação](IMPORTADOR_SINTETICO_V1.md) registra a reconciliação
-BZN corrigida na v1.1.1, a promoção controlada de D11 na v1.2.0 e a primeira
-política não crítica na v1.3.0. A temporalidade de arquivo revisado, a promoção
-das outras dez chaves e a classificação individual dos demais erros secundários
-ainda são requisitos sem cobertura completa na implementação.
+BZN corrigida na v1.1.1, a promoção controlada de D11 na v1.2.0, a primeira
+política não crítica na v1.3.0 e D8/F13 na v1.6.0. A temporalidade operacional
+de arquivo revisado, as promoções restantes e a classificação individual dos
+demais erros secundários ainda não têm cobertura completa.
 
 ## Vocabulário operacional
 
@@ -91,7 +94,8 @@ ainda são requisitos sem cobertura completa na implementação.
 A associação linha → atendimento acima descreve o contrato v1. Para versões
 revisadas, aplicar o contrato temporal complementar somente após sua implementação
 e homologação; não estender essa regra automaticamente a toda atualização do
-registro de origem. A representação anual de D8 continua pendente.
+registro de origem. O ano isolado de D8 tem representação estruturada e teste
+sintético; isso não autoriza revisão operacional entre hashes.
 
 Vazio e ausente resultam em `NULL` ou ausência de registro dependente, nunca em
 `FALSE`, zero, string vazia normalizada ou catálogo `nao_informado`. Inválido
@@ -444,14 +448,16 @@ uma ou mais chaves antes preservadas somente no bruto. Ela não se aplica a arqu
 com outro hash, não cria uma nova visita e não reexecuta o fluxo completo da linha.
 
 Cada chave promovível deve constar de um registro versionado no código, validado
-contra o manifesto, contendo: chave semântica, cobertura plena atual, handler
+contra o manifesto, contendo: chave semântica, cobertura declarada compatível, handler
 específico, tabelas de destino permitidas, âncora (`paciente` ou `atendimento`) e
 política de reconciliação. Mudar apenas `situacao_cobertura` no manifesto não
-habilita promoção. A lista inicial da v1.2.0 contém somente
+habilita promoção. A lista inicial da v1.2.0 continha somente
 `pendencias_observacao`, com handler `pending_note`, destino
 `pendencia_atendimento`, âncora `atendimento` e política
-`repeatable_by_provenance`. As outras dez chaves parciais continuam desabilitadas
-até aprovação e implementação individuais.
+`repeatable_by_provenance`. A lista atual também inclui data de descoberta,
+datas reais dos retornos BZN e ano D8. Esses handlers não tornam os rótulos
+parciais integralmente cobertos; valores sem conversão inequívoca continuam
+brutos e pendentes. As outras chaves requerem aprovação e implementação próprias.
 
 O processamento deve seguir estas regras, na mesma transação da nova linha:
 
@@ -609,8 +615,10 @@ não equivale a prontidão para o MVP revisado. Bloqueiam seus fluxos afetados:
 - escolher destinos/representações ainda pendentes antes de promover D2/D3 e
   outros campos cujo contrato não esteja fechado.
 
-As dez chaves `parcial` continuam brutas e, quando preenchidas, tornam a linha
-`importada_com_pendencia`. As respostas já confirmadas dispensam rediscutir sua
+As nove chaves `parcial` continuam preservadas no bruto. Quando preenchidas sem
+handler/conversão válida, tornam a linha `importada_com_pendencia`; ano D8 válido
+e datas reais de retorno BZN podem ser estruturados seletivamente. As respostas
+já confirmadas dispensam rediscutir sua
 semântica, mas não dispensam atualização coordenada de manifesto, handlers e testes.
 
 Autoridade de importação, responsável por revisão, provisionamento institucional
@@ -643,9 +651,9 @@ Esses itens não autorizam alterar as regras normativas deste documento.
 
 ## Critério de prontidão
 
-A homologação atual comprova 126 rótulos plenos, a preservação determinística das
-nove chaves parciais e a promoção controlada de D11. A prontidão para o MVP
-revisado depende
+A homologação atual comprova 126 rótulos plenos declarados, preservação
+determinística dos nove rótulos parciais, promoção de D11 e mapeamento seletivo
+de D8 no cenário sintético. A prontidão para o MVP revisado depende
 dos critérios do [roadmap](PROXIMOS_PASSOS.md), regressões das lacunas conhecidas e
 cenários sintéticos das novas decisões; não decorre apenas da contagem de 126
 rótulos. Dados reais continuam bloqueados pela governança institucional. Alterar
@@ -661,3 +669,31 @@ inferir resultado de sorologia ou confirmação da doença. O original permanece
 no bruto e o alvo é registrado na proveniência. A promoção de lotes antigos
 para esse novo campo ainda exige implementação e testes próprios; a barreira
 contra revisão entre hashes continua ativa.
+
+## Ano do último comparecimento — D8 na v1.6.0 sintética
+
+O texto legado de `retorno_anual_realizado` permanece no bruto. Se representar
+um único ano válido, o importador registra `evento_clinico.ano_evento` com tipo
+`ultimo_comparecimento_ano_informado`, original preservado, paciente e
+proveniência. O ano informa precisão anual; não prova atendimento, retorno
+realizado, quantidade de visitas nem dia/mês. Texto livre ou ambíguo conserva a
+pendência, sem fabricar um evento.
+
+No reprocessamento do mesmo hash, associação de evento existente exige vínculo
+de proveniência da mesma fonte e layout; alvo divergente ou múltiplo é conflito.
+Igualdade de ano em outra fonte não comprova identidade. O E2E sintético aprovado
+com manifesto v1.4 em `/tmp/ambulatorio-check-lvoqpa3u/output.log` cobriu carga de 2023, texto
+ambíguo preservado, no-op, reprocessamento sem duplicação, correção privada
+2023→2022 e bloqueio da origem superada após a correção. Esse teste demonstra
+F13 e a representação anual nesse cenário. A CLI segue recusando revisão entre
+hashes até o aceite integral da ADR-022.
+
+## Exame familiar legado — D3 com manifesto v1.4
+
+O rótulo `familiares_diretos_mae_pai_irmaos_realizaram_o_exame_de_chagas`
+continua parcial e preservado no bruto. Uma negativa booleana inequívoca permite
+registrar `rastreio_familiar.familiares_examinados = false`, com original,
+atendimento e proveniência. Uma afirmativa sem parente e resultado identificados
+não autoriza inventar exame individual; texto ambíguo permanece pendente. O
+handler e o metadado v1.4 foram validados em banco descartável: carga negativa,
+preservação do bruto, promoção de lote legado e proveniência sem duplicação.

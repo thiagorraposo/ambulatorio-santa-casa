@@ -1,6 +1,6 @@
 # Manifesto Físico da Planilha — v1
 
-Atualizado em: 2026-09-21
+Atualizado em: 2026-10-01
 
 ## Fonte oficial
 
@@ -10,9 +10,10 @@ da linha 1 das duas abas clínicas do arquivo local ignorado
 `planejamento/Nova Planilha ambulatório.xlsx`. Nenhuma célula clínica ou linha de
 paciente foi lida para compor o manifesto.
 
-A versão explícita é `v1.1`, identificada tecnicamente como
-`planilha_ambulatorio_v1`. Ela descreve apenas o layout observado e não pressupõe
-versões históricas inexistentes.
+A versão de layout permanece `planilha_ambulatorio_v1`; o campo `versao` está em
+`v1.4` e identifica
+a evolução semântica do manifesto. Ela descreve o layout observado e os destinos
+declarados, sem pressupor versões históricas inexistentes.
 
 ## Inventário
 
@@ -55,8 +56,9 @@ eles não são associações com `projeto_estudo`.
 
 O manifesto atual declara 126 dos 136 rótulos com cobertura estruturada plena:
 8 direta e 118 com transformação. Nove permanecem parciais e `Localizado`
-permanece excluído. Cada parcial registra uma razão no manifesto e fica somente
-no JSONB bruto. D11 (`pendencias_observacao`) passou a destino pleno na v1.1 do
+permanece excluído. Cada parcial preserva o original no JSONB bruto; alguns
+valores inequívocos também podem ser materializados por handlers explícitos,
+sem alterar a classificação global. D11 (`pendencias_observacao`) passou a destino pleno na v1.1 do
 manifesto e é promovida de forma controlada pelo importador v1.2.0. A contagem não
 comprova, isoladamente, cobertura funcional das demais respostas da equipe.
 
@@ -66,14 +68,16 @@ A fonte semântica vigente é
 [decisões humanas](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md), com avaliação na
 [matriz de impacto](dados/COBERTURA_COLUNAS_PLANILHA.md). Razões antigas de
 semântica indefinida para retornos, contrarreferência e `Localizado` ficaram
-superadas; D11 e a data de descoberta do paciente possuem destinos executáveis; esta última exige a migration 28.
+superadas; D11, D2 e ano D8 possuem destinos executáveis. D2 exige a migration 28;
+D8 usa `evento_clinico.ano_evento` sem criar visita e tem captura nova na 52.
 
-O gerador infere tipo por trechos da transformação: idade aparece como `data`,
-enquanto retornos BZN e ano do retorno anual continuam `texto`. A revisão futura
-deve definir metadados explícitos coerentes com D1/D6/D7/D8, atualizar manifesto,
-gerador, validador, handlers e expectativas de testes conjuntamente. As contagens
-126/9 e as listas de parciais são fixadas nesses artefatos: aprovação do
-`manifest-check` atual não valida a nova semântica nem resolve essas lacunas.
+O tipo semântico do texto legado de retorno BZN, ano D8 e exame de familiares é
+`texto`, pois nem toda célula permite conversão segura. Os destinos parciais
+declarados indicam onde um valor inequívoco pode ser materializado; não afirmam
+que todo texto foi promovido. Idade ainda aparece como `data` por inferência do
+gerador, ponto de metadado a corrigir com validador e testes. As contagens 126/9
+e as listas de parciais são fixadas nesses artefatos: aprovação do
+`manifest-check` não substitui o aceite funcional de cada handler.
 
 ## Exclusões deliberadas
 
@@ -113,3 +117,19 @@ O layout físico permanece v1; o contrato semântico do manifesto passou a v1.2.
 O validador verifica o destino `diagnostico_chagas.data_descoberta_autorelato`
 na migration 28, adicionalmente ao dump persistente até migration 20. Essa
 validação não afirma que a extensão está aplicada no banco persistente.
+
+## Destinos parciais seletivos — manifesto v1.4
+
+O layout e as contagens permanecem iguais. O manifesto v1.4 declara destinos
+parciais para o texto legado: datas reais de retorno BZN em
+`acompanhamento_cuidado.data_realizada`, ano inequívoco D8 em
+`evento_clinico.ano_evento` e negativa inequívoca D3 em
+`rastreio_familiar.familiares_examinados`. Os rótulos continuam `parcial` e com
+`tipo_semantico = texto`: `sim`, texto ambíguo e afirmativa familiar sem parente/
+resultado não viram fatos estruturados por aproximação. O bruto é preservado.
+
+O validador confere esses destinos contra o schema e as migrations incrementais
+25/28. A migration 52 ativa captura de novos `ano_evento`; não atribui prova
+retroativa a eventos legados. O E2E da versão v1.4 passou junto com 32 testes
+unitários em `/tmp/ambulatorio-check-lvoqpa3u/output.log`, cobrindo D3, D8 e
+F13. O manifesto não habilita a revisão operacional entre hashes.

@@ -1,6 +1,6 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-09-29
+Atualizado em: 2026-10-03
 
 Esta é a síntese vigente do sistema. Detalhes normativos pertencem às fontes
 temáticas indicadas abaixo; decisões antigas e resultados de etapas permanecem
@@ -9,7 +9,8 @@ preservados em `historico/`, `validacoes/` e no registro cronológico.
 ## Escopo e estágio
 
 O projeto organiza registros do ambulatório em PostgreSQL e já contém migrations,
-20 testes SQL transacionais, importador com homologação sintética do contrato v1, hardening, CI e
+31 suítes SQL sintéticas, importador com homologação sintética do contrato v1,
+hardening, CI e
 uma fundação NestJS com autenticação, autorização mínima e primeiros fluxos
 clínicos transacionais. A importação HTTP existe sob ativação sintética explícita;
 não há frontend nem autorização para dados reais.
@@ -51,6 +52,40 @@ Foram adicionados testes SQL transacionais e a API ganhou ficha de paciente e
 criação/consulta de atendimentos com DTOs, SQL parametrizado, transação e
 controle de versão. A revisão entre hashes continua desabilitada.
 
+Em 2026-10-03, o importador v1.7.0/manifesto v1.4 e as migrations 45–60
+avançaram a promoção de campos, captura anual, sucessão temporal, diagnóstico
+após rollback e classificação sanitizada de erros. A migration 54 corrige a
+ordem de validação diferida dentro do executor privado. A decisão de governança
+delegada para a 5A exige entitlement nominal separado do perfil, implementado
+pela migration 55 e pelas rotas HTTP de registro de fonte e concessão/revogação;
+administrador sem entitlement é recusado. O teste HTTP específico de gestão
+passou. SQL56 acrescenta recebimento idempotente do XLSX inteiro, hash dos bytes
+e bruto e preparação atômica sem efeitos clínicos; artefatos do importador são
+registrados previamente por mantenedor fora da API. SQL57 cria wrappers privados
+para aplicação, finalização e diagnóstico, sem EXECUTE para papéis operacionais.
+O staging HTTP exige ativação sintética fora de produção; aplicação e finalização
+exigem adicionalmente `NODE_ENV=test`. O runner
+concede os wrappers somente no banco descartável. O teste HTTP específico do
+staging passou 2/2 após cobrir concorrência, rollback tardio, diagnóstico e
+fechamento. A rodada ampla passou com sete suítes/36 testes em instalação limpa
+02–60. O contrato HTTP está versionado em `/v1`, com aliases compatíveis sem
+prefixo. SQL58 restringe o acompanhamento de lotes pelos vínculos clínicos e
+exclui lotes revisados; administração mantém metadados ordinários sanitizados.
+SQL59 reconhece o reenvio autorizado após fechamento/avanço antes de simular a
+base antiga. SQL60 habilita captura de `atendimento.data_atendimento` e
+`atendimento.observacoes`, sem história retroativa, além do ano D8 já ativo.
+SQL31 comprova captura, autoria, A→B→A, rollback e recusa de exclusão; o teste
+clínico aplica data/texto ao mesmo atendimento e preserva proveniência.
+SQL01–31 e `manifest-check` passaram em descartável até 60, reaproveitando os
+testes aprovados ao corrigir fixtures. Build, 53 testes unitários/de contrato,
+oito da fundação, 36 clínicos HTTP e importador (32 unitários/E2E) passaram.
+A prova de precedência em todos os escritores dos destinos habilitados
+e o aceite completo F01–F16/T01–T18 permanecem
+obrigatórios. A Etapa 5 está incompleta e a revisão não está habilitada fora do
+ambiente sintético de teste.
+O histórico, os limites e as validações estão em
+[`CONTINUIDADE_ETAPA_5.md`](validacoes/CONTINUIDADE_ETAPA_5.md).
+
 ## Componentes vigentes
 
 - PostgreSQL no schema `ambulatorio`, construído por migrations incrementais de
@@ -59,8 +94,9 @@ controle de versão. A revisão entre hashes continua desabilitada.
   descrição humana é [`MODELO_FISICO_ATUAL.md`](MODELO_FISICO_ATUAL.md) e a
   evidência física é
   [`evidencias/schema_atual_ambulatorio.sql`](evidencias/schema_atual_ambulatorio.sql).
-- Importador v1 em Python, homologado com fixture sintética nas duas abas
-  clínicas; o manifesto v1.2 declara 126 rótulos plenos, nove preservados apenas no
+- Importador v1.7.0 em Python, com fixture sintética nas duas abas
+  clínicas; o manifesto v1.4 declara 126 rótulos plenos, nove parciais
+  preservados no
   bruto e `Localizado` excluído do estruturado. Esses números não comprovam
   cobertura funcional das novas respostas. O contrato normativo está em
   [`ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`](ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md),
@@ -82,6 +118,13 @@ controle de versão. A revisão entre hashes continua desabilitada.
   pacientes e registra proveniência. Idempotência e reprocessamento encadeado
   existem para o contrato v1; a promoção controlada está habilitada para D11.
   A v1.4.0 exige finalidade explícita e recusa revisões, inclusive em dry-run.
+  A v1.6.0 estrutura seletivamente o ano inequívoco de D8 e preserva o efeito de
+  uma correção temporal ao reprocessar origem antiga (F13), comprovado com o
+  escritor Python real. O aceite sintético 2023→2022 passou com manifesto v1.3
+  sem criar visita; texto ambíguo permanece bruto e pendente. O manifesto v1.4 também declara
+  destino parcial para negativa inequívoca de exame familiar D3; D3, D8 e F13
+  passaram em E2E PostgreSQL com manifesto v1.4 e 32 testes unitários. SQL52
+  captura novos anos sem inferir história anterior.
   Atualização de uma mesma linha clínica em arquivo modificado e as demais
   promoções têm limitações descritas abaixo.
 - As migrations antigas aplicadas permanecem imutáveis; evoluções usam novas
@@ -119,18 +162,21 @@ continuam somente no bruto. Erros são críticos por padrão; catálogo de proje
 ausente é a primeira exceção explícita, preserva o atendimento e pode ser resolvida
 sem nova visita após correção do catálogo. Os demais erros secundários ainda podem
 rejeitar a linha inteira.
-Um arquivo com novo hash não tem reconciliação de atualização clínica. A v1.4.0
+Um arquivo com novo hash não tem reconciliação de atualização clínica operacional.
+A v1.4.0
 recusa revisões e exige carga inicial declarada para iniciar novo conteúdo;
 declaração incorreta ainda pode gerar outro atendimento. O contrato temporal já
-distingue revisão de nova visita, mas linhagem entre hashes, mapeamento e auditoria
-por campo ainda precisam ser implementados antes de habilitar revisões.
-A representação estruturada do ano legado continua pendente; nenhum histórico
+distingue revisão de nova visita, e seu armazenamento, mapeamento e auditoria
+por campo têm implementação sintética parcial; a ativação depende do aceite
+integrado F01–F16/T01–T18. O ano legado inequívoco tem representação estruturada
+e aceite sintético D8; nenhum histórico
 ausente pode ser reconstruído automaticamente.
 
 Existem DTOs e endpoints para paciente, atendimento, consulta de lotes e
-importação HTTP multipart com credenciais separadas. Retornos BZN, projetos,
-exames, notificação e tratamento já possuem consultas; contrarreferência e demais
-recursos ainda precisam ser integrados. A importação permanece desabilitada por
+importação HTTP multipart com credenciais separadas. Os recursos clínicos incluem
+consultas e escritas de projetos, notificação, encaminhamentos com
+contrarreferências múltiplas, ocorrências e retornos anuais, pendências e BZN;
+exames já possuem consulta. A importação permanece desabilitada por
 padrão e em produção.
 O guard recusa rota privada sem metadados `@Perfis`; somente `@Public` permite
 acesso público. A matriz explícita de cada operação usa política da classe ou
@@ -140,10 +186,11 @@ pacientes usa o mesmo filtro por vínculo e paginação da exportação.
 O PATCH do paciente agora abrange comunidade, snapshot de endereço e adição
 de telefones, mantendo dados anteriores. O PATCH do atendimento exige versão
 e vínculo ao paciente. Atendimentos, exames, projetos, retornos BZN e pendências
-possuem paginação; pendências possui filtro por status e DTO explícito de saída.
-Dezoito cenários HTTP/SQL clínicos foram aprovados em instalação descartável 02–42,
-incluindo três perfis, edição composta, rollback e concorrência de versões.
-Coleções clínicas aninhadas ainda precisam de paginação integrada. Linhas de lote
+possuem paginação; pendências possuem filtro por status e DTO explícito de saída.
+Vinte e oito cenários HTTP/SQL clínicos foram aprovados em instalação descartável
+até 51, incluindo três perfis, novos recursos/DTOs, edição composta, rollback,
+concorrência de versões e casos temporais. Coleções clínicas aninhadas têm
+paginação integrada. Linhas de lote
 possuem `limit`/`offset`, com metadados de página. A importação HTTP foi testada com
 worker Python real e credenciais separadas: dry-run, carga inicial, idempotência,
 consulta sanitizada de lote com os três perfis e recusa de revisão temporal.
@@ -162,19 +209,33 @@ preparação com bruto/manifesto conferidos, transformações determinísticas f
 e exigência de representação de todos os campos alterados e destinos derivados.
 Correção/anulação exige captura atribuível desde a importação da linha-base,
 com proveniência do alvo; marco legado e igualdade aparente não bastam. A prova
-atual cobre a base inicial e sua cadeia do mesmo conteúdo; a continuidade por
-revisões aplicadas ainda depende do executor. O login herdado do importador
+inicial cobre a base importada e sua cadeia do mesmo conteúdo. O login herdado do importador
 agora também exige contexto, mesmo sem SET ROLE. Há aprovação sintética de nome
 e data do atendimento sem mudança clínica, além de captura pelo escritor Python
 real. Migrations 40–42 avaliam decisão publicada em READ ONLY e fornecem executor
 privado para alvos existentes: correção/associação, eventos/proveniência, avanço
 atômico da fonte, rollback e retomada sem duplicação. A simulação passou sem
 alterações em todas as tabelas e sequências; dois executores produziram um único
-sucesso. Criação de visitas/dependentes, fechamento, prova através das revisões
-aplicadas e simulação de proposta/arquivo sem staging continuam pendentes. O
+sucesso. Migrations 43–49 acrescentam fechamento atribuível, prova por revisões
+encerradas, criação resolvida de visitas/dependentes e diagnóstico técnico em
+transação posterior ao rollback. Vinte cenários clínicos passaram em instalação
+limpa descartável: visitas distintas na mesma data, dois executores, sucessor
+reutilizando IDs/proveniência, nulo inicial, recusa de troca de paciente/alvo,
+fechamento com pendências e simulação virtual sem consumo de sequências.
+As migrations 50–51 acrescentam simulação de proposta/arquivo antes do staging,
+sem escrita ou consumo de sequências, e guarda de identidade de ocorrência na
+publicação/aplicação de criação (T18). Os testes SQL 21–22 passaram em instalação
+limpa até 51. A suíte conjunta passou em 28 cenários clínicos HTTP/SQL, incluindo
+concorrência F12 e dry-run F15; SQL 22 prova T18. Essa cobertura é por cenário; outros planos
+clínicos, escritores e combinações de concorrência ainda exigem aceite. O
+catálogo de captura anual D8 é ativado pela migration 52 para novos fatos;
+SQL 24 prova A→B→A sem fabricar visita ou data completa. Instalação limpa até 52
+e atualização incremental 49→52 passaram em bancos descartáveis, sem transformar
+registros legados em história comprovada. O
 aceite integral F01–F16/T01–T18 e as demais transformações clínicas permanecem
 obrigatórios; o executor não tem EXECUTE concedido a operadores.
-O importador continua recusando revisão.
+O importador Python continua recusando revisão; o fluxo separado de revisão HTTP
+opera apenas no staging sintético de teste descrito acima.
 
 Dados reais continuam bloqueados por governança institucional, ambiente
 protegido, TLS, gestão/rotação de segredos, backup e retenção, auditoria de acesso,
