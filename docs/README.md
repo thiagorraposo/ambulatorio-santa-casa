@@ -19,6 +19,9 @@ fontes vigentes.
 | Aceite integrado 5A–5E e matriz F01–F16/T01–T18 | [`validacoes/ACEITE_INTEGRADO_ETAPA_5.md`](validacoes/ACEITE_INTEGRADO_ETAPA_5.md) |
 | Implementação atual do importador | [`IMPORTADOR_SINTETICO_V1.md`](IMPORTADOR_SINTETICO_V1.md) |
 | Arquitetura do backend | [`ARQUITETURA_BACKEND.md`](ARQUITETURA_BACKEND.md) |
+| Referência Figma Make e planejamento do frontend | [`arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md`](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md) |
+| Localização e uso dos materiais de referência | [`../referencias/README.md`](../referencias/README.md) |
+| Preparação da migração da planilha real | [`PROXIMOS_PASSOS.md`](PROXIMOS_PASSOS.md#preparação-da-migração-da-planilha-real) |
 | Segurança e política de dados | [`SEGURANCA_DE_DADOS.md`](SEGURANCA_DE_DADOS.md) |
 | Ameaças, controles e riscos residuais | [`THREAT_MODEL.md`](THREAT_MODEL.md) |
 | Workflow e validação local | [`WORKFLOW_DE_DESENVOLVIMENTO.md`](WORKFLOW_DE_DESENVOLVIMENTO.md) |

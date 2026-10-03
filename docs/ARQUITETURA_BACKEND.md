@@ -190,6 +190,9 @@ URLs sem prefixo abaixo também estão disponíveis em `/v1`.
   Retorna lote efetivo também em reenvio idempotente com outro código solicitado;
   diferencia `codigoLote` e `codigoLoteSolicitado`. `dryRun` aceita booleano ou
   os textos multipart `true`/`false`; outros valores retornam 400.
+  O DTO/worker não expõe `--reprocessar`: reenvio idempotente/retomada não cria
+  novo elo como a operação encadeada da CLI. Expor essa capacidade exigiria
+  contrato operacional específico, separado da revisão entre hashes.
   O subprocesso recebe ambiente restrito às variáveis de execução e à senha do
   importador, sem credenciais da aplicação/identidade nem segredo JWT.
 - `GET /auth/authorization-check`: prova técnica para `edicao` e `administracao`.
@@ -233,6 +236,14 @@ O futuro React deverá enviar `Authorization: Bearer <JWT>`, obter token no logi
 e reler identidade em `/auth/me`. O backend não decide armazenamento do token,
 navegação ou estado da interface. CORS está desabilitado; uma origem distinta
 exigirá allowlist explícita por ambiente.
+
+A [ADR-024](DECISOES_ARQUITETURAIS.md#adr-024) orienta construir frontend próprio,
+usando o Figma Make como referência de apresentação. Sessão, consultas e
+rascunhos ficam separados; regras clínicas, autorização, transações e versões
+permanecem no monólito modular. A
+[análise de integração](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md) detalha os
+contratos disponíveis e as lacunas; o [roadmap](PROXIMOS_PASSOS.md#etapa-6--fundação-do-frontend)
+define a execução. A avaliação não altera módulos, banco ou contratos HTTP.
 
 ## Testes
 

@@ -19,6 +19,72 @@ e sintaxe dos sete scripts Bash. Nenhum script de instalação/deploy foi execut
 Build e homologação visual do protótipo continuam fora desta organização de
 commits; o runtime será validado na implementação futura.
 
+## 2026-10-03 — realocação do protótipo para materiais de referência
+
+Movido `figma-make-prototipo/` da raiz para
+`referencias/frontend/figma-make-prototipo/`, preservando integralmente seus
+40 arquivos e seis subdiretórios. O material continua útil durante a implementação,
+sem ocupar o diretório da futura aplicação ou integrar seu build/implantação.
+
+Criado o [índice de referências](../referencias/README.md); README principal,
+índice documental, análise de integração e ADR-024 apontam para a organização
+vigente. Registros históricos mantêm o caminho original como contexto da época.
+O protótipo continua não versionado; não houve instalação de dependências,
+alteração do código do protótipo, backend, banco, contratos ou regras clínicas.
+Alterações preexistentes preservadas; sem commit ou push.
+
+Validação: comparação SHA-256 antes/depois dos arquivos e inventário de diretórios,
+`make docs-check COMPACT=1`, referências locais, `git diff --check` e status Git.
+Não houve execução do protótipo ou de suítes de banco/backend, pois a mudança
+é de localização e documentação.
+
+## 2026-10-03 — próximos passos com frontend referencial e preparação de migração
+
+Atualizado o [roadmap](PROXIMOS_PASSOS.md) para construir frontend próprio em
+React/TypeScript com apresentação revisada do Figma Make: 6A entrega base/sessão
+e 6B integra leitura. Etapas 7–8 explicitam catálogos, cobertura HTTP, versões,
+fronteiras transacionais, rascunhos e condições para funcionalidades complementares.
+Sequência e critérios de aceite ficam no roadmap; o
+[plano de integração](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md) concentra
+compatibilidade, reaproveitamento e pendências técnicas.
+
+Registrada a preparação de migração em paralelo ao frontend, com matriz por
+camada, ensaio sintético e prontidão operacional. Processamento real, inclusive
+simulação, continua condicionado à liberação 9D e à homologação controlada;
+importação não implica exposição de todos os campos pela API. Corrigida a distinção
+entre reenvio HTTP idempotente e novo elo de reprocessamento: o POST atual não
+expõe `--reprocessar`, disponível na CLI. Revisão entre hashes permanece separada.
+
+ADR-024, arquitetura do backend, estado e índice documental alinhados. Nenhuma
+alteração em código executável, dependências, contratos HTTP, regras de negócio,
+migrations ou banco; protótipo e alterações preexistentes preservados. Nenhum
+arquivo clínico real foi acessado, importado ou versionado; sem commit ou push.
+
+Validação: `make docs-check COMPACT=1`, revisão de conteúdo/referências locais,
+`git diff --check` e status Git. Build e suítes executáveis não são aplicáveis
+às alterações exclusivamente documentais; a interface ainda requer validação
+de runtime e navegador na Etapa 6.
+
+## 2026-10-03 — análise do Figma Make e planejamento do frontend
+
+Concluída a análise estática de `figma-make-prototipo/`, preservando o diretório
+preexistente não versionado. O [plano de integração](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
+inventaria telas, componentes, formulários, tabelas, filtros, estados e fluxos;
+compara controllers/DTOs/services e regras vigentes; distingue apresentação
+reutilizável, adaptações e referências sem suporte HTTP. A ADR-024 registra a
+subordinação do protótipo aos contratos existentes; índice, estado e roadmap
+apontam para a avaliação sem declarar frontend implementado.
+
+Registradas diferenças de autorização, paginação, idade, triestado, fronteiras
+clínicas, salvamento composto e importação/revisão. Pendências incluem catálogos,
+cobertura HTTP de recursos clínicos, edição de filhos, fila global, métricas,
+gestão de usuários e UX de revisão. Nenhum código executável, dependência, API,
+regra clínica, migration, banco ou dump foi alterado; não houve commit ou push.
+
+Validação documental: `make docs-check COMPACT=1`, revisão de referências locais,
+`git diff --check` e status Git. Build, navegador e suítes de banco/backend não
+foram executados nesta avaliação exclusivamente textual.
+
 ## 2026-10-03 — organização autorizada dos commits do aceite final
 
 As 36 alterações pendentes foram revisadas contra status, diff e histórico e

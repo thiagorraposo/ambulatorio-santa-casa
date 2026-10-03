@@ -14,6 +14,14 @@ Implementação, importador, recursos clínicos e provas F01–F16/T01–T18 sã
 relacionados na [matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md).
 Frontend e Etapas 6–10 não foram implementados nesta entrega.
 
+A [avaliação do protótipo Figma Make](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
+foi concluída em 2026-10-03, com inventário, compatibilidade HTTP e plano das
+Etapas 6–8. A direção é construir frontend próprio em React/TypeScript e
+reaproveitar apresentação revisada, preservando arquitetura e regras existentes.
+O próximo desenvolvimento previsto é 6A (base/sessão), seguido de 6B (leitura),
+conforme o [roadmap](PROXIMOS_PASSOS.md#etapa-6--fundação-do-frontend).
+É planejamento documental; não altera o estágio de implementação.
+
 As respostas de [campos e regras clínicas](Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
 são autoritativas: idade derivada do nascimento, descoberta de Chagas distinta da
 sorologia, familiares identificados com resultado, exames identificados e retorno
@@ -63,6 +71,8 @@ a revisão tem fluxo HTTP separado de fonte, autorização, simulação, recebim
 XLSX, aprovação seletiva, aplicação e encerramento. Manifesto/transformações são
 artefatos imutáveis registrados pelo mantenedor. Hash novo não equivale a visita
 nova; identidade de ocorrência é explícita. Dry-run não grava tabelas/sequências.
+O POST ordinário permite importação/reenvio idempotente, sem expor a opção
+`--reprocessar` da CLI para criar novo elo encadeado.
 
 A captura mínima ativa abrange ano D8, data/observação do atendimento e descoberta
 D2. Todos esses escritores geram histórico ou são recusados. Correções exigem
@@ -82,6 +92,11 @@ As portas HTTP de importação/revisão ficam desligadas por padrão e recusam
 produção. A ativação sintética de execução foi validada em `development`/`test`,
 com opt-in, staging, Git válido e permissões dedicadas da migration 63. Não há
 aplicação das novas migrations nem ativação no banco persistente.
+
+A [preparação da migração real](PROXIMOS_PASSOS.md#preparação-da-migração-da-planilha-real)
+pode avançar com mapeamento e ensaios sintéticos em paralelo ao frontend. Execução
+real depende da liberação 9D, do ambiente compatível e dos controles institucionais;
+campos importados sem HTTP continuam sem consulta/edição pela interface.
 
 ## Validação e limites
 

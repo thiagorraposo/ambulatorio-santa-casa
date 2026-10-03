@@ -6,6 +6,15 @@ identidade/autorização mínimas, sem escrita clínica, frontend ou dados reais
 
 O schema aplicado é `ambulatorio`. A principal evidência física versionada é `docs/evidencias/schema_atual_ambulatorio.sql`.
 
+## Referência do frontend
+
+O código do protótipo Figma Make fica em
+[`referencias/frontend/figma-make-prototipo/`](referencias/frontend/figma-make-prototipo/),
+como material de apoio visual e funcional. A futura aplicação será construída em
+`frontend/`, seguindo os contratos do sistema. Consulte a
+[organização das referências](referencias/README.md) e a
+[análise de integração](docs/arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md).
+
 ## Pré-requisitos
 
 - PostgreSQL com `psql` e `pg_dump`; o servidor pode ser local ou Docker.
