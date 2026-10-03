@@ -26,6 +26,7 @@ DECLARE ator bigint; paciente_teste bigint; atendimento_teste bigint; lote bigin
   linha_base bigint; fonte bigint; autorizacao bigint; campo_nome bigint; campo_sexo bigint;
   campo_data bigint; campo_observacoes bigint; campo_pendencia bigint; bruto jsonb; bruto_visita jsonb;
   manifesto jsonb; manifesto_visita jsonb; regras jsonb; regras_visita jsonb;
+  regras_sem_observacao jsonb;
   linha jsonb; linha_visita jsonb; proposta jsonb; plano jsonb; plano_visita jsonb;
   manifesto_texto text; regras_texto text; envelope_nome jsonb; envelope_sexo jsonb;
   resposta jsonb; repetida jsonb; obsoleta jsonb; antes jsonb; depois jsonb;
@@ -68,9 +69,11 @@ BEGIN
     {"chave":"nome","bloco":"cadastro","ocorrencia":1,"tabela":"paciente","coluna":"nome","transformacao":"texto"},
     {"chave":"sexo","bloco":"cadastro","ocorrencia":1,"tabela":"paciente","coluna":"sexo","transformacao":"texto"}]}';
   bruto_visita:=bruto||jsonb_build_array(jsonb_build_object('posicao','D','cabecalho','Data',
-    'chave','data_visita','bloco','geral','ocorrencia',1,'valor','05/04/2026'),
-    jsonb_build_object('posicao','E','cabecalho','Observacao','chave','observacao_ausente',
-      'bloco','geral','ocorrencia',1,'valor',''));
+    'chave','data_visita','bloco','geral','ocorrencia',1,'valor','05/04/2026'));
+  IF EXISTS(SELECT 1 FROM jsonb_array_elements(bruto) x WHERE x->>'chave'='observacao_ausente')
+    OR EXISTS(SELECT 1 FROM jsonb_array_elements(bruto_visita) x WHERE x->>'chave'='observacao_ausente') THEN
+    RAISE EXCEPTION 'Fixture exige observacao ausente nos dois arquivos';
+  END IF;
   SELECT jsonb_build_object('versao','proposta-visita-v1','layout_versao','proposta-visita-v1','sheets',jsonb_build_array(
     jsonb_build_object('aba_nome_original','Sintetica','aba_ordem',1,'columns',jsonb_agg(jsonb_build_object(
       'posicao_fisica',x->'posicao','cabecalho_original',x->'cabecalho','chave_semantica',x->'chave',
@@ -176,7 +179,7 @@ BEGIN
     'alvoChave','visita','registroId',NULL,'chaveSemantica','observacao_ausente',
     'blocoFuncional','geral','ocorrencia',1,'categoria','nova_visita','operacao','criar',
     'base',revisao_transformar_v1('coluna_ausente','null'::jsonb,'text','texto'),
-    'proposto',revisao_transformar_v1('celula_vazia','""'::jsonb,'text','texto')));
+    'proposto',revisao_transformar_v1('coluna_ausente','null'::jsonb,'text','texto')));
   linha_visita:=linha||jsonb_build_object('atendimentoBaseId',NULL,
     'dadosBrutos',jsonb_set(bruto_visita,'{3,valor}','""'::jsonb),'campos',plano_visita);
   SET LOCAL ROLE ambulatorio_revisao_servico;
@@ -195,12 +198,12 @@ BEGIN
     'blocoFuncional','geral','ocorrencia',1,'categoria','nova_visita','operacao','criar',
     'base',revisao_transformar_v1('coluna_ausente','null'::jsonb,'date','data_dd_mm_aaaa'),
     'proposto',revisao_transformar_v1('valor',to_jsonb('05/04/2026'::text),'date','data_dd_mm_aaaa')));
-  -- Cada campo habilitado da visita deve constar do plano, inclusive ausencia.
+  -- Cada campo habilitado da visita deve constar do plano, mesmo sem coluna nos arquivos.
   plano_visita:=plano_visita||jsonb_build_array(jsonb_build_object('campoId',campo_observacoes,
     'alvoChave','visita','registroId',NULL,'chaveSemantica','observacao_ausente',
     'blocoFuncional','geral','ocorrencia',1,'categoria','nova_visita','operacao','criar',
     'base',revisao_transformar_v1('coluna_ausente','null'::jsonb,'text','texto'),
-    'proposto',revisao_transformar_v1('celula_vazia','""'::jsonb,'text','texto')));
+    'proposto',revisao_transformar_v1('coluna_ausente','null'::jsonb,'text','texto')));
   linha_visita:=linha||jsonb_build_object('atendimentoBaseId',NULL,
     'dadosBrutos',bruto_visita,'campos',plano_visita);
   SET LOCAL ROLE ambulatorio_revisao_servico;
@@ -209,7 +212,44 @@ BEGIN
   RESET ROLE;
   IF resposta->>'resultado'<>'apta' OR (resposta->'linhas'->0->>'alvosNovos')::integer<>1
     OR pg_temp.pegada_revisao()<>antes THEN
-    RAISE EXCEPTION 'Nova visita comprovada nao foi simulada sem reservar ID';
+    RAISE EXCEPTION 'Nova visita comprovada nao foi simulada sem reservar ID: %',resposta;
+  END IF;
+
+  -- O campo capturado omitido do plano bloqueia a criacao completa.
+  SET LOCAL ROLE ambulatorio_revisao_servico;
+  resposta:=revisao_simular_proposta(fonte,lote,autorizacao,ator,manifesto_visita::text,
+    regras_visita::text,jsonb_build_object('linhas',jsonb_build_array(
+      linha_visita||jsonb_build_object('campos',jsonb_build_array(plano_visita->0)))));
+  RESET ROLE;
+  IF resposta->>'resultado'<>'conflito'
+    OR resposta->'linhas'->0->>'codigo'<>'revisao_criacao_captura_incompleta'
+    OR pg_temp.pegada_revisao()<>antes THEN
+    RAISE EXCEPTION 'Campo capturado omitido nao bloqueou criacao com coluna ausente';
+  END IF;
+
+  -- A ausencia nos dois arquivos não autoriza correção de destino existente.
+  SET LOCAL ROLE ambulatorio_revisao_servico;
+  resposta:=revisao_simular_proposta(fonte,lote,autorizacao,ator,manifesto_visita::text,
+    regras_visita::text,jsonb_build_object('linhas',jsonb_build_array(linha_visita||
+      jsonb_build_object('campos',jsonb_build_array(plano_visita->0,
+        (plano_visita->1)||jsonb_build_object('categoria','correcao_ocorrencia','operacao','definir'))))));
+  RESET ROLE;
+  IF resposta->>'resultado'<>'conflito'
+    OR resposta->'linhas'->0->>'codigo'<>'revisao_campo_fora_catalogo'
+    OR pg_temp.pegada_revisao()<>antes THEN
+    RAISE EXCEPTION 'Coluna ausente nos dois arquivos foi aceita como correcao';
+  END IF;
+
+  -- A chave sem uma regra fechada de transformacao tambem nao vira campo virtual.
+  regras_sem_observacao:=jsonb_set(regras_visita,'{regras}',(regras_visita->'regras')-1);
+  SET LOCAL ROLE ambulatorio_revisao_servico;
+  resposta:=revisao_simular_proposta(fonte,lote,autorizacao,ator,manifesto_visita::text,
+    regras_sem_observacao::text,jsonb_build_object('linhas',jsonb_build_array(linha_visita)));
+  RESET ROLE;
+  IF resposta->>'resultado'<>'conflito'
+    OR resposta->'linhas'->0->>'codigo'<>'revisao_campo_fora_catalogo'
+    OR pg_temp.pegada_revisao()<>antes THEN
+    RAISE EXCEPTION 'Campo ausente sem transformacao contratada foi aceito';
   END IF;
 
   -- A pendencia copiada do bruto anterior nao comprova outra ocorrencia.
