@@ -1,6 +1,6 @@
 # Especificação Normativa do Importador da Planilha — v1
 
-Atualizado em: 2026-10-01
+Atualizado em: 2026-10-03
 
 ## Preflight, relatório e rastreabilidade
 
@@ -18,13 +18,16 @@ do importador e revisão Git. Logs JSON permitem apenas eventos/metadados técni
 e contadores, nunca valores de células ou mensagens clínicas por linha.
 
 Status: importador v1.7.0 com promoção controlada de D11 e mapeamento seletivo
-de datas reais dos retornos BZN, ano inequívoco de D8 e negativa inequívoca de
-exame familiar D3. O manifesto semântico vigente é v1.4; 32 testes unitários e
-E2E da versão passaram em banco descartável. A primeira política
-não crítica foi implementada na v1.3.0. A ADR-022 define revisão entre hashes;
-a CLI mantém a barreira da v1.4.0 e recusa sua aplicação operacional. Há prova
-sintética privada de D8/F13, sem aceite global de revisão. Lacunas técnicas
-remanescentes constam da matriz e do roadmap; dados reais não estão autorizados.
+de datas reais dos retornos BZN, ano inequívoco de D8, negativa inequívoca de
+exame familiar D3 e promoção restrita de D2 após prova de captura do `NULL` na
+linha-base. O manifesto semântico vigente é v1.4; 34 testes unitários e E2E,
+incluindo concorrência de promoção D2 e preservação F13, passaram em banco
+descartável. A primeira política não crítica foi implementada na v1.3.0. A
+ADR-022 define revisão entre hashes; a CLI mantém a barreira da v1.4.0 e recusa
+sua aplicação operacional. A Etapa 5 sintética teve aceite integrado, registrado
+em [ACEITE_INTEGRADO_ETAPA_5.md](validacoes/ACEITE_INTEGRADO_ETAPA_5.md); a
+ativação HTTP permanece explicitamente opt-in, desabilitada por padrão e recusada
+em produção. Dados legados sem evidência de captura não são promovidos.
 
 ## Finalidade, autoridade e escopo
 
@@ -73,9 +76,11 @@ histórico perdido.
 
 O [estado da implementação](IMPORTADOR_SINTETICO_V1.md) registra a reconciliação
 BZN corrigida na v1.1.1, a promoção controlada de D11 na v1.2.0, a primeira
-política não crítica na v1.3.0 e D8/F13 na v1.6.0. A temporalidade operacional
-de arquivo revisado, as promoções restantes e a classificação individual dos
-demais erros secundários ainda não têm cobertura completa.
+política não crítica na v1.3.0, D8/F13 na v1.6.0 e a promoção segura de D2
+descrita abaixo. Revisões temporais entre hashes são suportadas pelo fluxo
+separado da ADR-022 no backend sintético aceito; a CLI do importador mantém sua
+recusa. Outras promoções e a classificação individual de erros secundários
+continuam limitadas aos handlers e contratos já aprovados.
 
 ## Vocabulário operacional
 
@@ -92,10 +97,11 @@ demais erros secundários ainda não têm cobertura completa.
   sem conflito e apta a gerar exatamente um atendimento.
 
 A associação linha → atendimento acima descreve o contrato v1. Para versões
-revisadas, aplicar o contrato temporal complementar somente após sua implementação
-e homologação; não estender essa regra automaticamente a toda atualização do
-registro de origem. O ano isolado de D8 tem representação estruturada e teste
-sintético; isso não autoriza revisão operacional entre hashes.
+revisadas, o fluxo da ADR-022 implementa o contrato temporal complementar no
+backend sintético; não estender a regra de carga inicial automaticamente a toda
+atualização do registro de origem. A CLI do importador continua isolada e recusa
+revisões entre hashes. O ano isolado de D8 tem representação estruturada, sem
+inventar dia ou visita.
 
 Vazio e ausente resultam em `NULL` ou ausência de registro dependente, nunca em
 `FALSE`, zero, string vazia normalizada ou catálogo `nao_informado`. Inválido
@@ -531,11 +537,12 @@ Casos de aceite obrigatórios para a implementação:
 O [contrato temporal complementar](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md)
 define identidade entre versões, correção da mesma ocorrência, nova visita,
 atualização consolidada, precedência, auditoria e casos de aceite. A v1.4.0
-implementa a barreira de finalidade e recusa revisões; reconciliação entre hashes
-continua pendente. Declarar carga inicial indevidamente ainda pode duplicar visitas. Não usar
+implementa a barreira de finalidade e recusa revisões. A reconciliação entre hashes
+foi implementada e aceita no fluxo HTTP separado da Etapa 5; a CLI mantém essa
+recusa. Declarar carga inicial indevidamente ainda pode duplicar visitas. Não usar
 `--reprocessar` nem a FK de predecessor do mesmo hash para representar revisão.
 
-A aplicação futura exige finalidade explícita, mapeamento revisado e histórico
+A aplicação HTTP exige finalidade explícita, mapeamento revisado e histórico
 por campo antes de qualquer correção. Sem evidência de ocorrência nova, não criar
 visita; sem identidade/proveniência inequívoca, preservar o bruto e bloquear a
 linha. Auditoria mínima por alvo da promoção D11 não basta para esse fluxo.
@@ -610,10 +617,13 @@ não equivale a prontidão para o MVP revisado. Bloqueiam seus fluxos afetados:
 
 - expandir a promoção controlada somente para chaves com contrato, manifesto,
   handler e testes aprovados; D11 já está implementada;
-- implementar e homologar o contrato temporal antes de importar atualizações da
-  mesma fonte; a barreira está implementada, mas linhagem e auditoria continuam pendentes;
-- escolher destinos/representações ainda pendentes antes de promover D2/D3 e
-  outros campos cujo contrato não esteja fechado.
+- a CLI do importador não executa revisões entre hashes e mantém recusa antes de
+  qualquer escrita. Atualizações temporais devem usar o fluxo próprio da ADR-022,
+  aprovado no ambiente sintético integrado; não contornar essa separação via
+  `--reprocessar`;
+- promover apenas campos com contrato humano resolvido e proteção técnica
+  específica; D2 agora tem uma prova restrita de promoção de `NULL` capturado,
+  enquanto D3 e outros campos permanecem sujeitos às suas próprias condições.
 
 As nove chaves `parcial` continuam preservadas no bruto. Quando preenchidas sem
 handler/conversão válida, tornam a linha `importada_com_pendencia`; ano D8 válido
@@ -631,7 +641,8 @@ reais. As roles e o isolamento técnico já existem; não são uma etapa a refaz
   testes; `catalogo_projeto_ausente` é a primeira regra não crítica;
 - mecanismo concreto de bloqueio exclusivo por lote e detecção de executor ativo;
 - lista de tabelas permitidas derivada do manifesto e verificação de alvos órfãos;
-- testes sintéticos de concorrência, queda e retomada;
+- testes sintéticos de concorrência para outros fluxos, queda e retomada; D2 já
+  comprova especificamente a serialização da promoção diante de edição concorrente;
 - forma de aplicar as normalizações sem depender de locale.
 
 Esses itens não autorizam alterar as regras normativas deste documento.
@@ -651,9 +662,13 @@ Esses itens não autorizam alterar as regras normativas deste documento.
 
 ## Critério de prontidão
 
-A homologação atual comprova 126 rótulos plenos declarados, preservação
-determinística dos nove rótulos parciais, promoção de D11 e mapeamento seletivo
-de D8 no cenário sintético. A prontidão para o MVP revisado depende
+A homologação do importador comprova 126 rótulos plenos declarados, preservação
+determinística dos nove rótulos parciais, promoção de D11, mapeamento seletivo
+de D8 e a promoção restrita de D2 com captura atribuível e concorrência coberta
+no cenário sintético. A Etapa 5 sintética foi aceita após validação integrada
+(ver [registro de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md)). A ativação
+HTTP permanece opt-in, desabilitada por padrão e recusada em produção.
+A prontidão para o MVP revisado depende
 dos critérios do [roadmap](PROXIMOS_PASSOS.md), regressões das lacunas conhecidas e
 cenários sintéticos das novas decisões; não decorre apenas da contagem de 126
 rótulos. Dados reais continuam bloqueados pela governança institucional. Alterar
@@ -666,9 +681,29 @@ A chave `autorelato_diagnostico_de_chagas_do_participante_data` é convertida
 explicitamente para `diagnostico_chagas.data_descoberta_autorelato`. A presença
 somente dessa data pode criar o registro de diagnóstico do atendimento, sem
 inferir resultado de sorologia ou confirmação da doença. O original permanece
-no bruto e o alvo é registrado na proveniência. A promoção de lotes antigos
-para esse novo campo ainda exige implementação e testes próprios; a barreira
-contra revisão entre hashes continua ativa.
+no bruto e o alvo é registrado na proveniência. A migration 61 habilita captura
+prospectiva de `diagnostico_chagas.data_descoberta_autorelato`, sem backfill de
+`NULL` legado. Na promoção de mesmo conteúdo/layout, o importador exige um único
+diagnóstico associado pela proveniência da linha-base. Um valor igual gera
+somente `associado`, sem `UPDATE`; uma divergência permanece pendente para revisão.
+
+O preenchimento de `NULL` só é permitido quando a própria linha-base prova o
+`INSERT` inicial do diagnóstico com evento de auditoria versão 1, origem
+`importacao`, antes `alvo_ausente`, depois `nulo`, e nenhum evento posterior para
+o campo e alvo. A função restrita
+`auditoria_d2_null_captura_comprovada(linha_atual, linha_base, diagnostico)`
+verifica cadeia de reprocessamento, hash/layout, posição, bruto e proveniência,
+retornando apenas booleano; o importador é seu único executor autorizado e não
+consulta nem expõe os eventos brutos. `NULL` legado sem essa evidência, valor
+divergente e ciclo de edição A→B→A (mesmo que o valor atual volte a `NULL`) não
+são promovidos. A suíte sintética `tests/importador/test_descoberta_chagas.py`
+e `tests/sql/34_validar_captura_descoberta_chagas.sql` cobrem esses casos, a
+associação sem escrita e a preservação da trilha. A prova de concorrência em
+`tests/importador/test_concorrencia_promocao_d2.py` mantém o alvo bloqueado em
+uma sessão, executa NULL→data→NULL antes da retomada e confirma a recusa sem
+efeito clínico ou auditoria parcial. A barreira da CLI a revisões entre hashes
+continua isolada; o aceite integrado da Etapa 5 não habilita essa funcionalidade
+na CLI. A ativação HTTP é opt-in, default off e recusada em produção.
 
 ## Ano do último comparecimento — D8 na v1.6.0 sintética
 
@@ -682,11 +717,12 @@ pendência, sem fabricar um evento.
 No reprocessamento do mesmo hash, associação de evento existente exige vínculo
 de proveniência da mesma fonte e layout; alvo divergente ou múltiplo é conflito.
 Igualdade de ano em outra fonte não comprova identidade. O E2E sintético aprovado
-com manifesto v1.4 em `/tmp/ambulatorio-check-lvoqpa3u/output.log` cobriu carga de 2023, texto
-ambíguo preservado, no-op, reprocessamento sem duplicação, correção privada
-2023→2022 e bloqueio da origem superada após a correção. Esse teste demonstra
-F13 e a representação anual nesse cenário. A CLI segue recusando revisão entre
-hashes até o aceite integral da ADR-022.
+com manifesto v1.4 em `/tmp/ambulatorio-check-hsao0uvy/output.log` cobriu carga
+de 2023, texto ambíguo preservado, no-op, reprocessamento sem duplicação,
+correção privada 2023→2022 e bloqueio da origem superada após a correção. O teste
+de precedência estende F13 a data e observações do atendimento. A CLI continua
+recusando revisão entre hashes mesmo após o aceite integrado da ADR-022; a revisão
+é uma operação isolada no backend.
 
 ## Exame familiar legado — D3 com manifesto v1.4
 

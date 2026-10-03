@@ -15,7 +15,8 @@ fontes vigentes.
 | Modelo físico PostgreSQL | [`MODELO_FISICO_ATUAL.md`](MODELO_FISICO_ATUAL.md) |
 | Contrato físico da planilha | [`MANIFESTO_FISICO_PLANILHA_V1.md`](MANIFESTO_FISICO_PLANILHA_V1.md) e manifesto executável em [`../manifestos/planilha_ambulatorio_v1.json`](../manifestos/planilha_ambulatorio_v1.json) |
 | Regras do importador | [`ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`](ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md) |
-| Revisão de planilhas entre hashes (implementação parcial; aplicação desabilitada) | [`arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md`](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md) |
+| Revisão de planilhas entre hashes em ambiente sintético | [`arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md`](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md) |
+| Aceite integrado 5A–5E e matriz F01–F16/T01–T18 | [`validacoes/ACEITE_INTEGRADO_ETAPA_5.md`](validacoes/ACEITE_INTEGRADO_ETAPA_5.md) |
 | Implementação atual do importador | [`IMPORTADOR_SINTETICO_V1.md`](IMPORTADOR_SINTETICO_V1.md) |
 | Arquitetura do backend | [`ARQUITETURA_BACKEND.md`](ARQUITETURA_BACKEND.md) |
 | Segurança e política de dados | [`SEGURANCA_DE_DADOS.md`](SEGURANCA_DE_DADOS.md) |

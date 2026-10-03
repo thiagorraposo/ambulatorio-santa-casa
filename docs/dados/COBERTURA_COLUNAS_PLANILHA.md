@@ -113,7 +113,7 @@ P2 é importante, não bloqueante; P3 é pós-MVP. Prioridades são propostas t�
 | Decisão | Situação atual | Banco | Importador | Backend | Frontend | Migration? | Prioridade |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | D1 — idade por nascimento | Semântica incorporada; data de referência da consulta deve ficar explícita | `paciente.data_nascimento` já basta | Idade legada permanece bruta e não é usada como valor atual | Calcular com referência explícita | Exibir idade e referência | Não | P1 |
-| D2 — data de descoberta de Chagas | Implementada no contrato e na migration 28 | `diagnostico_chagas.data_descoberta_autorelato`, distinta da sorologia | Conversão na carga inicial; promoção de lotes antigos ainda pendente | Campo na criação/consulta do atendimento | Campo próprio | Sim, migration 28 | P1 |
+| D2 — data de descoberta de Chagas | Contrato clínico confirmado; migrations 28/61 | `diagnostico_chagas.data_descoberta_autorelato`, distinta da sorologia | Carga inicial; promoção segura com proveniência e NULL capturado desde a base, sem edição posterior; legado desconhecido preservado | Campo na criação/consulta do atendimento | Campo próprio e captura prospectiva | Sim, migrations 28/61 | P1 |
 | D3 — familiares examinados, quais e resultado | Contrato/migration 25 implementados; negativa legada seletiva em teste | Rastreio triestado e resultados repetíveis | Negativa inequívoca pode criar `familiares_examinados = false`; afirmativa sem parente/resultado e texto ambíguo ficam brutos | DTO de rastreio familiar | Flag e detalhes dos examinados | Sim, migration 25 | P1 |
 | D4 — identificar exames trazidos | Parcialmente atendida | `paciente_exame_complementar` e catálogo suportam ocorrências | Indicador agregado está bruto; categoria genérica precisa de identificação textual inequívoca | Exigir identificação quando afirmativo | Seleção/descrição do exame | Não; reutilizar modelo | P1 |
 | D5 — identificar exames solicitados | Parcialmente atendida | Bloco `solicitado` já existe; resultado pode faltar | Associar solicitação ao exame, sem exigir resultado | Validar identificação, não resultado | Formulário próprio de solicitação | Não | P1 |
@@ -145,16 +145,22 @@ P2 é importante, não bloqueante; P3 é pós-MVP. Prioridades são propostas t�
   [estado do importador](../IMPORTADOR_SINTETICO_V1.md).
 - **Temporalidade:** o [contrato complementar](../arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md)
   define revisão entre hashes e seus casos de aceite. A CLI mantém a barreira de
-  finalidade e recusa revisões, inclusive em dry-run. Migrations e funções privadas
-  acrescentaram linhagem, decisão, captura e executor parciais; D8/F13 foi provado
-  em cenário sintético, sem habilitar o fluxo operacional. Aceite integral ainda
-  é necessário para ativação.
+  finalidade e recusa revisões, inclusive em dry-run. O fluxo HTTP separado tem
+  linhagem, decisão seletiva, dry-run, captura e aplicação; o aceite integrado
+  F01–F16/T01–T18 foi aprovado. Migrations 61–63 completam promoção D2 segura,
+  simulação de criação com coluna ausente e permissões operacionais dedicadas.
+  Execução exige opt-in sintético fora de produção e permanece desligada por padrão.
   Isso não altera cobertura de colunas nem justifica tabelas clínicas por retorno.
-- **Backend/frontend:** DTOs de entrada e fluxos clínicos já existem para parte
-  dos contratos, com autorização e transações compostas. Faltam a consolidação
-  dos DTOs de saída e os recursos restantes descritos no roadmap. Não há frontend.
+- **Backend/frontend:** DTOs de entrada/saída e fluxos clínicos do roadmap estão
+  concluídos e validados por HTTP, com autorização por recurso, paginação e
+  transações compostas. Não há frontend. A cobertura sintética e seus limites
+  constam da [matriz de aceite](../validacoes/ACEITE_INTEGRADO_ETAPA_5.md).
 
-## Testes necessários
+## Critérios clínicos e evidências
+
+Os critérios abaixo foram implementados e validados no escopo sintético da
+Etapa 5. A matriz de aceite associa provas SQL, importador real e HTTP; não
+confunde classificação semântica do manifesto com implementação de cada fluxo.
 
 - D1: aniversário, nascimento ausente e referência aprovada; idade legada divergente
   não sobrepõe nascimento.
@@ -167,15 +173,16 @@ P2 é importante, não bloqueante; P3 é pós-MVP. Prioridades são propostas t�
 - D8/D9: ano sem dia/mês, várias visitas, planilha atualizada sem nova visita e
   orientação futura não transformada em retorno realizado; preservar histórico.
   A matriz T01–T18 do contrato temporal detalha revisão, precedência, concorrência
-  e auditoria. T01 e a recusa de T02 estão cobertos na v1.4.0; D8/F13 tem prova
-  privada específica, sem aceite da matriz temporal integral.
+  e auditoria. A matriz temporal integral foi aprovada, incluindo precisão anual,
+  precedência dos escritores, dry-run, staging, rollback e concorrência.
 - D10/D11/D12: contrarreferências múltiplas, estados desconhecidos, pendência livre,
   observação clínica preservada e ausência funcional de `Localizado` com bruto intacto.
 - Transversais: BZN repetido compatível/conflitante, preenchimento de nulos e
   atomicidade foram cobertos na v1.1.1; promoção de D11, conflito manual, dry-run e
   dois elos foram cobertos na v1.2.0; catálogo de projeto ausente, correção e nova
-  tentativa seletiva foram cobertos na v1.3.0. Ainda faltam as demais promoções e
-  acesso negado por operação/recurso nos novos módulos clínicos.
+  tentativa seletiva foram cobertos na v1.3.0. As promoções aprovadas restantes
+  e acessos negados por operação/recurso têm provas na suíte final; NULL legado
+  sem cobertura e valores ambíguos continuam preservados, não promovidos por suposição.
 
 Não alterar os testes SQL históricos apenas por conterem o modelo anterior: o
 teste de encaminhamento que evita colunas específicas de contrarreferência só
@@ -191,8 +198,9 @@ de fonte e de autorizações temporais exige entitlement nominal separado do
 perfil funcional, provisionado fora da API. Isso não altera a classificação
 semântica ou física das 136 colunas da planilha e não concede autorização clínica
 por fonte. O impacto está na fronteira de segurança da ADR-022: migration 55 e
-rotas específicas aplicam a regra; a ativação permanece condicionada ao aceite
-integrado F01–F16/T01–T18.
+rotas específicas aplicam a regra. O aceite integrado F01–F16/T01–T18 foi
+concluído; a ativação operacional sintética validada não concede autorização
+por fonte automaticamente nem designa pessoas em produção.
 
 As referências vigentes afetadas são as decisões humanas, este mapa, o estado
 atual, o roadmap, a especificação/implementação do importador, o manifesto físico,
@@ -204,6 +212,7 @@ sobrepõem código, schema nem respostas confirmadas da equipe.
 O número “não coberta = 0” no manifesto significa sua classificação de
 rótulos com preservação possível, não ausência de lacunas funcionais. As onze
 parciais originais não podem mais ser relegadas em bloco ao pós-MVP; nove continuam
-nessa classificação após D11 e a carga inicial de D2. Isso não comprova promoção
-de D2 em lotes antigos. A ordem vigente é o
+nessa classificação após D11 e a carga inicial de D2. Esses totais não comprovam
+promoção histórica. D2 agora exige a prova restrita de captura/proveniência da
+migration 61; NULL legado sem prova permanece bloqueado. A ordem vigente é o
 [roadmap](../PROXIMOS_PASSOS.md), sem recalcular cobertura antes da implementação.

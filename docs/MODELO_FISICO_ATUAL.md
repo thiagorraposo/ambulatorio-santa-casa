@@ -1103,9 +1103,10 @@ Manifesto e transformações são artefatos técnicos registrados previamente po
 mantenedor fora da rota HTTP.
 
 A migration 57 cria wrappers distintos para aplicação aprovada, finalização e
-diagnóstico pós-rollback. Ela não concede `EXECUTE` aos papéis operacionais. O
-runner HTTP de homologação concede esses direitos apenas no banco descartável e
-requer modo de teste/staging. SQL27–28 e o teste HTTP específico são evidências
+diagnóstico pós-rollback. Ela não concede `EXECUTE` aos papéis operacionais. Até
+o aceite integrado, o runner concedia esses direitos somente no descartável;
+após a migration 63, ele usa as permissões dela, sem concessão adicional.
+SQL27–28 e o teste HTTP específico são evidências
 de bancos descartáveis; não alteram a descrição do schema persistente acima nem
 justificam regenerar seu dump.
 
@@ -1135,3 +1136,50 @@ visita nova exige data completa. D8 permanece ativo, sem ampliar o catálogo aos
 demais destinos. SQL31 e os testes clínicos validam captura e correção aplicada;
 instalação limpa 02–60 e atualização incremental 58→59→60 passaram em bancos
 descartáveis. A evidência do schema persistente permanece inalterada.
+
+## Captura da descoberta e prova restrita de promoção — migration 61
+
+A 61 habilita prospectivamente `diagnostico_chagas.data_descoberta_autorelato`
+(`date`, PK `diagnostico_chagas_id`, serialização v1), reutilizando os triggers
+existentes. Não cria tabelas, não preenche registros antigos e não faz backfill.
+O instante de captura não é uma data clínica nem prova cobertura do legado.
+
+A função `auditoria_d2_null_captura_comprovada` retorna apenas boolean ao
+importador. Confere identidade técnica, contexto real da linha corrente, cadeia
+de reprocessamento de mesmo hash/layout/bruto, proveniência do diagnóstico na
+linha-base e evento inicial de NULL importado sem evento posterior. Não concede
+leitura das tabelas de auditoria, identidade ou snapshots. A regra de promoção
+e seus casos positivos/negativos estão no contrato do importador.
+
+SQL34 e o E2E D2 distinguem legado anterior à 61 de NULL capturado depois dela,
+incluindo manutenção e edição A→B→A. A promoção bloqueia o diagnóstico antes
+da prova; o E2E concorrente verifica edição A→B→A enquanto o importador espera.
+Instalação limpa e atualização 60→61 foram aprovadas; os logs vigentes estão na
+[matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md).
+O schema persistente e seu dump continuam representando o ambiente aplicado,
+sem incorporar evidência de um banco temporário.
+
+## Simulação de criação com coluna ausente — migration 62
+
+A 62 alinha o simulador pré-staging à criação autorizada com coluna ausente nos
+dois arquivos. Materializa apenas a comparação ausente/ausente explicitamente
+planejada para criação, com campo ativo e uma transformação única para o destino.
+Não relaxa completude do plano, identidade de ocorrência ou proteção de correção;
+omissões, correções sem coluna e transformações ausentes são recusadas. SQL22 e
+o HTTP XLSX real validam dry-run sem efeitos, aplicação única e replay.
+
+## Ativação operacional sintética — migration 63
+
+Depois do aceite integrado até 62, a 63 concede somente três wrappers
+(`revisao_aplicar_aprovada`, `revisao_finalizar_aprovada` e
+`revisao_diagnosticar_falha`) a `ambulatorio_revisao_servico`. Importador,
+aplicação, serviço de identidade, gestão e PUBLIC não recebem execução; rotinas
+internas permanecem privadas. SQL21/35 verificam isolamento, identidade e reversão
+por REVOKE, preservando decisões/eventos/evidências. HTTP usa a concessão real.
+Runtime exige ativação explícita sintética com staging em development/test;
+produção continua recusada e o padrão é desligado.
+
+Instalação limpa 02–63, atualizações 61→62→63, 34 testes SQL e suítes integradas
+passaram somente em bancos descartáveis. A [matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md)
+registra a conclusão sintética de 5A–5E. Nada nesta seção descreve migrations
+aplicadas ao banco persistente nem justifica regenerar sua evidência estrutural.

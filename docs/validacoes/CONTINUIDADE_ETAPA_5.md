@@ -3,6 +3,131 @@
 Execução iniciada em 2026-09-27. Documento de trabalho e evidência de execução;
 o escopo permanece em [PROXIMOS_PASSOS.md](../PROXIMOS_PASSOS.md).
 
+## Organização autorizada do aceite final — 2026-10-03
+
+O responsável solicitou organizar todas as alterações pendentes em commits, sem
+descartar trabalho, usar comandos destrutivos ou fazer push. Status, diff, índice
+inicialmente vazio e histórico foram revisados na `main`, a partir de `062de16`.
+Um inventário de hashes dos 36 arquivos permite conferir preservação integral;
+somente a guarda de teste e os registros desta organização receberam ajustes.
+
+Os grupos seguem a dependência: captura/promoção D2 (61), simulador (62),
+integridade SQL, regressões do importador, ativação sintética (63), testes HTTP,
+CI e documentação. Regressões imediatas acompanham a funcionalidade; provas mais
+amplas permanecem em commits `test`. Não houve push nem alteração no banco persistente.
+
+A guarda D2 agora valida a porta configurada em vez de exigir 55457, permitindo
+o CI efêmero em 5433. O sufixo `_importador_test` continua obrigatório. A prova
+isolada aceitou ambas as portas e recusou porta inválida/banco nominal sem
+conectar ao banco. Por essa alteração, `importer-test COMPACT=1` foi repetido
+no descartável em 55457 e passou 34 unitários + E2E, incluindo concorrência D2;
+log local `/tmp/ambulatorio-check-1zb87v3q/output.log`. Suítes SQL/backend aprovadas
+abaixo foram reaproveitadas porque seu estado permaneceu inalterado.
+
+Migrations antigas, SQL21 preexistente e dump aplicado foram conferidos sem diff.
+A revisão final usa `docs-check COMPACT=1`, `git diff --check` e conferência dos
+arquivos de cada commit, seguida de status/log. O próximo desenvolvimento
+previsto continua sendo a Etapa 6, fora desta organização.
+
+## Fechamento integrado — 2026-10-03
+
+**Etapa 5 (5A–5E) concluída no ambiente sintético.** Esta seção e a
+[matriz de aceite](ACEITE_INTEGRADO_ETAPA_5.md) descrevem o estado presente.
+As seções datadas abaixo preservam resultados e pendências daqueles incrementos;
+não substituem o estado atual. Não há decisão humana pendente no escopo autorizado.
+As respostas clínicas permanecem autoritativas; a governança de gestão usa o
+entitlement nominal por delegação já registrada, separado da autorização por fonte.
+
+### Implementação e decisões técnicas
+
+- SQL61 habilita captura prospectiva D2 e prova booleana restrita para promoção.
+  O importador bloqueia o diagnóstico antes de conferir contexto, proveniência
+  e evento inicial importado da linha-base, sem evento posterior. NULL legado,
+  divergência e A→B→A são preservados; igualdade só associa. Não há backfill nem
+  acesso bruto do importador à auditoria. SQL34 e os E2E distinguem legado,
+  manutenção e edição concorrente real, sem manipular o ledger ou desabilitar triggers.
+- SQL62 alinha simulação pré-staging à criação com observação ausente em ambos
+  os manifestos: plano explícito, catálogo ativo e uma transformação fechada.
+  Correção sem coluna, omissão do campo e transformação ausente continuam recusadas.
+  SQL22 e o HTTP XLSX real percorrem simulação, recebimento, publicação, aplicação
+  e replay com exatamente uma visita, sem copiar BZN/dependentes anteriores.
+- SQL63 foi implementada depois do aceite integrado até 62. Concede só os três
+  wrappers de aplicação, encerramento e diagnóstico à role dedicada de revisão;
+  internals permanecem privados. SQL21/35 provam ACLs, identidade e reversão por
+  REVOKE, sem apagar evidências. O runner usa essas permissões sem GRANT adicional.
+  A execução exige opt-in sintético com staging/Git em development/test; padrão
+  desligado e produção recusada. Não há ativação no banco persistente.
+- SQL11 amplia negativos de base/fonte/hash/layout, ciclo de lotes, planos
+  conflitantes, eventos forjados e reversão de concessão. SQL33 confirma B e
+  fecha a fonte em transações reais, recusando reprocessamento A e revisão B→A.
+  SQL28/29/33 deixam apenas baselines sintéticos confirmados no descartável;
+  os demais testes preferem BEGIN/ROLLBACK e constraints imediatas.
+- HTTP de staging cobre correção data/texto + fato anual com falha depois da
+  gravação do atendimento e rollback completo, revisão anual isolada com precisão
+  anual, e criação com coluna ausente. Escritores Python reais provam precedência
+  no reprocessamento/promoção e concorrência D2 sob lock observado no PostgreSQL.
+- A auditoria paralela de 5D/5E conferiu rotas, DTOs, services e provas HTTP de
+  paciente completo, recursos, filtros, CSV, importação/lotes/erros, versionamento,
+  perfis, autorização por vínculo e transações; não encontrou requisito obrigatório
+  restante. A matriz normativa F01–F16/T01–T18 foi preservada e mapeada às provas.
+
+### Validações aprovadas
+
+Todos os resultados aprovados usam somente o servidor descartável em 55457.
+Os logs abaixo são locais e temporários, não artefatos versionados nem evidência
+estrutural do ambiente persistente.
+
+| Verificação | Resultado | Log local |
+| --- | --- | --- |
+| Instalação limpa 02–61 e incremento 60→61, SQL31/34 | Aprovados | `/tmp/ambulatorio-check-2_fl7o9k/output.log` |
+| Incremento 61→62 e SQL22/23 | Aprovados | `/tmp/ambulatorio-check-_fv9o02p/output.log` |
+| Aceite integrado anterior à 63: importador + clínica até 62 | 34 unitários/E2E e 38 clínicos aprovados | `/tmp/ambulatorio-check-d95toauq/output.log`; `/tmp/ambulatorio-check-emif8w_u/output.log` |
+| Instalação limpa 02–63 e incremento 62→63, SQL21/35 | Aprovados | `/tmp/ambulatorio-check-lyqo_k8q/output.log` |
+| `manifest-check project-check COMPACT=1` final | Manifesto, 34 testes SQL (01–31, 33–35), documentação/diff aprovados | `/tmp/ambulatorio-check-y1fxyaqv/output.log` |
+| `importer-test COMPACT=1` final | 34 unitários + E2E aprovado, incluindo precedência/concorrência D2 | `/tmp/ambulatorio-check-hsao0uvy/output.log` |
+| Build + unitários/contratos do backend | Build e 53 testes aprovados; fundação desse comando falhou antes do SQL e foi repetida separadamente | `/tmp/ambulatorio-check-u4vil19h/output.log` |
+| Fundação + runner clínico final | Oito testes de fundação e sete suítes/38 clínicos aprovados, incluindo staging development | `/tmp/ambulatorio-check-ted3bt14/output.log` |
+| Revisão documental de fechamento | `docs-check COMPACT=1` e `git diff --check` aprovados | `/tmp/ambulatorio-check-0s1nylh0/output.log` |
+
+O build/unitários e a fundação/runner final compõem os alvos de `backend-check`
+mais `backend-clinical-test`; os 38 casos clínicos são executados separadamente
+no runner, não contabilizados pelos skips da suíte unitária. Verificações foram
+selecionadas pela matriz do workflow e não repetidas depois de mudanças apenas
+documentais. O CI passou a incluir o runner clínico em banco próprio; não houve
+execução remota do CI nesta entrega.
+
+### Falhas intermediárias e limitações
+
+A chamada inicial do importador apontou banco-base inexistente, e uma tentativa
+E2E encontrou manifesto já registrado por outro cenário. A fixture passou a
+reutilizar o artefato imutável pelo hash e os cenários têm namespaces distintos.
+A prova booleana de D2 foi corrigida para exigir `t`, e a concorrência passou a
+bloquear o diagnóstico antes de verificar captura. O cenário de nova visita
+exibiu divergência entre simulador e executor na ausência de coluna; SQL62 corrige
+a causa mantendo as recusas. Essas rodadas intermediárias não contam como aceite.
+
+O primeiro comando agregado de backend informou apenas `SYNTHETIC_PG_*`,
+insuficiente para o alvo de fundação, que usa `DB_*`. O Make verificou o serviço
+padrão e a conexão em 5433 foi recusada na autenticação, antes de qualquer SQL.
+Nenhuma alteração ocorreu no banco persistente. A repetição informou DB_ENV/local,
+DB_* e APP_DB_* explicitamente em 55457 e usou login exclusivo da tarefa. Todos
+os resultados aprovados e migrations desta entrega pertencem aos descartáveis.
+
+Migrations antigas 00–44, SQL21 preexistente e dump persistente foram preservados.
+Hash da SQL21: `0c96ea418b5b0dfaed4de648e6d81eb15d8ed20b5649485578e568a61921578e`.
+Não houve dado real, frontend, Etapas 6–10, commit ou push nesta continuação.
+NULL sem cobertura, ocorrência sem identidade e valores ambíguos permanecem
+preservados ou recusados por contrato, sem transformar isso em decisão ausente.
+Implantação, segredos/TLS/backup/retenção e homologação institucional são posteriores.
+
+### Continuidade
+
+5A–5E e o aceite integrado estão concluídos; não resta trabalho obrigatório desta
+etapa. Ao fechar o aceite, as alterações permaneciam no worktree da main; a
+organização autorizada posterior está registrada acima. O próximo desenvolvimento previsto
+é a Etapa 6, fora desta execução. A sincronização anterior do remoto foi resolvida
+no commit `062de16`, sem push feito pelo agente.
+
 ## Organização autorizada de commits e validação até 60 — 2026-10-03
 
 O responsável solicitou organizar todas as alterações por contexto/tipo e

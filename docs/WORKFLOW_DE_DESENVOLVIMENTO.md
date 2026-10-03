@@ -1,11 +1,16 @@
 # Workflow de Desenvolvimento
 
-Atualizado em: 2026-09-25
+Atualizado em: 2026-10-03
 
 O CI em `.github/workflows/validacoes.yml` usa credenciais sintéticas descartáveis,
 PostgreSQL 16.15 e executa migrations em banco limpo, manifesto, importador,
 testes SQL, backend (build, unitários, integração e container), documentação e
 `git diff --check`. A seleção local por escopo não reduz essa cobertura do CI.
+
+O CI também executa `backend-clinical-test COMPACT=1` com `SYNTHETIC_PG_*`
+apontando ao servidor efêmero e banco próprio criado pelo runner. Esse alvo cobre
+os endpoints clínicos/revisões; a fundação não substitui sua execução. O runner
+usa as permissões instaladas pelas migrations, sem conceder wrappers manualmente.
 
 ## Contexto por tarefa
 

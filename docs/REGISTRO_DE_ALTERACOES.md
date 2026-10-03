@@ -1,5 +1,59 @@
 # Registro de Alterações
 
+## 2026-10-03 — organização autorizada dos commits do aceite final
+
+As 36 alterações pendentes foram revisadas contra status, diff e histórico e
+organizadas por contexto/dependência: captura/promoção D2, correção do simulador,
+integridade SQL, regressões do importador, execução sintética, testes HTTP, CI e
+documentação. Regressões diretamente ligadas à funcionalidade acompanham o
+respectivo commit; nenhum conteúdo pendente foi descartado e não houve push.
+
+A revisão encontrou a guarda do E2E D2 fixada em 55457, incompatível com o CI
+efêmero em 5433. Ela passou a validar a porta configurada, mantendo a exigência
+de banco com sufixo `_importador_test`. A verificação isolada aceitou 5433/55457
+e recusou porta inválida/banco nominal, sem conexão. `importer-test COMPACT=1`
+passou novamente no descartável em 55457 (34 unitários + E2E), pois o helper do
+teste mudou. As demais suítes aprovadas foram reaproveitadas; detalhes estão na
+[continuidade](validacoes/CONTINUIDADE_ETAPA_5.md#organização-autorizada-do-aceite-final--2026-10-03).
+Migrations antigas, SQL21 preexistente, dump e banco persistente foram preservados.
+
+## 2026-10-03 — conclusão sintética da Etapa 5 e ativação controlada
+
+Etapa 5 (5A–5E) concluída com aceite integrado F01–F16/T01–T18. A nova
+[matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md) relaciona os requisitos
+às provas SQL, importador real e HTTP; estado, roadmap e fontes temáticas foram
+alinhados. Não resta decisão humana pendente no escopo sintético autorizado.
+
+SQL61 habilita captura prospectiva da descoberta e prova booleana restrita por
+contexto/proveniência/cadeia, sem backfill nem leitura bruta da auditoria pelo
+importador. Promoção de NULL exige lock do diagnóstico e evento importado da
+linha-base sem alteração posterior; legado desconhecido/divergência/A→B→A são
+preservados. Igualdade apenas associa. E2E reais provam D2, edição concorrente e
+precedência de data/texto; fixtures reutilizam artefatos imutáveis pelo hash.
+
+SQL62 alinha simulação e criação com coluna ausente nos dois arquivos, mantendo
+plano completo, catálogo/transformação fechados e recusas para correção/omissão.
+Após aceite até 62, SQL63 concede só os três wrappers operacionais à role dedicada;
+rotinas internas continuam privadas. Runtime exige opt-in sintético com staging
+em development/test, permanece desligado por padrão e recusa produção. O runner
+HTTP usa as permissões da migration, sem GRANT manual; SQL35 prova revogação e
+preservação das evidências.
+
+SQL11 amplia integridade negativa; SQL33 recusa ciclo A→B→A após fechamento real;
+SQL34 comprova captura/permissões D2. HTTP verifica rollback misto, revisão anual
+isolada e nova visita com observação ausente, sem duplicar/copiar dados. CI passou
+a incluir o runner clínico em banco próprio, sem execução remota nesta entrega.
+
+Passaram instalação limpa 02–63, incrementos 60→61→62→63, 34 testes SQL, manifesto,
+34 unitários + E2E do importador, build, 53 unitários/de contrato do backend,
+oito testes de fundação e sete suítes/38 clínicos HTTP. Logs, falhas intermediárias
+e limites estão na [continuidade](validacoes/CONTINUIDADE_ETAPA_5.md#fechamento-integrado--2026-10-03).
+Todos os resultados aprovados pertencem aos descartáveis em 55457; o primeiro
+comando da fundação foi recusado na autenticação em 5433 antes de qualquer SQL e
+corrigido por parâmetros explícitos. Banco persistente, dump, migrations antigas
+e alteração preexistente SQL21 permanecem inalterados. Não houve dado real,
+frontend, antecipação das Etapas 6–10, commit ou push nesta continuação.
+
 ## 2026-10-03 — reenvio histórico, captura do atendimento e organização de commits
 
 SQL59 e a API reconhecem recebimentos idênticos após encerramento/avanço da

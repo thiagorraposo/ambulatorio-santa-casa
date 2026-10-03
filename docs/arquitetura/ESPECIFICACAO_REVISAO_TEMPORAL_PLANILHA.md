@@ -2,11 +2,19 @@
 
 Atualizado em: 2026-10-03
 
-Status: armazenamento, captura, gestão e preparação/aprovação implementados
-parcialmente em migrations 21–57 no ambiente sintético, com avaliação de decisão
-somente de leitura, simulação de proposta antes do staging, executor privado de
-alvos existentes/novos, fechamento e diagnóstico após rollback. Revisões continuam
-bloqueadas até completar os planos clínicos e o aceite integrado.
+Status: aceite integrado sintético da Etapa 5 aprovado até a migration 63.
+Armazenamento, captura, gestão, preparação/aprovação, simulação virtual,
+aplicação restrita e staging HTTP foram validados em bancos descartáveis. A
+migration 63 concede os três wrappers somente a `ambulatorio_revisao_servico`;
+instalação limpa e atualização incremental 62→63 passaram. A captura ativa
+abrange ano D8, data e observação do atendimento e data de descoberta D2. D2 só
+promove NULL quando a linha-base prova captura importada ainda vigente; legado
+desconhecido permanece inalterado. SQL62 admite ausência nos dois arquivos
+somente para campo de criação com catálogo e transformação fechados. A interface
+HTTP continua desligada por padrão, opt-in apenas em `development` ou `test`
+sintético, e recusada em produção. Nenhuma evidência usa dados reais ou o banco
+persistente. Consulte a [matriz de aceite](../validacoes/ACEITE_INTEGRADO_ETAPA_5.md)
+para os critérios normativos e evidências do aceite.
 
 ## Autoridade e limite
 
@@ -455,7 +463,10 @@ um campo livre da requisição, da planilha ou de um GUC configurável pelo clie
 As funções revalidam usuário ativo, autorização da mesma fonte/usuário, vigência
 e revogação na aprovação e na aplicação. Só a camada autenticadora confiável pode
 afirmar o ator; uma FK ou o papel compartilhado do pool não prova quem decidiu.
-Definir institucionalmente quem concede/revoga é pendência anterior à ativação.
+A competência de conceder/revogar no ambiente sintético foi definida na 5A,
+por delegação: entitlement nominal provisionado externamente e separado do
+perfil funcional. A designação institucional de pessoas em produção permanece
+anterior à ativação nesse ambiente; não bloqueia o aceite sintético autorizado.
 
 Os dois papéis atuais ainda têm DML clínico. Por isso, armazenamento e permissões
 das novas relações não bastam: antes da primeira revisão, instalar e testar
@@ -584,7 +595,12 @@ conteúdo não homologam revisão operacional entre hashes.
 | T17 | Dry-run, falha operacional e diagnóstico de conflito | Sem persistência no dry-run; rollback atômico na falha; nenhum valor clínico em logs |
 | T18 | Nova visita com exame/pendência copiado e identidade de ocorrência ausente | Bloquear a linha em vez de duplicar os destinos repetíveis |
 
-## Sequência de implementação e pendências
+## Histórico de implementação até a migration 52
+
+Os registros a seguir descrevem os incrementos e resultados disponíveis naquele
+marco. Para o estado e as provas atuais até a migration 63, consulte a seção
+[estado de staging e execução HTTP](#estado-de-staging-e-execução-http--2026-10-03)
+e a [matriz de aceite integrado](../validacoes/ACEITE_INTEGRADO_ETAPA_5.md).
 
 Primeiro incremento concluído na v1.4.0: barreira explícita de finalidade do
 arquivo e recusa do modo revisão antes de qualquer escrita, com testes unitários
@@ -623,10 +639,11 @@ O catálogo não é habilitado automaticamente e o importador continua recusando
 revisões, inclusive em dry-run. Não inferir linhagem ou autoria de dados antigos.
 Reversão usa migration restritiva que preserve evidências.
 
-Ainda é obrigatório comprovar captura/precedência em todos os escritores dos
-destinos habilitados e o aceite integrado F08/F09/F13 antes da ativação. O aceite
-dos demais planos clínicos e da identidade de ocorrências além de exame/pendência,
-bem como as combinações restantes de concorrência, permanecem pendentes.
+Naquele marco, ainda era obrigatório comprovar captura/precedência em todos os
+escritores dos destinos habilitados e o aceite integrado F08/F09/F13 antes da
+ativação. O aceite dos demais planos clínicos e da identidade de ocorrências
+além de exame/pendência, bem como as combinações restantes de concorrência,
+permaneciam pendentes.
 Migrations 43–49 e vinte cenários clínicos comprovam continuidade por
 revisões encerradas, criação de visitas/dependentes, sucessão sem duplicação,
 fechamento com pendências e diagnóstico sanitizado após rollback. F10/F11/F14 e
@@ -639,10 +656,10 @@ comprovou F13 para reprocessamento de origem antiga pelo escritor Python real.
 O E2E D8 aprovou ano 2023 na carga, correção privada para 2022 e recusa da origem
 superada, sem criar visita; SQL 24 valida captura A→B→A após a migration 52.
 O manifesto semântico vigente passou a v1.4 com destinos parciais seletivos D3/D8;
-sua regressão integrada ainda está em execução.
-Cada prova cobre seu cenário, sem concluir F01–F16/T01–T18 como conjuntos.
-O aceite D8 cobre esse cenário sintético. Revisões permanecem bloqueadas
-até o aceite integrado; criar tabelas não conclui a Etapa 5B.
+sua regressão integrada ainda estava em execução naquele marco. Cada prova cobre
+seu cenário, sem concluir F01–F16/T01–T18 como conjuntos. O aceite D8 cobre esse
+cenário sintético. Naquele marco, revisões permaneciam bloqueadas até o aceite
+integrado; criar tabelas não concluía a Etapa 5B.
 
 As respostas clínicas vigentes estão em
 [`Perguntas pendentes sobre campos e regras clínicas.md`](../Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
@@ -650,7 +667,8 @@ e nos contratos de 5A; não há resposta humana pendente nesse conjunto. Papéis
 sintéticos não definem responsabilidade institucional de produção nem autorizam
 dados reais. As pendências deste executor são técnicas e de aceite, registradas
 em [CONTINUIDADE_ETAPA_5.md](../validacoes/CONTINUIDADE_ETAPA_5.md).
-A Etapa 5B não está concluída.
+Naquele marco, a Etapa 5B não estava concluída. O estado atual consta no início
+deste documento e na seção de staging abaixo.
 
 ## Estado de staging e execução HTTP — 2026-10-03
 
@@ -659,23 +677,52 @@ staging/preparação atômicos, mais wrappers privados para aplicação, finaliz
 e diagnóstico após rollback. O endpoint não cadastra manifesto nem
 transformações: um mantenedor os registra previamente. O ledger de recebimento
 é idempotente para a mesma fonte/base/arquivo/artefatos, compara hash dos bytes e
-bruto e não produz efeitos clínicos. Os wrappers não têm `EXECUTE` concedido aos
-papéis operacionais; somente o runner de teste concede acesso no banco
-descartável. Execução HTTP exige `NODE_ENV=test` e staging sintético.
+bruto e não produz efeitos clínicos.
 
-O teste HTTP específico passou 2/2 cenários, cobrindo perfis, revogação,
-recebimentos e executores concorrentes, rollback tardio com diagnóstico
-posterior, fechamento com pendências e repetição de histórico após
-edição manual. Isso demonstra o fluxo exercitado, não o aceite integral F01–F16
-ou T01–T18. SQL27–30 passaram; SQL28 cobre D8 com sequência A–B–A, legado
-de cobertura desconhecida e casos iguais/NULL sem cobertura. SQL60 habilita
-`atendimento.data_atendimento` e `atendimento.observacoes`, além de
-`evento_clinico.ano_evento`; SQL31 valida captura, autoria, A→B→A, rollback e
-proteção de exclusão. SQL29 comprova associação
-equivalente aplicada sem mudança clínica/histórica e preservação de edição
-manual na repetição. SQL59 retorna recebimentos históricos após fechamento
-antes da simulação, sem nova preparação e mantendo a autorização vigente.
-A rodada ampla até 60 passou com sete suítes/36 testes, incluindo correção
-aplicada de data/texto ao mesmo atendimento e reenvio após fechamento;
-nenhuma aplicação de revisão está habilitada fora do ambiente sintético de
-teste e os demais destinos/casos continuam pendentes.
+A fronteira da 57 é histórica: ela criou os três wrappers, manteve `EXECUTE`
+revogado para os papéis operacionais e deixou o runner de teste conceder acesso
+somente no banco descartável. A migration 63 concede os mesmos wrappers
+exclusivamente a `ambulatorio_revisao_servico`; rotinas internas continuam
+privadas e `PUBLIC`, importador, aplicação, serviço autenticado e gestor não
+recebem essa concessão. A configuração HTTP permanece desligada por padrão e
+exige opt-in sintético: `REVISION_HTTP_ENABLED`, `REVISION_SYNTHETIC_MODE` e
+`REVISION_STAGING_HTTP_ENABLED`, além de `REVISION_GIT` para staging. A execução
+HTTP exige ainda `REVISION_EXECUTION_HTTP_ENABLED` e `NODE_ENV=development` ou
+`test`, sempre em modo sintético com staging ativo; produção é recusada. Isso
+não autoriza dados reais nem uso do banco persistente. A instalação limpa e a
+atualização incremental da 63, assim como as suítes finais em banco descartável,
+foram aprovadas. A concessão não habilita a execução por padrão.
+
+O teste HTTP de staging passou 4/4 cenários. Além dos perfis, revogação,
+recebimentos/executores concorrentes, rollback tardio com diagnóstico posterior,
+fechamento com pendências e repetição de histórico após edição manual, a rodada
+incluiu criação de atendimento com data completa quando a observação não existe
+fisicamente na aba. A aplicação criou uma única visita, preservou observação como
+NULL, captura/proveniência e alvos anteriores; o replay não duplicou a visita.
+Isso registra os fluxos exercitados, não equivale ao aceite integral F01–F16 ou
+T01–T18, cuja fonte é a [matriz de aceite integrado](../validacoes/ACEITE_INTEGRADO_ETAPA_5.md).
+
+SQL61 habilita prospectivamente `diagnostico_chagas.data_descoberta_autorelato`,
+sem backfill. O importador promove um NULL somente com prova restrita de que a
+linha-base importou esse NULL e não há evento posterior; igualdade é associada
+sem UPDATE, e NULL legado/desvio/A→B→A permanecem preservados. SQL34 e o E2E D2
+validam a prova e o isolamento F05, sem SELECT operacional das tabelas de
+auditoria.
+
+SQL62 corrige apenas a simulação virtual de criação: quando o campo está ausente
+em ambos os brutos/manifestos, um item explícito `criar` pode receber envelopes
+`coluna_ausente` se catálogo ativo e transformação fechada concordarem na mesma
+tabela/coluna. SQL22 comprova visita com data completa e observação ausente,
+recusa omissão do campo obrigatório, correção por campo ausente e transformação
+não contratada, além de zero efeito no dry-run. A simulação não relaxa catálogo,
+identidade nem cobertura de correções.
+
+A execução HTTP pode ser habilitada somente em `development` ou `test` sintético,
+com opt-in de revisão, staging e Git explícitos; produção e banco persistente
+permanecem fora do escopo. A migration 63 concede apenas os três wrappers ao
+papel de serviço. O aceite integrado F01–F16/T01–T18 foi aprovado após clean
+02–63, atualização incremental 62→63, project-check/manifest-check e testes SQL,
+importer/E2E/concurrency D2, build/testes unitários do backend e suítes de
+fundação e clínica, todos direcionados a bancos descartáveis. Não há bloqueio
+humano pendente dentro do escopo aprovado. Migrations 61–62 não autorizam dados
+reais, não fazem backfill e não habilitam destinos além dos contratos existentes.

@@ -2,8 +2,13 @@
 
 Atualizado em: 2026-10-03
 
-Status: fundação pronta para os módulos clínicos da Etapa 5, ainda exclusivamente
-com dados sintéticos. Evidências: `docs/validacoes/VALIDACAO_ETAPA_4C.md`.
+Status: implementação e aceite integrado sintético da Etapa 5 concluídos até a
+migration 63, exclusivamente com dados sintéticos. A execução HTTP de revisão
+permanece desligada por padrão, disponível somente com opt-in em `development`
+ou `test`, e recusada em produção. Isso não autoriza dados reais nem uso do banco
+persistente. Provisionamento institucional e autorização para implantação
+continuam fora do escopo. Evidências finais estão registradas na matriz
+`docs/validacoes/ACEITE_INTEGRADO_ETAPA_5.md`.
 
 ## Escopo e fluxo
 
@@ -100,10 +105,21 @@ transação única. Migrations 43–49 acrescentam criação/fechamento, continu
 histórica e diagnóstico restrito; 50–51 simulam arquivos antes do staging e
 protegem identidade de ocorrência; 56 recebe o XLSX e faz staging/preparação
 atômicos; 57 cria wrappers de aplicação, finalização e diagnóstico. Os wrappers
-não recebem EXECUTE para papéis operacionais nas migrations. Apenas o runner de
-homologação concede esses direitos no banco descartável. A execução HTTP também
-exige `NODE_ENV=test` e staging ativado. Isso não substitui o aceite integral dos
-planos clínicos nem habilita revisão fora desse ambiente.
+da 57 eram privados: `EXECUTE` seguia revogado e apenas o runner de homologação
+concedia esses direitos no banco descartável. A migration 63 concede os três
+wrappers somente a `ambulatorio_revisao_servico`; funções internas continuam
+privadas; `PUBLIC`, importador, aplicação, serviço autenticado e gestor não
+recebem `EXECUTE`. A concessão não abre o recurso por si só: HTTP de revisão
+exige opt-in sintético, staging e revisão Git explícitos, e a execução fica
+recusada em produção. A instalação limpa e a atualização incremental da 63,
+junto com os testes integrados, foram aprovadas em bancos descartáveis. Isso não
+substitui a restrição de uso sintético. As migrations 58–59
+limitam consulta de lotes e devolvem recebimentos históricos sob autorização;
+60–61 habilitam captura prospectiva de data/observação do atendimento e D2;
+62 faz a simulação virtual aceitar `coluna_ausente` nos dois arquivos somente
+para criação com catálogo e transformação fechados. A revisão operacional ainda
+usa a concessão restrita da migration 63, aprovada na instalação limpa e na
+atualização incremental em bancos descartáveis.
 
 ## Contratos HTTP
 
@@ -188,8 +204,10 @@ vínculo e catálogo. Nenhuma dessas rotas expõe `dados_brutos`.
 
 Entrada inválida retorna 400. O filtro padroniza `statusCode`, `error` e
 `message`, sem stack, SQL, credenciais ou detalhes do schema. DTOs e seleções
-explícitas limitam os campos retornados. A uniformização dos DTOs dos recursos
-clínicos preexistentes permanece no aceite de 5E.
+explícitas limitam os campos retornados. A uniformização dos DTOs e os contratos
+de validação/erro foram incluídos no aceite integrado de 5E, aprovado com build,
+53 testes unitários, oito testes de fundação e sete suítes clínicas (38 testes)
+em banco descartável.
 Rotas privadas sem política `@Perfis` são recusadas com 403. Somente `@Public`
 permite acesso público; políticas da operação prevalecem sobre as da classe.
 
@@ -263,23 +281,47 @@ recebimento é idempotente para a mesma fonte/base/arquivo/manifesto/transforma�
 e recusa bruto divergente sob a mesma identidade.
 
 Rotas separadas publicam decisões, simulam decisão existente, aplicam decisão e
-encerram/cancelam revisão. Aplicação e finalização usam wrappers específicos da
-migration 57 e executam cada operação numa transação autenticada pelo JWT. Falha
-de aplicação reverte a transação clínica e o diagnóstico sanitizado é tentado em
-transação posterior. A migration não concede `EXECUTE` desses wrappers ao papel
-do serviço: somente o runner de testes o concede no banco descartável. A
-configuração exige `NODE_ENV=test` e staging habilitado para expor aplicação e
-finalização; recursos de revisão permanecem desabilitados por padrão e em
-produção.
+encerram/cancelam revisão. Aplicação e finalização usam os wrappers da migration
+57, com concessão operacional restrita pela migration 63, e executam cada
+operação numa transação autenticada pelo JWT. Falha de aplicação reverte a
+transação clínica e o diagnóstico sanitizado é tentado em transação posterior.
+Essa concessão não alcança as rotinas internas; apenas
+`ambulatorio_revisao_servico` recebe `EXECUTE` nos wrappers, condicionada à
+configuração HTTP opt-in sintética e ao vínculo de autorização. `REVISION_HTTP_ENABLED`
+e `REVISION_SYNTHETIC_MODE` são necessários; staging exige
+`REVISION_STAGING_HTTP_ENABLED` e `REVISION_GIT`. A execução também exige
+`REVISION_EXECUTION_HTTP_ENABLED`; a configuração aceita execução com
+`NODE_ENV=development` ou `test`, desde que o modo sintético e staging estejam
+ativos. Produção é sempre recusada, e todos os recursos permanecem desligados
+por padrão. A migration 63 e a execução HTTP sintética passaram na validação
+integrada; produção continua recusada.
 
-O teste HTTP dedicado de staging passou com 2/2 cenários: três perfis, recusa por
-autorização revogada, recebimentos concorrentes idempotentes, dois executores,
-rollback tardio/diagnóstico posterior, fechamento com pendências e repetição
-histórica após edição manual. Isso comprova o cenário integrado exercitado, não
-todos os destinos, escritores ou casos F01–F16/T01–T18. A rodada ampla até a
-migration 60 passou com sete suítes/36 testes, incluindo reenvio após fechamento
-e correção aplicada de data/texto do mesmo atendimento. Os testes usam apenas banco, identidade, autorização e XLSX
-sintéticos.
+O teste HTTP dedicado de staging passou com 4/4 cenários. A cobertura inclui os
+três perfis, recusa por autorização revogada, recebimentos concorrentes
+idempotentes, dois executores, rollback tardio/diagnóstico posterior, fechamento
+com pendências, repetição histórica após edição manual e criação de visita com
+data completa quando a coluna de observação não existe na aba. O caso criou uma
+visita, manteve observação NULL e proveniência/auditoria corretas, preservou a
+visita anterior e não duplicou no replay.
+
+SQL34 e o E2E D2 exercitam a promoção de `diagnostico_chagas.data_descoberta_autorelato`:
+somente NULL importado na linha-base, sem evento posterior, pode ser promovido;
+igualdade associa sem UPDATE e legado desconhecido ou divergência/A→B→A ficam
+preservados. O helper de prova retorna apenas booleano ao importador, sem SELECT
+direto às relações de auditoria. SQL22 valida a simulação de criação com coluna
+ausente em ambos os brutos/manifestos, com envelopes explícitos e plano completo;
+omissão, correção sem coluna ou transformação não contratada continuam recusadas,
+e a pegada do dry-run confirma zero efeito.
+
+O aceite integrado F01–F16/T01–T18 foi aprovado; a [matriz integrada](validacoes/ACEITE_INTEGRADO_ETAPA_5.md)
+registra a cobertura e seus limites. A validação incluiu instalação limpa até
+63, atualização incremental 62→63, testes SQL, importer/E2E/concurrency D2,
+build e testes unitários do backend, além das suítes de fundação e clínicas em
+banco descartável. Uma primeira tentativa da suíte de fundação apontou apenas
+falha de conexão aos parâmetros padrão antes de executar SQL; a execução
+subsequente no banco descartável correto passou. As evidências de staging e
+aplicação usam somente banco, identidade, autorização e XLSX sintéticos, sem
+ativação de produção ou alteração do banco persistente.
 
 ### Escopo do acompanhamento de lotes
 

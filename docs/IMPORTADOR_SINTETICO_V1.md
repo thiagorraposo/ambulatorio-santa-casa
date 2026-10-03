@@ -1,12 +1,17 @@
 # Importador Sintético v1
 
-Atualizado em: 2026-10-01
+Atualizado em: 2026-10-03
 
 O importador v1.7.0 usa o manifesto semântico v1.4, registra o ano inequívoco do
 último comparecimento (D8) como evento anual e preserva correções temporais ao
 reprocessar origem antiga no cenário F13. A v1.5.0 incorporou a data de descoberta
-do paciente pela migration 28. Mantém a barreira da v1.4.0: exige finalidade explícita e recusa revisões de conteúdo antes
-de qualquer escrita, inclusive em dry-run. A v1.3.0 classifica erros de forma conservadora e implementa a primeira
+do paciente pela migration 28; a migration 61 habilita a captura prospectiva usada
+na promoção segura de D2. A CLI mantém a barreira da v1.4.0: exige finalidade
+explícita e recusa revisões de conteúdo antes de qualquer escrita, inclusive em
+dry-run. A Etapa 5 sintética teve aceite integrado, conforme
+[registro de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md). A execução HTTP
+segue opt-in, desabilitada por padrão e recusada em produção; dados legados sem
+evidência de captura permanecem protegidos. A v1.3.0 classifica erros de forma conservadora e implementa a primeira
 regra não crítica para catálogo de projeto ausente. A v1.2.0 implementou a
 promoção controlada de D11 (`pendencias_observacao`) e a v1.1.1 corrigiu a
 reconciliação de BZN por paciente. Os recursos
@@ -109,6 +114,43 @@ associada; ausência cria o registro; outra pendência preexistente sem proveni�
 também inclui data de descoberta, retornos BZN com data real e ano D8. As demais
 chaves ainda dependem de contrato clínico, manifesto, handler e testes próprios.
 
+### Promoção D2 segura após captura prospectiva
+
+`autorelato_diagnostico_de_chagas_do_participante_data` continua sendo um
+autorrelato de data de descoberta, sem inferir confirmação por sorologia. A
+migration 61 habilita captura de `diagnostico_chagas.data_descoberta_autorelato`
+somente a partir da instalação; ela não preenche nem cria eventos retroativos
+para `NULL` anteriores.
+
+Na promoção de uma linha pendente do mesmo hash/layout, o importador exige um
+único diagnóstico apontado pela proveniência da linha-base. Se o valor atual
+coincide com a data importada, registra somente `associado`, sem executar
+`UPDATE`. Para preencher `NULL`, exige evento inicial versão 1 atribuído à
+importação da linha-base (`antes=alvo_ausente`, `depois=nulo`) e ausência de
+qualquer evento posterior desse alvo. A função SQL restrita
+`auditoria_d2_null_captura_comprovada(linha_atual, linha_base, diagnostico)`
+confere cadeia, identidade da linha, hash/layout e proveniência, e retorna apenas
+booleano; só a role do importador pode executá-la. O código de promoção usa essa
+prova sem ler nem expor o conteúdo bruto da trilha.
+
+`NULL` legado sem captura atribuível, valor divergente e A→B→A posterior ficam
+pendentes; igualdade isolada sem alvo único com proveniência não é suficiente.
+O E2E `tests/importador/test_descoberta_chagas.py` verifica promoção positiva,
+NULL legado, divergência e A→B→A; `tests/sql/34_validar_captura_descoberta_chagas.sql`
+verifica a captura e os limites da função auxiliar. O E2E
+`tests/importador/test_concorrencia_promocao_d2.py` cobre a corrida: uma sessão
+mantém o diagnóstico bloqueado, a trilha muda NULL→data→NULL e, após obter o
+lock, a promoção reavalia a evidência e recusa sem efeito clínico nem auditoria
+parcial. `tests/importador/test_precedencia_atendimento.py` cobre separadamente
+a recusa F13 após revisão aprovada de data e observações, além de promoção de
+catálogo sem restaurar esses campos.
+
+Essas provas têm escopo seletivo. A Etapa 5 sintética teve aceite integrado,
+registrado em [ACEITE_INTEGRADO_ETAPA_5.md](validacoes/ACEITE_INTEGRADO_ETAPA_5.md).
+A CLI continua recusando revisões operacionais entre hashes; a aceitação
+integrada não transfere essa operação para a CLI. A execução HTTP exige opt-in,
+fica desabilitada por padrão e é recusada em produção.
+
 Múltiplos candidatos, ID auxiliar divergente, duplicidade entre abas, contexto
 ambulatorial contraditório e valor inválido rejeitam a linha. Catálogos ausentes
 também são críticos, salvo a regra explícita de projeto descrita abaixo. Itens de
@@ -131,9 +173,13 @@ reprocessamento do mesmo hash sem duplicação. Depois, uma revisão sintética
 privada corrigiu a mesma ocorrência para 2022; tentar reprocessar a origem
 superada foi recusado e preservou o evento corrigido (F13). O teste também
 comprovou bruto original, captura atribuível e ausência de visita inventada.
-`make manifest-check importer-test COMPACT=1` passou com 32 testes unitários e
-E2E usando manifesto v1.4 em `/tmp/ambulatorio-check-lvoqpa3u/output.log`.
-A CLI ainda recusa revisão entre hashes; o E2E não a habilita operacionalmente.
+`tests/importador/test_precedencia_atendimento.py` amplia a prova F13 para a
+data e as observações do atendimento e confirma que a promoção de uma pendência
+de catálogo não restaura esses campos.
+`make manifest-check importer-test COMPACT=1` passou com 34 testes unitários e
+E2E usando manifesto v1.4 em `/tmp/ambulatorio-check-hsao0uvy/output.log`.
+A CLI continua isolada e recusa revisão entre hashes; o E2E não habilita essa
+operação pela CLI.
 
 ## Negativa inequívoca de exame familiar — D3
 
@@ -186,26 +232,30 @@ preenchimento de nulos, preservação do vínculo/originais, conflito tardio com
 rollback de tratamento/endereço/atendimento/proveniência, continuidade do lote,
 dry-run sem alterar BZN preexistente e dois elos de reprocessamento sem duplicação.
 
-## Lacunas verificadas em 2026-09-14
+## Limites ainda aplicáveis, atualizados em 2026-10-03
 
 As respostas da equipe estão consolidadas nas
-[decisões humanas](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md). A reconciliação BZN
-foi corrigida na v1.1.1; as demais lacunas abaixo permanecem abertas.
+[decisões humanas](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md). A reconciliação BZN,
+D8/F13 e as promoções seletivas documentadas acima passaram no ambiente
+sintético. Os limites abaixo preservam o escopo da CLI e das regras por campo;
+não representam pendência do aceite integrado da Etapa 5.
 
 | Regra ou decisão | Implementação atual | Problema e alteração recomendada |
 | --- | --- | --- |
 | Um tratamento BZN consolidado por paciente | Corrigido na v1.1.1: consulta por paciente e reconcilia valores preservando o vínculo existente | Regressões unitárias e E2E cobrem associação, preenchimento de nulos e rejeição atômica de divergências; unicidade preservada |
 | Reprocessar para resolver pendências | Corrigido na v1.2.0 para D11: registro explícito por chave, âncoras vindas da proveniência, handler seletivo, savepoint e reconciliação conservadora | E2E cobre promoção parcial, edição manual ambígua, rollback, dry-run e dois elos; expandir somente após aprovar cada contrato |
 | Campo secundário inválido pode gerar pendência, conforme contrato | v1.3.0 mantém rollback como padrão e permite apenas `catalogo_projeto_ausente` na allowlist não crítica | Expandir somente por handler, com contrato de efeitos, nova tentativa e testes; demais `RowConflict` continuam críticos |
-| D8: planilha atualizada guarda último ano visitado | v1.6.0 mapeia ano inequívoco com proveniência; v1.7.0 foi validada com manifesto v1.4 e captura SQL52 | Texto ambíguo permanece bruto; a CLI ainda bloqueia revisão operacional e o aceite global T01–T18 segue pendente |
+| D8: planilha atualizada guarda último ano visitado | v1.6.0 mapeia ano inequívoco com proveniência; v1.7.0 passou E2E com manifesto v1.4 e captura SQL52 | Texto ambíguo permanece bruto; a CLI segue sem executar revisões entre hashes. O fluxo ADR-022 do backend foi aceito em ambiente sintético, sem habilitar essa capacidade na CLI |
 | D4/D5: identificar o exame | Indicadores agregados permanecem brutos; categorias genéricas podem registrar `tipo_exame_original` como a chave, por exemplo `outros`, e o conteúdo como resultado | Validar identificação inequívoca sem exigir resultado da solicitação; não criar catálogo automaticamente |
-| D1–D12: semântica revisada | D11 foi promovida; nove rótulos continuam parciais no manifesto v1.4, alguns com tratamento seletivo no código | Atualizar contrato executável e handlers em conjunto, incluindo tipos semânticos; não declarar cobertura plena por tratamento seletivo |
+| D1–D12: semântica revisada | D11 e promoções seletivas de D2/D3 foram validadas; nove rótulos continuam parciais no manifesto v1.4 | Expandir somente com contrato e handlers aprovados; tratamentos seletivos não mudam a cobertura parcial do manifesto |
 
 O [contrato de revisão entre hashes](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md)
-tem barreira da CLI, armazenamento e executor privados parciais. T01 e a parte
-de T02 relativa à recusa de finalidade/revisão estão cobertos; D8/F13 tem prova
-privada específica, sem aceite global de T01–T18. A cobertura declarada do
-manifesto permanece 126 plenos, nove parciais e um excluído.
+mantém uma CLI isolada: ela recusa revisão entre hashes antes de escrita. A prova
+F13 usa integração sintética privada e não oferece essa capacidade à CLI. O
+aceite integrado da Etapa 5 e suas limitações estão registrados em
+[ACEITE_INTEGRADO_ETAPA_5.md](validacoes/ACEITE_INTEGRADO_ETAPA_5.md); a ativação
+HTTP continua opt-in, default off e recusada em produção. A cobertura declarada
+do manifesto permanece 126 plenos, nove parciais e um excluído.
 
 Validação da v1.4.0: 26 testes unitários e E2E sintético com recusas em execução
 normal e dry-run, ausência de efeitos em todas as tabelas e sequências, relatório
