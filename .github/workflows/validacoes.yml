@@ -14,7 +14,7 @@ concurrency:
 jobs:
   project-check:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       POSTGRES_DB: ambulatorio_santa_casa
       POSTGRES_USER: ambulatorio_ci
@@ -30,8 +30,18 @@ jobs:
       NODE_ENV: test
       AUTH_JWT_SECRET: segredo_jwt_exclusivamente_sintetico_ci_com_mais_de_32_caracteres
       AUTH_JWT_EXPIRES_IN_SECONDS: "900"
+      SYNTHETIC_PG_HOST: localhost
+      SYNTHETIC_PG_PORT: "5433"
+      SYNTHETIC_PG_USER: ambulatorio_ci
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
       - name: Criar configuracao local sintetica
         run: |
           umask 077
@@ -40,19 +50,18 @@ jobs:
         run: make docker-up docker-wait
       - name: Aplicar migrations incrementais
         run: make docker-migrate
-      - name: Instalar e validar backend
-        run: make backend-install backend-check
-      - name: Validar fluxos clínicos em banco descartável
+      - name: Instalar dependências reproduzíveis
+        run: make backend-install frontend-install
+      - name: Instalar navegador de teste
+        run: cd frontend && npx playwright install --with-deps chromium
+      - name: Validar backend, fluxos clínicos e frontend
         env:
-          SYNTHETIC_PG_HOST: localhost
-          SYNTHETIC_PG_PORT: "5433"
-          SYNTHETIC_PG_USER: ambulatorio_ci
           PGPASSWORD: ${{ env.POSTGRES_PASSWORD }}
-        run: make backend-clinical-test COMPACT=1
+        run: make backend-check backend-clinical-test frontend-check COMPACT=1
       - name: Validar imagem e container backend
         run: make backend-container-check
       - name: Validar manifesto, importador e projeto
-        run: make manifest-check importer-test docker-project-check
+        run: make manifest-check importer-test docker-project-check workflow-test COMPACT=1
       - name: Verificar whitespace do diff
         run: git diff --check
       - name: Diagnostico do PostgreSQL em falha
