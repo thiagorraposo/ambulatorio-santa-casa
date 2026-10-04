@@ -53,6 +53,11 @@ __pycache__/
 node_modules/
 backend/dist/
 backend/coverage/
+frontend/dist/
+frontend/coverage/
+frontend/test-results/
+frontend/playwright-report/
+frontend/.vite/
 *.tmp
 *.temp
 *.swp
