@@ -91,16 +91,16 @@ make db-check DB_ENV=docker
 | `make docker-stop` | Para o container sem remover o volume. | Para somente o ambiente Docker. |
 | `make docker-recreate` | Recria o container preservando o volume. | Substitui somente o container Docker. |
 | `make docker-logs` | Acompanha logs do PostgreSQL Docker. | Não |
-| `make docker-migrate` | Aplica `sql/00`–`sql/20` em ordem no Docker vazio. | Sim, somente no banco Docker. |
+| `make docker-migrate` | Aplica as migrations versionadas em `sql/` em ordem no banco Docker vazio. | Sim, somente no banco Docker. |
 | `make docker-db-check` | Executa `db-check` contra `5433`. | Não |
-| `make docker-db-test` | Executa os dez testes SQL no Docker. | Não persiste dados sintéticos. |
+| `make docker-db-test` | Executa os testes SQL versionados no Docker. | Não persiste dados sintéticos. |
 | `make docker-schema-dump` | Gera dump estrutural Docker em `/tmp`. | Não altera o banco nem a evidência oficial. |
 | `make docker-project-check` | Executa o check completo contra o Docker. | Não persiste dados sintéticos. |
 | `make docker-backup` | Cria e valida backup lógico custom do Docker. | Lê o banco e grava arquivo local ignorado. |
 | `make docker-backup-list` | Lista os backups lógicos locais. | Não. |
 | `make docker-restore BACKUP_FILE=... RESTORE_ENV=docker-restore` | Restaura no serviço Docker controlado. | **Substitui somente o schema do banco de recuperação.** |
 | `make docker-restore-check` | Confirma estrutura e catálogos restaurados. | Não. |
-| `make docker-restore-test` | Executa os dez testes transacionais no restore. | Não persiste dados sintéticos. |
+| `make docker-restore-test` | Executa os testes SQL versionados no banco restaurado. | Não persiste dados sintéticos. |
 | `make docker-destroy DESTROY_ENV=docker` | Remove containers, rede e volumes deste Compose. | **Destrutivo somente para o ambiente Docker.** |
 | `make importer-fixture` | Regera a planilha XLSX exclusivamente sintética. | Não altera banco. |
 | `make importer-test` | Testa o importador em banco Docker temporário. | Cria e remove somente o banco isolado. |
