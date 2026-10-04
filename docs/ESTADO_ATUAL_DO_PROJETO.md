@@ -1,6 +1,6 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-10-03
+Atualizado em: 2026-10-04
 
 Esta é a síntese vigente. Contratos pertencem às fontes temáticas; o histórico
 cronológico está no [registro](REGISTRO_DE_ALTERACOES.md) e na
@@ -12,15 +12,19 @@ Etapas 1–4 concluídas. **Etapa 5 (5A–5E) concluída no ambiente sintético 
 2026-10-03**, incluindo o aceite integrado e a ativação controlada.
 Implementação, importador, recursos clínicos e provas F01–F16/T01–T18 são
 relacionados na [matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md).
-Frontend e Etapas 6–10 não foram implementados nesta entrega.
+**Etapa 6 (6A–6B) concluída no ambiente sintético em 2026-10-04**: aplicação
+própria em `frontend/`, sessão em memória, navegação e leitura pela API `/v1`.
+Setup e contratos estão em [FRONTEND.md](FRONTEND.md); a matriz de evidências
+está em [VALIDACAO_ETAPA_6.md](validacoes/VALIDACAO_ETAPA_6.md). Etapas 7–10
+permanecem futuras.
 
 A [avaliação do protótipo Figma Make](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
 foi concluída em 2026-10-03, com inventário, compatibilidade HTTP e plano das
-Etapas 6–8. A direção é construir frontend próprio em React/TypeScript e
-reaproveitar apresentação revisada, preservando arquitetura e regras existentes.
-O próximo desenvolvimento previsto é 6A (base/sessão), seguido de 6B (leitura),
-conforme o [roadmap](PROXIMOS_PASSOS.md#etapa-6--fundação-do-frontend).
-É planejamento documental; não altera o estágio de implementação.
+Etapas 6–8. A fundação implementada usa React/TypeScript e apresentação revisada,
+preservando arquitetura e regras existentes. A análise mantém a fotografia do
+planejamento original; o [roadmap](PROXIMOS_PASSOS.md#etapa-6--fundação-do-frontend)
+continua definindo sequência e critérios de aceite. O próximo desenvolvimento
+previsto é 7A (cadastro e atendimentos), seguido das demais subetapas clínicas.
 
 As respostas de [campos e regras clínicas](Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
 são autoritativas: idade derivada do nascimento, descoberta de Chagas distinta da
@@ -44,8 +48,13 @@ Designar pessoas e operar com dados reais pertencem à implantação posterior.
 - Backend NestJS/TypeScript com autenticação JWT, DTOs explícitos, operações de
   negócio, SQL parametrizado, transações e controle de versão. O contrato é
   `/v1`, com aliases compatíveis sem prefixo e recusa de versões inexistentes.
-- CI executa manifesto, importador, SQL, build, fundação e também o runner
-  clínico em banco próprio descartável. Há alvos Make com `COMPACT=1`.
+- Frontend React/TypeScript com Vite, React Router e TanStack Query. Sessão e
+  cache clínico separados; token em memória, identidade por `/auth/me`, busca
+  nome/sexo e ficha/histórico em leitura. A referência Figma Make não integra o
+  build. Não há escrita clínica ou gestão administrativa pela interface desta etapa.
+- A configuração de CI contempla manifesto, importador, SQL, backend, runner
+  clínico e frontend (build, unitários e Chromium/API/PostgreSQL descartável).
+  Há alvos Make com `COMPACT=1`; a CI remota ainda não foi executada nesta entrega.
 
 ## Recursos clínicos e autorização
 
@@ -100,6 +109,13 @@ campos importados sem HTTP continuam sem consulta/edição pela interface.
 
 ## Validação e limites
 
+A Etapa 6 passou instalação limpa pelo lockfile, build TypeScript/Vite,
+47 testes de sessão/componentes, oito E2E Chromium/API/PostgreSQL e nove testes
+de workflow. A revisão incluiu teclado/foco, contraste automatizado, zoom/reflow
+e telas de 390/320 px. Comandos, evidências e limites estão no
+[relatório próprio](validacoes/VALIDACAO_ETAPA_6.md). Os resultados abaixo são
+as evidências anteriores da Etapa 5.
+
 Instalação limpa 02–63 e atualizações incrementais 60→61→62→63 aprovadas.
 A rodada final passou 34 testes SQL, manifesto, 34 unitários e E2E do importador,
 build, 53 unitários/de contrato do backend, oito de fundação e 38 clínicos HTTP.
@@ -115,7 +131,8 @@ histórico. `Localizado` continua excluído do estruturado, separado da localiza
 do prontuário. Planejamento D9 não produz comparecimento; upload avançado de
 contrarreferência permanece no backlog aprovado. Não há nova regra clínica inferida.
 
-Dados reais, frontend, implantação, TLS/segredos/backup/retenção e homologação
-institucional não fazem parte desta execução. O backlog e as próximas etapas
+Dados reais, implantação, TLS/segredos/backup/retenção e homologação institucional
+não fazem parte desta execução. Formulários clínicos e complementos da interface
+seguem as Etapas 7–8. O backlog e as próximas etapas
 estão em [PROXIMOS_PASSOS.md](PROXIMOS_PASSOS.md); regras e workflow estão no
 [índice da documentação](README.md).

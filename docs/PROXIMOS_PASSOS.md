@@ -1,9 +1,9 @@
 # Roadmap do Projeto
 
-Atualizado em: 2026-10-03
+Atualizado em: 2026-10-04
 
 Este é o roadmap oficial do projeto. A estrutura original possui dez etapas;
-as etapas 1–5 estão concluídas no ambiente sintético. As etapas 5, 6, 7, 9 e 10 possuem subetapas porque
+as etapas 1–6 estão concluídas no ambiente sintético. As etapas 5, 6, 7, 9 e 10 possuem subetapas porque
 contêm entregas independentes e dependências próprias. As letras identificam
 subetapas de execução e não criam uma nova numeração principal.
 
@@ -186,18 +186,21 @@ integrado F01–F16/T01–T18 comprovado. Não equivale a implantação ou homol
 ## Etapa 6 — Fundação do frontend
 
 A [análise do Figma Make e plano de integração](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
-foi concluída em 2026-10-03. A direção é construir uma aplicação própria em
-`frontend/`, com React/TypeScript, usando o protótipo como referência visual e
-funcional. Reaproveitar apresentação após revisão; implementar sessão, rotas,
-consultas e formulários conforme os contratos `/v1`. Bibliotecas e versões serão
-definidas na fundação, sem adotar automaticamente a arquitetura ou as dependências
-geradas. A [ADR-024](DECISOES_ARQUITETURAIS.md#adr-024) registra essa diretriz.
+foi concluída em 2026-10-03. A fundação foi implementada e validada em
+2026-10-04: aplicação própria em `frontend/`, com React/TypeScript, usando o
+protótipo como referência visual e funcional. Sessão, rotas e consultas seguem
+os contratos `/v1`. Bibliotecas e toolchain adotados estão em
+[FRONTEND.md](FRONTEND.md) e no lockfile; a
+[ADR-024](DECISOES_ARQUITETURAIS.md#adr-024) registra as fronteiras.
 
 Este roadmap é a fonte da sequência e dos critérios de aceite. A análise mantém
 o inventário, a matriz de compatibilidade e os detalhes técnicos de integração.
-Esta revisão é documental e não inicia a implementação das etapas abaixo.
+A evidência da execução está no
+[relatório da Etapa 6](validacoes/VALIDACAO_ETAPA_6.md).
 
 ### 6A — Base técnica, sessão e navegação
+
+**Status:** concluída no ambiente sintético em 2026-10-04; aceite documentado.
 
 - **Objetivo:** criar a fundação do frontend consumindo somente a API existente.
 - **Principais alterações:** diretório próprio, toolchain/lockfile, layout e
@@ -214,6 +217,8 @@ Esta revisão é documental e não inicia a implementação das etapas abaixo.
   Combinar verificações de outras camadas somente se forem alteradas.
 
 ### 6B — Busca e ficha em leitura
+
+**Status:** concluída no ambiente sintético em 2026-10-04; aceite documentado.
 
 - **Objetivo:** localizar pacientes e consultar os recursos já publicados.
 - **Principais alterações:** busca por nome/sexo, paginação `limit`/`offset`,
@@ -443,14 +448,15 @@ importador e backend funcionais antes de iniciar as Etapas 6–8.
 ## Próximo trabalho
 
 A Etapa 5 está concluída no ambiente sintético, com evidências na
-[matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md). O próximo desenvolvimento
-previsto é **6A, seguida de 6B**: base própria, sessão e leitura pelas APIs atuais.
-Em seguida, avançar 7A–7D conforme suporte real dos contratos e resolver catálogos
+[matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md). **6A–6B estão
+concluídas no ambiente sintético**, com evidências no
+[relatório da Etapa 6](validacoes/VALIDACAO_ETAPA_6.md): base própria, sessão e
+leitura pelas APIs atuais. Avançar 7A–7D conforme suporte real dos contratos e resolver catálogos
 antes dos formulários dependentes. Métricas, fila global e gestão de usuários
 não bloqueiam essa fundação nem entram automaticamente por aparecerem no protótipo.
 
-Esta entrega atualiza somente análise e planejamento. Backend, banco persistente
-e protótipo permanecem preservados; frontend e Etapas 6–10 exigem execução futura.
+Esta entrega desenvolve a fundação do frontend sem alterar contratos HTTP,
+backend, banco persistente ou protótipo. Etapas 7–10 exigem execução futura.
 Upload avançado e planejamento D9 não foram antecipados nem inferidos como dados
 clínicos. Dados reais seguem a liberação 9D, sem confundir viabilidade do importador
 com autorização de uso.

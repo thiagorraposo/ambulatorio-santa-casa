@@ -1,17 +1,24 @@
 # Ambulatório Santa Casa
 
 Base PostgreSQL construída incrementalmente para organizar dados do ambulatório.
-O schema físico possui 38 tabelas. As Etapas 4A/4B adicionam a fundação NestJS e
-identidade/autorização mínimas, sem escrita clínica, frontend ou dados reais.
+O schema persistente possui 38 tabelas. Importador e backend NestJS evoluíram até
+a Etapa 5 no ambiente sintético; a fundação do frontend React/TypeScript
+(6A–6B) está concluída e validada no ambiente sintético. Consulte o
+[estado vigente](docs/ESTADO_ATUAL_DO_PROJETO.md) para os limites de cada ambiente.
 
 O schema aplicado é `ambulatorio`. A principal evidência física versionada é `docs/evidencias/schema_atual_ambulatorio.sql`.
 
-## Referência do frontend
+## Frontend e referência visual
+
+A aplicação própria fica em [`frontend/`](frontend/), consome a API `/v1` e
+inclui sessão, navegação, busca e ficha em leitura. Setup, comandos e contratos
+estão em [`docs/FRONTEND.md`](docs/FRONTEND.md); os resultados de validação ficam
+no [relatório da Etapa 6](docs/validacoes/VALIDACAO_ETAPA_6.md).
 
 O código do protótipo Figma Make fica em
 [`referencias/frontend/figma-make-prototipo/`](referencias/frontend/figma-make-prototipo/),
-como material de apoio visual e funcional. A futura aplicação será construída em
-`frontend/`, seguindo os contratos do sistema. Consulte a
+como material de apoio visual e funcional, separado do build da aplicação.
+Consulte a
 [organização das referências](referencias/README.md) e a
 [análise de integração](docs/arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md).
 
@@ -21,7 +28,8 @@ como material de apoio visual e funcional. A futura aplicação será construíd
 - Docker Engine com Docker Compose, ambiente padrão de desenvolvimento.
 - GNU Make.
 - Git.
-- Node.js 24 e npm para execução local do backend.
+- Node.js 24 e npm para execução local do backend e frontend.
+- Chromium do Playwright para os testes de navegador do frontend.
 - Banco `ambulatorio_santa_casa`, usuário `ambulatorio_user` e schema `ambulatorio` já existentes.
 - Autenticação local configurada em `~/.pgpass` com permissão `0600`.
 
@@ -108,6 +116,9 @@ make db-check DB_ENV=docker
 | `make backend-install` | Instala dependências exatamente pelo `package-lock`. | Não. |
 | `make backend-check` | Compila e testa integração, autenticação e autorização. | Insere e remove paciente e usuários sintéticos. |
 | `make backend-up` | Provisiona o login técnico e sobe o backend no Compose. | Altera somente a role de login; não altera schema. |
+| `make frontend-install` | Instala dependências exatamente pelo lockfile. | Não. |
+| `make frontend-dev` | Serve Vite e encaminha `/v1` à API sintética configurada. | A interface desta etapa só faz leitura. |
+| `make frontend-check COMPACT=1` | Compila, testa sessão/componentes e executa navegador/API reais. | Cria e remove banco/roles exclusivamente sintéticos e descartáveis. |
 
 Os alvos genéricos não aplicam migrations. `docker-migrate` aplica as migrations
 somente quando selecionado explicitamente, e `docker-destroy` exige a confirmação

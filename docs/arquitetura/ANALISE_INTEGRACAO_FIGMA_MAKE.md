@@ -5,6 +5,11 @@ frontend não iniciada. A análise é estática, sobre o código disponibilizado
 `referencias/frontend/figma-make-prototipo/`; não representa homologação visual
 no navegador.
 
+Esta fotografia preserva a avaliação estática de 2026-10-03. A implementação
+posterior da Etapa 6 está descrita em [FRONTEND.md](../FRONTEND.md), com estágio
+vigente em [ESTADO_ATUAL_DO_PROJETO.md](../ESTADO_ATUAL_DO_PROJETO.md) e evidências
+no [relatório de validação](../validacoes/VALIDACAO_ETAPA_6.md).
+
 ## Objetivo, limites e fontes
 
 Aproveitar a identidade visual, a organização da ficha e os fluxos úteis do

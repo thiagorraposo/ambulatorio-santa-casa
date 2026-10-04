@@ -1,16 +1,23 @@
 # Workflow de Desenvolvimento
 
-Atualizado em: 2026-10-03
+Atualizado em: 2026-10-04
 
 O CI em `.github/workflows/validacoes.yml` usa credenciais sintéticas descartáveis,
 PostgreSQL 16.15 e executa migrations em banco limpo, manifesto, importador,
-testes SQL, backend (build, unitários, integração e container), documentação e
-`git diff --check`. A seleção local por escopo não reduz essa cobertura do CI.
+testes SQL, backend (build, unitários, integração e container), frontend (build,
+unitários e Chromium/API/PostgreSQL sintéticos), documentação, workflow e
+`git diff --check`. Node.js 24 e lockfiles são usados para a instalação
+reproduzível. A seleção local por escopo não reduz essa cobertura do CI.
 
 O CI também executa `backend-clinical-test COMPACT=1` com `SYNTHETIC_PG_*`
 apontando ao servidor efêmero e banco próprio criado pelo runner. Esse alvo cobre
 os endpoints clínicos/revisões; a fundação não substitui sua execução. O runner
 usa as permissões instaladas pelas migrations, sem conceder wrappers manualmente.
+
+Os checks de backend, recursos clínicos e frontend são combinados na mesma
+chamada do Make no CI, compartilhando `backend-build`. O navegador é instalado
+com Playwright/Chromium. O runner do frontend usa seu próprio banco descartável e
+não aponta ao banco persistente do projeto.
 
 ## Contexto por tarefa
 
@@ -65,6 +72,27 @@ não é provisionamento de produção. `make backend-check` cobre build, unitár
 autenticação, autorização, isolamento do pool e integração. A matriz e as
 pendências deliberadas estão em `docs/validacoes/VALIDACAO_ETAPA_4C.md`.
 
+## Frontend — fundação 6A–6B
+
+```bash
+make frontend-install
+cd frontend && npx playwright install chromium
+make frontend-check COMPACT=1
+```
+
+Use Node.js 24. `frontend-check` inclui build TypeScript/Vite, unitários e E2E no
+navegador. `frontend-e2e` depende de `backend-build` e recebe as variáveis
+`SYNTHETIC_PG_*` de um servidor exclusivamente sintético; o runner cria e remove
+seu banco/roles e serve API/Vite. Ele não lê `.env` para selecionar o banco.
+No CI, Chromium é instalado com `--with-deps`.
+
+`frontend-dev` mantém o servidor Vite ativo e não aceita `COMPACT=1`.
+`FRONTEND_API_TARGET` seleciona a API para o proxy local, com padrão
+`http://127.0.0.1:3000`; `/v1` é preservado. Consulte
+[FRONTEND.md](FRONTEND.md) para sessão, navegação, paginação e limites de contrato.
+Os resultados de aceite estão em
+[VALIDACAO_ETAPA_6.md](validacoes/VALIDACAO_ETAPA_6.md).
+
 ## Comandos Oficiais
 
 Use os alvos do `Makefile` como interface local padrão:
@@ -91,6 +119,11 @@ Use os alvos do `Makefile` como interface local padrão:
 | `make importer-test` | Executar o E2E em banco Docker temporário e descartável. |
 | `make backend-foundation-e2e` | Executar o cenário integrado da fundação NestJS/PostgreSQL. |
 | `make backend-container-check` | Construir e validar health e usuário não-root da imagem backend. |
+| `make frontend-install` | Instalar dependências pelo lockfile. |
+| `make frontend-dev` | Servir Vite e proxy `/v1` para a API sintética. |
+| `make frontend-build` / `frontend-unit-test` | Compilar ou verificar sessão/contratos/apresentação. |
+| `make frontend-e2e` | Testar navegador/API em banco próprio descartável. |
+| `make frontend-check` | Combinar build, unitários e E2E do frontend. |
 | `make importer-run IMPORT_FILE=... IMPORT_PURPOSE=...` | Importar um arquivo sintético com finalidade explícita no Docker selecionado. |
 | `make importer-dry-run IMPORT_FILE=... IMPORT_PURPOSE=...` | Validar a mesma finalidade e simular o pipeline sem persistir registros. |
 
@@ -110,6 +143,7 @@ receber exclusivamente fixtures sintéticas.
 | Exclusivamente textual | `make docs-check`, revisão do conteúdo e `git diff --check`. |
 | Importador ou manifesto | `make manifest-check importer-test project-check` ao finalizar. |
 | Backend | `make backend-check project-check` ao finalizar. |
+| Frontend | `make frontend-check docs-check`, revisão de teclado/foco/contraste/zoom/telas menores, conteúdo/links, `git diff --check` e status ao finalizar. O runner exige servidor sintético e Chromium. |
 | Schema ou migration | `make project-check` inicial; aplicar migrations em banco limpo descartável e executar testes SQL; verificar diff, documentação e estado final com `project-check`, reaproveitando a execução final da suíte no ambiente validado. |
 | Docker ou infraestrutura | Verificações dos componentes afetados: configuração, conexão, imagem/container ou recuperação, conforme a mudança. Para o mecanismo de validação, `make workflow-test` e execuções representativas nos modos normal e compacto. |
 
@@ -121,10 +155,16 @@ o mesmo estado e ambiente. Registre comandos, resultados e limitações reais.
 `docs-check` verifica somente arquivos obrigatórios presentes e não vazios: não
 valida a correção do conteúdo nem dos links. `project-check` inclui `docs-check`,
 `db-test` (que inclui `db-check`), `git diff --check` e status Git; não executa
-manifesto, importador ou backend. `docker-project-check` chama essa mesma suíte
+manifesto, importador, backend ou frontend. `docker-project-check` chama essa mesma suíte
 com `DB_ENV=docker`, acrescentando a espera pelo healthcheck. Escolha uma das
 duas entradas para a mesma validação. Não execute `backend-foundation-e2e`
 novamente após `backend-check` sem um motivo concreto.
+
+Mudança só no frontend não exige testes SQL ou do importador. Se também afetar o
+backend, combine `backend-check project-check frontend-check` numa chamada para
+compartilhar dependências. Se afetar recursos clínicos/contratos que a fundação
+não cobre, acrescente `backend-clinical-test`; Makefile/CI exigem também
+`workflow-test` e execuções representativas nos modos normal e compacto.
 
 ## Saída compacta
 
@@ -134,11 +174,12 @@ No trabalho com Codex, prefira, por exemplo:
 make docs-check COMPACT=1
 make manifest-check importer-test project-check COMPACT=1
 make backend-check project-check COMPACT=1
+make frontend-check docs-check COMPACT=1
 ```
 
 Cada exemplo corresponde a um escopo; não é uma sequência obrigatória.
 Sem `COMPACT=1`, os alvos mantêm a saída habitual. `make help` lista os alvos
-compatíveis, incluindo verificações SQL, importador, backend e Docker. Operações
+compatíveis, incluindo verificações SQL, importador, backend, frontend e Docker. Operações
 como migration, importação, backup, restore e destruição continuam sendo chamadas
 explicitamente pela interface habitual.
 
@@ -243,10 +284,14 @@ container ou volume está em `docs/RECUPERACAO_POSTGRESQL_DOCKER.md`.
 - Autenticação e autorização foram consideradas?
 - Testes cobrem fluxos principais?
 
-## Checklist para Futuro Frontend
+## Checklist para Frontend
 
 - A interface usa dados da API, não acesso direto ao banco?
 - Estados de erro e carregamento foram tratados?
+- Saída/401/expiração limpam sessão/cache e impedem respostas antigas?
+- Links diretos, voltar/recarregar e filtros/página na URL funcionam?
+- A paginação respeita os contratos sem inferir total ou completude global?
+- Teclado, foco, contraste, zoom e telas menores foram revisados?
 - Campos seguem domínios e valores permitidos?
 - Não há dados reais embutidos no código?
 - Testes ou validações manuais foram registrados?

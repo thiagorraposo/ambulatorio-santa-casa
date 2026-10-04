@@ -1,5 +1,34 @@
 # Registro de Alterações
 
+## 2026-10-04 — fundação do frontend e integração das validações (6A–6B)
+
+Implementada e validada a aplicação própria React/TypeScript em `frontend/`,
+com apresentação revisada da referência Figma Make, Vite, React Router e TanStack
+Query. Sessão com token em memória, identidade pela API `/v1/auth/me`, saída,
+início/Minha conta, busca nome/sexo e ficha/histórico em leitura. Estado de filtros,
+aba e paginação é representado na URL; autorização permanece na API. Formulários
+clínicos, complementos das Etapas 7–8 e dados reais continuam fora do escopo.
+
+Makefile inclui instalação, desenvolvimento, build, unitários, E2E e check do
+frontend, com `COMPACT=1` nos alvos de validação. CI usa Node.js 24, lockfiles,
+Chromium e runners sintéticos; backend/frontend compartilham dependências do Make
+numa chamada de checks, evitando recompilar o backend na mesma execução.
+Artefatos locais são ignorados. Documentação de uso, matriz de validação,
+estado/roadmap, ADR-024, índices e workflow foram atualizados; a análise estática
+original aponta ao estado vigente e mantém seu contexto histórico.
+
+Validação: `make frontend-install` e `make frontend-check workflow-test COMPACT=1`
+aprovados: build, 47 unitários/componentes, oito E2E no Chromium com API/PostgreSQL
+sintéticos e nove testes do workflow. Teclado/foco, contraste, zoom/reflow e telas
+menores foram revisados. O E2E detectou e comprovou a correção da reconsulta da
+ficha após vínculo revogado com identidade inalterada; respostas tardias após
+saída/401/expiração são descartadas. Parâmetros inválidos de paginação foram
+normalizados na URL. Detalhes, logs e limites estão no
+[relatório da Etapa 6](validacoes/VALIDACAO_ETAPA_6.md).
+A CI remota não foi executada nesta entrega. Banco/login/processos criados pelos
+runners foram removidos. Não houve alteração de backend, SQL, manifesto ou
+protótipo, nem migrations/escritas no banco persistente, dados reais, commit ou push.
+
 ## 2026-10-03 — versionamento da referência e organização do planejamento
 
 Revisadas as 49 alterações pendentes com status, diffs e histórico recente.

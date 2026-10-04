@@ -19,6 +19,8 @@ fontes vigentes.
 | Aceite integrado 5A–5E e matriz F01–F16/T01–T18 | [`validacoes/ACEITE_INTEGRADO_ETAPA_5.md`](validacoes/ACEITE_INTEGRADO_ETAPA_5.md) |
 | Implementação atual do importador | [`IMPORTADOR_SINTETICO_V1.md`](IMPORTADOR_SINTETICO_V1.md) |
 | Arquitetura do backend | [`ARQUITETURA_BACKEND.md`](ARQUITETURA_BACKEND.md) |
+| Aplicação frontend, setup e contratos de leitura | [`FRONTEND.md`](FRONTEND.md) |
+| Validação da fundação do frontend 6A–6B | [`validacoes/VALIDACAO_ETAPA_6.md`](validacoes/VALIDACAO_ETAPA_6.md) |
 | Referência Figma Make e planejamento do frontend | [`arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md`](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md) |
 | Localização e uso dos materiais de referência | [`../referencias/README.md`](../referencias/README.md) |
 | Preparação da migração da planilha real | [`PROXIMOS_PASSOS.md`](PROXIMOS_PASSOS.md#preparação-da-migração-da-planilha-real) |
@@ -38,8 +40,8 @@ matriz distinguem código existente, lacunas e trabalho técnico restante.
   decisões técnicas específicas de módulos.
 - [`dados/`](dados/): cobertura, decisões semânticas e metadados seguros da
   planilha.
-- [`validacoes/`](validacoes/): relatórios de aceite e evidências de etapas
-  concluídas.
+- [`validacoes/`](validacoes/): relatórios de aceite e evidências de execução,
+  com estágio e pendências identificados em cada documento.
 - [`evidencias/`](evidencias/): artefatos estruturais; o dump vigente é
   [`schema_atual_ambulatorio.sql`](evidencias/schema_atual_ambulatorio.sql).
 - [`historico/`](historico/): fotografias anteriores, reconstruções históricas e

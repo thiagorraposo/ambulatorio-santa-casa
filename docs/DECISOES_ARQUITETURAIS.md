@@ -658,7 +658,7 @@ Título: Protótipo Figma Make como referência de interface subordinada aos con
 
 Data: 2026-10-03
 
-Status: Diretriz definida no planejamento; integração não implementada
+Status: Aceita; fundação 6A–6B implementada e validada em 2026-10-04
 
 Decisão: usar o código do Figma Make como referência visual e funcional,
 reaproveitando apresentação após revisão e adaptando fluxos aos contratos `/v1`.
@@ -683,9 +683,26 @@ Consequências: a fundação React deve começar por sessão, busca e ficha com 
 existentes. Recursos sem suporte ficam como pendência explícita; evolução de API
 exige necessidade funcional e justificativa própria, e evolução estrutural segue
 migration incremental. A organização de `frontend/`, as bibliotecas e o fluxo de
-implementação detalhados na análise orientam a Etapa 6; bibliotecas, versões e
-toolchain ainda serão escolhidos na 6A. Nenhuma dessas alterações foi implementada.
+implementação detalhados na análise orientam a Etapa 6. A avaliação estática
+original permanece preservada; o estágio e a evidência atual pertencem ao estado
+vigente e ao relatório de validação.
+
+Detalhamento de 2026-10-04: adotar Vite e React Router para rotas reais, TanStack
+Query para consultas por recurso e CSS próprio para a apresentação revisada.
+Toolchain Node.js 24/npm reproduzível pelo lockfile. Token somente em memória,
+identidade obtida de `/auth/me` e novo login ao recarregar com retorno ao destino.
+Saída, expiração/401 e troca de identidade cancelam leituras pendentes e limpam
+cache clínico; respostas de uma identidade anterior não podem repovoar a próxima
+sessão. Proxy de desenvolvimento preserva `/v1` e a mesma origem, sem CORS novo.
+Retomar foco/visibilidade reconsulta os recursos ativos mesmo com identidade
+inalterada, para respeitar revogação de vínculo; falha de leitura oculta o dado
+anterior em vez de manter uma ficha previamente autorizada.
+Vitest e Playwright verificam sessão/contratos e integração no Chromium com
+API/PostgreSQL exclusivamente sintéticos e descartáveis. Versões instaladas
+pertencem a `frontend/package.json` e ao lockfile.
 
 Documentos relacionados:
 [análise e planejamento da integração](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
-e [sequência oficial de execução](PROXIMOS_PASSOS.md#etapa-6--fundação-do-frontend).
+e [sequência oficial de execução](PROXIMOS_PASSOS.md#etapa-6--fundação-do-frontend),
+[implementação do frontend](FRONTEND.md) e
+[validação da Etapa 6](validacoes/VALIDACAO_ETAPA_6.md).
