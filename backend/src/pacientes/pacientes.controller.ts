@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Header, Param, Patch, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Header, Param, Patch, Post, Put, Query, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { ListarPacientesQuery } from './dto/listar-pacientes.query';
 import { PacienteResponse } from './dto/paciente.response';
 import { PendenciaResponse } from '../clinico/dto/pendencia.response';
@@ -9,7 +10,7 @@ import { AuthenticatedUser } from '../auth/auth.types';
 import { ClinicalIdPipe } from '../clinico/clinical-validation';
 import { AccessDto, AttendanceCreateDto, AttendanceUpdateDto, BznReturnDto, BznTreatmentCreateDto, PageQuery, PendingQuery, PatientCreateDto, PatientUpdateDto } from '../clinico/dto/clinico.dto';
 import { AtendimentoDetalheResponse, AtendimentoResumoResponse, ExameResponse, PacienteDetalheResponse,
-  RetornoBznCriadoResponse, RetornoBznResponse, TratamentoBznResponse, AtendimentoCriadoResponse,
+  RetornoBznCriadoResponse, RetornoBznResponse, AtendimentoCriadoResponse,
   PacienteAtualizadoResponse, PacienteCriadoResponse } from '../clinico/dto/clinico.response';
 import { csvCell } from './csv-cell';
 
@@ -42,8 +43,9 @@ export class PacientesController {
     @CurrentUser() user: AuthenticatedUser): Promise<RetornoBznCriadoResponse> {
     return this.pacientes.createBznReturn(user, id, dto);
   }
-  @Get(':id/tratamento-bzn') bznTreatment(@Param('id', ClinicalIdPipe) id: string, @CurrentUser() user: AuthenticatedUser): Promise<TratamentoBznResponse | null> {
-    return this.pacientes.bznTreatment(user, id);
+  @Get(':id/tratamento-bzn') async bznTreatment(@Param('id', ClinicalIdPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser, @Res() response: Response): Promise<void> {
+    response.json(await this.pacientes.bznTreatment(user, id));
   }
   @Post(':id/tratamento-bzn') @Perfis('edicao', 'administracao') createBznTreatment(@Param('id', ClinicalIdPipe) id: string,
     @Body() dto: BznTreatmentCreateDto, @CurrentUser() user: AuthenticatedUser): Promise<{ tratamentoId: string }> {

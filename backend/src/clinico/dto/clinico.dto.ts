@@ -1,5 +1,5 @@
 import { Transform, Type } from 'class-transformer';
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsDateString, IsIn, IsInt, IsNumber,
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsDateString, IsIn, IsInt, IsNumber, IsObject,
   IsOptional, IsString, Length, Matches, Max, MaxLength, Min, ValidateIf, ValidateNested } from 'class-validator';
 
 export class PageQuery {
@@ -25,7 +25,7 @@ export class PatientCreateDto {
   @IsOptional() @IsString() @MaxLength(50) raca?: string | null;
   @IsOptional() @IsBoolean() pertenceComunidadeTradicional?: boolean | null;
   @IsOptional() @IsIn(['indigena', 'quilombola']) tipoComunidadeTradicional?: string | null;
-  @IsOptional() @ValidateNested() @Type(() => AddressDto) endereco?: AddressDto;
+  @IsOptional() @IsObject() @ValidateNested() @Type(() => AddressDto) endereco?: AddressDto;
   @IsOptional() @IsArray() @ArrayMaxSize(10) @IsString({ each: true }) @Length(1, 30, { each: true }) telefones?: string[];
 }
 export class PatientUpdateDto {
@@ -38,7 +38,7 @@ export class PatientUpdateDto {
   @IsOptional() @IsString() @MaxLength(50) raca?: string | null;
   @IsOptional() @IsBoolean() pertenceComunidadeTradicional?: boolean | null;
   @IsOptional() @IsIn(['indigena', 'quilombola']) tipoComunidadeTradicional?: string | null;
-  @IsOptional() @ValidateNested() @Type(() => AddressDto) endereco?: AddressDto;
+  @IsOptional() @IsObject() @ValidateNested() @Type(() => AddressDto) endereco?: AddressDto;
   @IsOptional() @IsArray() @ArrayMinSize(1) @ArrayMaxSize(10) @IsString({ each: true }) @Length(1, 30, { each: true }) telefonesAdicionar?: string[];
 }
 export class ClinicalDataDto {
@@ -71,7 +71,8 @@ export class ExamDto {
 }
 export class PendingDto {
   @IsString() @Length(1, 10000) descricao!: string;
-  @IsOptional() @IsIn(['aberta', 'em_andamento', 'resolvida', 'cancelada', 'nao_informado']) status?: string;
+  @IsOptional() @IsIn(['aberta', 'em_andamento', 'resolvida', 'cancelada', 'nao_informado']) status?: string | null;
+  @IsOptional() @IsDateString({ strict: true }) @Matches(/^\d{4}-\d{2}-\d{2}$/) dataResolucao?: string | null;
 }
 export class FamilyResultDto {
   @IsString() @Length(1, 1000) familiar!: string;
@@ -79,7 +80,7 @@ export class FamilyResultDto {
 }
 export class FamilyScreeningDto {
   @ValidateIf((_o: unknown, v: unknown) => v !== null) @IsBoolean() familiaresExaminados!: boolean | null;
-  @IsArray() @ArrayMaxSize(50) @ValidateNested({ each: true }) @Type(() => FamilyResultDto) familiares!: FamilyResultDto[];
+  @IsArray() @ArrayMaxSize(50) @IsObject({ each: true }) @ValidateNested({ each: true }) @Type(() => FamilyResultDto) familiares!: FamilyResultDto[];
 }
 export class AttendanceCreateDto {
   @IsDateString({ strict: true }) @Matches(/^\d{4}-\d{2}-\d{2}$/) dataAtendimento!: string;
@@ -87,11 +88,11 @@ export class AttendanceCreateDto {
   @IsOptional() @IsBoolean() ambulatorioUnicamente?: boolean | null;
   @IsOptional() @IsBoolean() ambulatorioAnexoProjeto?: boolean | null;
   @IsOptional() @IsString() @MaxLength(10000) observacoes?: string | null;
-  @IsOptional() @ValidateNested() @Type(() => ClinicalDataDto) dadosClinicos?: ClinicalDataDto;
-  @IsOptional() @ValidateNested() @Type(() => DiagnosisDto) diagnosticoChagas?: DiagnosisDto;
-  @IsOptional() @IsArray() @ArrayMaxSize(30) @ValidateNested({ each: true }) @Type(() => ExamDto) exames?: ExamDto[];
-  @IsOptional() @IsArray() @ArrayMaxSize(30) @ValidateNested({ each: true }) @Type(() => PendingDto) pendencias?: PendingDto[];
-  @IsOptional() @ValidateNested() @Type(() => FamilyScreeningDto) rastreioFamiliar?: FamilyScreeningDto;
+  @IsOptional() @IsObject() @ValidateNested() @Type(() => ClinicalDataDto) dadosClinicos?: ClinicalDataDto;
+  @IsOptional() @IsObject() @ValidateNested() @Type(() => DiagnosisDto) diagnosticoChagas?: DiagnosisDto;
+  @IsOptional() @IsArray() @ArrayMaxSize(30) @IsObject({ each: true }) @ValidateNested({ each: true }) @Type(() => ExamDto) exames?: ExamDto[];
+  @IsOptional() @IsArray() @ArrayMaxSize(30) @IsObject({ each: true }) @ValidateNested({ each: true }) @Type(() => PendingDto) pendencias?: PendingDto[];
+  @IsOptional() @IsObject() @ValidateNested() @Type(() => FamilyScreeningDto) rastreioFamiliar?: FamilyScreeningDto;
 }
 export class AttendanceUpdateDto {
   @Matches(/^[1-9]\d{0,18}$/) versao!: string;
@@ -131,7 +132,7 @@ export class BznTreatmentCreateDto {
   @IsOptional() @IsString() @MaxLength(10000) motivoNaoInicio?: string | null;
   @IsOptional() @IsBoolean() teveReacaoAdversa?: boolean | null;
   @IsOptional() @IsString() @MaxLength(10000) observacoes?: string | null;
-  @IsOptional() @IsArray() @ArrayMaxSize(30) @ValidateNested({ each: true }) @Type(() => BznReactionDto) reacoes?: BznReactionDto[];
+  @IsOptional() @IsArray() @ArrayMaxSize(30) @IsObject({ each: true }) @ValidateNested({ each: true }) @Type(() => BznReactionDto) reacoes?: BznReactionDto[];
 }
 export class AnnualFactDto {
   @IsInt() @Min(1) @Max(9999) ano!: number;

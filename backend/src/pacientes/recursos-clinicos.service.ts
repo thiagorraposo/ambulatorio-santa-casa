@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { AuthenticatedUser } from '../auth/auth.types';
-import { databaseConflict } from '../clinico/clinical-validation';
+import { databaseConflict, rejectFuture, validatePendingResolution } from '../clinico/clinical-validation';
 import { PageQuery } from '../clinico/dto/clinico.dto';
 import { AnnualAttendanceDto, AnnualReturnDto, ClinicalEventsQuery, CounterReferralDto, NotificationDto, PendingCreateDto, PendingUpdateDto,
   ProjectDto, ReferralDto, ReferralQuery } from '../clinico/dto/recursos.dto';
@@ -200,6 +200,8 @@ export class RecursosClinicosService {
   async createAnnualReturn(user: AuthenticatedUser, patientId: string, dto: AnnualReturnDto): Promise<{ retornoId: string }> {
     return this.patientOperation(user, patientId, true, async tx => {
       await this.attendanceExists(tx, patientId, dto.atendimentoId);
+      const today = await tx.query<{ data_atual: string }>('SELECT CURRENT_DATE::text AS data_atual');
+      rejectFuture(dto.dataRealizada, today.rows[0].data_atual);
       const result = await tx.query<{ acompanhamento_cuidado_id: string }>(`INSERT INTO acompanhamento_cuidado
         (atendimento_id,data_realizada,compareceu,status_acompanhamento,tipo_acompanhamento,resumo_acompanhamento)
         VALUES($1,$2,true,'concluido','retorno_anual',$3) RETURNING acompanhamento_cuidado_id::text`,
@@ -212,10 +214,11 @@ export class RecursosClinicosService {
     return this.patientOperation(user, patientId, true, async tx => {
       await this.attendanceExists(tx, patientId, dto.atendimentoId);
       if (!dto.descricao.trim()) throw new BadRequestException('Descrição da pendência é obrigatória');
+      validatePendingResolution(dto.status, dto.dataResolucao);
       const result = await tx.query<{ pendencia_atendimento_id: string }>(`INSERT INTO pendencia_atendimento
-        (atendimento_id,descricao,status_pendencia,data_identificacao) VALUES($1,$2,$3,$4)
+        (atendimento_id,descricao,status_pendencia,data_identificacao,data_resolucao) VALUES($1,$2,$3,$4,$5)
         RETURNING pendencia_atendimento_id::text`,
-      [dto.atendimentoId,dto.descricao,dto.status ?? 'aberta',dto.dataIdentificacao ?? null]);
+      [dto.atendimentoId,dto.descricao,dto.status === undefined ? 'aberta' : dto.status,dto.dataIdentificacao ?? null,dto.dataResolucao ?? null]);
       return { pendenciaId: result.rows[0].pendencia_atendimento_id };
     });
   }
@@ -223,8 +226,7 @@ export class RecursosClinicosService {
   async updatePending(user: AuthenticatedUser, patientId: string, pendingId: string,
     dto: PendingUpdateDto): Promise<{ pendenciaId: string; status: string }> {
     return this.patientOperation(user, patientId, true, async tx => {
-      if (dto.status === 'resolvida' && !dto.dataResolucao) throw new BadRequestException('Resolução exige data informada');
-      if (dto.status !== 'resolvida' && dto.dataResolucao) throw new BadRequestException('Data de resolução exige status resolvida');
+      validatePendingResolution(dto.status, dto.dataResolucao);
       const result = await tx.query(`UPDATE pendencia_atendimento p SET status_pendencia=$3,data_resolucao=$4,
         atualizado_em=CURRENT_TIMESTAMP FROM atendimento a WHERE p.atendimento_id=a.atendimento_id
         AND a.paciente_id=$1 AND p.pendencia_atendimento_id=$2 RETURNING p.pendencia_atendimento_id`,

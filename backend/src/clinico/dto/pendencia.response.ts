@@ -4,4 +4,5 @@ export interface PendenciaResponse {
   descricao: string;
   status: string | null;
   dataIdentificacao: string | null;
+  dataResolucao: string | null;
 }

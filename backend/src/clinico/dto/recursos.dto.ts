@@ -56,8 +56,9 @@ export class CounterReferralDto {
 export class PendingCreateDto {
   @Matches(idPattern) atendimentoId!: string;
   @IsString() @MaxLength(10000) descricao!: string;
-  @IsOptional() @IsIn(['aberta', 'em_andamento', 'resolvida', 'cancelada', 'nao_informado']) status?: string;
+  @IsOptional() @IsIn(['aberta', 'em_andamento', 'resolvida', 'cancelada', 'nao_informado']) status?: string | null;
   @IsOptional() @IsDateString({ strict: true }) @Matches(datePattern) dataIdentificacao?: string | null;
+  @IsOptional() @IsDateString({ strict: true }) @Matches(datePattern) dataResolucao?: string | null;
 }
 
 export class PendingUpdateDto {

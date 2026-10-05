@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException, 
 import { AuthenticatedUser } from '../auth/auth.types';
 import { DatabaseService } from '../common/database/database.service';
 import { ClinicalAccessService } from '../common/security/clinical-access.service';
-import { databaseConflict } from '../clinico/clinical-validation';
+import { databaseConflict, rejectFuture, validatePendingResolution } from '../clinico/clinical-validation';
 import { AccessDto, AttendanceCreateDto, AttendanceUpdateDto, BznReturnDto, BznTreatmentCreateDto, PageQuery, PendingQuery, PatientCreateDto, PatientUpdateDto } from '../clinico/dto/clinico.dto';
 import { PacienteResponse } from './dto/paciente.response';
 import { PacientesRepository } from './pacientes.repository';
@@ -42,6 +42,7 @@ interface ExamRow {
 interface PendingAttendanceRow {
   pendencia_atendimento_id: string; descricao: string | null;
   status_pendencia: string | null; data_identificacao: string | null;
+  data_resolucao: string | null;
 }
 interface FamilyScreeningRow {
   rastreio_familiar_id: string; familiares_examinados: boolean | null;
@@ -238,8 +239,13 @@ export class PacientesService {
           (paciente_id,atendimento_id,tipo_exame_complementar_id,bloco_origem,tipo_exame_original,resultado_texto,observacoes)
           VALUES($1,$2,$3,$4,$5,$6,$7)`, [patientId,e.atendimentoId ?? id,e.tipoExameId,e.bloco,e.identificacao ?? null,e.resultado ?? null,e.observacoes ?? null]);
         }
-        for (const p of dto.pendencias ?? []) await tx.query(`INSERT INTO pendencia_atendimento
-          (atendimento_id,descricao,status_pendencia,data_identificacao) VALUES($1,$2,$3,$4)`, [id,p.descricao,p.status ?? 'aberta',dto.dataAtendimento]);
+        for (const p of dto.pendencias ?? []) {
+          validatePendingResolution(p.status, p.dataResolucao);
+          if (!p.descricao.trim()) throw new BadRequestException('Descrição da pendência é obrigatória');
+          await tx.query(`INSERT INTO pendencia_atendimento
+            (atendimento_id,descricao,status_pendencia,data_identificacao,data_resolucao) VALUES($1,$2,$3,$4,$5)`,
+          [id,p.descricao,p.status === undefined ? 'aberta' : p.status,dto.dataAtendimento,p.dataResolucao ?? null]);
+        }
         if (dto.rastreioFamiliar) {
           const f = dto.rastreioFamiliar;
           const fr = await tx.query<{ rastreio_familiar_id: string }>(`INSERT INTO rastreio_familiar
@@ -272,7 +278,7 @@ export class PacientesService {
           JOIN tipo_exame_complementar t ON t.tipo_exame_complementar_id=e.tipo_exame_complementar_id
           WHERE e.paciente_id=$1 AND e.atendimento_id=$2 ORDER BY e.paciente_exame_complementar_id
           LIMIT $3 OFFSET $4`, [patientId, attendanceId,query.limit,query.offset]),
-        await tx.query<PendingAttendanceRow>(`SELECT pendencia_atendimento_id::text,descricao,status_pendencia,data_identificacao::text
+        await tx.query<PendingAttendanceRow>(`SELECT pendencia_atendimento_id::text,descricao,status_pendencia,data_identificacao::text,data_resolucao::text
           FROM pendencia_atendimento WHERE atendimento_id=$1 ORDER BY pendencia_atendimento_id
           LIMIT $2 OFFSET $3`, [attendanceId,query.limit,query.offset]),
         await tx.query<FamilyScreeningRow>(`SELECT rastreio_familiar_id::text,familiares_examinados FROM rastreio_familiar
@@ -311,7 +317,7 @@ export class PacientesService {
         dadosClinicos, diagnosticoChagas,
         exames: exams.rows.map(examResponse), pendencias: pending.rows.map((p): PendenciaAtendimentoResponse => ({
           pendenciaId: p.pendencia_atendimento_id, descricao: p.descricao, status: p.status_pendencia,
-          dataIdentificacao: p.data_identificacao })),
+          dataIdentificacao: p.data_identificacao, dataResolucao: p.data_resolucao })),
         rastreioFamiliar: screenings.length === 1 ? screenings[0] : null,
         rastreiosFamiliares: screenings, paginacaoColecoes: { limit: query.limit, offset: query.offset } };
     });
@@ -342,6 +348,8 @@ export class PacientesService {
         if (!attendance.rowCount) throw new ConflictException('Atendimento não pertence ao paciente');
         const treatment = await tx.query('SELECT 1 FROM tratamento_benzonidazol WHERE paciente_id=$1 FOR SHARE', [patientId]);
         if (!treatment.rowCount) throw new ConflictException('Retorno exige tratamento BZN do paciente');
+        const today = await tx.query<{ data_atual: string }>('SELECT CURRENT_DATE::text AS data_atual');
+        rejectFuture(dto.dataRealizada, today.rows[0].data_atual);
         const result = await tx.query<{ acompanhamento_cuidado_id: string }>(`INSERT INTO acompanhamento_cuidado
           (atendimento_id,data_realizada,retorno_programado,compareceu,status_acompanhamento,tipo_acompanhamento,resumo_acompanhamento)
           VALUES($1,$2,false,true,'concluido',$3,$4) RETURNING acompanhamento_cuidado_id::text`,
@@ -426,14 +434,15 @@ export class PacientesService {
     return this.database.transaction(async (tx) => {
       await this.access!.patient(tx, user, patientId);
       const result = await tx.query<{ pendencia_id: string; atendimento_id: string; descricao: string;
-        status_pendencia: string | null; data_identificacao: string | null }>(`SELECT p.pendencia_atendimento_id::text AS pendencia_id,
-        p.atendimento_id::text,p.descricao,p.status_pendencia,p.data_identificacao::text
+        status_pendencia: string | null; data_identificacao: string | null; data_resolucao: string | null }>(`SELECT p.pendencia_atendimento_id::text AS pendencia_id,
+        p.atendimento_id::text,p.descricao,p.status_pendencia,p.data_identificacao::text,p.data_resolucao::text
         FROM pendencia_atendimento p JOIN atendimento a USING(atendimento_id)
         WHERE a.paciente_id=$1 AND ($2::text IS NULL OR p.status_pendencia=$2)
         ORDER BY p.data_identificacao DESC NULLS LAST,p.pendencia_atendimento_id DESC LIMIT $3 OFFSET $4`,
       [patientId, query.status ?? null, query.limit, query.offset]);
       return result.rows.map(row => ({ pendenciaId: row.pendencia_id, atendimentoId: row.atendimento_id,
-        descricao: row.descricao, status: row.status_pendencia, dataIdentificacao: row.data_identificacao }));
+        descricao: row.descricao, status: row.status_pendencia, dataIdentificacao: row.data_identificacao,
+        dataResolucao: row.data_resolucao }));
     });
   }
 

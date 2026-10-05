@@ -44,6 +44,7 @@ export interface ExameResponse {
 export interface PendenciaAtendimentoResponse {
   pendenciaId: string; descricao: string | null; status: string | null;
   dataIdentificacao: string | null;
+  dataResolucao: string | null;
 }
 
 export interface FamiliarExaminadoResponse {
