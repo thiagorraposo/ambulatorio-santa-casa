@@ -1,0 +1,134 @@
+/* Reviewed presentation from the Figma reference: palette, cards and sidebar.
+   Fonts use the local system stack; no third-party request accompanies clinical navigation. */
+:root {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #111827;
+  background: #f4f6f9;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --primary: #1a4fa0;
+  --primary-hover: #143e7d;
+  --muted: #4b5563;
+  --border: #d6dfea;
+  --ring: #1a4fa0;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-size: 1rem; line-height: 1.6; }
+button, input, select { font: inherit; }
+button, a, input, select, summary { -webkit-tap-highlight-color: transparent; }
+a { color: var(--primary); text-underline-offset: .2em; }
+a:hover { color: var(--primary-hover); }
+:focus-visible { outline: 3px solid var(--ring); outline-offset: 3px; }
+[tabindex="-1"]:focus { outline: none; }
+h1, h2, h3, p { margin-top: 0; }
+h1 { margin-bottom: .3rem; font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.3; letter-spacing: -.025em; }
+h2 { font-size: 1.25rem; line-height: 1.4; }
+h3 { font-size: 1.05rem; }
+p:last-child { margin-bottom: 0; }
+.muted { color: var(--muted); }
+.mono { font-family: ui-monospace, "Cascadia Code", monospace; overflow-wrap: anywhere; }
+.app-layout { min-height: 100dvh; display: grid; grid-template-columns: 15rem minmax(0, 1fr); }
+.sidebar { background: #fff; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.2rem .85rem; gap: 1.8rem; }
+.brand { display: flex; align-items: center; gap: .8rem; padding: .4rem; color: #111827; text-decoration: none; line-height: 1.4; font-size: .85rem; }
+.brand strong { display: block; font-size: 1rem; }
+.brand-mark { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 2.7rem; height: 2.7rem; color: var(--primary); background: #edf3fe; border: 1px solid #d3dff4; border-radius: .6rem; font-size: 1.8rem; font-weight: 600; }
+.sidebar nav { display: grid; gap: .45rem; }
+.sidebar nav a { color: var(--muted); text-decoration: none; padding: .65rem .85rem; border-radius: .4rem; display: flex; gap: .7rem; align-items: center; }
+.sidebar nav a:hover { background: #eef1f6; color: #111827; }
+.sidebar nav a.active { background: var(--primary); color: white; font-weight: 600; }
+.sidebar nav a span { font-size: 1.35rem; line-height: 1; }
+.sidebar-account { border-top: 1px solid var(--border); margin-top: auto; padding: 1rem .4rem 0; display: grid; gap: .7rem; overflow-wrap: anywhere; }
+.workspace { min-width: 0; display: flex; flex-direction: column; }
+.topbar { background: white; border-bottom: 1px solid var(--border); min-height: 4rem; padding: .8rem 2rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .7rem; color: var(--muted); font-size: .9rem; }
+.page-content { padding: 2rem; width: 100%; max-width: 88rem; margin: 0 auto; flex: 1; min-width: 0; }
+.page-heading { margin-bottom: 1.6rem; }
+.page-heading p { max-width: 65ch; }
+.card { background: white; border: 1px solid var(--border); border-radius: .65rem; padding: 1.5rem; margin-bottom: 1.25rem; min-width: 0; box-shadow: 0 1px 2px #11182705; }
+.card h2 { margin-bottom: .9rem; }
+.home-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 1.5rem; }
+.home-grid .card { padding: 1.8rem; }
+.home-grid p { color: var(--muted); max-width: 55ch; margin-bottom: 1.6rem; }
+.section-label { display: block; color: var(--primary); font-size: .72rem; font-weight: 750; letter-spacing: .07em; margin-bottom: .85rem; }
+.badge { display: inline-block; border: 1px solid #d3dff4; background: #edf3fe; color: #164387; border-radius: .35rem; padding: .2rem .65rem; font-size: .82rem; font-weight: 600; }
+.button { display: inline-flex; align-items: center; justify-content: center; gap: .7rem; border: 1px solid var(--primary); border-radius: .4rem; background: var(--primary); color: #fff; padding: .6rem 1rem; min-height: 2.75rem; font-weight: 600; cursor: pointer; text-decoration: none; line-height: 1.4; }
+.button:hover { background: var(--primary-hover); border-color: var(--primary-hover); color: #fff; }
+.button-secondary { background: #fff; color: var(--primary); border-color: #aabbd2; }
+.button-secondary:hover { color: var(--primary-hover); background: #edf3fe; border-color: var(--primary); }
+.button:disabled { background: #e5e7eb; border-color: #b8c1ce; color: #4b5563; cursor: default; }
+.form-field { display: grid; gap: .4rem; min-width: 0; }
+.form-field label { font-weight: 600; font-size: .9rem; }
+input, select { width: 100%; min-width: 0; min-height: 2.75rem; padding: .6rem .8rem; border: 1px solid #97a7bf; border-radius: .35rem; background: #fff; color: #111827; }
+input:disabled, select:disabled { background: #eef1f6; color: #4b5563; }
+.filters { display: flex; flex-wrap: wrap; align-items: end; gap: 1rem; }
+.filters .form-field:first-child { flex: 1 1 15rem; }
+.filters .form-field { flex: 0 1 11rem; }
+.filters .button { flex: 0 0 auto; }
+.table-scroll { overflow-x: auto; max-width: 100%; }
+.data-table { width: 100%; border-collapse: collapse; text-align: left; }
+.data-table th { background: #f6f8fb; color: #374151; font-size: .85rem; font-weight: 650; }
+.data-table th, .data-table td { padding: .85rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; overflow-wrap: anywhere; }
+.data-table tr:last-child td { border-bottom: 0; }
+.data-table th:first-child { border-radius: .4rem 0 0 .4rem; }
+.data-table td a { font-weight: 600; }
+.pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding-top: 1.2rem; border-top: 1px solid var(--border); margin-top: 1rem; }
+.pagination > div { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
+.pagination select { width: auto; }
+.pagination p { margin: 0; }
+.record-nav { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 1.5rem; padding: 0 0 1rem; border-bottom: 1px solid var(--border); }
+.record-nav a { border-radius: .35rem; padding: .5rem .8rem; text-decoration: none; background: white; border: 1px solid var(--border); color: #374151; }
+.record-nav a[aria-current="page"], .record-nav a.active { color: white; background: var(--primary); border-color: var(--primary); }
+.record-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); column-gap: 2rem; row-gap: 1.3rem; margin: 0 0 1.3rem; }
+.record-grid div { min-width: 0; }
+dt { font-size: .85rem; color: var(--muted); margin-bottom: .2rem; font-weight: 600; }
+dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.details-list { display: grid; gap: .85rem; padding-left: 0; list-style: none; }
+details { border: 1px solid var(--border); border-radius: .45rem; padding: 1rem; margin-bottom: 1rem; }
+summary { cursor: pointer; font-weight: 600; color: var(--primary); }
+details[open] > summary { padding-bottom: 1rem; }
+.collection-section { margin-top: 1.5rem; }
+.resource-list { display: grid; gap: 1rem; }
+.resource-item { border: 1px solid var(--border); border-radius: .45rem; padding: 1rem; min-width: 0; }
+.resource-item p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.resource-item h3, .resource-item h4 { overflow-wrap: anywhere; }
+.patient-summary { border-left: 4px solid var(--primary); }
+.patient-summary h2 { margin-bottom: .35rem; font-size: 1.5rem; }
+.patient-summary p { margin-bottom: .5rem; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: 0 0 1rem; font-size: .9rem; }
+.breadcrumb > :not(:first-child)::before { content: '/'; padding-right: .5rem; color: var(--muted); }
+.empty-state, .loading-state { color: var(--muted); text-align: center; background: #f8fafc; border-radius: .5rem; padding: 2rem 1rem; }
+.loading-state { display: flex; justify-content: center; align-items: center; gap: .7rem; }
+.loading-state p { margin: 0; }
+.spinner { border: 2px solid #c2d1e8; border-top-color: var(--primary); width: 1.25rem; height: 1.25rem; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.error-state { background: #fff4f4; color: #8f2525; border: 1px solid #dba4a4; border-radius: .5rem; padding: 1.2rem; margin-bottom: 1rem; }
+.error-state h2 { font-size: 1.1rem; margin-bottom: .5rem; }
+.notice { padding: .8rem; background: #edf3fe; color: #164387; border: 1px solid #d3dff4; border-radius: .4rem; }
+.app-footer { padding: 1rem 2rem; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); }
+.skip-link { position: absolute; top: -10rem; left: 1rem; background: #fff; color: var(--primary); padding: .8rem; z-index: 10; }
+.skip-link:focus { top: 1rem; }
+.login-page { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1rem; }
+.login-brand { display: flex; align-items: center; gap: .8rem; margin-bottom: 1.4rem; }
+.login-brand p { margin: 0; line-height: 1.4; }
+.login-brand strong { display: block; }
+.login-card { width: 100%; max-width: 28rem; padding: 2rem; }
+.login-card h1 { font-size: 1.5rem; }
+.login-card .page-heading p { font-size: .9rem; }
+.login-card form { display: grid; gap: 1.1rem; }
+.login-footer { color: var(--muted); font-size: .8rem; text-align: center; }
+@media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+@media (max-width: 800px) {
+  .app-layout { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { border-right: none; border-bottom: 1px solid var(--border); padding: .8rem 1rem; gap: .8rem; }
+  .sidebar nav { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .sidebar nav a { padding: .5rem .7rem; }
+  .sidebar-account { border-top: 0; padding: 0; margin: 0; display: flex; align-items: center; justify-content: space-between; gap: .8rem; }
+  .sidebar-account .button { padding: .4rem .8rem; min-height: 2.5rem; }
+  .topbar { padding: .75rem 1rem; }
+  .page-content { padding: 1.5rem 1rem; }
+  .home-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .card, .home-grid .card { padding: 1.1rem; }
+  .app-footer { padding: 1rem; }
+  .data-table th, .data-table td { padding: .7rem .6rem; }
+}
+@media (max-width: 420px) { .sidebar nav a span { display: none; } .filters .form-field { flex-basis: 100%; } }

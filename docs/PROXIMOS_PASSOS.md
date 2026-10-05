@@ -1,9 +1,9 @@
 # Roadmap do Projeto
 
-Atualizado em: 2026-10-03
+Atualizado em: 2026-10-04
 
 Este é o roadmap oficial do projeto. A estrutura original possui dez etapas;
-as etapas 1–5 estão concluídas no ambiente sintético. As etapas 5, 7, 9 e 10 possuem subetapas porque
+as etapas 1–6 estão concluídas no ambiente sintético. As etapas 5, 6, 7, 9 e 10 possuem subetapas porque
 contêm entregas independentes e dependências próprias. As letras identificam
 subetapas de execução e não criam uma nova numeração principal.
 
@@ -185,51 +185,115 @@ integrado F01–F16/T01–T18 comprovado. Não equivale a implantação ou homol
 
 ## Etapa 6 — Fundação do frontend
 
-- **Objetivo:** permitir login e navegação básica consumindo somente a API.
-- **Principais alterações:** React, rotas, sessão, comunicação autenticada, layout principal, navegação, erros, listagem, busca e página de paciente.
-- **Dependências:** Etapa 5E e contratos HTTP estáveis.
-- **Critérios de aceite:** usuário autenticado entra, navega, pesquisa e abre paciente; expiração de sessão e erros são tratados; nenhuma estética sofisticada bloqueia o fluxo.
-- **Validação:** build, testes de componentes/fluxos sintéticos, revisão manual de autenticação e `make project-check`.
+A [análise do Figma Make e plano de integração](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
+foi concluída em 2026-10-03. A fundação foi implementada e validada em
+2026-10-04: aplicação própria em `frontend/`, com React/TypeScript, usando o
+protótipo como referência visual e funcional. Sessão, rotas e consultas seguem
+os contratos `/v1`. Bibliotecas e toolchain adotados estão em
+[FRONTEND.md](FRONTEND.md) e no lockfile; a
+[ADR-024](DECISOES_ARQUITETURAIS.md#adr-024) registra as fronteiras.
+
+Este roadmap é a fonte da sequência e dos critérios de aceite. A análise mantém
+o inventário, a matriz de compatibilidade e os detalhes técnicos de integração.
+A evidência da execução está no
+[relatório da Etapa 6](validacoes/VALIDACAO_ETAPA_6.md).
+
+### 6A — Base técnica, sessão e navegação
+
+**Status:** concluída no ambiente sintético em 2026-10-04; aceite documentado.
+
+- **Objetivo:** criar a fundação do frontend consumindo somente a API existente.
+- **Principais alterações:** diretório próprio, toolchain/lockfile, layout e
+  componentes revisados, rotas reais, cliente HTTP `/v1`, login, `/auth/me`, saída
+  e estados de erro. Separar sessão, consultas do servidor e rascunhos locais;
+  preferir proxy de desenvolvimento e mesma origem na implantação.
+- **Dependências:** Etapa 5E; ambiente sintético com schema compatível e política
+  de acesso explícita. Não aplicar migrations no startup do frontend/backend.
+- **Critérios de aceite:** login e identidade vêm do servidor; saída/401 limpam
+  sessão e cache clínico; 403/429/503 têm tratamento compreensível; links diretos,
+  voltar e recarregar funcionam. A interface não simula persistência ou autorização.
+- **Validação:** acrescentar alvos de build/check do frontend ao Makefile e CI;
+  executar build, testes dos fluxos de sessão e revisão manual de teclado/foco.
+  Combinar verificações de outras camadas somente se forem alteradas.
+
+### 6B — Busca e ficha em leitura
+
+**Status:** concluída no ambiente sintético em 2026-10-04; aceite documentado.
+
+- **Objetivo:** localizar pacientes e consultar os recursos já publicados.
+- **Principais alterações:** busca por nome/sexo, paginação `limit`/`offset`,
+  listagem com ID/nome, ficha carregada por recurso/aba, histórico de atendimento,
+  Minha conta básica e início com atalhos. Reduzir a tabela ampla do protótipo aos
+  campos disponíveis, sem consultas individuais para preencher cada linha.
+- **Dependências:** 6A e contratos de leitura da Etapa 5E.
+- **Critérios de aceite:** os três perfis consultam somente seu escopo; vazio,
+  carregamento e erro são distintos; filtros/página ficam na URL; não inventar
+  totais nem interpretar ausência na página como inexistência global.
+- **Validação:** testes de componentes e integração sintética de busca/ficha,
+  paginação, expiração e recusa por vínculo; revisão manual da navegação.
 
 ## Etapa 7 — Fluxos clínicos
 
 **Objetivo:** tornar utilizáveis as telas efetivamente usadas pela equipe.
 
+Antes de cada formulário, conferir a matriz da análise: existir no schema ou no
+importador não significa possuir contrato HTTP de consulta/escrita. Campos sem
+suporte permanecem pendências explícitas; nenhuma entrada preenchida pode ser
+silenciosamente descartada. Catálogos e extensões estritamente necessárias devem
+ter contrato, autorização e validação próprios antes de integrar o fluxo afetado.
+
 ### 7A — Cadastro e atendimentos
 
 - **Objetivo:** permitir localizar pacientes e registrar atendimentos básicos.
-- **Principais alterações:** cadastro/edição de paciente, busca, atendimento,
-  dados demográficos, idade calculada com referência visível e histórico básico.
-- **Dependências:** Etapa 6, Etapa 5E e contratos de 5A.
+- **Principais alterações:** busca prévia, cadastro/edição de paciente,
+  criação/edição versionada de atendimento, dados demográficos, contatos/endereço,
+  idade calculada com referência visível e histórico básico.
+- **Dependências:** 6A–6B, Etapa 5E e contratos de 5A.
 - **Critérios de aceite:** paciente pode ser consultado e editado conforme perfil;
-  idade não é digitada como fato independente; atendimento não é sobrescrito.
-- **Validação:** testes de componentes e integração sintética de paciente/atendimento.
+  cadastro também respeita a política clínica do ambiente. Nome é obrigatório;
+  nascimento/sexo seguem a opcionalidade da API. Idade não é digitada como fato
+  independente; contatos/endereço anteriores são preservados; PATCH usa a versão
+  original e 409 não provoca sobrescrita automática. Não fundir possíveis duplicados.
+- **Validação:** testes de componentes e integração sintética de paciente/atendimento,
+  incluindo validação, recusa por vínculo e edição concorrente.
 
 ### 7B — Dados clínicos e exames
 
 - **Objetivo:** registrar os dados clínicos e exames necessários ao atendimento.
-- **Principais alterações:** dados clínicos, exames trazidos e solicitados,
-  identificação obrigatória, familiares examinados e resultados, preservação de
-  ausências e estados desconhecidos.
-- **Dependências:** contratos incorporados de Chagas, exames e familiares, além da
-  migration física restante da Etapa 5C.
-- **Critérios de aceite:** exame solicitado não exige resultado; exame trazido é
-  identificado; familiar examinado não vira histórico de doença.
+- **Principais alterações:** avaliação clínica, diagnóstico/descoberta de Chagas,
+  exames trazidos e solicitados, familiares identificados e resultados, pendências
+  da criação e preservação de ausências/estados desconhecidos. Criar núcleo e
+  filhos aceitos do atendimento na mesma requisição transacional.
+- **Dependências:** 7A; contratos e migrations da Etapa 5C já validados, aplicados
+  no ambiente sintético apropriado; consulta de catálogos ativos antes dos selects.
+  Definir o recorte de sorologias, condições/comorbidades, dispositivos/eventos/óbito,
+  medicamentos e resultados detalhados ainda sem HTTP; não prometer cobertura total
+  do protótipo antes dessa avaliação.
+- **Critérios de aceite:** descoberta não vira data de sorologia; exame solicitado
+  não exige resultado; exame genérico é identificado; familiar examinado não vira
+  histórico de doença; nenhum campo preenchido se perde. Edição do núcleo não é
+  apresentada como edição de filhos que o PATCH atual não suporta.
 - **Validação:** testes de formulário/API com casos positivos, negativos, vazios e
   ambíguos, usando somente dados sintéticos.
 
 ### 7C — Tratamento, retornos e encaminhamentos
 
 - **Objetivo:** implementar os fluxos clínicos de BZN e comunicação assistencial.
-- **Principais alterações:** BZN, reações, retorno de 30 dias, retorno final,
-  retornos anuais, histórico de ocorrências, encaminhamento, contrarreferências
-  repetíveis, notificação e pendências textuais.
-- **Dependências:** contrato temporal de D6–D11 e importador/API da Etapa 5; não
-  fabricar datas do ano legado. Contrarreferência avançada e upload permanecem
-  fora do escopo atual.
+- **Principais alterações:** BZN/reações na criação do tratamento, retornos de
+  30 dias/final efetivamente realizados, retornos anuais, ano informado separado
+  de visita, projetos, notificação, encaminhamento, contrarreferências repetíveis
+  e pendências por paciente. Operações posteriores ao atendimento têm confirmação
+  própria, com indicação do que já foi salvo e do que permanece em rascunho.
+- **Dependências:** 7A–7B, contrato temporal de D6–D11, APIs da Etapa 5 e catálogos
+  ativos de projetos/tipos de encaminhamento. Edição de BZN existente, reação
+  isolada, exame/encaminhamento existente e observação/responsável de revisão de
+  pendência exigem contratos específicos; não improvisar com criação duplicada.
+  Contrarreferência avançada e upload permanecem fora do escopo atual.
 - **Critérios de aceite:** datas são comparecimentos efetivos; 30/60 dias não são
-  calculados automaticamente; histórico não é substituído; `Localizado` não
-  aparece funcionalmente.
+  calculados automaticamente; ano isolado não fabrica visita; histórico não é
+  substituído; BZN permanece único; projetos/notificação respeitam o contexto do
+  paciente e os estados desconhecidos. Pendência resolvida exige data;
+  `Localizado` não aparece funcionalmente.
 - **Validação:** testes de componentes e integração com múltiplos retornos,
   contrarreferências e conflitos de autorização.
 
@@ -237,20 +301,36 @@ integrado F01–F16/T01–T18 comprovado. Não equivale a implantação ou homol
 
 - **Objetivo:** comprovar que os módulos formam um atendimento utilizável.
 - **Principais alterações:** navegação entre ficha, atendimento, exames, BZN,
-  encaminhamento, notificação e histórico; mensagens de erro e estados de carga.
+  encaminhamento, notificação e histórico; mensagens de erro, estados de carga,
+  proteção de rascunhos e recuperação após falha entre operações.
 - **Dependências:** 7A–7C e contratos HTTP estabilizados.
 - **Critérios de aceite:** fluxo principal completo sem acesso direto ao banco;
   dados permanecem rastreáveis e o usuário não perde alterações válidas.
+  Consulta não escreve; 401/403/409 não produzem sucesso fictício; falha de rede
+  após escrita exige verificação, sem retry automático nem duplicação do atendimento.
 - **Validação:** fluxo end-to-end sintético, revisão de usabilidade com a equipe e
   `make project-check`.
 
 ## Etapa 8 — Dashboard e funcionalidades complementares
 
 - **Objetivo:** oferecer visão operacional pequena e útil.
-- **Principais alterações:** dashboard inicial, filtros e indicadores essenciais, CSV pela interface, importação, acompanhamento de lote, inconsistências, validações de formulário e ajustes de UX.
-- **Dependências:** Etapas 5–7 e métricas aprovadas; não iniciar plataforma analítica nem dashboard sofisticado.
-- **Critérios de aceite:** indicadores têm definição verificável e não exibem JSONB bruto; importação e inconsistências são compreensíveis; CSV respeita autorização e filtros.
-- **Validação:** testes de interface/API, revisão com dados sintéticos e análise de permissões/exportação.
+- **Principais alterações:** CSV de pacientes, acompanhamento sanitizado de lotes,
+  upload/simulação e reenvio idempotente sintéticos, inconsistências efetivamente
+  expostas e ajustes de UX. Indicadores e filtros adicionais entram somente após
+  definição e contrato agregado; até lá, o início da 6B pode oferecer atalhos.
+- **Dependências:** Etapas 5–7; métricas e população autorizada aprovadas; habilitação
+  sintética explícita das portas operacionais. Fila global de pendências, gestão
+  de usuários e relatório rico de simulação não possuem contrato atual e exigem
+  priorização própria. Criar novo elo de reprocessamento usa `--reprocessar` na CLI;
+  `POST /importacoes` não expõe essa opção. Um botão para esse fluxo exigiria
+  evolução HTTP justificada; revisão entre arquivos alterados continua separada.
+- **Critérios de aceite:** indicadores têm definição verificável e não são
+  calculados de páginas parciais; CSV explicita filtros/página e respeita os três
+  perfis autorizados; lotes respeitam seu escopo e não expõem JSONB bruto.
+  Simulação não grava; confirmação revalida; reenvio mostra o lote efetivo;
+  progresso/contagens não são inventados.
+- **Validação:** testes de interface/API, revisão com dados sintéticos e análise
+  de permissões, exportação, simulação e idempotência.
 
 ## Etapa 9 — Produção
 
@@ -263,14 +343,17 @@ integrado F01–F16/T01–T18 comprovado. Não equivale a implantação ou homol
   configuração por ambiente, roles PostgreSQL, permissões e healthchecks.
 - **Dependências:** Etapa 8 e arquitetura de implantação escolhida.
 - **Critérios de aceite:** aplicação sobe em ambiente controlado sem comandos
-  privados do autor; migrations seguem o procedimento correto.
+  privados do autor; migrations seguem o procedimento incremental correto,
+  distinguindo evidência persistente 00–20 dos incrementos validados em descartáveis.
 - **Validação:** `make docker-project-check` e teste de reinício/recuperação.
 
 ### 9B — Segurança de transporte e segredos
 
 - **Objetivo:** proteger comunicação, credenciais e dados estruturados/brutos.
 - **Principais alterações:** HTTPS, gestão/rotação de segredos, roles mínimas,
-  permissões, proteção do JSONB e revisão da exposição da API/frontend.
+  permissões, proteção do JSONB e revisão da exposição da API/frontend. Planejar
+  evolução explícita e testada dos bloqueios atuais de produção para acesso
+  clínico/importação/revisão; não contorná-los alterando `NODE_ENV`.
 - **Dependências:** 9A e decisões institucionais de identidade e acesso.
 - **Critérios de aceite:** nenhum segredo versionado; transporte seguro; JSONB
   não acessível por rotas genéricas; acesso indevido retorna 401/403.
@@ -290,10 +373,12 @@ integrado F01–F16/T01–T18 comprovado. Não equivale a implantação ou homol
 
 - **Objetivo:** verificar que a operação está autorizada antes de dados reais.
 - **Principais alterações:** responsáveis por lotes, revisão de incidentes,
-  E2E sintético e decisão formal de liberação.
+  E2E sintético, plano de migração e decisão formal de liberação.
 - **Dependências:** 9A–9C e governança institucional aprovada.
 - **Critérios de aceite:** controles verificados, autorização explícita registrada
-  e nenhum dado real carregado prematuramente.
+  e nenhum dado real processado prematuramente, inclusive em simulação.
+  Arquivos, backups e credenciais permanecem fora do Git; acesso, retenção,
+  recuperação e responsáveis estão definidos antes do piloto autorizado.
 - **Validação:** `make docker-project-check`, E2E, restore e revisão operacional.
 
 ## Etapa 10 — Homologação e estabilização
@@ -303,11 +388,13 @@ integrado F01–F16/T01–T18 comprovado. Não equivale a implantação ou homol
 ### 10A — Homologação funcional
 
 - **Objetivo:** testar com usuários os fluxos definidos nas Etapas 5–8.
-- **Principais alterações:** roteiro de uso, importação completa autorizada,
+- **Principais alterações:** roteiro de uso, piloto e importação completa autorizados,
   pacientes, atendimentos, exames, BZN, retornos, encaminhamentos, dashboard e CSV.
 - **Dependências:** Etapas 5–9 e dados sintéticos ou autorizados conforme 9D.
 - **Critérios de aceite:** usuários completam o fluxo principal e registram
-  evidências sem acessar o banco diretamente.
+  evidências sem acessar o banco diretamente. Reconciliar contagens, amostras,
+  campos promovidos, conteúdo preservado e pendências antes de ampliar o piloto;
+  dados importados não são declarados consultáveis/editáveis sem suporte HTTP.
 - **Validação:** sessões de homologação, E2E e registro de casos aceitos/rejeitados.
 
 ### 10B — Correções e regressão
@@ -360,18 +447,46 @@ importador e backend funcionais antes de iniciar as Etapas 6–8.
 
 ## Próximo trabalho
 
-A execução autorizada abrange toda a Etapa 5; o antigo recorte de próxima tarefa
-isolada foi superado. Implementação e evidências estão na
-[matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md). A implementação,
-validação final e documentação foram concluídas. Por solicitação do responsável,
-as alterações foram organizadas em commits locais por contexto e dependência,
-sem push.
+A Etapa 5 está concluída no ambiente sintético, com evidências na
+[matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md). **6A–6B estão
+concluídas no ambiente sintético**, com evidências no
+[relatório da Etapa 6](validacoes/VALIDACAO_ETAPA_6.md): base própria, sessão e
+leitura pelas APIs atuais. Avançar 7A–7D conforme suporte real dos contratos e resolver catálogos
+antes dos formulários dependentes. Métricas, fila global e gestão de usuários
+não bloqueiam essa fundação nem entram automaticamente por aparecerem no protótipo.
 
-O backend permanece exclusivamente sintético, com banco persistente preservado.
-Frontend e Etapas 6–10 exigem trabalho posterior fora desta entrega; os seus
-critérios acima continuam vigentes. O próximo desenvolvimento previsto é a
-Etapa 6, que depende de nova execução. Upload avançado e planejamento D9 não foram
-antecipados nem inferidos como dados clínicos.
+Esta entrega desenvolve a fundação do frontend sem alterar contratos HTTP,
+backend, banco persistente ou protótipo. Etapas 7–10 exigem execução futura.
+Upload avançado e planejamento D9 não foram antecipados nem inferidos como dados
+clínicos. Dados reais seguem a liberação 9D, sem confundir viabilidade do importador
+com autorização de uso.
+
+### Preparação da migração da planilha real
+
+A preparação pode ocorrer em paralelo à construção do frontend, sem exigir a
+reprodução completa do protótipo. A importação utiliza o importador existente;
+o frontend consulta as projeções publicadas pela API. Executar a carga real
+continua condicionado a 9D e à homologação controlada de 10A.
+
+- **Mapeamento:** produzir uma matriz `campo da planilha → manifesto/importador →
+  destino estruturado ou proveniência → API → tela`, partindo da
+  [cobertura de colunas](dados/COBERTURA_COLUNAS_PLANILHA.md). Distinguir campos
+  promovidos, preservados sem interpretação, excluídos funcionalmente e sem HTTP;
+  não alterar regra clínica ou schema apenas para preencher uma tela do protótipo.
+- **Ensaio sintético:** validar layout, formatos, ambiguidades, identidade,
+  duplicações, idempotência, proveniência e conciliação em ambiente descartável
+  compatível. Definir resultados esperados e roteiro de recuperação antes do piloto.
+- **Prontidão operacional:** definir ambiente e plano incremental de migrations,
+  responsáveis, acessos, segredos, localização dos arquivos fora do Git,
+  retenção/auditoria e backup/restore conforme a
+  [política de dados](SEGURANCA_DE_DADOS.md). Registrar a liberação explícita.
+- **Execução posterior:** após 9D, simular e executar piloto autorizado, verificar
+  resultados e ampliar somente após aceite. Não usar portas HTTP sintéticas ou
+  flags de desenvolvimento como atalho para dados reais.
+
+Entregas esperadas desta preparação: matriz de cobertura, roteiro sintético de
+migração/conciliação, plano operacional e lista de lacunas HTTP priorizadas.
+Nenhuma planilha real é lida ou importada nesta revisão documental.
 
 ## Validação da revisão documental de 2026-09-14
 

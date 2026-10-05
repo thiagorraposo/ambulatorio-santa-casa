@@ -41,7 +41,8 @@ COMPACT_TARGETS := git-status docs-check manifest-check manifest-source-check \
 	db-check db-test project-check docker-config-check docker-db-check docker-db-test \
 	docker-project-check docker-restore-check docker-restore-test importer-test \
 	backend-build backend-unit-test backend-integration-test backend-foundation-e2e \
-	backend-check backend-container-check backend-clinical-test workflow-test
+	backend-check backend-container-check backend-clinical-test workflow-test \
+	frontend-build frontend-unit-test frontend-e2e frontend-check
 ifneq ($(filter-out $(COMPACT_TARGETS),$(COMPACT_GOALS)),)
 $(error COMPACT=1 aceita somente alvos de validação ou git-status; consulte make help)
 endif
@@ -62,7 +63,8 @@ else
 	docker-backup docker-backup-list docker-restore docker-restore-check docker-restore-test \
 	manifest-check manifest-source-check importer-fixture importer-run importer-dry-run importer-test \
 	backend-install backend-build backend-unit-test backend-db-setup backend-integration-test \
-	backend-foundation-e2e backend-clinical-test backend-check backend-up backend-container-check backend-logs backend-stop workflow-test
+	backend-foundation-e2e backend-clinical-test backend-check backend-up backend-container-check backend-logs backend-stop workflow-test \
+	frontend-install frontend-dev frontend-build frontend-unit-test frontend-e2e frontend-check
 
 help:
 	@echo "Comandos disponíveis:"
@@ -85,11 +87,18 @@ help:
 	@echo "  make backend-up      Provisiona login técnico e sobe o backend Docker"
 	@echo "  make backend-container-check Constrói e valida health/usuário do container backend"
 	@echo "  make backend-logs    Acompanha logs do backend"
+	@echo "  make frontend-install Instala dependências reproduzíveis com npm ci (Node 24)"
+	@echo "  make frontend-dev    Inicia Vite com proxy /v1 para FRONTEND_API_TARGET"
+	@echo "  make frontend-build  Verifica TypeScript e compila o frontend"
+	@echo "  make frontend-unit-test Executa testes de sessão, contratos e apresentação"
+	@echo "  make frontend-e2e    Compila backend e valida navegador/API em banco descartável (SYNTHETIC_PG_*)"
+	@echo "  make frontend-check  Executa build, unitários e E2E do frontend"
 	@echo "  make project-check   Executa docs-check, testes SQL, diff e status Git"
 	@echo "  make workflow-test   Testa saída compacta e propagação de falhas com dados sintéticos"
 	@echo "  make <validação> COMPACT=1 Resume o resultado e guarda log filtrado em /tmp"
 	@echo "    Disponível para docs/manifest/db/project-check, db-test, importer-test,"
-	@echo "    backend-{build,unit-test,integration-test,foundation-e2e,check,container-check},"
+	@echo "    backend-{build,unit-test,integration-test,foundation-e2e,clinical-test,check,container-check},"
+	@echo "    frontend-{build,unit-test,e2e,check},"
 	@echo "    docker-{config-check,db-check,db-test,project-check,restore-check,restore-test},"
 	@echo "    manifest-source-check, workflow-test e git-status. Sem opção: saída habitual."
 	@echo "  make db-schema-dump  Atualiza somente o dump estrutural do schema $(DB_SCHEMA)"
@@ -99,16 +108,16 @@ help:
 	@echo "  make docker-stop     Para o container sem remover o volume"
 	@echo "  make docker-recreate Recria o container preservando o volume"
 	@echo "  make docker-logs     Acompanha os logs do PostgreSQL Docker"
-	@echo "  make docker-migrate  Aplica sql/00 a sql/20 em PostgreSQL Docker limpo"
+	@echo "  make docker-migrate  Aplica as migrations versionadas em sql/ no banco Docker vazio"
 	@echo "  make docker-db-check Executa db-check explicitamente no Docker"
-	@echo "  make docker-db-test  Executa os dez testes SQL no Docker"
+	@echo "  make docker-db-test  Executa os $(words $(SQL_TESTS)) testes SQL versionados no Docker"
 	@echo "  make docker-schema-dump Gera dump estrutural Docker em $(DOCKER_SCHEMA_DUMP)"
 	@echo "  make docker-project-check Executa o project-check no Docker"
 	@echo "  make docker-backup    Cria backup lógico custom em $(BACKUP_DIR)/"
 	@echo "  make docker-backup-list Lista backups locais ignorados pelo Git"
 	@echo "  make docker-restore BACKUP_FILE=... RESTORE_ENV=docker-restore"
 	@echo "  make docker-restore-check Valida o banco Docker restaurado"
-	@echo "  make docker-restore-test Executa os dez testes no banco restaurado"
+	@echo "  make docker-restore-test Executa os $(words $(SQL_TESTS)) testes SQL versionados no banco restaurado"
 	@echo "  make docker-destroy DESTROY_ENV=docker  DESTROI os volumes Docker do projeto"
 
 git-status:
@@ -185,6 +194,8 @@ docs-check:
 		docs/THREAT_MODEL.md \
 		docs/ARQUITETURA_BACKEND.md \
 		docs/validacoes/VALIDACAO_ETAPA_4C.md \
+		docs/FRONTEND.md \
+		docs/validacoes/VALIDACAO_ETAPA_6.md \
 		docs/WORKFLOW_DE_DESENVOLVIMENTO.md; do \
 		if [ ! -s "$$file" ]; then \
 			echo "Ausente ou vazio: $$file"; \
@@ -278,6 +289,24 @@ backend-logs: docker-config-check
 
 backend-stop: docker-config-check
 	@$(COMPOSE) stop backend
+
+frontend-install:
+	@cd frontend && npm ci
+
+frontend-dev:
+	@cd frontend && npm run dev
+
+frontend-build:
+	@cd frontend && npm run build
+
+frontend-unit-test:
+	@cd frontend && npm run test:unit
+
+frontend-e2e: backend-build
+	@bash tests/frontend/test_e2e.sh
+
+frontend-check: frontend-build frontend-unit-test frontend-e2e
+	@echo "OK: frontend compilado e testado com navegador/API sintéticos"
 
 project-check: docs-check db-test
 	@git diff --check

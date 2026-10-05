@@ -1,0 +1,11 @@
+{
+  "title": "Ambulatório Santa Casa",
+  "description": "This web application streamlines project management by enabling teams to collaborate effectively, track progress, and meet deadlines efficiently.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

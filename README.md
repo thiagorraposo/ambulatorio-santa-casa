@@ -1,10 +1,26 @@
 # Ambulatório Santa Casa
 
 Base PostgreSQL construída incrementalmente para organizar dados do ambulatório.
-O schema físico possui 38 tabelas. As Etapas 4A/4B adicionam a fundação NestJS e
-identidade/autorização mínimas, sem escrita clínica, frontend ou dados reais.
+O schema persistente possui 38 tabelas. Importador e backend NestJS evoluíram até
+a Etapa 5 no ambiente sintético; a fundação do frontend React/TypeScript
+(6A–6B) está concluída e validada no ambiente sintético. Consulte o
+[estado vigente](docs/ESTADO_ATUAL_DO_PROJETO.md) para os limites de cada ambiente.
 
 O schema aplicado é `ambulatorio`. A principal evidência física versionada é `docs/evidencias/schema_atual_ambulatorio.sql`.
+
+## Frontend e referência visual
+
+A aplicação própria fica em [`frontend/`](frontend/), consome a API `/v1` e
+inclui sessão, navegação, busca e ficha em leitura. Setup, comandos e contratos
+estão em [`docs/FRONTEND.md`](docs/FRONTEND.md); os resultados de validação ficam
+no [relatório da Etapa 6](docs/validacoes/VALIDACAO_ETAPA_6.md).
+
+O código do protótipo Figma Make fica em
+[`referencias/frontend/figma-make-prototipo/`](referencias/frontend/figma-make-prototipo/),
+como material de apoio visual e funcional, separado do build da aplicação.
+Consulte a
+[organização das referências](referencias/README.md) e a
+[análise de integração](docs/arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md).
 
 ## Pré-requisitos
 
@@ -12,7 +28,8 @@ O schema aplicado é `ambulatorio`. A principal evidência física versionada é
 - Docker Engine com Docker Compose, ambiente padrão de desenvolvimento.
 - GNU Make.
 - Git.
-- Node.js 24 e npm para execução local do backend.
+- Node.js 24 e npm para execução local do backend e frontend.
+- Chromium do Playwright para os testes de navegador do frontend.
 - Banco `ambulatorio_santa_casa`, usuário `ambulatorio_user` e schema `ambulatorio` já existentes.
 - Autenticação local configurada em `~/.pgpass` com permissão `0600`.
 
@@ -82,16 +99,16 @@ make db-check DB_ENV=docker
 | `make docker-stop` | Para o container sem remover o volume. | Para somente o ambiente Docker. |
 | `make docker-recreate` | Recria o container preservando o volume. | Substitui somente o container Docker. |
 | `make docker-logs` | Acompanha logs do PostgreSQL Docker. | Não |
-| `make docker-migrate` | Aplica `sql/00`–`sql/20` em ordem no Docker vazio. | Sim, somente no banco Docker. |
+| `make docker-migrate` | Aplica as migrations versionadas em `sql/` em ordem no banco Docker vazio. | Sim, somente no banco Docker. |
 | `make docker-db-check` | Executa `db-check` contra `5433`. | Não |
-| `make docker-db-test` | Executa os dez testes SQL no Docker. | Não persiste dados sintéticos. |
+| `make docker-db-test` | Executa os testes SQL versionados no Docker. | Não persiste dados sintéticos. |
 | `make docker-schema-dump` | Gera dump estrutural Docker em `/tmp`. | Não altera o banco nem a evidência oficial. |
 | `make docker-project-check` | Executa o check completo contra o Docker. | Não persiste dados sintéticos. |
 | `make docker-backup` | Cria e valida backup lógico custom do Docker. | Lê o banco e grava arquivo local ignorado. |
 | `make docker-backup-list` | Lista os backups lógicos locais. | Não. |
 | `make docker-restore BACKUP_FILE=... RESTORE_ENV=docker-restore` | Restaura no serviço Docker controlado. | **Substitui somente o schema do banco de recuperação.** |
 | `make docker-restore-check` | Confirma estrutura e catálogos restaurados. | Não. |
-| `make docker-restore-test` | Executa os dez testes transacionais no restore. | Não persiste dados sintéticos. |
+| `make docker-restore-test` | Executa os testes SQL versionados no banco restaurado. | Não persiste dados sintéticos. |
 | `make docker-destroy DESTROY_ENV=docker` | Remove containers, rede e volumes deste Compose. | **Destrutivo somente para o ambiente Docker.** |
 | `make importer-fixture` | Regera a planilha XLSX exclusivamente sintética. | Não altera banco. |
 | `make importer-test` | Testa o importador em banco Docker temporário. | Cria e remove somente o banco isolado. |
@@ -99,6 +116,9 @@ make db-check DB_ENV=docker
 | `make backend-install` | Instala dependências exatamente pelo `package-lock`. | Não. |
 | `make backend-check` | Compila e testa integração, autenticação e autorização. | Insere e remove paciente e usuários sintéticos. |
 | `make backend-up` | Provisiona o login técnico e sobe o backend no Compose. | Altera somente a role de login; não altera schema. |
+| `make frontend-install` | Instala dependências exatamente pelo lockfile. | Não. |
+| `make frontend-dev` | Serve Vite e encaminha `/v1` à API sintética configurada. | A interface desta etapa só faz leitura. |
+| `make frontend-check COMPACT=1` | Compila, testa sessão/componentes e executa navegador/API reais. | Cria e remove banco/roles exclusivamente sintéticos e descartáveis. |
 
 Os alvos genéricos não aplicam migrations. `docker-migrate` aplica as migrations
 somente quando selecionado explicitamente, e `docker-destroy` exige a confirmação
