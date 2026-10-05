@@ -6,6 +6,7 @@ import { clinicalLabel, displayText, formatAge, formatClinicalDate, triState } f
 import { AttendanceLink, Fields } from './components';
 import { pagePath, Pagination, usePage } from './pagination';
 import { useSession } from '../../app/session';
+import ClinicalActions from '../clinical/ClinicalActions';
 import {
   AttendanceHistory, PatientAnnualFollowup, PatientBzn, PatientExams, PatientNotification,
   PatientPending, PatientProjects, PatientReferrals,
@@ -87,6 +88,7 @@ export default function PatientPage() {
           {session.user?.perfil !== 'consulta' && <div className="form-actions">
             <Link to={`${path}/editar`} className="button button-secondary">Editar paciente</Link>
             <Link to={`${path}/atendimentos/novo`} className="button">Novo atendimento</Link>
+            <Link to={`${path}/registrar?tipo=bzn`} className="button button-secondary">Registrar acompanhamento</Link>
           </div>}
         </Card>
         <nav className="record-nav" aria-label="Seções da ficha">
@@ -97,6 +99,7 @@ export default function PatientPage() {
           })}
         </nav>
         <PatientSection key={`${pacienteId}-${section}`} section={section} pacienteId={pacienteId} path={path} data={data} changePage={page.changePage} />
+        <ClinicalActions pacienteId={pacienteId} section={section} />
       </>}
     </QueryState>
   </>;

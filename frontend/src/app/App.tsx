@@ -8,6 +8,7 @@ import PatientPage from '../features/pacientes/PatientPage';
 import AttendancePage from '../features/pacientes/AttendancePage';
 import PatientFormPage from '../features/clinical/PatientFormPage';
 import AttendanceFormPage from '../features/clinical/AttendanceFormPage';
+import FollowupPage from '../features/clinical/FollowupPage';
 import { DraftProvider } from '../shared/writing';
 
 const profiles = { consulta: 'Consulta', edicao: 'Edição', administracao: 'Administração' };
@@ -160,6 +161,7 @@ export default function App() {
       <Route path="/pacientes" element={<PatientsPage />} />
       <Route path="/pacientes/novo" element={<PatientFormPage />} />
       <Route path="/pacientes/:pacienteId/editar" element={<PatientFormPage />} />
+      <Route path="/pacientes/:pacienteId/registrar" element={<FollowupPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/novo" element={<AttendanceFormPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/editar" element={<AttendanceFormPage />} />
       <Route path="/pacientes/:pacienteId" element={<PatientPage />} />

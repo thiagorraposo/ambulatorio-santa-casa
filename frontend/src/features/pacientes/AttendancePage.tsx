@@ -6,6 +6,7 @@ import { clinicalLabel, displayText, formatClinicalDate, formatNumeric, triState
 import { ExamList, Fields } from './components';
 import { pagePath, Pagination, usePage } from './pagination';
 import { useSession } from '../../app/session';
+import ClinicalActions from '../clinical/ClinicalActions';
 
 function FamilyScreenings({ rows }: { rows: RastreioFamiliarResponse[] }) {
   return <>{rows.map(item => <article className="resource-item" key={item.rastreioFamiliarId}>
@@ -51,6 +52,7 @@ export default function AttendancePage() {
             {location.state?.saved && <p className="notice" role="status">{String(location.state.saved)}</p>}
             {session.user?.perfil !== 'consulta' && <div className="form-actions">
               <Link to={`${patientPath}/atendimentos/${atendimentoId}/editar`} className="button button-secondary">Editar atendimento</Link>
+              <Link to={`${patientPath}/registrar?tipo=bzn`} className="button button-secondary">Registrar acompanhamento</Link>
             </div>}
             <Fields items={[
               ['ID do atendimento', <span className="mono">{data.atendimentoId}</span>],
@@ -104,6 +106,7 @@ export default function AttendancePage() {
             {families.length === 0 ? <EmptyState>Nenhum rastreio nesta página.</EmptyState> : <FamilyScreenings rows={families} />}
             <Pagination label="coleções do atendimento" {...data.paginacaoColecoes} count={collectionLength} showCount={false} onChange={page.changePage} />
           </Card>
+          <ClinicalActions pacienteId={pacienteId} atendimentoId={atendimentoId} />
         </>;
       }}
     </QueryState>
