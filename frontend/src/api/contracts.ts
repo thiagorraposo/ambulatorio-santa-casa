@@ -16,6 +16,7 @@ export interface LoginResponse {
 
 export interface ColecaoPaginaResponse { limit: number; offset: number }
 export interface PacienteResponse { pacienteId: string; nome: string }
+export interface PacienteCapacidadesResponse { podeCadastrar: boolean }
 
 export interface PacienteDetalheResponse {
   pacienteId: string;
@@ -87,6 +88,7 @@ export interface PendenciaAtendimentoResponse {
   descricao: string | null;
   status: string | null;
   dataIdentificacao: string | null;
+  dataResolucao: string | null;
 }
 
 export interface FamiliarExaminadoResponse {
@@ -202,6 +204,7 @@ export interface PendenciaResponse {
   descricao: string;
   status: string | null;
   dataIdentificacao: string | null;
+  dataResolucao: string | null;
 }
 
 export interface ClinicalEventResponse {

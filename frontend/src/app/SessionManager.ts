@@ -6,6 +6,7 @@ export interface SessionSnapshot {
   status: 'anonymous' | 'authenticating' | 'authenticated';
   user: AuthUser | null;
   generation: number;
+  draftScope: number;
   reason: SessionEndReason | null;
   identityError: ApiError | null;
 }
@@ -26,8 +27,9 @@ export class SessionManager {
   private timer: ReturnType<typeof setTimeout> | undefined;
   private expiresAt = 0;
   private validating: Promise<void> | undefined;
+  private draftScope = 0;
   private state: SessionSnapshot = {
-    status: 'anonymous', user: null, generation: 0, reason: null, identityError: null,
+    status: 'anonymous', user: null, generation: 0, draftScope: 0, reason: null, identityError: null,
   };
 
   constructor(fetcher?: typeof fetch) {
@@ -44,8 +46,8 @@ export class SessionManager {
     return () => this.listeners.delete(listener);
   };
 
-  private publish(next: Omit<SessionSnapshot, 'generation'>): void {
-    this.state = { ...next, generation: this.client.generation };
+  private publish(next: Omit<SessionSnapshot, 'generation' | 'draftScope'>): void {
+    this.state = { ...next, generation: this.client.generation, draftScope: this.draftScope };
     for (const listener of this.listeners) listener();
   }
 
@@ -56,6 +58,7 @@ export class SessionManager {
 
   private end(reason: SessionEndReason | null): void {
     this.intent++;
+    this.draftScope++;
     clearTimeout(this.timer);
     this.expiresAt = 0;
     this.validating = undefined;
@@ -101,6 +104,7 @@ export class SessionManager {
         if (intent !== this.intent) return;
         const changed = user.usuarioId !== this.state.user?.usuarioId || user.perfil !== this.state.user?.perfil;
         if (changed) {
+          this.draftScope++;
           this.client.cancelPending();
           this.clearQueries();
         }

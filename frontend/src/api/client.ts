@@ -2,8 +2,9 @@ const messages: Record<number, string> = {
   0: 'Não foi possível conectar ao serviço. Verifique sua conexão e tente novamente.',
   400: 'A solicitação não é válida. Revise os campos e filtros e tente novamente.',
   401: 'Sua sessão terminou. Entre novamente para continuar.',
-  403: 'Você não tem autorização para consultar este recurso.',
+  403: 'Você não tem autorização para esta operação ou recurso.',
   404: 'Registro ou página não disponível.',
+  409: 'Este registro foi alterado por outra pessoa ou a operação conflita com um registro existente. Consulte o estado atual antes de continuar.',
   429: 'Muitas tentativas. Aguarde um pouco antes de tentar novamente.',
   503: 'O serviço está indisponível ou este recurso está desabilitado. Tente novamente mais tarde.',
 };
@@ -58,7 +59,7 @@ export class ApiClient {
     return this.request<T>(path, { signal });
   }
 
-  async request<T>(path: string, options: { method?: 'GET' | 'POST'; body?: unknown;
+  async request<T>(path: string, options: { method?: 'GET' | 'POST' | 'PATCH' | 'PUT'; body?: unknown;
     signal?: AbortSignal; public?: boolean } = {}): Promise<T> {
     // Only application-relative, versioned URLs may receive the credential.
     if (!path.startsWith('/') || path.startsWith('//') || path.includes('\\')) throw new ApiError(400);

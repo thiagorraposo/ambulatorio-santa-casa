@@ -6,6 +6,7 @@ import { Card, PageHeading, ApiErrorState } from '../shared/ui';
 import PatientsPage from '../features/pacientes/PatientsPage';
 import PatientPage from '../features/pacientes/PatientPage';
 import AttendancePage from '../features/pacientes/AttendancePage';
+import { DraftProvider } from '../shared/writing';
 
 const profiles = { consulta: 'Consulta', edicao: 'Edição', administracao: 'Administração' };
 
@@ -97,7 +98,7 @@ function Layout({ children }: { children: ReactNode }) {
         <button className="button button-secondary" onClick={session.logout}>Sair</button></div>
     </aside>
     <div className="workspace">
-      <header className="topbar"><span>Consulta do ambulatório</span>
+      <header className="topbar"><span>Ambulatório Santa Casa</span>
         <span className="badge">{profiles[user.perfil]}</span></header>
       <main id="conteudo" className="page-content" tabIndex={-1}>{children}</main>
       <footer className="app-footer">Ambulatório Santa Casa</footer>
@@ -112,8 +113,8 @@ function ProtectedLayout() {
     const next = encodeURIComponent(`${location.pathname}${location.search}${location.hash}`);
     return <Navigate to={`/login?next=${next}`} replace />;
   }
-  return <Layout>{session.identityError
-    ? <ApiErrorState error={session.identityError} retry={() => { void session.revalidate(); }} /> : <Outlet />}</Layout>;
+  return <DraftProvider key={session.draftScope}><Layout>{session.identityError
+    ? <ApiErrorState error={session.identityError} retry={() => { void session.revalidate(); }} /> : <Outlet />}</Layout></DraftProvider>;
 }
 
 function HomePage() {
