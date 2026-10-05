@@ -136,7 +136,7 @@ suite('Fluxos clínicos HTTP em banco descartável', () => {
     const exame = await owner.query("SELECT tipo_exame_complementar_id::text FROM ambulatorio.tipo_exame_complementar WHERE codigo_exame='holter'");
     const second = await http().post(`/pacientes/${patientId}/atendimentos`).auth(tokens.edicao, { type: 'bearer' })
       .send({ dataAtendimento: '2026-01-15', exames: [{ tipoExameId: exame.rows[0].tipo_exame_complementar_id, bloco: 'trazido' }],
-        pendencias: [{ descricao: 'Pendência concluída sintética', status: 'resolvida' }] }).expect(201);
+        pendencias: [{ descricao: 'Pendência concluída sintética', status: 'resolvida', dataResolucao: '2026-01-15' }] }).expect(201);
     for (const perfil of ['consulta', 'edicao', 'administracao']) {
       const first = await http().get(`/pacientes/${patientId}/atendimentos?limit=1`).auth(tokens[perfil], { type: 'bearer' }).expect(200);
       expect(first.body.map((a: { atendimentoId: string }) => a.atendimentoId)).toEqual([second.body.atendimentoId]);
@@ -145,7 +145,7 @@ suite('Fluxos clínicos HTTP em banco descartável', () => {
       const pending = await http().get(`/pacientes/${patientId}/pendencias?status=aberta&limit=1`)
         .auth(tokens[perfil], { type: 'bearer' }).expect(200);
       expect(pending.body).toEqual([{ pendenciaId: expect.any(String), atendimentoId: attendanceId,
-        descricao: 'Pendência sintética', status: 'aberta', dataIdentificacao: '2026-01-01' }]);
+        descricao: 'Pendência sintética', status: 'aberta', dataIdentificacao: '2026-01-01', dataResolucao: null }]);
       await http().get(`/pacientes/${patientId}/pendencias?status=aberta&limit=1&offset=1`)
         .auth(tokens[perfil], { type: 'bearer' }).expect(200).expect([]);
     }

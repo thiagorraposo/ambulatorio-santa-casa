@@ -37,6 +37,23 @@ suite('DTOs clínicos HTTP no banco descartável', () => {
 
   afterAll(async () => { await app?.close(); await owner?.end(); });
 
+  it('serializa recursos canônicos ausentes como JSON null para os três perfis sem escrever', async () => {
+    for (const resource of ['tratamento-bzn', 'notificacao']) {
+      const path = `/v1/pacientes/${patientId}/${resource}`;
+      await http().get(path).expect(401);
+      for (const perfil of ['consulta', 'edicao', 'administracao']) {
+        const response = await http().get(path).auth(tokens[perfil], { type: 'bearer' })
+          .expect(200).expect('Content-Type', /application\/json/);
+        expect(response.text).toBe('null');
+        expect(response.body).toBeNull();
+      }
+    }
+    const persisted = await owner.query(`SELECT
+      (SELECT count(*)::int FROM ambulatorio.tratamento_benzonidazol WHERE paciente_id=$1) AS tratamentos,
+      (SELECT count(*)::int FROM ambulatorio.notificacao WHERE paciente_id=$1) AS notificacoes`, [patientId]);
+    expect(persisted.rows).toEqual([{ tratamentos: 0, notificacoes: 0 }]);
+  });
+
   it('responde com campos clínicos explícitos em camelCase para os três perfis', async () => {
     const examType = await owner.query(`SELECT tipo_exame_complementar_id::text FROM ambulatorio.tipo_exame_complementar
       WHERE codigo_exame='holter'`);
@@ -68,7 +85,7 @@ suite('DTOs clínicos HTTP no banco descartável', () => {
         bloco: 'solicitado', identificacao: null, resultado: 'Resultado sintético',
         observacoes: null, codigoExame: 'holter', nomeExame: expect.any(String) }]);
       expect(detail.pendencias).toEqual([{ pendenciaId: expect.any(String),
-        descricao: 'Pendência sintética', status: 'aberta', dataIdentificacao: '2026-04-01' }]);
+        descricao: 'Pendência sintética', status: 'aberta', dataIdentificacao: '2026-04-01', dataResolucao: null }]);
       expect(detail.rastreioFamiliar).toEqual({ rastreioFamiliarId: expect.any(String),
         familiaresExaminados: true, familiares: [{ rastreioFamiliarId: expect.any(String),
           identificacaoFamiliar: 'Familiar sintético', resultadoSorologia: 'Sorologia sintética' }] });

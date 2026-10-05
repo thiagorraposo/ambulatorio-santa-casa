@@ -54,4 +54,26 @@ describe('PacientesService', () => {
       { ativo: true, podeEditar: false })).resolves.toEqual({ pacienteId: '4', usuarioId: '8', ativo: true, podeEditar: false });
     expect(query).toHaveBeenCalledWith(expect.stringContaining('definir_acesso_paciente'), ['4', '8', false, true]);
   });
+
+  it('lê a data de resolução da pendência como data clínica textual ou nula', async () => {
+    const query = jest.fn().mockResolvedValue({ rows: [
+      { pendencia_id: '7', atendimento_id: '10', descricao: 'Pendência sintética resolvida',
+        status_pendencia: 'resolvida', data_identificacao: '2026-09-01', data_resolucao: '2026-09-05' },
+      { pendencia_id: '8', atendimento_id: '10', descricao: 'Pendência sintética aberta',
+        status_pendencia: 'aberta', data_identificacao: '2026-09-01', data_resolucao: null },
+    ] });
+    const tx = { query };
+    const database = { transaction: jest.fn(async (operation: (value: unknown) => Promise<unknown>) => operation(tx)) } as never;
+    const access = { patient: jest.fn().mockResolvedValue(undefined) };
+    const service = new PacientesService({} as never, database, access as never);
+    const user = { usuarioId: '3', nome: 'Consulta sintética', perfil: 'consulta' as const };
+    await expect(service.pending(user, '4', { limit: 20, offset: 0 })).resolves.toEqual([
+      { pendenciaId: '7', atendimentoId: '10', descricao: 'Pendência sintética resolvida',
+        status: 'resolvida', dataIdentificacao: '2026-09-01', dataResolucao: '2026-09-05' },
+      { pendenciaId: '8', atendimentoId: '10', descricao: 'Pendência sintética aberta',
+        status: 'aberta', dataIdentificacao: '2026-09-01', dataResolucao: null },
+    ]);
+    expect(access.patient).toHaveBeenCalledWith(tx, user, '4');
+    expect(query).toHaveBeenCalledWith(expect.stringContaining('p.data_resolucao::text'), ['4', null, 20, 0]);
+  });
 });
