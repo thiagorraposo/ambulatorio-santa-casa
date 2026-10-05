@@ -1,5 +1,71 @@
 # Registro de Alterações
 
+## 2026-10-05 — organização das alterações locais em commits
+
+Criada a branch `etapa7-commits` a partir de `etapa6-frontend`, no commit
+`adf2fd5`, preservando os 77 arquivos pendentes. As mudanças foram divididas
+em 13 contextos: correções dos contratos clínicos, catálogos/capacidade,
+testes backend, infraestrutura de escrita, testes de rascunhos, cadastro e
+atendimentos, testes do núcleo, acompanhamento, testes do acompanhamento,
+E2E, contratos/recorte, uso do frontend e evidências/reauditoria.
+
+Arquivos com contextos distintos foram separados pelo índice do Git, sem
+reescrever o conteúdo de implementação no working tree. Estado, roadmap e
+relatório de validação receberam referências à reauditoria e ao aceite
+pendente da Etapa 7, preservando as evidências anteriores.
+
+O código mantém o conteúdo das rodadas sintéticas já aprovadas e documentadas;
+a organização reaproveita essas validações. A conferência desta rodada abrange
+documentação, links, whitespace, preservação de conteúdo e estado final do Git.
+Nenhuma das sete lacunas foi corrigida nesta organização. Sem merge ou push.
+
+## 2026-10-05 — relatório do trabalho local e reauditoria da Etapa 7
+
+Gerado o [relatório desde o último commit](RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md),
+com base em `adf2fd5`: fotografia de 42 arquivos modificados e 34 novos antes
+do relatório. O documento distingue APIs já existentes, implementação local,
+validações executadas e limites, com inventário completo e evidências.
+
+A reauditoria confirmou sete lacunas ainda sem correção, além da ausência de
+um percurso positivo completo pela interface e da revisão com a equipe.
+O aceite integral da Etapa 7 foi antecipado; as suítes aprovadas comprovam
+somente os cenários executados. As exclusões originalmente autorizadas são
+registradas separadamente. Nesta rodada houve auditoria e documentação, sem
+correção de runtime, alteração do banco da prévia, commit ou push.
+
+## 2026-10-04 — fluxos clínicos e recuperação de escrita (7A–7D)
+
+Implementados cadastro/edição de pacientes com busca prévia, contatos/endereço e
+idade derivada; atendimentos versionados com criação transacional dos filhos
+aceitos; avaliação, descoberta de Chagas, exames, familiares e pendências. BZN e
+reações na criação, retornos BZN/anuais por comparecimento, fato anual separado,
+projetos, notificação, encaminhamentos e contrarreferências repetíveis integram
+a ficha e o histórico. Cada operação confirma seu resultado; falha posterior
+preserva o atendimento já confirmado e os demais rascunhos.
+
+Catálogos ativos paginados e capacidade de cadastro usam autorização própria.
+DTOs preservam estados desconhecidos e exigem data explícita para resolução;
+retornos futuros e objetos/arrays incompatíveis são recusados. A interface usa
+somente `/v1` e IDs/versões textuais. PATCH conserva a versão original; 409 oferece
+comparação por GET e descarte explícito antes de uma nova edição. Falha de rede
+ou confirmação inválida bloqueia a intenção e exige consulta, sem retry ou
+duplicação. Rascunhos em memória protegem navegação/recarregamento e são apagados
+na saída, 401, expiração ou troca de identidade. O diálogo contém o foco e o
+restaura ao fechar, inclusive durante reconsulta de acesso.
+
+O [recorte clínico](arquitetura/RECORTE_CLINICO_ETAPA_7.md) registra o destino dos
+campos e as áreas sem suporte HTTP; contratos, ADR-024, estado, roadmap, índice
+e workflow foram atualizados. Validação técnica sintética aprovada conforme
+o [relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md): build frontend/backend,
+106 unitários/componentes, 92 unitários/de contrato backend, oito testes de
+fundação, 51 clínicos HTTP, 30 cenários Chromium/API/PostgreSQL, 34 testes SQL e
+nove testes do workflow. O E2E comprovou a correção de foco do diálogo; SQL foi
+executado em banco novo com identificação de teste, sem registros prévios de
+revisão. Logs intermediários e finais estão no relatório. Revisão de usabilidade
+com a equipe e CI remota permanecem pendentes. Alterações preexistentes preservadas, sem nova
+migration, dependência, dado real, alteração do banco persistente ou protótipo,
+commit ou push.
+
 ## 2026-10-04 — fundação do frontend e integração das validações (6A–6B)
 
 Implementada e validada a aplicação própria React/TypeScript em `frontend/`,

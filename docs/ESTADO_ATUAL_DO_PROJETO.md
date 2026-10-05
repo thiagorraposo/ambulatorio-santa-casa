@@ -6,6 +6,13 @@ Esta é a síntese vigente. Contratos pertencem às fontes temáticas; o histór
 cronológico está no [registro](REGISTRO_DE_ALTERACOES.md) e na
 [continuidade da Etapa 5](validacoes/CONTINUIDADE_ETAPA_5.md).
 
+**Reauditoria de 2026-10-05:** o aceite integral da Etapa 7 permanece pendente.
+O [relatório do trabalho local](RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md)
+registra sete lacunas funcionais ainda sem correção e limites de cobertura.
+Os resultados de 2026-10-04 abaixo comprovam os cenários executados. A
+continuidade deve priorizar essas correções, o percurso integrado pela interface
+e a revisão com a equipe antes de avançar ao aceite da Etapa 8.
+
 ## Escopo e estágio
 
 Etapas 1–4 concluídas. **Etapa 5 (5A–5E) concluída no ambiente sintético em
@@ -15,16 +22,19 @@ relacionados na [matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md).
 **Etapa 6 (6A–6B) concluída no ambiente sintético em 2026-10-04**: aplicação
 própria em `frontend/`, sessão em memória, navegação e leitura pela API `/v1`.
 Setup e contratos estão em [FRONTEND.md](FRONTEND.md); a matriz de evidências
-está em [VALIDACAO_ETAPA_6.md](validacoes/VALIDACAO_ETAPA_6.md). Etapas 7–10
-permanecem futuras.
+está em [VALIDACAO_ETAPA_6.md](validacoes/VALIDACAO_ETAPA_6.md). **Etapa 7
+(7A–7D) implementada e validada tecnicamente no ambiente sintético em 2026-10-04**,
+com evidências em [VALIDACAO_ETAPA_7.md](validacoes/VALIDACAO_ETAPA_7.md). A revisão de
+usabilidade com a equipe permanece pendente. Etapas 8–10 permanecem futuras.
 
 A [avaliação do protótipo Figma Make](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
 foi concluída em 2026-10-03, com inventário, compatibilidade HTTP e plano das
 Etapas 6–8. A fundação implementada usa React/TypeScript e apresentação revisada,
 preservando arquitetura e regras existentes. A análise mantém a fotografia do
 planejamento original; o [roadmap](PROXIMOS_PASSOS.md#etapa-6--fundação-do-frontend)
-continua definindo sequência e critérios de aceite. O próximo desenvolvimento
-previsto é 7A (cadastro e atendimentos), seguido das demais subetapas clínicas.
+continua definindo sequência e critérios de aceite. Os formulários seguem o
+[recorte clínico da Etapa 7](arquitetura/RECORTE_CLINICO_ETAPA_7.md), com suporte
+HTTP explícito para cada campo. O próximo desenvolvimento previsto é a Etapa 8.
 
 As respostas de [campos e regras clínicas](Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
 são autoritativas: idade derivada do nascimento, descoberta de Chagas distinta da
@@ -50,8 +60,10 @@ Designar pessoas e operar com dados reais pertencem à implantação posterior.
   `/v1`, com aliases compatíveis sem prefixo e recusa de versões inexistentes.
 - Frontend React/TypeScript com Vite, React Router e TanStack Query. Sessão e
   cache clínico separados; token em memória, identidade por `/auth/me`, busca
-  nome/sexo e ficha/histórico em leitura. A referência Figma Make não integra o
-  build. Não há escrita clínica ou gestão administrativa pela interface desta etapa.
+  nome/sexo, ficha/histórico e formulários clínicos 7A–7D. Rascunhos separados do
+  cache, versões originais, conflitos com comparação explícita e confirmação por
+  operação. A referência Figma Make não integra o build; gestão administrativa
+  permanece em etapa posterior.
 - A configuração de CI contempla manifesto, importador, SQL, backend, runner
   clínico e frontend (build, unitários e Chromium/API/PostgreSQL descartável).
   Há alvos Make com `COMPACT=1`; a CI remota ainda não foi executada nesta entrega.
@@ -65,6 +77,12 @@ encaminhamentos, contrarreferências múltiplas, fatos/retornos anuais e pendên
 Busca, filtros, coleções aninhadas e CSV seguem a mesma autorização por vínculo;
 CSV neutraliza fórmulas. Consultas de lotes/linhas retornam DTOs paginados e códigos
 técnicos, sem JSONB bruto ou mensagens clínicas de processamento.
+
+Os formulários consultam catálogos ativos paginados de exames, projetos e tipos
+de encaminhamento. A capacidade de cadastro respeita a política clínica e os
+perfis sem revelar pacientes/vínculos. Resolução de pendência exige data explícita;
+retorno exige comparecimento efetivo e não aceita data futura. Contratos e áreas
+sem HTTP estão no recorte da Etapa 7; nenhuma estrutura física foi alterada.
 
 Perfis `consulta`, `edicao` e `administracao` têm operações explícitas. Autenticação
 não concede vínculo ao paciente; administração também não concede entitlement
@@ -113,10 +131,15 @@ A Etapa 6 passou instalação limpa pelo lockfile, build TypeScript/Vite,
 47 testes de sessão/componentes, oito E2E Chromium/API/PostgreSQL e nove testes
 de workflow. A revisão incluiu teclado/foco, contraste automatizado, zoom/reflow
 e telas de 390/320 px. Comandos, evidências e limites estão no
-[relatório próprio](validacoes/VALIDACAO_ETAPA_6.md). Os resultados abaixo são
-as evidências anteriores da Etapa 5.
+[relatório próprio](validacoes/VALIDACAO_ETAPA_6.md). A Etapa 7 passou build do
+frontend/backend,
+106 testes de componentes, 92 unitários/de contrato do backend, oito de fundação
+e 51 clínicos HTTP, 30 cenários Chromium/API/PostgreSQL, 34 testes SQL e nove
+testes do workflow. O
+[relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md) concentra as evidências.
 
-Instalação limpa 02–63 e atualizações incrementais 60→61→62→63 aprovadas.
+Evidências anteriores da Etapa 5: instalação limpa 02–63 e atualizações
+incrementais 60→61→62→63 aprovadas.
 A rodada final passou 34 testes SQL, manifesto, 34 unitários e E2E do importador,
 build, 53 unitários/de contrato do backend, oito de fundação e 38 clínicos HTTP.
 As provas de concessão, recusa e reversão operacional estão incluídas; os testes
@@ -132,7 +155,8 @@ do prontuário. Planejamento D9 não produz comparecimento; upload avançado de
 contrarreferência permanece no backlog aprovado. Não há nova regra clínica inferida.
 
 Dados reais, implantação, TLS/segredos/backup/retenção e homologação institucional
-não fazem parte desta execução. Formulários clínicos e complementos da interface
-seguem as Etapas 7–8. O backlog e as próximas etapas
+não fazem parte desta execução. A revisão de usabilidade com a equipe clínica
+permanece pendente; formulários 7A–7D estão implementados, e complementos da
+interface seguem a Etapa 8. O backlog e as próximas etapas
 estão em [PROXIMOS_PASSOS.md](PROXIMOS_PASSOS.md); regras e workflow estão no
 [índice da documentação](README.md).

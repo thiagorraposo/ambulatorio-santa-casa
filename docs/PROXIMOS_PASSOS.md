@@ -2,8 +2,18 @@
 
 Atualizado em: 2026-10-04
 
+**Reauditoria de 2026-10-05:** o aceite da Etapa 7 continua pendente, com sete
+lacunas funcionais sem correção. A prioridade é concluir a recuperação de
+escrita, a preservação de contexto/estados/confirmações e a paginação de
+familiares, além do percurso integrado pela interface e da revisão com a equipe.
+Evidências e limites estão no
+[relatório do trabalho local](RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md).
+As menções à validação de 2026-10-04 abaixo registram os cenários executados.
+
 Este é o roadmap oficial do projeto. A estrutura original possui dez etapas;
-as etapas 1–6 estão concluídas no ambiente sintético. As etapas 5, 6, 7, 9 e 10 possuem subetapas porque
+as etapas 1–6 estão concluídas no ambiente sintético. Os fluxos 7A–7D estão
+implementados e validados tecnicamente no ambiente sintético, com revisão de
+usabilidade com a equipe pendente. As etapas 5, 6, 7, 9 e 10 possuem subetapas porque
 contêm entregas independentes e dependências próprias. As letras identificam
 subetapas de execução e não criam uma nova numeração principal.
 
@@ -234,6 +244,11 @@ A evidência da execução está no
 
 ## Etapa 7 — Fluxos clínicos
 
+**Estado:** 7A–7D implementadas e validadas tecnicamente no ambiente sintético em
+2026-10-04. O [relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md) reúne as
+provas, o recorte HTTP e as limitações. A revisão de usabilidade com a equipe
+permanece pendente.
+
 **Objetivo:** tornar utilizáveis as telas efetivamente usadas pela equipe.
 
 Antes de cada formulário, conferir a matriz da análise: existir no schema ou no
@@ -451,15 +466,20 @@ A Etapa 5 está concluída no ambiente sintético, com evidências na
 [matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md). **6A–6B estão
 concluídas no ambiente sintético**, com evidências no
 [relatório da Etapa 6](validacoes/VALIDACAO_ETAPA_6.md): base própria, sessão e
-leitura pelas APIs atuais. Avançar 7A–7D conforme suporte real dos contratos e resolver catálogos
-antes dos formulários dependentes. Métricas, fila global e gestão de usuários
-não bloqueiam essa fundação nem entram automaticamente por aparecerem no protótipo.
+leitura pelas APIs atuais. **7A–7D estão implementadas e validadas tecnicamente**,
+com evidência sintética registrada no
+[relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md). A revisão de
+usabilidade com a equipe ainda precisa ocorrer antes do aceite institucional.
 
-Esta entrega desenvolve a fundação do frontend sem alterar contratos HTTP,
-backend, banco persistente ou protótipo. Etapas 7–10 exigem execução futura.
-Upload avançado e planejamento D9 não foram antecipados nem inferidos como dados
-clínicos. Dados reais seguem a liberação 9D, sem confundir viabilidade do importador
-com autorização de uso.
+O próximo desenvolvimento previsto é a Etapa 8, com definição dos indicadores e
+contratos necessários antes do dashboard. Métricas, fila global e gestão de
+usuários não entram automaticamente por aparecerem no protótipo. A Etapa 7
+acrescenta catálogos ativos, capacidade de cadastro e validações estritamente
+necessárias aos formulários, sem alterar banco persistente, migrations ou
+protótipo. O [recorte clínico](arquitetura/RECORTE_CLINICO_ETAPA_7.md) explicita
+os campos e as operações ainda sem HTTP. Etapas 8–10 exigem execução futura;
+upload avançado e planejamento D9 não foram antecipados. Dados reais seguem a
+liberação 9D, sem confundir viabilidade do importador com autorização de uso.
 
 ### Preparação da migração da planilha real
 
