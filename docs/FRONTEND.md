@@ -1,13 +1,16 @@
-# Frontend — fundação de leitura
+# Frontend — leitura e fluxos clínicos
 
-Atualizado em: 2026-10-04. Etapa 6A–6B concluída e validada no ambiente sintético.
+Atualizado em: 2026-10-04. Fundação 6A–6B concluída; fluxos 7A–7D implementados
+e validados tecnicamente no ambiente sintético.
 
 A aplicação própria está em [`frontend/`](../frontend/). Consome os contratos
 públicos `/v1` do backend, com React/TypeScript, Vite, roteamento e consultas por
 recurso. O [roadmap](PROXIMOS_PASSOS.md#etapa-6--fundação-do-frontend) define o
-escopo e os critérios de aceite; o
-[relatório da Etapa 6](validacoes/VALIDACAO_ETAPA_6.md) registra a evidência de
-execução. O estágio vigente está em
+escopo e os critérios de aceite; os relatórios da
+[Etapa 6](validacoes/VALIDACAO_ETAPA_6.md) e da
+[Etapa 7](validacoes/VALIDACAO_ETAPA_7.md) registram evidências e limites,
+incluindo a revisão de usabilidade com a equipe ainda pendente. O estágio
+vigente está em
 [ESTADO_ATUAL_DO_PROJETO.md](ESTADO_ATUAL_DO_PROJETO.md).
 
 ## Preparação e comandos
@@ -81,6 +84,7 @@ frontend.
 | `src/app/` | Composição de rotas, layout e sessão em memória. |
 | `src/api/` | Cliente HTTP, tipos públicos e consultas canceláveis por recurso. |
 | `src/features/pacientes/` | Busca, ficha e detalhe/histórico dos atendimentos. |
+| `src/features/clinical/` | Cadastro, atendimento composto e operações de acompanhamento. |
 | `src/shared/` | Componentes e formatação de apresentação, sem regras clínicas. |
 
 React monta a interface; React Router representa a navegação na URL; TanStack
@@ -110,6 +114,11 @@ Minha conta mostra a identidade retornada pela API.
 | `/login` | Autenticação e retorno ao destino protegido. |
 | `/` | Início com atalhos. |
 | `/pacientes` | Busca; nome, sexo, limit e offset na query string. |
+| `/pacientes/novo` | Busca prévia e cadastro conforme política do servidor. |
+| `/pacientes/:pacienteId/editar` | Cadastro com versão original e alterações parciais. |
+| `/pacientes/:pacienteId/atendimentos/novo` | Atendimento e filhos aceitos numa transação. |
+| `/pacientes/:pacienteId/atendimentos/:atendimentoId/editar` | Edição versionada dos dados básicos. |
+| `/pacientes/:pacienteId/registrar?tipo=...` | Salvamento independente por módulo clínico. |
 | `/pacientes/:pacienteId?aba=...` | Ficha com aba representada na URL. |
 | `/pacientes/:pacienteId/atendimentos/:atendimentoId` | Detalhe de atendimento e coleções paginadas por limit/offset. |
 | `/minha-conta` | Identidade e perfil obtidos da API. |
@@ -156,6 +165,56 @@ dia pelo fuso. Idade usa o valor e a referência retornados pela API. Valores
 desconhecidos e nulos não recebem interpretação clínica inventada; a apresentação
 mantém a distinção definida pelos contratos.
 
+## Escrita clínica e rascunhos
+
+O [recorte clínico da Etapa 7](arquitetura/RECORTE_CLINICO_ETAPA_7.md) é a fonte
+dos destinos de campos, preservação e pendências HTTP. A ficha oferece ações de
+escrita a edição/administração; o servidor decide também política de cadastro e
+vínculo de escrita. O perfil consulta mantém somente leitura, inclusive ao abrir
+diretamente uma rota de edição. Não há descoberta pública de todas as capacidades
+por vínculo; um perfil de edição não garante cadastro em qualquer política.
+`GET /v1/pacientes/capacidades` informa somente `podeCadastrar`, segundo a mesma
+política revalidada no POST. Cadastro e seu formulário só aparecem após essa
+confirmação; carga/falha não concede capacidade implicitamente.
+
+Os tipos de `/registrar` são `bzn`, `retorno-bzn`, `projeto`, `notificacao`,
+`encaminhamento`, `contrarreferencia`, `retorno-anual`, `ocorrencia-anual` e
+`pendencia`. O atendimento do contexto pode ser levado em `atendimentoId`;
+`projetoId`, `encaminhamentoId` e `pendenciaId` selecionam registros existentes.
+Seletores paginam opções da API; IDs continuam texto e não são hardcoded.
+
+Criação do atendimento envia medidas, diagnóstico/descoberta, exames,
+familiares e pendências junto com o núcleo. BZN/reações, retornos, projetos,
+notificação, encaminhamentos, contrarreferências e pendências posteriores usam
+operações com confirmação própria. PATCH do núcleo não edita filhos. Paciente
+e atendimento conservam a versão obtida antes da edição; reconsulta por foco
+não rebasa o rascunho nem permite sobrescrever uma versão concorrente.
+
+`DraftProvider`/`useClinicalDraft` mantêm valores, baseline e intenção de envio
+somente em memória, com assinatura para propagar o resultado mesmo se houver
+remontagem durante uma consulta. O escopo dos rascunhos é separado da geração
+de requisições: cancelar uma leitura por falha temporária de identidade não
+apaga alterações válidas. Formulários ficam ocultos/desabilitados durante a
+revalidação, preservando o bloqueio de navegação e retirando dados antigos da tela.
+
+React Router usa data router para bloquear navegação com alterações pendentes;
+o diálogo permite continuar ou sair mantendo rascunho nesta sessão.
+`beforeunload` protege saída/recarregamento, cuja perda de memória é informada.
+Essa proteção inclui rascunhos de outros módulos ou seleções mantidos na sessão.
+O diálogo usa portal para continuar acessível quando reconsultas ocultam o
+formulário.
+Saída, 401, expiração e troca de identidade/perfil limpam cache e rascunhos.
+
+`MutationForm` envia uma única vez por intenção e não usa retry. 403/409 não
+produzem sucesso. Após 409 cadastral ou do núcleo de atendimento, o usuário
+pode consultar a comparação de versões e descartar explicitamente somente esse
+rascunho para iniciar outra edição com a versão consultada. Nenhum PATCH é
+reenviado automaticamente. A confirmação exige o ID canônico textual do recurso
+e, na edição, o mesmo ID original. Rede, resposta inválida, 5xx ou cancelamento durante escrita
+deixam resultado incerto: consulta para verificar o registro e reenvio bloqueado,
+inclusive ao voltar à mesma intenção. Novos episódios após sucesso confirmado
+recebem nova intenção local; isso não equivale a idempotência entre sessões.
+
 ## Apresentação e erros
 
 A identidade visual, a organização do layout e as abas da ficha foram
@@ -166,10 +225,10 @@ O protótipo não fornece persistência, autorização, identidade ou regras cl�
 
 Carregamento, vazio e erro são estados distintos. 401 leva à reautenticação; 403
 explica a recusa de acesso, 429 informa limite temporário, 503 informa serviço
-indisponível, e falha de rede permite tentar novamente. Conteúdo clínico de uma
+indisponível, e falha de rede em leitura permite tentar novamente. Conteúdo clínico de uma
 resposta anterior não deve permanecer visível enquanto uma nova consulta falha.
 Navegação deve funcionar por links diretos, teclado, foco visível e telas menores.
 
-Esta etapa não inclui formulários de escrita, importação/revisão, métricas, fila
-global ou gestão de usuários. Etapas 7–8 seguem os contratos e dependências do
-roadmap; produção e uso de dados reais dependem das Etapas 9–10.
+Importação/revisão, métricas, fila global e gestão de usuários permanecem fora
+destes formulários. As lacunas clínicas específicas estão no recorte; produção
+e uso de dados reais dependem das Etapas 9–10.

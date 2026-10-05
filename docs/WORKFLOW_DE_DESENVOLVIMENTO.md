@@ -72,7 +72,7 @@ não é provisionamento de produção. `make backend-check` cobre build, unitár
 autenticação, autorização, isolamento do pool e integração. A matriz e as
 pendências deliberadas estão em `docs/validacoes/VALIDACAO_ETAPA_4C.md`.
 
-## Frontend — fundação 6A–6B
+## Frontend — fundação 6A–6B e fluxos clínicos 7A–7D
 
 ```bash
 make frontend-install
@@ -92,6 +92,12 @@ No CI, Chromium é instalado com `--with-deps`.
 [FRONTEND.md](FRONTEND.md) para sessão, navegação, paginação e limites de contrato.
 Os resultados de aceite estão em
 [VALIDACAO_ETAPA_6.md](validacoes/VALIDACAO_ETAPA_6.md).
+Os formulários usam o mesmo check e CI; `tests/frontend/stage7.spec.ts` é
+descoberto automaticamente pelo Playwright, junto com a regressão da leitura.
+O [recorte clínico](arquitetura/RECORTE_CLINICO_ETAPA_7.md) delimita contratos e
+pendências; o [aceite da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md) registra suas
+evidências. Escrita deve ser comprovada na API/banco reais do runner, incluindo
+versão original, rollback, episódios repetíveis e falha de resposta após commit.
 
 ## Comandos Oficiais
 

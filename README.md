@@ -3,7 +3,8 @@
 Base PostgreSQL construída incrementalmente para organizar dados do ambulatório.
 O schema persistente possui 38 tabelas. Importador e backend NestJS evoluíram até
 a Etapa 5 no ambiente sintético; a fundação do frontend React/TypeScript
-(6A–6B) está concluída e validada no ambiente sintético. Consulte o
+(6A–6B) está concluída; os fluxos clínicos 7A–7D foram implementados e validados
+tecnicamente no ambiente sintético. Consulte o
 [estado vigente](docs/ESTADO_ATUAL_DO_PROJETO.md) para os limites de cada ambiente.
 
 O schema aplicado é `ambulatorio`. A principal evidência física versionada é `docs/evidencias/schema_atual_ambulatorio.sql`.
@@ -11,9 +12,10 @@ O schema aplicado é `ambulatorio`. A principal evidência física versionada é
 ## Frontend e referência visual
 
 A aplicação própria fica em [`frontend/`](frontend/), consome a API `/v1` e
-inclui sessão, navegação, busca e ficha em leitura. Setup, comandos e contratos
+inclui sessão, navegação, busca, ficha e formulários clínicos. Setup, comandos e contratos
 estão em [`docs/FRONTEND.md`](docs/FRONTEND.md); os resultados de validação ficam
-no [relatório da Etapa 6](docs/validacoes/VALIDACAO_ETAPA_6.md).
+nos relatórios da [Etapa 6](docs/validacoes/VALIDACAO_ETAPA_6.md) e da
+[Etapa 7](docs/validacoes/VALIDACAO_ETAPA_7.md).
 
 O código do protótipo Figma Make fica em
 [`referencias/frontend/figma-make-prototipo/`](referencias/frontend/figma-make-prototipo/),
@@ -117,7 +119,7 @@ make db-check DB_ENV=docker
 | `make backend-check` | Compila e testa integração, autenticação e autorização. | Insere e remove paciente e usuários sintéticos. |
 | `make backend-up` | Provisiona o login técnico e sobe o backend no Compose. | Altera somente a role de login; não altera schema. |
 | `make frontend-install` | Instala dependências exatamente pelo lockfile. | Não. |
-| `make frontend-dev` | Serve Vite e encaminha `/v1` à API sintética configurada. | A interface desta etapa só faz leitura. |
+| `make frontend-dev` | Serve Vite e encaminha `/v1` à API sintética configurada. | Formulários podem escrever conforme perfil, vínculo e política da API. |
 | `make frontend-check COMPACT=1` | Compila, testa sessão/componentes e executa navegador/API reais. | Cria e remove banco/roles exclusivamente sintéticos e descartáveis. |
 
 Os alvos genéricos não aplicam migrations. `docker-migrate` aplica as migrations

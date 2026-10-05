@@ -9,6 +9,12 @@ Esta fotografia preserva a avaliação estática de 2026-10-03. A implementaçã
 posterior da Etapa 6 está descrita em [FRONTEND.md](../FRONTEND.md), com estágio
 vigente em [ESTADO_ATUAL_DO_PROJETO.md](../ESTADO_ATUAL_DO_PROJETO.md) e evidências
 no [relatório de validação](../validacoes/VALIDACAO_ETAPA_6.md).
+A evolução dos formulários da Etapa 7 está no
+[recorte clínico vigente](RECORTE_CLINICO_ETAPA_7.md) e no
+[contrato dos catálogos ativos](CONTRATOS_CATALOGOS_ETAPA_7.md). As lacunas da
+matriz abaixo preservam a fotografia anterior à implementação.
+As provas de execução pertencem ao
+[relatório da Etapa 7](../validacoes/VALIDACAO_ETAPA_7.md).
 
 ## Objetivo, limites e fontes
 
