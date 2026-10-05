@@ -658,7 +658,8 @@ Título: Protótipo Figma Make como referência de interface subordinada aos con
 
 Data: 2026-10-03
 
-Status: Aceita; fundação 6A–6B implementada e validada em 2026-10-04
+Status: Aceita; 6A–6B e 7A–7D implementadas e validadas tecnicamente no ambiente
+sintético em 2026-10-04
 
 Decisão: usar o código do Figma Make como referência visual e funcional,
 reaproveitando apresentação após revisão e adaptando fluxos aos contratos `/v1`.
@@ -687,6 +688,28 @@ implementação detalhados na análise orientam a Etapa 6. A avaliação estáti
 original permanece preservada; o estágio e a evidência atual pertencem ao estado
 vigente e ao relatório de validação.
 
+Detalhamento dos fluxos clínicos de 2026-10-04: manter rascunhos, baseline e
+intenção de escrita somente em memória, separados do cache de consultas. O
+escopo da sessão/identidade é distinto da geração de requisições: revalidação
+temporariamente indisponível oculta formulários sem descartar rascunhos. Saída,
+401, expiração e troca de identidade/perfil apagam ambos. Data router permite
+bloquear navegação; store assinado conserva o estado de confirmação durante
+remontagens. Escritas não têm retry automático; resultado incerto exige consulta
+e impede reenvio da mesma intenção. Conflitos preservam a versão original.
+Novos episódios após sucesso confirmado ganham intenção própria; não se promete
+idempotência de POST entre sessões. O
+[recorte da Etapa 7](arquitetura/RECORTE_CLINICO_ETAPA_7.md) registra os destinos
+públicos de campos e áreas que aguardam contrato, mantendo o schema atual.
+
+Detalhamento de recuperação e contratos da Etapa 7: conflitos cadastrais/do
+núcleo oferecem comparação por GET e descarte explícito somente da intenção
+afetada antes de uma nova edição; não há rebase ou retry automático. Rascunhos
+inativos também protegem recarregamento e o diálogo permanece acessível durante
+reconsultas. Confirmação exige ID canônico textual do recurso. Consultar somente
+a capacidade de cadastro permite alinhar a interface à política revalidada no
+POST, sem expor vínculos ou ampliar acesso. Catálogos ativos e validação de
+resolução/comparecimento usam o modelo existente, sem migration.
+
 Detalhamento de 2026-10-04: adotar Vite e React Router para rotas reais, TanStack
 Query para consultas por recurso e CSS próprio para a apresentação revisada.
 Toolchain Node.js 24/npm reproduzível pelo lockfile. Token somente em memória,
@@ -705,4 +728,5 @@ Documentos relacionados:
 [análise e planejamento da integração](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
 e [sequência oficial de execução](PROXIMOS_PASSOS.md#etapa-6--fundação-do-frontend),
 [implementação do frontend](FRONTEND.md) e
-[validação da Etapa 6](validacoes/VALIDACAO_ETAPA_6.md).
+[validação da Etapa 6](validacoes/VALIDACAO_ETAPA_6.md) e
+[validação da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md).

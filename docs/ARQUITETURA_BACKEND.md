@@ -1,6 +1,6 @@
 # Arquitetura do Backend — Fundação e incrementos clínicos sintéticos
 
-Atualizado em: 2026-10-03
+Atualizado em: 2026-10-04
 
 Status: implementação e aceite integrado sintético da Etapa 5 concluídos até a
 migration 63, exclusivamente com dados sintéticos. A execução HTTP de revisão
@@ -13,8 +13,9 @@ continuam fora do escopo. Evidências finais estão registradas na matriz
 ## Escopo e fluxo
 
 O backend é um monólito modular NestJS/TypeScript com módulos `health`, `auth` e
-`pacientes` e `importacoes`. A API oferece operações clínicas transacionais e
-importação HTTP condicional com credencial separada; frontend é etapa posterior.
+`pacientes`, `catalogos` e `importacoes`. A API oferece operações clínicas
+transacionais e importação HTTP condicional com credencial separada; o frontend
+consome somente os contratos públicos.
 
 ```text
 HTTP -> autenticação -> autorização -> controller -> service -> repository
@@ -132,8 +133,17 @@ URLs sem prefixo abaixo também estão disponíveis em `/v1`.
 - `POST /auth/login`: público; aceita somente `{ "login", "senha" }`; sucesso
   201 retorna `{ "accessToken", "tokenType": "Bearer", "expiresIn" }`.
 - `GET /auth/me`: Bearer obrigatório; retorna somente `usuarioId`, `nome` e `perfil`.
+- `GET /catalogos/exames`, `/catalogos/projetos` e `/catalogos/tipos-encaminhamento`:
+  consulta autenticada de tipos ativos, para os três perfis, arrays com
+  `{id, codigo, nome, ativo}` e paginação `limit`/`offset`. Contrato completo em
+  [CONTRATOS_CATALOGOS_ETAPA_7.md](arquitetura/CONTRATOS_CATALOGOS_ETAPA_7.md).
 - `GET /pacientes?limit=20&offset=0`: limites validados, busca por nome/sexo e
   escopo por vínculo; retorna DTO com `pacienteId` e `nome`.
+- `GET /pacientes/capacidades`: consulta autenticada da capacidade de cadastro
+  `{podeCadastrar:boolean}` conforme perfil e política clínica; identidade
+  revalidada e 503 se clínica desabilitada. Não concede vínculo nem escrita.
+  O [recorte da Etapa 7](arquitetura/RECORTE_CLINICO_ETAPA_7.md#extensões-http-necessárias)
+  registra autorização e limites; POST revalida a mesma política.
 - `GET /pacientes/:id`: ficha e idade derivada com `dataReferenciaIdade`.
   `telefones` e `atendimentos` são paginados pelo mesmo `limit`/`offset` da
   consulta; a resposta informa `paginacaoColecoes`.
@@ -150,7 +160,8 @@ URLs sem prefixo abaixo também estão disponíveis em `/v1`.
   `paginacaoColecoes`. O atendimento pertence ao paciente da rota.
 - `GET /pacientes/:id/atendimentos`, `/exames`, `/projetos`, `/retornos-bzn` e
   `/pendencias`: arrays paginados por `limit` (1–100, padrão 20) e `offset`
-  (0–100000, padrão 0), com ordenação estável. Pendências aceita filtro `status`.
+  (0–100000, padrão 0), com ordenação estável. Pendências aceita filtro `status`
+  e retorna `dataResolucao`, também nas pendências do detalhe do atendimento.
 - `PUT /pacientes/:id/projetos`: cria ou atualiza a associação pelo `projetoId`
   ativo. Exige pelo menos um campo de estado; campos omitidos não são alterados.
 - `GET/PUT /pacientes/:id/notificacao`: consulta o registro único ou `null` e
@@ -169,12 +180,13 @@ URLs sem prefixo abaixo também estão disponíveis em `/v1`.
   Ano futuro é recusado. A resposta informa `precisao: "ano"`.
 - `GET/POST /pacientes/:id/retornos-anuais`: consulta paginada e criação de
   `acompanhamento_cuidado` do tipo `retorno_anual` com `atendimentoId` do paciente
-  e `dataRealizada` efetiva obrigatória.
+  e `dataRealizada` efetiva obrigatória; datas futuras são recusadas.
 - `POST /pacientes/:id/pendencias` e
   `PATCH /pacientes/:id/pendencias/:pendenciaId`: criam pendência textual de um
-  atendimento do paciente e atualizam seu status. `resolvida` exige
+  atendimento do paciente e atualizam seu status. Na criação e atualização, `resolvida` exige
   `dataResolucao`; a data não é aceita em outro status.
-- `POST /pacientes/:id/retornos-bzn`: exige tratamento do paciente e data real.
+- `POST /pacientes/:id/retornos-bzn`: exige tratamento do paciente e data real,
+  sem comparecimento futuro nem cálculo automático de 30/60 dias.
 - `POST /pacientes/:id/tratamento-bzn`: registra tratamento canônico e reações;
   vínculo de atendimento é conferido e duplicação retorna 409 sem sobrescrita.
 - `PUT /pacientes/:id/acesso/:usuarioId`: administração com contexto do ator.
