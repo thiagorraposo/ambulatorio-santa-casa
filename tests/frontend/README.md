@@ -39,12 +39,32 @@ três perfis, saída/troca de identidade, expiração e respostas tardias, 401,
 revogação de vínculo ao retomar foco, teclado/foco, Axe WCAG A/AA, tela estreita,
 zoom de 200% e ausência de persistência em storage/cookies/IndexedDB/CacheStorage.
 
-Intercepções nos testes apenas atrasam respostas obtidas da API real por
-`route.fetch()`; não substituem seu conteúdo nem status. A expiração local usa
+`stage7.spec.ts` usa pacientes adicionais criados pela API nos próprios cenários,
+sem alterar a fixture de leitura. Cobre cadastro/homônimos, preservação de
+contatos/endereço, PATCH com a versão original, 409 com comparação e descarte
+explícito do rascunho antes de nova edição, recusa por perfil/vínculo e política
+de cadastro consultada pela capacidade pública,
+atendimento composto com rollback e pendência resolvida com data na mesma
+transação, BZN/reações, retornos e contrarreferências
+repetíveis, ano informado separado de visita, projetos/notificação, resolução
+de pendências, rascunhos, perda de resposta após commit de atendimento, PATCH de
+paciente, retorno anual e contrarreferência, confirmação parcial, reconsulta de
+vínculo revogado com ocultação antes da resposta e revalidação da identidade
+interrompida durante a resposta de escrita já commitada.
+IDs dos catálogos vêm das consultas públicas; não são constantes de teste.
+O helper de login respeita os cabeçalhos do limite real de tentativas por IP.
+
+Intercepções de leitura atrasam respostas obtidas da API real por `route.fetch()`,
+sem substituir conteúdo/status; o cenário de revalidação interrompe a conexão
+de `/auth/me` e recupera depois a consulta real. Na Etapa 7, os cenários de perda
+de resposta executam a escrita real e interrompem sua entrega após commit;
+400/409/401 são provocados na própria API. Não há persistência clínica simulada. A expiração local usa
 o relógio do navegador, mantendo o servidor real: o 401 do servidor é verificado
-separadamente por inativação da identidade. 429/503/falhas de rede são cobertos
-pelos testes de componentes/cliente, sem provocar indisponibilidade artificial
-do PostgreSQL. Axe e screenshots complementam a revisão manual de acessibilidade.
+separadamente por inativação da identidade. 429/503 também são cobertos pelos
+testes de componentes/cliente, sem provocar indisponibilidade artificial do
+PostgreSQL. Axe cobre todos os tipos de formulário clínico, incluindo comparação
+de conflito e diálogo de rascunho; teclado, tela estreita, zoom e screenshots
+complementam a revisão manual de acessibilidade.
 
 Os testes executam serialmente para compartilhar fixtures e respeitar o limite
 real de login. Logs, screenshots, resultados e traces ficam apenas em um

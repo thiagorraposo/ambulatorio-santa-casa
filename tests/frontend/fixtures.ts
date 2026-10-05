@@ -22,8 +22,11 @@ export const fixture: Fixture = JSON.parse(readFileSync(process.env.FRONTEND_E2E
 const requireBackend = createRequire(resolve(__dirname, '../../backend/package.json'));
 const { sign } = requireBackend('jsonwebtoken');
 const { Pool } = requireBackend('pg');
+let loginWindowUntil = 0;
 
 export async function signIn(page: Page, perfil: Perfil, destination = '/') {
+  const pause = loginWindowUntil - Date.now();
+  if (pause > 0) await new Promise(resolve => setTimeout(resolve, pause));
   await page.goto(destination);
   await expect(page.getByLabel('Usuário', { exact: true })).toBeVisible();
   await page.getByLabel('Usuário', { exact: true }).fill(fixture.users[perfil].login);
@@ -32,9 +35,28 @@ export async function signIn(page: Page, perfil: Perfil, destination = '/') {
   await page.getByLabel('Senha', { exact: true }).fill(fixture.password);
   await page.keyboard.press('Tab');
   await expect(page.getByRole('button', { name: 'Entrar', exact: true })).toBeFocused();
-  const loginResponse = page.waitForResponse(response => new URL(response.url()).pathname === '/v1/auth/login' && response.status() === 201);
+  const loginResponse = page.waitForResponse(response => new URL(response.url()).pathname === '/v1/auth/login'
+    && response.request().method() === 'POST');
   await page.keyboard.press('Enter');
-  const authentication = await (await loginResponse).json() as { accessToken: string; expiresIn: number };
+  let response = await loginResponse;
+  // A new Playwright worker/file may start without the previous login window.
+  // Respect the real 429 rather than changing or bypassing the API limiter.
+  if (response.status() === 429) {
+    const seconds = Number(response.headers()['retry-after'] ?? response.headers()['x-ratelimit-reset']);
+    expect(Number.isFinite(seconds) && seconds > 0 && seconds <= 60).toBe(true);
+    await expect(page.getByRole('alert')).toContainText(/tentativas|aguarde|limite/i);
+    await new Promise(resolve => setTimeout(resolve, seconds * 1000 + 200));
+    const resumed = page.waitForResponse(item => new URL(item.url()).pathname === '/v1/auth/login'
+      && item.request().method() === 'POST');
+    await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+    response = await resumed;
+  }
+  expect(response.status()).toBe(201);
+  if (response.headers()['x-ratelimit-remaining'] === '0') {
+    const seconds = Number(response.headers()['x-ratelimit-reset']);
+    if (Number.isFinite(seconds) && seconds > 0) loginWindowUntil = Date.now() + seconds * 1000 + 200;
+  }
+  const authentication = await response.json() as { accessToken: string; expiresIn: number };
   await expect(page).not.toHaveURL(/\/login(?:\?|$)/);
   return authentication;
 }
