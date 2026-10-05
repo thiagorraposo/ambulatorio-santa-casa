@@ -1,10 +1,11 @@
-import { Link, useParams, useSearchParams } from 'react-router';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router';
 import type { PacienteDetalheResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
 import { Card, EmptyState, PageHeading, QueryState } from '../../shared/ui';
 import { clinicalLabel, displayText, formatAge, formatClinicalDate, triState } from '../../shared/formatters';
 import { AttendanceLink, Fields } from './components';
 import { pagePath, Pagination, usePage } from './pagination';
+import { useSession } from '../../app/session';
 import {
   AttendanceHistory, PatientAnnualFollowup, PatientBzn, PatientExams, PatientNotification,
   PatientPending, PatientProjects, PatientReferrals,
@@ -65,6 +66,8 @@ function PatientSection({ section, pacienteId, path, data, changePage }: {
 }
 
 export default function PatientPage() {
+  const session = useSession();
+  const location = useLocation();
   const { pacienteId = '' } = useParams<{ pacienteId: string }>();
   const [searchParams] = useSearchParams();
   const section = searchParams.get('aba') ?? 'dados';
@@ -80,7 +83,11 @@ export default function PatientPage() {
           <h2>{data.nome}</h2>
           <p>ID <span className="mono">{data.pacienteId}</span></p>
           <p>{formatAge(data.idade, data.dataReferenciaIdade)}</p>
-          <span className="badge">Consulta</span>
+          {location.state?.saved && <p className="notice" role="status">{String(location.state.saved)}</p>}
+          {session.user?.perfil !== 'consulta' && <div className="form-actions">
+            <Link to={`${path}/editar`} className="button button-secondary">Editar paciente</Link>
+            <Link to={`${path}/atendimentos/novo`} className="button">Novo atendimento</Link>
+          </div>}
         </Card>
         <nav className="record-nav" aria-label="Seções da ficha">
           {sections.map(([value, label]) => {

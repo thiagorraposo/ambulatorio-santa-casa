@@ -6,6 +6,8 @@ import { Card, PageHeading, ApiErrorState } from '../shared/ui';
 import PatientsPage from '../features/pacientes/PatientsPage';
 import PatientPage from '../features/pacientes/PatientPage';
 import AttendancePage from '../features/pacientes/AttendancePage';
+import PatientFormPage from '../features/clinical/PatientFormPage';
+import AttendanceFormPage from '../features/clinical/AttendanceFormPage';
 import { DraftProvider } from '../shared/writing';
 
 const profiles = { consulta: 'Consulta', edicao: 'Edição', administracao: 'Administração' };
@@ -156,6 +158,10 @@ export default function App() {
     <Route element={<ProtectedLayout />}>
       <Route index element={<HomePage />} />
       <Route path="/pacientes" element={<PatientsPage />} />
+      <Route path="/pacientes/novo" element={<PatientFormPage />} />
+      <Route path="/pacientes/:pacienteId/editar" element={<PatientFormPage />} />
+      <Route path="/pacientes/:pacienteId/atendimentos/novo" element={<AttendanceFormPage />} />
+      <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/editar" element={<AttendanceFormPage />} />
       <Route path="/pacientes/:pacienteId" element={<PatientPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId" element={<AttendancePage />} />
       <Route path="/minha-conta" element={<AccountPage />} />

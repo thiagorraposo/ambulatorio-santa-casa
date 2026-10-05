@@ -1,10 +1,11 @@
-import { Link, useParams } from 'react-router';
+import { Link, useLocation, useParams } from 'react-router';
 import type { AtendimentoDetalheResponse, RastreioFamiliarResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
 import { Card, EmptyState, PageHeading, QueryState } from '../../shared/ui';
 import { clinicalLabel, displayText, formatClinicalDate, formatNumeric, triState } from '../../shared/formatters';
 import { ExamList, Fields } from './components';
 import { pagePath, Pagination, usePage } from './pagination';
+import { useSession } from '../../app/session';
 
 function FamilyScreenings({ rows }: { rows: RastreioFamiliarResponse[] }) {
   return <>{rows.map(item => <article className="resource-item" key={item.rastreioFamiliarId}>
@@ -23,6 +24,8 @@ function FamilyScreenings({ rows }: { rows: RastreioFamiliarResponse[] }) {
 }
 
 export default function AttendancePage() {
+  const session = useSession();
+  const location = useLocation();
   const { pacienteId = '', atendimentoId = '' } = useParams<{ pacienteId: string; atendimentoId: string }>();
   const page = usePage();
   const patientPath = `/pacientes/${encodeURIComponent(pacienteId)}`;
@@ -45,6 +48,10 @@ export default function AttendancePage() {
         return <>
           <Card>
             <h2>Atendimento de {formatClinicalDate(data.dataAtendimento)}</h2>
+            {location.state?.saved && <p className="notice" role="status">{String(location.state.saved)}</p>}
+            {session.user?.perfil !== 'consulta' && <div className="form-actions">
+              <Link to={`${patientPath}/atendimentos/${atendimentoId}/editar`} className="button button-secondary">Editar atendimento</Link>
+            </div>}
             <Fields items={[
               ['ID do atendimento', <span className="mono">{data.atendimentoId}</span>],
               ['Localização do prontuário', displayText(data.localizacaoProntuario)],
@@ -89,6 +96,7 @@ export default function AttendancePage() {
                 <Fields items={[
                   ['ID da pendência', <span className="mono">{item.pendenciaId}</span>],
                   ['Status', clinicalLabel(item.status)], ['Identificada em', formatClinicalDate(item.dataIdentificacao)],
+                  ['Resolvida em', formatClinicalDate(item.dataResolucao)],
                 ]} />
               </article>)}</div>
             )}

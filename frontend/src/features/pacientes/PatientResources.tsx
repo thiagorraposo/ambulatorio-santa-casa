@@ -164,6 +164,7 @@ export function PatientPending({ pacienteId, path }: { pacienteId: string; path:
         ['ID da pendência', <span className="mono">{item.pendenciaId}</span>],
         ['Atendimento', <AttendanceLink pacienteId={pacienteId} atendimentoId={item.atendimentoId} />],
         ['Status', clinicalLabel(item.status)], ['Identificada em', formatClinicalDate(item.dataIdentificacao)],
+        ['Resolvida em', formatClinicalDate(item.dataResolucao)],
       ]} />
     </article>)}</div>}
   </Collection>;
