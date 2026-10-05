@@ -12,6 +12,7 @@ import PatientPage from './PatientPage';
 import PatientsPage from './PatientsPage';
 
 vi.mock('../../api/useApiQuery', () => ({ useApiQuery: vi.fn() }));
+vi.mock('../../app/session', () => ({ useSession: () => ({ user: { usuarioId: '42', nome: 'Consulta sintética', perfil: 'consulta' } }) }));
 
 const ID = '9007199254740993';
 const responses = new Map<string, unknown>();
