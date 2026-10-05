@@ -72,6 +72,15 @@ function examResponse(row: ExamRow): ExameResponse {
 export class PacientesService {
   constructor(private readonly repository: PacientesRepository, @Optional() private readonly database?: DatabaseService,
     @Optional() private readonly access?: ClinicalAccessService) {}
+
+  async capabilities(user: AuthenticatedUser): Promise<{ podeCadastrar: boolean }> {
+    if (!this.database || !this.access) throw new Error('Dependências clínicas indisponíveis');
+    return this.database.transaction(async tx => {
+      await this.access!.identity(tx, user);
+      return { podeCadastrar: this.access!.canCreate(user) };
+    });
+  }
+
   async list(query: ListarPacientesQuery, user: AuthenticatedUser): Promise<PacienteResponse[]> {
     if (!this.database || !this.access) throw new Error('Dependências clínicas indisponíveis');
     const result = await this.database.transaction(async (tx) => {

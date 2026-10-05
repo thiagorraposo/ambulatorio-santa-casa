@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ImportacoesModule } from './importacoes/importacoes.module';
+import { CatalogosModule } from './catalogos/catalogos.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ImportacoesModule } from './importacoes/importacoes.module';
     AuthModule,
     HealthModule,
     PacientesModule,
+    CatalogosModule,
     ImportacoesModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

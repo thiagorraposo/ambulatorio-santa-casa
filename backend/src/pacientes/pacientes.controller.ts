@@ -27,6 +27,10 @@ export class PacientesController {
     const rows = await this.pacientes.exportCsv(user, query);
     return ['paciente_id,nome', ...rows.map((row) => `${csvCell(row.pacienteId)},${csvCell(row.nome)}`)].join('\n') + '\n';
   }
+  @Get('capacidades')
+  capabilities(@CurrentUser() user: AuthenticatedUser): Promise<{ podeCadastrar: boolean }> {
+    return this.pacientes.capabilities(user);
+  }
   @Get(':id') get(@Param('id', ClinicalIdPipe) id: string, @Query() query: PageQuery,
     @CurrentUser() user: AuthenticatedUser): Promise<PacienteDetalheResponse> {
     return this.pacientes.get(user, id, query);
