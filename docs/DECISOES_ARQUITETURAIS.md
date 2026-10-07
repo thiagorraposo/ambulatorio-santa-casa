@@ -658,8 +658,8 @@ Título: Protótipo Figma Make como referência de interface subordinada aos con
 
 Data: 2026-10-03
 
-Status: Aceita; 6A–6B e 7A–7D implementadas e validadas tecnicamente no ambiente
-sintético em 2026-10-04
+Status: Aceita; 6A–6B concluídas no ambiente sintético. 7A–7D têm implementação
+e validação parcial de 2026-10-04; reauditoria de 05/10 mantém aceite pendente.
 
 Decisão: usar o código do Figma Make como referência visual e funcional,
 reaproveitando apresentação após revisão e adaptando fluxos aos contratos `/v1`.
@@ -693,8 +693,9 @@ intenção de escrita somente em memória, separados do cache de consultas. O
 escopo da sessão/identidade é distinto da geração de requisições: revalidação
 temporariamente indisponível oculta formulários sem descartar rascunhos. Saída,
 401, expiração e troca de identidade/perfil apagam ambos. Data router permite
-bloquear navegação; store assinado conserva o estado de confirmação durante
-remontagens. Escritas não têm retry automático; resultado incerto exige consulta
+bloquear navegação; store assinado conserva o estado de envio durante
+remontagens. Recibos/valores confirmados ainda se perdem após falha temporária de
+identidade (R7-07); sua conservação permanece requisito. Escritas não têm retry automático; resultado incerto exige consulta
 e impede reenvio da mesma intenção. Conflitos preservam a versão original.
 Novos episódios após sucesso confirmado ganham intenção própria; não se promete
 idempotência de POST entre sessões. O
@@ -709,6 +710,12 @@ reconsultas. Confirmação exige ID canônico textual do recurso. Consultar some
 a capacidade de cadastro permite alinhar a interface à política revalidada no
 POST, sem expor vínculos ou ampliar acesso. Catálogos ativos e validação de
 resolução/comparecimento usam o modelo existente, sem migration.
+
+Precisão de 2026-10-05: os limites de recuperação/contexto/paginação e a
+cobertura real dos testes estão na [reavaliação atual](frontend/VISAO_E_ESPECIFICACAO.md#reavaliação-das-sete-lacunas-e-cobertura-de-validação).
+A [matriz individual](frontend/MATRIZ_FIGMA_FRONTEND.md) sucede o inventário
+histórico para o produto, com propostas P-01–09 e pacotes associados. Não altera
+a decisão arquitetural aceita nem aprova antecipadamente contratos futuros.
 
 Detalhamento de 2026-10-04: adotar Vite e React Router para rotas reais, TanStack
 Query para consultas por recurso e CSS próprio para a apresentação revisada.

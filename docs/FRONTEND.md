@@ -1,17 +1,24 @@
 # Frontend — leitura e fluxos clínicos
 
-Atualizado em: 2026-10-04. Fundação 6A–6B concluída; fluxos 7A–7D implementados
-e validados tecnicamente no ambiente sintético.
+Atualizado em: 2026-10-05. Fundação 6A–6B concluída; fluxos 7A–7D com
+implementação e validação parcial sintética. Sete lacunas, prova do percurso
+integrado e revisão com a equipe impedem aceite completo.
 
 A aplicação própria está em [`frontend/`](../frontend/). Consome os contratos
 públicos `/v1` do backend, com React/TypeScript, Vite, roteamento e consultas por
-recurso. O [roadmap](PROXIMOS_PASSOS.md#etapa-6--fundação-do-frontend) define o
+recurso. O [roadmap](PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend) define o
 escopo e os critérios de aceite; os relatórios da
 [Etapa 6](validacoes/VALIDACAO_ETAPA_6.md) e da
 [Etapa 7](validacoes/VALIDACAO_ETAPA_7.md) registram evidências e limites,
-incluindo a revisão de usabilidade com a equipe ainda pendente. O estágio
+com escopo limitado aos cenários executados. O estágio
 vigente está em
 [ESTADO_ATUAL_DO_PROJETO.md](ESTADO_ATUAL_DO_PROJETO.md).
+
+Este documento descreve setup e comportamento existente. A experiência
+pretendida está na [visão de produto](frontend/VISAO_E_ESPECIFICACAO.md);
+a [matriz Figma/frontend](frontend/MATRIZ_FIGMA_FRONTEND.md) inventaria campos,
+ações e destinos, e os [pacotes do roadmap](PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend)
+definem dependências e aceite. Proposta não é contrato publicado.
 
 ## Preparação e comandos
 
@@ -157,7 +164,8 @@ coleções externas e filhos de snapshots. Ainda não há cursor independente do
 familiares de cada snapshot: avançar o offset pode retirar o snapshot da página
 antes de alcançar todos os seus filhos. A interface preserva a paginação
 retornada e seus limites, sem afirmar completude global ou reconstruir dados
-ausentes. Evoluir esse contrato pertence a uma entrega própria do backend.
+ausentes. A correção R7-01 foi decomposta em
+[7B-R1B](PROXIMOS_PASSOS.md#7b-r1b) e [7B-R1U](PROXIMOS_PASSOS.md#7b-r1u).
 
 IDs PostgreSQL permanecem texto, inclusive acima de `Number.MAX_SAFE_INTEGER`.
 Datas clínicas são apresentadas como datas civis, sem conversão que desloque o
@@ -182,6 +190,8 @@ Os tipos de `/registrar` são `bzn`, `retorno-bzn`, `projeto`, `notificacao`,
 `pendencia`. O atendimento do contexto pode ser levado em `atendimentoId`;
 `projetoId`, `encaminhamentoId` e `pendenciaId` selecionam registros existentes.
 Seletores paginam opções da API; IDs continuam texto e não são hardcoded.
+Alguns atalhos ainda omitem esse contexto; [7D-R1](PROXIMOS_PASSOS.md#7d-r1)
+cobre os caminhos restantes, preservando os que já o transportam.
 
 Criação do atendimento envia medidas, diagnóstico/descoberta, exames,
 familiares e pendências junto com o núcleo. BZN/reações, retornos, projetos,
@@ -214,6 +224,15 @@ e, na edição, o mesmo ID original. Rede, resposta inválida, 5xx ou cancelamen
 deixam resultado incerto: consulta para verificar o registro e reenvio bloqueado,
 inclusive ao voltar à mesma intenção. Novos episódios após sucesso confirmado
 recebem nova intenção local; isso não equivale a idempotência entre sessões.
+
+A recuperação permanece parcial: 403 mantém a intenção bloqueada sem retomada;
+consulta após resposta perdida não reconcilia o resultado; GET do BZN concorrente
+pode ocultar o rascunho, e recibo/valores confirmados não sobrevivem à remontagem
+após falha temporária de identidade. A criação de pendência aceita null no
+backend, mas os formulários impedem esse estado; PATCH atual exige string.
+Esses limites e a cobertura exata dos testes estão na
+[reauditoria atual](frontend/VISAO_E_ESPECIFICACAO.md#reavaliação-das-sete-lacunas-e-cobertura-de-validação).
+Bloquear repetição contém duplicação; ainda não conclui a recuperação pretendida.
 
 ## Apresentação e erros
 

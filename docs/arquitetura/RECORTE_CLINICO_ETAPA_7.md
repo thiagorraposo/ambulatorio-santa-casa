@@ -6,6 +6,13 @@ Esta decisão aplica a [ADR-024](../DECISOES_ARQUITETURAIS.md#adr-024): campos
 editáveis precisam ter destino público, autorização e persistência comprovados.
 Não amplia o escopo para reproduzir todas as telas do protótipo.
 
+Precisão de 2026-10-05: este é o recorte da implementação existente, não a
+visão integral do produto. A [especificação proposta](../frontend/VISAO_E_ESPECIFICACAO.md)
+e a [matriz individual](../frontend/MATRIZ_FIGMA_FRONTEND.md) atribuem destinos
+e entregas às áreas sem HTTP. As sete lacunas reavaliadas permanecem abertas;
+preservação/recuperação abaixo descrevem garantias limitadas aos cenários
+validados, sem aceite completo dos formulários.
+
 ## Cobertura implementada
 
 | Área | Formulário e contrato público | Preservação e limites |
@@ -22,7 +29,7 @@ Não amplia o escopo para reproduzir todas as telas do protótipo.
 | Projetos/notificação | PUT por paciente, com pré-carga do registro existente. | Envia somente alterações em campos existentes; triestados, número, justificativas e textos são independentes. Ausência de associação não é inferida da primeira página. |
 | Encaminhamento | Criação com atendimento e catálogos ativos. | Tipo/projeto opcionais, destino, datas, estados e textos públicos. Não substitui edição por criação. |
 | Contrarreferência | Episódios simples e repetíveis vinculados ao encaminhamento escolhido. | Preserva histórico; não inclui upload ou representação documental avançada. |
-| Pendências | Criação textual junto ao atendimento ou POST posterior, e PATCH de status/data. | Resolução exige `dataResolucao` explícita também na criação; outro status recusa data preenchida. Reabertura remove a data explicitamente. Omissão cria `aberta`; `null` preserva desconhecido. GET inclui a data, inclusive no detalhe do atendimento. Não há revisão de observação/responsável. |
+| Pendências | Criação textual junto ao atendimento ou POST posterior, e PATCH de status/data. | Resolução exige `dataResolucao` explícita também na criação; outro status recusa data preenchida. Reabertura remove a data explicitamente. Na criação HTTP, omissão cria `aberta` e `null` preserva desconhecido; formulários ainda impedem null (R7-04). PATCH atual exige status string e não aceita null. GET inclui a data, inclusive no detalhe do atendimento. Não há revisão de observação/responsável. |
 
 Os catálogos usam estruturas existentes, sem migration. Consulta, paginação e
 autorização estão em
@@ -90,3 +97,9 @@ entre sessões. A verificação não presume que uma página vazia significa aus
 global. A interface só confirma sucesso após resposta HTTP válida com o ID textual
 canônico do recurso esperado; PATCH versionado de paciente/atendimento confere
 também o ID original.
+
+Limites reavaliados: falta saída de 403/resultado incerto, rascunho do BZN
+concorrente pode ficar oculto e recibos/valores confirmados se perdem na
+remontagem após falha temporária de identidade. Bloqueio de reenvio não é
+reconciliação concluída. [Pacotes R da Etapa 7](../PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend)
+cobrem esses casos sem inventar suporte HTTP atual.
