@@ -1,6 +1,6 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-10-04
+Atualizado em: 2026-10-05
 
 Esta é a síntese vigente. Contratos pertencem às fontes temáticas; o histórico
 cronológico está no [registro](REGISTRO_DE_ALTERACOES.md) e na
@@ -11,7 +11,10 @@ O [relatório do trabalho local](RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md)
 registra sete lacunas funcionais ainda sem correção e limites de cobertura.
 Os resultados de 2026-10-04 abaixo comprovam os cenários executados. A
 continuidade deve priorizar essas correções, o percurso integrado pela interface
-e a revisão com a equipe antes de avançar ao aceite da Etapa 8.
+e a revisão com a equipe antes de ampliar a Etapa 8. A
+[reavaliação pelo código atual](frontend/VISAO_E_ESPECIFICACAO.md#reavaliação-das-sete-lacunas-e-cobertura-de-validação)
+confirma as sete lacunas; os [pacotes do roadmap](PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend)
+definem sua recuperação e aceite.
 
 ## Escopo e estágio
 
@@ -23,9 +26,10 @@ relacionados na [matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md).
 própria em `frontend/`, sessão em memória, navegação e leitura pela API `/v1`.
 Setup e contratos estão em [FRONTEND.md](FRONTEND.md); a matriz de evidências
 está em [VALIDACAO_ETAPA_6.md](validacoes/VALIDACAO_ETAPA_6.md). **Etapa 7
-(7A–7D) implementada e validada tecnicamente no ambiente sintético em 2026-10-04**,
-com evidências em [VALIDACAO_ETAPA_7.md](validacoes/VALIDACAO_ETAPA_7.md). A revisão de
-usabilidade com a equipe permanece pendente. Etapas 8–10 permanecem futuras.
+(7A–7D) com implementação e validação parcial sintética em 2026-10-04**,
+com evidências em [VALIDACAO_ETAPA_7.md](validacoes/VALIDACAO_ETAPA_7.md). Sete
+lacunas, prova integrada pela interface e revisão com a equipe impedem aceite
+completo. Etapas 8–10 permanecem futuras.
 
 A [avaliação do protótipo Figma Make](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
 foi concluída em 2026-10-03, com inventário, compatibilidade HTTP e plano das
@@ -34,13 +38,20 @@ preservando arquitetura e regras existentes. A análise mantém a fotografia do
 planejamento original; o [roadmap](PROXIMOS_PASSOS.md#etapa-6--fundação-do-frontend)
 continua definindo sequência e critérios de aceite. Os formulários seguem o
 [recorte clínico da Etapa 7](arquitetura/RECORTE_CLINICO_ETAPA_7.md), com suporte
-HTTP explícito para cada campo. O próximo desenvolvimento previsto é a Etapa 8.
+HTTP explícito para cada campo editável. A
+[visão de produto](frontend/VISAO_E_ESPECIFICACAO.md) e a
+[matriz Figma/frontend](frontend/MATRIZ_FIGMA_FRONTEND.md), de 05/10, sucedem a
+fotografia anterior para experiência pretendida, inventário e diferenças atuais.
+O próximo desenvolvimento é concluir a recuperação da Etapa 7 e seu percurso
+integrado; complementos operacionais são pacotes posteriores da Etapa 8.
 
 As respostas de [campos e regras clínicas](Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
 são autoritativas: idade derivada do nascimento, descoberta de Chagas distinta da
 sorologia, familiares identificados com resultado, exames identificados e retorno
 BZN ligado ao comparecimento real. Não há decisão humana pendente no escopo
-sintético. A governança delegada da 5A exige entitlement nominal para gestão,
+sintético já aprovado da 5A. A nova proposta de produto possui decisões P-01–09
+explicitamente pendentes, sem reabrir respostas clínicas aprovadas. A governança
+delegada da 5A exige entitlement nominal para gestão,
 independente do perfil administrativo e da autorização clínica por fonte.
 Designar pessoas e operar com dados reais pertencem à implantação posterior.
 
@@ -62,7 +73,8 @@ Designar pessoas e operar com dados reais pertencem à implantação posterior.
   cache clínico separados; token em memória, identidade por `/auth/me`, busca
   nome/sexo, ficha/histórico e formulários clínicos 7A–7D. Rascunhos separados do
   cache, versões originais, conflitos com comparação explícita e confirmação por
-  operação. A referência Figma Make não integra o build; gestão administrativa
+  operação, com recuperação e preservação de recibos ainda parciais conforme R7.
+  A referência Figma Make não integra o build; gestão administrativa
   permanece em etapa posterior.
 - A configuração de CI contempla manifesto, importador, SQL, backend, runner
   clínico e frontend (build, unitários e Chromium/API/PostgreSQL descartável).
@@ -127,6 +139,13 @@ campos importados sem HTTP continuam sem consulta/edição pela interface.
 
 ## Validação e limites
 
+A análise documental de 05/10 partiu de `29b3186` e status limpo, preservando o
+código. Houve inspeção estática e Chromium do protótipo/aplicação com respostas
+HTTP interceptadas e dados sintéticos; as [capturas e observações](frontend/visuais/README.md)
+comprovam apenas composição/transições e defeitos indicados, sem API/banco reais.
+Não houve nova execução de suítes clínicas, migrations ou atualização do dump.
+Documentação, rastreabilidade, links, diagramas e diff foram conferidos.
+
 A Etapa 6 passou instalação limpa pelo lockfile, build TypeScript/Vite,
 47 testes de sessão/componentes, oito E2E Chromium/API/PostgreSQL e nove testes
 de workflow. A revisão incluiu teclado/foco, contraste automatizado, zoom/reflow
@@ -156,7 +175,7 @@ contrarreferência permanece no backlog aprovado. Não há nova regra clínica i
 
 Dados reais, implantação, TLS/segredos/backup/retenção e homologação institucional
 não fazem parte desta execução. A revisão de usabilidade com a equipe clínica
-permanece pendente; formulários 7A–7D estão implementados, e complementos da
-interface seguem a Etapa 8. O backlog e as próximas etapas
+permanece pendente; formulários 7A–7D têm implementação, porém recuperação e
+aceite continuam abertos. O backlog e as próximas etapas
 estão em [PROXIMOS_PASSOS.md](PROXIMOS_PASSOS.md); regras e workflow estão no
 [índice da documentação](README.md).

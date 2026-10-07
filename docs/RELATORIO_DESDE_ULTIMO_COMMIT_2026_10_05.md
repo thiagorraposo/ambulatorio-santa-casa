@@ -2,6 +2,13 @@
 
 Data: 2026-10-05. Comparação: árvore de trabalho local contra `HEAD`.
 
+Nota de continuidade: esta fotografia compara o trabalho então local com
+`adf2fd5`. Os 13 commits posteriores até `29b3186` incorporaram esse conteúdo;
+as contagens abaixo não descrevem a árvore da nova entrega documental. A
+[reavaliação atual](frontend/VISAO_E_ESPECIFICACAO.md#reavaliação-das-sete-lacunas-e-cobertura-de-validação)
+e a [matriz individual](frontend/MATRIZ_FIGMA_FRONTEND.md) confirmam os limites
+e vinculam cada lacuna aos [pacotes do roadmap](PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend).
+
 Foi acrescentada uma implementação substancial dos fluxos clínicos 7A–7D,
 com formulários, integração HTTP, proteção de rascunhos, catálogos e testes.
 **A Etapa 7 completa não está comprovada:** a reauditoria identificou sete

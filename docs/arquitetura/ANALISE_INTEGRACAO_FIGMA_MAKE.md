@@ -16,6 +16,13 @@ matriz abaixo preservam a fotografia anterior à implementação.
 As provas de execução pertencem ao
 [relatório da Etapa 7](../validacoes/VALIDACAO_ETAPA_7.md).
 
+Em 2026-10-05, a [visão e especificação de produto](../frontend/VISAO_E_ESPECIFICACAO.md)
+e a [matriz ponto a ponto](../frontend/MATRIZ_FIGMA_FRONTEND.md) reavaliaram o
+protótipo, frontend e backend atuais, com observações no navegador delimitadas.
+Elas são as fontes vigentes do inventário/destino e da experiência pretendida;
+este documento preserva a fotografia histórica. A sequência vigente está nos
+[pacotes do roadmap](../PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend).
+
 ## Objetivo, limites e fontes
 
 Aproveitar a identidade visual, a organização da ficha e os fluxos úteis do

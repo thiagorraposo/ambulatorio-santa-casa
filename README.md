@@ -3,8 +3,9 @@
 Base PostgreSQL construída incrementalmente para organizar dados do ambulatório.
 O schema persistente possui 38 tabelas. Importador e backend NestJS evoluíram até
 a Etapa 5 no ambiente sintético; a fundação do frontend React/TypeScript
-(6A–6B) está concluída; os fluxos clínicos 7A–7D foram implementados e validados
-tecnicamente no ambiente sintético. Consulte o
+(6A–6B) está concluída; os fluxos clínicos 7A–7D têm implementação e validação
+parcial sintética. Sete lacunas e o percurso integrado ainda impedem aceite
+completo. Consulte o
 [estado vigente](docs/ESTADO_ATUAL_DO_PROJETO.md) para os limites de cada ambiente.
 
 O schema aplicado é `ambulatorio`. A principal evidência física versionada é `docs/evidencias/schema_atual_ambulatorio.sql`.
@@ -23,6 +24,13 @@ como material de apoio visual e funcional, separado do build da aplicação.
 Consulte a
 [organização das referências](referencias/README.md) e a
 [análise de integração](docs/arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md).
+
+A [visão proposta do produto](docs/frontend/VISAO_E_ESPECIFICACAO.md), a
+[matriz ponto a ponto](docs/frontend/MATRIZ_FIGMA_FRONTEND.md) e os
+[pacotes do roadmap](docs/PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend)
+explicitam a experiência pretendida, diferenças, dependências e aceite;
+[capturas e wireframes](docs/frontend/visuais/README.md) distinguem observação
+da interface e proposta.
 
 ## Pré-requisitos
 
