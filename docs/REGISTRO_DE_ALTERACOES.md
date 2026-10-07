@@ -1,5 +1,52 @@
 # Registro de Alterações
 
+## 2026-10-07 — organização da documentação frontend em commits
+
+Criada a branch `docs-frontend` a partir de `etapa7-commits`, no commit
+`29b3186`, preservando os 37 arquivos pendentes e o índice inicialmente vazio.
+As alterações foram organizadas em onze contextos: especificação e wireframes,
+capturas/anotações, matriz de navegação/cadastro/ficha, matriz de atendimento/
+acompanhamento, matriz operacional/estados, recuperação/aceite da Etapa 7,
+extensões clínicas, complementos do
+roadmap, limites técnicos, índices/fontes de estado e registro cronológico.
+
+Matriz e roadmap foram separados por seções no índice do Git, sem alterar o
+conteúdo final dos documentos no working tree. A conferência inclui hashes de
+preservação dos arquivos existentes, documentação, links, diff e status. A
+única extensão de conteúdo desta organização é esta entrada cronológica.
+Nenhuma funcionalidade, contrato ou migration foi modificada; as sete lacunas
+continuam abertas. Sem merge ou push.
+
+## 2026-10-05 — produto frontend, comparação Figma e roadmap verificável
+
+Criadas a [visão e especificação proposta](frontend/VISAO_E_ESPECIFICACAO.md)
+e a [matriz ponto a ponto](frontend/MATRIZ_FIGMA_FRONTEND.md), com 580 elementos/
+requisitos em 35 famílias, IDs estáveis, fontes, suporte HTTP, diferenças,
+decisões/destinos, aceite e rastreabilidade. Protótipo, intenção original,
+implementação atual, proposta e evidência são distinguidos. Regras clínicas
+vigentes prevalecem; ausência de API vira dependência, sem exclusão automática.
+
+O [roadmap oficial](PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend)
+preserva as dez etapas e 7A–7D, com pacotes e unidades separadamente aceitáveis,
+dependências por camada e evidência proporcional. Sete lacunas continuam abertas;
+recuperação após 403/409/resposta perdida, confirmação/contexto/desconhecido e
+percurso cadastro → atendimento → acompanhamento → histórico têm entregas
+próprias. VU1 sintética e visão posterior são propostas; P-01–09 aguardam decisão.
+
+O [caderno visual](frontend/visuais/README.md) registra 21 capturas sintéticas,
+pares desktop/móvel e anotações de diferenças, além de três wireframes SVG
+marcados PROPOSTA. Chromium executou o protótipo de cópia temporária e o frontend
+com todas as chamadas `/v1` interceptadas; isso não comprova API/banco reais.
+Cinco diagramas Mermaid foram analisados/renderizados, e os SVGs inspecionados.
+
+Índice, README, estado, uso técnico, ADR-024, recorte, análise histórica e relatório de reauditoria
+apontam às novas fontes sem reproduzir o inventário. A precisão sobre null
+em criação versus PATCH de pendência descreve o código existente; não muda o
+contrato. Conferência documental por `docs-check COMPACT=1`, links/âncoras,
+rastreabilidade, representações, diff e status. Nenhuma implementação, migration,
+dado real, atualização de dump, commit ou push. Suítes anteriores não foram
+repetidas em uma entrega exclusivamente documental.
+
 ## 2026-10-05 — organização das alterações locais em commits
 
 Criada a branch `etapa7-commits` a partir de `etapa6-frontend`, no commit
