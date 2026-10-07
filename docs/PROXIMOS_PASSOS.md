@@ -1240,6 +1240,506 @@ cada contrato antecede sua UI, preservando as decisões clínicas vigentes.
 
 **Validação/evidência e conclusão:** VF. Roteiro de plano e visita real, fontes/IDs e captura revisada com equipe. Concluir somente pela condição comum acima e pelos critérios desta unidade.
 
+### Complementos vinculados à Etapa 8
+
+<a id="8a1"></a>
+
+#### 8A1 — Baixar CSV real da página de pacientes
+
+**Estado e cobertura:** Planejado; não aceito. RQ-DAS-12–17; RQ-EST-17 (telas/elementos na matriz).
+
+**Escopo:** ID/nome com filtros/página atuais e aviso de escopo; sem relatório do dashboard/exportação completa.
+
+**Dependências/decisões:** H16 publicado; Etapa 7 aceita; P-05 para manter política dos três perfis.
+
+**Trabalho por camada:** Frontend: ação de download, nome de arquivo, carga/erro/sucesso só após arquivo recebido; backend existente preservado.
+
+**Aceite — cenário principal e falhas:** Arquivo tem exatamente a página/filtros autorizados, acentos corretos e fórmulas neutralizadas. Consulta/edição/admin seguem H16; 403/rede não dão toast de download concluído nem arquivo indevido.
+
+**Validação/evidência e conclusão:** VF. Arquivo sintético comparado à página e caso de fórmula/403; nenhum dado real no Git. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8a2d"></a>
+
+#### 8A2D — Definir fila operacional e responsabilidade de revisão
+
+**Estado e cobertura:** Planejado; não aceito. RQ-NAV-04; RQ-HOM-21; RQ-PEN-01–03, 05–06, 09–18 (telas/elementos na matriz).
+
+**Escopo:** Separar pendências assistenciais de inconsistências de importação, ou agrupá-las com distinção; definir filtros/status/origem/período, revisão e responsabilidade.
+
+**Dependências/decisões:** P-04; D11; H12/H14 e autorização por fonte/paciente.
+
+**Trabalho por camada:** Documentação: vocabulário e decisão de produto, permissões, população dos contadores e retenção da revisão.
+
+**Aceite — cenário principal e falhas:** Toda pendência/inconsistência possui destino e regra de acesso/decisão; texto livre não é classificado automaticamente; nenhum responsável presumido de dado legado.
+
+**Validação/evidência e conclusão:** VD. Decisão/fluxo com exemplos e casos de visibilidade, antes de B/U. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8a2b"></a>
+
+#### 8A2B — Consultar fila global autorizada sem varrer pacientes
+
+**Estado e cobertura:** Planejado; não aceito. RQ-NAV-04; RQ-HOM-10, 12, 21; RQ-PEN-01–06 (telas/elementos na matriz).
+
+**Escopo:** Consulta agregada paginada, filtros aprovados e contadores por estado/escopo; projeção sanitizada e autorização antes da paginação.
+
+**Dependências/decisões:** 8A2D; P-04; H12/H14 não fornecem fila global hoje.
+
+**Trabalho por camada:** Backend: DTO/projeção e queries parametrizadas; dados/índices somente com evidência de necessidade, sem interpretar texto.
+
+**Aceite — cenário principal e falhas:** Conjunto conhecido com dois pacientes/vínculos: linhas e contadores só do escopo autorizado; filtros/período coerentes, estado desconhecido distinto; sem N+1 de toda população e sem JSONB bruto.
+
+**Validação/evidência e conclusão:** VB. HTTP/SQL com população conhecida, paginação/contadores e perfis sem visibilidade cruzada. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8a2u"></a>
+
+#### 8A2U — Encontrar e abrir pendência da fila preservando filtros
+
+**Estado e cobertura:** Planejado; não aceito. RQ-NAV-04; RQ-HOM-10, 12, 21; RQ-PEN-01–07 (telas/elementos na matriz).
+
+**Escopo:** Lista/contadores/filtros da fila e Abrir contexto; registro de decisão fica para 8A3U.
+
+**Dependências/decisões:** 8A2B aceito; 7D-R1; P-04.
+
+**Trabalho por camada:** Frontend: rota, menu conforme capacidade, URL filtros/página, tabela acessível, estado vazio/erro.
+
+**Aceite — cenário principal e falhas:** Filtro leva ao item certo; abrir pessoa/consulta e voltar conserva fila. Falha de contador não vira zero; sem autorização não aparece conteúdo antigo.
+
+**Validação/evidência e conclusão:** VF. Roteiro de filtros/detalhe/voltar, contagem conhecida, 403 e teclado/390 px. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8a3b"></a>
+
+#### 8A3B — Registrar revisão auditável de pendência
+
+**Estado e cobertura:** Planejado; não aceito. RQ-PEN-08, 10–23 (telas/elementos na matriz).
+
+**Escopo:** Nota de revisão separada de observação original, ator/data/status e controle de concorrência; sem classificar texto ou editar origem.
+
+**Dependências/decisões:** 8A2D/P-04; P-03 para concorrência; avaliar H12 e 7C-R2B.
+
+**Trabalho por camada:** Backend/dados: DTO/versionamento e registro de decisão autorizada; reaproveitar auditoria ou migration nova justificada.
+
+**Aceite — cenário principal e falhas:** Duas revisões concorrentes não apagam decisão; nota não sobrescreve fato/observação original; ator vem da sessão, resolvida exige data, null conforme contrato aprovado; recusas não gravam.
+
+**Validação/evidência e conclusão:** VB. Histórico antes/depois, dois escritores, autoria/versão e autorização. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8a3u"></a>
+
+#### 8A3U — Revisar pendência com fato original e decisão visíveis
+
+**Estado e cobertura:** Planejado; não aceito. RQ-PEN-08–23; RQ-EST-17 (telas/elementos na matriz).
+
+**Escopo:** Modal/página com contexto, descrição atual, nota/responsável/data somente aprovados, status e confirmar/cancelar; retorno à fila ou pessoa.
+
+**Dependências/decisões:** 8A3B; 8A2U quando vindo da fila; recuperação 7D.
+
+**Trabalho por camada:** Frontend: leitura da decisão anterior, formulário e comparação; diálogo acessível e recibo.
+
+**Aceite — cenário principal e falhas:** Revisor distingue fato de nota e conhece paciente/consulta; cancelamento/fechar não grava; sucesso relido; 409/403/resposta perdida recuperáveis sem duplicar decisão.
+
+**Validação/evidência e conclusão:** VF. Revisão pela UI com histórico/recibo, foco do diálogo e caso de concorrência. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8b1d"></a>
+
+#### 8B1D — Aprovar métricas e semântica de período
+
+**Estado e cobertura:** Planejado; não aceito. RQ-NAV-06; RQ-HOM-01–05, 13–20; RQ-RES-29; RQ-DAS-01–11 (telas/elementos na matriz).
+
+**Escopo:** Definir pacientes cadastrados, atendimentos, pendências abertas e lotes, população/perfil/período; definir origem/projeto/completude ou manter sem exibição.
+
+**Dependências/decisões:** P-05; Etapa 7 aceita; não criar score clínico.
+
+**Trabalho por camada:** Documentação: fórmula/tempo/denominador, casos conhecidos e regras de sobreposição. KPI não deriva de páginas parciais.
+
+**Aceite — cenário principal e falhas:** Exemplo numérico reproduz cada métrica e efeito do filtro; zero/falha distintos; projetos sobrepostos não somam população; completude só se houver regra aprovada.
+
+**Validação/evidência e conclusão:** VD. Tabela de definições e fixture com resultados esperados, aprovada antes de B/U. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8b1b"></a>
+
+#### 8B1B — Publicar os quatro indicadores operacionais aprovados
+
+**Estado e cobertura:** Planejado; não aceito. RQ-NAV-06; RQ-HOM-02–05; RQ-DAS-01–11 (telas/elementos na matriz).
+
+**Escopo:** Agregado de quatro KPIs, definição/período e população autorizada; série/gráficos e atividade recente em 8B2.
+
+**Dependências/decisões:** 8B1D; P-05.
+
+**Trabalho por camada:** Backend: consulta agregada com autorização antes do cálculo, DTO explícito; sem endpoint genérico de banco.
+
+**Aceite — cenário principal e falhas:** Resultados iguais à fixture aprovada nos períodos e três perfis; nenhuma soma de páginas; falta de acesso/serviço é erro e não zero; dado bruto não aparece.
+
+**Validação/evidência e conclusão:** VB. Contrato e integração com contagens esperadas, período e dois escopos de acesso. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8b1u"></a>
+
+#### 8B1U — Exibir KPIs com período, definição e estados honestos
+
+**Estado e cobertura:** Planejado; não aceito. RQ-NAV-06; RQ-HOM-01–05; RQ-DAS-01–11 (telas/elementos na matriz).
+
+**Escopo:** Quatro cards e filtro aprovado no Início/dashboard, legenda de definição; nenhum gráfico ainda.
+
+**Dependências/decisões:** 8B1B; 8B1D; P-05.
+
+**Trabalho por camada:** Frontend: leitura de agregado, período na URL, vazio/falha/carga e tabela/descrição acessível.
+
+**Aceite — cenário principal e falhas:** Mudança de período só afeta KPIs definidos; erro não aparece como zero; estado sem dados é identificável; foco/teclado e 390 px operáveis.
+
+**Validação/evidência e conclusão:** VF. Captura com resultados da fixture, troca de período e falha; comparação com API agregada. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8b2b"></a>
+
+#### 8B2B — Publicar atividade recente e séries autorizadas em unidades separadas
+
+**Estado e cobertura:** Planejado; não aceito. RQ-HOM-11, 13–20; RQ-RES-29–30; RQ-HIS-03–04, 11; RQ-DAS-01–11 (telas/elementos na matriz).
+
+**Escopo:** B2.1 últimas consultas/pendências com links/fontes; B2.2 série mensal de atendimentos; B2.3 origem/projetos e timeline integrada apenas se semântica aprovada. Cada projeção é uma unidade, não uma query clínica universal.
+
+**Dependências/decisões:** 8B1D/P-05; 8B1B para período; P-04 para fila. B2.3 pode ser adiado à VP.
+
+**Trabalho por camada:** Backend: DTO/queries paginadas ou agregadas específicos, autorização e precisão/proveniência; sem classificar consulta completa automaticamente.
+
+**Aceite — cenário principal e falhas:** Cada unidade bate com fixture/IDs conhecidos; ordenação/limite explícitos; sobreposição de projeto não duplica população; origem não confunde diagnóstico/proveniência; sem acesso cruzado.
+
+**Validação/evidência e conclusão:** VB. Aceite individual B2.1/B2.2/B2.3 com dados/contagens esperados e guard; B2.3 bloqueada até definição. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8b2u"></a>
+
+#### 8B2U — Abrir atividade recente e interpretar séries com tabela equivalente
+
+**Estado e cobertura:** Planejado; não aceito. RQ-HOM-11, 13–20; RQ-RES-29–30; RQ-HIS-03–04, 11; RQ-DAS-01–11 (telas/elementos na matriz).
+
+**Escopo:** U2.1 recentes no Início; U2.2 gráfico mensal+tabela; U2.3 gráficos origem/projeto e timeline integrada após contrato. Mesmo particionamento de B2.
+
+**Dependências/decisões:** 8B2B unidade correspondente; 7D-R1; P-05.
+
+**Trabalho por camada:** Frontend: gráfico sem score, tooltip/legenda acessíveis, link para consulta/pendência exatos e tabela de valores; cada unidade aceita sozinha.
+
+**Aceite — cenário principal e falhas:** Recentes abrem contexto exato; série equivale à tabela e filtro; falha não renderiza dado antigo/zero; vazio e itens fora do escopo explícitos; teclado permite ler sem tooltip de mouse.
+
+**Validação/evidência e conclusão:** VF. Captura e valores/links por unidade, caso vazio/erro e revisão humana de interpretação. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8b3d"></a>
+
+#### 8B3D — Decidir busca, colunas e origem de negócio
+
+**Estado e cobertura:** Planejado; não aceito. RQ-LIS-02–05, 13–21; RQ-CAD-03, 20, 25–30; RQ-FIC-02, 05; RQ-RES-02; RQ-ATD-20 (telas/elementos na matriz).
+
+**Escopo:** Código de pessoa, nascimento, origem, projeto/período, última consulta e procedência; definir o que é filtro, dado clínico e proveniência.
+
+**Dependências/decisões:** P-05; fontes clínicas e H2/H3/H5. Não derivar origem de hasChagas.
+
+**Trabalho por camada:** Documentação: dicionário/projeção e busca prévia ampliada, precisão de nascimento e política do código.
+
+**Aceite — cenário principal e falhas:** Cada coluna/filtro tem fonte/regra e exemplo de desconhecido; código do protótipo não é gerado ficticiamente; decisão distingue proveniência de condição clínica.
+
+**Validação/evidência e conclusão:** VD. Dicionário e seleção de primeira expansão, sem exigir todos os filtros de uma vez. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8b3b"></a>
+
+#### 8B3B — Ampliar projeção de pacientes por fatias aprovadas
+
+**Estado e cobertura:** Planejado; não aceito. RQ-LIS-02–05, 13–21; RQ-CAD-03, 09, 20, 25–30; RQ-FIC-02, 05; RQ-RES-02; RQ-ATD-20 (telas/elementos na matriz).
+
+**Escopo:** B3.1 código/nascimento/idade e busca; B3.2 origem/proveniência; B3.3 projeto/período/última consulta. Três contratos/unidades de expansão, compatíveis com busca atual.
+
+**Dependências/decisões:** 8B3D; P-05; idade D1 calculada com referência.
+
+**Trabalho por camada:** Backend/dados: DTO e queries de lista autorizadas, sem buscar cada ficha na UI; novo índice/modelo só justificado.
+
+**Aceite — cenário principal e falhas:** Cada unidade: filtro antes da paginação, campos corretos e null/precisão preservados; idade usa referência declarada, procedência sanitizada; três perfis só veem seu conjunto.
+
+**Validação/evidência e conclusão:** VB. Aceite separado B3.1/B3.2/B3.3 com paginação, fonte dos campos e casos de homônimo/autorização. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8b3u"></a>
+
+#### 8B3U — Usar tabela ampliada e atalhos por pessoa
+
+**Estado e cobertura:** Planejado; não aceito. RQ-LIS-02–05, 09–10, 13–21; RQ-CAD-03, 09, 20, 25–30; RQ-FIC-02, 05; RQ-RES-02; RQ-ATD-20 (telas/elementos na matriz).
+
+**Escopo:** U3.1 tabela/busca código/nascimento; U3.2 origem/proveniência; U3.3 projeto/período/última consulta; U3.4 Editar/Novo atendimento diretos com nome/ID e capacidade. Quatro unidades separadas.
+
+**Dependências/decisões:** 8B3B unidade correspondente; U3.4 pode usar H3/rotas atuais sem depender das novas colunas; P-05.
+
+**Trabalho por camada:** Frontend: filtros em URL, colunas/tabela responsiva, estados e ações reais por perfil, preservando busca ao voltar.
+
+**Aceite — cenário principal e falhas:** Cada filtro/coluna coincide com contrato; não simula total de páginas; Editar abre edição e Novo atendimento abre a pessoa correta. Vazio/falha não afirmam inexistência; teclado/320 px alcançam ações.
+
+**Validação/evidência e conclusão:** VF. Roteiro/captura por unidade e ID de destino/payload, sem N+1 de fichas. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8c1"></a>
+
+#### 8C1 — Consultar lotes e linhas sanitizados pela interface
+
+**Estado e cobertura:** Planejado; não aceito. RQ-NAV-05; RQ-IMP-01–11, 19–24 (telas/elementos na matriz).
+
+**Escopo:** Lista → detalhe → linhas/erros paginados e voltar; somente metadados já publicados. Não publicar arquivo/hash/candidatos/motivo bruto ausentes no DTO.
+
+**Dependências/decisões:** H14/ADR-023; Etapa 7 aceita; ambiente sintético para provas. Sem necessidade de upload para este pacote.
+
+**Trabalho por camada:** Frontend: rotas/menu conforme capacidades efetivas, paginação e códigos de erro compreensíveis. Backend existente reutilizado.
+
+**Aceite — cenário principal e falhas:** Admin vê lotes ordinários; consulta/edição só com vínculo de todos os pacientes/proveniência íntegra. Segundo lote/página funciona; revised lot permanece fora da porta ordinária; 403 não deixa dados do lote anterior.
+
+**Validação/evidência e conclusão:** VF. Lista/detalhe em três perfis com fixtures reais do runner e caso de proveniência/vínculo recusados. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8c2b"></a>
+
+#### 8C2B — Evoluir relatório de simulação e metadados por unidades
+
+**Estado e cobertura:** Planejado; não aceito. RQ-IMP-01–24, 32, 36, 39, 42–51 (telas/elementos na matriz).
+
+**Escopo:** C2B.1 contagens/códigos do dry-run e totais reais; C2B.2 arquivo/hash/versões sanitizados; C2B.3 candidatos de conflito com autorização. Três unidades; C2B.3 posterior/VP até decidir exposição mínima.
+
+**Dependências/decisões:** H14; P-05 para metadados e P-04 para conflito. Dry-run atual mínimo permanece válido até incremento.
+
+**Trabalho por camada:** Backend/importador: DTOs sanitizados do resultado do pipeline e projeção de lote; nunca devolver linha bruta/dados de pessoa não autorizada. Sem inferir sucesso pelo timer.
+
+**Aceite — cenário principal e falhas:** C2B.1 contagens batem com fixture e simulação não grava nem consome sequência; C2B.2 valores reais e escopo; C2B.3 candidato só autorizado, ausência explicada sem vazamento. Reenvio informa lote efetivo.
+
+**Validação/evidência e conclusão:** VI. Aceites separados com pipeline/HTTP/SQL, comparação de contagens/metadados e guard; nenhum XLSX real versionado. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8c2u"></a>
+
+#### 8C2U — Selecionar, simular e confirmar XLSX em unidades concluíveis
+
+**Estado e cobertura:** Planejado; não aceito. RQ-HOM-09; RQ-IMP-01–51; RQ-EST-17 (telas/elementos na matriz).
+
+**Escopo:** C2U.1 seleção real/finalidade/código/cancelar/dry-run mínimo; C2U.2 confirmação e lote efetivo; C2U.3 relatório rico/metadados; C2U.4 conflito autorizado. Quatro unidades; não bloquear U.1/U.2 pelo relatório ainda ausente.
+
+**Dependências/decisões:** H14 para U.1/U.2; 8C1; C2B correspondente para U.3/U.4; P-04/P-05; recuperação de operação não reenvia importação cegamente.
+
+**Trabalho por camada:** Frontend: File real multipart, estados por resposta, revisão/finalidade e confirmação única; sem porcentagem/count/log fictício.
+
+**Aceite — cenário principal e falhas:** U.1 arquivo inválido/recusa não grava e troca/cancelar preserva escolha consciente; U.2 simular zero escrita, confirmar/reenvio mostra lote efetivo e recusa de arquivo alterado explica revisão; U.3 contagens/metadados reais; U.4 links sem exposição indevida. Resposta perdida mantém incerto e verifica lote/operação autorizados.
+
+**Validação/evidência e conclusão:** VI. Roteiro separado por unidade com XLSX sintético/POST contados, lote relido e falhas; período/etapa não avançam por timer. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8c3d"></a>
+
+#### 8C3D — Decidir upload de contrarreferência
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ACO-49 (telas/elementos na matriz).
+
+**Escopo:** Documento versus estado, formatos/tamanho, armazenamento, retenção, metadados e autorização/download; prioridade posterior ou promoção.
+
+**Dependências/decisões:** P-07/D10; múltiplas contrarreferências já aprovadas não implicam upload aprovado.
+
+**Trabalho por camada:** Documentação/arquitetura: representação e política de arquivos com ciclo de acesso/remoção.
+
+**Aceite — cenário principal e falhas:** Decisão define anexado/recebido/pendente, erro de upload, retenção e escopo; upload não vira prova de cuidado realizado nem coluna improvisada.
+
+**Validação/evidência e conclusão:** VD. Decisão aprovada e fluxo/contrato propostos; sem arquivos reais neste pacote. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8c3b"></a>
+
+#### 8C3B — Anexar e ler documento autorizado de contrarreferência
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ACO-49 (telas/elementos na matriz).
+
+**Escopo:** C3B.1 upload/metadados/associação; C3B.2 download/retirada conforme retenção aprovada. Duas unidades separadas; arquivo fora do Git.
+
+**Dependências/decisões:** 8C3D/P-07; H10 e arquitetura de armazenamento.
+
+**Trabalho por camada:** Backend/dados: validar formato/tamanho, storage e recurso/guard; migration incremental se necessária, sem substituir resumo clínico.
+
+**Aceite — cenário principal e falhas:** Arquivo sintético ligado ao episódio correto; falha não apresenta anexo íntegro; download só autorizado; dois episódios não compartilham por engano; retirada mantém auditoria conforme decisão.
+
+**Validação/evidência e conclusão:** VB. Integração de storage/HTTP e associação/guard por unidade, falha parcial e conteúdo sintético. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8c3u"></a>
+
+#### 8C3U — Associar e consultar anexo sem perder episódio
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ACO-49 (telas/elementos na matriz).
+
+**Escopo:** C3U.1 selecionar/enviar/cancelar e status; C3U.2 download/retirada explícita. Duas unidades, resumo/conduta continuam próprios.
+
+**Dependências/decisões:** 8C3B unidade correspondente; P-07; contexto 7D-R1.
+
+**Trabalho por camada:** Frontend: upload real, progresso apenas verificável, erro/estado e links autorizados.
+
+**Aceite — cenário principal e falhas:** Episódio correto mantém texto e anexo; cancelar não envia; falha permite verificar estado sem duplicar; arquivo disponível só após confirmação; acesso revogado não baixa.
+
+**Validação/evidência e conclusão:** VF. Roteiro/capturas por unidade e ID de contrarreferência/anexo, cancelamento e falha de autorização. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8c4d"></a>
+
+#### 8C4D — Definir reprocessamento como novo elo explícito
+
+**Estado e cobertura:** Planejado; não aceito. RQ-IMP-52–57 (telas/elementos na matriz).
+
+**Escopo:** Separar reenvio idempotente, novo elo --reprocessar e revisão de hash diferente; decidir quem pode comandar/retomar e metadados necessários.
+
+**Dependências/decisões:** P-09; semântica existente CLI/ADR-022/023.
+
+**Trabalho por camada:** Documentação: desenho HTTP proposto compatível com proveniência/locks, confirmação e correlação da operação.
+
+**Aceite — cenário principal e falhas:** Exemplos de três ações têm resultado e autorização distintos; clique não vira novo hash/novo elo automático; concorrência e resposta perdida têm prova de resultado.
+
+**Validação/evidência e conclusão:** VD. Decisão/contrato e diagrama aprovados antes de B/U. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8c4b"></a>
+
+#### 8C4B — Publicar comando de novo elo com vínculo de proveniência
+
+**Estado e cobertura:** Planejado; não aceito. RQ-IMP-52–57 (telas/elementos na matriz).
+
+**Escopo:** Operação explícita de reprocessamento, consulta do elo/resultado e conflito; reutilizar invariantes CLI sem acrescentar flag tácita ao POST ordinário.
+
+**Dependências/decisões:** 8C4D/P-09; 5B/5D aceitos; correlação/guard definidos.
+
+**Trabalho por camada:** Backend/importador: DTO/worker, lock/idempotência da intenção e projeção encadeada; dados existentes preservados.
+
+**Aceite — cenário principal e falhas:** Mesmo conteúdo produz um novo elo quando solicitado uma vez; reenvio ordinário não produz elo. Concorrência/resposta perdida não duplicam; sem autorização nada grava; proveniência permanece ligada.
+
+**Validação/evidência e conclusão:** VI. HTTP/SQL com cadeia de dois elos e concorrência; comparação com invariantes CLI já validadas. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8c4u"></a>
+
+#### 8C4U — Confirmar novo elo e consultar cadeia de reprocessamento
+
+**Estado e cobertura:** Planejado; não aceito. RQ-IMP-52–57; RQ-EST-17 (telas/elementos na matriz).
+
+**Escopo:** Aviso do efeito/lote anterior, confirmar/cancelar, resultado/consulta da cadeia e retorno ao detalhe; outra ação para reenvio.
+
+**Dependências/decisões:** 8C4B; 8C1; P-09.
+
+**Trabalho por camada:** Frontend: ação por capacidade, revisão do efeito e consulta da operação, sem contadores simulados.
+
+**Aceite — cenário principal e falhas:** Cancelar não envia; confirmar uma vez abre elo correto; resposta perdida só consulta resultado; outro hash direciona revisão temporal; usuário distingue lote anterior e efetivo.
+
+**Validação/evidência e conclusão:** VI. Roteiro sintético com cadeia/contagem de comandos e resultado incerto, 403/409. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8c5b"></a>
+
+#### 8C5B — Permitir consulta e retomada de revisão temporal
+
+**Estado e cobertura:** Planejado; não aceito. RQ-IMP-58 (telas/elementos na matriz).
+
+**Escopo:** C5B.1 fonte/capacidades; C5B.2 proposta/decisão; C5B.3 aplicação/encerramento e resultado. Três unidades de leitura autorizada; POST existentes permanecem portas próprias.
+
+**Dependências/decisões:** P-09/P-04; H15/ADR-022; entitlement de gestão separado de perfil e autorização de fonte.
+
+**Trabalho por camada:** Backend: DTOs GET/capacidades e consulta de estado/correlação, sanitização e regras de acesso sem abrir artefato bruto.
+
+**Aceite — cenário principal e falhas:** Cada unidade retoma processo no estado real; gestor sem autorização da fonte não lê conteúdo; não gestor não publica/aplica. Consulta nunca aplica decisão nem altera hash; estado incerto é verificável ou mantém bloqueio.
+
+**Validação/evidência e conclusão:** VB. Aceites separados de leitura/guard e estados da revisão, usando invariantes F/T existentes onde correspondem. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8c5u"></a>
+
+#### 8C5U — Percorrer revisão temporal em cinco unidades de interface
+
+**Estado e cobertura:** Planejado; não aceito. RQ-IMP-58 (telas/elementos na matriz).
+
+**Escopo:** C5U.1 fonte/autorização; C5U.2 arquivo e simulação; C5U.3 comparação/decisão seletiva; C5U.4 publicação/aplicação única; C5U.5 encerramento/retomada. Cinco unidades separadas, sem inventar nova visita por hash.
+
+**Dependências/decisões:** 8C5B unidade de leitura correspondente e H15; P-09; não pressupor entitlement de administração.
+
+**Trabalho por camada:** Frontend: telas por estado, ações/capacidades, confirmações e recibos; distinguir corrigir/nova visita/consolidado segundo contrato.
+
+**Aceite — cenário principal e falhas:** U.1 escopo válido; U.2 dry-run sem escrita; U.3 decisão seletiva explícita; U.4 aplica uma vez; U.5 retoma/encerra estado correto. Em cada unidade revogação/conflito/resposta perdida não reaplicam nem perdem decisão confirmada.
+
+**Validação/evidência e conclusão:** VI. Roteiro/evidência por unidade e fonte/hash/proposta/decisão/aplicação, todos sintéticos; cadeia e autorização reconciliadas. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8d1d"></a>
+
+#### 8D1D — Decidir gestão de identidade e limites de administração
+
+**Estado e cobertura:** Planejado; não aceito. RQ-NAV-07; RQ-USR-01–10 (telas/elementos na matriz).
+
+**Escopo:** Usuários e Minha conta, perfis, ativação/inativação, último administrador, autoalteração, suporte, auditabilidade e política institucional de vínculo.
+
+**Dependências/decisões:** P-08; H1 e política sintética não equivalem a liberação real 9D.
+
+**Trabalho por camada:** Documentação: regra de gestão e escopo de dados de identidade; gestão não concede entitlement temporal nem vínculo clínico por efeito lateral.
+
+**Aceite — cenário principal e falhas:** Cada ação tem responsável/capacidade, regra de sessão e caso de bloqueio; não propor exclusão definitiva ou ligação automática a digitador legado.
+
+**Validação/evidência e conclusão:** VD. Decisão com cenários de último admin/autoalteração/revogação, antes dos endpoints novos. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8d1b"></a>
+
+#### 8D1B — Consultar usuários e identidade ampliada com escopo explícito
+
+**Estado e cobertura:** Planejado; não aceito. RQ-NAV-07; RQ-USR-01–10; RQ-CTA-03–04 (telas/elementos na matriz).
+
+**Escopo:** D1B.1 listagem paginada admin de nome/login/perfil/status; D1B.2 me com campos aprovados. Duas unidades separadas, sem senha/hash.
+
+**Dependências/decisões:** 8D1D/P-08; H1.
+
+**Trabalho por camada:** Backend: DTO/queries/guard específicos; usar usuários existentes, sem alterar gestão de vínculo clínico.
+
+**Aceite — cenário principal e falhas:** D1B.1 consulta/edição não listam usuários, paginação funciona; D1B.2 só própria identidade e fields aprovados. Nenhuma senha/hash/login de terceiros em mensagem pública de erro.
+
+**Validação/evidência e conclusão:** VB. Aceites separados de listagem/me com três perfis e paginação/negação. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8d1u"></a>
+
+#### 8D1U — Ler usuários e Minha conta sem afirmar estado fictício
+
+**Estado e cobertura:** Planejado; não aceito. RQ-NAV-07; RQ-USR-01–10; RQ-CTA-03–04 (telas/elementos na matriz).
+
+**Escopo:** D1U.1 tabela/admin e autoações indisponíveis conforme regra; D1U.2 dados de conta/suporte/sair. Duas unidades; ações de alteração em D2U.
+
+**Dependências/decisões:** 8D1B unidade correspondente; P-08; 7D-U4.
+
+**Trabalho por camada:** Frontend: rotas/menus por capacidade, tabela responsiva, conta com fields reais e logout local atual.
+
+**Aceite — cenário principal e falhas:** Listagem só para autorizado; conta só mostra login/status quando publicados; erro não usa mock. Sair limpa sessão/rascunhos; retorno/390 px/teclado funcionam.
+
+**Validação/evidência e conclusão:** VF. Capturas/roteiros por unidade, três perfis e erro de identidade. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8d2b"></a>
+
+#### 8D2B — Alterar perfil e estado do usuário com concorrência e auditoria
+
+**Estado e cobertura:** Planejado; não aceito. RQ-USR-11–18 (telas/elementos na matriz).
+
+**Escopo:** D2B.1 perfil; D2B.2 ativação/inativação. Duas unidades versionadas, sem excluir usuário ou conceder gestão temporal automaticamente.
+
+**Dependências/decisões:** 8D1D/P-08; 8D1B.
+
+**Trabalho por camada:** Backend/dados: comandos explícitos, guard/auditoria, revogação/revalidação de sessão e regras de autoalteração/último administrador.
+
+**Aceite — cenário principal e falhas:** Cada unidade: operação válida relida; autoalteração/último admin/versão obsoleta recusados conforme política aprovada; sessão afetada revalidada; sem edição por consulta/edição.
+
+**Validação/evidência e conclusão:** VB. Dois administradores/versões, log de decisão, sessão afetada e três perfis; aceite separado por comando. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="8d2u"></a>
+
+#### 8D2U — Confirmar alteração de perfil ou ativação com efeitos compreensíveis
+
+**Estado e cobertura:** Planejado; não aceito. RQ-USR-11–18; RQ-EST-17 (telas/elementos na matriz).
+
+**Escopo:** D2U.1 modal/página perfil com anterior→novo; D2U.2 ativar/inativar com consequência. Duas unidades separadas, foco/fechar/cancelar acessíveis.
+
+**Dependências/decisões:** 8D2B unidade correspondente; P-08; padrão de recuperação de operação definido.
+
+**Trabalho por camada:** Frontend: leitura atual, seleção, revisão e confirmação, recibo e conflito; nenhum toggle puramente local.
+
+**Aceite — cenário principal e falhas:** Cancelar/X/Escape não escreve; confirmar um comando real; 409 preserva escolha e compara estado; 403/resposta perdida verificam sem repetir; conta/sessão afetadas refletem revalidação.
+
+**Validação/evidência e conclusão:** VF. Roteiro por comando com payload/estado relido, foco do diálogo e caso de conflito. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+### Disposição documental
+
+<a id="doc-ex"></a>
+
+#### DOC-EX — Registrar exclusões sem apagar legado
+
+**Estado e cobertura:** Disposição documentada; não é alteração funcional. RQ-LOG-08; RQ-PRJ-02; RQ-USR-19; RQ-EST-18–23 (telas/elementos na matriz).
+
+**Escopo:** Credenciais de demo, timers/count/hash fictícios, Localizado funcional, origem que inventa Chagas, escores/inferências e data fixa do protótipo ficam fora do produto. Legado/bruto permanecem conforme fontes.
+
+**Dependências/decisões:** D1/D12/ADR-017–024; destinos EX da matriz.
+
+**Trabalho por camada:** Documentação nesta entrega: disposição e justificativa individual; implementação futura não deve reincorporar esses comportamentos.
+
+**Aceite — cenário principal e falhas:** Cada item EX tem motivo, distinção do dado legítimo (ex.: localização de prontuário) e fonte; nenhum dado legado é removido nesta análise.
+
+**Validação/evidência e conclusão:** VD. Linhas EX conferidas com fontes e diff exclusivamente documental. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
 ## Próximo trabalho
 
 Concluir as correções e a recuperação da Etapa 7, seguindo a sequência acima,
