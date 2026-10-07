@@ -1,6 +1,6 @@
 # Roadmap do Projeto
 
-Atualizado em: 2026-10-04
+Atualizado em: 2026-10-05
 
 **Reauditoria de 2026-10-05:** o aceite da Etapa 7 continua pendente, com sete
 lacunas funcionais sem correção. A prioridade é concluir a recuperação de
@@ -11,9 +11,11 @@ Evidências e limites estão no
 As menções à validação de 2026-10-04 abaixo registram os cenários executados.
 
 Este é o roadmap oficial do projeto. A estrutura original possui dez etapas;
-as etapas 1–6 estão concluídas no ambiente sintético. Os fluxos 7A–7D estão
-implementados e validados tecnicamente no ambiente sintético, com revisão de
-usabilidade com a equipe pendente. As etapas 5, 6, 7, 9 e 10 possuem subetapas porque
+as etapas 1–6 estão concluídas no ambiente sintético. Os fluxos 7A–7D possuem
+implementação e validação
+parcial no ambiente sintético; sete lacunas e o percurso integrado impedem
+conclusão com aceite. A revisão com a equipe também permanece pendente.
+As etapas 5, 6, 7, 9 e 10 possuem subetapas porque
 contêm entregas independentes e dependências próprias. As letras identificam
 subetapas de execução e não criam uma nova numeração principal.
 
@@ -204,7 +206,9 @@ os contratos `/v1`. Bibliotecas e toolchain adotados estão em
 [ADR-024](DECISOES_ARQUITETURAIS.md#adr-024) registra as fronteiras.
 
 Este roadmap é a fonte da sequência e dos critérios de aceite. A análise mantém
-o inventário, a matriz de compatibilidade e os detalhes técnicos de integração.
+a fotografia histórica e os detalhes técnicos de integração. O inventário atual
+está na [matriz ponto a ponto](frontend/MATRIZ_FIGMA_FRONTEND.md) e a experiência
+pretendida na [visão de produto](frontend/VISAO_E_ESPECIFICACAO.md).
 A evidência da execução está no
 [relatório da Etapa 6](validacoes/VALIDACAO_ETAPA_6.md).
 
@@ -244,10 +248,10 @@ A evidência da execução está no
 
 ## Etapa 7 — Fluxos clínicos
 
-**Estado:** 7A–7D implementadas e validadas tecnicamente no ambiente sintético em
-2026-10-04. O [relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md) reúne as
-provas, o recorte HTTP e as limitações. A revisão de usabilidade com a equipe
-permanece pendente.
+**Estado:** 7A–7D têm implementação e validação parcial sintética de 2026-10-04.
+O [relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md) reúne provas dos cenários
+executados. As sete lacunas reavaliadas, o percurso integrado e a revisão com a
+equipe continuam pendentes; os pacotes abaixo definem o caminho até o aceite.
 
 **Objetivo:** tornar utilizáveis as telas efetivamente usadas pela equipe.
 
@@ -323,8 +327,9 @@ ter contrato, autorização e validação próprios antes de integrar o fluxo af
   dados permanecem rastreáveis e o usuário não perde alterações válidas.
   Consulta não escreve; 401/403/409 não produzem sucesso fictício; falha de rede
   após escrita exige verificação, sem retry automático nem duplicação do atendimento.
-- **Validação:** fluxo end-to-end sintético, revisão de usabilidade com a equipe e
-  `make project-check`.
+- **Validação:** fluxo UI/API/PostgreSQL sintético, revisão com a equipe e
+  `make frontend-check docs-check COMPACT=1`; combinar backend/SQL somente se
+  alterados, conforme a matriz do workflow e os pacotes abaixo.
 
 ## Etapa 8 — Dashboard e funcionalidades complementares
 
@@ -460,26 +465,422 @@ Para compromisso de dez semanas, 24 horas semanais é a referência recomendada;
 20 horas é piso arriscado. O marco de risco é concluir a Etapa 5 com banco,
 importador e backend funcionais antes de iniciar as Etapas 6–8.
 
+## Pacotes verificáveis do produto frontend
+
+Esta decomposição de 2026-10-05 preserva as dez etapas e as subetapas 7A–7D.
+Sufixos `R` corrigem a reauditoria, `U` explicitam a experiência e `E` estendem
+recursos clínicos. `8A`–`8D` organizam complementos da Etapa 8, sem criar etapas
+principais novas. `B` é contrato/persistência, `U` é interface e `D` é decisão/
+desenho. As [linhas da matriz](frontend/MATRIZ_FIGMA_FRONTEND.md) ligam elemento
+FM e requisito RQ aos pacotes abaixo; a [visão](frontend/VISAO_E_ESPECIFICACAO.md)
+define VU1/MVP/VP/EX e decisões P-01–09. Destino posterior não é exclusão.
+
+**Estado:** código correspondente presente é implementação, relatórios antigos
+são validação parcial dos seus cenários, contrato/decisão ausente é dependência
+identificada, e conclusão exige aceite do pacote. Nenhum pacote novo de código
+foi implementado/aceito por esta análise. `DOC-EX` registra disposição documental.
+7A–7D mantêm sete lacunas abertas; revisão de usabilidade e prova integrada também
+faltam. Não avançar para dashboard como se esse aceite já estivesse dado.
+
+**Unidade de entrega:** onde um ID agrega unidades `.1`, `.2` etc., abrir trabalho,
+revisar, validar e aceitar cada unidade separadamente. Os critérios nomeiam a
+unidade; a âncora do conjunto só conclui quando todas as unidades do destino
+aprovado concluírem. Uma unidade posterior pode permanecer planejada/VP, sem
+impedir o aceite de outra; isso deve constar do registro de aceite e do destino
+individual na matriz. Usar o ID completo da unidade (por exemplo, `7D-U3.2`)
+nos trabalhos e evidências, sem renumerar o conjunto. Nenhum conjunto deve virar PR monolítica ou tarefa
+“finalizar frontend”. Reutilizar componentes/infraestrutura não dispensa prova
+do recurso que grava.
+
+**Condição de conclusão de cada entrega:** escopo delimitado implementado (ou
+decisão/documento aprovado nos pacotes D), todos os critérios da unidade abaixo
+comprovados, documentação/contrato atualizado, evidência identificando RQ,
+ambiente, cenário, IDs sintéticos e resultado, limitações residuais explícitas e
+aceite registrado. Falha pertinente não resolvida ou decisão obrigatória aberta
+impede conclusão. Build/rota/formulário/suíte geral não substituem esse aceite.
+Para unidades de código, preservar alterações preexistentes e revisar diff/status;
+commit/push apenas quando autorizados em sua própria tarefa.
+
+### Validação proporcional dos pacotes futuros
+
+Os códigos abaixo são planos de validação, **não comandos executados nesta
+entrega documental**. Usar a [matriz do workflow](WORKFLOW_DE_DESENVOLVIMENTO.md#validação-proporcional),
+`COMPACT=1` e combinar camadas alteradas sem repetir suíte aprovada no mesmo
+estado. Preparar banco descartável exclusivamente sintético quando requerido.
+
+| Código | Verificação e limite |
+| --- | --- |
+| VD | `make docs-check COMPACT=1`, links/diagramas/diff e revisão da decisão/semântica. Não aplica migrations. |
+| VF | `make frontend-check docs-check COMPACT=1`; cenário UI/API/PostgreSQL sintético do requisito, mais revisão visual/teclado quando afetados. Build/unitários ou browser interceptado sozinhos não comprovam escrita. |
+| VB | `make backend-check backend-clinical-test docs-check COMPACT=1`; integração de contrato/guard/persistência. Se houver mudança física futura autorizada, testes SQL próprios e `project-check` no ambiente adequado; nenhuma migration antiga editada. |
+| VI | VF/VB conforme camadas alteradas, e `importer-test` quando o pipeline/semântica do importador mudar. Dry-run/rollback, proveniência, autorização e ausência de duplicação precisam de evidência real sintética. |
+
+Toda entrega de UI inclui carga/vazio/erro/sucesso do recurso, perfil consulta em
+leitura e ação de escrita condicionada à autorização real. Toda entrega de
+escrita se vincula ao protocolo de recuperação da sua classe: não adicionar
+retry automático, não chamar resposta perdida de “não salvo” e não esconder
+recibo anterior. Falhas podem ser cobertas por cenários focados que referenciem
+a infraestrutura já aceita; não é necessário reexecutar o percurso inteiro em
+cada pacote. Conferir os RQ efetivamente exercitados, sem afirmar cobertura de
+todos os campos por associação a um teste.
+
+### Sequência recomendada e marcos
+
+1. Corrigir lacunas independentes: 7D-R1/R2/R4/R5 e 7B-R1B→R1U/R2.
+2. Decidir 7D-R6D; entregar recuperação core 7D-R6B→R6U e acompanhamentos
+   7D-R6B-A→R6U-A, uma classe por vez. Correção PATCH para null é 7C-R2B→R2U,
+   explicitamente posterior salvo promoção P-01.
+3. Entregar 7A-U1, 7D-U1→U2, U3.1→U3.2→U3.3 e U4.1/U4.2; as dependências
+   reais prevalecem sobre a ordem de uma lista. Fazer revisão humana das etapas.
+4. Executar 7D-A1 e registrar aceite/limites. Este é o marco da **VU1 sintética
+   proposta**, condicionado a P-01/P-03, à recuperação de todas as operações
+   usadas e à revisão da equipe. Nenhum desses pacotes libera dados reais.
+5. Etapa 8 começa por 8A1 e 8C1, que usam contratos presentes; depois
+   8C2U.1/U.2 e decisões 8A2D/8B1D, seguidas de contratos e UI correspondentes.
+   Fila/nota, KPIs e séries são entregas distintas. Expandir lista por fatia.
+6. Módulos 7B-E/7C-E, upload, revisão/reprocessamento e gestão de usuários têm
+   destino MVP/VP/decisão individual na matriz. Se forem essenciais ao primeiro
+   uso, P-01/P-07/P-08/P-09 os promovem antes de aceitar esse marco; API ausente
+   é trabalho B/dados necessário, nunca justificativa para excluir o produto.
+7. Produção/homologação permanecem Etapas 9 e 10, com liberação 9D e validação
+   operacional. VU1 sintética não é promessa de substituição integral da planilha.
+
+### Recuperação e experiência da Etapa 7
+
+<a id="7a-u1"></a>
+
+#### 7A-U1 — Cadastro precedido por busca e escolha consciente
+
+**Estado e cobertura:** Planejado; não aceito. RQ-HOM-07; RQ-LIS-07; RQ-CAD-01–02, 04–08, 10–18, 23, 25–30 (telas/elementos na matriz).
+
+**Escopo:** Busca por nome → correspondências autorizadas → declaração de nenhuma correspondente → cadastro; edição existente fica fora deste fluxo. Não impedir criação por homônimo nem fundir pessoas.
+
+**Dependências/decisões:** 6B/7A presentes; P-01. Usar H2/H3 sem prometer busca por nascimento/código.
+
+**Trabalho por camada:** Frontend: separar estados/etapas, URL de retorno, capacidade atual e rascunho do cadastro. Backend/dados: nenhum incremento para o recorte nome/sexo.
+
+**Aceite — cenário principal e falhas:** Pessoa existente abre ficha sem POST; pessoa nova só envia após escolha explícita. Nome obrigatório, nascimento/sexo opcionais; 403/capacidade recusada, homônimos, vazio, falha na busca e cancelar não produzem duplicação.
+
+**Validação/evidência e conclusão:** VF. Roteiro com os dois caminhos, contagem de POST e releitura do cadastro com contatos/endereço. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7b-r1b"></a>
+
+#### 7B-R1B — Todos os familiares tornam-se consultáveis por página
+
+**Estado e cobertura:** Planejado; não aceito. RQ-HIS-16; RQ-ACO-01–04 (telas/elementos na matriz).
+
+**Escopo:** Contrato de paginação independente entre snapshots e seus resultados; escolher extensão mínima compatível, sem substituir fatos clínicos.
+
+**Dependências/decisões:** R7-01; H5. Definir DTO/cursor ou recurso de resultados por snapshot antes da UI.
+
+**Trabalho por camada:** Backend: consulta autorizada, paginação e DTO explícitos. Dados: reutilizar modelo existente; justificar eventual incremento, sem reescrever migrations antigas.
+
+**Aceite — cenário principal e falhas:** Um snapshot com 30 e outro com 50 resultados: páginas sucessivas retornam todos, sem repetição/perda. Dois snapshots não misturam filhos; offset fora de faixa é vazio; vínculo recusado não expõe familiares.
+
+**Validação/evidência e conclusão:** VB. Integração HTTP/PostgreSQL com IDs conhecidos e união das páginas, inclusive autorização. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7b-r1u"></a>
+
+#### 7B-R1U — Paginar familiares mantendo a consulta e o snapshot
+
+**Estado e cobertura:** Planejado; não aceito. RQ-HIS-16; RQ-ACO-01–04 (telas/elementos na matriz).
+
+**Escopo:** Controles separados para snapshots e familiares; consulta específica preservada em URL/voltar. Não corrigir a perda apenas elevando o limite.
+
+**Dependências/decisões:** 7B-R1B aceito.
+
+**Trabalho por camada:** Frontend: adaptar DTO, carregar páginas por snapshot, estados vazio/erro, retorno e foco. Sem nova escrita.
+
+**Aceite — cenário principal e falhas:** Chegar ao familiar 30/50 por navegação; voltar restaura consulta/snapshot/página. Falha da segunda página permite nova leitura e não chama ausência de família.
+
+**Validação/evidência e conclusão:** VF. Captura/roteiro de duas páginas e IDs comparados ao contrato; cenário com falha de leitura. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7b-r2"></a>
+
+#### 7B-R2 — Criar pendência com estado desconhecido preservado
+
+**Estado e cobertura:** Planejado; não aceito. RQ-FIC-19; RQ-ACO-05–07, 40–44 (telas/elementos na matriz).
+
+**Escopo:** Criação composta e POST posterior permitem distinguir null, nao_informado, aberta e resolvida; omissão e null seguem o contrato de cada campo. Não ampliar PATCH nesta entrega.
+
+**Dependências/decisões:** R7-04; POST atuais H4/H12 aceitam null.
+
+**Trabalho por camada:** Frontend: normalização, opção/rotulagem de desconhecido e revisão dos dois formulários. Backend/dados: sem evolução para criação.
+
+**Aceite — cenário principal e falhas:** Criar ambos os tipos com null e reler null; nao_informado permanece string distinta. Resolvida exige data; estado não resolvido recusa data incompatível; outros dados do atendimento preservados.
+
+**Validação/evidência e conclusão:** VF. Payload, recurso relido e duas intenções de UI, sem converter desconhecido em pendente. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7c-r2b"></a>
+
+#### 7C-R2B — Correção de pendência pode retornar a desconhecido
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ACO-45–46 (telas/elementos na matriz).
+
+**Escopo:** Evolução explícita de PendingUpdateDto e semântica PATCH para null; não afirmar que já existe. Histórico/auditoria e concorrência seguem desenho de 8A3B quando promovidos.
+
+**Dependências/decisões:** P-01/P-03 para prioridade; H12 atualmente exige string. Regra D11 preservada.
+
+**Trabalho por camada:** Backend: DTO, validação status/data e persistência parcial. Dados: avaliar estrutura de auditoria existente antes de incremento.
+
+**Aceite — cenário principal e falhas:** PATCH de estado conhecido para null, com data de resolução limpa explicitamente, retorna/rele null. Estado inválido, data incompatível e 403 recusados; descrição e vínculo não são apagados.
+
+**Validação/evidência e conclusão:** VB. Matriz de casos null/omissão/string e contrato documentado com rollback/guard. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7c-r2u"></a>
+
+#### 7C-R2U — Revisar pendência distinguindo desconhecido de não informado
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ACO-45–46 (telas/elementos na matriz).
+
+**Escopo:** Editar status/data de pendência existente com null; nota/responsável ficam para 8A3. Controle informa que descrição está em leitura.
+
+**Dependências/decisões:** 7C-R2B; recuperação 7D-R2/R4/R6.
+
+**Trabalho por camada:** Frontend: carregar estado atual, opções distintas, resumo da alteração e confirmação.
+
+**Aceite — cenário principal e falhas:** Pendência resolvida retorna a desconhecido sem data e é relida corretamente. Cancelar não altera; 403 preserva intenção; falha não apresenta sucesso.
+
+**Validação/evidência e conclusão:** VF. Cenário de correção pela UI, valores antes/depois e leitura sem escrita adicional. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7d-r1"></a>
+
+#### 7D-R1 — Atalhos de acompanhamento mantêm paciente e atendimento
+
+**Estado e cobertura:** Planejado; não aceito. RQ-NAV-03, 12; RQ-LIS-01, 06, 08, 11; RQ-FIC-11, 17, 20; RQ-HIS-12, 15; RQ-ENC-07; RQ-BZN-21; RQ-ECR-01–14; RQ-ACO-08–11, 28–33; RQ-EST-08 (telas/elementos na matriz).
+
+**Escopo:** Atalho principal do detalhe, BZN ↔ retorno e contrarreferência; preservar rotas ClinicalActions que já incluem contexto. Aba/página/filtros de retorno fazem parte do percurso.
+
+**Dependências/decisões:** R7-05; H5/H9/H10; rascunhos atuais.
+
+**Trabalho por camada:** Frontend: parâmetros, breadcrumbs e seletores; verificar que atendimento pertence ao paciente antes de preencher. Sem incremento de API.
+
+**Aceite — cenário principal e falhas:** Todos os caminhos iniciados na consulta X enviam/mostram X; trocar para Y é explícito. Link direto inválido ou de outro paciente não escreve; voltar/avançar preservam seleção e histórico.
+
+**Validação/evidência e conclusão:** VF. Tabela de links percorridos e IDs do payload; ao menos duas consultas da mesma pessoa. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7d-r2"></a>
+
+#### 7D-R2 — Retomar uma intenção recusada por 403
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ERR-02; RQ-EST-11 (telas/elementos na matriz).
+
+**Escopo:** Saída de denied por verificação somente de leitura e nova confirmação; manter rascunho no mesmo escopo. GET autorizado não é prova de permissão de escrita.
+
+**Dependências/decisões:** R7-02; H1/guards atuais. Não depende do protocolo de resultado incerto para um 403 comprovadamente recebido.
+
+**Trabalho por camada:** Frontend: transição explícita, mensagem, ocultação quando acesso falta e revalidação. Servidor continua revalidando cada escrita.
+
+**Aceite — cenário principal e falhas:** 403 → leitura ainda recusada mantém bloqueio/ocultação → vínculo restabelecido permite revisar e confirmar. Revalidar/foco não envia; nova confirmação faz um envio, que pode receber outro 403.
+
+**Validação/evidência e conclusão:** VF. UI/API real com revogação/restauração sintética, rascunho comparado e contagem de escritas. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7d-r4"></a>
+
+#### 7D-R4 — Confirmação e valores sobrevivem a falha temporária de identidade
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ACO-12–39; RQ-ERR-06; RQ-EST-06, 15 (telas/elementos na matriz).
+
+**Escopo:** Guardar recibo e valores confirmados no escopo de sessão/operação após salvar; conservar também ao navegar e voltar. Nova intenção repetível é uma ação separada.
+
+**Dependências/decisões:** R7-07; SessionManager/DraftProvider e estado de escrita presentes.
+
+**Trabalho por camada:** Frontend: store de confirmação e renderização após remount, sem guardar clínica no armazenamento persistente do navegador.
+
+**Aceite — cenário principal e falhas:** Salvar retorno → me indisponível oculta → mesma identidade recuperada mostra mesmo ID/data e nenhum POST novo. Logout/401/identidade diferente limpa tudo; resposta tardia não contamina outra sessão.
+
+**Validação/evidência e conclusão:** VF. Recibo/valores antes e depois da falha e saída, contagem de POST e teste de identidade diferente. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7d-r5"></a>
+
+#### 7D-R5 — Conflito de BZN conserva o tratamento atual e o rascunho
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ACO-12–27; RQ-EST-13 (telas/elementos na matriz).
+
+**Escopo:** POST concorrente recebe 409 e consulta canônico; painel de comparação/cópia/descarte sem transformar criação em correção.
+
+**Dependências/decisões:** R7-06; H8; 7D-R4 para recibos compartilhados.
+
+**Trabalho por camada:** Frontend: expor rascunho mesmo quando GET encontra tratamento; controle explícito de descarte e link para consulta. Sem PATCH BZN nesta entrega.
+
+**Aceite — cenário principal e falhas:** Duas intenções concorrem: apenas um tratamento, perdedora mantém todos os campos/reações. Consulta/cópia não escrevem; descartar apenas rascunho afetado; falha no GET mantém bloqueio recuperável.
+
+**Validação/evidência e conclusão:** VF. Dois contextos concorrentes, contagem de tratamentos e comparação do rascunho após GET. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7d-r6d"></a>
+
+#### 7D-R6D — Decidir como provar o resultado de uma operação incerta
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ERR-04; RQ-EST-14 (telas/elementos na matriz).
+
+**Escopo:** Desenho de correlação autorizada: confirmado, não aplicado com prova, em curso e indeterminável; separar core e acompanhamentos. Recuperação após nova sessão, retenção e privacidade entram na decisão.
+
+**Dependências/decisões:** P-02. Não é nova aprovação de contrato nesta análise.
+
+**Trabalho por camada:** Documentação/arquitetura: comparar recibo/registro de operação/idempotência, atomicidade, chave de intenção, autorização e expiração; inventariar todas as operações atuais. Sem implementação neste pacote.
+
+**Aceite — cenário principal e falhas:** Para cada operação, desenho identifica como consultar sem reaplicar e como provar não aplicação. Janela commit/resposta, queda de processo e revogação têm estados definidos; página vazia nunca é prova.
+
+**Validação/evidência e conclusão:** VD. Decisão revisada com diagramas de falha, contrato proposto e tabela das operações, aprovada antes de 7D-R6B. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7d-r6b"></a>
+
+#### 7D-R6B — Servidor comprova operações de cadastro/atendimento sem reaplicar
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ERR-04; RQ-EST-14 (telas/elementos na matriz).
+
+**Escopo:** Duas unidades separadas abaixo: B.1 cadastro/PATCH paciente; B.2 criação/PATCH atendimento composto. A âncora agrega dependências, não autoriza uma entrega monolítica.
+
+**Dependências/decisões:** 7D-R6D aprovado; política/DTO da correlação definidos.
+
+**Trabalho por camada:** Backend/dados: implementar consulta autorizada do resultado e vínculo atômico à operação por unidade; migration nova somente se o desenho exigir.
+
+**Aceite — cenário principal e falhas:** Cada unidade prova sucesso com resposta perdida, falha antes do commit, rollback de filhos, intenção em curso/expirada e 403. Verificação faz zero escrita clínica/reexecução; nenhuma chave permite consultar outro usuário/recurso.
+
+**Validação/evidência e conclusão:** VB. Aceitar B.1 e B.2 separadamente com HTTP/SQL e falhas injetadas; agregado só termina quando ambas aceitas. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7d-r6u"></a>
+
+#### 7D-R6U — Interface encerra incerteza de cadastro/atendimento por verificação
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ACO-28–39; RQ-ERR-04, 06; RQ-EST-14 (telas/elementos na matriz).
+
+**Escopo:** U.1 cadastro/edição paciente e U.2 atendimento novo/edição, aceitos separadamente; revisar a intenção e consultar resultado. Nunca desbloquear por ausência em busca.
+
+**Dependências/decisões:** 7D-R6B unidade correspondente, 7D-R4; desenho de 7D-R6D.
+
+**Trabalho por camada:** Frontend: ação Verificar resultado, recibo reconciliado, bloqueio de estado indeterminável e nova confirmação apenas com prova de não aplicação.
+
+**Aceite — cenário principal e falhas:** Resposta perdida → verificação mostra recurso correto e mantém um registro; rollback comprovado permite nova intenção consciente. GET falha/revogado/em curso mantém bloqueio; recarga/nova sessão seguem o desenho aprovado.
+
+**Validação/evidência e conclusão:** VF. Cada unidade tem roteiro de commit perdido e não aplicação, contagem de escritas antes/depois da verificação. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7d-r6b-a"></a>
+
+#### 7D-R6B-A — Servidor comprova acompanhamentos sem duplicar episódios
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ACO-28–39; RQ-ERR-04, 06; RQ-EST-14 (telas/elementos na matriz).
+
+**Escopo:** A.1 BZN/retornos; A.2 encaminhamento/contrarreferência/anuais; A.3 PUT projeto/notificação e pendências. Três unidades de aceite, reutilizando infraestrutura sem presumir idempotência em episódios repetíveis.
+
+**Dependências/decisões:** 7D-R6D e infraestrutura 7D-R6B; contratos atuais H7–H12.
+
+**Trabalho por camada:** Backend/dados: correlacionar cada operação, seu contexto/identidade e recurso confirmado; consulta e autorização; nenhuma reaplicação por leitura.
+
+**Aceite — cenário principal e falhas:** Cada classe prova resposta perdida, rollback, revogação e dois episódios intencionais iguais com IDs distintos. PUT não confunde valor coincidente com resultado da intenção; leitura não cria ocorrência.
+
+**Validação/evidência e conclusão:** VB. Matriz de operações das três unidades, falhas após commit e contagem/IDs de recursos. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7d-r6u-a"></a>
+
+#### 7D-R6U-A — Interface recupera acompanhamentos e conserva confirmações anteriores
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ACO-28–39; RQ-ERR-04, 06; RQ-EST-14 (telas/elementos na matriz).
+
+**Escopo:** A.1 BZN/retornos; A.2 encaminhamento/contrarreferência/anuais; A.3 projeto/notificação/pendência. O atendimento confirmado permanece visível ao recuperar operação posterior.
+
+**Dependências/decisões:** 7D-R6B-A unidade correspondente; 7D-R4/R5.
+
+**Trabalho por camada:** Frontend: aplicar fluxo comum por operação, comparar contexto e recibo; Novo registro inicia outra intenção após concluir a anterior.
+
+**Aceite — cenário principal e falhas:** Em cada unidade a resposta perdida é reconciliada com um registro; confirmação anterior não some. Estado desconhecido bloqueia, 403 não expõe clínica, nova ocorrência só por ação explícita; zero retry automático.
+
+**Validação/evidência e conclusão:** VF. Um cenário positivo e falhas pertinentes por unidade, rastreado aos recursos e POST/PUT/PATCH. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7d-u1"></a>
+
+#### 7D-U1 — Preencher atendimento em cinco etapas sem perder dados
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ATD-01–04, 16–19; RQ-DIA-01–07, 22; RQ-MED-01–09; RQ-EXN-01–09; RQ-OBS-01–02; RQ-EST-10 (telas/elementos na matriz).
+
+**Escopo:** Atendimento, Avaliação/Chagas, Exames/familiares, Pendências e Revisão; somente campos hoje aceitos. Prévia de resumo não confirma ainda; etapa de revisão completa pertence a U2.
+
+**Dependências/decisões:** P-03; H4; 7B-R2; 7D-R1.
+
+**Trabalho por camada:** Frontend: agrupar formulário existente, anterior/próxima, resumo de etapa, validação/foco, cancelar com decisão de rascunho e uma coluna em mobile.
+
+**Aceite — cenário principal e falhas:** Ida/volta entre cinco etapas mantém todos os valores/filhos; erro direciona etapa/campo; data obrigatória; cancelar não escreve e permite preservar/descartar conscientemente.
+
+**Validação/evidência e conclusão:** VF. Roteiro com filhos repetidos, vazio/desconhecido, navegação e teclado/390 px, sem perda. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7d-u2"></a>
+
+#### 7D-U2 — Revisar atendimento e reconhecer cada confirmação separada
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ATD-05–10, 12–14; RQ-DIA-01–07; RQ-MED-01–09; RQ-PRJ-01; RQ-EXN-01–09; RQ-NTF-01–03; RQ-OBS-01–03 (telas/elementos na matriz).
+
+**Escopo:** Revisão de todos os valores/filhos aceitos, links Voltar e editar, confirmação única do atendimento e ação Continuar acompanhamento. Acompanhamento não integra o POST composto.
+
+**Dependências/decisões:** 7D-U1; 7D-R4; P-03; H4/H7–H12.
+
+**Trabalho por camada:** Frontend: representação de resumo, campos ausentes relevantes, recibo e ação seguinte com contexto; não exibir status Completo sem critério.
+
+**Aceite — cenário principal e falhas:** Alterar um campo na revisão atualiza só ele; confirmar grava uma vez; falha de acompanhamento não desfaz/oculta consulta salva. Duplo clique e Enter não duplicam; resposta incerta segue R6.
+
+**Validação/evidência e conclusão:** VF. Comparação resumo/payload/releitura com valores discriminantes; captura do recibo e falha posterior. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7d-u3"></a>
+
+#### 7D-U3 — Ficha e detalhe mostram a origem temporal de cada dado
+
+**Estado e cobertura:** Planejado; não aceito. RQ-HOM-06, 08; RQ-CAD-19; RQ-FIC-01–04, 06, 10, 12, 14, 16; RQ-RES-01–28, 30–31; RQ-HIS-01–11, 14; RQ-CHA-01–06, 15; RQ-EXA-01–06, 14; RQ-AVL-01–08 (telas/elementos na matriz).
+
+**Escopo:** U3.1 cabeçalho/resumo/última consulta; U3.2 diagnóstico/avaliação por consulta selecionada; U3.3 histórico/detalhe/exames e links às áreas canônicas. Cada unidade pode ser revisada/aceita separadamente.
+
+**Dependências/decisões:** H3/H5–H12; 7B-R1U, 7D-R1. Código de negócio/origem e timeline integrada ficam para 8B3/8B2.
+
+**Trabalho por camada:** Frontend: reordenar painéis usando leituras existentes, abas/seleção em URL e recursos paginados; sem varrer todas as páginas para calcular resumo.
+
+**Aceite — cenário principal e falhas:** U3.1 identifica última consulta, ID secundário e referência de idade; U3.2 alterna duas consultas inclusive null sem carregar último não nulo; U3.3 abre recurso correto e restaura página. Carga/403/vazio não exibem dado antigo nem inventam completude.
+
+**Validação/evidência e conclusão:** VF. Capturas/roteiros de cada unidade com duas consultas e recursos canônicos; checar IDs/fontes/limite de página. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7d-u4"></a>
+
+#### 7D-U4 — Layout, controles e mensagens são operáveis em telas menores e teclado
+
+**Estado e cobertura:** Planejado; não aceito. RQ-LOG-01–03, 05–06; RQ-NAV-01–02, 08–10, 13; RQ-LIS-12; RQ-ATD-15; RQ-CTA-01–02, 05–06; RQ-ERR-03, 05, 07; RQ-EST-01–07, 09–10 (telas/elementos na matriz).
+
+**Escopo:** U4.1 shell/login/conta/erros: navegação, foco e layout 320/390; U4.2 controles compartilhados de formulário/tabela/diálogo: rótulo, erro, status, Escape, foco. Aplicar a telas atuais sem copiar modais inseguros do Figma.
+
+**Dependências/decisões:** P-03 para novos diálogos; 6A/7 atuais; conteúdo U1/U2/U3 quando afetado.
+
+**Trabalho por camada:** Frontend: CSS/componentes compartilhados; tabelas com rolagem própria, formulários em uma coluna, contraste/status por texto e anúncio de erro/sucesso.
+
+**Aceite — cenário principal e falhas:** Cada unidade: navegação só teclado, zoom 200%, 320/390 px, foco visível e ações alcançáveis sem rolagem horizontal da página. Diálogo restaura foco; nenhuma linha exige clique sem alternativa; erro sanitizado possui retorno útil.
+
+**Validação/evidência e conclusão:** VF. Capturas comparáveis, Axe e revisão humana de teclado/foco nas duas unidades; Axe não substitui revisão. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7d-a1"></a>
+
+#### 7D-A1 — Comprovar cadastro → atendimento → acompanhamento → histórico pela interface
+
+**Estado e cobertura:** Planejado; não aceito. RQ-LOG-04, 07; RQ-NAV-11; RQ-CAD-21–22, 24; RQ-FIC-07–09, 13, 15, 18–19; RQ-HIS-13; RQ-PRO-01–09; RQ-TRA-01–11; RQ-ENC-01–06, 08; RQ-NOT-01–05; RQ-ATD-14; RQ-MED-10; RQ-PRJ-01; RQ-BZN-01–08, 21; RQ-ECR-01–15; RQ-NTF-01–03; RQ-ACO-12–44; RQ-CTA-05–06; RQ-ERR-01; RQ-EST-12, 16–17 (telas/elementos na matriz).
+
+**Escopo:** Um cenário integrado positivo: buscar/criar paciente, atendimento com avaliação/diagnóstico/exames/família/pendência, BZN/reação, retorno efetivo, encaminhamento/contrarreferência, resolver pendência, reler ficha/histórico. Não preparar paciente/consulta com helpers de API.
+
+**Dependências/decisões:** Correções R7-01–07 aceitas nas classes utilizadas, 7A-U1, 7D-U1/U2/U3/U4; P-01/P-03. 7C-R2 só obrigatório se retorno a null promovido à VU1.
+
+**Trabalho por camada:** Validação/frontend: roteiro e E2E UI/API/PostgreSQL real sintético. Preparação por helper limitada a identidade, vínculo, catálogos e fixture de falha; sem implementar recurso novo nesta prova.
+
+**Aceite — cenário principal e falhas:** Todo recurso tem ID e consulta de origem corretos; usuário completa sem SQL. Falhas 403, 409 de versão/BZN e resposta perdida recuperam só intenção afetada; confirmação anterior permanece. Duas intenções iguais são distinguíveis; zero reenvio automático/duplicação.
+
+**Validação/evidência e conclusão:** VF. IDs por passo, contagem/releitura em API/SQL, capturas dos pontos de decisão e revisão com equipe; cobrir falhas por casos focados, sem repetir toda a suíte após o mesmo estado aprovado. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
 ## Próximo trabalho
 
-A Etapa 5 está concluída no ambiente sintético, com evidências na
-[matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md). **6A–6B estão
-concluídas no ambiente sintético**, com evidências no
-[relatório da Etapa 6](validacoes/VALIDACAO_ETAPA_6.md): base própria, sessão e
-leitura pelas APIs atuais. **7A–7D estão implementadas e validadas tecnicamente**,
-com evidência sintética registrada no
-[relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md). A revisão de
-usabilidade com a equipe ainda precisa ocorrer antes do aceite institucional.
+Concluir as correções e a recuperação da Etapa 7, seguindo a sequência acima,
+antes do aceite da VU1 e da ampliação operacional. Etapas 5 e 6 mantêm seus
+aceites sintéticos; Etapa 7 mantém implementação e evidências parciais, sem
+aceite completo. O [relatório histórico](validacoes/VALIDACAO_ETAPA_7.md) não
+elimina a [reauditoria](frontend/VISAO_E_ESPECIFICACAO.md#reavaliação-das-sete-lacunas-e-cobertura-de-validação).
 
-O próximo desenvolvimento previsto é a Etapa 8, com definição dos indicadores e
-contratos necessários antes do dashboard. Métricas, fila global e gestão de
-usuários não entram automaticamente por aparecerem no protótipo. A Etapa 7
-acrescenta catálogos ativos, capacidade de cadastro e validações estritamente
-necessárias aos formulários, sem alterar banco persistente, migrations ou
-protótipo. O [recorte clínico](arquitetura/RECORTE_CLINICO_ETAPA_7.md) explicita
-os campos e as operações ainda sem HTTP. Etapas 8–10 exigem execução futura;
-upload avançado e planejamento D9 não foram antecipados. Dados reais seguem a
-liberação 9D, sem confundir viabilidade do importador com autorização de uso.
+O próximo pacote pode ser 7D-R1 (contexto de atendimento), seguido de R4/R2/R5;
+7B-R1B e o desenho R6D são frentes independentes. Confirmar as decisões P-01–09
+quando necessárias ao pacote; esta documentação apresenta propostas, sem
+aprovação implícita. Até essa escolha, trabalhar no que não depende dela.
+Upload/D9/gestão e módulos sem HTTP têm destinos e dependências explícitos;
+não se tornam escopo implementado por constarem do protótipo.
 
 ### Preparação da migração da planilha real
 
