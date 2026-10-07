@@ -867,6 +867,379 @@ todos os campos por associação a um teste.
 
 **Validação/evidência e conclusão:** VF. IDs por passo, contagem/releitura em API/SQL, capturas dos pontos de decisão e revisão com equipe; cobrir falhas por casos focados, sem repetir toda a suíte após o mesmo estado aprovado. Concluir somente pela condição comum acima e pelos critérios desta unidade.
 
+### Extensões clínicas vinculadas a 7B e 7C
+
+Sem HTTP atual permanecem dependências planejadas. Confirmar prioridade P-01;
+cada contrato antecede sua UI, preservando as decisões clínicas vigentes.
+
+<a id="7b-e1b"></a>
+
+#### 7B-E1B — Publicar contrato de sorologias por episódio
+
+**Estado e cobertura:** Planejado; não aceito. RQ-FIC-12; RQ-CHA-07–14; RQ-DIA-08–18 (telas/elementos na matriz).
+
+**Escopo:** Método, solicitação/coleta/resultado com datas próprias, laboratório/observação; solicitação geral separada quando aprovada. Não reinterpretar resultados.
+
+**Dependências/decisões:** P-01 para prioridade; campos/modelo físico e fontes clínicas examinados antes do DTO; D2–D5 quando pertinentes.
+
+**Trabalho por camada:** Backend: contrato de consulta/criação específico, autorização por paciente/atendimento e transação. Dados: reutilização ou nova migration incremental justificada; nenhuma inferência para preencher legado.
+
+**Aceite — cenário principal e falhas:** Duas sorologias permanecem distintas, data de descoberta não muda; método genérico tem identificação; desconhecido/ausente preservados. GET/POST sem vínculo recebe recusa; falha de filho reverte a operação correspondente.
+
+**Validação/evidência e conclusão:** VB. DTO/semântica aprovados e integração HTTP/SQL com dois episódios/consultas, null, inválido, rollback e guard. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7b-e1u"></a>
+
+#### 7B-E1U — Registrar e consultar sorologias por episódio
+
+**Estado e cobertura:** Planejado; não aceito. RQ-FIC-12; RQ-CHA-07–14; RQ-DIA-08–21 (telas/elementos na matriz).
+
+**Escopo:** Método, solicitação/coleta/resultado com datas próprias, laboratório/observação; solicitação geral separada quando aprovada. Não reinterpretar resultados. Uma seção/formulário por módulo; revisão lista todos os campos.
+
+**Dependências/decisões:** 7B-E1B aceito; infraestrutura 7D-R1/R4/R6; P-01.
+
+**Trabalho por camada:** Frontend: formulário, revisão, lista/detalhe paginados e estados; não adicionar campo editável antes de destino HTTP.
+
+**Aceite — cenário principal e falhas:** Duas sorologias permanecem distintas, data de descoberta não muda; método genérico tem identificação; desconhecido/ausente preservados. Confirmar uma vez, reler; cancelar/falha preservam rascunho e consulta de origem; perfil consulta só lê.
+
+**Validação/evidência e conclusão:** VF. Valores discriminantes na revisão/payload/releitura, captura e caso de falha pertinente; todos os RQ do módulo exercitados ou pendência individual registrada. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7b-e2b"></a>
+
+#### 7B-E2B — Publicar contrato de condição e complicações
+
+**Estado e cobertura:** Planejado; não aceito. RQ-CON-01–10 (telas/elementos na matriz).
+
+**Escopo:** Forma clínica/cardíaca/digestiva, classificação e sintomas/regurgitação/constipação/disfagia/dor/dispneia; sem classificação automática.
+
+**Dependências/decisões:** P-01 para prioridade; campos/modelo físico e fontes clínicas examinados antes do DTO; D2–D5 quando pertinentes.
+
+**Trabalho por camada:** Backend: contrato de consulta/criação específico, autorização por paciente/atendimento e transação. Dados: reutilização ou nova migration incremental justificada; nenhuma inferência para preencher legado.
+
+**Aceite — cenário principal e falhas:** Condição/sintomas preenchidos deixam de ser descartados; alternância de opção não apaga silenciosamente dado anterior; sem inferência a partir de sintoma. GET/POST sem vínculo recebe recusa; falha de filho reverte a operação correspondente.
+
+**Validação/evidência e conclusão:** VB. DTO/semântica aprovados e integração HTTP/SQL com dois episódios/consultas, null, inválido, rollback e guard. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7b-e2u"></a>
+
+#### 7B-E2U — Registrar e consultar condição e complicações
+
+**Estado e cobertura:** Planejado; não aceito. RQ-CON-01–11 (telas/elementos na matriz).
+
+**Escopo:** Forma clínica/cardíaca/digestiva, classificação e sintomas/regurgitação/constipação/disfagia/dor/dispneia; sem classificação automática. Uma seção/formulário por módulo; revisão lista todos os campos.
+
+**Dependências/decisões:** 7B-E2B aceito; infraestrutura 7D-R1/R4/R6; P-01.
+
+**Trabalho por camada:** Frontend: formulário, revisão, lista/detalhe paginados e estados; não adicionar campo editável antes de destino HTTP.
+
+**Aceite — cenário principal e falhas:** Condição/sintomas preenchidos deixam de ser descartados; alternância de opção não apaga silenciosamente dado anterior; sem inferência a partir de sintoma. Confirmar uma vez, reler; cancelar/falha preservam rascunho e consulta de origem; perfil consulta só lê.
+
+**Validação/evidência e conclusão:** VF. Valores discriminantes na revisão/payload/releitura, captura e caso de falha pertinente; todos os RQ do módulo exercitados ou pendência individual registrada. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7b-e3b"></a>
+
+#### 7B-E3B — Publicar contrato de comorbidades
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ATD-11; RQ-COM-01–02 (telas/elementos na matriz).
+
+**Escopo:** Hipertensão/diabetes e histórico de doença familiar separados do rastreio de exames; representação triestado e observações.
+
+**Dependências/decisões:** P-01 para prioridade; campos/modelo físico e fontes clínicas examinados antes do DTO; D2–D5 quando pertinentes.
+
+**Trabalho por camada:** Backend: contrato de consulta/criação específico, autorização por paciente/atendimento e transação. Dados: reutilização ou nova migration incremental justificada; nenhuma inferência para preencher legado.
+
+**Aceite — cenário principal e falhas:** Negativo, desconhecido e ausente não se confundem; resultado de familiar não vira histórico de doença; duas consultas mantêm snapshots distintos. GET/POST sem vínculo recebe recusa; falha de filho reverte a operação correspondente.
+
+**Validação/evidência e conclusão:** VB. DTO/semântica aprovados e integração HTTP/SQL com dois episódios/consultas, null, inválido, rollback e guard. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7b-e3u"></a>
+
+#### 7B-E3U — Registrar e consultar comorbidades
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ATD-11; RQ-COM-01–02 (telas/elementos na matriz).
+
+**Escopo:** Hipertensão/diabetes e histórico de doença familiar separados do rastreio de exames; representação triestado e observações. Uma seção/formulário por módulo; revisão lista todos os campos.
+
+**Dependências/decisões:** 7B-E3B aceito; infraestrutura 7D-R1/R4/R6; P-01.
+
+**Trabalho por camada:** Frontend: formulário, revisão, lista/detalhe paginados e estados; não adicionar campo editável antes de destino HTTP.
+
+**Aceite — cenário principal e falhas:** Negativo, desconhecido e ausente não se confundem; resultado de familiar não vira histórico de doença; duas consultas mantêm snapshots distintos. Confirmar uma vez, reler; cancelar/falha preservam rascunho e consulta de origem; perfil consulta só lê.
+
+**Validação/evidência e conclusão:** VF. Valores discriminantes na revisão/payload/releitura, captura e caso de falha pertinente; todos os RQ do módulo exercitados ou pendência individual registrada. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7b-e4b"></a>
+
+#### 7B-E4B — Publicar contrato de eventos, dispositivos e óbito
+
+**Estado e cobertura:** Planejado; não aceito. RQ-EVT-01–08 (telas/elementos na matriz).
+
+**Escopo:** AVC prévio, marcapasso/CDI/resincronizador e óbito/causa/data/precisão; escolher contrato clínico antes de campo inferido.
+
+**Dependências/decisões:** P-01 para prioridade; campos/modelo físico e fontes clínicas examinados antes do DTO; D2–D5 quando pertinentes.
+
+**Trabalho por camada:** Backend: contrato de consulta/criação específico, autorização por paciente/atendimento e transação. Dados: reutilização ou nova migration incremental justificada; nenhuma inferência para preencher legado.
+
+**Aceite — cenário principal e falhas:** Fato/data parcial preservados sem fabricar dia ou diagnóstico; controles preenchidos persistem e aparecem na consulta de origem; negativo não apaga histórico. GET/POST sem vínculo recebe recusa; falha de filho reverte a operação correspondente.
+
+**Validação/evidência e conclusão:** VB. DTO/semântica aprovados e integração HTTP/SQL com dois episódios/consultas, null, inválido, rollback e guard. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7b-e4u"></a>
+
+#### 7B-E4U — Registrar e consultar eventos, dispositivos e óbito
+
+**Estado e cobertura:** Planejado; não aceito. RQ-EVT-01–08 (telas/elementos na matriz).
+
+**Escopo:** AVC prévio, marcapasso/CDI/resincronizador e óbito/causa/data/precisão; escolher contrato clínico antes de campo inferido. Uma seção/formulário por módulo; revisão lista todos os campos.
+
+**Dependências/decisões:** 7B-E4B aceito; infraestrutura 7D-R1/R4/R6; P-01.
+
+**Trabalho por camada:** Frontend: formulário, revisão, lista/detalhe paginados e estados; não adicionar campo editável antes de destino HTTP.
+
+**Aceite — cenário principal e falhas:** Fato/data parcial preservados sem fabricar dia ou diagnóstico; controles preenchidos persistem e aparecem na consulta de origem; negativo não apaga histórico. Confirmar uma vez, reler; cancelar/falha preservam rascunho e consulta de origem; perfil consulta só lê.
+
+**Validação/evidência e conclusão:** VF. Valores discriminantes na revisão/payload/releitura, captura e caso de falha pertinente; todos os RQ do módulo exercitados ou pendência individual registrada. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7b-e5b"></a>
+
+#### 7B-E5B — Publicar contrato de medicamentos por atendimento
+
+**Estado e cobertura:** Planejado; não aceito. RQ-FIC-15; RQ-TRA-14–21; RQ-BZN-09–20 (telas/elementos na matriz).
+
+**Escopo:** Princípio ativo/identificação, apresentação/dose/unidade/frequência/via, início/fim/status/origem e observações, sem sugerir prescrição.
+
+**Dependências/decisões:** P-01 para prioridade; campos/modelo físico e fontes clínicas examinados antes do DTO; D2–D5 quando pertinentes.
+
+**Trabalho por camada:** Backend: contrato de consulta/criação específico, autorização por paciente/atendimento e transação. Dados: reutilização ou nova migration incremental justificada; nenhuma inferência para preencher legado.
+
+**Aceite — cenário principal e falhas:** Dois itens identificados e todas as propriedades preenchidas reaparecem no atendimento; datas incompatíveis são recusadas por regra aprovada; nenhum cálculo de dose. GET/POST sem vínculo recebe recusa; falha de filho reverte a operação correspondente.
+
+**Validação/evidência e conclusão:** VB. DTO/semântica aprovados e integração HTTP/SQL com dois episódios/consultas, null, inválido, rollback e guard. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7b-e5u"></a>
+
+#### 7B-E5U — Registrar e consultar medicamentos por atendimento
+
+**Estado e cobertura:** Planejado; não aceito. RQ-FIC-15; RQ-TRA-14–21; RQ-BZN-09–20 (telas/elementos na matriz).
+
+**Escopo:** Princípio ativo/identificação, apresentação/dose/unidade/frequência/via, início/fim/status/origem e observações, sem sugerir prescrição. Uma seção/formulário por módulo; revisão lista todos os campos.
+
+**Dependências/decisões:** 7B-E5B aceito; infraestrutura 7D-R1/R4/R6; P-01.
+
+**Trabalho por camada:** Frontend: formulário, revisão, lista/detalhe paginados e estados; não adicionar campo editável antes de destino HTTP.
+
+**Aceite — cenário principal e falhas:** Dois itens identificados e todas as propriedades preenchidas reaparecem no atendimento; datas incompatíveis são recusadas por regra aprovada; nenhum cálculo de dose. Confirmar uma vez, reler; cancelar/falha preservam rascunho e consulta de origem; perfil consulta só lê.
+
+**Validação/evidência e conclusão:** VF. Valores discriminantes na revisão/payload/releitura, captura e caso de falha pertinente; todos os RQ do módulo exercitados ou pendência individual registrada. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7b-e6b"></a>
+
+#### 7B-E6B — Publicar contrato de resultados de exames identificados
+
+**Estado e cobertura:** Planejado; não aceito. RQ-EXA-07–13, 16 (telas/elementos na matriz).
+
+**Escopo:** Status/datas do exame e parâmetros valor/unidade/referência/interpretação textual humana; complementar H6 sem calcular diagnóstico.
+
+**Dependências/decisões:** P-01 para prioridade; campos/modelo físico e fontes clínicas examinados antes do DTO; D2–D5 quando pertinentes.
+
+**Trabalho por camada:** Backend: contrato de consulta/criação específico, autorização por paciente/atendimento e transação. Dados: reutilização ou nova migration incremental justificada; nenhuma inferência para preencher legado.
+
+**Aceite — cenário principal e falhas:** Solicitado sem resultado/data é válido; genérico precisa de identificação; resultado não é inferido; dois parâmetros mantêm valor/unidade/referência separados. GET/POST sem vínculo recebe recusa; falha de filho reverte a operação correspondente.
+
+**Validação/evidência e conclusão:** VB. DTO/semântica aprovados e integração HTTP/SQL com dois episódios/consultas, null, inválido, rollback e guard. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7b-e6u"></a>
+
+#### 7B-E6U — Registrar e consultar resultados de exames identificados
+
+**Estado e cobertura:** Planejado; não aceito. RQ-EXA-07–13, 16 (telas/elementos na matriz).
+
+**Escopo:** Status/datas do exame e parâmetros valor/unidade/referência/interpretação textual humana; complementar H6 sem calcular diagnóstico. Uma seção/formulário por módulo; revisão lista todos os campos.
+
+**Dependências/decisões:** 7B-E6B aceito; infraestrutura 7D-R1/R4/R6; P-01.
+
+**Trabalho por camada:** Frontend: formulário, revisão, lista/detalhe paginados e estados; não adicionar campo editável antes de destino HTTP.
+
+**Aceite — cenário principal e falhas:** Solicitado sem resultado/data é válido; genérico precisa de identificação; resultado não é inferido; dois parâmetros mantêm valor/unidade/referência separados. Confirmar uma vez, reler; cancelar/falha preservam rascunho e consulta de origem; perfil consulta só lê.
+
+**Validação/evidência e conclusão:** VF. Valores discriminantes na revisão/payload/releitura, captura e caso de falha pertinente; todos os RQ do módulo exercitados ou pendência individual registrada. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7b-e7b"></a>
+
+#### 7B-E7B — Publicar correções independentes de filhos do atendimento
+
+**Estado e cobertura:** Planejado; não aceito. RQ-EXA-15; RQ-ACO-48 (telas/elementos na matriz).
+
+**Escopo:** E7B.1 avaliação, E7B.2 diagnóstico, E7B.3 exame independente e E7B.4 rastreio/resultados. Quatro contratos/unidades separados; criação de exame independente é E7B.3. Não alterar PATCH de núcleo implicitamente.
+
+**Dependências/decisões:** P-01/P-03; H4–H6; 7B-R1B para familiares. Definir versionamento/auditoria de cada recurso.
+
+**Trabalho por camada:** Backend/dados por unidade: consulta/criação quando necessária e correção versionada no recurso existente, guard/atomicidade e história preservada.
+
+**Aceite — cenário principal e falhas:** Cada unidade altera só o recurso selecionado; versão obsoleta retorna 409 sem sobrescrever, vínculo recusado não grava. Correção não cria atendimento duplicado nem perde filhos; criar exame novo é intenção distinta.
+
+**Validação/evidência e conclusão:** VB. Quatro unidades aceitas individualmente com concorrência/rollback e IDs antes/depois; agregado depende das quatro. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7b-e7u"></a>
+
+#### 7B-E7U — Editar o filho correto mantendo a consulta original
+
+**Estado e cobertura:** Planejado; não aceito. RQ-EXA-15; RQ-ACO-48 (telas/elementos na matriz).
+
+**Escopo:** E7U.1 avaliação, E7U.2 diagnóstico, E7U.3 exame e E7U.4 familiares, separadamente; original/rascunho/atual comparáveis.
+
+**Dependências/decisões:** 7B-E7B unidade correspondente; 7D-R1/R4/R6.
+
+**Trabalho por camada:** Frontend: ações na área/detalhe correto, formulário específico e comparação de conflito; não chamar PATCH núcleo de edição integral.
+
+**Aceite — cenário principal e falhas:** Em cada unidade correção relida no mesmo atendimento; 409 permite comparar/descarte sem reaplicar; formulário anterior não contamina outro filho; cancelar não escreve.
+
+**Validação/evidência e conclusão:** VF. Cenário de correção e conflito por unidade; snapshots e IDs de recurso/atendimento. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7c-e1b"></a>
+
+#### 7C-E1B — Corrigir BZN e acrescentar reação ao canônico — contrato
+
+**Estado e cobertura:** Planejado; não aceito. RQ-TRA-12–13 (telas/elementos na matriz).
+
+**Escopo:** E1.1 correção versionada de tratamento; E1.2 criação de reação isolada. Duas unidades separadas, nunca segundo tratamento.
+
+**Dependências/decisões:** H8; P-01/P-03; D6/D7; 7D-R5.
+
+**Trabalho por camada:** Backend/dados: DTO/versão, guard, conflito e persistência específica; avaliar auditoria existente e migration incremental mínima se necessária.
+
+**Aceite — cenário principal e falhas:** E1.1 versão obsoleta não sobrescreve; E1.2 duas reações intencionais têm IDs distintos e tratamento único; evento adverso permanece texto sem escala inferida. Sem vínculo não grava e rollback preserva recurso.
+
+**Validação/evidência e conclusão:** VB. Integração por unidade, duas sessões/versões, ID e campos não alterados; aceite separado por unidade. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7c-e1u"></a>
+
+#### 7C-E1U — Corrigir BZN e acrescentar reação ao canônico — interface
+
+**Estado e cobertura:** Planejado; não aceito. RQ-TRA-12–13 (telas/elementos na matriz).
+
+**Escopo:** E1.1 correção versionada de tratamento; E1.2 criação de reação isolada. Duas unidades separadas, nunca segundo tratamento.
+
+**Dependências/decisões:** 7C-E1B unidade correspondente; recuperação 7D-R1/R4/R6.
+
+**Trabalho por camada:** Frontend: carregamento do recurso, edição/revisão, comparação e recibo; nenhuma criação duplicada como correção.
+
+**Aceite — cenário principal e falhas:** E1.1 versão obsoleta não sobrescreve; E1.2 duas reações intencionais têm IDs distintos e tratamento único; evento adverso permanece texto sem escala inferida. Cancelar/comparar só lê; confirmação é explícita e uma falha mantém intenção.
+
+**Validação/evidência e conclusão:** VF. Cenário positivo e conflito por unidade, releitura do ID original e revisão visual. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7c-e2b"></a>
+
+#### 7C-E2B — Corrigir encaminhamento existente — contrato
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ECR-16 (telas/elementos na matriz).
+
+**Escopo:** Campos/documento/datas/status do encaminhamento selecionado, versão e preservação de contrarreferências; upload fora desta unidade.
+
+**Dependências/decisões:** H10; P-01/P-03.
+
+**Trabalho por camada:** Backend/dados: DTO/versão, guard, conflito e persistência específica; avaliar auditoria existente e migration incremental mínima se necessária.
+
+**Aceite — cenário principal e falhas:** Correção mantém ID e episódios filhos; 409 não sobrescreve; tipo/projeto inativo recusado na nova seleção, legado permanece consultável. Sem vínculo não grava e rollback preserva recurso.
+
+**Validação/evidência e conclusão:** VB. Integração por unidade, duas sessões/versões, ID e campos não alterados; aceite separado por unidade. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7c-e2u"></a>
+
+#### 7C-E2U — Corrigir encaminhamento existente — interface
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ECR-16 (telas/elementos na matriz).
+
+**Escopo:** Campos/documento/datas/status do encaminhamento selecionado, versão e preservação de contrarreferências; upload fora desta unidade.
+
+**Dependências/decisões:** 7C-E2B unidade correspondente; recuperação 7D-R1/R4/R6.
+
+**Trabalho por camada:** Frontend: carregamento do recurso, edição/revisão, comparação e recibo; nenhuma criação duplicada como correção.
+
+**Aceite — cenário principal e falhas:** Correção mantém ID e episódios filhos; 409 não sobrescreve; tipo/projeto inativo recusado na nova seleção, legado permanece consultável. Cancelar/comparar só lê; confirmação é explícita e uma falha mantém intenção.
+
+**Validação/evidência e conclusão:** VF. Cenário positivo e conflito por unidade, releitura do ID original e revisão visual. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7c-e4b"></a>
+
+#### 7C-E4B — Detectar concorrência em projeto e notificação — contrato
+
+**Estado e cobertura:** Planejado; não aceito. RQ-PRO-10; RQ-NOT-05 (telas/elementos na matriz).
+
+**Escopo:** E4.1 upsert projeto; E4.2 notificação canônica. Duas unidades de versionamento/baseline e comparação; manter atualização parcial.
+
+**Dependências/decisões:** H7/H11; P-03; avaliar compatibilidade dos PUT existentes.
+
+**Trabalho por camada:** Backend/dados: DTO/versão, guard, conflito e persistência específica; avaliar auditoria existente e migration incremental mínima se necessária.
+
+**Aceite — cenário principal e falhas:** Dois escritores: versão obsoleta recusada, campos não enviados preservados; indicador nulo não vira não; alteração de texto não limpa outros campos. Sem vínculo não grava e rollback preserva recurso.
+
+**Validação/evidência e conclusão:** VB. Integração por unidade, duas sessões/versões, ID e campos não alterados; aceite separado por unidade. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7c-e4u"></a>
+
+#### 7C-E4U — Detectar concorrência em projeto e notificação — interface
+
+**Estado e cobertura:** Planejado; não aceito. RQ-PRO-10; RQ-NOT-05 (telas/elementos na matriz).
+
+**Escopo:** E4.1 upsert projeto; E4.2 notificação canônica. Duas unidades de versionamento/baseline e comparação; manter atualização parcial.
+
+**Dependências/decisões:** 7C-E4B unidade correspondente; recuperação 7D-R1/R4/R6.
+
+**Trabalho por camada:** Frontend: carregamento do recurso, edição/revisão, comparação e recibo; nenhuma criação duplicada como correção.
+
+**Aceite — cenário principal e falhas:** Dois escritores: versão obsoleta recusada, campos não enviados preservados; indicador nulo não vira não; alteração de texto não limpa outros campos. Cancelar/comparar só lê; confirmação é explícita e uma falha mantém intenção.
+
+**Validação/evidência e conclusão:** VF. Cenário positivo e conflito por unidade, releitura do ID original e revisão visual. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7c-e5d"></a>
+
+#### 7C-E5D — Decidir destino de planejamento/desfecho D9
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ACO-47, 50–57 (telas/elementos na matriz).
+
+**Escopo:** Distinguir data/tipo/status de retorno futuro do comparecimento efetivo; decidir preservação/exibição e eventual retirada funcional do legado.
+
+**Dependências/decisões:** P-06/D9 pendente; fontes clínicas vigentes. Não remover campo por opinião do protótipo.
+
+**Trabalho por camada:** Documentação: escolha clínica e modelo/contrato propostos, incluindo precisão e migração/preservação de legado.
+
+**Aceite — cenário principal e falhas:** Decisão humana registrada com exemplos de futuro, visita realizada e ano informado; nenhuma regra implícita de 30/60 dias; legado tem destino explícito.
+
+**Validação/evidência e conclusão:** VD. Resposta/decisão e impacto na matriz/contrato, antes de B/U. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7c-e5b"></a>
+
+#### 7C-E5B — Publicar planejamento de retorno conforme decisão D9
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ACO-47, 50–57 (telas/elementos na matriz).
+
+**Escopo:** Operação de planejamento distinta do retorno efetivamente realizado; recurso/precisão/correção somente conforme E5D.
+
+**Dependências/decisões:** 7C-E5D aprovado; P-01 para prioridade.
+
+**Trabalho por camada:** Backend/dados: reutilizar modelo aprovado ou novo incremento, DTO/guard/versão; sem migrar fatos como visitas fictícias.
+
+**Aceite — cenário principal e falhas:** Plano futuro permanece separado da visita e do ano; legado não é perdido; recusa/rollback não altera retorno real; GET distingue plano e fato.
+
+**Validação/evidência e conclusão:** VB. Casos definidos pela decisão, autorização, concorrência e preservação do legado. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+<a id="7c-e5u"></a>
+
+#### 7C-E5U — Consultar e registrar planejamento separado de visitas
+
+**Estado e cobertura:** Planejado; não aceito. RQ-ACO-47, 50–57 (telas/elementos na matriz).
+
+**Escopo:** Formulário e lista de planos com status e resumo aprovados; acesso a retornos reais por seção distinta.
+
+**Dependências/decisões:** 7C-E5B aceito; 7D-R1/R4/R6.
+
+**Trabalho por camada:** Frontend: rotular Planejado/Realizado/ano informado pela semântica, revisão e ações próprias.
+
+**Aceite — cenário principal e falhas:** Usuário identifica plano futuro e retorno efetivo sem confusão; cancelar não gera visita; falha preserva rascunho; histórico identifica precisão.
+
+**Validação/evidência e conclusão:** VF. Roteiro de plano e visita real, fontes/IDs e captura revisada com equipe. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
 ## Próximo trabalho
 
 Concluir as correções e a recuperação da Etapa 7, seguindo a sequência acima,
