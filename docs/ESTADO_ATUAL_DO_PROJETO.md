@@ -22,6 +22,12 @@ Uma seleção incorreta de ambiente durante validação SQL atingiu o Docker pad
 com transações revertidas e possível avanço de sequências; a ocorrência está
 registrada no relatório U3.1. Não houve aplicação de migrations nesse ambiente.
 
+A [unidade U3.2](validacoes/VALIDACAO_7D_U3_2.md) também passou na validação
+técnica: abas de diagnóstico/avaliação por consulta escolhida explicitamente,
+com seleção na URL, paginação própria e dados ausentes sem herança entre visitas.
+O frontend possui 163 unitários aprovados; os novos percursos passaram com API
+real, incluindo revogação de vínculo durante paginação.
+
 **Continuidade de 2026-10-15:** o aceite integral da Etapa 7 permanece pendente.
 As sete lacunas da reauditoria receberam correções; o percurso clínico original
 passou integralmente pela interface. A regressão técnica foi concluída; a revisão

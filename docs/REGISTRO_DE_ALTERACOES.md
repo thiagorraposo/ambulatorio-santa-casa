@@ -1,5 +1,19 @@
 # Registro de Alterações
 
+## 2026-10-17 — diagnóstico e avaliação por consulta selecionada
+
+Implementada a unidade técnica U3.2 com abas Chagas/Avaliação clínica, seleção
+explícita e paginação independente. A URL conserva consulta, aba e página;
+dados de visitas distintas não são consolidados. Painéis do detalhe são
+reutilizados, preservando desconhecidos, falso, zero e precisão numérica.
+403/404 nas opções ocultam o detalhe anterior sem apagar a seleção.
+
+Build e 163 unitários aprovados; quatro cenários de navegador aprovados,
+incluindo leitura antiga, detalhe, duas consultas com dados distintos/ausentes
+e revogação real de vínculo. Revisão independente sem defeitos materiais.
+Evidências e limite da breadcrumb na
+[validação U3.2](validacoes/VALIDACAO_7D_U3_2.md). Sem API nova ou migration.
+
 ## 2026-10-17 — ordenação numérica de pendências, reações e lotes
 
 Corrigidas três leituras cujo ORDER BY resolvia o alias textual do ID, gerando

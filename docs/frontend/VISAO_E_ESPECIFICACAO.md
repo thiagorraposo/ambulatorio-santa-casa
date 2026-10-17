@@ -9,6 +9,11 @@ As correções R7-01–07 e o percurso integrado do recorte original estão no
 [relatório vigente](../validacoes/VALIDACAO_ETAPA_7.md). Elas não concluem os
 pacotes propostos de UX/VU1 nem a revisão com a equipe.
 
+**Continuidade de 17/10:** cabeçalho/último atendimento (U3.1) e
+diagnóstico/avaliação por consulta selecionada (U3.2) receberam implementação e
+validação técnica, registradas no [roadmap](../PROXIMOS_PASSOS.md#7d-u3).
+Os demais recortes continuam sujeitos aos próprios critérios e decisões.
+
 Este documento é a fonte da experiência pretendida. A
 [matriz ponto a ponto](MATRIZ_FIGMA_FRONTEND.md) define os requisitos de cada
 elemento, sua implementação, lacuna e destino. O

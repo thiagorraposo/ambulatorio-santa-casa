@@ -831,7 +831,10 @@ todos os campos por associação a um teste.
 
 **Continuidade técnica de 17/10:** U3.1 implementada, com
 [evidências próprias](validacoes/VALIDACAO_7D_U3_1.md) e validação técnica aprovada.
-O estado agregado acima não declara U3.2/U3.3 nem aceite clínico concluídos.
+U3.2 também recebeu implementação e
+[validação técnica](validacoes/VALIDACAO_7D_U3_2.md), com seleção explícita e
+sem consolidação entre consultas. U3.3 permanece pendente.
+O estado agregado acima não declara U3 integral, VU1 ou aceite clínico concluídos.
 
 **Dependências/decisões:** H3/H5–H12; 7B-R1U, 7D-R1. Código de negócio/origem e timeline integrada ficam para 8B3/8B2.
 

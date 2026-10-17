@@ -2,12 +2,13 @@ import { Link, useLocation, useParams } from 'react-router';
 import type { AtendimentoDetalheResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
 import { Card, EmptyState, PageHeading, QueryState } from '../../shared/ui';
-import { clinicalLabel, displayText, formatClinicalDate, formatNumeric, triState } from '../../shared/formatters';
+import { clinicalLabel, displayText, formatClinicalDate, triState } from '../../shared/formatters';
 import { ExamList, Fields } from './components';
 import { pagePath, Pagination, usePage } from './pagination';
 import { useSession } from '../../app/session';
 import ClinicalActions from '../clinical/ClinicalActions';
 import { AttendanceFamilies } from './PatientResources';
+import { AttendanceChagasDiagnosis, AttendanceClinicalAssessment } from './AttendanceClinicalPanels';
 
 export default function AttendancePage() {
   const session = useSession();
@@ -24,8 +25,6 @@ export default function AttendancePage() {
     <PageHeading title="Detalhe do atendimento" description={`Paciente ${pacienteId} · atendimento ${atendimentoId}`} />
     <QueryState query={query}>
       {data => {
-        const clinical = data.dadosClinicos;
-        const diagnosis = data.diagnosticoChagas;
         const collectionLength = Math.max(data.exames.length, data.pendencias.length);
         return <>
           <Card>
@@ -44,28 +43,8 @@ export default function AttendancePage() {
             ]} />
           </Card>
           <div className="record-grid">
-            <Card>
-              <h2>Dados clínicos deste atendimento</h2>
-              {clinical === null ? <EmptyState>Dados clínicos não registrados.</EmptyState> : <Fields items={[
-                ['Altura', formatNumeric(clinical.alturaCm, 'cm')], ['Peso', formatNumeric(clinical.pesoKg, 'kg')],
-                ['Circunferência abdominal', formatNumeric(clinical.circunferenciaAbdominalCm, 'cm')],
-                ['Frequência cardíaca', formatNumeric(clinical.frequenciaCardiacaBpm, 'bpm')],
-                ['Saturação', formatNumeric(clinical.saturacaoPercentual, '%')],
-                ['PA sistólica', formatNumeric(clinical.paSistolicaMmhg, 'mmHg')],
-                ['PA diastólica', formatNumeric(clinical.paDiastolicaMmhg, 'mmHg')],
-                ['NYHA', clinicalLabel(clinical.nyha)], ['Observações', displayText(clinical.observacoes)],
-              ]} />}
-            </Card>
-            <Card>
-              <h2>Diagnóstico de Chagas deste atendimento</h2>
-              {diagnosis === null ? <EmptyState>Diagnóstico não registrado neste atendimento.</EmptyState> : <Fields items={[
-                ['Possui diagnóstico', triState(diagnosis.possuiDiagnosticoChagas)],
-                ['Status', clinicalLabel(diagnosis.statusDiagnostico)], ['Resultado final', clinicalLabel(diagnosis.resultadoFinal)],
-                ['Data do resultado final', formatClinicalDate(diagnosis.dataResultadoFinal)],
-                ['Descoberta por autorrelato', formatClinicalDate(diagnosis.dataDescobertaAutorelato)],
-                ['Critério de confirmação', clinicalLabel(diagnosis.criterioConfirmacao)], ['Observações', displayText(diagnosis.observacoes)],
-              ]} />}
-            </Card>
+            <AttendanceClinicalAssessment clinical={data.dadosClinicos} />
+            <AttendanceChagasDiagnosis diagnosis={data.diagnosticoChagas} />
           </div>
           <Card>
             <h2>Coleções deste atendimento</h2>

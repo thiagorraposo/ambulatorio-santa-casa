@@ -8,13 +8,15 @@ import { pagePath, Pagination, usePage } from './pagination';
 import { useSession } from '../../app/session';
 import ClinicalActions from '../clinical/ClinicalActions';
 import { LatestAttendance } from './LatestAttendance';
+import { SelectedAttendance } from './SelectedAttendance';
 import {
   AttendanceHistory, PatientAnnualFollowup, PatientBzn, PatientExams, PatientNotification,
   PatientPending, PatientProjects, PatientReferrals,
 } from './PatientResources';
 
 const sections = [
-  ['dados', 'Dados do paciente'], ['atendimentos', 'Atendimentos'], ['exames', 'Exames'],
+  ['dados', 'Dados do paciente'], ['atendimentos', 'Atendimentos'], ['chagas', 'Chagas'],
+  ['avaliacao', 'Avaliação clínica'], ['exames', 'Exames'],
   ['bzn', 'BZN e retornos'], ['projetos', 'Projetos'], ['notificacao', 'Notificação'],
   ['encaminhamentos', 'Encaminhamentos'], ['pendencias', 'Pendências'], ['acompanhamento', 'Acompanhamento anual'],
 ] as const;
@@ -56,6 +58,8 @@ function PatientSection({ section, pacienteId, path, data, changePage }: {
   switch (section) {
     case 'dados': return <PatientData data={data} changePage={changePage} />;
     case 'atendimentos': return <AttendanceHistory pacienteId={pacienteId} path={path} />;
+    case 'chagas': return <SelectedAttendance pacienteId={pacienteId} section="chagas" />;
+    case 'avaliacao': return <SelectedAttendance pacienteId={pacienteId} section="avaliacao" />;
     case 'exames': return <PatientExams pacienteId={pacienteId} path={path} />;
     case 'bzn': return <PatientBzn pacienteId={pacienteId} path={path} />;
     case 'projetos': return <PatientProjects path={path} />;

@@ -10,6 +10,12 @@ de 05/10. Correções R7-01–07 e novas evidências do recorte original estão 
 [relatório vigente](../validacoes/VALIDACAO_ETAPA_7.md); não há aceite automático
 das melhorias propostas nem da VU1.
 
+**Continuidade de 17/10:** as unidades
+[U3.1](../validacoes/VALIDACAO_7D_U3_1.md) e
+[U3.2](../validacoes/VALIDACAO_7D_U3_2.md) possuem implementação e validação técnica
+próprias. Elas sucedem a fotografia abaixo somente nesses recortes; não alteram
+automaticamente o aceite das demais linhas.
+
 ## Como ler e manter a rastreabilidade
 
 Cada linha tem ID estável `FM-FAMÍLIA-NN`. Seu requisito individual é

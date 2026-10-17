@@ -116,6 +116,33 @@ describe('busca e paginação de pacientes', () => {
 });
 
 describe('ficha por recurso', () => {
+  it('abre Chagas e avaliação por demanda preservando a consulta selecionada entre abas', async () => {
+    const user = userEvent.setup();
+    const attendance = { atendimentoId: '9007199254740995', dataAtendimento: '2026-02-21',
+      localizacaoProntuario: null, ambulatorioUnicamente: null, ambulatorioAnexoProjeto: null,
+      observacoes: null, versao: '1' };
+    responses.set(`/pacientes/${ID}/atendimentos?limit=20&offset=0`, [attendance]);
+    responses.set(`/pacientes/${ID}/atendimentos/${attendance.atendimentoId}?limit=1&offset=0`, {
+      ...attendance, dadosClinicos: null, diagnosticoChagas: null,
+      exames: [], pendencias: [], rastreioFamiliar: null, rastreiosFamiliares: [],
+      paginacaoColecoes: { limit: 1, offset: 0 },
+    });
+    renderRoute(<PatientPage />, `/pacientes/${ID}?dadosOffset=0&nome=Pessoa`, '/pacientes/:pacienteId');
+    expect(useApiQuery).not.toHaveBeenCalledWith(`/pacientes/${ID}/atendimentos?limit=20&offset=0`);
+    const navigation = within(screen.getByRole('navigation', { name: 'Seções da ficha' }));
+    await user.click(navigation.getByRole('link', { name: 'Chagas' }));
+    expect(screen.getByRole('combobox', { name: 'Atendimento para consulta clínica' })).toHaveValue('');
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Atendimento para consulta clínica' }), attendance.atendimentoId);
+    expect(screen.getByText('Diagnóstico não registrado neste atendimento.')).toBeVisible();
+    await user.click(navigation.getByRole('link', { name: 'Avaliação clínica' }));
+    expect(screen.getByRole('combobox', { name: 'Atendimento para consulta clínica' })).toHaveValue(attendance.atendimentoId);
+    expect(screen.getByText('Dados clínicos não registrados neste atendimento.')).toBeVisible();
+    expect(screen.getByTestId('location')).toHaveTextContent('nome=Pessoa');
+    expect(screen.getByTestId('location')).toHaveTextContent(`atendimentoId=${attendance.atendimentoId}`);
+    await user.click(screen.getByRole('button', { name: 'Voltar no navegador' }));
+    expect(screen.getByText('Diagnóstico não registrado neste atendimento.')).toBeVisible();
+  });
+
   it('identifica nascimento e última consulta mesmo fora da primeira página dos dados', () => {
     responses.set(`/pacientes/${ID}?limit=1&offset=20`, {
       ...patient, telefones: ['Telefone sintético da página 20'],

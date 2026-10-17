@@ -1,8 +1,8 @@
 # Frontend — leitura e fluxos clínicos
 
 Atualizado em: 2026-10-17. Fundação 6A–6B concluída; recorte original 7A–7D
-implementado e validado tecnicamente com dados sintéticos, com 39 cenários de
-navegador verificados após o incremento U3.1.
+implementado e validado tecnicamente com dados sintéticos, com 41 cenários de
+navegador verificados após os incrementos U3.1/U3.2.
 As evidências e seus limites pertencem ao relatório da entrega.
 Aceite integral, revisão com a equipe e VU1
 não são declarados aqui.
@@ -155,6 +155,15 @@ histórico ordenado, independentemente da paginação cadastral. Data desconheci
 é apresentada explicitamente, sem afirmar cronologia. Contexto, prontuário e
 observação pertencem à consulta indicada; nenhum resumo clínico é inferido.
 A [validação U3.1](validacoes/VALIDACAO_7D_U3_1.md) delimita essa unidade.
+
+As abas Chagas e Avaliação clínica exigem escolha explícita da consulta.
+`atendimentoId` na URL preserva a seleção entre abas e navegação; as opções
+usam `consultaLimit/consultaOffset`, sem trocar a consulta ao paginar. O painel
+indica data/ID da fonte e mostra somente seus dados, inclusive ausências, sem
+buscar valores de outra visita. Diagnóstico e avaliação reutilizam os mesmos
+painéis do detalhe. ID inválido não gera leitura de detalhe; 403/404 das opções
+ocultam a consulta anterior. Critérios, provas e limites estão na
+[validação U3.2](validacoes/VALIDACAO_7D_U3_2.md).
 
 A sessão usa o token retornado pelo login somente em memória. A identidade e o
 perfil são obtidos de `/v1/auth/me`; nenhum dado de paciente fica em armazenamento
