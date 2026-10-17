@@ -13,6 +13,15 @@ interrupção na preparação de salvamentos. A integração clínica, fundaçã
 foram novamente validadas em servidor descartável; os resultados e limites estão
 na [continuidade técnica](validacoes/VALIDACAO_ETAPA_7.md#continuidade-de-2026-10-17--execução-autônoma-e-ambiente-sintético).
 
+A [unidade U3.1](validacoes/VALIDACAO_7D_U3_1.md) recebeu implementação e
+validação técnica: cabeçalho e último atendimento independentes da paginação,
+tipos de data desconhecida e desempate numérico. A
+[auditoria de ordenação](validacoes/VALIDACAO_ORDENACAO_IDENTIFICADORES.md)
+corrigiu também pendências, reações e lotes; 70 testes clínicos passaram.
+Uma seleção incorreta de ambiente durante validação SQL atingiu o Docker padrão
+com transações revertidas e possível avanço de sequências; a ocorrência está
+registrada no relatório U3.1. Não houve aplicação de migrations nesse ambiente.
+
 **Continuidade de 2026-10-15:** o aceite integral da Etapa 7 permanece pendente.
 As sete lacunas da reauditoria receberam correções; o percurso clínico original
 passou integralmente pela interface. A regressão técnica foi concluída; a revisão

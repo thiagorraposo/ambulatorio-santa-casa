@@ -1,5 +1,19 @@
 # Registro de Alterações
 
+## 2026-10-17 — ordenação numérica de pendências, reações e lotes
+
+Corrigidas três leituras cujo ORDER BY resolvia o alias textual do ID, gerando
+ordem lexical. As consultas agora qualificam as colunas bigint originais;
+respostas mantêm IDs textuais e a mesma autorização/paginação. As regressões
+reproduziram as três falhas antes do ajuste, usando IDs grandes sintéticos.
+
+O teste clínico temporal passou a selecionar explicitamente `paciente.nome`,
+sem depender de coincidências de IDs de outras tabelas. O runner padrão inclui
+a nova regressão. Suíte clínica completa aprovada: 70 testes em 12 suítes.
+Evidências e limites na
+[validação da ordenação](validacoes/VALIDACAO_ORDENACAO_IDENTIFICADORES.md).
+Sem migration, dados persistentes alterados ou push.
+
 ## 2026-10-17 — cabeçalho da ficha e último atendimento independente
 
 Implementada a unidade técnica 7D-U3.1: nascimento no cabeçalho e último

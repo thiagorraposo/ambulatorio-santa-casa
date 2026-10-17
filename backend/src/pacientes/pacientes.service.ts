@@ -288,7 +288,7 @@ export class PacientesService {
           WHERE e.paciente_id=$1 AND e.atendimento_id=$2 ORDER BY e.paciente_exame_complementar_id
           LIMIT $3 OFFSET $4`, [patientId, attendanceId,query.limit,query.offset]),
         await tx.query<PendingAttendanceRow>(`SELECT pendencia_atendimento_id::text,descricao,status_pendencia,data_identificacao::text,data_resolucao::text
-          FROM pendencia_atendimento WHERE atendimento_id=$1 ORDER BY pendencia_atendimento_id
+          FROM pendencia_atendimento p WHERE atendimento_id=$1 ORDER BY p.pendencia_atendimento_id
           LIMIT $2 OFFSET $3`, [attendanceId,query.limit,query.offset]),
       ];
       const a = attendance.rows[0];
@@ -454,8 +454,8 @@ export class PacientesService {
         FROM tratamento_benzonidazol WHERE paciente_id=$1`, [patientId]);
       if (!treatment.rows[0]) return null;
       const reactions = await tx.query<BznReactionRow>(`SELECT reacao_adversa_benzonidazol_id::text,descricao,gravidade,
-        data_reacao::text,consequencia,observacoes FROM reacao_adversa_benzonidazol
-        WHERE tratamento_benzonidazol_id=$1 ORDER BY reacao_adversa_benzonidazol_id`, [treatment.rows[0].tratamento_benzonidazol_id]);
+        data_reacao::text,consequencia,observacoes FROM reacao_adversa_benzonidazol r
+        WHERE tratamento_benzonidazol_id=$1 ORDER BY r.reacao_adversa_benzonidazol_id`, [treatment.rows[0].tratamento_benzonidazol_id]);
       const t = treatment.rows[0];
       return { tratamentoId: t.tratamento_benzonidazol_id, atendimentoId: t.atendimento_id,
         temIndicacao: t.tem_indicacao, iniciado: t.iniciado,

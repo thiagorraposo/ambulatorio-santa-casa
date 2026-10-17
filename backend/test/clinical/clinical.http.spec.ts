@@ -551,8 +551,10 @@ suite('Fluxos clínicos HTTP em banco descartável', () => {
         const edited = await http().patch(`/pacientes/${temporal.target}`).auth(tokens.administracao, { type: 'bearer' }).send({ versao: version, nome }).expect(200);
         version = edited.body.versao;
       }
-      const nameField = (await owner.query(`SELECT campo_id::text,ultimo_evento_avaliado_id::text FROM ambulatorio.importacao_revisao_campo
-        WHERE decisao_id=$1 AND registro_id=$2`, [temporal.decision,temporal.target])).rows[0];
+      const nameField = (await owner.query(`SELECT r.campo_id::text,r.ultimo_evento_avaliado_id::text
+        FROM ambulatorio.importacao_revisao_campo r JOIN ambulatorio.auditoria_campo c USING(campo_id)
+        WHERE r.decisao_id=$1 AND r.registro_id=$2 AND c.tabela_destino='paciente' AND c.coluna_destino='nome'`,
+      [temporal.decision,temporal.target])).rows[0];
       const latest = (await owner.query(`SELECT evento_id::text FROM ambulatorio.auditoria_campo_evento
         WHERE campo_id=$1 AND registro_id=$2 ORDER BY versao_campo DESC LIMIT 1`, [nameField.campo_id,temporal.target])).rows[0].evento_id;
       expect(latest).not.toBe(nameField.ultimo_evento_avaliado_id);
