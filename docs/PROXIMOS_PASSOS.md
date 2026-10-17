@@ -829,6 +829,10 @@ todos os campos por associação a um teste.
 
 **Escopo:** U3.1 cabeçalho/resumo/última consulta; U3.2 diagnóstico/avaliação por consulta selecionada; U3.3 histórico/detalhe/exames e links às áreas canônicas. Cada unidade pode ser revisada/aceita separadamente.
 
+**Continuidade técnica de 17/10:** U3.1 implementada, com
+[evidências próprias](validacoes/VALIDACAO_7D_U3_1.md) e validação técnica aprovada.
+O estado agregado acima não declara U3.2/U3.3 nem aceite clínico concluídos.
+
 **Dependências/decisões:** H3/H5–H12; 7B-R1U, 7D-R1. Código de negócio/origem e timeline integrada ficam para 8B3/8B2.
 
 **Trabalho por camada:** Frontend: reordenar painéis usando leituras existentes, abas/seleção em URL e recursos paginados; sem varrer todas as páginas para calcular resumo.

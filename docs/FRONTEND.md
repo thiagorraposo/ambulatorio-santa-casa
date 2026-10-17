@@ -1,7 +1,8 @@
 # Frontend — leitura e fluxos clínicos
 
-Atualizado em: 2026-10-15. Fundação 6A–6B concluída; recorte original 7A–7D
-implementado e validado tecnicamente com dados sintéticos, incluindo 38 E2E.
+Atualizado em: 2026-10-17. Fundação 6A–6B concluída; recorte original 7A–7D
+implementado e validado tecnicamente com dados sintéticos, com 39 cenários de
+navegador verificados após o incremento U3.1.
 As evidências e seus limites pertencem ao relatório da entrega.
 Aceite integral, revisão com a equipe e VU1
 não são declarados aqui.
@@ -147,6 +148,13 @@ estático; o proxy `/v1` desta fundação pertence ao servidor de desenvolviment
 A implantação posterior precisa servir assets e API pela mesma origem.
 
 ## Sessão e navegação
+
+A ficha mantém nascimento, ID e idade com referência no cabeçalho. O painel
+“Último atendimento por data registrada” lê apenas a primeira posição do
+histórico ordenado, independentemente da paginação cadastral. Data desconhecida
+é apresentada explicitamente, sem afirmar cronologia. Contexto, prontuário e
+observação pertencem à consulta indicada; nenhum resumo clínico é inferido.
+A [validação U3.1](validacoes/VALIDACAO_7D_U3_1.md) delimita essa unidade.
 
 A sessão usa o token retornado pelo login somente em memória. A identidade e o
 perfil são obtidos de `/v1/auth/me`; nenhum dado de paciente fica em armazenamento

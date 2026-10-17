@@ -14,7 +14,7 @@ import { AtendimentoDetalheResponse, AtendimentoResumoResponse, DadosClinicosRes
   PacienteAtualizadoResponse, PacienteCriadoResponse } from '../clinico/dto/clinico.response';
 
 interface AttendanceRow {
-  atendimento_id: string; data_atendimento: string; localizacao_prontuario: string | null;
+  atendimento_id: string; data_atendimento: string | null; localizacao_prontuario: string | null;
   ambulatorio_unicamente: boolean | null; ambulatorio_anexo_projeto: boolean | null;
   observacoes: string | null; versao_registro: string;
 }
@@ -117,7 +117,7 @@ export class PacientesService {
       const [address, contacts, attendances] = [
         await tx.query<{ endereco: string | null; cidade: string | null }>('SELECT endereco,cidade FROM paciente_endereco WHERE paciente_id=$1 ORDER BY endereco_id DESC LIMIT 1', [id]),
         await tx.query<{ telefone: string | null }>('SELECT telefone FROM paciente_contato WHERE paciente_id=$1 ORDER BY contato_id LIMIT $2 OFFSET $3', [id,query.limit,query.offset]),
-        await tx.query<{ atendimento_id: string; data_atendimento: string; observacoes: string | null; versao_registro: string }>('SELECT atendimento_id::text,data_atendimento::text,observacoes,versao_registro::text FROM atendimento WHERE paciente_id=$1 ORDER BY data_atendimento DESC NULLS LAST, atendimento_id DESC LIMIT $2 OFFSET $3', [id,query.limit,query.offset]),
+        await tx.query<{ atendimento_id: string; data_atendimento: string | null; observacoes: string | null; versao_registro: string }>('SELECT atendimento_id::text,data_atendimento::text,observacoes,versao_registro::text FROM atendimento a WHERE paciente_id=$1 ORDER BY a.data_atendimento DESC NULLS LAST, a.atendimento_id DESC LIMIT $2 OFFSET $3', [id,query.limit,query.offset]),
       ];
       return { pacienteId: row.paciente_id, nome: row.nome, dataNascimento: row.data_nascimento, sexo: row.sexo,
         idade: row.idade, dataReferenciaIdade: row.data_referencia_idade,
@@ -206,7 +206,7 @@ export class PacientesService {
       await this.access!.patient(tx, user, patientId);
       const result = await tx.query<AttendanceRow>(`SELECT atendimento_id::text,data_atendimento::text,localizacao_prontuario,
         ambulatorio_unicamente,ambulatorio_anexo_projeto,observacoes,versao_registro::text
-        FROM atendimento WHERE paciente_id=$1 ORDER BY data_atendimento DESC NULLS LAST,atendimento_id DESC
+        FROM atendimento a WHERE paciente_id=$1 ORDER BY a.data_atendimento DESC NULLS LAST,a.atendimento_id DESC
         LIMIT $2 OFFSET $3`, [patientId, query.limit, query.offset]);
       return result.rows.map((x) => ({ atendimentoId: x.atendimento_id,
         dataAtendimento: x.data_atendimento, localizacaoProntuario: x.localizacao_prontuario,

@@ -1,5 +1,21 @@
 # Registro de Alterações
 
+## 2026-10-17 — cabeçalho da ficha e último atendimento independente
+
+Implementada a unidade técnica 7D-U3.1: nascimento no cabeçalho e último
+atendimento por data registrada consultado independentemente da página dos
+dados cadastrais. Mantidos ID textual, idade com referência, contexto literal,
+estados de leitura e tratamento explícito de data desconhecida.
+
+Corrigidos tipos de leitura para data nullable e o desempate numérico de
+atendimentos: o ORDER BY sem qualificador resolvia a projeção textual do ID.
+Nova regressão HTTP verifica datas repetidas/nulas, IDs grandes, páginas e os
+três perfis. Componente, integração da ficha e percurso pelo navegador possuem
+evidências na [validação U3.1](validacoes/VALIDACAO_7D_U3_1.md).
+Sem migration ou inferência clínica. Uma chamada de validação atingiu por
+engano o Docker padrão: transações foram revertidas, mas sequências podem ter
+avançado. A ocorrência e a correção do comando estão registradas no relatório.
+
 ## 2026-10-17 — execução sintética reproduzível e preparação de salvamentos
 
 Retomada autônoma com revisão independente do backend e frontend, preservando

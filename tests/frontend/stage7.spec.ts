@@ -636,7 +636,8 @@ test('7D: resposta perdida após commit exige verificação e não repete atendi
   await page.getByRole('link', { name: 'Verificar registro salvo', exact: true }).click();
   await page.getByRole('dialog', { name: 'Alterações não salvas', exact: true }).getByRole('button', { name: 'Sair e manter rascunho', exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/pacientes/${patient.pacienteId}\\?aba=atendimentos$`));
-  await expect(page.getByText('Atendimento com resposta perdida sintético', { exact: true })).toBeVisible();
+  const savedRow = page.getByRole('row').filter({ has: page.getByRole('link', { name: `Atendimento ${created.atendimentoId}`, exact: true }) });
+  await expect(savedRow.getByRole('cell', { name: 'Atendimento com resposta perdida sintético', exact: true })).toBeVisible();
   expect((await readAttendance(`${patient.path}/atendimentos/${created.atendimentoId}`)).observacoes).toBe('Atendimento com resposta perdida sintético');
   expect(await apiJson<unknown[]>('GET', `${patient.path}/atendimentos`)).toHaveLength(1);
   await page.goBack();

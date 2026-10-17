@@ -7,6 +7,7 @@ import { AttendanceLink, Fields } from './components';
 import { pagePath, Pagination, usePage } from './pagination';
 import { useSession } from '../../app/session';
 import ClinicalActions from '../clinical/ClinicalActions';
+import { LatestAttendance } from './LatestAttendance';
 import {
   AttendanceHistory, PatientAnnualFollowup, PatientBzn, PatientExams, PatientNotification,
   PatientPending, PatientProjects, PatientReferrals,
@@ -22,7 +23,7 @@ function PatientData({ data, changePage }: { data: PacienteDetalheResponse; chan
   return <Card>
     <h2>Dados do paciente</h2>
     <Fields items={[
-      ['Nascimento', formatClinicalDate(data.dataNascimento)], ['Sexo', clinicalLabel(data.sexo)],
+      ['Sexo', clinicalLabel(data.sexo)],
       ['Raça', clinicalLabel(data.raca)], ['Comunidade tradicional', triState(data.pertenceComunidadeTradicional)],
       ['Tipo de comunidade', displayText(data.tipoComunidadeTradicional)],
       ['Endereço', displayText(data.endereco?.endereco)], ['Cidade', displayText(data.endereco?.cidade)],
@@ -83,6 +84,7 @@ export default function PatientPage() {
         <Card className="patient-summary">
           <h2>{data.nome}</h2>
           <p>ID <span className="mono">{data.pacienteId}</span></p>
+          <p>Nascimento: <span>{formatClinicalDate(data.dataNascimento)}</span></p>
           <p>{formatAge(data.idade, data.dataReferenciaIdade)}</p>
           {location.state?.saved && <p className="notice" role="status">{String(location.state.saved)}</p>}
           {session.user?.perfil !== 'consulta' && <div className="form-actions">
@@ -91,6 +93,7 @@ export default function PatientPage() {
             <Link to={`${path}/registrar?tipo=bzn`} className="button button-secondary">Registrar acompanhamento</Link>
           </div>}
         </Card>
+        <LatestAttendance key={pacienteId} pacienteId={pacienteId} />
         <nav className="record-nav" aria-label="Seções da ficha">
           {sections.map(([value, label]) => {
             const next = new URLSearchParams(searchParams);

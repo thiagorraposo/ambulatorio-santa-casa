@@ -1,0 +1,41 @@
+import { test, expect } from '@playwright/test';
+import { apiAs, assertNoPersistentClinicalState, fixture, signIn } from './fixtures';
+
+test('7D-U3.1: última consulta independe da página dos dados e abre o atendimento correto', async ({ page }, testInfo) => {
+  const path = `/pacientes/${fixture.main.pacienteId}`;
+  const response = await apiAs('consulta', 'GET', `${path}/atendimentos?limit=1&offset=0`);
+  expect(response.status).toBe(200);
+  const [latest] = await response.json() as Array<{ atendimentoId: string; dataAtendimento: string }>;
+  expect(latest).toBeDefined();
+  const writes: string[] = [];
+  const attendanceReads: string[] = [];
+  page.on('request', request => {
+    const url = new URL(request.url());
+    if (url.pathname.startsWith(`/v1${path}`) && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method())) writes.push(url.pathname);
+    if (url.pathname === `/v1${path}/atendimentos`) attendanceReads.push(url.search);
+  });
+  await signIn(page, 'consulta', `${path}?aba=dados&dadosLimit=1&dadosOffset=1`);
+  const summary = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Último atendimento por data registrada', exact: true }) });
+  const detail = `${path}/atendimentos/${latest!.atendimentoId}`;
+  await expect(summary.getByRole('link')).toHaveAttribute('href', detail);
+  await expect(summary.getByText(latest!.dataAtendimento.split('-').reverse().join('/'), { exact: true })).toBeVisible();
+  const pagination = page.getByRole('navigation', { name: 'Paginação de coleções dos dados do paciente', exact: true });
+  await pagination.getByRole('button', { name: 'Próxima', exact: true }).click();
+  await expect(page).toHaveURL(/dadosOffset=2/);
+  await expect(summary.getByRole('link')).toHaveAttribute('href', detail);
+  expect(attendanceReads.length).toBeGreaterThan(0);
+  expect(attendanceReads.every(search => search === '?limit=1&offset=0')).toBe(true);
+  await page.setViewportSize({ width: 320, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath('ultima-consulta-320.png'), fullPage: true });
+  await summary.getByRole('link').focus();
+  await expect(summary.getByRole('link')).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(new RegExp(`${detail}$`));
+  await expect(page.getByRole('heading', { level: 1, name: 'Detalhe do atendimento', exact: true })).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(/dadosOffset=2/);
+  await expect(summary.getByRole('link')).toHaveAttribute('href', detail);
+  expect(writes).toEqual([]);
+  await assertNoPersistentClinicalState(page);
+});

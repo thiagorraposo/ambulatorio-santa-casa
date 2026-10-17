@@ -28,6 +28,7 @@ fontes vigentes.
 | Recuperação de escrita clínica e recibos por operação | [`arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md`](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) |
 | Paginação de snapshots e familiares | [`arquitetura/CONTRATO_FAMILIARES_ETAPA_7.md`](arquitetura/CONTRATO_FAMILIARES_ETAPA_7.md) |
 | Validação dos fluxos clínicos 7A–7D | [`validacoes/VALIDACAO_ETAPA_7.md`](validacoes/VALIDACAO_ETAPA_7.md) |
+| Cabeçalho e último atendimento independente da paginação | [`validacoes/VALIDACAO_7D_U3_1.md`](validacoes/VALIDACAO_7D_U3_1.md) |
 | Roteiro e registro da revisão com a equipe clínica | [`validacoes/ROTEIRO_REVISAO_CLINICA_ETAPA_7.md`](validacoes/ROTEIRO_REVISAO_CLINICA_ETAPA_7.md) |
 | Trabalho local desde o commit `adf2fd5` e reauditoria da Etapa 7 | [`RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md`](RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md) |
 | Contratos dos catálogos clínicos ativos | [`arquitetura/CONTRATOS_CATALOGOS_ETAPA_7.md`](arquitetura/CONTRATOS_CATALOGOS_ETAPA_7.md) |

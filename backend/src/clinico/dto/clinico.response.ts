@@ -11,11 +11,11 @@ export interface PacienteDetalheResponse {
   pertenceComunidadeTradicional: boolean | null; tipoComunidadeTradicional: string | null;
   versao: string; endereco: { endereco: string | null; cidade: string | null } | null;
   telefones: Array<string | null>; paginacaoColecoes: ColecaoPaginaResponse;
-  atendimentos: Array<{ atendimentoId: string; dataAtendimento: string; observacoes: string | null; versao: string }>;
+  atendimentos: Array<{ atendimentoId: string; dataAtendimento: string | null; observacoes: string | null; versao: string }>;
 }
 
 export interface AtendimentoResumoResponse {
-  atendimentoId: string; dataAtendimento: string; localizacaoProntuario: string | null;
+  atendimentoId: string; dataAtendimento: string | null; localizacaoProntuario: string | null;
   ambulatorioUnicamente: boolean | null; ambulatorioAnexoProjeto: boolean | null;
   observacoes: string | null; versao: string;
 }

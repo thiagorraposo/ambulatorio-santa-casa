@@ -34,7 +34,7 @@ export interface PacienteDetalheResponse {
   paginacaoColecoes: ColecaoPaginaResponse;
   atendimentos: Array<{
     atendimentoId: string;
-    dataAtendimento: string;
+    dataAtendimento: string | null;
     observacoes: string | null;
     versao: string;
   }>;
@@ -42,7 +42,7 @@ export interface PacienteDetalheResponse {
 
 export interface AtendimentoResumoResponse {
   atendimentoId: string;
-  dataAtendimento: string;
+  dataAtendimento: string | null;
   localizacaoProntuario: string | null;
   ambulatorioUnicamente: boolean | null;
   ambulatorioAnexoProjeto: boolean | null;

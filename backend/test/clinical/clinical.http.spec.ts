@@ -1243,4 +1243,48 @@ suite('Fluxos clínicos HTTP em banco descartável', () => {
       first.release(); second.release();
     }
   }, 15000);
+  it('ordena histórico por data decrescente, nulos por último e ID decrescente nas três leituras', async () => {
+    // Legado importado admite data desconhecida, mesmo quando a escrita HTTP
+    // de novos atendimentos exige data. A fixture owner reproduz esse contrato.
+    const patient = (await owner.query(`INSERT INTO ambulatorio.paciente(nome)
+      VALUES('Histórico temporal de teste') RETURNING paciente_id::text`)).rows[0].paciente_id;
+    for (const perfil of ['consulta', 'edicao']) await owner.query(`INSERT INTO ambulatorio.acesso_paciente
+      (paciente_id,usuario_id,pode_editar,concedido_por_usuario_id) VALUES($1,$2,$3,$4)`,
+      [patient, ids[perfil], perfil === 'edicao', ids.administracao]);
+    const dates = [null, '2025-12-01', '2026-01-01', '2026-01-01', null];
+    const records: Array<{ atendimentoId: string; dataAtendimento: string | null }> = [];
+    for (const [index, date] of dates.entries()) {
+      // Crossing a decimal-width boundary catches ORDER BY resolving the
+      // text-cast output alias instead of the underlying bigint column.
+      const id = (999999999999999997n + BigInt(index)).toString();
+      const row = (await owner.query(`INSERT INTO ambulatorio.atendimento(atendimento_id,paciente_id,data_atendimento)
+        VALUES($1::bigint,$2,$3::date) RETURNING atendimento_id::text`, [id, patient, date])).rows[0];
+      records.push({ atendimentoId: row.atendimento_id, dataAtendimento: date });
+    }
+    const expected = [records[3], records[2], records[1], records[4], records[0]];
+    const summary = (rows: Array<{ atendimentoId: string; dataAtendimento: string | null }>) => rows.map(row => ({
+      atendimentoId: row.atendimentoId, dataAtendimento: row.dataAtendimento,
+    }));
+    for (const perfil of ['consulta', 'edicao', 'administracao']) {
+      const full = await http().get(`/pacientes/${patient}/atendimentos?limit=100`)
+        .auth(tokens[perfil], { type: 'bearer' }).expect(200);
+      expect(summary(full.body)).toEqual(expected);
+      for (const offset of [0, 2, 4, 6]) {
+        const query = `limit=2&offset=${offset}`;
+        const page = await http().get(`/pacientes/${patient}/atendimentos?${query}`)
+          .auth(tokens[perfil], { type: 'bearer' }).expect(200);
+        const detail = await http().get(`/pacientes/${patient}?${query}`)
+          .auth(tokens[perfil], { type: 'bearer' }).expect(200);
+        expect(summary(page.body)).toEqual(expected.slice(offset, offset + 2));
+        expect(summary(detail.body.atendimentos)).toEqual(expected.slice(offset, offset + 2));
+      }
+      for (const record of records) {
+        const detail = await http().get(`/pacientes/${patient}/atendimentos/${record.atendimentoId}`)
+          .auth(tokens[perfil], { type: 'bearer' }).expect(200);
+        expect(detail.body).toMatchObject(record);
+      }
+    }
+  });
+
+
 });

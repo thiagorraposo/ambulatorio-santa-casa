@@ -43,6 +43,7 @@ function successful<T>(data: T): UseQueryResult<T, ApiError> {
 beforeEach(() => {
   responses.clear();
   responses.set(`/pacientes/${ID}?limit=20&offset=0`, patient);
+  responses.set(`/pacientes/${ID}/atendimentos?limit=1&offset=0`, []);
   vi.mocked(useApiQuery).mockImplementation(<T,>(path: string): UseQueryResult<T, ApiError> => {
     const value = responses.get(path);
     if (value instanceof ApiError) return {
@@ -115,6 +116,30 @@ describe('busca e paginação de pacientes', () => {
 });
 
 describe('ficha por recurso', () => {
+  it('identifica nascimento e última consulta mesmo fora da primeira página dos dados', () => {
+    responses.set(`/pacientes/${ID}?limit=1&offset=20`, {
+      ...patient, telefones: ['Telefone sintético da página 20'],
+      atendimentos: [{ atendimentoId: '81', dataAtendimento: '2020-01-01', observacoes: null, versao: '1' }],
+      paginacaoColecoes: { limit: 1, offset: 20 },
+    });
+    responses.set(`/pacientes/${ID}/atendimentos?limit=1&offset=0`, [{
+      atendimentoId: '9007199254740995', dataAtendimento: '2026-02-21', localizacaoProntuario: null,
+      ambulatorioUnicamente: null, ambulatorioAnexoProjeto: null, observacoes: null, versao: '1',
+    }]);
+    renderRoute(<PatientPage />, `/pacientes/${ID}?dadosLimit=1&dadosOffset=20`, '/pacientes/:pacienteId');
+    const header = screen.getByRole('heading', { name: patient.nome }).closest('section')!;
+    expect(header).toHaveTextContent('Nascimento: 10/02/1980');
+    expect(within(header).getByText('10/02/1980')).toBeVisible();
+    expect(within(header).getByText('37 anos · referência: 01/01/2001')).toBeVisible();
+    const latest = screen.getByRole('heading', { name: 'Último atendimento por data registrada' }).closest('section')!;
+    expect(within(latest).getByText('21/02/2026')).toBeVisible();
+    expect(within(latest).getByRole('link', { name: 'Abrir último atendimento 9007199254740995' })).toHaveAttribute(
+      'href', `/pacientes/${ID}/atendimentos/9007199254740995`,
+    );
+    expect(screen.getByRole('link', { name: 'Atendimento 81' })).toBeVisible();
+    expect(screen.getByText('Telefone sintético da página 20')).toBeVisible();
+  });
+
   it('normaliza scopes simultâneos sem perder correções, filtros ou scopes válidos', () => {
     responses.set(`/pacientes/${ID}?limit=20&offset=2`, {
       ...patient, paginacaoColecoes: { limit: 20, offset: 2 },
@@ -148,7 +173,9 @@ describe('ficha por recurso', () => {
     expect(screen.getByText('10/02/1980')).toBeVisible();
     expect(screen.getByText('37 anos · referência: 01/01/2001')).toBeVisible();
     expect(screen.getByText('legado_sintetico')).toBeVisible();
-    expect(vi.mocked(useApiQuery).mock.calls.every(([path]) => path === `/pacientes/${ID}?limit=20&offset=0`)).toBe(true);
+    expect(vi.mocked(useApiQuery).mock.calls.every(([path]) => [
+      `/pacientes/${ID}?limit=20&offset=0`, `/pacientes/${ID}/atendimentos?limit=1&offset=0`,
+    ].includes(path))).toBe(true);
 
     await user.click(within(screen.getByRole('navigation', { name: 'Seções da ficha' })).getByRole('link', { name: 'Projetos' }));
     expect(screen.getByText('Projeto Sintético')).toBeVisible();
