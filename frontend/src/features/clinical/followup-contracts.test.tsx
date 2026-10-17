@@ -56,6 +56,31 @@ describe('semântica dos registros de acompanhamento', () => {
     expect(result).toEqual({ projetoId: BIG_ID, participa: null });
   });
 
+  it('não valida nem reenvia textos legados intocados ao alterar outro campo parcial', () => {
+    const legacyText = 'S'.repeat(10001);
+    const notification = notificationDraft({ notificacaoId: BIG_ID, pacienteNotificado: null,
+      numeroNotificacao: null, justificativaNaoNotificacao: legacyText, observacoes: legacyText });
+    expect(followupBody('notificacao', { ...notification, pacienteNotificado: 'false' }, { original: notification }))
+      .toEqual({ pacienteNotificado: false });
+    expect(() => followupBody('notificacao', { ...notification, observacoes: `${legacyText}N` }, { original: notification }))
+      .toThrow(/10000 caracteres/);
+    const project = projectDraft({ projetoId: BIG_ID, codigo: 'SINTETICO', nome: 'Sintético', participa: null,
+      possuiPendencia: null, descricaoPendencia: legacyText, houveFalha: null, descricaoFalha: legacyText, observacoes: legacyText });
+    expect(followupBody('projeto', { ...project, participa: 'true' }, { projectId: BIG_ID, original: project }))
+      .toEqual({ projetoId: BIG_ID, participa: true });
+  });
+
+  it('cria pendência desconhecida sem confundir null, não informado e aberta, sem ampliar PATCH', () => {
+    const common = { atendimentoId: BIG_ID, descricao: 'Pendência sintética', dataIdentificacao: '', dataResolucao: '' };
+    expect(followupBody('pendencia', { ...common, status: '' })).toMatchObject({ status: null, dataResolucao: null });
+    expect(followupBody('pendencia', { ...common, status: 'nao_informado' })).toMatchObject({ status: 'nao_informado' });
+    expect(followupBody('pendencia', { ...common, status: 'aberta' })).toMatchObject({ status: 'aberta' });
+    expect(() => followupBody('pendencia', { ...common, status: '', dataResolucao: '2024-02-29' }))
+      .toThrow(/Data de resolução exige status resolvida/);
+    expect(() => followupBody('pendencia', { ...common, status: '' }, { updatePending: true }))
+      .toThrow(/atualização ainda exige um status conhecido/);
+  });
+
   it('encaminhamento leva todos os campos preenchidos e mantém os indicadores desconhecidos', () => {
     const result = followupBody('encaminhamento', { atendimentoId: BIG_ID, tipoEncaminhamentoId: '12', projetoId: '13',
       origem: 'ambulatorio', destinoNome: 'Nome sintético', destinoServico: 'Serviço sintético', especialidadeDestino: 'Especialidade',

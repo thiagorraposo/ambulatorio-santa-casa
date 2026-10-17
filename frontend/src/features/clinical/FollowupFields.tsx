@@ -26,15 +26,16 @@ export function FollowupField({ label, children, hint }: { label: string; childr
 }
 
 export function FollowupText({ label, value, onChange, type = 'text', required = false, maximum = 10000,
-  min, max, hint, multiline = false }: {
+  min, max, hint, multiline = false, readOnly = false }: {
   label: string; value: string; onChange: (value: string) => void;
   type?: 'text' | 'date' | 'number'; required?: boolean; maximum?: number;
   min?: number; max?: number; hint?: string; multiline?: boolean;
+  readOnly?: boolean;
 }) {
   return <FollowupField label={label} hint={hint}>{id => multiline
-    ? <textarea id={id} value={value} maxLength={maximum} required={required} rows={3}
+    ? <textarea id={id} value={value} maxLength={maximum} required={required} rows={3} readOnly={readOnly}
       onChange={event => onChange(event.target.value)} />
-    : <input id={id} type={type} value={value} required={required} maxLength={type === 'text' ? maximum : undefined}
+    : <input id={id} type={type} value={value} required={required} readOnly={readOnly} maxLength={type === 'text' ? maximum : undefined}
       min={min} max={max} step={type === 'number' ? 1 : undefined} onChange={event => onChange(event.target.value)} />
   }</FollowupField>;
 }

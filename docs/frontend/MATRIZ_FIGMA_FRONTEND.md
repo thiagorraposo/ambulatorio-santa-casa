@@ -5,6 +5,11 @@ Fonte ponto a ponto da [visão de produto](VISAO_E_ESPECIFICACAO.md) e dos
 [pacotes do roadmap](../PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend).
 Decisões são propostas, salvo regra vigente explicitamente referenciada.
 
+**Continuidade de 15/10:** os estados das linhas abaixo registram a fotografia
+de 05/10. Correções R7-01–07 e novas evidências do recorte original estão no
+[relatório vigente](../validacoes/VALIDACAO_ETAPA_7.md); não há aceite automático
+das melhorias propostas nem da VU1.
+
 ## Como ler e manter a rastreabilidade
 
 Cada linha tem ID estável `FM-FAMÍLIA-NN`. Seu requisito individual é

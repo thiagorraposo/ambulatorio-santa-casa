@@ -96,7 +96,7 @@ details[open] > summary { padding-bottom: 1rem; }
 .patient-summary p { margin-bottom: .5rem; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: 0 0 1rem; font-size: .9rem; }
-.breadcrumb > :not(:first-child)::before { content: '/'; padding-right: .5rem; color: var(--muted); }
+.breadcrumb > :not(:first-child)::before { content: ''; display: inline-block; height: .8em; border-left: 1px solid var(--muted); margin-right: .6rem; transform: rotate(18deg); }
 .empty-state, .loading-state { color: var(--muted); text-align: center; background: #f8fafc; border-radius: .5rem; padding: 2rem 1rem; }
 .loading-state { display: flex; justify-content: center; align-items: center; gap: .7rem; }
 .loading-state p { margin: 0; }

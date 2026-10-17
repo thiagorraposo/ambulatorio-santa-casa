@@ -1,20 +1,20 @@
 # Roadmap do Projeto
 
-Atualizado em: 2026-10-05
+Atualizado em: 2026-10-15
 
-**Reauditoria de 2026-10-05:** o aceite da Etapa 7 continua pendente, com sete
-lacunas funcionais sem correção. A prioridade é concluir a recuperação de
-escrita, a preservação de contexto/estados/confirmações e a paginação de
-familiares, além do percurso integrado pela interface e da revisão com a equipe.
-Evidências e limites estão no
-[relatório do trabalho local](RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md).
-As menções à validação de 2026-10-04 abaixo registram os cenários executados.
+**Continuidade de 2026-10-15:** as sete lacunas da reauditoria de 05/10 receberam
+correções de código e novas provas sintéticas. O percurso integrado original 7D
+passou pela interface e a regressão técnica foi concluída. A revisão clínica com
+a equipe continua necessária ao aceite integral. Evidências atuais estão no
+[relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md); o
+[relatório de 05/10](RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md) preserva a
+fotografia anterior. Pacotes adicionais de UX/VU1 mantêm decisões e aceites próprios.
 
 Este é o roadmap oficial do projeto. A estrutura original possui dez etapas;
 as etapas 1–6 estão concluídas no ambiente sintético. Os fluxos 7A–7D possuem
-implementação e validação
-parcial no ambiente sintético; sete lacunas e o percurso integrado impedem
-conclusão com aceite. A revisão com a equipe também permanece pendente.
+implementação e validação técnica sintética concluídas no recorte original; a revisão com a equipe
+permanece pendente. Implementação do recorte original não equivale ao aceite
+dos pacotes de UX propostos posteriormente.
 As etapas 5, 6, 7, 9 e 10 possuem subetapas porque
 contêm entregas independentes e dependências próprias. As letras identificam
 subetapas de execução e não criam uma nova numeração principal.
@@ -248,10 +248,11 @@ A evidência da execução está no
 
 ## Etapa 7 — Fluxos clínicos
 
-**Estado:** 7A–7D têm implementação e validação parcial sintética de 2026-10-04.
+**Estado:** 7A–7D têm implementação e evidências sintéticas de 04/10 e 15/10.
 O [relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md) reúne provas dos cenários
-executados. As sete lacunas reavaliadas, o percurso integrado e a revisão com a
-equipe continuam pendentes; os pacotes abaixo definem o caminho até o aceite.
+executados. As sete lacunas receberam correções e o percurso integrado passou;
+a revisão com a equipe permanece pendente. Os pacotes de
+produto abaixo mantêm suas dependências e aceites próprios, sem promoção implícita.
 
 **Objetivo:** tornar utilizáveis as telas efetivamente usadas pela equipe.
 
@@ -479,8 +480,9 @@ define VU1/MVP/VP/EX e decisões P-01–09. Destino posterior não é exclusão.
 são validação parcial dos seus cenários, contrato/decisão ausente é dependência
 identificada, e conclusão exige aceite do pacote. Nenhum pacote novo de código
 foi implementado/aceito por esta análise. `DOC-EX` registra disposição documental.
-7A–7D mantêm sete lacunas abertas; revisão de usabilidade e prova integrada também
-faltam. Não avançar para dashboard como se esse aceite já estivesse dado.
+Essa era a fotografia de 05/10. As correções e a prova integrada de 15/10 estão
+no relatório vigente; a revisão de usabilidade e o aceite dos pacotes propostos
+continuam separados. Não avançar para dashboard como se esse aceite já estivesse dado.
 
 **Unidade de entrega:** onde um ID agrega unidades `.1`, `.2` etc., abrir trabalho,
 revisar, validar e aceitar cada unidade separadamente. Os critérios nomeiam a
@@ -1742,14 +1744,14 @@ cada contrato antecede sua UI, preservando as decisões clínicas vigentes.
 
 ## Próximo trabalho
 
-Concluir as correções e a recuperação da Etapa 7, seguindo a sequência acima,
-antes do aceite da VU1 e da ampliação operacional. Etapas 5 e 6 mantêm seus
-aceites sintéticos; Etapa 7 mantém implementação e evidências parciais, sem
-aceite completo. O [relatório histórico](validacoes/VALIDACAO_ETAPA_7.md) não
-elimina a [reauditoria](frontend/VISAO_E_ESPECIFICACAO.md#reavaliação-das-sete-lacunas-e-cobertura-de-validação).
+Concluir a revisão clínica da Etapa 7 antes do aceite integral.
+Etapas 5 e 6 mantêm seus aceites sintéticos. O
+[relatório vigente](validacoes/VALIDACAO_ETAPA_7.md) relaciona as correções de
+15/10 às lacunas da reauditoria, preservando as evidências históricas.
 
-O próximo pacote pode ser 7D-R1 (contexto de atendimento), seguido de R4/R2/R5;
-7B-R1B e o desenho R6D são frentes independentes. Confirmar as decisões P-01–09
+Para a VU1 proposta, priorizar as decisões e os pacotes de UX ainda não aceitos
+(7A-U1 e 7D-U1/U2/U3/U4), aproveitando a recuperação e o percurso já implementados.
+Confirmar as decisões P-01–09
 quando necessárias ao pacote; esta documentação apresenta propostas, sem
 aprovação implícita. Até essa escolha, trabalhar no que não depende dela.
 Upload/D9/gestão e módulos sem HTTP têm destinos e dependências explícitos;

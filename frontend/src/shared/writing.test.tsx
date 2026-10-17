@@ -5,6 +5,7 @@ import { createMemoryRouter, Link, Route, RouterProvider, Routes } from 'react-r
 import { SessionProvider, useSession } from '../app/session';
 import { SessionManager } from '../app/SessionManager';
 import { DraftProvider, MutationForm, useClinicalDraft } from './writing';
+import { withRegisteredOperations } from '../test/operation-fixture';
 
 const managers: SessionManager[] = [];
 afterEach(() => managers.splice(0).forEach(manager => manager.dispose()));
@@ -35,7 +36,7 @@ async function setup(response: () => Promise<Response>) {
     if (url === '/v1/auth/me') return Response.json({ usuarioId: '42', nome: 'Profissional sintético', perfil: 'edicao' });
     return writes(url, init);
   });
-  const manager = new SessionManager(fetcher); managers.push(manager);
+  const manager = new SessionManager(withRegisteredOperations(fetcher)); managers.push(manager);
   await manager.login('sintetico@example.invalid', 'senha-sintetica');
   const router = createMemoryRouter([{ path: '*', element: <SessionProvider manager={manager}><ExampleShell /></SessionProvider> }], { initialEntries: ['/write'] });
   render(<RouterProvider router={router} />);

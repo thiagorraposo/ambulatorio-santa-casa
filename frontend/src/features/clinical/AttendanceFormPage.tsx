@@ -125,7 +125,7 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
           {draft.pending.map((pending, index) => <fieldset key={index} className="form-section"><legend>Pendência {index + 1}</legend>
             <TextAreaField label={`Descrição da pendência ${index + 1}`} value={pending.descricao}
               onChange={value => setDraft(previous => ({ ...previous, pending: previous.pending.map((item, i) => i === index ? { ...item, descricao: value } : item) }))} />
-            <SelectField label={`Status da pendência ${index + 1}`} required value={pending.status}
+            <SelectField label={`Status da pendência ${index + 1}`} value={pending.status} blank="Desconhecido"
               options={[["aberta", "Aberta"], ["em_andamento", "Em andamento"], ["resolvida", "Resolvida"], ["cancelada", "Cancelada"], ["nao_informado", "Não informado"]]}
               onChange={value => setDraft(previous => ({ ...previous, pending: previous.pending.map((item, i) => i === index ? { ...item, status: value } : item) }))} />
             <InputField label={`Data de resolução da pendência ${index + 1}`} type="date" value={pending.dataResolucao ?? ''}

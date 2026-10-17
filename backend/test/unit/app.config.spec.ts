@@ -9,6 +9,16 @@ const valid = {
 };
 
 describe('validateConfig', () => {
+  it('permite bind explícito IPv4/IPv6 e preserva o padrão, recusando host inválido', () => {
+    expect(validateConfig(valid).apiHost).toBe('0.0.0.0');
+    for (const API_HOST of ['127.0.0.1', '::1']) {
+      expect(validateConfig({ ...valid, API_HOST }).apiHost).toBe(API_HOST);
+    }
+    for (const API_HOST of ['', 'http://127.0.0.1', '127.0.0.999', ' localhost ', 123]) {
+      expect(() => validateConfig({ ...valid, API_HOST })).toThrow('Configuração inválida: API_HOST');
+    }
+  });
+
   it('falha de forma controlada quando configuração obrigatória está ausente', () => {
     const { APP_DB_PASSWORD: _, ...missing } = valid;
     expect(() => validateConfig(missing)).toThrow('Configuração obrigatória ausente: APP_DB_PASSWORD');

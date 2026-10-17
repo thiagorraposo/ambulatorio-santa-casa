@@ -1,8 +1,10 @@
 # Frontend — leitura e fluxos clínicos
 
-Atualizado em: 2026-10-05. Fundação 6A–6B concluída; fluxos 7A–7D com
-implementação e validação parcial sintética. Sete lacunas, prova do percurso
-integrado e revisão com a equipe impedem aceite completo.
+Atualizado em: 2026-10-15. Fundação 6A–6B concluída; recorte original 7A–7D
+implementado e validado tecnicamente com dados sintéticos, incluindo 38 E2E.
+As evidências e seus limites pertencem ao relatório da entrega.
+Aceite integral, revisão com a equipe e VU1
+não são declarados aqui.
 
 A aplicação própria está em [`frontend/`](../frontend/). Consome os contratos
 públicos `/v1` do backend, com React/TypeScript, Vite, roteamento e consultas por
@@ -59,7 +61,8 @@ O runner [`tests/frontend/test_e2e.sh`](../tests/frontend/test_e2e.sh) recebe
 `SYNTHETIC_PG_HOST`, `SYNTHETIC_PG_PORT`, `SYNTHETIC_PG_USER` e `PGPASSWORD` pelo
 ambiente, todos obrigatórios. O usuário deve poder criar banco e login de teste.
 Ele cria seu banco e roles de teste, aplica as
-migrations apenas nesse banco, inicia API/Vite e encerra os recursos que criou.
+migrations 02–64 apenas nesse banco, inicia API/Vite e encerra os recursos que
+criou.
 Não lê `.env` para selecionar o banco de teste. Não exige build do frontend para
 servir Vite; o build de produção é verificado separadamente por `frontend-check`.
 Logs e artefatos de navegador ficam em `/tmp`, fora do repositório.
@@ -71,6 +74,10 @@ fixture, depois de instalar dependências e executar `make backend-build`, use
 `bash tests/frontend/test_e2e.sh --serve` com as variáveis sintéticas configuradas.
 O runner mantém os serviços ativos até a interrupção e informa os acessos
 exclusivamente sintéticos; o encerramento remove seu banco e login de teste.
+A sessão desse modo dura 15 minutos para permitir a revisão dos formulários;
+nos testes automáticos ela continua durando 60 segundos. O
+[roteiro clínico](validacoes/ROTEIRO_REVISAO_CLINICA_ETAPA_7.md) orienta as tarefas
+e o registro do parecer da equipe.
 
 Em mudanças mistas, combine os alvos numa chamada para compartilhar dependências:
 
@@ -83,6 +90,37 @@ do runner sintético. Consulte a
 [matriz de validação](WORKFLOW_DE_DESENVOLVIMENTO.md#validação-proporcional).
 `project-check` cobre documentação, SQL, diff e status; não substitui testes do
 frontend.
+
+## Demonstração sintética isolada
+
+`make dev-sintetico-start` cria um PostgreSQL 16.15 exclusivo e inicia o runner
+`test_e2e.sh --serve`, com migrations e fixture sintéticas. Requer Python 3.9+
+em Linux com suporte a pidfd, Docker, Node.js 24, clientes PostgreSQL e build preparados
+por `make backend-install frontend-install backend-build`. O Chromium só é
+necessário para testes automatizados, não para servir a aplicação.
+
+O frontend fica em `http://127.0.0.1:4177`, a API em
+`http://127.0.0.1:6062/v1` e o PostgreSQL em `127.0.0.1:55458`.
+Os usuários são `frontend-consulta@example.invalid`,
+`frontend-edicao@example.invalid` e `frontend-administracao@example.invalid`,
+todos com a senha exclusivamente sintética `Etapa6-sintetica!`.
+Cada sessão de login dura 15 minutos; novo login permite continuar a revisão.
+
+`make dev-sintetico-status` verifica o supervisor e a disponibilidade HTTP;
+`make dev-sintetico-stop` encerra o runner e o container que pertencem à
+demonstração. O banco usa armazenamento temporário e é descartado ao encerrar;
+um novo start recria a fixture. O estado e os logs ficam em diretório privado
+em `/tmp`, indicado pelos comandos. O script não lê `.env`, não usa volumes
+persistentes e recusa portas ocupadas. Reiniciar não incorpora alterações de
+backend sem executar antes `make backend-build`.
+O supervisor verifica a identidade dos processos e limpa seus descendentes
+marcados mesmo após morte abrupta do runner, usando pidfd para evitar sinalizar
+um PID reaproveitado. Se o próprio supervisor for morto abruptamente, execute
+`stop` para limpar os recursos antes de um novo `start`.
+
+Para portas alternativas, use diretamente `python3 scripts/dev_sintetico.py start
+--pg-port 55459 --api-port 6064 --web-port 4178`. As operações `status` e `stop`
+consultam o estado salvo, sem precisar repetir as portas.
 
 ## Organização
 
@@ -159,13 +197,17 @@ URL com substituição da entrada de histórico, preservando filtros e páginas
 válidas de outros recursos. Parâmetros ausentes usam os defaults 20/0.
 
 Paginação aninhada segue `paginacaoColecoes` e os parâmetros do contrato de cada
-recurso. No detalhe de atendimento, um único offset pode paginar simultaneamente
-coleções externas e filhos de snapshots. Ainda não há cursor independente dos
-familiares de cada snapshot: avançar o offset pode retirar o snapshot da página
-antes de alcançar todos os seus filhos. A interface preserva a paginação
-retornada e seus limites, sem afirmar completude global ou reconstruir dados
-ausentes. A correção R7-01 foi decomposta em
-[7B-R1B](PROXIMOS_PASSOS.md#7b-r1b) e [7B-R1U](PROXIMOS_PASSOS.md#7b-r1u).
+recurso. Familiares têm consultas independentes: a lista de rastreios usa
+`/atendimentos/:atendimentoId/rastreios-familiares`, e cada página de filhos usa
+`/:rastreioFamiliarId/familiares` sob essa rota. No endereço do detalhe,
+`familiaresLimit`/`familiaresOffset` paginam snapshots;
+`familiares<rastreioFamiliarId>Limit`/`familiares<rastreioFamiliarId>Offset`
+paginam seus resultados. Exames e pendências conservam seus parâmetros.
+Voltar, avançar e reabrir o endereço restauram as páginas; mudar página move o
+foco ao bloco atualizado. Falha de leitura permite nova consulta, sem apresentar
+a página anterior como atual ou afirmar ausência de familiares. O
+[contrato de familiares](arquitetura/CONTRATO_FAMILIARES_ETAPA_7.md) descreve os
+IDs e a prévia de até 20 resultados por snapshot no detalhe compatível.
 
 IDs PostgreSQL permanecem texto, inclusive acima de `Number.MAX_SAFE_INTEGER`.
 Datas clínicas são apresentadas como datas civis, sem conversão que desloque o
@@ -190,8 +232,11 @@ Os tipos de `/registrar` são `bzn`, `retorno-bzn`, `projeto`, `notificacao`,
 `pendencia`. O atendimento do contexto pode ser levado em `atendimentoId`;
 `projetoId`, `encaminhamentoId` e `pendenciaId` selecionam registros existentes.
 Seletores paginam opções da API; IDs continuam texto e não são hardcoded.
-Alguns atalhos ainda omitem esse contexto; [7D-R1](PROXIMOS_PASSOS.md#7d-r1)
-cobre os caminhos restantes, preservando os que já o transportam.
+Atalhos do detalhe e entre acompanhamentos preservam paciente, atendimento e
+origem de retorno. A seleção de outra consulta é explícita; o contexto de uma
+consulta é validado no recurso do paciente antes de mostrar o formulário.
+`retorno` preserva o endereço de origem e `origemAtendimentoId` separa a origem
+da consulta escolhida para a operação.
 
 Criação do atendimento envia medidas, diagnóstico/descoberta, exames,
 familiares e pendências junto com o núcleo. BZN/reações, retornos, projetos,
@@ -215,24 +260,38 @@ O diálogo usa portal para continuar acessível quando reconsultas ocultam o
 formulário.
 Saída, 401, expiração e troca de identidade/perfil limpam cache e rascunhos.
 
-`MutationForm` envia uma única vez por intenção e não usa retry. 403/409 não
-produzem sucesso. Após 409 cadastral ou do núcleo de atendimento, o usuário
-pode consultar a comparação de versões e descartar explicitamente somente esse
-rascunho para iniciar outra edição com a versão consultada. Nenhum PATCH é
-reenviado automaticamente. A confirmação exige o ID canônico textual do recurso
-e, na edição, o mesmo ID original. Rede, resposta inválida, 5xx ou cancelamento durante escrita
-deixam resultado incerto: consulta para verificar o registro e reenvio bloqueado,
-inclusive ao voltar à mesma intenção. Novos episódios após sucesso confirmado
-recebem nova intenção local; isso não equivale a idempotência entre sessões.
+`MutationForm` registra uma UUID com método, caminho e hash SHA-256 do corpo em
+`POST /v1/operacoes`; em seguida envia a escrita uma vez com `X-Operacao-Id`.
+O protocolo cobre as 14 mutações de cadastro, atendimento e acompanhamento
+enumeradas no [contrato de recuperação](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md).
+O recibo mínimo de IDs/versão é confirmado na mesma transação da clínica e seus
+filhos. Rede, resposta inválida, 5xx ou cancelamento após envio clínico mantêm a
+intenção bloqueada. Verificar consulta `GET /v1/operacoes/:operacaoId`; encerrar
+usa `POST /v1/operacoes/:operacaoId/encerrar`. Nenhuma ação reaplica a clínica.
+Resultado confirmado reconcilia o recibo; em curso, indeterminável ou falha de
+consulta conservam o bloqueio. Prova de não aplicação permite revisar e confirmar
+outra intenção. Página vazia ou valor coincidente não provam o resultado.
 
-A recuperação permanece parcial: 403 mantém a intenção bloqueada sem retomada;
-consulta após resposta perdida não reconcilia o resultado; GET do BZN concorrente
-pode ocultar o rascunho, e recibo/valores confirmados não sobrevivem à remontagem
-após falha temporária de identidade. A criação de pendência aceita null no
-backend, mas os formulários impedem esse estado; PATCH atual exige string.
-Esses limites e a cobertura exata dos testes estão na
-[reauditoria atual](frontend/VISAO_E_ESPECIFICACAO.md#reavaliação-das-sete-lacunas-e-cobertura-de-validação).
-Bloquear repetição contém duplicação; ainda não conclui a recuperação pretendida.
+403/409 não produzem sucesso. Após 403, revalidar acesso faz somente leitura e
+libera revisão; nova confirmação revalida a escrita no servidor. Após 409
+cadastral ou do núcleo de atendimento, o usuário pode comparar versões e
+descartar somente esse rascunho antes de outra edição. Conflito BZN mantém o
+canônico e todos os campos/reações do rascunho para comparação, cópia e descarte
+explícito; não oferece correção por criação duplicada. Nenhum PATCH é reenviado
+automaticamente. Confirmação exige ID canônico textual e, na edição, o ID original.
+
+Recibos e valores confirmados permanecem em memória ao navegar e após falha
+temporária de identidade na mesma sessão. Outro episódio exige ação explícita;
+recibos anteriores continuam disponíveis. Logout, 401, expiração e troca de
+identidade/perfil limpam esses dados. Recarregar perde a memória local: a API
+permite verificar uma UUID conhecida pela mesma identidade autorizada, mas a
+interface não persiste nem redescobre automaticamente as intenções de outra sessão.
+
+Os dois formulários de criação de pendência distinguem desconhecido (`null`),
+`nao_informado` e `aberta`; resolução exige data explícita. PATCH atual exige
+status string e não permite retornar a `null`. Essa evolução, as etapas/revisão
+do atendimento e outros pacotes de UX permanecem propostas no roadmap; não são
+declarados implementados pela correção de recuperação.
 
 ## Apresentação e erros
 
@@ -247,6 +306,8 @@ explica a recusa de acesso, 429 informa limite temporário, 503 informa serviço
 indisponível, e falha de rede em leitura permite tentar novamente. Conteúdo clínico de uma
 resposta anterior não deve permanecer visível enquanto uma nova consulta falha.
 Navegação deve funcionar por links diretos, teclado, foco visível e telas menores.
+Separadores dos breadcrumbs são traços desenhados em CSS, sem texto que altere
+o nome acessível dos links.
 
 Importação/revisão, métricas, fila global e gestão de usuários permanecem fora
 destes formulários. As lacunas clínicas específicas estão no recorte; produção

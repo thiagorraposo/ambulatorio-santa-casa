@@ -1,6 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { DatabaseService } from '../../src/common/database/database.service';
 import { AppConfig } from '../../src/config/app.config';
+import { clinicalOperationContext, ClinicalOperationContext } from '../../src/common/database/clinical-operation.context';
 
 describe('DatabaseService', () => {
   const config = { get: jest.fn().mockReturnValue({
@@ -82,5 +83,36 @@ describe('DatabaseService', () => {
     expect(query.mock.calls.map(([sql]) => sql)).not.toContain('COMMIT');
     expect(query).toHaveBeenLastCalledWith('ROLLBACK');
     expect(release).toHaveBeenCalledWith(undefined);
+  });
+
+  it('associa recibo antes do mesmo COMMIT e não consome o contexto em leitura auxiliar', async () => {
+    const query = jest.fn().mockResolvedValue({ rows: [] });
+    const { service } = serviceWith(query);
+    const scope: ClinicalOperationContext = { actorId: '4', transactionStarted: false,
+      before: async tx => { await tx.query('LOCK operação'); },
+      after: async (tx,result) => { await tx.query('RECIBO operação',[result]); } };
+    await clinicalOperationContext.run(scope, async () => {
+      await service.query('LEITURA auxiliar');
+      expect(scope.transactionStarted).toBe(false);
+      await service.transaction(async tx => { await tx.query('ESCRITA clínica'); return { pacienteId: '5' }; },'4');
+      await expect(service.transaction(async () => undefined,'4')).rejects.toThrow('exatamente uma transação');
+    });
+    const sql = query.mock.calls.map(([value]) => value);
+    expect(sql.slice(sql.indexOf('LOCK operação'))).toEqual(['LOCK operação','ESCRITA clínica','RECIBO operação','COMMIT']);
+    expect(query).toHaveBeenCalledWith('RECIBO operação',[{ pacienteId: '5' }]);
+  });
+
+  it('reverte clínica quando recibo falha e nunca confirma transação de outro ator', async () => {
+    const query = jest.fn().mockResolvedValue({ rows: [] });
+    const { service } = serviceWith(query);
+    const scope: ClinicalOperationContext = { actorId: '4', transactionStarted: false,
+      before: async () => undefined, after: async () => { throw new Error('Recibo sintético indisponível'); } };
+    await clinicalOperationContext.run(scope, async () => {
+      await expect(service.transaction(async () => undefined,'5')).rejects.toThrow('exatamente uma transação');
+      expect(scope.transactionStarted).toBe(false);
+      await expect(service.transaction(async tx => tx.query('ESCRITA clínica'),'4')).rejects.toThrow('Recibo sintético');
+    });
+    expect(query.mock.calls.map(([sql]) => sql)).not.toContain('COMMIT');
+    expect(query).toHaveBeenLastCalledWith('ROLLBACK');
   });
 });

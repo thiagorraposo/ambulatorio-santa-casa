@@ -75,5 +75,5 @@ cd backend
 if (( $# )); then
   npx jest --runInBand --runTestsByPath "$@"
 else
-  npx jest --runInBand --runTestsByPath test/clinical/clinical.http.spec.ts test/clinical/recursos.http.spec.ts test/clinical/response-dto.http.spec.ts test/clinical/catalogos.http.spec.ts test/clinical/stage7.http.spec.ts test/clinical/importacoes.http.spec.ts test/clinical/revisoes.sql.http.spec.ts test/clinical/revisoes.staging.http.spec.ts test/clinical/versioning.http.spec.ts
+  npx jest --runInBand --runTestsByPath test/clinical/clinical.http.spec.ts test/clinical/recursos.http.spec.ts test/clinical/response-dto.http.spec.ts test/clinical/familiares.http.spec.ts test/clinical/catalogos.http.spec.ts test/clinical/stage7.http.spec.ts test/clinical/operacoes.http.spec.ts test/clinical/importacoes.http.spec.ts test/clinical/revisoes.sql.http.spec.ts test/clinical/revisoes.staging.http.spec.ts test/clinical/versioning.http.spec.ts
 fi

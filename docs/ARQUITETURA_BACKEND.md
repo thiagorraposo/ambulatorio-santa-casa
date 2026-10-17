@@ -232,6 +232,10 @@ permite acesso público; políticas da operação prevalecem sobre as da classe.
 `AUTH_JWT_EXPIRES_IN_SECONDS` são obrigatórios; valor ausente/inseguro impede o
 startup. Segredos existem somente no ambiente.
 
+`API_HOST` é opcional, aceita endereço IPv4/IPv6 e mantém o padrão `0.0.0.0`
+para o container. O runner sintético define `127.0.0.1` explicitamente, para
+que sua API executada diretamente no host fique restrita ao acesso local.
+
 Logs usam allowlist técnica. Não registram body, login completo, senha, hash,
 JWT, Authorization, secret, connection string, SQL/valores, nome de paciente,
 telefone, endereço, conteúdo clínico ou JSONB bruto. Erros internos registram

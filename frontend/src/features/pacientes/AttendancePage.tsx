@@ -1,5 +1,5 @@
 import { Link, useLocation, useParams } from 'react-router';
-import type { AtendimentoDetalheResponse, RastreioFamiliarResponse } from '../../api/contracts';
+import type { AtendimentoDetalheResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
 import { Card, EmptyState, PageHeading, QueryState } from '../../shared/ui';
 import { clinicalLabel, displayText, formatClinicalDate, formatNumeric, triState } from '../../shared/formatters';
@@ -7,22 +7,7 @@ import { ExamList, Fields } from './components';
 import { pagePath, Pagination, usePage } from './pagination';
 import { useSession } from '../../app/session';
 import ClinicalActions from '../clinical/ClinicalActions';
-
-function FamilyScreenings({ rows }: { rows: RastreioFamiliarResponse[] }) {
-  return <>{rows.map(item => <article className="resource-item" key={item.rastreioFamiliarId}>
-    <h3>Rastreio <span className="mono">{item.rastreioFamiliarId}</span></h3>
-    <Fields items={[['Familiares examinados', triState(item.familiaresExaminados)]]} />
-    {item.familiares.length === 0 ? <EmptyState>Nenhum familiar nesta página do rastreio.</EmptyState> : (
-      <div className="table-scroll"><table className="data-table">
-        <caption>Familiares desta página do rastreio {item.rastreioFamiliarId}</caption>
-        <thead><tr><th scope="col">Identificação do familiar</th><th scope="col">Resultado de sorologia</th></tr></thead>
-        <tbody>{item.familiares.map((family, index) => <tr key={`${index}-${family.identificacaoFamiliar}`}>
-          <td>{displayText(family.identificacaoFamiliar)}</td><td>{clinicalLabel(family.resultadoSorologia)}</td>
-        </tr>)}</tbody>
-      </table></div>
-    )}
-  </article>)}</>;
-}
+import { AttendanceFamilies } from './PatientResources';
 
 export default function AttendancePage() {
   const session = useSession();
@@ -41,18 +26,14 @@ export default function AttendancePage() {
       {data => {
         const clinical = data.dadosClinicos;
         const diagnosis = data.diagnosticoChagas;
-        // rastreiosFamiliares é a coleção canônica; o alias singular não deve
-        // duplicar um snapshot nem ocultar outros existentes.
-        const families = data.rastreiosFamiliares;
-        const collectionLength = Math.max(data.exames.length, data.pendencias.length, families.length,
-          ...families.map(item => item.familiares.length));
+        const collectionLength = Math.max(data.exames.length, data.pendencias.length);
         return <>
           <Card>
             <h2>Atendimento de {formatClinicalDate(data.dataAtendimento)}</h2>
             {location.state?.saved && <p className="notice" role="status">{String(location.state.saved)}</p>}
             {session.user?.perfil !== 'consulta' && <div className="form-actions">
               <Link to={`${patientPath}/atendimentos/${atendimentoId}/editar`} className="button button-secondary">Editar atendimento</Link>
-              <Link to={`${patientPath}/registrar?tipo=bzn`} className="button button-secondary">Registrar acompanhamento</Link>
+              <Link to={`${patientPath}/registrar?tipo=bzn&atendimentoId=${encodeURIComponent(atendimentoId)}&retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`} className="button button-secondary">Registrar acompanhamento</Link>
             </div>}
             <Fields items={[
               ['ID do atendimento', <span className="mono">{data.atendimentoId}</span>],
@@ -88,7 +69,7 @@ export default function AttendancePage() {
           </div>
           <Card>
             <h2>Coleções deste atendimento</h2>
-            <p className="muted">A paginação abaixo avança exames, pendências, rastreios e familiares em conjunto.</p>
+            <p className="muted">A paginação abaixo avança exames e pendências. Rastreios familiares têm controles próprios.</p>
             <h3>Exames desta página ({data.exames.length})</h3>
             {data.exames.length === 0 ? <EmptyState>Nenhum exame nesta página.</EmptyState> : <ExamList rows={data.exames} pacienteId={pacienteId} />}
             <h3>Pendências desta página ({data.pendencias.length})</h3>
@@ -102,10 +83,9 @@ export default function AttendancePage() {
                 ]} />
               </article>)}</div>
             )}
-            <h3>Rastreios familiares desta página ({families.length})</h3>
-            {families.length === 0 ? <EmptyState>Nenhum rastreio nesta página.</EmptyState> : <FamilyScreenings rows={families} />}
             <Pagination label="coleções do atendimento" {...data.paginacaoColecoes} count={collectionLength} showCount={false} onChange={page.changePage} />
           </Card>
+          <AttendanceFamilies path={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}`} />
           <ClinicalActions pacienteId={pacienteId} atendimentoId={atendimentoId} />
         </>;
       }}

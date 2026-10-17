@@ -115,9 +115,10 @@ export function projectDraft(existing: ProjectResponse | undefined): FollowupDra
 export function pendingDraft(existing: PendenciaResponse): FollowupDraft {
   return { status: existing.status ?? '', dataResolucao: existing.dataResolucao ?? '' };
 }
-function changed(body: Record<string, unknown>, draft: FollowupDraft, original?: FollowupDraft): Record<string, unknown> {
-  if (!original) return body;
-  return Object.fromEntries(Object.entries(body).filter(([key]) => draft[key] !== original[key]));
+function changed(fields: Record<string, () => unknown>, draft: FollowupDraft, original?: FollowupDraft): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(fields)
+    .filter(([key]) => !original || draft[key] !== original[key])
+    .map(([key, value]) => [key, value()]));
 }
 
 /** Every editable field has a public /v1 destination. No value is inferred from another field. */
@@ -158,15 +159,15 @@ export function followupBody(kind: FollowupKind, draft: FollowupDraft, options: 
     case 'ocorrencia-anual':
       return { ano: integer(draft.ano, 'Ano de comparecimento informado', new Date().getFullYear(), true) };
     case 'notificacao':
-      return changed({ pacienteNotificado: booleanValue(draft.pacienteNotificado),
-        numeroNotificacao: text(draft.numeroNotificacao, 'Número da notificação', 100),
-        justificativaNaoNotificacao: text(draft.justificativaNaoNotificacao, 'Justificativa de não notificação'),
-        observacoes: text(draft.observacoes, 'Observações') }, draft, options.original);
+      return changed({ pacienteNotificado: () => booleanValue(draft.pacienteNotificado),
+        numeroNotificacao: () => text(draft.numeroNotificacao, 'Número da notificação', 100),
+        justificativaNaoNotificacao: () => text(draft.justificativaNaoNotificacao, 'Justificativa de não notificação'),
+        observacoes: () => text(draft.observacoes, 'Observações') }, draft, options.original);
     case 'projeto':
       return { projetoId: clinicalId(options.projectId, 'o projeto'), ...changed({
-        participa: booleanValue(draft.participa), possuiPendencia: booleanValue(draft.possuiPendencia),
-        descricaoPendencia: text(draft.descricaoPendencia, 'Descrição da pendência'), houveFalha: booleanValue(draft.houveFalha),
-        descricaoFalha: text(draft.descricaoFalha, 'Descrição da falha'), observacoes: text(draft.observacoes, 'Observações'),
+        participa: () => booleanValue(draft.participa), possuiPendencia: () => booleanValue(draft.possuiPendencia),
+        descricaoPendencia: () => text(draft.descricaoPendencia, 'Descrição da pendência'), houveFalha: () => booleanValue(draft.houveFalha),
+        descricaoFalha: () => text(draft.descricaoFalha, 'Descrição da falha'), observacoes: () => text(draft.observacoes, 'Observações'),
       }, draft, options.original) };
     case 'encaminhamento':
       return { atendimentoId: clinicalId(draft.atendimentoId, 'o atendimento'),
@@ -185,9 +186,10 @@ export function followupBody(kind: FollowupKind, draft: FollowupDraft, options: 
         status: state(draft.status, counterReferralStatuses, 'status'), resumo: text(draft.resumo, 'Resumo'),
         conduta: text(draft.conduta, 'Conduta'), observacoes: text(draft.observacoes, 'Observações') };
     case 'pendencia': {
-      const status = state(draft.status, pendingStatuses, 'status')
-        ?? (!options.updatePending && draft.status === undefined ? 'aberta' : null);
-      if (!status) throw new Error('Escolha o status da pendência.');
+      const status = state(draft.status, pendingStatuses, 'status');
+      if (options.updatePending && status === null) {
+        throw new Error('A atualização ainda exige um status conhecido. O retorno a desconhecido depende de evolução do contrato.');
+      }
       const date = clinicalDate(draft.dataResolucao, 'a data da resolução', status === 'resolvida');
       if (date && status !== 'resolvida') throw new Error('Data de resolução exige status resolvida. Revise os dois campos.');
       if (options.updatePending) return { status, dataResolucao: date };

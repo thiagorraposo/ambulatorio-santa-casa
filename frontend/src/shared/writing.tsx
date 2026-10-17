@@ -6,6 +6,7 @@ import { useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import { aborted, ApiError, isAbort } from '../api/client';
 import { useSession } from '../app/session';
 import { ApiErrorState, Card } from './ui';
+import { clinicalHash, registerIntention, verifyIntention, type ClinicalIntention } from './operation';
 
 class DraftStore {
   readonly values = new Map<string, unknown>();
@@ -68,7 +69,8 @@ export function DraftQueryState<T>({ query, children }: { query: UseQueryResult<
   </>;
 }
 
-type WriteState = { status: 'idle' | 'pending' | 'saved' | 'error' | 'uncertain' | 'conflict' | 'denied'; message?: string };
+type WriteState = { status: 'idle' | 'pending' | 'saved' | 'error' | 'uncertain' | 'conflict' | 'denied' | 'not_applied';
+  message?: string; intention?: ClinicalIntention };
 export interface MutationFormProps<T = Record<string, unknown>> {
   title: string;
   path: string;
@@ -85,25 +87,28 @@ export interface MutationFormProps<T = Record<string, unknown>> {
   responseId?: string;
   expectedId?: string;
   conflictReview?: (abandonIntention: () => void) => ReactNode;
+  intentionReview?: (abandonIntention: () => void) => ReactNode;
+  onConflict?: () => void;
 }
 
 export function MutationForm<T = Record<string, unknown>>({ title, path, method, buildBody, onSaved, children, dirty,
   submitLabel = 'Salvar registro', verificationPath, verificationLabel = 'Verificar registro salvo', disabled = false,
-  operationKey = '', responseId, expectedId, conflictReview }: MutationFormProps<T>) {
+  operationKey = '', responseId, expectedId, conflictReview, intentionReview, onConflict }: MutationFormProps<T>) {
   const session = useSession();
   const queries = useQueryClient();
   const drafts = useContext(Drafts)!;
   const writeKey = `write:${method}:${path}:${operationKey}`;
   const [state, setState] = useClinicalDraft<WriteState>(writeKey, { status: 'idle' });
+  const [verifying, setVerifying] = useState(false);
   const sending = useRef(false);
   const allowNavigation = useRef(false);
   const alert = useRef<HTMLDivElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const blocked = useBlocker(({ currentLocation, nextLocation }) => !allowNavigation.current
-    && (dirty || sending.current) && state.status !== 'saved'
+    && (dirty || sending.current || state.status === 'pending') && state.status !== 'saved'
     && `${currentLocation.pathname}${currentLocation.search}` !== `${nextLocation.pathname}${nextLocation.search}`);
   const busy = state.status === 'pending';
-  const locked = busy || ['saved', 'uncertain', 'conflict', 'denied'].includes(state.status);
+  const locked = busy || ['saved', 'uncertain', 'conflict', 'denied', 'not_applied'].includes(state.status);
   useEffect(() => { allowNavigation.current = false; }, [writeKey]);
   useEffect(() => {
     if ((dirty || busy) && state.status !== 'saved') drafts.unsaved.add(writeKey);
@@ -129,6 +134,61 @@ export function MutationForm<T = Record<string, unknown>>({ title, path, method,
     };
   }, [blocked.state]);
 
+  function confirm(data: T, intention?: ClinicalIntention) {
+    const ids = data && typeof data === 'object' ? Object.entries(data).filter(([key, value]) =>
+      (responseId ? key === responseId : key.endsWith('Id')) && typeof value === 'string' && /^[1-9]\d{0,18}$/.test(value)) : [];
+    if (!ids.length || (expectedId !== undefined && ids[0]![1] !== expectedId)) throw new ApiError(502);
+    allowNavigation.current = true;
+    drafts.unsaved.delete(writeKey);
+    setState({ status: 'saved', message: 'Registro salvo.', intention });
+    onSaved?.(data);
+    void queries.invalidateQueries({ queryKey: ['clinical'], refetchType: 'active' });
+  }
+
+  async function recover(close = false) {
+    if (!state.intention || verifying) return;
+    const intention = state.intention;
+    const generation = session.client.generation;
+    setVerifying(true);
+    try {
+      const outcome = await verifyIntention(session.client, intention, close);
+      if (session.client.generation !== generation) throw aborted();
+      if (outcome.estado === 'confirmada') {
+        confirm(outcome.resultado as T, intention);
+      } else if (outcome.estado === 'nao_aplicada') {
+        setState({ status: 'not_applied', intention,
+          message: 'O servidor confirmou que este envio não foi aplicado. Os dados permanecem em rascunho. Revise antes de preparar um novo envio.' });
+      } else {
+        setState({ status: 'uncertain', intention, message: outcome.estado === 'em_curso'
+          ? 'O envio ainda está em processamento. Aguarde e verifique novamente; nenhum dado foi reenviado.'
+          : 'O resultado ainda não pôde ser determinado. Verifique novamente ou encerre esta tentativa antes de preparar outra. Nenhum dado foi reenviado.' });
+      }
+    } catch (error) {
+      if (isAbort(error)) return;
+      setState({ status: 'uncertain', intention,
+        message: 'Não foi possível verificar este envio com o acesso atual. O rascunho está preservado e o reenvio permanece bloqueado.' });
+    } finally { setVerifying(false); }
+  }
+
+  async function revalidateAccess() {
+    if (verifying) return;
+    const generation = session.client.generation;
+    setVerifying(true);
+    try {
+      const patientPath = path.match(/^\/pacientes\/[1-9]\d*(?=\/|$)/)?.[0];
+      if (patientPath) await session.client.get(patientPath);
+      else {
+        const capabilities = await session.client.get<{ podeCadastrar: boolean }>('/pacientes/capacidades');
+        if (!capabilities.podeCadastrar) throw new ApiError(403);
+      }
+      if (session.client.generation !== generation) throw aborted();
+      setState({ status: 'idle', message: 'O contexto está disponível para revisão. Confirme novamente para salvar; a autorização de escrita será revalidada pelo servidor.' });
+    } catch (error) {
+      if (isAbort(error)) return;
+      setState(previous => ({ ...previous, message: 'O acesso ainda não pôde ser revalidado. O rascunho permanece preservado.' }));
+    } finally { setVerifying(false); }
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (sending.current || locked || disabled || session.user?.perfil === 'consulta') return;
@@ -141,27 +201,39 @@ export function MutationForm<T = Record<string, unknown>>({ title, path, method,
     sending.current = true;
     const requestGeneration = session.client.generation;
     setState({ status: 'pending' });
+    let intention: ClinicalIntention | undefined;
+    let submitted = false;
     try {
-      const data = await session.client.request<T>(path, { method, body });
+      const hash = await clinicalHash(body);
       if (session.client.generation !== requestGeneration) throw aborted();
-      const ids = data && typeof data === 'object' ? Object.entries(data).filter(([key, value]) =>
-        (responseId ? key === responseId : key.endsWith('Id')) && typeof value === 'string' && /^[1-9]\d{0,18}$/.test(value)) : [];
-      if (!ids.length || (expectedId !== undefined && ids[0]![1] !== expectedId)) throw new ApiError(502);
-      allowNavigation.current = true;
-      drafts.unsaved.delete(writeKey);
-      setState({ status: 'saved', message: 'Registro salvo.' });
-      onSaved?.(data);
-      void queries.invalidateQueries({ queryKey: ['clinical'], refetchType: 'active' });
+      intention = { operacaoId: crypto.randomUUID(), metodo: method, caminho: `/v1${path}`, corpoHash: hash };
+      setState({ status: 'pending', intention });
+      await registerIntention(session.client, intention);
+      if (session.client.generation !== requestGeneration) throw aborted();
+      submitted = true;
+      const data = await session.client.request<T>(path, { method, body, operationId: intention.operacaoId });
+      if (session.client.generation !== requestGeneration) throw aborted();
+      confirm(data, intention);
     } catch (error) {
       if (isAbort(error)) {
-        setState({ status: 'uncertain', message: 'Não foi possível confirmar se a operação foi salva. A consulta de acesso interrompeu a confirmação. Verifique o registro antes de qualquer nova operação.' });
+        setState(intention ? { status: 'uncertain', intention,
+          message: submitted
+            ? 'Não foi possível confirmar se a operação foi salva. A identificação foi preservada; verifique seu resultado antes de preparar outro envio.'
+            : 'Não foi possível confirmar o registro da tentativa. A identificação foi preservada para verificação; nenhuma escrita clínica foi enviada.' }
+          : { status: 'error', message: 'A preparação foi interrompida antes de registrar a tentativa. O rascunho está disponível para revisão; nenhuma escrita clínica foi enviada.' });
         return;
       }
       const safe = error instanceof ApiError ? error : new ApiError(0);
-      if (safe.status === 0 || safe.status >= 500) {
-        setState({ status: 'uncertain', message: 'Não foi possível confirmar se a operação foi salva. Consulte o registro antes de qualquer nova operação. Este envio não será repetido automaticamente.' });
+      if (!submitted && intention && (safe.status === 0 || safe.status >= 500 || safe.status === 409)) {
+        setState({ status: 'uncertain', intention,
+          message: 'Não foi possível confirmar o registro da tentativa. A identificação foi preservada para verificação; nenhuma escrita clínica foi enviada.' });
+      } else if (!submitted && safe.status !== 403) {
+        setState({ status: 'error', message: 'Não foi possível preparar o envio. Nenhuma escrita clínica foi enviada. Revise a conexão e tente novamente.' });
+      } else if (safe.status === 0 || safe.status >= 500) {
+        setState({ status: 'uncertain', intention, message: 'Não foi possível confirmar se a operação foi salva. Consulte o registro antes de qualquer nova operação. Este envio não será repetido automaticamente.' });
       } else {
-        setState({ status: safe.status === 409 ? 'conflict' : safe.status === 403 ? 'denied' : 'error', message: safe.message });
+        setState({ status: safe.status === 409 ? 'conflict' : safe.status === 403 ? 'denied' : 'error', intention, message: safe.message });
+        if (safe.status === 409) onConflict?.();
         if (safe.status === 403) void queries.invalidateQueries({ queryKey: ['clinical'], refetchType: 'active' });
       }
     } finally { sending.current = false; }
@@ -175,11 +247,24 @@ export function MutationForm<T = Record<string, unknown>>({ title, path, method,
         {verificationPath && ['saved', 'uncertain', 'conflict'].includes(state.status)
           && <Link to={verificationPath}>{verificationLabel}</Link>}
       </div>}
+      {state.status === 'uncertain' && state.intention && <div className="form-actions" aria-live="polite">
+        <button type="button" className="button button-secondary" disabled={verifying} onClick={() => { void recover(); }}>Verificar resultado do envio</button>
+        <button type="button" className="button button-secondary" disabled={verifying} onClick={() => { void recover(true); }}>Encerrar tentativa e verificar</button>
+        {verifying && <span role="status">Verificando o resultado…</span>}
+      </div>}
+      {state.status === 'not_applied' && <button type="button" className="button button-secondary"
+        onClick={() => setState({ status: 'idle', message: 'Rascunho disponível para revisão. Salvar exigirá uma nova confirmação.' })}>Revisar e preparar novo envio</button>}
+      {state.status === 'denied' && <button type="button" className="button button-secondary" disabled={verifying}
+        onClick={() => { void revalidateAccess(); }}>Revalidar acesso e revisar rascunho</button>}
       {state.status === 'conflict' && conflictReview?.(() => {
         drafts.unsaved.delete(writeKey);
         setState({ status: 'idle' });
       })}
-      <fieldset disabled={busy || state.status === 'saved'} className="form-body"><legend className="sr-only">{title}</legend>{children}</fieldset>
+      {intentionReview?.(() => {
+        drafts.unsaved.delete(writeKey);
+        setState({ status: 'idle' });
+      })}
+      <fieldset disabled={locked} className="form-body"><legend className="sr-only">{title}</legend>{children}</fieldset>
       <div className="form-actions"><button type="submit" className="button" disabled={locked || disabled || !dirty}>
         {busy ? 'Salvando…' : submitLabel}</button>
         {dirty && state.status !== 'saved' && <span className="muted">Alterações em rascunho; ainda não confirmadas.</span>}

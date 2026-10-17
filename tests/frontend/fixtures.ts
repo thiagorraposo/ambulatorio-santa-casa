@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
-import { expect, type Page } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 export type Perfil = 'consulta' | 'edicao' | 'administracao';
 interface User { usuarioId: string; login: string; nome: string; perfil: Perfil }
@@ -24,9 +24,17 @@ const { sign } = requireBackend('jsonwebtoken');
 const { Pool } = requireBackend('pg');
 let loginWindowUntil = 0;
 
+async function waitForLoginWindow(milliseconds: number) {
+  // The real rate limiter can add a full minute between logins. Account for
+  // that wait separately from the scenario's action/assertion budget.
+  const info = test.info();
+  info.setTimeout(info.timeout + milliseconds);
+  await new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
 export async function signIn(page: Page, perfil: Perfil, destination = '/') {
   const pause = loginWindowUntil - Date.now();
-  if (pause > 0) await new Promise(resolve => setTimeout(resolve, pause));
+  if (pause > 0) await waitForLoginWindow(pause);
   await page.goto(destination);
   await expect(page.getByLabel('Usuário', { exact: true })).toBeVisible();
   await page.getByLabel('Usuário', { exact: true }).fill(fixture.users[perfil].login);
@@ -45,7 +53,7 @@ export async function signIn(page: Page, perfil: Perfil, destination = '/') {
     const seconds = Number(response.headers()['retry-after'] ?? response.headers()['x-ratelimit-reset']);
     expect(Number.isFinite(seconds) && seconds > 0 && seconds <= 60).toBe(true);
     await expect(page.getByRole('alert')).toContainText(/tentativas|aguarde|limite/i);
-    await new Promise(resolve => setTimeout(resolve, seconds * 1000 + 200));
+    await waitForLoginWindow(seconds * 1000 + 200);
     const resumed = page.waitForResponse(item => new URL(item.url()).pathname === '/v1/auth/login'
       && item.request().method() === 'POST');
     await page.getByRole('button', { name: 'Entrar', exact: true }).click();

@@ -4,8 +4,8 @@ Base PostgreSQL construída incrementalmente para organizar dados do ambulatóri
 O schema persistente possui 38 tabelas. Importador e backend NestJS evoluíram até
 a Etapa 5 no ambiente sintético; a fundação do frontend React/TypeScript
 (6A–6B) está concluída; os fluxos clínicos 7A–7D têm implementação e validação
-parcial sintética. Sete lacunas e o percurso integrado ainda impedem aceite
-completo. Consulte o
+sintética aprovadas no recorte original. As correções da reauditoria e o percurso integrado
+foram implementados; o aceite clínico com a equipe permanece pendente. Consulte o
 [estado vigente](docs/ESTADO_ATUAL_DO_PROJETO.md) para os limites de cada ambiente.
 
 O schema aplicado é `ambulatorio`. A principal evidência física versionada é `docs/evidencias/schema_atual_ambulatorio.sql`.
@@ -31,6 +31,28 @@ A [visão proposta do produto](docs/frontend/VISAO_E_ESPECIFICACAO.md), a
 explicitam a experiência pretendida, diferenças, dependências e aceite;
 [capturas e wireframes](docs/frontend/visuais/README.md) distinguem observação
 da interface e proposta.
+
+## Demonstração local com dados sintéticos
+
+Com Docker, Python 3, Node.js 24 e os clientes PostgreSQL instalados:
+
+```bash
+make backend-install frontend-install backend-build
+make dev-sintetico-start
+make dev-sintetico-status
+```
+
+Abra `http://127.0.0.1:4177`. Para escrita, use
+`frontend-edicao@example.invalid` com a senha exclusivamente sintética
+`Etapa6-sintetica!`. O comando também informa os outros perfis e o caminho dos logs.
+O ambiente possui PostgreSQL próprio e descartável; não usa o `.env` nem os bancos
+persistentes. Para encerrar e descartar somente essa demonstração:
+
+```bash
+make dev-sintetico-stop
+```
+
+Detalhes, portas e limites estão em [FRONTEND.md](docs/FRONTEND.md#demonstração-sintética-isolada).
 
 ## Pré-requisitos
 

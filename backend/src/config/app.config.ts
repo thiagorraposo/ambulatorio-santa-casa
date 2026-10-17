@@ -1,6 +1,9 @@
+import { isIP } from 'node:net';
+
 export interface AppConfig {
   nodeEnv: 'development' | 'test' | 'production';
   apiPort: number;
+  apiHost: string;
   database: {
     host: string;
     port: number;
@@ -44,6 +47,10 @@ const flag = (env: Record<string, unknown>, key: string): boolean => {
 };
 
 export function validateConfig(env: Record<string, unknown>): AppConfig {
+  const apiHost = env.API_HOST ?? '0.0.0.0';
+  if (typeof apiHost !== 'string' || !isIP(apiHost)) {
+    throw new Error('Configuração inválida: API_HOST');
+  }
   const nodeEnv = required(env, 'NODE_ENV');
   if (!['development', 'test', 'production'].includes(nodeEnv)) {
     throw new Error('Configuração inválida: NODE_ENV');
@@ -109,6 +116,7 @@ export function validateConfig(env: Record<string, unknown>): AppConfig {
   return {
     nodeEnv: nodeEnv as AppConfig['nodeEnv'],
     apiPort: port(env, 'API_PORT'),
+    apiHost,
     database: {
       host: required(env, 'APP_DB_HOST'),
       port: port(env, 'APP_DB_PORT'),

@@ -87,8 +87,9 @@ suite('DTOs clínicos HTTP no banco descartável', () => {
       expect(detail.pendencias).toEqual([{ pendenciaId: expect.any(String),
         descricao: 'Pendência sintética', status: 'aberta', dataIdentificacao: '2026-04-01', dataResolucao: null }]);
       expect(detail.rastreioFamiliar).toEqual({ rastreioFamiliarId: expect.any(String),
-        familiaresExaminados: true, familiares: [{ rastreioFamiliarId: expect.any(String),
-          identificacaoFamiliar: 'Familiar sintético', resultadoSorologia: 'Sorologia sintética' }] });
+        familiaresExaminados: true, familiares: [{ resultadoId: expect.any(String), rastreioFamiliarId: expect.any(String),
+          identificacaoFamiliar: 'Familiar sintético', resultadoSorologia: 'Sorologia sintética' }],
+        paginacaoFamiliares: { limit: 20, offset: 0 } });
       expect(detail.rastreiosFamiliares).toEqual([detail.rastreioFamiliar]);
       expect(JSON.stringify(detail)).not.toMatch(/"[^"]*_[^"]*"\s*:/);
     }

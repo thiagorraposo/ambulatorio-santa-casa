@@ -122,7 +122,7 @@ export function attendanceBody(draft: AttendanceDraft): Record<string, unknown> 
     body.pendencias = draft.pending.map((item, index) => {
       if (item.status === 'resolvida' && !item.dataResolucao) throw new Error(`Pendência ${index + 1}: informe a data de resolução.`);
       if (item.status !== 'resolvida' && item.dataResolucao) throw new Error(`Pendência ${index + 1}: data de resolução exige status resolvida. Nenhum campo será descartado.`);
-      return { descricao: item.descricao, status: item.status,
+      return { descricao: item.descricao, status: item.status || null,
         ...(item.dataResolucao ? { dataResolucao: item.dataResolucao } : {}) };
     });
   }

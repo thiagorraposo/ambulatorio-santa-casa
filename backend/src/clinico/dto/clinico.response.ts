@@ -48,12 +48,13 @@ export interface PendenciaAtendimentoResponse {
 }
 
 export interface FamiliarExaminadoResponse {
-  rastreioFamiliarId: string; identificacaoFamiliar: string; resultadoSorologia: string;
+  resultadoId: string; rastreioFamiliarId: string; identificacaoFamiliar: string; resultadoSorologia: string;
 }
 
 export interface RastreioFamiliarResponse {
   rastreioFamiliarId: string; familiaresExaminados: boolean | null;
   familiares: FamiliarExaminadoResponse[];
+  paginacaoFamiliares: ColecaoPaginaResponse;
 }
 
 export interface AtendimentoDetalheResponse extends AtendimentoResumoResponse {

@@ -1,25 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, type APIResponse, type Page } from '@playwright/test';
 import type { AtendimentoDetalheResponse, PacienteDetalheResponse } from '../../frontend/src/api/contracts';
-import { apiAs, fixture, signIn as fixtureSignIn, type Perfil } from './fixtures';
-
-let loginWindowUntil = 0;
-
-// Several browser scenarios authenticate separately. Respect the API's real
-// login limiter rather than changing its configuration for this test suite.
-export async function signIn(page: Page, perfil: Perfil, destination = '/') {
-  const pause = loginWindowUntil - Date.now();
-  if (pause > 0) await new Promise(resolve => setTimeout(resolve, pause));
-  const response = page.waitForResponse(item => new URL(item.url()).pathname === '/v1/auth/login'
-    && item.status() === 201);
-  const authentication = await fixtureSignIn(page, perfil, destination);
-  const headers = (await response).headers();
-  if (headers['x-ratelimit-remaining'] === '0') {
-    const seconds = Number(headers['x-ratelimit-reset']);
-    if (Number.isFinite(seconds) && seconds > 0) loginWindowUntil = Date.now() + seconds * 1000 + 100;
-  }
-  return authentication;
-}
+import { apiAs, fixture, type Perfil } from './fixtures';
+export { signIn } from './fixtures';
 
 export async function apiJson<T>(method: string, path: string, body?: unknown, perfil: Perfil = 'administracao'): Promise<T> {
   const response = await apiAs(perfil, method, path, body);
@@ -61,8 +44,31 @@ export async function submitWrite(page: Page, method: string, path: string, butt
 }
 
 export async function visitByLink(page: Page, path: string) {
-  await page.locator(`a[href="${path}"]`).first().click();
-  await expect.poll(() => `${new URL(page.url()).pathname}${new URL(page.url()).search}`).toBe(path);
+  // Navigation now carries the source page and attendance. Check all requested
+  // parameters while allowing that additional context to travel with the link.
+  let href: string | undefined;
+  await expect.poll(async () => {
+    href = await page.locator('a[href]').evaluateAll((links, requested) => {
+      const target = new URL(requested, location.origin);
+      return links.map(link => link.getAttribute('href')!).find(value => {
+        const candidate = new URL(value, location.origin);
+        return candidate.pathname === target.pathname && [...target.searchParams]
+          .every(([key, item]) => candidate.searchParams.get(key) === item);
+      });
+    }, path);
+    return href;
+  }, { message: `Link para ${path}` }).toBeTruthy();
+  await page.locator(`a[href=${JSON.stringify(href)}]`).first().click();
+  await expect.poll(() => `${new URL(page.url()).pathname}${new URL(page.url()).search}${new URL(page.url()).hash}`).toBe(href);
+  // Router updates location before React commits the destination. Wait for
+  // that destination so a following click cannot select a link from the old UI.
+  const target = new URL(path, page.url());
+  if (/^\/pacientes\/[1-9]\d*$/.test(target.pathname)) {
+    await expect(page.getByRole('heading', { level: 1, name: 'Ficha do paciente', exact: true })).toBeVisible();
+  } else if (target.pathname.endsWith('/registrar') && target.searchParams.has('tipo')) {
+    const current = page.getByRole('navigation', { name: 'Operações clínicas', exact: true }).locator('a[aria-current="page"]');
+    await expect(current).toHaveAttribute('href', new RegExp(`[?&]tipo=${target.searchParams.get('tipo')}(?:&|$)`));
+  }
 }
 
 export async function assertAccessible(page: Page) {

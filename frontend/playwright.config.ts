@@ -19,6 +19,7 @@ export default defineConfig({
     baseURL: process.env.FRONTEND_E2E_BASE_URL,
     locale: 'pt-BR',
     timezoneId: 'America/Sao_Paulo',
+    actionTimeout: 10_000,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },

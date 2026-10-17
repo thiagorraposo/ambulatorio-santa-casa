@@ -7,6 +7,7 @@ import { SessionManager } from '../app/SessionManager';
 import { SessionProvider, useSession } from '../app/session';
 import { ApiErrorState } from './ui';
 import { DraftProvider, MutationForm, useClinicalDraft } from './writing';
+import { withRegisteredOperations } from '../test/operation-fixture';
 
 const managers: SessionManager[] = [];
 const routers: ReturnType<typeof createMemoryRouter>[] = [];
@@ -49,7 +50,7 @@ function authentication(fetcher: ReturnType<typeof vi.fn<typeof fetch>>) {
     .mockResolvedValueOnce(Response.json(identity));
 }
 async function setup(fetcher: typeof fetch, onSaved?: (data: unknown) => void) {
-  const manager = new SessionManager(fetcher);
+  const manager = new SessionManager(withRegisteredOperations(fetcher));
   managers.push(manager);
   await manager.login('sintetico@example.invalid', 'senha-sintetica');
   const router = createMemoryRouter([{ path: '/', element: <SessionProvider manager={manager}>

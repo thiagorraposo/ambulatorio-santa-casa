@@ -1,5 +1,73 @@
 # Registro de Alterações
 
+## 2026-10-17 — execução sintética reproduzível e preparação de salvamentos
+
+Retomada autônoma com revisão independente do backend e frontend, preservando
+as alterações locais anteriores e os bancos persistentes. Corrigidas duas
+falhas da preparação: interrupção durante o hash agora conserva rascunho
+editável; resposta perdida ao registrar intenção conserva UUID e recuperação
+explícita, sem reenvio automático. Acrescentadas regressões focadas.
+Rótulos dos retornos BZN de 30 dias e final foram corrigidos na ficha, com
+regressão de apresentação dos dois tipos.
+
+Criado o supervisor `scripts/dev_sintetico.py`, com alvos Make de início, status
+e encerramento. A demonstração usa PostgreSQL próprio descartável, runner e
+fixture já existentes, estado privado em `/tmp` e portas locais separadas.
+README e documentação frontend descrevem execução e limites.
+O runner fixa o bind HTTP da API em loopback por `API_HOST`, validado na
+configuração do backend; o padrão do container permanece compatível. O
+supervisor encerra o grupo de processos próprio e garante a limpeza do
+container mesmo quando o runner excede o prazo de encerramento.
+Descendentes órfãos são identificados por marcador exclusivo e encerrados por
+pidfd; o suporte do Linux/Python é verificado antes da criação de recursos.
+As validações e ocorrências intermediárias estão no
+[relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md#continuidade-de-2026-10-17--execução-autônoma-e-ambiente-sintético).
+Sem aplicação de migrations no ambiente persistente, alteração do dump ou push.
+
+## 2026-10-15 — recuperação e prova integrada dos fluxos clínicos 7A–7D
+
+Preparado também o roteiro preenchível de revisão clínica, com tarefas por
+perfil, resultados observáveis e registro explícito do parecer humano.
+`test_e2e.sh --serve` usa sessão de 15 minutos para essa demonstração; os testes
+automáticos conservam os 60 segundos. A preparação não declara aceite da equipe.
+Verificação focada: sintaxe shell, Chromium com login/identidade/listagem/saída
+e TTL 900 real, documentação, links e diff; sem repetir suítes aprovadas de
+aplicação/schema, que não foram alterados por essa preparação.
+
+Continuada a implementação existente, preservando as alterações locais. Corrigidas
+as sete lacunas da reauditoria: paginação independente de snapshots/familiares;
+retomada consciente após 403; verificação de resultado incerto; criação de
+pendência com estado desconhecido; contexto de atendimento nos atalhos; comparação,
+cópia e descarte do rascunho BZN concorrente; recibos/valores durante falha
+temporária de identidade. Novos episódios são intenções explícitas, com histórico
+e confirmações anteriores preservados na sessão.
+
+A ADR-025 e a migration incremental 64 registram correlação por UUID/hash de
+14 mutações. O recibo participa do mesmo COMMIT clínico; verificar/encerrar não
+reexecuta a operação. Autor, perfil, vínculo e IDs textuais até bigint são
+validados. Migrations antigas, banco persistente e dump permanecem preservados.
+O contrato de familiares documenta seus novos recursos de leitura.
+
+Acrescentados cenários UI/API/PostgreSQL de familiares 30/50, fluxo completo pela
+interface (cadastro, composto, BZN/reação, retorno, encaminhamento/contrarreferência,
+pendência resolvida e histórico), recuperação após 403 e conservação de contexto/
+rascunhos/recibos. Separadores decorativos do breadcrumb deixaram de integrar
+nomes acessíveis. Os testes respeitam o limitador real de login com orçamento de
+espera separado e aguardam links/contextos carregados assincronamente.
+
+Build/backend, 120 unitários, 65 clínicos HTTP, regressão focada de nove casos de
+operações, oito testes de fundação, 136 unitários frontend, 38 E2E e nove
+testes de workflow passaram. O project-check passou em banco novo com 35 arquivos SQL;
+as fixtures SQL/TTL da fundação foram ajustadas às constraints/configuração reais.
+O alvo final frontend-check/docs-check passou, reaproveitando build/unitários
+aprovados na mesma versão do código de produção. Resultados,
+logs e falhas intermediárias estão no
+[relatório vigente](validacoes/VALIDACAO_ETAPA_7.md).
+
+Documentação técnica, roadmap, estado e índices atualizados. Aceite com a equipe
+clínica e CI remota permanecem sem evidência. Os pacotes de UX/VU1 propostos não
+foram declarados aceitos. Sem commit/push.
+
 ## 2026-10-07 — organização da documentação frontend em commits
 
 Criada a branch `docs-frontend` a partir de `etapa7-commits`, no commit

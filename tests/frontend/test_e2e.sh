@@ -82,11 +82,11 @@ fi
 createdb "$task_db"
 task_db_created=true
 psql -X -q -d "$task_db" -v ON_ERROR_STOP=1 -c "CREATE SCHEMA ambulatorio AUTHORIZATION $PGUSER; ALTER DATABASE $task_db SET search_path TO ambulatorio,public" >"$task_dir/migrations.log" 2>&1
-printf 'Aplicando migrations 02–63 no banco descartável %s\n' "$task_db"
+printf 'Aplicando migrations 02–64 no banco descartável %s\n' "$task_db"
 for task_migration in "$task_root"/sql/[0-9][0-9]_*.sql; do
   task_name="$(basename "$task_migration")"
   [[ "$task_name" == 00_* || "$task_name" == 01_* ]] && continue
-  if [[ "${task_name:0:2}" > 63 ]]; then
+  if [[ "${task_name:0:2}" > 64 ]]; then
     printf 'Migration fora da base esperada da Etapa 6: %s\n' "$task_name" >&2
     exit 1
   fi
@@ -100,10 +100,16 @@ export APP_DB_USER="$task_login"
 export APP_DB_PASSWORD="$(node -e "process.stdout.write(require('node:crypto').randomBytes(24).toString('hex'))")"
 task_role_created=true
 psql -X -q -d "$task_db" -v ON_ERROR_STOP=1 -f "$task_root/scripts/configurar_login_aplicacao.sql" >>"$task_dir/migrations.log" 2>&1
+export API_HOST=127.0.0.1
 export NODE_ENV=test API_PORT="$task_api_port" APP_DB_HOST="$PGHOST" APP_DB_PORT="$PGPORT" APP_DB_NAME="$task_db"
 export APP_DB_ROLE=ambulatorio_aplicacao CLINICAL_ACCESS_POLICY=vinculo_explicito
 export AUTH_JWT_SECRET="$(node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('hex'))")"
+# A inspeção humana precisa de tempo para preencher os formulários. O prazo
+# curto permanece fixo nos testes automáticos de expiração.
 export AUTH_JWT_EXPIRES_IN_SECONDS=60
+if [[ "${1:-}" == --serve ]]; then
+  export AUTH_JWT_EXPIRES_IN_SECONDS=900
+fi
 export CLINICAL_IMPORT_ENABLED=false REVISION_HTTP_ENABLED=false REVISION_SYNTHETIC_MODE=false
 export REVISION_STAGING_HTTP_ENABLED=false REVISION_EXECUTION_HTTP_ENABLED=false REVISION_MANAGER_HTTP_ENABLED=false
 export FRONTEND_API_TARGET="http://127.0.0.1:$task_api_port"
@@ -145,6 +151,7 @@ JS
 
 if [[ "${1:-}" == --serve ]]; then
   printf 'Frontend sintético: %s\nAPI sintética: %s\nFixture: %s\nRunner PID: %s\n' "$FRONTEND_E2E_BASE_URL" "$FRONTEND_API_TARGET" "$FRONTEND_E2E_FIXTURE" "$BASHPID"
+  printf 'Sessão de demonstração: %s segundos\n' "$AUTH_JWT_EXPIRES_IN_SECONDS"
   printf 'Usuários: frontend-consulta@example.invalid, frontend-edicao@example.invalid, frontend-administracao@example.invalid\nSenha exclusivamente sintética: Etapa6-sintetica!\n'
   wait "$task_frontend_pid"
 else

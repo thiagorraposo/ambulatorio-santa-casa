@@ -2,6 +2,7 @@ import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Pool, QueryResult, QueryResultRow } from 'pg';
 import { AppConfig } from '../../config/app.config';
+import { clinicalOperationContext } from './clinical-operation.context';
 
 /** Consultas da mesma operacao usam a mesma conexao e a mesma transacao. */
 export interface Transaction {
@@ -33,6 +34,14 @@ export class DatabaseService implements OnModuleDestroy {
   }
 
   async transaction<T>(operation: (transaction: Transaction) => Promise<T>, actorId?: string): Promise<T> {
+    // Guards and read-only auxiliary transactions do not consume the write scope.
+    const linked = actorId === undefined ? undefined : clinicalOperationContext.getStore();
+    if (linked) {
+      if (linked.actorId !== actorId || linked.transactionStarted) {
+        throw new Error('A operação deve conter exatamente uma transação clínica do ator');
+      }
+      linked.transactionStarted = true;
+    }
     const client = await this.pool.connect();
     let discardConnection: Error | undefined;
     try {
@@ -46,7 +55,9 @@ export class DatabaseService implements OnModuleDestroy {
       const transaction: Transaction = {
         query: (text, values = []) => client.query(text, [...values]),
       };
+      if (linked) await linked.before(transaction);
       const result = await operation(transaction);
+      if (linked) await linked.after(transaction, result);
       await client.query('COMMIT');
       return result;
     } catch (error) {

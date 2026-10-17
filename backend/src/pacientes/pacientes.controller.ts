@@ -11,7 +11,7 @@ import { ClinicalIdPipe } from '../clinico/clinical-validation';
 import { AccessDto, AttendanceCreateDto, AttendanceUpdateDto, BznReturnDto, BznTreatmentCreateDto, PageQuery, PendingQuery, PatientCreateDto, PatientUpdateDto } from '../clinico/dto/clinico.dto';
 import { AtendimentoDetalheResponse, AtendimentoResumoResponse, ExameResponse, PacienteDetalheResponse,
   RetornoBznCriadoResponse, RetornoBznResponse, AtendimentoCriadoResponse,
-  PacienteAtualizadoResponse, PacienteCriadoResponse } from '../clinico/dto/clinico.response';
+  PacienteAtualizadoResponse, PacienteCriadoResponse, RastreioFamiliarResponse } from '../clinico/dto/clinico.response';
 import { csvCell } from './csv-cell';
 
 @Perfis('consulta', 'edicao', 'administracao')
@@ -72,6 +72,17 @@ export class PacientesController {
     @Param('atendimentoId', ClinicalIdPipe) atendimentoId: string, @Query() query: PageQuery,
     @CurrentUser() user: AuthenticatedUser): Promise<AtendimentoDetalheResponse> {
     return this.pacientes.attendance(user, id, atendimentoId, query);
+  }
+  @Get(':id/atendimentos/:atendimentoId/rastreios-familiares') familyScreenings(
+    @Param('id', ClinicalIdPipe) id: string, @Param('atendimentoId', ClinicalIdPipe) atendimentoId: string,
+    @Query() query: PageQuery, @CurrentUser() user: AuthenticatedUser): Promise<RastreioFamiliarResponse[]> {
+    return this.pacientes.familyScreenings(user, id, atendimentoId, query);
+  }
+  @Get(':id/atendimentos/:atendimentoId/rastreios-familiares/:rastreioFamiliarId/familiares') familyResults(
+    @Param('id', ClinicalIdPipe) id: string, @Param('atendimentoId', ClinicalIdPipe) atendimentoId: string,
+    @Param('rastreioFamiliarId', ClinicalIdPipe) rastreioFamiliarId: string, @Query() query: PageQuery,
+    @CurrentUser() user: AuthenticatedUser): Promise<RastreioFamiliarResponse> {
+    return this.pacientes.familyResults(user, id, atendimentoId, rastreioFamiliarId, query);
   }
   @Post(':id/atendimentos') @Perfis('edicao', 'administracao') createAttendance(@Param('id', ClinicalIdPipe) id: string, @Body() dto: AttendanceCreateDto,
     @CurrentUser() user: AuthenticatedUser): Promise<AtendimentoCriadoResponse> {

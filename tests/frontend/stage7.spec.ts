@@ -11,7 +11,7 @@ test('7A: cadastro exige nome, usa busca prévia e mantém homônimos separados'
   const existing = await seedPatient('Homônimo');
   const original = await readPatient(existing.path);
   const capability = page.waitForResponse(response => response.request().method() === 'GET'
-    && new URL(response.url()).pathname === '/v1/pacientes/capacidades');
+    && new URL(response.url()).pathname === '/v1/pacientes/capacidades', { timeout: 0 });
   await signIn(page, 'administracao', '/pacientes/novo');
   expect(await (await capability).json()).toEqual({ podeCadastrar: true });
   await expect(page.getByRole('heading', { name: 'Cadastrar paciente', exact: true })).toBeVisible();
@@ -195,18 +195,23 @@ test('7D: consulta não escreve, vínculo delimita edição e administração se
   expect((await readPatient(`/pacientes/${fixture.reserved.pacienteId}`)).raca).toBe('Raça administrativa sintética');
 });
 
-test('7D: revogação da permissão de escrita retorna 403 e conserva rascunho sem sucesso', async ({ page }) => {
+test('7D: revogação da permissão recusa a preparação com 403 e conserva rascunho sem sucesso', async ({ page }) => {
   const patient = await seedPatient('Vínculo revogado');
   const original = await readPatient(patient.path);
   await signIn(page, 'edicao', `${patient.path}/editar`);
   await expect(page.getByLabel('Nome completo', { exact: true })).toHaveValue(original.nome);
   await page.getByLabel('Nome completo', { exact: true }).fill('Etapa 7 rascunho sem autorização Sintético');
   await apiJson('PUT', `${patient.path}/acesso/${fixture.users.edicao.usuarioId}`, { ativo: true, podeEditar: false });
-  await submitWrite(page, 'PATCH', patient.path, 'Salvar paciente', 403);
+  let clinicalWrites = 0;
+  page.on('request', request => {
+    if (request.method() === 'PATCH' && new URL(request.url()).pathname === `/v1${patient.path}`) clinicalWrites++;
+  });
+  await submitWrite(page, 'POST', '/operacoes', 'Salvar paciente', 403);
   await expect(page.getByRole('alert')).toContainText(/acesso|permissão|autoriza/i);
   await expect(page.getByLabel('Nome completo', { exact: true })).toHaveValue('Etapa 7 rascunho sem autorização Sintético');
   await expect(page.getByText('Paciente salvo.', { exact: true })).toHaveCount(0);
   expect((await readPatient(patient.path)).nome).toBe(original.nome);
+  expect(clinicalWrites).toBe(0);
 });
 
 test('7D: draft protege navegação, voltar, teclado, mobile e zoom; saída apaga o draft', async ({ page }, testInfo) => {
@@ -428,11 +433,12 @@ test('7C: BZN único com reação, retornos repetidos e ano informado separado d
   await visitByLink(page, `${patient.path}?aba=bzn`);
   await visitByLink(page, `${patient.path}/registrar?tipo=bzn`);
   await expect(page.getByRole('heading', { name: 'Tratamento BZN já registrado', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Salvar registro', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Salvar registro', exact: true })).toBeDisabled();
   await visitByLink(page, `${patient.path}?aba=bzn`);
   for (const [index, date, type] of [[1, '2026-05-08', 'retorno_bzn_30_dias'],
     [2, '2026-05-21', 'retorno_bzn_30_dias'], [3, '2026-06-20', 'retorno_bzn_final']] as const) {
     await visitByLink(page, `${patient.path}/registrar?tipo=retorno-bzn`);
+    if (index > 1) await page.getByRole('button', { name: 'Registrar outro comparecimento', exact: true }).click();
     await page.getByLabel('Atendimento de registro', { exact: true }).selectOption(attendance.atendimentoId);
     await page.getByLabel('Tipo de retorno BZN', { exact: true }).selectOption(type);
     await expect(page.getByLabel('Data efetiva do comparecimento', { exact: true })).toHaveValue('');
@@ -464,6 +470,7 @@ test('7C: BZN único com reação, retornos repetidos e ano informado separado d
   await visitByLink(page, `${patient.path}?aba=acompanhamento`);
   for (const [index, date] of [[1, '2026-04-25'], [2, '2026-06-11']] as const) {
     await visitByLink(page, `${patient.path}/registrar?tipo=retorno-anual`);
+    if (index > 1) await page.getByRole('button', { name: 'Registrar outro comparecimento', exact: true }).click();
     await page.getByLabel('Atendimento de registro', { exact: true }).selectOption(attendance.atendimentoId);
     await page.getByLabel('Data efetiva do comparecimento', { exact: true }).fill(date);
     await page.getByLabel('Resumo do retorno anual', { exact: true }).fill(`Retorno anual efetivo sintético ${index}`);
@@ -509,6 +516,7 @@ test('7C: projeto, notificação, encaminhamento, contrarreferências e resoluç
   await visitByLink(page, `${patient.path}/registrar?tipo=projeto`);
   await page.getByLabel('Projeto', { exact: true }).selectOption(projectId);
   await expect(page.getByLabel('Observações do projeto', { exact: true })).toHaveValue('Participação sintética original');
+  await page.getByRole('button', { name: 'Revisar este registro novamente', exact: true }).click();
   await page.getByLabel('Observações do projeto', { exact: true }).fill('Participação sintética atualizada');
   const projectEdit = await submitWrite(page, 'PUT', `${patient.path}/projetos`, 'Salvar registro');
   expect(projectEdit.body).toEqual({ projetoId: projectId, observacoes: 'Participação sintética atualizada' });
@@ -561,6 +569,7 @@ test('7C: projeto, notificação, encaminhamento, contrarreferências e resoluç
   await visitByLink(page, `${patient.path}?aba=encaminhamentos`);
   for (const [index, status, date] of [[1, 'pendente', ''], [2, 'concluido', '2026-06-21']] as const) {
     await visitByLink(page, `${patient.path}/registrar?tipo=contrarreferencia`);
+    if (index > 1) await page.getByRole('button', { name: 'Registrar outro episódio', exact: true }).click();
     await page.getByLabel('Encaminhamento de origem', { exact: true }).selectOption(referral.encaminhamentoId);
     await page.getByLabel('Status da contrarreferência', { exact: true }).selectOption(status);
     if (date) await page.getByLabel('Data de realização da contrarreferência', { exact: true }).fill(date);
@@ -637,6 +646,10 @@ test('7D: resposta perdida após commit exige verificação e não repete atendi
   await page.waitForLoadState('networkidle');
   expect(lost.writes()).toBe(1);
   expect(await apiJson<unknown[]>('GET', `${patient.path}/atendimentos`)).toHaveLength(1);
+  await page.getByRole('button', { name: 'Verificar resultado do envio', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`${patient.path}/atendimentos/${created.atendimentoId}$`));
+  await expect(page.getByText(/Atendimento salvo.*confirmação própria/)).toBeVisible();
+  expect(lost.writes()).toBe(1);
 });
 
 test('7D: conflito no acompanhamento conserva o atendimento confirmado e o rascunho posterior', async ({ page }) => {
@@ -674,7 +687,7 @@ test('7D: 401 real em escrita encerra sessão e remove rascunho clínico', async
   await page.getByLabel('Nome completo', { exact: true }).fill('Etapa 7 rascunho após401 Sintético');
   try {
     await setUserActive('edicao', false);
-    await submitWrite(page, 'PATCH', patient.path, 'Salvar paciente', 401);
+    await submitWrite(page, 'POST', '/operacoes', 'Salvar paciente', 401);
     await expect(page.getByLabel('Usuário', { exact: true })).toBeVisible();
     await expect(page.getByLabel('Nome completo', { exact: true })).toHaveCount(0);
     await assertNoPersistentClinicalState(page);
@@ -714,7 +727,7 @@ test('7D: resposta antiga de escrita não navega nem mostra sucesso após trocar
 test('7A/7D: política clínica impede formulário de cadastro mesmo com perfil de edição', async ({ page }) => {
   expect(await apiJson('GET', '/pacientes/capacidades', undefined, 'edicao')).toEqual({ podeCadastrar: false });
   const capability = page.waitForResponse(response => response.request().method() === 'GET'
-    && new URL(response.url()).pathname === '/v1/pacientes/capacidades');
+    && new URL(response.url()).pathname === '/v1/pacientes/capacidades', { timeout: 0 });
   let writes = 0;
   page.on('request', request => {
     if (request.method() === 'POST' && new URL(request.url()).pathname === '/v1/pacientes') writes++;
@@ -763,6 +776,10 @@ test('7D: perda da resposta do PATCH confirma pela ficha sem repetir alteração
   await page.waitForLoadState('networkidle');
   expect(lost.writes()).toBe(1);
   expect((await readPatient(patient.path)).versao).toBe(updated.versao);
+  await page.getByRole('button', { name: 'Verificar resultado do envio', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`${patient.path}$`));
+  await expect(page.getByText('Paciente salvo.', { exact: true })).toBeVisible();
+  expect(lost.writes()).toBe(1);
   await assertNoPersistentClinicalState(page);
 });
 
@@ -801,6 +818,7 @@ for (const kind of ['retorno-anual', 'contrarreferencia'] as const) {
     await page.getByRole('link', { name: 'Verificar registro salvo', exact: true }).click();
     await page.getByRole('dialog', { name: 'Alterações não salvas', exact: true })
       .getByRole('button', { name: 'Sair e manter rascunho', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Ficha do paciente', exact: true })).toBeVisible();
     await expect(page.getByText(summary, { exact: true })).toBeVisible();
     if (kind === 'contrarreferencia') {
       expect(new URL(page.url()).searchParams.get('contrarreferencia')).toBe(referralId);
@@ -816,6 +834,9 @@ for (const kind of ['retorno-anual', 'contrarreferencia'] as const) {
     await page.waitForLoadState('networkidle');
     expect(lost.writes()).toBe(1);
     expect(await apiJson('GET', resource)).toEqual(confirmed);
+    await page.getByRole('button', { name: 'Verificar resultado do envio', exact: true }).click();
+    await expect(page.getByText('Registro salvo.', { exact: true })).toBeVisible();
+    expect(lost.writes()).toBe(1);
     expect(await apiJson<unknown[]>('GET', `${patient.path}/atendimentos`)).toHaveLength(1);
     await assertNoPersistentClinicalState(page);
   });
@@ -859,6 +880,7 @@ test('7D: falha de rede na revalidação durante escrita oculta e recupera a int
   await page.getByRole('link', { name: 'Verificar registro salvo', exact: true }).click();
   await page.getByRole('dialog', { name: 'Alterações não salvas', exact: true })
     .getByRole('button', { name: 'Sair e manter rascunho', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Ficha do paciente', exact: true })).toBeVisible();
   await expect(page.getByText(summary, { exact: true })).toBeVisible();
   await page.goBack();
   await expect(page.getByLabel('Resumo do retorno anual', { exact: true })).toHaveValue(summary);

@@ -4,6 +4,11 @@ Data da análise: 2026-10-05. Base: `29b3186`, branch `etapa7-commits`, árvore
 limpa antes desta entrega. **Documento de produto proposto; não é aceite de
 implementação nem autorização de uso real.**
 
+**Continuidade de 15/10:** a análise abaixo preserva a fotografia de 05/10.
+As correções R7-01–07 e o percurso integrado do recorte original estão no
+[relatório vigente](../validacoes/VALIDACAO_ETAPA_7.md). Elas não concluem os
+pacotes propostos de UX/VU1 nem a revisão com a equipe.
+
 Este documento é a fonte da experiência pretendida. A
 [matriz ponto a ponto](MATRIZ_FIGMA_FRONTEND.md) define os requisitos de cada
 elemento, sua implementação, lacuna e destino. O

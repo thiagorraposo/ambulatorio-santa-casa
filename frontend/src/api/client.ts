@@ -60,7 +60,7 @@ export class ApiClient {
   }
 
   async request<T>(path: string, options: { method?: 'GET' | 'POST' | 'PATCH' | 'PUT'; body?: unknown;
-    signal?: AbortSignal; public?: boolean } = {}): Promise<T> {
+    signal?: AbortSignal; public?: boolean; operationId?: string } = {}): Promise<T> {
     // Only application-relative, versioned URLs may receive the credential.
     if (!path.startsWith('/') || path.startsWith('//') || path.includes('\\')) throw new ApiError(400);
     const epoch = this.epoch;
@@ -82,6 +82,7 @@ export class ApiClient {
       const headers: Record<string, string> = { Accept: 'application/json' };
       if (!options.public && credential) headers.Authorization = `Bearer ${credential.token}`;
       if (options.body !== undefined) headers['Content-Type'] = 'application/json';
+      if (options.operationId) headers['X-Operacao-Id'] = options.operationId;
       const response = await this.fetcher(`/v1${path}`, {
         method: options.method ?? 'GET', headers, credentials: 'omit', cache: 'no-store',
         body: options.body === undefined ? undefined : JSON.stringify(options.body), signal: controller.signal,

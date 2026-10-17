@@ -81,4 +81,13 @@ describe('escrita cadastral e atendimento composto', () => {
     value.pending[0]!.status = 'aberta';
     expect(() => attendanceBody(value)).toThrow(/Nenhum campo será descartado/);
   });
+  it('preserva desconhecido e não informado como estados distintos da pendência', () => {
+    const value = draft();
+    value.pending = [{ descricao: 'Estado desconhecido sintético', status: '' },
+      { descricao: 'Não informado sintético', status: 'nao_informado' }];
+    expect(attendanceBody(value).pendencias).toEqual([
+      { descricao: 'Estado desconhecido sintético', status: null },
+      { descricao: 'Não informado sintético', status: 'nao_informado' },
+    ]);
+  });
 });
