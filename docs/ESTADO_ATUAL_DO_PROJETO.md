@@ -6,6 +6,14 @@ Esta é a síntese vigente. Contratos pertencem às fontes temáticas; o histór
 cronológico está no [registro](REGISTRO_DE_ALTERACOES.md) e na
 [continuidade da Etapa 5](validacoes/CONTINUIDADE_ETAPA_5.md).
 
+**Continuidade de 2026-10-21 — U4.1:** navegação compacta em tela menor,
+sidebar desktop, identidade no cabeçalho, foco ao fechar/navegar/redimensionar,
+conta e recuperação de erros receberam implementação e validação técnica
+(11 cenários finais de navegador aprovados). O relatório
+[U4.1](validacoes/VALIDACAO_7D_U4_1.md) distingue provas reais sintéticas,
+falhas simuladas e limites. U4.2, cadastro/atendimento por etapas, revisão clínica
+e fidelidade visual integral permanecem sujeitos aos próprios aceites.
+
 **Continuidade de 2026-10-20:** U3.3 implementa retorno do detalhe à ficha com
 aba/seleção/páginas, histórico com contexto e exames da página agrupados em
 trazidos/solicitados com expansão na URL. Links do detalhe abrem as áreas

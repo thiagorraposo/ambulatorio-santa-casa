@@ -856,6 +856,13 @@ O estado agregado acima não declara U3 integral, VU1 ou aceite clínico conclu�
 
 **Escopo:** U4.1 shell/login/conta/erros: navegação, foco e layout 320/390; U4.2 controles compartilhados de formulário/tabela/diálogo: rótulo, erro, status, Escape, foco. Aplicar a telas atuais sem copiar modais inseguros do Figma.
 
+**Continuidade técnica de 21/10:** U4.1 recebeu implementação de menu compacto,
+sidebar desktop, foco de navegação/breakpoint, conta e erros; a
+[validação própria](validacoes/VALIDACAO_7D_U4_1.md) registra o aceite técnico,
+11 cenários finais de navegador aprovados e os limites.
+Não introduz diálogo nem resolve P-01/P-03; U4.2 permanece pendente. O estado
+agregado não declara U4 integral, VU1 ou aceite clínico concluídos.
+
 **Dependências/decisões:** P-03 para novos diálogos; 6A/7 atuais; conteúdo U1/U2/U3 quando afetado.
 
 **Trabalho por camada:** Frontend: CSS/componentes compartilhados; tabelas com rolagem própria, formulários em uma coluna, contraste/status por texto e anúncio de erro/sucesso.

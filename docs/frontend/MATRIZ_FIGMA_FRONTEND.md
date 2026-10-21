@@ -23,6 +23,12 @@ os RQ exercitados, as evidências e os limites. A fotografia abaixo é históric
 esta continuidade não aceita procedência/status/projetos históricos sem API,
 novos campos de exames, outras unidades de UX ou fidelidade visual integral.
 
+**Continuidade de 21/10 — U4.1:** [evidências próprias](../validacoes/VALIDACAO_7D_U4_1.md)
+para navegação compacta/desktop, conta, foco e erros no recorte documentado.
+A prova não aceita controles/diálogos de U4.2 nem todos os requisitos da família
+por associação. Suporte tem orientação genérica; canal institucional nominal e
+homologação da identidade visual continuam pendentes.
+
 ## Como ler e manter a rastreabilidade
 
 Cada linha tem ID estável `FM-FAMÍLIA-NN`. Seu requisito individual é

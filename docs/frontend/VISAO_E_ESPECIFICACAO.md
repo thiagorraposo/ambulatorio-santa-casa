@@ -27,6 +27,11 @@ links aos recursos canônicos do paciente. A comparação visual geral, as etapa
 de cadastro/atendimento e a revisão humana continuam pendentes; esta entrega
 não declara fidelidade integral ao protótipo.
 
+**Continuidade de 21/10:** [U4.1](../validacoes/VALIDACAO_7D_U4_1.md) implementa
+menu compacto em tela menor, sidebar desktop e foco/retorno em navegação e erros.
+Conta e identidade continuam em leitura pelo contrato vigente. U4.2, etapas de
+cadastro/atendimento e parecer clínico não são aceitos por esta continuidade.
+
 ## Objetivo e fronteiras da análise
 
 O produto organiza o trabalho do ambulatório em uma ficha longitudinal:

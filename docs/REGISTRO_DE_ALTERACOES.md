@@ -1,5 +1,20 @@
 # Registro de Alterações
 
+## 2026-10-21 — organizar alterações pendentes em commits
+
+Criada a branch `organizar-frontend` a partir de `docs-frontend`, no commit
+`84b1a32`, preservando todas as alterações locais. Organização em cinco commits:
+correção da edição com data legada desconhecida; implementação/testes U3.3;
+documentação/capturas U3.3; implementação/testes U4.1; documentação/capturas U4.1
+e este registro. Os trechos compartilhados de CSS e documentação foram
+selecionados pelo índice, preservando o conteúdo final dos arquivos.
+
+Revisados status, diff e histórico antes da organização. Validações anteriores
+de frontend reaproveitadas conforme os relatórios U3.3/U4.1; integração HTTP
+focada de data legada executada com sucesso nesta organização. Verificação de
+documentação e whitespace aprovada. Nenhuma migration, dado real, merge ou push.
+As pendências funcionais e de aceite permanecem registradas no roadmap.
+
 ## 2026-10-21 — preservar data desconhecida em atendimento legado
 
 A edição permite corrigir outros campos quando a data original do atendimento
@@ -14,6 +29,28 @@ Validação focada do backend aprovada em banco exclusivamente sintético:
 Log: `/tmp/ambulatorio-check-m0dyevhw/output.log`. A organização dos commits
 reaproveita as validações de frontend registradas nas entregas posteriores.
 Sem alteração de schema ou contrato público da API.
+
+## 2026-10-21 — navegação, conta e erros em telas menores (7D-U4.1)
+
+Selecionada a próxima unidade independente de decisão de produto após U3.3.
+Criado `AppNavigation`: sidebar desktop, menu compacto até 800 px, controle
+acessível, Escape, Tab sem aprisionamento e fechamento após navegação efetiva.
+Nome/perfil vêm da identidade vigente. Redimensionar recupera foco de controles
+que o CSS oculta; o cabeçalho compacto evita repetir a marca no celular.
+
+Minha conta mantém identidade em leitura e saída explícita, com orientação à
+equipe responsável, sem inventar canal institucional. Endereço desconhecido
+oferece início/busca; falha de identidade foca a orientação e devolve foco após
+recuperar por leitura, conservando destino e política de rascunhos/recibos.
+
+Componentes e navegador verificam teclado, breakpoint, 320/390 px, zoom 200%,
+Axe, sessão/conta e erros. Build e componentes aprovados; rodada final com
+11/11 cenários de navegador aprovados após corrigir CSS/foco e altura móvel.
+Falhas intermediárias e resultados estão na
+[validação U4.1](validacoes/VALIDACAO_7D_U4_1.md). Alterações anteriores
+preservadas. Sem API nova, migration, dado real, commit ou push. U4.2, etapas de
+cadastro/atendimento, fidelidade visual integral e revisão clínica continuam
+pendentes.
 
 ## 2026-10-20 — histórico, detalhe e exames com retorno à ficha (7D-U3.3)
 

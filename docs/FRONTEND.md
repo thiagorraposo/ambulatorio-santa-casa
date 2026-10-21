@@ -175,6 +175,20 @@ Exames são agrupados em trazidos/solicitados **desta página** e expandidos por
 não informados; sem vínculo de atendimento não se fabrica uma origem.
 A [validação U3.3](validacoes/VALIDACAO_7D_U3_3.md) registra critérios e limites.
 
+A navegação usa sidebar no desktop e menu recolhido em larguras até 800 px.
+O botão Menu anuncia abertura/fechamento; Escape dentro da navegação devolve
+foco ao botão, e navegar fecha o menu somente após a troca efetiva de rota.
+Tab pode sair do menu. Mudança de largura recolhe o menu e recupera foco quando
+o controle anterior deixa de estar visível. O cabeçalho mantém nome/perfil reais;
+Minha conta oferece saída e orientação genérica à equipe responsável, sem novo
+contrato de identidade ou canal institucional inventado.
+
+Endereço desconhecido oferece início/busca. Indisponibilidade temporária de
+identidade oculta a página, foca a orientação e permite revalidar por leitura
+ou sair. Recuperação mantém o destino e devolve foco ao conteúdo; a política de
+rascunhos/recibos permanece vigente. Critérios e evidências estão na
+[validação U4.1](validacoes/VALIDACAO_7D_U4_1.md).
+
 A sessão usa o token retornado pelo login somente em memória. A identidade e o
 perfil são obtidos de `/v1/auth/me`; nenhum dado de paciente fica em armazenamento
 persistente do navegador. Recarregar exige novo login e preserva o destino da
