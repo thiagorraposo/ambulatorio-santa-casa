@@ -1,4 +1,4 @@
-import { Link, useLocation, useParams } from 'react-router';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router';
 import type { AtendimentoDetalheResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
 import { Card, EmptyState, PageHeading, QueryState } from '../../shared/ui';
@@ -9,6 +9,7 @@ import { useSession } from '../../app/session';
 import ClinicalActions from '../clinical/ClinicalActions';
 import { AttendanceFamilies } from './PatientResources';
 import { AttendanceChagasDiagnosis, AttendanceClinicalAssessment } from './AttendanceClinicalPanels';
+import { attendanceReturn } from './attendance-navigation';
 
 export default function AttendancePage() {
   const session = useSession();
@@ -16,11 +17,15 @@ export default function AttendancePage() {
   const { pacienteId = '', atendimentoId = '' } = useParams<{ pacienteId: string; atendimentoId: string }>();
   const page = usePage();
   const patientPath = `/pacientes/${encodeURIComponent(pacienteId)}`;
+  const [search] = useSearchParams();
+  const origin = attendanceReturn(patientPath, search.get('retorno'));
   const query = useApiQuery<AtendimentoDetalheResponse>(pagePath(`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}`, page.limit, page.offset));
 
   return <>
     <nav className="breadcrumb" aria-label="Caminho da página">
-      <Link to="/pacientes">Pacientes</Link><Link to={`${patientPath}?aba=atendimentos`}>Histórico do paciente</Link><span>Atendimento</span>
+      <Link to="/pacientes">Pacientes</Link>
+      <Link to={origin ?? `${patientPath}?aba=atendimentos`}>{origin ? 'Voltar à ficha de origem' : 'Histórico do paciente'}</Link>
+      <span>Atendimento</span>
     </nav>
     <PageHeading title="Detalhe do atendimento" description={`Paciente ${pacienteId} · atendimento ${atendimentoId}`} />
     <QueryState query={query}>
@@ -29,6 +34,7 @@ export default function AttendancePage() {
         return <>
           <Card>
             <h2>Atendimento de {formatClinicalDate(data.dataAtendimento)}</h2>
+            <p className="muted">Avaliação, diagnóstico, exames e pendências abaixo pertencem a este atendimento.</p>
             {location.state?.saved && <p className="notice" role="status">{String(location.state.saved)}</p>}
             {session.user?.perfil !== 'consulta' && <div className="form-actions">
               <Link to={`${patientPath}/atendimentos/${atendimentoId}/editar`} className="button button-secondary">Editar atendimento</Link>
@@ -65,6 +71,21 @@ export default function AttendancePage() {
             <Pagination label="coleções do atendimento" {...data.paginacaoColecoes} count={collectionLength} showCount={false} onChange={page.changePage} />
           </Card>
           <AttendanceFamilies path={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}`} />
+          <Card>
+            <h2>Outras áreas da ficha</h2>
+            <p className="muted">Tratamento, projetos e notificação são registros do paciente. Consulte cada área para conferir o contexto dos registros.</p>
+            <nav className="record-nav" aria-label="Áreas do paciente">
+              {[
+                ['exames', 'Exames do paciente'], ['bzn', 'BZN e retornos'], ['projetos', 'Projetos'], ['notificacao', 'Notificação'],
+                ['encaminhamentos', 'Encaminhamentos'], ['pendencias', 'Pendências'],
+              ].map(([section, label]) => {
+                const target = new URL(origin ?? patientPath, 'http://app.local');
+                target.searchParams.set('aba', section);
+                target.searchParams.set('atendimentoId', atendimentoId);
+                return <Link key={section} to={`${target.pathname}${target.search}`}>{label}</Link>;
+              })}
+            </nav>
+          </Card>
           <ClinicalActions pacienteId={pacienteId} atendimentoId={atendimentoId} />
         </>;
       }}

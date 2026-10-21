@@ -49,7 +49,9 @@ describe('último atendimento por data registrada', () => {
     expect(screen.getByText('21/02/2026')).toBeVisible();
     expect(screen.getByText('Observação desta consulta sintética')).toBeVisible();
     expect(screen.getByRole('link', { name: `Abrir último atendimento ${attendance.atendimentoId}` })).toHaveAttribute(
-      'href', `/pacientes/${patientId}/atendimentos/${attendance.atendimentoId}`,
+      'href', `/pacientes/${patientId}/atendimentos/${attendance.atendimentoId}?${new URLSearchParams({
+        retorno: `/pacientes/${patientId}?aba=dados&dadosLimit=1&dadosOffset=20`,
+      })}`,
     );
     await user.click(screen.getByRole('button', { name: 'Outra página dos dados' }));
     expect(vi.mocked(useApiQuery).mock.calls.every(([resource]) => resource === path)).toBe(true);

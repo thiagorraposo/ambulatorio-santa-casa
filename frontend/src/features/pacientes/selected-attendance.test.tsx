@@ -83,7 +83,7 @@ describe('consulta clínica selecionada', () => {
     expect(screen.getByText('Não', { selector: 'dd' })).toBeVisible();
     expect(screen.getByText('04/03/2000')).toBeVisible();
     expect(screen.getByRole('link', { name: `Abrir detalhe do atendimento ${firstId}` })).toHaveAttribute(
-      'href', `${path}/${firstId}`,
+      'href', `${path}/${firstId}?${new URLSearchParams({ retorno: `/pacientes/${patientId}?aba=chagas&atendimentoId=${firstId}` })}`,
     );
     await user.click(screen.getByRole('link', { name: 'Trocar área clínica' }));
     expect(screen.getByTestId('location')).toHaveTextContent(`atendimentoId=${firstId}`);

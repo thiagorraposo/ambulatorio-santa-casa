@@ -161,7 +161,9 @@ describe('ficha por recurso', () => {
     const latest = screen.getByRole('heading', { name: 'Último atendimento por data registrada' }).closest('section')!;
     expect(within(latest).getByText('21/02/2026')).toBeVisible();
     expect(within(latest).getByRole('link', { name: 'Abrir último atendimento 9007199254740995' })).toHaveAttribute(
-      'href', `/pacientes/${ID}/atendimentos/9007199254740995`,
+      'href', `/pacientes/${ID}/atendimentos/9007199254740995?${new URLSearchParams({
+        retorno: `/pacientes/${ID}?dadosLimit=1&dadosOffset=20`,
+      })}`,
     );
     expect(screen.getByRole('link', { name: 'Atendimento 81' })).toBeVisible();
     expect(screen.getByText('Telefone sintético da página 20')).toBeVisible();
