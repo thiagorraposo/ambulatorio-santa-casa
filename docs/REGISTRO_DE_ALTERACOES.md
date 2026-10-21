@@ -1,5 +1,20 @@
 # Registro de Alterações
 
+## 2026-10-21 — preservar data desconhecida em atendimento legado
+
+A edição permite corrigir outros campos quando a data original do atendimento
+é desconhecida, sem exigir estimativa nem enviar uma data fabricada. Criação e
+atendimentos com data conhecida continuam exigindo data. Testes de contrato e
+formulário cobrem esses casos; a integração HTTP confirma autorização, versão,
+conflito e preservação de `NULL` após corrigir observações.
+
+Validação focada do backend aprovada em banco exclusivamente sintético:
+`bash tests/backend/test_clinical_integration.sh test/clinical/clinical.http.spec.ts
+--testNamePattern 'ordena histórico por data decrescente'`, com um caso aprovado.
+Log: `/tmp/ambulatorio-check-m0dyevhw/output.log`. A organização dos commits
+reaproveita as validações de frontend registradas nas entregas posteriores.
+Sem alteração de schema ou contrato público da API.
+
 ## 2026-10-17 — diagnóstico e avaliação por consulta selecionada
 
 Implementada a unidade técnica U3.2 com abas Chagas/Avaliação clínica, seleção

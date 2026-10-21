@@ -64,7 +64,9 @@ export function attendanceCore(values: Fields, original?: AtendimentoDetalheResp
     body[key] = ['ambulatorioUnicamente', 'ambulatorioAnexoProjeto'].includes(key) ? triValue(values[key]!)
       : values[key] === '' ? null : values[key];
   }
-  if (!values.dataAtendimento) throw new Error('Data do atendimento é obrigatória.');
+  if (!values.dataAtendimento && (!original || original.dataAtendimento !== null)) {
+    throw new Error('Data do atendimento é obrigatória.');
+  }
   if (original && Object.keys(body).length === 1) throw new Error('Nenhuma alteração informada.');
   return body;
 }

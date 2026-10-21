@@ -1286,6 +1286,15 @@ suite('Fluxos clínicos HTTP em banco descartável', () => {
         expect(detail.body).toMatchObject(record);
       }
     }
+    const legacyPath = `/pacientes/${patient}/atendimentos/${records[0]!.atendimentoId}`;
+    const before = (await http().get(legacyPath).auth(tokens.edicao, { type: 'bearer' }).expect(200)).body;
+    const patch = { versao: before.versao, observacoes: 'Observação legada corrigida sem estimar data' };
+    await http().patch(legacyPath).auth(tokens.consulta, { type: 'bearer' }).send(patch).expect(403);
+    const saved = (await http().patch(legacyPath).auth(tokens.edicao, { type: 'bearer' }).send(patch).expect(200)).body;
+    expect(saved.versao).toBe((BigInt(before.versao) + 1n).toString());
+    await http().patch(legacyPath).auth(tokens.edicao, { type: 'bearer' }).send(patch).expect(409);
+    const after = (await http().get(legacyPath).auth(tokens.administracao, { type: 'bearer' }).expect(200)).body;
+    expect(after).toMatchObject({ dataAtendimento: null, observacoes: patch.observacoes, versao: saved.versao });
   });
 
 
