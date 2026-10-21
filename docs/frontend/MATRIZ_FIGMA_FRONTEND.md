@@ -16,6 +16,13 @@ das melhorias propostas nem da VU1.
 próprias. Elas sucedem a fotografia abaixo somente nesses recortes; não alteram
 automaticamente o aceite das demais linhas.
 
+**Continuidade de 20/10:** [U3.3](../validacoes/VALIDACAO_7D_U3_3.md) implementa
+histórico/detalhe com retorno exato, contexto da consulta, exames agrupados por
+bloco e expansíveis por URL e links às áreas canônicas. O relatório explicita
+os RQ exercitados, as evidências e os limites. A fotografia abaixo é histórica;
+esta continuidade não aceita procedência/status/projetos históricos sem API,
+novos campos de exames, outras unidades de UX ou fidelidade visual integral.
+
 ## Como ler e manter a rastreabilidade
 
 Cada linha tem ID estável `FM-FAMÍLIA-NN`. Seu requisito individual é

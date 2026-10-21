@@ -1,6 +1,6 @@
 # Frontend — leitura e fluxos clínicos
 
-Atualizado em: 2026-10-17. Fundação 6A–6B concluída; recorte original 7A–7D
+Atualizado em: 2026-10-21. Fundação 6A–6B concluída; recorte original 7A–7D
 implementado e validado tecnicamente com dados sintéticos, com 41 cenários de
 navegador verificados após os incrementos U3.1/U3.2.
 As evidências e seus limites pertencem ao relatório da entrega.
@@ -164,6 +164,16 @@ buscar valores de outra visita. Diagnóstico e avaliação reutilizam os mesmos
 painéis do detalhe. ID inválido não gera leitura de detalhe; 403/404 das opções
 ocultam a consulta anterior. Critérios, provas e limites estão na
 [validação U3.2](validacoes/VALIDACAO_7D_U3_2.md).
+
+Histórico, último atendimento, seleção clínica e recursos da ficha abrem o
+atendimento com `retorno` restrito à ficha do mesmo paciente. O detalhe oferece
+Voltar à ficha de origem conservando aba, páginas e seleção; sem retorno válido,
+abre o histórico padrão. Links às áreas exames/BZN/projetos/notificação/encaminhamentos/
+pendências preservam o contexto sem atribuir estado atual a consultas passadas.
+Exames são agrupados em trazidos/solicitados **desta página** e expandidos por
+`exameId` na URL, inclusive ao voltar ou reautenticar. Campos ausentes continuam
+não informados; sem vínculo de atendimento não se fabrica uma origem.
+A [validação U3.3](validacoes/VALIDACAO_7D_U3_3.md) registra critérios e limites.
 
 A sessão usa o token retornado pelo login somente em memória. A identidade e o
 perfil são obtidos de `/v1/auth/me`; nenhum dado de paciente fica em armazenamento

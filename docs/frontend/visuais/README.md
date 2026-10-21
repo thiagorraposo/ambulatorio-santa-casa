@@ -144,3 +144,30 @@ visual e contexto; gravação exige UI/API/PostgreSQL reais do runner sintético
 Não repetir automaticamente o envio para produzir sucesso, nem considerar
 primeira página vazia como prova de não aplicação. Atualizar destino/estado do
 requisito somente com evidência correspondente e aceite registrado.
+
+
+## Continuidade de 2026-10-20 — exames da unidade U3.3
+
+Estas capturas sucedem a fotografia de 05/10 somente no recorte indicado.
+Chromium com API/PostgreSQL reais do runner descartável, perfil consulta,
+1440×960 e 390×844; imagens da página inteira. Paciente e dados exclusivamente
+sintéticos. O cabeçalho mantém identidade e referência de idade; o último
+atendimento usa composição mais compacta. A página de exames agrupa trazidos e
+solicitados, com identificação/expansão e contagens restritas à página.
+
+| Desktop | 390 px |
+| --- | --- |
+| ![Exames agrupados e expandidos, U3.3](u33-exames-desktop.png) | ![Exames agrupados em tela estreita, U3.3](u33-exames-390.png) |
+
+Origem: `tests/frontend/u33-navigation.spec.ts`, execução de 20/10 em
+`/tmp/etapa6-frontend-zg3qMF`; paciente `9007199254778759`, consultas `23/24`,
+exames `25/26`. A [validação U3.3](../../validacoes/VALIDACAO_7D_U3_3.md)
+registra percursos, falhas e limites. Imagens revisadas sem corte horizontal;
+Axe, teclado, 320/390 px e zoom 200% passaram nos cenários descritos. As imagens
+não constituem aceite clínico nem comprovam fidelidade visual integral.
+
+Diferenças visuais restantes: cabeçalho/último atendimento ainda ocupam mais
+espaço que a referência, especialmente em mobile; abas, densidade dos painéis e
+composição geral continuam distintas. Cadastro em etapas e atendimento guiado
+pertencem a unidades próprias. Esta continuidade comprova agrupamento/expansão e
+navegação do recorte, sem declarar o produto visual concluído.

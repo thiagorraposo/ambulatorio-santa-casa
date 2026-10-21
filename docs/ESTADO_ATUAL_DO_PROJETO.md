@@ -1,10 +1,21 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-10-17
+Atualizado em: 2026-10-21
 
 Esta é a síntese vigente. Contratos pertencem às fontes temáticas; o histórico
 cronológico está no [registro](REGISTRO_DE_ALTERACOES.md) e na
 [continuidade da Etapa 5](validacoes/CONTINUIDADE_ETAPA_5.md).
+
+**Continuidade de 2026-10-20:** U3.3 implementa retorno do detalhe à ficha com
+aba/seleção/páginas, histórico com contexto e exames da página agrupados em
+trazidos/solicitados com expansão na URL. Links do detalhe abrem as áreas
+canônicas do paciente sem atribuir seus estados atuais a consultas passadas.
+Cabeçalho e último atendimento receberam composição mais compacta. Evidências e
+limites estão na [validação U3.3](validacoes/VALIDACAO_7D_U3_3.md), com aceite
+técnico encerrado em 21/10: build, componentes e rodada focada de 13 cenários
+UI/API/PostgreSQL aprovados.
+Isso não conclui os demais pacotes de experiência, a fidelidade visual integral
+ou o aceite clínico da Etapa 7.
 
 **Continuidade de 2026-10-17:** adicionada demonstração sintética isolada por
 `make dev-sintetico-start/status/stop`, com instruções no

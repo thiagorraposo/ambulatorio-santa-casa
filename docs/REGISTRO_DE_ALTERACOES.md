@@ -15,6 +15,29 @@ Log: `/tmp/ambulatorio-check-m0dyevhw/output.log`. A organização dos commits
 reaproveita as validações de frontend registradas nas entregas posteriores.
 Sem alteração de schema ou contrato público da API.
 
+## 2026-10-20 — histórico, detalhe e exames com retorno à ficha (7D-U3.3)
+
+Revisadas as fontes vigentes de estado, roadmap, experiência, matriz Figma,
+contratos, segurança e validação. Selecionada U3.3, sucessora de U3.1/U3.2,
+preservando as alterações locais anteriores de navegação e datas legadas.
+
+Histórico mostra contexto da consulta; links de atendimento conservam retorno
+validado à ficha do mesmo paciente, aba, seleção e páginas. Exames trazidos e
+solicitados são agrupados por página e expandem por `exameId` na URL, mantendo
+identificação, resultado, observações e vínculo disponível. Detalhe oferece
+links às áreas canônicas, sem atribuir estados atuais do paciente ao passado.
+Cabeçalho e último atendimento ficaram mais compactos; paginação foca o título.
+
+Testes de componentes e navegador/API/PostgreSQL sintéticos verificam navegação,
+exames, consulta/edição, carga/vazio/recusa, revogação, teclado e tela estreita.
+Fechamento documental em 21/10: build, componentes e 13 cenários focados
+aprovados; seis falhas da rodada completa inicial foram corrigidas e revalidadas.
+Resultados, falhas intermediárias e evidências estão na
+[validação U3.3](validacoes/VALIDACAO_7D_U3_3.md).
+Sem migration, API nova, alteração de dados persistentes, commit ou push.
+Aceite clínico, demais pacotes de UX e fidelidade visual integral permanecem
+pendentes.
+
 ## 2026-10-17 — diagnóstico e avaliação por consulta selecionada
 
 Implementada a unidade técnica U3.2 com abas Chagas/Avaliação clínica, seleção

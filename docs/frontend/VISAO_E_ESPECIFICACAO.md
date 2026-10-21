@@ -21,6 +21,12 @@ elemento, sua implementação, lacuna e destino. O
 define a ordem e o aceite das entregas; [FRONTEND.md](../FRONTEND.md) continua
 sendo a fonte do setup e do funcionamento técnico existente.
 
+**Continuidade de 20/10:** [U3.3](../validacoes/VALIDACAO_7D_U3_3.md) acrescenta
+retorno à ficha/página de origem, agrupamento/expansão dos exames da página e
+links aos recursos canônicos do paciente. A comparação visual geral, as etapas
+de cadastro/atendimento e a revisão humana continuam pendentes; esta entrega
+não declara fidelidade integral ao protótipo.
+
 ## Objetivo e fronteiras da análise
 
 O produto organiza o trabalho do ambulatório em uma ficha longitudinal:

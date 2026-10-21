@@ -1,6 +1,6 @@
 # Roadmap do Projeto
 
-Atualizado em: 2026-10-15
+Atualizado em: 2026-10-21
 
 **Continuidade de 2026-10-15:** as sete lacunas da reauditoria de 05/10 receberam
 correções de código e novas provas sintéticas. O percurso integrado original 7D
@@ -833,7 +833,11 @@ todos os campos por associação a um teste.
 [evidências próprias](validacoes/VALIDACAO_7D_U3_1.md) e validação técnica aprovada.
 U3.2 também recebeu implementação e
 [validação técnica](validacoes/VALIDACAO_7D_U3_2.md), com seleção explícita e
-sem consolidação entre consultas. U3.3 permanece pendente.
+sem consolidação entre consultas. Em 20/10, U3.3 recebeu implementação de
+histórico/detalhe com retorno à ficha, exames agrupados e expansíveis e links às
+áreas canônicas; [validação própria](validacoes/VALIDACAO_7D_U3_3.md) registra
+resultados e limites, com validação técnica encerrada em 21/10. O aceite clínico e a fidelidade visual integral continuam
+pendentes.
 O estado agregado acima não declara U3 integral, VU1 ou aceite clínico concluídos.
 
 **Dependências/decisões:** H3/H5–H12; 7B-R1U, 7D-R1. Código de negócio/origem e timeline integrada ficam para 8B3/8B2.
