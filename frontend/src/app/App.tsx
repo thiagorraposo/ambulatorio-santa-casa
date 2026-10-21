@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { Link, Navigate, NavLink, Outlet, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router';
+import { Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { ApiError, isAbort } from '../api/client';
 import { useSession } from './session';
 import { Card, PageHeading, ApiErrorState } from '../shared/ui';
@@ -10,6 +10,7 @@ import PatientFormPage from '../features/clinical/PatientFormPage';
 import AttendanceFormPage from '../features/clinical/AttendanceFormPage';
 import FollowupPage from '../features/clinical/FollowupPage';
 import { DraftProvider } from '../shared/writing';
+import { AppNavigation } from './AppNavigation';
 
 const profiles = { consulta: 'Consulta', edicao: 'Edição', administracao: 'Administração' };
 
@@ -87,22 +88,11 @@ function Layout({ children }: { children: ReactNode }) {
   const user = session.user!;
   return <div className="app-layout">
     <a className="skip-link" href="#conteudo">Ir para o conteúdo</a>
-    <aside className="sidebar">
-      <Link to="/" className="brand" aria-label="Ambulatório Santa Casa, início">
-        <span className="brand-mark" aria-hidden="true">+</span>
-        <span>Ambulatório<strong>Santa Casa</strong></span>
-      </Link>
-      <nav aria-label="Menu principal">
-        <NavLink to="/" end><span aria-hidden="true">⌂</span> Início</NavLink>
-        <NavLink to="/pacientes"><span aria-hidden="true">◎</span> Pacientes</NavLink>
-        <NavLink to="/minha-conta"><span aria-hidden="true">○</span> Minha conta</NavLink>
-      </nav>
-      <div className="sidebar-account"><span className="muted">{user.nome}</span>
-        <button className="button button-secondary" onClick={session.logout}>Sair</button></div>
-    </aside>
+    <AppNavigation user={user} logout={session.logout} />
     <div className="workspace">
-      <header className="topbar"><span>Ambulatório Santa Casa</span>
-        <span className="badge">{profiles[user.perfil]}</span></header>
+      <header className="topbar"><span className="topbar-service">Ambulatório Santa Casa</span>
+        <div className="topbar-identity"><span>{user.nome}</span>
+          <span className="badge">{profiles[user.perfil]}</span></div></header>
       <main id="conteudo" className="page-content" tabIndex={-1}>{children}</main>
       <footer className="app-footer">Ambulatório Santa Casa</footer>
     </div>
@@ -117,7 +107,22 @@ function ProtectedLayout() {
     return <Navigate to={`/login?next=${next}`} replace />;
   }
   return <DraftProvider key={session.draftScope}><Layout>{session.identityError
-    ? <ApiErrorState error={session.identityError} retry={() => { void session.revalidate(); }} /> : <Outlet />}</Layout></DraftProvider>;
+    ? <IdentityUnavailable /> : <Outlet />}</Layout></DraftProvider>;
+}
+
+function IdentityUnavailable() {
+  const session = useSession();
+  const heading = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    heading.current?.focus();
+    const content = heading.current?.closest('main');
+    return () => { if (content?.isConnected) content.focus(); };
+  }, []);
+  return <div ref={heading} tabIndex={-1}>
+    <PageHeading title="Não foi possível verificar seu acesso" description="Tente verificar novamente para continuar de onde parou, ou saia da conta." />
+    <ApiErrorState error={session.identityError} retry={() => { void session.revalidate(); }} />
+    <button className="button button-secondary" onClick={session.logout}>Sair da conta</button>
+  </div>;
 }
 
 function HomePage() {
@@ -140,17 +145,19 @@ function HomePage() {
 function AccountPage() {
   const session = useSession();
   const user = session.user!;
-  return <><PageHeading title="Minha conta" description="Identificação informada pelo serviço de autenticação." />
+  return <><PageHeading title="Minha conta" description="Confira sua identificação e seu perfil de acesso." />
     <Card><dl className="record-grid"><div><dt>Nome</dt><dd>{user.nome}</dd></div>
       <div><dt>ID do usuário</dt><dd className="mono">{user.usuarioId}</dd></div>
       <div><dt>Perfil</dt><dd>{profiles[user.perfil]}</dd></div></dl>
+      <p className="muted">Para solicitar alterações no seu acesso, procure a equipe responsável pelo sistema.</p>
       <button className="button button-secondary" onClick={session.logout}>Sair da conta</button>
     </Card></>;
 }
 
 function NotFoundPage() {
-  return <><PageHeading title="Página não disponível" description="Verifique o endereço ou retorne ao início." />
-    <Link to="/" className="button">Ir para o início</Link></>;
+  return <Card><PageHeading title="Página não disponível" description="Verifique o endereço ou escolha um destino para continuar." />
+    <div className="form-actions"><Link to="/" className="button">Ir para o início</Link>
+      <Link to="/pacientes" className="button button-secondary">Consultar pacientes</Link></div></Card>;
 }
 
 export default function App() {

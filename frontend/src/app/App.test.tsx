@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import App, { returnDestination } from './App';
@@ -17,6 +17,28 @@ function setup(fetcher: typeof fetch, path = '/login?next=%2Fminha-conta') {
 }
 
 describe('login e navegação', () => {
+  it('campos vazios não enviam; carregamento anuncia e bloqueia autenticação repetida', async () => {
+    let release!: (response: Response) => void;
+    const fetcher = vi.fn<typeof fetch>().mockImplementationOnce(() => new Promise(resolve => { release = resolve; }))
+      .mockResolvedValueOnce(Response.json({ usuarioId: '42', nome: 'Profissional Sintético', perfil: 'consulta' }));
+    const { user } = setup(fetcher);
+    await user.click(screen.getByRole('button', { name: 'Entrar' }));
+    expect(fetcher).not.toHaveBeenCalled();
+    await user.type(screen.getByLabelText('Usuário', { exact: true }), 'sintetico@example.invalid');
+    await user.type(screen.getByLabelText('Senha', { exact: true }), 'senha-sintetica');
+    expect(screen.getByLabelText('Senha', { exact: true })).toHaveAttribute('type', 'password');
+    await user.click(screen.getByRole('button', { name: 'Entrar' }));
+    expect(screen.getByRole('status')).toHaveTextContent('Verificando seu acesso');
+    expect(screen.getByRole('button', { name: 'Entrando…' })).toBeDisabled();
+    fireEvent.submit(screen.getByRole('button', { name: 'Entrando…' }).closest('form')!);
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    await act(async () => release(Response.json({ accessToken: 'sintetico', tokenType: 'Bearer', expiresIn: 60 })));
+    expect(await screen.findByRole('heading', { name: 'Minha conta', level: 1 })).toBeVisible();
+    expect(fetcher.mock.calls.map(call => call[0])).toEqual(['/v1/auth/login', '/v1/auth/me']);
+    await user.click(screen.getByRole('button', { name: 'Sair da conta' }));
+    expect(await screen.findByLabelText('Senha', { exact: true })).toHaveValue('');
+  });
+
   it('retorna ao destino protegido após login e exibe somente identidade do servidor', async () => {
     const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(Response.json({ accessToken: 'sintetico', tokenType: 'Bearer', expiresIn: 60 }))
       .mockResolvedValueOnce(Response.json({ usuarioId: '42', nome: 'Profissional Sintético', perfil: 'consulta' }));
