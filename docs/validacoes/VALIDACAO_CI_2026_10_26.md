@@ -166,6 +166,15 @@ quando `docker compose exec ... id -u` retornava erro 37 e stdout vazio, o teste
 rejeita UID vazio ou não numérico. A regressão exercita os casos de UID 1000,
 UID 0, vazio, texto e erro 37 nos modos normal e compacto, sem Docker real nem
 comandos SQL. `make workflow-test repository-check COMPACT=1` passou com 30
-testes; `git diff --check` passou. O PR complementar e sua execução remota serão
-registrados após a validação integral, inclusive a execução correspondente na
-`main`.
+testes; `git diff --check` passou. O PR complementar [#9](https://github.com/thiagorraposo/ambulatorio-santa-casa/pull/9)
+teve Quality, Database e Backend aprovados na execução
+[40406296603](https://github.com/thiagorraposo/ambulatorio-santa-casa/actions/runs/40406296603).
+Frontend falhou em `writing.test.tsx:107`: o teste verificava a chamada clínica
+antes de terminar a preparação assíncrona (hash e registro da intenção). O campo
+já estava bloqueado, e a chamada ainda não havia sido despachada. `waitFor` agora
+sincroniza a mesma expectativa de exatamente uma chamada, sem alterar seu valor
+ou relaxar a proteção contra reenvio. A suíte frontend local passou com 21
+arquivos e 202 testes; workflow-test passou 30 e repository-check passou. O aviso
+do Vitest sobre custo de criação de jsdom é de desempenho e não bloqueia o job.
+A nova execução remota, revisão do PR, merge e CI subsequente de `main` ainda
+estão pendentes.
