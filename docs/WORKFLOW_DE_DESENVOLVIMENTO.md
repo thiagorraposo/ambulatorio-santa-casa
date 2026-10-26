@@ -25,6 +25,9 @@ Nenhuma permissão clínica é concedida manualmente para fazer teste passar.
 
 O composite `setup-node` fixa Node 24.15.0/npm 11.16.0; instalações usam lockfiles
 e `npm ci`. A imagem backend segue o Dockerfile e é validada separadamente.
+`backend-container-check` exige saída numérica do `id -u`, propaga falha da
+consulta e aceita somente UID não-root; a regressão cobre respostas inválidas
+e falhas de `exec` sem depender de Docker.
 Actions oficiais são fixadas por SHA, usam Node 24 e checkout sem persistência
 de credenciais. `GITHUB_TOKEN` recebe apenas `contents: read`. Actionlint
 1.7.12 é baixado com SHA-256 conferido. Não há lint/formatter de aplicação

@@ -104,7 +104,7 @@ describe('rascunhos e confirmação de escrita', () => {
     const submit = screen.getByRole('button', { name: 'Salvar registro' });
     await user.dblClick(submit);
     expect(screen.getByLabelText('Observação sintética')).toBeDisabled();
-    expect(writes).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(writes).toHaveBeenCalledTimes(1));
     expect(screen.queryByText('Registro salvo.')).not.toBeInTheDocument();
     await user.click(screen.getByRole('link', { name: 'Consultar registro' }));
     const dialog = await screen.findByRole('dialog', { name: 'Alterações não salvas' });

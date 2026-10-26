@@ -156,3 +156,37 @@ Aceite remoto: instalação/verificação de ripgrep e todas as etapas aprovadas
 incluindo os quatro alvos separados, backend, frontend, container e whitespace.
 Qualquer falha deve manter o job vermelho e ser investigada pelo primeiro erro
 da etapa correspondente. Não há autorização para deploy nesta missão.
+
+## Estabilização complementar: verificação do UID no container
+
+A execução na `main` após o merge inicial, `40382446360`, concluiu com sucesso
+nos quatro jobs. Na revisão final, um stub reproduziu um falso sucesso local:
+quando `docker compose exec ... id -u` retornava erro 37 e stdout vazio, o teste
+`[ "" != "0" ]` aceitava o container. O alvo agora preserva o status do exec e
+rejeita UID vazio ou não numérico. A regressão exercita os casos de UID 1000,
+UID 0, vazio, texto e erro 37 nos modos normal e compacto, sem Docker real nem
+comandos SQL. `make workflow-test repository-check COMPACT=1` passou com 30
+testes; `git diff --check` passou. O PR complementar [#9](https://github.com/thiagorraposo/ambulatorio-santa-casa/pull/9)
+teve Quality, Database e Backend aprovados na execução
+[40406296603](https://github.com/thiagorraposo/ambulatorio-santa-casa/actions/runs/40406296603).
+Frontend falhou em `writing.test.tsx:107`: o teste verificava a chamada clínica
+antes de terminar a preparação assíncrona (hash e registro da intenção). O campo
+já estava bloqueado, e a chamada ainda não havia sido despachada. `waitFor` agora
+sincroniza a mesma expectativa de exatamente uma chamada, sem alterar seu valor
+ou relaxar a proteção contra reenvio. A suíte frontend local passou com 21
+arquivos e 202 testes; workflow-test passou 30 e repository-check passou. O aviso
+do Vitest sobre custo de criação de jsdom é de desempenho e não bloqueia o job.
+O E2E que falhou passou quatro vezes em execução isolada no servidor descartável
+confirmado; o CI expirou no limite de espera HTTP configurado em 10 s. A espera
+do helper foi ajustada para 30 s, permanecendo limitada e exigindo a resposta e
+o status esperados. Isso não repete nem oculta a escrita; se ela não ocorrer, o
+teste continua falhando.
+A nova execução remota, revisão do PR, merge e CI subsequente de `main` ainda
+estavam pendentes na redação acima. A execução
+[40408685735](https://github.com/thiagorraposo/ambulatorio-santa-casa/actions/runs/40408685735)
+do commit `9824fce` concluiu com sucesso nos quatro jobs: Quality, Database,
+Backend e Frontend. Cada etapa de teste passou; somente os uploads condicionais
+de logs em falha foram ignorados por não haver falhas. O PR #9 está limpo e foi
+revisado quanto ao escopo: sete arquivos diretamente ligados ao CI, sem mudanças
+de aplicação ou migrations. O merge e a execução da versão integrada na `main`
+continuam pendentes.
