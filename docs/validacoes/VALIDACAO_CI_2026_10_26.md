@@ -156,3 +156,16 @@ Aceite remoto: instalação/verificação de ripgrep e todas as etapas aprovadas
 incluindo os quatro alvos separados, backend, frontend, container e whitespace.
 Qualquer falha deve manter o job vermelho e ser investigada pelo primeiro erro
 da etapa correspondente. Não há autorização para deploy nesta missão.
+
+## Estabilização complementar: verificação do UID no container
+
+A execução na `main` após o merge inicial, `40382446360`, concluiu com sucesso
+nos quatro jobs. Na revisão final, um stub reproduziu um falso sucesso local:
+quando `docker compose exec ... id -u` retornava erro 37 e stdout vazio, o teste
+`[ "" != "0" ]` aceitava o container. O alvo agora preserva o status do exec e
+rejeita UID vazio ou não numérico. A regressão exercita os casos de UID 1000,
+UID 0, vazio, texto e erro 37 nos modos normal e compacto, sem Docker real nem
+comandos SQL. `make workflow-test repository-check COMPACT=1` passou com 30
+testes; `git diff --check` passou. O PR complementar e sua execução remota serão
+registrados após a validação integral, inclusive a execução correspondente na
+`main`.

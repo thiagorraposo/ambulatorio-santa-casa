@@ -289,7 +289,11 @@ backend-container-check: backend-up
 			sleep 2; \
 		done; \
 		[ "$$(docker inspect --format '{{.State.Health.Status}}' "$$container_id")" = healthy ] || { echo "Erro: timeout no backend"; exit 1; }
-	@test "$$( $(COMPOSE) exec -T backend id -u )" != "0" || { echo "Erro: backend executa como root"; exit 1; }
+	@container_uid="$$( $(COMPOSE) exec -T backend id -u )" || { \
+		status=$$?; echo "Erro: não foi possível consultar o usuário do backend"; exit $$status; \
+	}; \
+		case "$$container_uid" in ''|*[!0-9]*) echo "Erro: UID inválido do backend"; exit 1 ;; esac; \
+		test "$$container_uid" -gt 0 || { echo "Erro: backend executa como root"; exit 1; }
 	@echo "OK: imagem backend construída, container healthy e usuário não-root"
 
 backend-logs: docker-config-check

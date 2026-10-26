@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-10-26 — propagar falhas na verificação do container
+
+Corrigido falso sucesso em `backend-container-check`: a consulta do UID agora
+propaga o código de erro do `docker compose exec` e rejeita saída vazia ou não
+numérica antes de aceitar somente UID diferente de zero. Adicionada regressão
+sintética que cobre UID válido, root, saída inválida e falha do exec nos modos
+normal e compacto, sem Docker ou acesso SQL. `make workflow-test
+repository-check COMPACT=1` passou com 30 testes; `git diff --check` passou.
+
 ## 2026-10-26 — estruturar o CI por componente
 
 Preservada e commitada a correção de ripgrep/portas. CI reorganizado em Quality,
