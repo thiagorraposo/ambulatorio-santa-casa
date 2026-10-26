@@ -79,9 +79,9 @@ export class ImportacoesService {
       const result = await tx.query<LoteRow>(`SELECT importacao_lote_id::text,codigo_lote,layout_versao,
         status_lote,lote_reprocessado_de_id::text,iniciado_em::text,finalizado_em::text,criado_em::text,
         atualizado_em::text,possui_erro,total_linhas::text,linhas_importadas::text,linhas_com_pendencia::text,
-        linhas_rejeitadas::text,codigo_erro FROM importacao_lote_consulta
+        linhas_rejeitadas::text,codigo_erro FROM importacao_lote_consulta l
         WHERE ambulatorio.importacao_lote_pode_consultar(importacao_lote_id)
-        ORDER BY importacao_lote_id DESC LIMIT $1 OFFSET $2`, [limit, offset]);
+        ORDER BY l.importacao_lote_id DESC LIMIT $1 OFFSET $2`, [limit, offset]);
       return result.rows.map((row): ImportacaoLoteResponse => this.loteResponse(row));
     }, user.usuarioId);
   }

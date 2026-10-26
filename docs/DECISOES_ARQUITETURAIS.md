@@ -658,7 +658,10 @@ Título: Protótipo Figma Make como referência de interface subordinada aos con
 
 Data: 2026-10-03
 
-Status: Aceita; fundação 6A–6B implementada e validada em 2026-10-04
+Status: Aceita; 6A–6B concluídas no ambiente sintético. 7A–7D receberam
+implementação e validação parcial em 2026-10-04, reauditoria em 05/10 e correções
+técnicas posteriores até 15/10. O relatório vigente registra as evidências e o
+aceite pendente; esta ADR não declara aceite global ou revisão de usabilidade.
 
 Decisão: usar o código do Figma Make como referência visual e funcional,
 reaproveitando apresentação após revisão e adaptando fluxos aos contratos `/v1`.
@@ -687,6 +690,56 @@ implementação detalhados na análise orientam a Etapa 6. A avaliação estáti
 original permanece preservada; o estágio e a evidência atual pertencem ao estado
 vigente e ao relatório de validação.
 
+Detalhamento dos fluxos clínicos de 2026-10-04: manter rascunhos, baseline e
+intenção de escrita somente em memória, separados do cache de consultas. O
+escopo da sessão/identidade é distinto da geração de requisições: revalidação
+temporariamente indisponível oculta formulários sem descartar rascunhos. Saída,
+401, expiração e troca de identidade/perfil apagam ambos. Data router permite
+bloquear navegação; store assinado conserva o estado de envio durante
+remontagens. Nesse estado de 04/10, recibos/valores confirmados ainda se perdiam
+após falha temporária de identidade (R7-07); a atualização de 15/10 abaixo
+registra sua conservação. Escritas não têm retry automático; resultado incerto exige consulta
+e impede reenvio da mesma intenção. Conflitos preservam a versão original.
+Novos episódios após sucesso confirmado ganham intenção própria; não se promete
+idempotência de POST entre sessões. O
+[recorte da Etapa 7](arquitetura/RECORTE_CLINICO_ETAPA_7.md) registra os destinos
+públicos de campos e áreas que aguardam contrato. A evolução estrutural posterior
+de correlação técnica está na ADR-025; o modelo clínico é preservado.
+
+Detalhamento de recuperação e contratos da Etapa 7: conflitos cadastrais/do
+núcleo oferecem comparação por GET e descarte explícito somente da intenção
+afetada antes de uma nova edição; não há rebase ou retry automático. Rascunhos
+inativos também protegem recarregamento e o diálogo permanece acessível durante
+reconsultas. Confirmação exige ID canônico textual do recurso. Consultar somente
+a capacidade de cadastro permite alinhar a interface à política revalidada no
+POST, sem expor vínculos ou ampliar acesso. Catálogos ativos e validação de
+resolução/comparecimento usam o modelo existente, sem migration.
+
+Precisão de 2026-10-05: os limites de recuperação/contexto/paginação e a
+cobertura real dos testes estão na [reavaliação atual](frontend/VISAO_E_ESPECIFICACAO.md#reavaliação-das-sete-lacunas-e-cobertura-de-validação).
+A [matriz individual](frontend/MATRIZ_FIGMA_FRONTEND.md) sucede o inventário
+histórico para o produto, com propostas P-01–09 e pacotes associados. Não altera
+a decisão arquitetural aceita nem aprova antecipadamente contratos futuros.
+
+Atualização técnica de 2026-10-15: a consulta de familiares separa paginação de
+snapshots e resultados de cada snapshot, com IDs textuais e parâmetros próprios
+na URL, conforme o
+[contrato de familiares](arquitetura/CONTRATO_FAMILIARES_ETAPA_7.md). Os módulos
+preservam paciente, atendimento de origem e recurso escolhido na navegação;
+rascunhos, valores confirmados e recibos sobrevivem à remontagem após falha
+temporária de identidade. Conflito BZN permite comparar/copiar e descartar o
+rascunho explicitamente, sem criar outro tratamento. Criação composta e POST de
+pendência oferecem desconhecido e enviam `status: null`; PATCH continua exigindo
+estado textual, e aceitar null nele requer extensão futura. Após 403, revalidar
+acesso permite revisar o rascunho e confirmar outra vez, sem escrita automática.
+
+O resultado incerto das 14 mutações clínicas é reconciliado pelo recibo atômico
+da ADR-025, com registro prévio da intenção, leitura autorizada e encerramento
+explícito. A migration 64 acrescenta esse ledger técnico; catálogos, datas
+clínicas e a leitura paginada de familiares continuam usando estruturas
+existentes. A validação sintética descrita no relatório não substitui o aceite
+individual dos pacotes ou a revisão de usabilidade com a equipe.
+
 Detalhamento de 2026-10-04: adotar Vite e React Router para rotas reais, TanStack
 Query para consultas por recurso e CSS próprio para a apresentação revisada.
 Toolchain Node.js 24/npm reproduzível pelo lockfile. Token somente em memória,
@@ -705,4 +758,42 @@ Documentos relacionados:
 [análise e planejamento da integração](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
 e [sequência oficial de execução](PROXIMOS_PASSOS.md#etapa-6--fundação-do-frontend),
 [implementação do frontend](FRONTEND.md) e
-[validação da Etapa 6](validacoes/VALIDACAO_ETAPA_6.md).
+[validação da Etapa 6](validacoes/VALIDACAO_ETAPA_6.md) e
+[validação da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md).
+
+## ADR-025
+
+ID: ADR-025
+
+Título: Recibo atômico e verificação autorizada de operações clínicas incertas
+
+Data: 2026-10-14
+
+Status: Aceita tecnicamente após revisão do desenho; implementação e regressões
+sintéticas atualizadas em 2026-10-15. Evidências dos pacotes R6B/R6U e respectivos
+acompanhamentos pertencem ao relatório e ao roadmap; não há aceite global da
+Etapa 7 ou declaração de revisão de usabilidade nesta decisão.
+
+Decisão: registrar uma intenção autenticada por UUID, método, caminho e hash do
+corpo antes de enviá-la uma vez. Confirmar seu recibo mínimo de IDs/versão dentro
+da mesma transação da clínica e filhos. Consultar o resultado por leitura
+autorizada, sem repetir handlers. Não presumir não aplicação por página vazia,
+valor coincidente ou erro de COMMIT. Encerramento explícito e expiração competem
+com a transação clínica pelo mesmo lock e impedem qualquer escrita tardia.
+
+Justificativa: a janela entre COMMIT e resposta pode perder a confirmação sem
+perder os dados; busca e retry não distinguem episódios intencionais iguais.
+Recibo posterior ao COMMIT também deixaria uma janela sem prova.
+
+Consequências: migration 64 cria ledger técnico sem corpo clínico/token. Contexto
+AsyncLocalStorage liga exatamente uma transação clínica atribuída ao ator;
+guardas e leituras auxiliares não o consomem. O frontend conserva UUID/corpo só
+em memória, sem retry automático; nova intenção exige confirmação consciente.
+Verificação revalida proprietário e vínculo atual, inclusive em nova sessão da
+mesma identidade. BZN único, versões e composição clínica continuam sob seus
+contratos próprios. A whitelist cobre as 14 mutações dos formulários e valida
+todos os IDs do caminho como texto decimal dentro da faixa bigint do PostgreSQL.
+Erro ao registrar/consultar, UUID desconhecida ou valor clínico coincidente não
+permite presumir não aplicação. Inventário, estados, alternativas, diagramas de falha,
+autorização e retenção estão no
+[protocolo de recuperação](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md).

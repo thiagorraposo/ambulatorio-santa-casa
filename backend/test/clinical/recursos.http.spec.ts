@@ -133,6 +133,10 @@ suite('Recursos clínicos HTTP no banco descartável', () => {
     const pending = await http().post(pendingPath).auth(tokens.edicao, { type: 'bearer' })
       .send({ atendimentoId: attendanceId, descricao: 'Pendência livre sintética', dataIdentificacao: '2026-02-01' }).expect(201);
     const path = `${pendingPath}/${pending.body.pendenciaId}`;
+    const initiallyOpen = await http().get(`${pendingPath}?status=aberta`).auth(tokens.consulta, { type: 'bearer' }).expect(200);
+    expect(initiallyOpen.body).toEqual(expect.arrayContaining([expect.objectContaining({
+      pendenciaId: pending.body.pendenciaId, dataResolucao: null,
+    })]));
     await http().patch(path).auth(tokens.consulta, { type: 'bearer' })
       .send({ status: 'resolvida', dataResolucao: '2026-02-02' }).expect(403);
     await http().patch(path).auth(tokens.edicao, { type: 'bearer' })
@@ -141,7 +145,17 @@ suite('Recursos clínicos HTTP no banco descartável', () => {
       .send({ status: 'resolvida', dataResolucao: '2026-02-02' }).expect(200);
     const resolved = await http().get(`${pendingPath}?status=resolvida`).auth(tokens.consulta, { type: 'bearer' }).expect(200);
     expect(resolved.body).toEqual(expect.arrayContaining([expect.objectContaining({ pendenciaId: pending.body.pendenciaId,
-      descricao: 'Pendência livre sintética', status: 'resolvida' })]));
+      descricao: 'Pendência livre sintética', status: 'resolvida', dataResolucao: '2026-02-02' })]));
+    const pendingDetail = await http().get(`/pacientes/${patientId}/atendimentos/${attendanceId}`)
+      .auth(tokens.consulta, { type: 'bearer' }).expect(200);
+    expect(pendingDetail.body.pendencias).toEqual(expect.arrayContaining([expect.objectContaining({
+      pendenciaId: pending.body.pendenciaId, status: 'resolvida', dataResolucao: '2026-02-02',
+    })]));
+    await http().patch(path).auth(tokens.edicao, { type: 'bearer' }).send({ status: 'em_andamento' }).expect(200);
+    const reopened = await http().get(`${pendingPath}?status=em_andamento`).auth(tokens.consulta, { type: 'bearer' }).expect(200);
+    expect(reopened.body).toEqual(expect.arrayContaining([expect.objectContaining({
+      pendenciaId: pending.body.pendenciaId, status: 'em_andamento', dataResolucao: null,
+    })]));
     await http().patch(`/pacientes/${otherId}/pendencias/${pending.body.pendenciaId}`)
       .auth(tokens.administracao, { type: 'bearer' }).send({ status: 'em_andamento' }).expect(404);
   });

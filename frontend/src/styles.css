@@ -14,8 +14,8 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; font-size: 1rem; line-height: 1.6; }
-button, input, select { font: inherit; }
-button, a, input, select, summary { -webkit-tap-highlight-color: transparent; }
+button, input, select, textarea { font: inherit; }
+button, a, input, select, textarea, summary { -webkit-tap-highlight-color: transparent; }
 a { color: var(--primary); text-underline-offset: .2em; }
 a:hover { color: var(--primary-hover); }
 :focus-visible { outline: 3px solid var(--ring); outline-offset: 3px; }
@@ -57,8 +57,9 @@ p:last-child { margin-bottom: 0; }
 .button:disabled { background: #e5e7eb; border-color: #b8c1ce; color: #4b5563; cursor: default; }
 .form-field { display: grid; gap: .4rem; min-width: 0; }
 .form-field label { font-weight: 600; font-size: .9rem; }
-input, select { width: 100%; min-width: 0; min-height: 2.75rem; padding: .6rem .8rem; border: 1px solid #97a7bf; border-radius: .35rem; background: #fff; color: #111827; }
-input:disabled, select:disabled { background: #eef1f6; color: #4b5563; }
+input, select, textarea { width: 100%; min-width: 0; min-height: 2.75rem; padding: .6rem .8rem; border: 1px solid #97a7bf; border-radius: .35rem; background: #fff; color: #111827; }
+input:disabled, select:disabled, textarea:disabled { background: #eef1f6; color: #4b5563; }
+textarea { resize: vertical; }
 .filters { display: flex; flex-wrap: wrap; align-items: end; gap: 1rem; }
 .filters .form-field:first-child { flex: 1 1 15rem; }
 .filters .form-field { flex: 0 1 11rem; }
@@ -95,7 +96,7 @@ details[open] > summary { padding-bottom: 1rem; }
 .patient-summary p { margin-bottom: .5rem; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: 0 0 1rem; font-size: .9rem; }
-.breadcrumb > :not(:first-child)::before { content: '/'; padding-right: .5rem; color: var(--muted); }
+.breadcrumb > :not(:first-child)::before { content: ''; display: inline-block; height: .8em; border-left: 1px solid var(--muted); margin-right: .6rem; transform: rotate(18deg); }
 .empty-state, .loading-state { color: var(--muted); text-align: center; background: #f8fafc; border-radius: .5rem; padding: 2rem 1rem; }
 .loading-state { display: flex; justify-content: center; align-items: center; gap: .7rem; }
 .loading-state p { margin: 0; }
@@ -116,6 +117,17 @@ details[open] > summary { padding-bottom: 1rem; }
 .login-card .page-heading p { font-size: .9rem; }
 .login-card form { display: grid; gap: 1.1rem; }
 .login-footer { color: var(--muted); font-size: .8rem; text-align: center; }
+.form-body { border: 0; padding: 0; margin: 0; min-width: 0; }
+.form-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+.choice-field { margin: 1rem 0; min-width: 0; }
+.form-section { border: 1px solid var(--border); border-radius: .45rem; padding: 1rem; margin: 0 0 1.3rem; min-width: 0; }
+.form-section legend { font-weight: 650; padding: 0 .4rem; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 1rem; }
+.form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; margin: 1rem 0; }
+.repeat-row { display: flex; align-items: end; flex-wrap: wrap; gap: .8rem; margin-bottom: 1rem; }
+.repeat-row .form-field { flex: 1 1 15rem; }
+.draft-dialog { border: 1px solid var(--border); border-radius: .65rem; padding: 1.5rem; color: #111827; max-width: min(36rem, calc(100vw - 2rem)); }
+.draft-dialog::backdrop { background: #11182766; }
 @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
 @media (max-width: 800px) {
   .app-layout { grid-template-columns: minmax(0, 1fr); }

@@ -19,9 +19,22 @@ fontes vigentes.
 | Aceite integrado 5A–5E e matriz F01–F16/T01–T18 | [`validacoes/ACEITE_INTEGRADO_ETAPA_5.md`](validacoes/ACEITE_INTEGRADO_ETAPA_5.md) |
 | Implementação atual do importador | [`IMPORTADOR_SINTETICO_V1.md`](IMPORTADOR_SINTETICO_V1.md) |
 | Arquitetura do backend | [`ARQUITETURA_BACKEND.md`](ARQUITETURA_BACKEND.md) |
-| Aplicação frontend, setup e contratos de leitura | [`FRONTEND.md`](FRONTEND.md) |
+| Aplicação frontend, setup e contratos de leitura/escrita | [`FRONTEND.md`](FRONTEND.md) |
+| Produto frontend pretendido, perfis, fluxos e decisões propostas | [`frontend/VISAO_E_ESPECIFICACAO.md`](frontend/VISAO_E_ESPECIFICACAO.md) |
+| Inventário ponto a ponto Figma → requisito → implementação → lacuna → entrega → aceite | [`frontend/MATRIZ_FIGMA_FRONTEND.md`](frontend/MATRIZ_FIGMA_FRONTEND.md) |
+| Capturas comparáveis, observação no navegador e wireframes propostos | [`frontend/visuais/README.md`](frontend/visuais/README.md) |
 | Validação da fundação do frontend 6A–6B | [`validacoes/VALIDACAO_ETAPA_6.md`](validacoes/VALIDACAO_ETAPA_6.md) |
-| Referência Figma Make e planejamento do frontend | [`arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md`](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md) |
+| Recorte dos formulários clínicos 7A–7D | [`arquitetura/RECORTE_CLINICO_ETAPA_7.md`](arquitetura/RECORTE_CLINICO_ETAPA_7.md) |
+| Recuperação de escrita clínica e recibos por operação | [`arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md`](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) |
+| Paginação de snapshots e familiares | [`arquitetura/CONTRATO_FAMILIARES_ETAPA_7.md`](arquitetura/CONTRATO_FAMILIARES_ETAPA_7.md) |
+| Validação dos fluxos clínicos 7A–7D | [`validacoes/VALIDACAO_ETAPA_7.md`](validacoes/VALIDACAO_ETAPA_7.md) |
+| Cabeçalho e último atendimento independente da paginação | [`validacoes/VALIDACAO_7D_U3_1.md`](validacoes/VALIDACAO_7D_U3_1.md) |
+| Diagnóstico e avaliação por consulta selecionada | [`validacoes/VALIDACAO_7D_U3_2.md`](validacoes/VALIDACAO_7D_U3_2.md) |
+| Ordenação numérica de IDs em pendências, reações e lotes | [`validacoes/VALIDACAO_ORDENACAO_IDENTIFICADORES.md`](validacoes/VALIDACAO_ORDENACAO_IDENTIFICADORES.md) |
+| Roteiro e registro da revisão com a equipe clínica | [`validacoes/ROTEIRO_REVISAO_CLINICA_ETAPA_7.md`](validacoes/ROTEIRO_REVISAO_CLINICA_ETAPA_7.md) |
+| Trabalho local desde o commit `adf2fd5` e reauditoria da Etapa 7 | [`RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md`](RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md) |
+| Contratos dos catálogos clínicos ativos | [`arquitetura/CONTRATOS_CATALOGOS_ETAPA_7.md`](arquitetura/CONTRATOS_CATALOGOS_ETAPA_7.md) |
+| Fotografia histórica de integração do Figma Make (03/10) | [`arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md`](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md) |
 | Localização e uso dos materiais de referência | [`../referencias/README.md`](../referencias/README.md) |
 | Preparação da migração da planilha real | [`PROXIMOS_PASSOS.md`](PROXIMOS_PASSOS.md#preparação-da-migração-da-planilha-real) |
 | Segurança e política de dados | [`SEGURANCA_DE_DADOS.md`](SEGURANCA_DE_DADOS.md) |
@@ -42,6 +55,8 @@ matriz distinguem código existente, lacunas e trabalho técnico restante.
   planilha.
 - [`validacoes/`](validacoes/): relatórios de aceite e evidências de execução,
   com estágio e pendências identificados em cada documento.
+- [`frontend/`](frontend/): especificação proposta, comparação individual e
+  representações visuais; não substituem contratos nem aceites de implementação.
 - [`evidencias/`](evidencias/): artefatos estruturais; o dump vigente é
   [`schema_atual_ambulatorio.sql`](evidencias/schema_atual_ambulatorio.sql).
 - [`historico/`](historico/): fotografias anteriores, reconstruções históricas e

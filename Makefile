@@ -64,10 +64,14 @@ else
 	manifest-check manifest-source-check importer-fixture importer-run importer-dry-run importer-test \
 	backend-install backend-build backend-unit-test backend-db-setup backend-integration-test \
 	backend-foundation-e2e backend-clinical-test backend-check backend-up backend-container-check backend-logs backend-stop workflow-test \
-	frontend-install frontend-dev frontend-build frontend-unit-test frontend-e2e frontend-check
+	frontend-install frontend-dev frontend-build frontend-unit-test frontend-e2e frontend-check \
+	dev-sintetico-start dev-sintetico-status dev-sintetico-stop
 
 help:
 	@echo "Comandos disponíveis:"
+	@echo "  make dev-sintetico-start Inicia PostgreSQL/API/frontend exclusivos com dados sintéticos"
+	@echo "  make dev-sintetico-status Exibe prontidão, endereços e login sintético"
+	@echo "  make dev-sintetico-stop Encerra somente os recursos sintéticos deste ambiente"
 	@echo "  make help            Exibe esta ajuda"
 	@echo "  make git-status      Exibe status Git e últimos commits"
 	@echo "  make db-check        Valida conexão, banco, schema e usuário"
@@ -289,6 +293,15 @@ backend-logs: docker-config-check
 
 backend-stop: docker-config-check
 	@$(COMPOSE) stop backend
+
+dev-sintetico-start:
+	@python3 scripts/dev_sintetico.py start
+
+dev-sintetico-status:
+	@python3 scripts/dev_sintetico.py status
+
+dev-sintetico-stop:
+	@python3 scripts/dev_sintetico.py stop
 
 frontend-install:
 	@cd frontend && npm ci

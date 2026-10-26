@@ -1,10 +1,41 @@
 # Estado Atual do Projeto
 
-Atualizado em: 2026-10-04
+Atualizado em: 2026-10-17
 
 Esta é a síntese vigente. Contratos pertencem às fontes temáticas; o histórico
 cronológico está no [registro](REGISTRO_DE_ALTERACOES.md) e na
 [continuidade da Etapa 5](validacoes/CONTINUIDADE_ETAPA_5.md).
+
+**Continuidade de 2026-10-17:** adicionada demonstração sintética isolada por
+`make dev-sintetico-start/status/stop`, com instruções no
+[frontend](FRONTEND.md#demonstração-sintética-isolada). Corrigidos dois casos de
+interrupção na preparação de salvamentos. A integração clínica, fundação e SQL
+foram novamente validadas em servidor descartável; os resultados e limites estão
+na [continuidade técnica](validacoes/VALIDACAO_ETAPA_7.md#continuidade-de-2026-10-17--execução-autônoma-e-ambiente-sintético).
+
+A [unidade U3.1](validacoes/VALIDACAO_7D_U3_1.md) recebeu implementação e
+validação técnica: cabeçalho e último atendimento independentes da paginação,
+tipos de data desconhecida e desempate numérico. A
+[auditoria de ordenação](validacoes/VALIDACAO_ORDENACAO_IDENTIFICADORES.md)
+corrigiu também pendências, reações e lotes; 70 testes clínicos passaram.
+Uma seleção incorreta de ambiente durante validação SQL atingiu o Docker padrão
+com transações revertidas e possível avanço de sequências; a ocorrência está
+registrada no relatório U3.1. Não houve aplicação de migrations nesse ambiente.
+
+A [unidade U3.2](validacoes/VALIDACAO_7D_U3_2.md) também passou na validação
+técnica: abas de diagnóstico/avaliação por consulta escolhida explicitamente,
+com seleção na URL, paginação própria e dados ausentes sem herança entre visitas.
+O frontend possui 163 unitários aprovados; os novos percursos passaram com API
+real, incluindo revogação de vínculo durante paginação.
+
+**Continuidade de 2026-10-15:** o aceite integral da Etapa 7 permanece pendente.
+As sete lacunas da reauditoria receberam correções; o percurso clínico original
+passou integralmente pela interface. A regressão técnica foi concluída; a revisão
+de usabilidade com a equipe ainda é necessária. O
+[relatório vigente](validacoes/VALIDACAO_ETAPA_7.md) reúne as evidências novas;
+o [relatório de 05/10](RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md) é histórico.
+Os [pacotes do roadmap](PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend)
+definem decisões e aceites próprios para a evolução de UX/VU1.
 
 ## Escopo e estágio
 
@@ -15,22 +46,32 @@ relacionados na [matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md).
 **Etapa 6 (6A–6B) concluída no ambiente sintético em 2026-10-04**: aplicação
 própria em `frontend/`, sessão em memória, navegação e leitura pela API `/v1`.
 Setup e contratos estão em [FRONTEND.md](FRONTEND.md); a matriz de evidências
-está em [VALIDACAO_ETAPA_6.md](validacoes/VALIDACAO_ETAPA_6.md). Etapas 7–10
-permanecem futuras.
+está em [VALIDACAO_ETAPA_6.md](validacoes/VALIDACAO_ETAPA_6.md). **Etapa 7
+(7A–7D) com implementação e validação técnica sintética concluídas no recorte original em 2026-10-15**,
+com evidências em [VALIDACAO_ETAPA_7.md](validacoes/VALIDACAO_ETAPA_7.md).
+O aceite clínico com a equipe permanece pendente. Etapas 8–10 permanecem futuras.
 
 A [avaliação do protótipo Figma Make](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
 foi concluída em 2026-10-03, com inventário, compatibilidade HTTP e plano das
 Etapas 6–8. A fundação implementada usa React/TypeScript e apresentação revisada,
 preservando arquitetura e regras existentes. A análise mantém a fotografia do
 planejamento original; o [roadmap](PROXIMOS_PASSOS.md#etapa-6--fundação-do-frontend)
-continua definindo sequência e critérios de aceite. O próximo desenvolvimento
-previsto é 7A (cadastro e atendimentos), seguido das demais subetapas clínicas.
+continua definindo sequência e critérios de aceite. Os formulários seguem o
+[recorte clínico da Etapa 7](arquitetura/RECORTE_CLINICO_ETAPA_7.md), com suporte
+HTTP explícito para cada campo editável. A
+[visão de produto](frontend/VISAO_E_ESPECIFICACAO.md) e a
+[matriz Figma/frontend](frontend/MATRIZ_FIGMA_FRONTEND.md), de 05/10, sucedem a
+fotografia anterior para experiência pretendida, inventário e diferenças atuais.
+O próximo marco é concluir a revisão clínica da Etapa 7.
+Os novos pacotes de UX e complementos operacionais mantêm priorização própria.
 
 As respostas de [campos e regras clínicas](Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
 são autoritativas: idade derivada do nascimento, descoberta de Chagas distinta da
 sorologia, familiares identificados com resultado, exames identificados e retorno
 BZN ligado ao comparecimento real. Não há decisão humana pendente no escopo
-sintético. A governança delegada da 5A exige entitlement nominal para gestão,
+sintético já aprovado da 5A. A nova proposta de produto possui decisões P-01–09
+explicitamente pendentes, sem reabrir respostas clínicas aprovadas. A governança
+delegada da 5A exige entitlement nominal para gestão,
 independente do perfil administrativo e da autorização clínica por fonte.
 Designar pessoas e operar com dados reais pertencem à implantação posterior.
 
@@ -50,8 +91,11 @@ Designar pessoas e operar com dados reais pertencem à implantação posterior.
   `/v1`, com aliases compatíveis sem prefixo e recusa de versões inexistentes.
 - Frontend React/TypeScript com Vite, React Router e TanStack Query. Sessão e
   cache clínico separados; token em memória, identidade por `/auth/me`, busca
-  nome/sexo e ficha/histórico em leitura. A referência Figma Make não integra o
-  build. Não há escrita clínica ou gestão administrativa pela interface desta etapa.
+  nome/sexo, ficha/histórico e formulários clínicos 7A–7D. Rascunhos separados do
+  cache, versões originais, conflitos com comparação explícita e confirmação por
+  operação, com recuperação e preservação de recibos ainda parciais conforme R7.
+  A referência Figma Make não integra o build; gestão administrativa
+  permanece em etapa posterior.
 - A configuração de CI contempla manifesto, importador, SQL, backend, runner
   clínico e frontend (build, unitários e Chromium/API/PostgreSQL descartável).
   Há alvos Make com `COMPACT=1`; a CI remota ainda não foi executada nesta entrega.
@@ -65,6 +109,14 @@ encaminhamentos, contrarreferências múltiplas, fatos/retornos anuais e pendên
 Busca, filtros, coleções aninhadas e CSV seguem a mesma autorização por vínculo;
 CSV neutraliza fórmulas. Consultas de lotes/linhas retornam DTOs paginados e códigos
 técnicos, sem JSONB bruto ou mensagens clínicas de processamento.
+
+Os formulários consultam catálogos ativos paginados de exames, projetos e tipos
+de encaminhamento. A capacidade de cadastro respeita a política clínica e os
+perfis sem revelar pacientes/vínculos. Resolução de pendência exige data explícita;
+retorno exige comparecimento efetivo e não aceita data futura. Contratos e áreas
+sem HTTP estão no recorte da Etapa 7. A migration 64 acrescenta o ledger de
+correlação somente nos bancos descartáveis desta entrega; banco persistente e
+evidência física versionada permanecem preservados.
 
 Perfis `consulta`, `edicao` e `administracao` têm operações explícitas. Autenticação
 não concede vínculo ao paciente; administração também não concede entitlement
@@ -109,14 +161,28 @@ campos importados sem HTTP continuam sem consulta/edição pela interface.
 
 ## Validação e limites
 
+A análise documental de 05/10 partiu de `29b3186` e status limpo, preservando o
+código. Houve inspeção estática e Chromium do protótipo/aplicação com respostas
+HTTP interceptadas e dados sintéticos; as [capturas e observações](frontend/visuais/README.md)
+comprovam apenas composição/transições e defeitos indicados, sem API/banco reais.
+Não houve nova execução de suítes clínicas, migrations ou atualização do dump.
+Documentação, rastreabilidade, links, diagramas e diff foram conferidos.
+
 A Etapa 6 passou instalação limpa pelo lockfile, build TypeScript/Vite,
 47 testes de sessão/componentes, oito E2E Chromium/API/PostgreSQL e nove testes
 de workflow. A revisão incluiu teclado/foco, contraste automatizado, zoom/reflow
 e telas de 390/320 px. Comandos, evidências e limites estão no
-[relatório próprio](validacoes/VALIDACAO_ETAPA_6.md). Os resultados abaixo são
-as evidências anteriores da Etapa 5.
+[relatório próprio](validacoes/VALIDACAO_ETAPA_6.md). Na rodada histórica de
+04/10, a Etapa 7 passou build do
+frontend/backend,
+106 testes de componentes, 92 unitários/de contrato do backend, oito de fundação
+e 51 clínicos HTTP, 30 cenários Chromium/API/PostgreSQL, 34 testes SQL e nove
+testes do workflow. O
+[relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md) concentra as evidências,
+incluindo os resultados atuais de 15/10 e suas falhas intermediárias.
 
-Instalação limpa 02–63 e atualizações incrementais 60→61→62→63 aprovadas.
+Evidências anteriores da Etapa 5: instalação limpa 02–63 e atualizações
+incrementais 60→61→62→63 aprovadas.
 A rodada final passou 34 testes SQL, manifesto, 34 unitários e E2E do importador,
 build, 53 unitários/de contrato do backend, oito de fundação e 38 clínicos HTTP.
 As provas de concessão, recusa e reversão operacional estão incluídas; os testes
@@ -132,7 +198,8 @@ do prontuário. Planejamento D9 não produz comparecimento; upload avançado de
 contrarreferência permanece no backlog aprovado. Não há nova regra clínica inferida.
 
 Dados reais, implantação, TLS/segredos/backup/retenção e homologação institucional
-não fazem parte desta execução. Formulários clínicos e complementos da interface
-seguem as Etapas 7–8. O backlog e as próximas etapas
+não fazem parte desta execução. A revisão de usabilidade com a equipe clínica
+permanece pendente. Os formulários 7A–7D e a recuperação estão implementados;
+isso não declara aceite clínico ou dos novos pacotes de UX/VU1. O backlog e as próximas etapas
 estão em [PROXIMOS_PASSOS.md](PROXIMOS_PASSOS.md); regras e workflow estão no
 [índice da documentação](README.md).

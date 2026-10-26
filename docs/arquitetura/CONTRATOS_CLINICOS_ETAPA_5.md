@@ -93,8 +93,16 @@ As coleções de atendimentos, exames, projetos, retornos BZN e pendências usam
 arrays, mantendo o formato anterior. Ordenações possuem desempate por ID; a
 paginação por offset não promete snapshot entre requisições concorrentes.
 `GET /pacientes/:id/pendencias` aceita status e retorna somente `pendenciaId`,
-`atendimentoId`, `descricao`, `status` e `dataIdentificacao`. Recursos omitidos
+`atendimentoId`, `descricao`, `status`, `dataIdentificacao` e `dataResolucao`. Recursos omitidos
 dessas operações permanecem pendentes conforme o roadmap integral.
+
+Extensões da Etapa 7: pendências resolvidas exigem `dataResolucao` explícita
+também no POST e na criação composta do atendimento. Outros status recusam data
+preenchida; omissão cria `aberta`, enquanto `null` preserva o desconhecido.
+Retornos BZN e anuais exigem data efetiva não futura, validada contra
+`CURRENT_DATE` na transação do servidor. Consulta de catálogos ativos e capacidade
+de cadastro estão documentadas no
+[recorte HTTP da Etapa 7](RECORTE_CLINICO_ETAPA_7.md#extensões-http-necessárias).
 
 O detalhe do atendimento retorna `rastreiosFamiliares`, preservando todos os
 snapshots existentes e associando resultados somente ao respectivo ID. O campo

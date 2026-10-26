@@ -41,7 +41,8 @@ describe('Backend com PostgreSQL real', () => {
   it('percorre controller, service, repositório e retorna somente DTO público', async () => {
     const auth = await login(process.env.TEST_LOGIN_CONSULTA!, 'SenhaSintetica123!').expect(201);
     consultaToken = auth.body.accessToken;
-    expect(auth.body).toEqual({ accessToken: expect.any(String), tokenType: 'Bearer', expiresIn: 900 });
+    expect(auth.body).toEqual({ accessToken: expect.any(String), tokenType: 'Bearer',
+      expiresIn: Number(process.env.AUTH_JWT_EXPIRES_IN_SECONDS) });
     const response = await request(app.getHttpServer()).get('/pacientes?limit=100')
       .set('Authorization', `Bearer ${consultaToken}`).expect(200);
     const patient = response.body.find((item: { nome: string }) => item.nome === 'Paciente Backend Sintético');

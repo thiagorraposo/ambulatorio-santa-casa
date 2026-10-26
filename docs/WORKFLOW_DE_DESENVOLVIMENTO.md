@@ -72,7 +72,7 @@ não é provisionamento de produção. `make backend-check` cobre build, unitár
 autenticação, autorização, isolamento do pool e integração. A matriz e as
 pendências deliberadas estão em `docs/validacoes/VALIDACAO_ETAPA_4C.md`.
 
-## Frontend — fundação 6A–6B
+## Frontend — fundação 6A–6B e fluxos clínicos 7A–7D
 
 ```bash
 make frontend-install
@@ -92,8 +92,35 @@ No CI, Chromium é instalado com `--with-deps`.
 [FRONTEND.md](FRONTEND.md) para sessão, navegação, paginação e limites de contrato.
 Os resultados de aceite estão em
 [VALIDACAO_ETAPA_6.md](validacoes/VALIDACAO_ETAPA_6.md).
+Os formulários usam o mesmo check e CI. Playwright descobre os arquivos
+`tests/frontend/*.spec.ts`, incluindo regressão de leitura/escrita, familiares,
+percurso integrado, recuperação de 403 e dos acompanhamentos. O helper comum
+contabiliza a espera exigida pelo limiter real separadamente no timeout do
+cenário; ações continuam limitadas a 10 segundos, sem retry automático de teste.
+O [recorte clínico](arquitetura/RECORTE_CLINICO_ETAPA_7.md) delimita contratos e
+pendências; o [aceite da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md) registra suas
+evidências. Escrita deve ser comprovada na API/banco reais do runner, incluindo
+versão original, rollback, episódios repetíveis e falha de resposta após commit.
+Famílias exigem evidência de páginas independentes de snapshots e filhos;
+recuperação usa UUID/método/caminho/hash, registro, uma escrita e verificação ou
+encerramento sem reaplicar clínica. O
+[protocolo](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) enumera as 14 mutações;
+infraestrutura comum não dispensa comprovação das classes utilizadas. Recibos,
+rascunhos e contexto precisam sobreviver às navegações/reconsultas previstas,
+preservando a limpeza de sessão e a distinção de `null` na criação de pendências.
+Evidência técnica sintética não substitui revisão com a equipe nem aceita
+antecipadamente os pacotes propostos de UX ou a VU1.
 
 ## Comandos Oficiais
+
+Os testes SQL28, SQL29 e
+[SQL33](../tests/sql/33_validar_ciclo_conteudo_a_b_a.sql) preservam
+fixtures com COMMIT para provar efeitos entre transações. Cada rodada completa
+de SQL exige banco descartável novo e identificado como teste; não reutilize
+esse banco em outra rodada, mesmo após limpeza das fixtures HTTP. A guarda
+do SQL33 aceita nomes com `test`, `e2e`, `discard`, `descart`, `etapa5` ou
+`synthetic` (ou a identidade do CI efêmero). Não remova dados para contornar
+essa premissa de isolamento.
 
 Use os alvos do `Makefile` como interface local padrão:
 

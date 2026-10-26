@@ -2,8 +2,9 @@ const messages: Record<number, string> = {
   0: 'Não foi possível conectar ao serviço. Verifique sua conexão e tente novamente.',
   400: 'A solicitação não é válida. Revise os campos e filtros e tente novamente.',
   401: 'Sua sessão terminou. Entre novamente para continuar.',
-  403: 'Você não tem autorização para consultar este recurso.',
+  403: 'Você não tem autorização para esta operação ou recurso.',
   404: 'Registro ou página não disponível.',
+  409: 'Este registro foi alterado por outra pessoa ou a operação conflita com um registro existente. Consulte o estado atual antes de continuar.',
   429: 'Muitas tentativas. Aguarde um pouco antes de tentar novamente.',
   503: 'O serviço está indisponível ou este recurso está desabilitado. Tente novamente mais tarde.',
 };
@@ -58,8 +59,8 @@ export class ApiClient {
     return this.request<T>(path, { signal });
   }
 
-  async request<T>(path: string, options: { method?: 'GET' | 'POST'; body?: unknown;
-    signal?: AbortSignal; public?: boolean } = {}): Promise<T> {
+  async request<T>(path: string, options: { method?: 'GET' | 'POST' | 'PATCH' | 'PUT'; body?: unknown;
+    signal?: AbortSignal; public?: boolean; operationId?: string } = {}): Promise<T> {
     // Only application-relative, versioned URLs may receive the credential.
     if (!path.startsWith('/') || path.startsWith('//') || path.includes('\\')) throw new ApiError(400);
     const epoch = this.epoch;
@@ -81,6 +82,7 @@ export class ApiClient {
       const headers: Record<string, string> = { Accept: 'application/json' };
       if (!options.public && credential) headers.Authorization = `Bearer ${credential.token}`;
       if (options.body !== undefined) headers['Content-Type'] = 'application/json';
+      if (options.operationId) headers['X-Operacao-Id'] = options.operationId;
       const response = await this.fetcher(`/v1${path}`, {
         method: options.method ?? 'GET', headers, credentials: 'omit', cache: 'no-store',
         body: options.body === undefined ? undefined : JSON.stringify(options.body), signal: controller.signal,

@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Put, Query, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { Perfis } from '../auth/perfis.decorator';
@@ -6,7 +7,7 @@ import { ClinicalIdPipe } from '../clinico/clinical-validation';
 import { PageQuery } from '../clinico/dto/clinico.dto';
 import { AnnualAttendanceDto, AnnualReturnDto, ClinicalEventsQuery, CounterReferralDto, NotificationDto, PendingCreateDto, PendingUpdateDto,
   ProjectDto, ReferralDto, ReferralQuery } from '../clinico/dto/recursos.dto';
-import { AnnualReturnResponse, ClinicalEventResponse, CounterReferralResponse, NotificationResponse, ProjectResponse, ReferralResponse } from '../clinico/dto/recursos.response';
+import { AnnualReturnResponse, ClinicalEventResponse, CounterReferralResponse, ProjectResponse, ReferralResponse } from '../clinico/dto/recursos.response';
 import { RecursosClinicosService } from './recursos-clinicos.service';
 
 @Perfis('consulta', 'edicao', 'administracao')
@@ -27,9 +28,9 @@ export class RecursosClinicosController {
   }
 
   @Get('notificacao')
-  notification(@Param('id', ClinicalIdPipe) id: string,
-    @CurrentUser() user: AuthenticatedUser): Promise<NotificationResponse | null> {
-    return this.recursos.notification(user, id);
+  async notification(@Param('id', ClinicalIdPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser, @Res() response: Response): Promise<void> {
+    response.json(await this.recursos.notification(user, id));
   }
 
   @Put('notificacao') @Perfis('edicao', 'administracao')

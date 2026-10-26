@@ -1,17 +1,22 @@
-import { Link, useParams, useSearchParams } from 'react-router';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router';
 import type { PacienteDetalheResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
 import { Card, EmptyState, PageHeading, QueryState } from '../../shared/ui';
 import { clinicalLabel, displayText, formatAge, formatClinicalDate, triState } from '../../shared/formatters';
 import { AttendanceLink, Fields } from './components';
 import { pagePath, Pagination, usePage } from './pagination';
+import { useSession } from '../../app/session';
+import ClinicalActions from '../clinical/ClinicalActions';
+import { LatestAttendance } from './LatestAttendance';
+import { SelectedAttendance } from './SelectedAttendance';
 import {
   AttendanceHistory, PatientAnnualFollowup, PatientBzn, PatientExams, PatientNotification,
   PatientPending, PatientProjects, PatientReferrals,
 } from './PatientResources';
 
 const sections = [
-  ['dados', 'Dados do paciente'], ['atendimentos', 'Atendimentos'], ['exames', 'Exames'],
+  ['dados', 'Dados do paciente'], ['atendimentos', 'Atendimentos'], ['chagas', 'Chagas'],
+  ['avaliacao', 'Avaliação clínica'], ['exames', 'Exames'],
   ['bzn', 'BZN e retornos'], ['projetos', 'Projetos'], ['notificacao', 'Notificação'],
   ['encaminhamentos', 'Encaminhamentos'], ['pendencias', 'Pendências'], ['acompanhamento', 'Acompanhamento anual'],
 ] as const;
@@ -20,7 +25,7 @@ function PatientData({ data, changePage }: { data: PacienteDetalheResponse; chan
   return <Card>
     <h2>Dados do paciente</h2>
     <Fields items={[
-      ['Nascimento', formatClinicalDate(data.dataNascimento)], ['Sexo', clinicalLabel(data.sexo)],
+      ['Sexo', clinicalLabel(data.sexo)],
       ['Raça', clinicalLabel(data.raca)], ['Comunidade tradicional', triState(data.pertenceComunidadeTradicional)],
       ['Tipo de comunidade', displayText(data.tipoComunidadeTradicional)],
       ['Endereço', displayText(data.endereco?.endereco)], ['Cidade', displayText(data.endereco?.cidade)],
@@ -53,6 +58,8 @@ function PatientSection({ section, pacienteId, path, data, changePage }: {
   switch (section) {
     case 'dados': return <PatientData data={data} changePage={changePage} />;
     case 'atendimentos': return <AttendanceHistory pacienteId={pacienteId} path={path} />;
+    case 'chagas': return <SelectedAttendance pacienteId={pacienteId} section="chagas" />;
+    case 'avaliacao': return <SelectedAttendance pacienteId={pacienteId} section="avaliacao" />;
     case 'exames': return <PatientExams pacienteId={pacienteId} path={path} />;
     case 'bzn': return <PatientBzn pacienteId={pacienteId} path={path} />;
     case 'projetos': return <PatientProjects path={path} />;
@@ -65,6 +72,8 @@ function PatientSection({ section, pacienteId, path, data, changePage }: {
 }
 
 export default function PatientPage() {
+  const session = useSession();
+  const location = useLocation();
   const { pacienteId = '' } = useParams<{ pacienteId: string }>();
   const [searchParams] = useSearchParams();
   const section = searchParams.get('aba') ?? 'dados';
@@ -79,9 +88,16 @@ export default function PatientPage() {
         <Card className="patient-summary">
           <h2>{data.nome}</h2>
           <p>ID <span className="mono">{data.pacienteId}</span></p>
+          <p>Nascimento: <span>{formatClinicalDate(data.dataNascimento)}</span></p>
           <p>{formatAge(data.idade, data.dataReferenciaIdade)}</p>
-          <span className="badge">Consulta</span>
+          {location.state?.saved && <p className="notice" role="status">{String(location.state.saved)}</p>}
+          {session.user?.perfil !== 'consulta' && <div className="form-actions">
+            <Link to={`${path}/editar`} className="button button-secondary">Editar paciente</Link>
+            <Link to={`${path}/atendimentos/novo`} className="button">Novo atendimento</Link>
+            <Link to={`${path}/registrar?tipo=bzn`} className="button button-secondary">Registrar acompanhamento</Link>
+          </div>}
         </Card>
+        <LatestAttendance key={pacienteId} pacienteId={pacienteId} />
         <nav className="record-nav" aria-label="Seções da ficha">
           {sections.map(([value, label]) => {
             const next = new URLSearchParams(searchParams);
@@ -90,6 +106,7 @@ export default function PatientPage() {
           })}
         </nav>
         <PatientSection key={`${pacienteId}-${section}`} section={section} pacienteId={pacienteId} path={path} data={data} changePage={page.changePage} />
+        <ClinicalActions pacienteId={pacienteId} section={section} />
       </>}
     </QueryState>
   </>;

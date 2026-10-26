@@ -1,5 +1,230 @@
 # Registro de Alterações
 
+## 2026-10-17 — diagnóstico e avaliação por consulta selecionada
+
+Implementada a unidade técnica U3.2 com abas Chagas/Avaliação clínica, seleção
+explícita e paginação independente. A URL conserva consulta, aba e página;
+dados de visitas distintas não são consolidados. Painéis do detalhe são
+reutilizados, preservando desconhecidos, falso, zero e precisão numérica.
+403/404 nas opções ocultam o detalhe anterior sem apagar a seleção.
+
+Build e 163 unitários aprovados; quatro cenários de navegador aprovados,
+incluindo leitura antiga, detalhe, duas consultas com dados distintos/ausentes
+e revogação real de vínculo. Revisão independente sem defeitos materiais.
+Evidências e limite da breadcrumb na
+[validação U3.2](validacoes/VALIDACAO_7D_U3_2.md). Sem API nova ou migration.
+
+## 2026-10-17 — ordenação numérica de pendências, reações e lotes
+
+Corrigidas três leituras cujo ORDER BY resolvia o alias textual do ID, gerando
+ordem lexical. As consultas agora qualificam as colunas bigint originais;
+respostas mantêm IDs textuais e a mesma autorização/paginação. As regressões
+reproduziram as três falhas antes do ajuste, usando IDs grandes sintéticos.
+
+O teste clínico temporal passou a selecionar explicitamente `paciente.nome`,
+sem depender de coincidências de IDs de outras tabelas. O runner padrão inclui
+a nova regressão. Suíte clínica completa aprovada: 70 testes em 12 suítes.
+Evidências e limites na
+[validação da ordenação](validacoes/VALIDACAO_ORDENACAO_IDENTIFICADORES.md).
+Sem migration, dados persistentes alterados ou push.
+
+## 2026-10-17 — cabeçalho da ficha e último atendimento independente
+
+Implementada a unidade técnica 7D-U3.1: nascimento no cabeçalho e último
+atendimento por data registrada consultado independentemente da página dos
+dados cadastrais. Mantidos ID textual, idade com referência, contexto literal,
+estados de leitura e tratamento explícito de data desconhecida.
+
+Corrigidos tipos de leitura para data nullable e o desempate numérico de
+atendimentos: o ORDER BY sem qualificador resolvia a projeção textual do ID.
+Nova regressão HTTP verifica datas repetidas/nulas, IDs grandes, páginas e os
+três perfis. Componente, integração da ficha e percurso pelo navegador possuem
+evidências na [validação U3.1](validacoes/VALIDACAO_7D_U3_1.md).
+Sem migration ou inferência clínica. Uma chamada de validação atingiu por
+engano o Docker padrão: transações foram revertidas, mas sequências podem ter
+avançado. A ocorrência e a correção do comando estão registradas no relatório.
+
+## 2026-10-17 — execução sintética reproduzível e preparação de salvamentos
+
+Retomada autônoma com revisão independente do backend e frontend, preservando
+as alterações locais anteriores e os bancos persistentes. Corrigidas duas
+falhas da preparação: interrupção durante o hash agora conserva rascunho
+editável; resposta perdida ao registrar intenção conserva UUID e recuperação
+explícita, sem reenvio automático. Acrescentadas regressões focadas.
+Rótulos dos retornos BZN de 30 dias e final foram corrigidos na ficha, com
+regressão de apresentação dos dois tipos.
+
+Criado o supervisor `scripts/dev_sintetico.py`, com alvos Make de início, status
+e encerramento. A demonstração usa PostgreSQL próprio descartável, runner e
+fixture já existentes, estado privado em `/tmp` e portas locais separadas.
+README e documentação frontend descrevem execução e limites.
+O runner fixa o bind HTTP da API em loopback por `API_HOST`, validado na
+configuração do backend; o padrão do container permanece compatível. O
+supervisor encerra o grupo de processos próprio e garante a limpeza do
+container mesmo quando o runner excede o prazo de encerramento.
+Descendentes órfãos são identificados por marcador exclusivo e encerrados por
+pidfd; o suporte do Linux/Python é verificado antes da criação de recursos.
+As validações e ocorrências intermediárias estão no
+[relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md#continuidade-de-2026-10-17--execução-autônoma-e-ambiente-sintético).
+Sem aplicação de migrations no ambiente persistente, alteração do dump ou push.
+
+## 2026-10-15 — recuperação e prova integrada dos fluxos clínicos 7A–7D
+
+Preparado também o roteiro preenchível de revisão clínica, com tarefas por
+perfil, resultados observáveis e registro explícito do parecer humano.
+`test_e2e.sh --serve` usa sessão de 15 minutos para essa demonstração; os testes
+automáticos conservam os 60 segundos. A preparação não declara aceite da equipe.
+Verificação focada: sintaxe shell, Chromium com login/identidade/listagem/saída
+e TTL 900 real, documentação, links e diff; sem repetir suítes aprovadas de
+aplicação/schema, que não foram alterados por essa preparação.
+
+Continuada a implementação existente, preservando as alterações locais. Corrigidas
+as sete lacunas da reauditoria: paginação independente de snapshots/familiares;
+retomada consciente após 403; verificação de resultado incerto; criação de
+pendência com estado desconhecido; contexto de atendimento nos atalhos; comparação,
+cópia e descarte do rascunho BZN concorrente; recibos/valores durante falha
+temporária de identidade. Novos episódios são intenções explícitas, com histórico
+e confirmações anteriores preservados na sessão.
+
+A ADR-025 e a migration incremental 64 registram correlação por UUID/hash de
+14 mutações. O recibo participa do mesmo COMMIT clínico; verificar/encerrar não
+reexecuta a operação. Autor, perfil, vínculo e IDs textuais até bigint são
+validados. Migrations antigas, banco persistente e dump permanecem preservados.
+O contrato de familiares documenta seus novos recursos de leitura.
+
+Acrescentados cenários UI/API/PostgreSQL de familiares 30/50, fluxo completo pela
+interface (cadastro, composto, BZN/reação, retorno, encaminhamento/contrarreferência,
+pendência resolvida e histórico), recuperação após 403 e conservação de contexto/
+rascunhos/recibos. Separadores decorativos do breadcrumb deixaram de integrar
+nomes acessíveis. Os testes respeitam o limitador real de login com orçamento de
+espera separado e aguardam links/contextos carregados assincronamente.
+
+Build/backend, 120 unitários, 65 clínicos HTTP, regressão focada de nove casos de
+operações, oito testes de fundação, 136 unitários frontend, 38 E2E e nove
+testes de workflow passaram. O project-check passou em banco novo com 35 arquivos SQL;
+as fixtures SQL/TTL da fundação foram ajustadas às constraints/configuração reais.
+O alvo final frontend-check/docs-check passou, reaproveitando build/unitários
+aprovados na mesma versão do código de produção. Resultados,
+logs e falhas intermediárias estão no
+[relatório vigente](validacoes/VALIDACAO_ETAPA_7.md).
+
+Documentação técnica, roadmap, estado e índices atualizados. Aceite com a equipe
+clínica e CI remota permanecem sem evidência. Os pacotes de UX/VU1 propostos não
+foram declarados aceitos. Sem commit/push.
+
+## 2026-10-07 — organização da documentação frontend em commits
+
+Criada a branch `docs-frontend` a partir de `etapa7-commits`, no commit
+`29b3186`, preservando os 37 arquivos pendentes e o índice inicialmente vazio.
+As alterações foram organizadas em onze contextos: especificação e wireframes,
+capturas/anotações, matriz de navegação/cadastro/ficha, matriz de atendimento/
+acompanhamento, matriz operacional/estados, recuperação/aceite da Etapa 7,
+extensões clínicas, complementos do
+roadmap, limites técnicos, índices/fontes de estado e registro cronológico.
+
+Matriz e roadmap foram separados por seções no índice do Git, sem alterar o
+conteúdo final dos documentos no working tree. A conferência inclui hashes de
+preservação dos arquivos existentes, documentação, links, diff e status. A
+única extensão de conteúdo desta organização é esta entrada cronológica.
+Nenhuma funcionalidade, contrato ou migration foi modificada; as sete lacunas
+continuam abertas. Sem merge ou push.
+
+## 2026-10-05 — produto frontend, comparação Figma e roadmap verificável
+
+Criadas a [visão e especificação proposta](frontend/VISAO_E_ESPECIFICACAO.md)
+e a [matriz ponto a ponto](frontend/MATRIZ_FIGMA_FRONTEND.md), com 580 elementos/
+requisitos em 35 famílias, IDs estáveis, fontes, suporte HTTP, diferenças,
+decisões/destinos, aceite e rastreabilidade. Protótipo, intenção original,
+implementação atual, proposta e evidência são distinguidos. Regras clínicas
+vigentes prevalecem; ausência de API vira dependência, sem exclusão automática.
+
+O [roadmap oficial](PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend)
+preserva as dez etapas e 7A–7D, com pacotes e unidades separadamente aceitáveis,
+dependências por camada e evidência proporcional. Sete lacunas continuam abertas;
+recuperação após 403/409/resposta perdida, confirmação/contexto/desconhecido e
+percurso cadastro → atendimento → acompanhamento → histórico têm entregas
+próprias. VU1 sintética e visão posterior são propostas; P-01–09 aguardam decisão.
+
+O [caderno visual](frontend/visuais/README.md) registra 21 capturas sintéticas,
+pares desktop/móvel e anotações de diferenças, além de três wireframes SVG
+marcados PROPOSTA. Chromium executou o protótipo de cópia temporária e o frontend
+com todas as chamadas `/v1` interceptadas; isso não comprova API/banco reais.
+Cinco diagramas Mermaid foram analisados/renderizados, e os SVGs inspecionados.
+
+Índice, README, estado, uso técnico, ADR-024, recorte, análise histórica e relatório de reauditoria
+apontam às novas fontes sem reproduzir o inventário. A precisão sobre null
+em criação versus PATCH de pendência descreve o código existente; não muda o
+contrato. Conferência documental por `docs-check COMPACT=1`, links/âncoras,
+rastreabilidade, representações, diff e status. Nenhuma implementação, migration,
+dado real, atualização de dump, commit ou push. Suítes anteriores não foram
+repetidas em uma entrega exclusivamente documental.
+
+## 2026-10-05 — organização das alterações locais em commits
+
+Criada a branch `etapa7-commits` a partir de `etapa6-frontend`, no commit
+`adf2fd5`, preservando os 77 arquivos pendentes. As mudanças foram divididas
+em 13 contextos: correções dos contratos clínicos, catálogos/capacidade,
+testes backend, infraestrutura de escrita, testes de rascunhos, cadastro e
+atendimentos, testes do núcleo, acompanhamento, testes do acompanhamento,
+E2E, contratos/recorte, uso do frontend e evidências/reauditoria.
+
+Arquivos com contextos distintos foram separados pelo índice do Git, sem
+reescrever o conteúdo de implementação no working tree. Estado, roadmap e
+relatório de validação receberam referências à reauditoria e ao aceite
+pendente da Etapa 7, preservando as evidências anteriores.
+
+O código mantém o conteúdo das rodadas sintéticas já aprovadas e documentadas;
+a organização reaproveita essas validações. A conferência desta rodada abrange
+documentação, links, whitespace, preservação de conteúdo e estado final do Git.
+Nenhuma das sete lacunas foi corrigida nesta organização. Sem merge ou push.
+
+## 2026-10-05 — relatório do trabalho local e reauditoria da Etapa 7
+
+Gerado o [relatório desde o último commit](RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md),
+com base em `adf2fd5`: fotografia de 42 arquivos modificados e 34 novos antes
+do relatório. O documento distingue APIs já existentes, implementação local,
+validações executadas e limites, com inventário completo e evidências.
+
+A reauditoria confirmou sete lacunas ainda sem correção, além da ausência de
+um percurso positivo completo pela interface e da revisão com a equipe.
+O aceite integral da Etapa 7 foi antecipado; as suítes aprovadas comprovam
+somente os cenários executados. As exclusões originalmente autorizadas são
+registradas separadamente. Nesta rodada houve auditoria e documentação, sem
+correção de runtime, alteração do banco da prévia, commit ou push.
+
+## 2026-10-04 — fluxos clínicos e recuperação de escrita (7A–7D)
+
+Implementados cadastro/edição de pacientes com busca prévia, contatos/endereço e
+idade derivada; atendimentos versionados com criação transacional dos filhos
+aceitos; avaliação, descoberta de Chagas, exames, familiares e pendências. BZN e
+reações na criação, retornos BZN/anuais por comparecimento, fato anual separado,
+projetos, notificação, encaminhamentos e contrarreferências repetíveis integram
+a ficha e o histórico. Cada operação confirma seu resultado; falha posterior
+preserva o atendimento já confirmado e os demais rascunhos.
+
+Catálogos ativos paginados e capacidade de cadastro usam autorização própria.
+DTOs preservam estados desconhecidos e exigem data explícita para resolução;
+retornos futuros e objetos/arrays incompatíveis são recusados. A interface usa
+somente `/v1` e IDs/versões textuais. PATCH conserva a versão original; 409 oferece
+comparação por GET e descarte explícito antes de uma nova edição. Falha de rede
+ou confirmação inválida bloqueia a intenção e exige consulta, sem retry ou
+duplicação. Rascunhos em memória protegem navegação/recarregamento e são apagados
+na saída, 401, expiração ou troca de identidade. O diálogo contém o foco e o
+restaura ao fechar, inclusive durante reconsulta de acesso.
+
+O [recorte clínico](arquitetura/RECORTE_CLINICO_ETAPA_7.md) registra o destino dos
+campos e as áreas sem suporte HTTP; contratos, ADR-024, estado, roadmap, índice
+e workflow foram atualizados. Validação técnica sintética aprovada conforme
+o [relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md): build frontend/backend,
+106 unitários/componentes, 92 unitários/de contrato backend, oito testes de
+fundação, 51 clínicos HTTP, 30 cenários Chromium/API/PostgreSQL, 34 testes SQL e
+nove testes do workflow. O E2E comprovou a correção de foco do diálogo; SQL foi
+executado em banco novo com identificação de teste, sem registros prévios de
+revisão. Logs intermediários e finais estão no relatório. Revisão de usabilidade
+com a equipe e CI remota permanecem pendentes. Alterações preexistentes preservadas, sem nova
+migration, dependência, dado real, alteração do banco persistente ou protótipo,
+commit ou push.
+
 ## 2026-10-04 — fundação do frontend e integração das validações (6A–6B)
 
 Implementada e validada a aplicação própria React/TypeScript em `frontend/`,

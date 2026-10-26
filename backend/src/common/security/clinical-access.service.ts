@@ -39,9 +39,14 @@ export class ClinicalAccessService {
     }
   }
 
+  canCreate(user: AuthenticatedUser): boolean {
+    return this.policy !== 'desabilitada' && (user.perfil === 'administracao'
+      || (user.perfil === 'edicao' && this.policy === 'todos_sinteticos'));
+  }
+
   requireCreate(user: AuthenticatedUser): void {
     this.requireEnabled();
-    if (user.perfil === 'consulta' || (this.policy === 'vinculo_explicito' && user.perfil !== 'administracao')) {
+    if (!this.canCreate(user)) {
       throw new ForbiddenException('Cadastro não autorizado para este perfil');
     }
   }

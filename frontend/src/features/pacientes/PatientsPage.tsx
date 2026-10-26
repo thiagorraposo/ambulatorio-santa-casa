@@ -4,6 +4,7 @@ import type { PacienteResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
 import { Card, EmptyState, PageHeading, QueryState } from '../../shared/ui';
 import { pagePath, Pagination, usePage } from './pagination';
+import { PatientCreateLink } from '../clinical/PatientCreateGate';
 
 export default function PatientsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -32,6 +33,7 @@ export default function PatientsPage() {
   return (
     <>
       <PageHeading title="Pacientes" description="Busque e consulte os pacientes disponíveis para sua conta." />
+      <PatientCreateLink />
       <Card>
         <form className="filters" onSubmit={submit} aria-label="Busca de pacientes">
           <div className="form-field">

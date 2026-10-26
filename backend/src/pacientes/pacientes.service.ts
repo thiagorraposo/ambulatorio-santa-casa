@@ -1,8 +1,8 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { AuthenticatedUser } from '../auth/auth.types';
-import { DatabaseService } from '../common/database/database.service';
+import { DatabaseService, Transaction } from '../common/database/database.service';
 import { ClinicalAccessService } from '../common/security/clinical-access.service';
-import { databaseConflict } from '../clinico/clinical-validation';
+import { databaseConflict, rejectFuture, validatePendingResolution } from '../clinico/clinical-validation';
 import { AccessDto, AttendanceCreateDto, AttendanceUpdateDto, BznReturnDto, BznTreatmentCreateDto, PageQuery, PendingQuery, PatientCreateDto, PatientUpdateDto } from '../clinico/dto/clinico.dto';
 import { PacienteResponse } from './dto/paciente.response';
 import { PacientesRepository } from './pacientes.repository';
@@ -14,7 +14,7 @@ import { AtendimentoDetalheResponse, AtendimentoResumoResponse, DadosClinicosRes
   PacienteAtualizadoResponse, PacienteCriadoResponse } from '../clinico/dto/clinico.response';
 
 interface AttendanceRow {
-  atendimento_id: string; data_atendimento: string; localizacao_prontuario: string | null;
+  atendimento_id: string; data_atendimento: string | null; localizacao_prontuario: string | null;
   ambulatorio_unicamente: boolean | null; ambulatorio_anexo_projeto: boolean | null;
   observacoes: string | null; versao_registro: string;
 }
@@ -42,12 +42,13 @@ interface ExamRow {
 interface PendingAttendanceRow {
   pendencia_atendimento_id: string; descricao: string | null;
   status_pendencia: string | null; data_identificacao: string | null;
+  data_resolucao: string | null;
 }
 interface FamilyScreeningRow {
   rastreio_familiar_id: string; familiares_examinados: boolean | null;
 }
 interface FamilyResultRow {
-  rastreio_familiar_id: string; identificacao_familiar: string; resultado_sorologia: string;
+  rastreio_familiar_resultado_id: string; rastreio_familiar_id: string; identificacao_familiar: string; resultado_sorologia: string;
 }
 interface BznTreatmentRow {
   tratamento_benzonidazol_id: string; atendimento_id: string | null;
@@ -71,6 +72,15 @@ function examResponse(row: ExamRow): ExameResponse {
 export class PacientesService {
   constructor(private readonly repository: PacientesRepository, @Optional() private readonly database?: DatabaseService,
     @Optional() private readonly access?: ClinicalAccessService) {}
+
+  async capabilities(user: AuthenticatedUser): Promise<{ podeCadastrar: boolean }> {
+    if (!this.database || !this.access) throw new Error('Dependências clínicas indisponíveis');
+    return this.database.transaction(async tx => {
+      await this.access!.identity(tx, user);
+      return { podeCadastrar: this.access!.canCreate(user) };
+    });
+  }
+
   async list(query: ListarPacientesQuery, user: AuthenticatedUser): Promise<PacienteResponse[]> {
     if (!this.database || !this.access) throw new Error('Dependências clínicas indisponíveis');
     const result = await this.database.transaction(async (tx) => {
@@ -107,7 +117,7 @@ export class PacientesService {
       const [address, contacts, attendances] = [
         await tx.query<{ endereco: string | null; cidade: string | null }>('SELECT endereco,cidade FROM paciente_endereco WHERE paciente_id=$1 ORDER BY endereco_id DESC LIMIT 1', [id]),
         await tx.query<{ telefone: string | null }>('SELECT telefone FROM paciente_contato WHERE paciente_id=$1 ORDER BY contato_id LIMIT $2 OFFSET $3', [id,query.limit,query.offset]),
-        await tx.query<{ atendimento_id: string; data_atendimento: string; observacoes: string | null; versao_registro: string }>('SELECT atendimento_id::text,data_atendimento::text,observacoes,versao_registro::text FROM atendimento WHERE paciente_id=$1 ORDER BY data_atendimento DESC NULLS LAST, atendimento_id DESC LIMIT $2 OFFSET $3', [id,query.limit,query.offset]),
+        await tx.query<{ atendimento_id: string; data_atendimento: string | null; observacoes: string | null; versao_registro: string }>('SELECT atendimento_id::text,data_atendimento::text,observacoes,versao_registro::text FROM atendimento a WHERE paciente_id=$1 ORDER BY a.data_atendimento DESC NULLS LAST, a.atendimento_id DESC LIMIT $2 OFFSET $3', [id,query.limit,query.offset]),
       ];
       return { pacienteId: row.paciente_id, nome: row.nome, dataNascimento: row.data_nascimento, sexo: row.sexo,
         idade: row.idade, dataReferenciaIdade: row.data_referencia_idade,
@@ -196,7 +206,7 @@ export class PacientesService {
       await this.access!.patient(tx, user, patientId);
       const result = await tx.query<AttendanceRow>(`SELECT atendimento_id::text,data_atendimento::text,localizacao_prontuario,
         ambulatorio_unicamente,ambulatorio_anexo_projeto,observacoes,versao_registro::text
-        FROM atendimento WHERE paciente_id=$1 ORDER BY data_atendimento DESC NULLS LAST,atendimento_id DESC
+        FROM atendimento a WHERE paciente_id=$1 ORDER BY a.data_atendimento DESC NULLS LAST,a.atendimento_id DESC
         LIMIT $2 OFFSET $3`, [patientId, query.limit, query.offset]);
       return result.rows.map((x) => ({ atendimentoId: x.atendimento_id,
         dataAtendimento: x.data_atendimento, localizacaoProntuario: x.localizacao_prontuario,
@@ -238,8 +248,13 @@ export class PacientesService {
           (paciente_id,atendimento_id,tipo_exame_complementar_id,bloco_origem,tipo_exame_original,resultado_texto,observacoes)
           VALUES($1,$2,$3,$4,$5,$6,$7)`, [patientId,e.atendimentoId ?? id,e.tipoExameId,e.bloco,e.identificacao ?? null,e.resultado ?? null,e.observacoes ?? null]);
         }
-        for (const p of dto.pendencias ?? []) await tx.query(`INSERT INTO pendencia_atendimento
-          (atendimento_id,descricao,status_pendencia,data_identificacao) VALUES($1,$2,$3,$4)`, [id,p.descricao,p.status ?? 'aberta',dto.dataAtendimento]);
+        for (const p of dto.pendencias ?? []) {
+          validatePendingResolution(p.status, p.dataResolucao);
+          if (!p.descricao.trim()) throw new BadRequestException('Descrição da pendência é obrigatória');
+          await tx.query(`INSERT INTO pendencia_atendimento
+            (atendimento_id,descricao,status_pendencia,data_identificacao,data_resolucao) VALUES($1,$2,$3,$4,$5)`,
+          [id,p.descricao,p.status === undefined ? 'aberta' : p.status,dto.dataAtendimento,p.dataResolucao ?? null]);
+        }
         if (dto.rastreioFamiliar) {
           const f = dto.rastreioFamiliar;
           const fr = await tx.query<{ rastreio_familiar_id: string }>(`INSERT INTO rastreio_familiar
@@ -261,7 +276,7 @@ export class PacientesService {
         ambulatorio_unicamente,ambulatorio_anexo_projeto,observacoes,versao_registro::text
         FROM atendimento WHERE atendimento_id=$1 AND paciente_id=$2`, [attendanceId, patientId]);
       if (!attendance.rows[0]) throw new NotFoundException('Atendimento não encontrado');
-      const [clinical, diagnosis, exams, pending, family, familyResults] = [
+      const [clinical, diagnosis, exams, pending] = [
         await tx.query<ClinicalDataRow>(`SELECT altura_cm,peso_kg,circunferencia_abdominal_cm,frequencia_cardiaca_bpm,saturacao_percentual,
           pa_sistolica_mmhg,pa_diastolica_mmhg,nyha,observacoes FROM dados_clinicos_atendimento WHERE atendimento_id=$1`, [attendanceId]),
         await tx.query<DiagnosisRow>(`SELECT possui_diagnostico_chagas,status_diagnostico,resultado_final,data_resultado_final::text,
@@ -272,19 +287,9 @@ export class PacientesService {
           JOIN tipo_exame_complementar t ON t.tipo_exame_complementar_id=e.tipo_exame_complementar_id
           WHERE e.paciente_id=$1 AND e.atendimento_id=$2 ORDER BY e.paciente_exame_complementar_id
           LIMIT $3 OFFSET $4`, [patientId, attendanceId,query.limit,query.offset]),
-        await tx.query<PendingAttendanceRow>(`SELECT pendencia_atendimento_id::text,descricao,status_pendencia,data_identificacao::text
-          FROM pendencia_atendimento WHERE atendimento_id=$1 ORDER BY pendencia_atendimento_id
+        await tx.query<PendingAttendanceRow>(`SELECT pendencia_atendimento_id::text,descricao,status_pendencia,data_identificacao::text,data_resolucao::text
+          FROM pendencia_atendimento p WHERE atendimento_id=$1 ORDER BY p.pendencia_atendimento_id
           LIMIT $2 OFFSET $3`, [attendanceId,query.limit,query.offset]),
-        await tx.query<FamilyScreeningRow>(`SELECT rastreio_familiar_id::text,familiares_examinados FROM rastreio_familiar
-          WHERE paciente_id=$1 AND atendimento_id=$2 ORDER BY rastreio_familiar_id
-          LIMIT $3 OFFSET $4`, [patientId, attendanceId,query.limit,query.offset]),
-        await tx.query<FamilyResultRow>(`SELECT rastreio_familiar_id,identificacao_familiar,resultado_sorologia FROM (
-          SELECT r.rastreio_familiar_id::text,identificacao_familiar,resultado_sorologia,
-            row_number() OVER (PARTITION BY r.rastreio_familiar_id ORDER BY r.rastreio_familiar_resultado_id) AS posicao
-          FROM rastreio_familiar_resultado r JOIN rastreio_familiar f USING(rastreio_familiar_id)
-          WHERE f.paciente_id=$1 AND f.atendimento_id=$2
-        ) resultados WHERE posicao>$3 AND posicao<=$3+$4
-        ORDER BY rastreio_familiar_id,posicao`, [patientId, attendanceId,query.offset,query.limit]),
       ];
       const a = attendance.rows[0];
       const c = clinical.rows[0];
@@ -299,21 +304,75 @@ export class PacientesService {
         resultadoFinal: d.resultado_final, dataResultadoFinal: d.data_resultado_final,
         dataDescobertaAutorelato: d.data_descoberta_autorelato,
         criterioConfirmacao: d.criterio_confirmacao, observacoes: d.observacoes } : null;
-      const screenings: RastreioFamiliarResponse[] = family.rows.map((snapshot) => ({
-        rastreioFamiliarId: snapshot.rastreio_familiar_id,
-        familiaresExaminados: snapshot.familiares_examinados,
-        familiares: familyResults.rows.filter((result) => result.rastreio_familiar_id === snapshot.rastreio_familiar_id)
-          .map((result) => ({ rastreioFamiliarId: result.rastreio_familiar_id,
-            identificacaoFamiliar: result.identificacao_familiar, resultadoSorologia: result.resultado_sorologia })) }));
+      const screenings = await this.readFamilyScreenings(tx, patientId, attendanceId, query);
       return { atendimentoId: a.atendimento_id, dataAtendimento: a.data_atendimento,
         localizacaoProntuario: a.localizacao_prontuario, ambulatorioUnicamente: a.ambulatorio_unicamente,
         ambulatorioAnexoProjeto: a.ambulatorio_anexo_projeto, observacoes: a.observacoes, versao: a.versao_registro,
         dadosClinicos, diagnosticoChagas,
         exames: exams.rows.map(examResponse), pendencias: pending.rows.map((p): PendenciaAtendimentoResponse => ({
           pendenciaId: p.pendencia_atendimento_id, descricao: p.descricao, status: p.status_pendencia,
-          dataIdentificacao: p.data_identificacao })),
+          dataIdentificacao: p.data_identificacao, dataResolucao: p.data_resolucao })),
         rastreioFamiliar: screenings.length === 1 ? screenings[0] : null,
         rastreiosFamiliares: screenings, paginacaoColecoes: { limit: query.limit, offset: query.offset } };
+    });
+  }
+
+  private async readFamilyScreenings(tx: Transaction, patientId: string, attendanceId: string,
+    query: PageQuery): Promise<RastreioFamiliarResponse[]> {
+    const snapshots = await tx.query<FamilyScreeningRow>(`SELECT f.rastreio_familiar_id::text,f.familiares_examinados
+      FROM rastreio_familiar f WHERE f.paciente_id=$1 AND f.atendimento_id=$2 ORDER BY f.rastreio_familiar_id
+      LIMIT $3 OFFSET $4`, [patientId, attendanceId, query.limit, query.offset]);
+    if (!snapshots.rows.length) return [];
+    // A prévia começa no primeiro familiar de cada snapshot. O offset dos
+    // snapshots nunca desloca também seus filhos; o recurso específico os pagina.
+    const results = await tx.query<FamilyResultRow>(`SELECT rastreio_familiar_resultado_id,rastreio_familiar_id,
+      identificacao_familiar,resultado_sorologia FROM (
+        SELECT r.rastreio_familiar_resultado_id::text,r.rastreio_familiar_id::text,
+          identificacao_familiar,resultado_sorologia,
+          row_number() OVER (PARTITION BY r.rastreio_familiar_id ORDER BY r.rastreio_familiar_resultado_id) AS posicao
+        FROM rastreio_familiar_resultado r WHERE r.rastreio_familiar_id=ANY($1::bigint[])
+      ) resultados WHERE posicao<=$2 ORDER BY rastreio_familiar_id,posicao`,
+    [snapshots.rows.map(snapshot => snapshot.rastreio_familiar_id), 20]);
+    return snapshots.rows.map(snapshot => ({ rastreioFamiliarId: snapshot.rastreio_familiar_id,
+      familiaresExaminados: snapshot.familiares_examinados,
+      familiares: results.rows.filter(result => result.rastreio_familiar_id === snapshot.rastreio_familiar_id)
+        .map(result => ({ resultadoId: result.rastreio_familiar_resultado_id,
+          rastreioFamiliarId: result.rastreio_familiar_id, identificacaoFamiliar: result.identificacao_familiar,
+          resultadoSorologia: result.resultado_sorologia })),
+      paginacaoFamiliares: { limit: 20, offset: 0 } }));
+  }
+
+  async familyScreenings(user: AuthenticatedUser, patientId: string, attendanceId: string,
+    query = new PageQuery()): Promise<RastreioFamiliarResponse[]> {
+    if (!this.database || !this.access) throw new Error('Dependências clínicas indisponíveis');
+    return this.database.transaction(async tx => {
+      await this.access!.patient(tx, user, patientId);
+      const attendance = await tx.query('SELECT 1 FROM atendimento WHERE atendimento_id=$1 AND paciente_id=$2',
+        [attendanceId, patientId]);
+      if (!attendance.rowCount) throw new NotFoundException('Atendimento não encontrado');
+      return this.readFamilyScreenings(tx, patientId, attendanceId, query);
+    });
+  }
+
+  async familyResults(user: AuthenticatedUser, patientId: string, attendanceId: string, snapshotId: string,
+    query = new PageQuery()): Promise<RastreioFamiliarResponse> {
+    if (!this.database || !this.access) throw new Error('Dependências clínicas indisponíveis');
+    return this.database.transaction(async tx => {
+      await this.access!.patient(tx, user, patientId);
+      const snapshot = await tx.query<FamilyScreeningRow>(`SELECT f.rastreio_familiar_id::text,f.familiares_examinados
+        FROM rastreio_familiar f JOIN atendimento a USING(atendimento_id)
+        WHERE f.paciente_id=$1 AND a.paciente_id=$1 AND f.atendimento_id=$2 AND f.rastreio_familiar_id=$3`,
+      [patientId, attendanceId, snapshotId]);
+      if (!snapshot.rows.length) throw new NotFoundException('Rastreio familiar não encontrado');
+      const results = await tx.query<FamilyResultRow>(`SELECT r.rastreio_familiar_resultado_id::text,r.rastreio_familiar_id::text,
+        r.identificacao_familiar,r.resultado_sorologia FROM rastreio_familiar_resultado r
+        WHERE r.rastreio_familiar_id=$1 ORDER BY r.rastreio_familiar_resultado_id LIMIT $2 OFFSET $3`,
+      [snapshotId, query.limit, query.offset]);
+      return { rastreioFamiliarId: snapshotId, familiaresExaminados: snapshot.rows[0].familiares_examinados,
+        familiares: results.rows.map(result => ({ resultadoId: result.rastreio_familiar_resultado_id,
+          rastreioFamiliarId: result.rastreio_familiar_id, identificacaoFamiliar: result.identificacao_familiar,
+          resultadoSorologia: result.resultado_sorologia })),
+        paginacaoFamiliares: { limit: query.limit, offset: query.offset } };
     });
   }
 
@@ -342,6 +401,8 @@ export class PacientesService {
         if (!attendance.rowCount) throw new ConflictException('Atendimento não pertence ao paciente');
         const treatment = await tx.query('SELECT 1 FROM tratamento_benzonidazol WHERE paciente_id=$1 FOR SHARE', [patientId]);
         if (!treatment.rowCount) throw new ConflictException('Retorno exige tratamento BZN do paciente');
+        const today = await tx.query<{ data_atual: string }>('SELECT CURRENT_DATE::text AS data_atual');
+        rejectFuture(dto.dataRealizada, today.rows[0].data_atual);
         const result = await tx.query<{ acompanhamento_cuidado_id: string }>(`INSERT INTO acompanhamento_cuidado
           (atendimento_id,data_realizada,retorno_programado,compareceu,status_acompanhamento,tipo_acompanhamento,resumo_acompanhamento)
           VALUES($1,$2,false,true,'concluido',$3,$4) RETURNING acompanhamento_cuidado_id::text`,
@@ -393,8 +454,8 @@ export class PacientesService {
         FROM tratamento_benzonidazol WHERE paciente_id=$1`, [patientId]);
       if (!treatment.rows[0]) return null;
       const reactions = await tx.query<BznReactionRow>(`SELECT reacao_adversa_benzonidazol_id::text,descricao,gravidade,
-        data_reacao::text,consequencia,observacoes FROM reacao_adversa_benzonidazol
-        WHERE tratamento_benzonidazol_id=$1 ORDER BY reacao_adversa_benzonidazol_id`, [treatment.rows[0].tratamento_benzonidazol_id]);
+        data_reacao::text,consequencia,observacoes FROM reacao_adversa_benzonidazol r
+        WHERE tratamento_benzonidazol_id=$1 ORDER BY r.reacao_adversa_benzonidazol_id`, [treatment.rows[0].tratamento_benzonidazol_id]);
       const t = treatment.rows[0];
       return { tratamentoId: t.tratamento_benzonidazol_id, atendimentoId: t.atendimento_id,
         temIndicacao: t.tem_indicacao, iniciado: t.iniciado,
@@ -426,14 +487,15 @@ export class PacientesService {
     return this.database.transaction(async (tx) => {
       await this.access!.patient(tx, user, patientId);
       const result = await tx.query<{ pendencia_id: string; atendimento_id: string; descricao: string;
-        status_pendencia: string | null; data_identificacao: string | null }>(`SELECT p.pendencia_atendimento_id::text AS pendencia_id,
-        p.atendimento_id::text,p.descricao,p.status_pendencia,p.data_identificacao::text
+        status_pendencia: string | null; data_identificacao: string | null; data_resolucao: string | null }>(`SELECT p.pendencia_atendimento_id::text AS pendencia_id,
+        p.atendimento_id::text,p.descricao,p.status_pendencia,p.data_identificacao::text,p.data_resolucao::text
         FROM pendencia_atendimento p JOIN atendimento a USING(atendimento_id)
         WHERE a.paciente_id=$1 AND ($2::text IS NULL OR p.status_pendencia=$2)
         ORDER BY p.data_identificacao DESC NULLS LAST,p.pendencia_atendimento_id DESC LIMIT $3 OFFSET $4`,
       [patientId, query.status ?? null, query.limit, query.offset]);
       return result.rows.map(row => ({ pendenciaId: row.pendencia_id, atendimentoId: row.atendimento_id,
-        descricao: row.descricao, status: row.status_pendencia, dataIdentificacao: row.data_identificacao }));
+        descricao: row.descricao, status: row.status_pendencia, dataIdentificacao: row.data_identificacao,
+        dataResolucao: row.data_resolucao }));
     });
   }
 

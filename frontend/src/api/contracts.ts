@@ -16,6 +16,7 @@ export interface LoginResponse {
 
 export interface ColecaoPaginaResponse { limit: number; offset: number }
 export interface PacienteResponse { pacienteId: string; nome: string }
+export interface PacienteCapacidadesResponse { podeCadastrar: boolean }
 
 export interface PacienteDetalheResponse {
   pacienteId: string;
@@ -33,7 +34,7 @@ export interface PacienteDetalheResponse {
   paginacaoColecoes: ColecaoPaginaResponse;
   atendimentos: Array<{
     atendimentoId: string;
-    dataAtendimento: string;
+    dataAtendimento: string | null;
     observacoes: string | null;
     versao: string;
   }>;
@@ -41,7 +42,7 @@ export interface PacienteDetalheResponse {
 
 export interface AtendimentoResumoResponse {
   atendimentoId: string;
-  dataAtendimento: string;
+  dataAtendimento: string | null;
   localizacaoProntuario: string | null;
   ambulatorioUnicamente: boolean | null;
   ambulatorioAnexoProjeto: boolean | null;
@@ -87,9 +88,11 @@ export interface PendenciaAtendimentoResponse {
   descricao: string | null;
   status: string | null;
   dataIdentificacao: string | null;
+  dataResolucao: string | null;
 }
 
 export interface FamiliarExaminadoResponse {
+  resultadoId: string;
   rastreioFamiliarId: string;
   identificacaoFamiliar: string;
   resultadoSorologia: string;
@@ -99,6 +102,7 @@ export interface RastreioFamiliarResponse {
   rastreioFamiliarId: string;
   familiaresExaminados: boolean | null;
   familiares: FamiliarExaminadoResponse[];
+  paginacaoFamiliares: ColecaoPaginaResponse;
 }
 
 export interface AtendimentoDetalheResponse extends AtendimentoResumoResponse {
@@ -202,6 +206,7 @@ export interface PendenciaResponse {
   descricao: string;
   status: string | null;
   dataIdentificacao: string | null;
+  dataResolucao: string | null;
 }
 
 export interface ClinicalEventResponse {

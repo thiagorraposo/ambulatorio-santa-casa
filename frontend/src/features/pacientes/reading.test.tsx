@@ -12,6 +12,7 @@ import PatientPage from './PatientPage';
 import PatientsPage from './PatientsPage';
 
 vi.mock('../../api/useApiQuery', () => ({ useApiQuery: vi.fn() }));
+vi.mock('../../app/session', () => ({ useSession: () => ({ user: { usuarioId: '42', nome: 'Consulta sintética', perfil: 'consulta' } }) }));
 
 const ID = '9007199254740993';
 const responses = new Map<string, unknown>();
@@ -42,6 +43,7 @@ function successful<T>(data: T): UseQueryResult<T, ApiError> {
 beforeEach(() => {
   responses.clear();
   responses.set(`/pacientes/${ID}?limit=20&offset=0`, patient);
+  responses.set(`/pacientes/${ID}/atendimentos?limit=1&offset=0`, []);
   vi.mocked(useApiQuery).mockImplementation(<T,>(path: string): UseQueryResult<T, ApiError> => {
     const value = responses.get(path);
     if (value instanceof ApiError) return {
@@ -114,6 +116,57 @@ describe('busca e paginação de pacientes', () => {
 });
 
 describe('ficha por recurso', () => {
+  it('abre Chagas e avaliação por demanda preservando a consulta selecionada entre abas', async () => {
+    const user = userEvent.setup();
+    const attendance = { atendimentoId: '9007199254740995', dataAtendimento: '2026-02-21',
+      localizacaoProntuario: null, ambulatorioUnicamente: null, ambulatorioAnexoProjeto: null,
+      observacoes: null, versao: '1' };
+    responses.set(`/pacientes/${ID}/atendimentos?limit=20&offset=0`, [attendance]);
+    responses.set(`/pacientes/${ID}/atendimentos/${attendance.atendimentoId}?limit=1&offset=0`, {
+      ...attendance, dadosClinicos: null, diagnosticoChagas: null,
+      exames: [], pendencias: [], rastreioFamiliar: null, rastreiosFamiliares: [],
+      paginacaoColecoes: { limit: 1, offset: 0 },
+    });
+    renderRoute(<PatientPage />, `/pacientes/${ID}?dadosOffset=0&nome=Pessoa`, '/pacientes/:pacienteId');
+    expect(useApiQuery).not.toHaveBeenCalledWith(`/pacientes/${ID}/atendimentos?limit=20&offset=0`);
+    const navigation = within(screen.getByRole('navigation', { name: 'Seções da ficha' }));
+    await user.click(navigation.getByRole('link', { name: 'Chagas' }));
+    expect(screen.getByRole('combobox', { name: 'Atendimento para consulta clínica' })).toHaveValue('');
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Atendimento para consulta clínica' }), attendance.atendimentoId);
+    expect(screen.getByText('Diagnóstico não registrado neste atendimento.')).toBeVisible();
+    await user.click(navigation.getByRole('link', { name: 'Avaliação clínica' }));
+    expect(screen.getByRole('combobox', { name: 'Atendimento para consulta clínica' })).toHaveValue(attendance.atendimentoId);
+    expect(screen.getByText('Dados clínicos não registrados neste atendimento.')).toBeVisible();
+    expect(screen.getByTestId('location')).toHaveTextContent('nome=Pessoa');
+    expect(screen.getByTestId('location')).toHaveTextContent(`atendimentoId=${attendance.atendimentoId}`);
+    await user.click(screen.getByRole('button', { name: 'Voltar no navegador' }));
+    expect(screen.getByText('Diagnóstico não registrado neste atendimento.')).toBeVisible();
+  });
+
+  it('identifica nascimento e última consulta mesmo fora da primeira página dos dados', () => {
+    responses.set(`/pacientes/${ID}?limit=1&offset=20`, {
+      ...patient, telefones: ['Telefone sintético da página 20'],
+      atendimentos: [{ atendimentoId: '81', dataAtendimento: '2020-01-01', observacoes: null, versao: '1' }],
+      paginacaoColecoes: { limit: 1, offset: 20 },
+    });
+    responses.set(`/pacientes/${ID}/atendimentos?limit=1&offset=0`, [{
+      atendimentoId: '9007199254740995', dataAtendimento: '2026-02-21', localizacaoProntuario: null,
+      ambulatorioUnicamente: null, ambulatorioAnexoProjeto: null, observacoes: null, versao: '1',
+    }]);
+    renderRoute(<PatientPage />, `/pacientes/${ID}?dadosLimit=1&dadosOffset=20`, '/pacientes/:pacienteId');
+    const header = screen.getByRole('heading', { name: patient.nome }).closest('section')!;
+    expect(header).toHaveTextContent('Nascimento: 10/02/1980');
+    expect(within(header).getByText('10/02/1980')).toBeVisible();
+    expect(within(header).getByText('37 anos · referência: 01/01/2001')).toBeVisible();
+    const latest = screen.getByRole('heading', { name: 'Último atendimento por data registrada' }).closest('section')!;
+    expect(within(latest).getByText('21/02/2026')).toBeVisible();
+    expect(within(latest).getByRole('link', { name: 'Abrir último atendimento 9007199254740995' })).toHaveAttribute(
+      'href', `/pacientes/${ID}/atendimentos/9007199254740995`,
+    );
+    expect(screen.getByRole('link', { name: 'Atendimento 81' })).toBeVisible();
+    expect(screen.getByText('Telefone sintético da página 20')).toBeVisible();
+  });
+
   it('normaliza scopes simultâneos sem perder correções, filtros ou scopes válidos', () => {
     responses.set(`/pacientes/${ID}?limit=20&offset=2`, {
       ...patient, paginacaoColecoes: { limit: 20, offset: 2 },
@@ -147,7 +200,9 @@ describe('ficha por recurso', () => {
     expect(screen.getByText('10/02/1980')).toBeVisible();
     expect(screen.getByText('37 anos · referência: 01/01/2001')).toBeVisible();
     expect(screen.getByText('legado_sintetico')).toBeVisible();
-    expect(vi.mocked(useApiQuery).mock.calls.every(([path]) => path === `/pacientes/${ID}?limit=20&offset=0`)).toBe(true);
+    expect(vi.mocked(useApiQuery).mock.calls.every(([path]) => [
+      `/pacientes/${ID}?limit=20&offset=0`, `/pacientes/${ID}/atendimentos?limit=1&offset=0`,
+    ].includes(path))).toBe(true);
 
     await user.click(within(screen.getByRole('navigation', { name: 'Seções da ficha' })).getByRole('link', { name: 'Projetos' }));
     expect(screen.getByText('Projeto Sintético')).toBeVisible();
@@ -202,11 +257,25 @@ describe('ficha por recurso', () => {
     expect(screen.getByRole('heading', { name: 'Retornos BZN' })).toBeVisible();
     expect(screen.getByText('Nenhum registro nesta página.')).toBeVisible();
   });
+
+  it('apresenta os tipos de retorno BZN com os nomes usados no registro clínico', () => {
+    responses.set(`/pacientes/${ID}/tratamento-bzn`, null);
+    responses.set(`/pacientes/${ID}/retornos-bzn?limit=20&offset=0`, [
+      { retornoId: '81', atendimentoId: '71', dataRealizada: '2024-03-30',
+        tipo: 'retorno_bzn_30_dias', status: 'realizado', resumo: null },
+      { retornoId: '82', atendimentoId: '72', dataRealizada: '2024-04-30',
+        tipo: 'retorno_bzn_final', status: 'realizado', resumo: null },
+    ]);
+    renderRoute(<PatientPage />, `/pacientes/${ID}?aba=bzn`, '/pacientes/:pacienteId');
+    expect(screen.getByText('Retorno BZN de 30 dias')).toBeVisible();
+    expect(screen.getByText('Retorno BZN final')).toBeVisible();
+    expect(screen.queryByText('retorno_bzn_30_dias')).not.toBeInTheDocument();
+    expect(screen.queryByText('retorno_bzn_final')).not.toBeInTheDocument();
+  });
 });
 
 describe('atendimento e coleções aninhadas', () => {
-  it('preserva decimais, vários rastreios e pagina todas as coleções com os parâmetros retornados', async () => {
-    const user = userEvent.setup();
+  it('preserva decimais e lê rastreios/familiares pelos recursos independentes', () => {
     const attendance: AtendimentoDetalheResponse = {
       atendimentoId: '71', dataAtendimento: '2024-02-29', localizacaoProntuario: null,
       ambulatorioUnicamente: false, ambulatorioAnexoProjeto: null, observacoes: null, versao: '1',
@@ -218,15 +287,15 @@ describe('atendimento e coleções aninhadas', () => {
       },
       exames: [], pendencias: [], rastreioFamiliar: null,
       rastreiosFamiliares: [
-        { rastreioFamiliarId: '81', familiaresExaminados: true, familiares: [{ rastreioFamiliarId: '81', identificacaoFamiliar: 'Familiar sintético A', resultadoSorologia: 'positivo' }] },
-        { rastreioFamiliarId: '82', familiaresExaminados: false, familiares: [] },
+        { rastreioFamiliarId: '81', familiaresExaminados: true, familiares: [{ resultadoId: '901', rastreioFamiliarId: '81', identificacaoFamiliar: 'Familiar sintético A', resultadoSorologia: 'positivo' }], paginacaoFamiliares: { limit: 20, offset: 0 } },
+        { rastreioFamiliarId: '82', familiaresExaminados: false, familiares: [], paginacaoFamiliares: { limit: 20, offset: 0 } },
       ],
       paginacaoColecoes: { limit: 2, offset: 0 },
     };
     responses.set(`/pacientes/${ID}/atendimentos/71?limit=2&offset=0`, attendance);
-    responses.set(`/pacientes/${ID}/atendimentos/71?limit=2&offset=2`, {
-      ...attendance, rastreiosFamiliares: [], paginacaoColecoes: { limit: 2, offset: 2 },
-    });
+    responses.set(`/pacientes/${ID}/atendimentos/71/rastreios-familiares?limit=20&offset=0`, attendance.rastreiosFamiliares);
+    for (const snapshot of attendance.rastreiosFamiliares) responses.set(
+      `/pacientes/${ID}/atendimentos/71/rastreios-familiares/${snapshot.rastreioFamiliarId}/familiares?limit=20&offset=0`, snapshot);
     renderRoute(<AttendancePage />, `/pacientes/${ID}/atendimentos/71?limit=2&offset=0`, '/pacientes/:pacienteId/atendimentos/:atendimentoId');
     expect(screen.getByText('9007199254740993,123456789000 cm')).toBeVisible();
     expect(screen.getByText('0 bpm')).toBeVisible();
@@ -235,10 +304,9 @@ describe('atendimento e coleções aninhadas', () => {
     expect(screen.getByRole('heading', { name: 'Rastreio 81' })).toBeVisible();
     expect(screen.getByRole('heading', { name: 'Rastreio 82' })).toBeVisible();
     expect(screen.getByRole('heading', { name: 'Atendimento de 29/02/2024' })).toBeVisible();
-    await user.click(screen.getByRole('button', { name: 'Próxima' }));
-    expect(screen.getByTestId('location')).toHaveTextContent('limit=2&offset=2');
-    expect(screen.getByText('Nenhum rastreio nesta página.')).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Anterior' })).toBeEnabled();
-    expect(vi.mocked(useApiQuery).mock.calls.every(([path]) => path.includes(`/pacientes/${ID}/atendimentos/71?`))).toBe(true);
+    expect(screen.getByRole('navigation', { name: 'Paginação de coleções do atendimento' })).toBeVisible();
+    expect(screen.getByRole('navigation', { name: 'Paginação de rastreios familiares' })).toBeVisible();
+    expect(useApiQuery).toHaveBeenCalledWith(`/pacientes/${ID}/atendimentos/71/rastreios-familiares?limit=20&offset=0`);
+    expect(useApiQuery).toHaveBeenCalledWith(`/pacientes/${ID}/atendimentos/71/rastreios-familiares/81/familiares?limit=20&offset=0`);
   });
 });

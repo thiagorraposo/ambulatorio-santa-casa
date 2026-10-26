@@ -173,14 +173,14 @@ test('link direto do atendimento, recarregamento e voltar preservam o destino', 
   await expect(page.getByText('Observação sintética 1', { exact: true })).toBeVisible();
   await expect(page.getByText('03/05/2010', { exact: true })).toBeVisible();
   await expect(page.getByText('Resultado familiar sintético', { exact: true })).toBeVisible();
-  await expect(page.getByText('Resultado familiar embutido sintético 2', { exact: true })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Próxima', exact: true }).click();
+  await expect(page.getByText('Resultado familiar embutido sintético 2', { exact: true })).toBeVisible();
+  const collections = page.getByRole('navigation', { name: 'Paginação de coleções do atendimento' });
+  await collections.getByRole('button', { name: 'Próxima', exact: true }).click();
   await expect(page).toHaveURL(/offset=1/);
-  await expect(page.getByText('Resultado familiar sintético', { exact: true })).toHaveCount(0);
-  // A página do snapshot e de seus familiares usa o mesmo offset: a API pode
-  // retornar rastreio vazio nesta página; a interface preserva esse contrato.
+  // Exames/pendências não deslocam os snapshots nem a página de cada familiar.
+  await expect(page.getByText('Resultado familiar sintético', { exact: true })).toBeVisible();
   await expect(page.getByText('Resultado embutido sintético 2', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Anterior', exact: true }).click();
+  await collections.getByRole('button', { name: 'Anterior', exact: true }).click();
   await expect(page.getByText('Resultado familiar sintético', { exact: true })).toBeVisible();
   await page.reload();
   await expect(page.getByLabel('Usuário', { exact: true })).toBeVisible();

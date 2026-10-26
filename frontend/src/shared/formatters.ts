@@ -47,6 +47,7 @@ const labels: Readonly<Record<string, string>> = {
   positivo: 'Positivo', negativo: 'Negativo', reagente: 'Reagente', nao_reagente: 'Não reagente',
   trazido: 'Trazido', exames_trazidos: 'Exames trazidos', exames_solicitados: 'Exames solicitados',
   retorno_bzn: 'Retorno BZN', retorno_anual: 'Retorno anual',
+  retorno_bzn_30_dias: 'Retorno BZN de 30 dias', retorno_bzn_final: 'Retorno BZN final',
   ultimo_comparecimento_ano_informado: 'Último comparecimento — ano informado', ano: 'Ano',
 };
 
