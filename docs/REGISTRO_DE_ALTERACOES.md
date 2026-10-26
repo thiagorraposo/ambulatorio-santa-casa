@@ -1,5 +1,47 @@
 # Registro de Alterações
 
+## 2026-10-26 — estruturar o CI por componente
+
+Preservada e commitada a correção de ripgrep/portas. CI reorganizado em Quality,
+Database, Backend e Frontend independentes, com PRs para main, push em main e
+execução manual. Actions oficiais fixadas por SHA, Node/npm fixados, PostgreSQL
+em tmpfs e confirmação de destino antes do bootstrap; nenhum volume persistente
+é usado. Logs compactos filtrados são preservados em falha, com retenção curta.
+
+Acrescentados `repository-check` e regressões sintéticas para sintaxe e whitespace
+commitado. Separadas as suítes do backend por diretório: o mock de revisão foi
+movido para unitários sem alterar seus casos; descoberta clínica preserva todos
+os arquivos e inclui novos testes automaticamente. Unitários: 18 suítes,
+121 testes aprovados, sem ignorados. O diagnóstico frontend agora inclui caudas
+internas filtradas em falha, com regressão sem SQL que verifica status e redação.
+Quality passou com 27 testes. A configuração passou em actionlint e na
+revisão dos scripts de inicialização. Evidências locais anteriores não foram
+repetidas sem motivo; validação integral e revisão do PR fazem parte da missão.
+Resultados remotos e critérios de aceite serão registrados no PR da branch
+`fix/ci-validacoes`; o procedimento está no workflow de desenvolvimento e no
+[relatório existente](validacoes/VALIDACAO_CI_2026_10_26.md).
+
+## 2026-10-26 — corrigir dependência e porta do CI
+
+Consultados os logs das execuções 40369782887, 40369517682 e 37256017821:
+todas pararam na linha 109 do E2E do importador por ausência de `rg`, após o
+manifesto e os 34 testes de transformação aprovados. Reprodução descartável
+confirmou o erro 127, propagado pelo Make como 2. Com `rg` disponível, surgiu
+outro bloqueio: as guardas D3/D8 exigem `55457`, mas o CI configurava `5433`.
+
+O workflow passa a instalar/verificar ripgrep, alinhar as três variáveis de
+porta em `55457` e separar os quatro alvos finais em etapas. Guardas, testes,
+Makefile, runner compacto, migrations e arquitetura preservados.
+
+Validação local: instalação em Ubuntu 24.04 limpo; manifesto, importador
+(34 unitários e E2E completo), 35 arquivos SQL e 19 testes de workflow aprovados
+em PostgreSQL 16.15 exclusivo em tmpfs. Modos normal/compacto e actionlint
+1.7.12, `docs-check` e `git diff --check` aprovados. Servidor descartável removido
+ao terminar; banco persistente fora do escopo. A confirmação remota depende
+de PR autorizado; detalhes e
+limitações no [relatório](validacoes/VALIDACAO_CI_2026_10_26.md).
+Sem commit, push, merge ou deploy nesta entrega.
+
 ## 2026-10-26 — organizar documentação pendente em commits
 
 Criada a branch `organizar-docs` a partir de `organizar-frontend`, no commit

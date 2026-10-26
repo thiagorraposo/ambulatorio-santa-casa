@@ -2,68 +2,156 @@ name: Validacoes
 
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: validacoes-${{ github.ref }}
+  group: validacoes-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Exclusivamente sintético. Cada job usa seu próprio runner e PostgreSQL em tmpfs.
+env:
+  POSTGRES_DB: ambulatorio_santa_casa
+  POSTGRES_USER: ambulatorio_ci
+  POSTGRES_PASSWORD: senha_exclusivamente_sintetica_ci
+  POSTGRES_PORT: "55457"
+  APP_DB_HOST: localhost
+  APP_DB_PORT: "55457"
+  APP_DB_NAME: ambulatorio_santa_casa
+  APP_DB_USER: ambulatorio_backend_ci
+  APP_DB_PASSWORD: senha_exclusivamente_sintetica_backend_ci
+  APP_DB_ROLE: ambulatorio_aplicacao
+  API_PORT: "3000"
+  NODE_ENV: test
+  AUTH_JWT_SECRET: segredo_jwt_exclusivamente_sintetico_ci_com_mais_de_32_caracteres
+  AUTH_JWT_EXPIRES_IN_SECONDS: "900"
+  SYNTHETIC_PG_HOST: localhost
+  SYNTHETIC_PG_PORT: "55457"
+  SYNTHETIC_PG_USER: ambulatorio_ci
+  PGPASSFILE: /dev/null
+  PGSERVICEFILE: /dev/null
+  CI_COMPOSE: docker compose --project-name ambulatorio-ci --env-file .env --project-directory . -f .github/compose.ci.yaml
+
 jobs:
-  project-check:
+  quality:
+    name: Quality
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    env:
-      POSTGRES_DB: ambulatorio_santa_casa
-      POSTGRES_USER: ambulatorio_ci
-      POSTGRES_PASSWORD: senha_exclusivamente_sintetica_ci
-      POSTGRES_PORT: "5433"
-      APP_DB_HOST: localhost
-      APP_DB_PORT: "5433"
-      APP_DB_NAME: ambulatorio_santa_casa
-      APP_DB_USER: ambulatorio_backend_ci
-      APP_DB_PASSWORD: senha_exclusivamente_sintetica_backend_ci
-      APP_DB_ROLE: ambulatorio_aplicacao
-      API_PORT: "3000"
-      NODE_ENV: test
-      AUTH_JWT_SECRET: segredo_jwt_exclusivamente_sintetico_ci_com_mais_de_32_caracteres
-      AUTH_JWT_EXPIRES_IN_SECONDS: "900"
-      SYNTHETIC_PG_HOST: localhost
-      SYNTHETIC_PG_PORT: "5433"
-      SYNTHETIC_PG_USER: ambulatorio_ci
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version: "24"
-          cache: npm
-          cache-dependency-path: |
-            backend/package-lock.json
-            frontend/package-lock.json
-      - name: Criar configuracao local sintetica
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validar documentação, manifesto, scripts e mecanismo de validação
+        env:
+          CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          CI_HEAD_SHA: ${{ github.sha }}
+        run: make docs-check manifest-check repository-check workflow-test COMPACT=1
+      - name: Validar workflows com actionlint fixado
         run: |
-          umask 077
-          env | grep '^POSTGRES_' > .env
-      - name: Validar Compose e iniciar PostgreSQL
-        run: make docker-up docker-wait
-      - name: Aplicar migrations incrementais
-        run: make docker-migrate
+          curl --fail --silent --show-error --location \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz \
+            --output "$RUNNER_TEMP/actionlint.tar.gz"
+          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $RUNNER_TEMP/actionlint.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint" -shellcheck= .github/workflows/*.yml
+      - name: Preservar logs filtrados em falha
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ci-quality-logs
+          path: /tmp/ambulatorio-check-*/output.log
+          retention-days: 7
+          if-no-files-found: warn
+
+  database:
+    name: Database
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Instalar ripgrep para o E2E do importador
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends ripgrep
+          rg --version
+      - uses: ./.github/actions/synthetic-postgres
+      - name: Validar importador sintético
+        run: make importer-test COMPACT=1 COMPOSE="$CI_COMPOSE"
+      - name: Validar integridade, permissões e regras SQL
+        run: make docker-db-test COMPACT=1 COMPOSE="$CI_COMPOSE"
+      - name: Preservar logs filtrados em falha
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ci-database-logs
+          path: /tmp/ambulatorio-check-*/output.log
+          retention-days: 7
+          if-no-files-found: warn
+
+  backend:
+    name: Backend
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      PGPASSWORD: senha_exclusivamente_sintetica_ci
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-node
+        with:
+          lockfiles: backend/package-lock.json
+      - uses: ./.github/actions/synthetic-postgres
+      - name: Instalar dependências reproduzíveis
+        run: make backend-install
+      - name: Compilar e testar unidades, autenticação e RBAC
+        run: make backend-check COMPACT=1 COMPOSE="$CI_COMPOSE"
+      - name: Validar contratos e fluxos clínicos HTTP
+        run: make backend-clinical-test COMPACT=1
+      - name: Validar build, saúde e usuário do container
+        run: make backend-container-check COMPACT=1 COMPOSE="$CI_COMPOSE"
+      - name: Preservar logs filtrados em falha
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ci-backend-logs
+          path: /tmp/ambulatorio-check-*/output.log
+          retention-days: 7
+          if-no-files-found: warn
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      PGPASSWORD: senha_exclusivamente_sintetica_ci
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-node
+      - uses: ./.github/actions/synthetic-postgres
+        with:
+          migrations: "false"
       - name: Instalar dependências reproduzíveis
         run: make backend-install frontend-install
-      - name: Instalar navegador de teste
+      - name: Instalar Chromium e bibliotecas de sistema
         run: cd frontend && npx playwright install --with-deps chromium
-      - name: Validar backend, fluxos clínicos e frontend
-        env:
-          PGPASSWORD: ${{ env.POSTGRES_PASSWORD }}
-        run: make backend-check backend-clinical-test frontend-check COMPACT=1
-      - name: Validar imagem e container backend
-        run: make backend-container-check
-      - name: Validar manifesto, importador e projeto
-        run: make manifest-check importer-test docker-project-check workflow-test COMPACT=1
-      - name: Verificar whitespace do diff
-        run: git diff --check
-      - name: Diagnostico do PostgreSQL em falha
+      - name: Validar TypeScript, build, componentes e navegador com API real
+        run: make frontend-check COMPACT=1
+      - name: Preservar logs filtrados em falha
         if: failure()
-        run: docker compose --env-file .env logs --no-color postgres
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ci-frontend-logs
+          path: /tmp/ambulatorio-check-*/output.log
+          retention-days: 7
+          if-no-files-found: warn

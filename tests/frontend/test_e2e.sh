@@ -45,6 +45,33 @@ cleanup() {
   # Preserva somente evidências sintéticas de execução; arquivo de fixture
   # contém identidades de teste e é removido após o uso.
   rm -f "$task_dir/fixture.json"
+  if (( task_exit != 0 )); then
+    # O ambiente deste filho conhece também os segredos aleatórios criados
+    # pelo runner, que não existem no ambiente do filtro externo do Make.
+    python3 - "$task_root" "$task_dir" >&2 <<'PY' || printf 'Não foi possível resumir os logs do frontend\n' >&2
+from collections import deque
+import os
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(sys.argv[1]) / "scripts"))
+from check_compact import redactor
+
+redact = redactor(os.environ)
+directory = Path(sys.argv[2])
+for name in ("migrations.log", "backend.log", "frontend.log", "cleanup.log"):
+    path = directory / name
+    if not path.is_file():
+        continue
+    print(f"Diagnóstico frontend: {name} (até 30 linhas / 6000 caracteres):")
+    try:
+        with path.open(encoding="utf-8", errors="replace") as log:
+            tail = deque((redact(line) for line in log), maxlen=30)
+        print("".join(tail)[-6000:], end="")
+    except OSError:
+        print("Não foi possível ler este log")
+PY
+  fi
   printf 'Evidências sintéticas: %s\n' "$task_dir"
   exit "$task_exit"
 }

@@ -1,0 +1,47 @@
+name: PostgreSQL sintético descartável
+description: Inicializa PostgreSQL em tmpfs, confirma destino e aplica somente o bootstrap solicitado
+inputs:
+  migrations:
+    description: Aplicar todas as migrations no banco de teste principal
+    required: false
+    default: "true"
+runs:
+  using: composite
+  steps:
+    - name: Confirmar configuração e iniciar PostgreSQL efêmero
+      shell: bash
+      run: |
+        test "$POSTGRES_USER" = ambulatorio_ci
+        test "$POSTGRES_DB" = ambulatorio_santa_casa
+        test "$POSTGRES_PORT" = 55457
+        test "$APP_DB_PORT" = "$POSTGRES_PORT"
+        test "$SYNTHETIC_PG_PORT" = "$POSTGRES_PORT"
+        test ! -e .env
+        umask 077
+        env | grep '^POSTGRES_' > .env
+        make docker-up docker-wait COMPOSE="$CI_COMPOSE"
+    - name: Confirmar armazenamento e identidade antes de SQL de bootstrap
+      shell: bash
+      env:
+        PGPASSWORD: ${{ env.POSTGRES_PASSWORD }}
+      run: |
+        container_id=$($CI_COMPOSE ps -q postgres)
+        storage=$(docker inspect --format '{{range $path, $_ := .HostConfig.Tmpfs}}{{if eq $path "/var/lib/postgresql/data"}}tmpfs{{end}}{{end}}' "$container_id")
+        test "$storage" = tmpfs
+        identity=$(psql -X -h "$SYNTHETIC_PG_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1 -Atc 'SELECT current_database(), session_user;')
+        test "$identity" = "$POSTGRES_DB|$POSTGRES_USER"
+        printf 'Destino confirmado: %s:%s / %s; usuário %s; armazenamento %s\n' "$SYNTHETIC_PG_HOST" "$POSTGRES_PORT" "$POSTGRES_DB" "$POSTGRES_USER" "$storage"
+    - name: Aplicar bootstrap no servidor descartável confirmado
+      shell: bash
+      env:
+        FULL_MIGRATIONS: ${{ inputs.migrations }}
+        PGPASSWORD: ${{ env.POSTGRES_PASSWORD }}
+      run: |
+        if [ "$FULL_MIGRATIONS" = true ]; then
+          make docker-migrate COMPOSE="$CI_COMPOSE"
+        else
+          # O runner frontend criará seu próprio banco e aplicará 02–64 nele.
+          # Somente a role de origem global precisa existir neste servidor novo.
+          test "$FULL_MIGRATIONS" = false
+          psql -X -h "$SYNTHETIC_PG_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1 -f sql/00_criar_banco.sql
+        fi
