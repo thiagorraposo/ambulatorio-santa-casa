@@ -14,6 +14,10 @@ expectativa não mudaram. `frontend-unit-test` passou os 202 testes,
 `workflow-test` passou 30, `repository-check` passou e `git diff --check` passou.
 O E2E 7D-R1 passou quatro execuções sintéticas; sua espera por resposta HTTP no
 runner foi ampliada de 10 para 30 segundos, mantendo status e endpoint esperados.
+Na execução remota do PR #9, todos os quatro jobs concluíram com sucesso
+(run `40408685735`, SHA `9824fce`); o job Frontend executou build, 202 testes
+unitários e a suíte completa Playwright. O merge e o CI posterior na `main`
+permanecem condicionados à revisão final.
 
 ## 2026-10-26 — estruturar o CI por componente
 

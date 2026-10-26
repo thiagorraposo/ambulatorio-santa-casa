@@ -182,4 +182,11 @@ do helper foi ajustada para 30 s, permanecendo limitada e exigindo a resposta e
 o status esperados. Isso não repete nem oculta a escrita; se ela não ocorrer, o
 teste continua falhando.
 A nova execução remota, revisão do PR, merge e CI subsequente de `main` ainda
-estão pendentes.
+estavam pendentes na redação acima. A execução
+[40408685735](https://github.com/thiagorraposo/ambulatorio-santa-casa/actions/runs/40408685735)
+do commit `9824fce` concluiu com sucesso nos quatro jobs: Quality, Database,
+Backend e Frontend. Cada etapa de teste passou; somente os uploads condicionais
+de logs em falha foram ignorados por não haver falhas. O PR #9 está limpo e foi
+revisado quanto ao escopo: sete arquivos diretamente ligados ao CI, sem mudanças
+de aplicação ou migrations. O merge e a execução da versão integrada na `main`
+continuam pendentes.
