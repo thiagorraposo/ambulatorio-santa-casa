@@ -11,6 +11,7 @@ import AttendanceFormPage from '../features/clinical/AttendanceFormPage';
 import FollowupPage from '../features/clinical/FollowupPage';
 import { DraftProvider } from '../shared/writing';
 import { AppNavigation } from './AppNavigation';
+import { ImportacaoDetalhePage, ImportacoesPage } from '../features/importacoes/ImportacoesPage';
 
 const profiles = { consulta: 'Consulta', edicao: 'Edição', administracao: 'Administração' };
 
@@ -25,7 +26,8 @@ function RouteEffects() {
   const location = useLocation();
   useEffect(() => {
     const name = location.pathname === '/login' ? 'Entrar' : location.pathname.startsWith('/pacientes')
-      ? 'Pacientes' : location.pathname === '/minha-conta' ? 'Minha conta' : 'Início';
+      ? 'Pacientes' : location.pathname.startsWith('/importacoes') ? 'Importações'
+      : location.pathname === '/minha-conta' ? 'Minha conta' : 'Início';
     document.title = `${name} | Ambulatório Santa Casa`;
     if (location.pathname !== '/login') document.querySelector<HTMLElement>('#conteudo')?.focus();
   }, [location.key, location.pathname]);
@@ -173,6 +175,8 @@ export default function App() {
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/editar" element={<AttendanceFormPage />} />
       <Route path="/pacientes/:pacienteId" element={<PatientPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId" element={<AttendancePage />} />
+      <Route path="/importacoes" element={<ImportacoesPage />} />
+      <Route path="/importacoes/lotes/:loteId" element={<ImportacaoDetalhePage />} />
       <Route path="/minha-conta" element={<AccountPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Route>
