@@ -1,5 +1,17 @@
 # Registro de Alterações
 
+## 2026-10-26 — consolidar orientações de ambiente e recuperação
+
+Versionadas as orientações pendentes de setup, seleção do PostgreSQL e efeitos
+dos alvos de validação, incluindo testes com COMMIT e exigência de ambiente
+descartável. Preservados os limites históricos da avaliação de ameaças e do
+check de backup/restore, sem mudar ferramentas ou controles. Corrigido o
+fechamento de um bloco Markdown no workflow.
+
+Validação: `make docs-check COMPACT=1` e `git diff --check` aprovados.
+Suítes SQL, importador, backend e frontend não executadas: escopo exclusivamente
+documental, conforme a matriz de validação proporcional.
+
 ## 2026-10-23 — adotar o protótipo como escopo de produto completo
 
 Por instrução explícita do responsável pelo produto, o roadmap passa a ter como
