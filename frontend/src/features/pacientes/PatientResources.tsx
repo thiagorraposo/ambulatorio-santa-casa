@@ -80,10 +80,12 @@ export function AttendanceHistory({ pacienteId, path }: { pacienteId: string; pa
   return <Collection<AtendimentoResumoResponse> title="Histórico de atendimentos" path={`${path}/atendimentos`} pageScope="atendimentos">
     {rows => <div className="table-scroll"><table className="data-table">
       <caption className="sr-only">Atendimentos desta página</caption>
-      <thead><tr><th scope="col">Data</th><th scope="col">Atendimento</th><th scope="col">Localização do prontuário</th><th scope="col">Observações</th></tr></thead>
+      <thead><tr><th scope="col">Data</th><th scope="col">Atendimento</th><th scope="col">Contexto</th><th scope="col">Localização do prontuário</th><th scope="col">Observações</th></tr></thead>
       <tbody>{rows.map(item => <tr key={item.atendimentoId}>
         <td>{formatClinicalDate(item.dataAtendimento)}</td>
         <td><AttendanceLink pacienteId={pacienteId} atendimentoId={item.atendimentoId} /></td>
+        <td>Unicamente pelo ambulatório: {triState(item.ambulatorioUnicamente)}<br />
+          Anexo a projeto: {triState(item.ambulatorioAnexoProjeto)}</td>
         <td>{displayText(item.localizacaoProntuario)}</td><td>{displayText(item.observacoes)}</td>
       </tr>)}</tbody>
     </table></div>}

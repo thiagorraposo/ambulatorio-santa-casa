@@ -1,6 +1,6 @@
 # Workflow de Desenvolvimento
 
-Atualizado em: 2026-10-04
+Atualizado em: 2026-10-23
 
 O CI em `.github/workflows/validacoes.yml` usa credenciais sintéticas descartáveis,
 PostgreSQL 16.15 e executa migrations em banco limpo, manifesto, importador,
@@ -18,6 +18,38 @@ Os checks de backend, recursos clínicos e frontend são combinados na mesma
 chamada do Make no CI, compartilhando `backend-build`. O navegador é instalado
 com Playwright/Chromium. O runner do frontend usa seu próprio banco descartável e
 não aponta ao banco persistente do projeto.
+
+## Preparar o ambiente
+
+Pré-requisitos gerais: GNU Make, Git, Docker Engine com Compose, Python 3,
+Node.js 24/npm 11 e clientes PostgreSQL (`psql` e `pg_dump`). Instale as
+dependências pelos lockfiles. Chromium do Playwright é necessário para os testes
+automatizados de navegador, não para abrir a aplicação manualmente.
+
+Para experimentar sem configurar o PostgreSQL persistente, use a
+[demonstração sintética isolada](FRONTEND.md#demonstração-sintética-isolada),
+que requer Python 3.9+ em Linux com pidfd. Setup, portas, perfis, duração da
+sessão, logs e descarte pertencem a esse guia. Para desenvolver contra um banco
+selecionado, siga [a escolha de ambiente](#escolha-explícita-do-postgresql).
+
+A configuração local manual exige banco `ambulatorio_santa_casa`, usuário
+`ambulatorio_user` e schema `ambulatorio` já existentes. Configure uma entrada
+local em `~/.pgpass`, com permissão `0600`, equivalente a:
+
+```text
+localhost:5432:ambulatorio_santa_casa:ambulatorio_user:SENHA_LOCAL
+```
+
+Substitua o marcador apenas no arquivo privado. O Makefile não abre nem imprime
+esse arquivo. Não coloque senhas em comandos, no Makefile ou em arquivos
+versionados. Depois verifique somente a conexão:
+
+```bash
+make db-check DB_ENV=local
+```
+
+Host, porta, banco, usuário e schema podem ser selecionados com `DB_HOST`,
+`DB_PORT`, `DB_NAME`, `DB_USER` e `DB_SCHEMA`, sem editar o Makefile.
 
 ## Contexto por tarefa
 
@@ -130,6 +162,13 @@ Use os alvos do `Makefile` como interface local padrão:
 | `make db-test` | Executar todos os testes SQL versionados. |
 | `make docs-check` | Conferir presença e conteúdo não vazio dos arquivos obrigatórios. |
 | `make project-check` | Executar docs-check, testes SQL, diff e status conforme a matriz abaixo. |
+| `make help` | Consultar os alvos disponíveis; o Makefile define a interface executável. |
+| `make git-status` | Revisar status e histórico recente. |
+| `make backend-install` | Instalar dependências pelo lockfile. |
+| `make backend-check` | Combinar build, unitários e integração da fundação; não substitui testes clínicos. |
+| `make backend-clinical-test` | Validar recursos clínicos/contratos em banco exclusivamente sintético. |
+| `make backend-up` | Provisionar o login técnico e subir o backend no Compose; não aplica migrations. |
+| `make dev-sintetico-start` / `dev-sintetico-status` / `dev-sintetico-stop` | Criar, consultar ou descartar a demonstração isolada; dados temporários são perdidos no stop. |
 | `make workflow-test` | Verificar saída compacta, logs e propagação de falhas com comandos sintéticos. |
 | `make db-schema-dump` | Atualizar a evidência estrutural após mudança física aplicada e autorizada. |
 | `make docker-up` / `docker-stop` | Subir ou parar o PostgreSQL Docker sem remover o volume. |
@@ -153,6 +192,13 @@ Use os alvos do `Makefile` como interface local padrão:
 | `make frontend-check` | Combinar build, unitários e E2E do frontend. |
 | `make importer-run IMPORT_FILE=... IMPORT_PURPOSE=...` | Importar um arquivo sintético com finalidade explícita no Docker selecionado. |
 | `make importer-dry-run IMPORT_FILE=... IMPORT_PURPOSE=...` | Validar a mesma finalidade e simular o pipeline sem persistir registros. |
+
+Os comandos têm efeitos distintos: instalação/build não gravam clínica;
+formulários e importação podem gravar conforme autorização; migrations alteram
+estrutura; backup escreve arquivo local; restore substitui somente o schema do
+serviço de recuperação; `docker-destroy` remove volumes. A suíte SQL completa
+não é uma operação apenas de leitura nem integralmente revertida: respeite o
+isolamento descrito acima. `project-check` inclui essa suíte.
 
 O ambiente padrão é `DB_ENV=docker`, com `.env` ignorado pelo Git e porta 5433.
 O ambiente local na porta 5432 permanece alternativa manual e só é selecionado
@@ -231,36 +277,46 @@ resulta em código 2, tanto no modo normal quanto no compacto.
 
 ## Escolha explícita do PostgreSQL
 
-Docker, padrão:
-
-```bash
-make docker-project-check COMPACT=1
-```
-
-Com o PostgreSQL já disponível, `make project-check COMPACT=1` é a alternativa
-sem a espera adicional; não execute ambos para validar o mesmo estado.
-
-Local, alternativa manual:
-
-```bash
-make project-check DB_ENV=local COMPACT=1
-```
-
-Docker:
+O Docker padrão publica PostgreSQL 16.15 somente em `127.0.0.1:5433` e usa o
+volume `ambulatorio_santa_casa_postgres_data`. Prepare a configuração privada:
 
 ```bash
 cp .env.example .env
-make docker-up
-make docker-migrate  # somente em volume novo/vazio
-make docker-project-check COMPACT=1
 ```
 
-Não execute `db-migrate` no PostgreSQL local já aplicado. `docker-destroy` exige
-`DESTROY_ENV=docker`, apaga os volumes persistentes e só deve ser chamado quando
-a destruição do ambiente Docker for intencional.
+Substitua a senha fictícia do `.env` por uma exclusiva de desenvolvimento.
+O arquivo é ignorado pelo Git. Depois execute:
 
-O procedimento de backup, teste de restauração e recuperação após perda de
-container ou volume está em `docs/RECUPERACAO_POSTGRESQL_DOCKER.md`.
+```bash
+make docker-up
+make docker-db-check
+```
+
+Em banco novo/vazio,
+`make docker-migrate` aplica o bootstrap versionado; em banco existente, use
+somente a migration incremental selecionada. Nenhum alvo genérico aplica
+migrations automaticamente.
+
+Selecione `DB_ENV=docker` ou `DB_ENV=local` explicitamente quando necessário.
+O PostgreSQL local em `127.0.0.1:5432` é alternativa manual e não é usado pela
+demonstração isolada. Os alvos Docker não alteram esse PostgreSQL local.
+
+**Validação SQL completa:** `project-check`, `docker-project-check`, `db-test`
+e seus wrappers exigem banco de teste novo e descartável com schema compatível.
+Os SQL28/29/33 fazem COMMIT para provar efeitos entre transações. O nome padrão
+do banco persistente não satisfaz necessariamente as guardas dos testes. Não
+execute a suíte no persistente nem remova as guardas para fazê-la passar.
+
+Em um ambiente descartável já selecionado, escolha apenas uma entrada:
+`make project-check COMPACT=1`, ou `make docker-project-check COMPACT=1` se
+precisar também da espera de prontidão do Docker. `DB_ENV=local` só deve ser usado
+para testes quando apontar explicitamente para um servidor/banco descartável;
+não implica que o banco local aplicado seja ambiente de teste.
+
+`docker-stop` para o container preservando o volume; `docker-recreate` substitui
+o container e preserva o volume. `docker-destroy DESTROY_ENV=docker` destrói os
+volumes e requer autorização explícita. Backup, restauração e limites do check
+de catálogo estão no [procedimento de recuperação](RECUPERACAO_POSTGRESQL_DOCKER.md).
 
 ## Fluxo Oficial
 
@@ -269,7 +325,9 @@ container ou volume está em `docs/RECUPERACAO_POSTGRESQL_DOCKER.md`.
 3. Para tarefas complexas, registrar plano curto antes de editar.
 4. Selecionar verificações pela matriz e executar validação inicial quando indicada.
 5. Implementar uma alteração pequena e isolada.
-6. Atualizar apenas a documentação afetada e o registro de alterações.
+6. Atualizar apenas a documentação afetada e o registro de alterações. Atualizar
+   o dump estrutural somente após mudança aplicada e motivo explícito, conforme
+   as regras do repositório.
 7. Executar as verificações aplicáveis e corrigir falhas introduzidas pela mudança.
 8. Revisar diff e status; informar resultados e limitações de forma breve.
 9. Quando solicitado, criar commit no padrão adotado e enviar ao remoto; usar
@@ -303,7 +361,7 @@ container ou volume está em `docs/RECUPERACAO_POSTGRESQL_DOCKER.md`.
 - Não há dados sensíveis?
 - Mudança relevante foi registrada no registro de alterações?
 
-## Checklist para Futuro Backend
+## Checklist para Backend
 
 - A API respeita constraints do banco?
 - Validações de entrada refletem o modelo físico?

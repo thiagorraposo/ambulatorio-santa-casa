@@ -206,7 +206,7 @@ As referências vigentes afetadas são as decisões humanas, este mapa, o estado
 atual, o roadmap, a especificação/implementação do importador, o manifesto físico,
 as especificações de BZN/encaminhamento e os limites do backend/segurança. Os
 relatórios de homologação, ADRs históricos, migrations e dump preservam o estado
-em que foram produzidos. Dicionários e planos antigos em `planejamento/` não
+em que foram produzidos. Dicionários e planos antigos em `docs/historico/planejamento/` não
 sobrepõem código, schema nem respostas confirmadas da equipe.
 
 O número “não coberta = 0” no manifesto significa sua classificação de

@@ -179,9 +179,11 @@ test('link direto do atendimento, recarregamento e voltar preservam o destino', 
   await expect(page).toHaveURL(/offset=1/);
   // Exames/pendências não deslocam os snapshots nem a página de cada familiar.
   await expect(page.getByText('Resultado familiar sintético', { exact: true })).toBeVisible();
+  await page.locator('.exam-group summary').first().click();
   await expect(page.getByText('Resultado embutido sintético 2', { exact: true })).toBeVisible();
   await collections.getByRole('button', { name: 'Anterior', exact: true }).click();
   await expect(page.getByText('Resultado familiar sintético', { exact: true })).toBeVisible();
+  const destinationWithExam = page.url();
   await page.reload();
   await expect(page.getByLabel('Usuário', { exact: true })).toBeVisible();
   await expect(page.getByText('Observação sintética 1', { exact: true })).toHaveCount(0);
@@ -190,7 +192,7 @@ test('link direto do atendimento, recarregamento e voltar preservam o destino', 
   await page.getByLabel('Senha', { exact: true }).fill(fixture.password);
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
   await response;
-  await expect(page).toHaveURL(new RegExp(`/atendimentos/${attendance.atendimentoId}\\?limit=1&offset=0$`));
+  await expect(page).toHaveURL(destinationWithExam);
   await expect(page.getByText('Observação sintética 1', { exact: true })).toBeVisible();
   await menu(page).getByRole('link', { name: 'Pacientes', exact: true }).click();
   await expect(patientRows(page)).toHaveCount(20);

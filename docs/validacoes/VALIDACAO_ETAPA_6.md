@@ -5,7 +5,7 @@ Data: 2026-10-04. Status: **CONCLUÍDA NO AMBIENTE SINTÉTICO**.
 Escopo: 6A (base, sessão e navegação) e 6B (busca/ficha em leitura), conforme
 o [roadmap](../PROXIMOS_PASSOS.md#etapa-6--fundação-do-frontend), a
 [ADR-024](../DECISOES_ARQUITETURAIS.md#adr-024) e a
-[análise de integração](../arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md).
+[análise de integração](../historico/ANALISE_FIGMA_MAKE_2026_10_03.md).
 [FRONTEND.md](../FRONTEND.md) descreve uso, contratos e limites vigentes.
 
 ## Ambiente e comandos executados

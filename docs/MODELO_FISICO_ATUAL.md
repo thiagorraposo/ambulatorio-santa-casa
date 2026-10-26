@@ -859,14 +859,21 @@ Finalidade: associação genérica N:N entre linhas e registros estruturados.
 
 ## Diferenças em Relação ao Dicionário de Dados ou Modelo Lógico Anterior
 
-- `docs/historico/dicionario-dados.md` está vazio.
-- `docs/historico/decisoes-modelagem.md` está vazio.
-- Não há modelo lógico anterior preenchido no repositório para comparação detalhada.
+- A comparação de origem usou os placeholders vazios `dicionario-dados.md` e
+  `decisoes-modelagem.md`; sua existência está preservada no
+  [registro histórico](historico/README.md#arquivos-originalmente-vazios).
+- Os [dicionários de planejamento](historico/README.md#planejamento-original)
+  são propostas de origem, não evidência do modelo aplicado nem substitutos
+  deste levantamento físico.
 - A comparação com a planilha completa será feita em fases posteriores,
   considerando que o núcleo atual não pretende cobrir integralmente os 136
   cabeçalhos canônicos das duas abas clínicas.
 
 ## Pendências de Validação
+
+Registro das verificações levantadas na análise física original. Não constitui
+uma nova execução ou uma lista atualizada de bloqueios da aplicação; consulte os
+[relatórios por módulo](validacoes/README.md) para as provas posteriores.
 
 - Confirmar permissões reais do usuário `ambulatorio_user`.
 - Confirmar se o script `02_tabelas_paciente.sql` sempre executa no schema correto, pois ele não contém `SET search_path`.

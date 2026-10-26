@@ -80,9 +80,9 @@ Não há backfill de história clínica nem preenchimento de NULL legado por sup
 | T17 | SQL22 e staging: dry-run sem persistência, falha atômica e diagnóstico sanitizado. |
 | T18 | SQL22/26: dependente repetível copiado sem identidade de ocorrência impede publicação, com zero efeito. |
 
-As referências SQL estão em [`tests/sql`](../../tests/sql/); os cenários de API
-em [`backend/test/clinical`](../../backend/test/clinical/) e os escritores reais
-em [`tests/importador`](../../tests/importador/). Os testes de armazenamento não
+As referências SQL estão em [`tests/sql`](../../tests/sql); os cenários de API
+em [`backend/test/clinical`](../../backend/test/clinical) e os escritores reais
+em [`tests/importador`](../../tests/importador). Os testes de armazenamento não
 substituem as provas HTTP dos endpoints novos.
 
 ## Critérios de 5A–5E

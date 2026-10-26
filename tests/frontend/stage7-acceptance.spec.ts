@@ -99,7 +99,8 @@ test('7D: cadastro → atendimento composto → acompanhamentos → resolução 
   await expect(page).toHaveURL(new RegExp(`${attendancePath}$`));
   await expect(page.getByText('Consulta integrada exclusivamente sintética', { exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Histórico do paciente', exact: true }).click();
-  await expect(page.getByText('Consulta integrada exclusivamente sintética', { exact: true })).toBeVisible();
+  await expect(page.getByRole('row').filter({ has: page.getByRole('link', { name: `Atendimento ${atendimentoId}`, exact: true }) })
+    .getByText('Consulta integrada exclusivamente sintética', { exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'BZN e retornos', exact: true }).click();
   await expect(page.getByText('BZN integrado exclusivamente sintético', { exact: true })).toBeVisible();
   await expect(page.getByText('Retorno integrado realizado, sem data calculada', { exact: true })).toBeVisible();

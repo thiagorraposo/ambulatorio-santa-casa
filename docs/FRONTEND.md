@@ -1,15 +1,15 @@
 # Frontend — leitura e fluxos clínicos
 
-Atualizado em: 2026-10-17. Fundação 6A–6B concluída; recorte original 7A–7D
+Atualizado em: 2026-10-21. Fundação 6A–6B concluída; recorte original 7A–7D
 implementado e validado tecnicamente com dados sintéticos, com 41 cenários de
 navegador verificados após os incrementos U3.1/U3.2.
 As evidências e seus limites pertencem ao relatório da entrega.
 Aceite integral, revisão com a equipe e VU1
 não são declarados aqui.
 
-A aplicação própria está em [`frontend/`](../frontend/). Consome os contratos
+A aplicação própria está em [`frontend/`](../frontend). Consome os contratos
 públicos `/v1` do backend, com React/TypeScript, Vite, roteamento e consultas por
-recurso. O [roadmap](PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend) define o
+recurso. O [roadmap](frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend) define o
 escopo e os critérios de aceite; os relatórios da
 [Etapa 6](validacoes/VALIDACAO_ETAPA_6.md) e da
 [Etapa 7](validacoes/VALIDACAO_ETAPA_7.md) registram evidências e limites,
@@ -20,7 +20,7 @@ vigente está em
 Este documento descreve setup e comportamento existente. A experiência
 pretendida está na [visão de produto](frontend/VISAO_E_ESPECIFICACAO.md);
 a [matriz Figma/frontend](frontend/MATRIZ_FIGMA_FRONTEND.md) inventaria campos,
-ações e destinos, e os [pacotes do roadmap](PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend)
+ações e destinos, e os [pacotes do roadmap](frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend)
 definem dependências e aceite. Proposta não é contrato publicado.
 
 ## Preparação e comandos
@@ -164,6 +164,30 @@ buscar valores de outra visita. Diagnóstico e avaliação reutilizam os mesmos
 painéis do detalhe. ID inválido não gera leitura de detalhe; 403/404 das opções
 ocultam a consulta anterior. Critérios, provas e limites estão na
 [validação U3.2](validacoes/VALIDACAO_7D_U3_2.md).
+
+Histórico, último atendimento, seleção clínica e recursos da ficha abrem o
+atendimento com `retorno` restrito à ficha do mesmo paciente. O detalhe oferece
+Voltar à ficha de origem conservando aba, páginas e seleção; sem retorno válido,
+abre o histórico padrão. Links às áreas exames/BZN/projetos/notificação/encaminhamentos/
+pendências preservam o contexto sem atribuir estado atual a consultas passadas.
+Exames são agrupados em trazidos/solicitados **desta página** e expandidos por
+`exameId` na URL, inclusive ao voltar ou reautenticar. Campos ausentes continuam
+não informados; sem vínculo de atendimento não se fabrica uma origem.
+A [validação U3.3](validacoes/VALIDACAO_7D_U3_3.md) registra critérios e limites.
+
+A navegação usa sidebar no desktop e menu recolhido em larguras até 800 px.
+O botão Menu anuncia abertura/fechamento; Escape dentro da navegação devolve
+foco ao botão, e navegar fecha o menu somente após a troca efetiva de rota.
+Tab pode sair do menu. Mudança de largura recolhe o menu e recupera foco quando
+o controle anterior deixa de estar visível. O cabeçalho mantém nome/perfil reais;
+Minha conta oferece saída e orientação genérica à equipe responsável, sem novo
+contrato de identidade ou canal institucional inventado.
+
+Endereço desconhecido oferece início/busca. Indisponibilidade temporária de
+identidade oculta a página, foca a orientação e permite revalidar por leitura
+ou sair. Recuperação mantém o destino e devolve foco ao conteúdo; a política de
+rascunhos/recibos permanece vigente. Critérios e evidências estão na
+[validação U4.1](validacoes/VALIDACAO_7D_U4_1.md).
 
 A sessão usa o token retornado pelo login somente em memória. A identidade e o
 perfil são obtidos de `/v1/auth/me`; nenhum dado de paciente fica em armazenamento
@@ -314,7 +338,7 @@ declarados implementados pela correção de recuperação.
 
 A identidade visual, a organização do layout e as abas da ficha foram
 revisadas a partir do
-[protótipo Figma Make](../referencias/frontend/figma-make-prototipo/). Os componentes
+[protótipo Figma Make](../referencias/frontend/figma-make-prototipo). Os componentes
 e CSS da aplicação ficam em `frontend/`, sem importar a referência no build.
 O protótipo não fornece persistência, autorização, identidade ou regras clínicas.
 

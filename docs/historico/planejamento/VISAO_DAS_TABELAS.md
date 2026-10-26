@@ -1,5 +1,10 @@
 # Dicionário de Dados — Visão Geral das Tabelas
 
+> Documento histórico, movido de `planejamento/Visão Geral das Tabelas.md` em 2026-10-23.
+> Propostas e comandos abaixo descrevem a origem e não o estado vigente.
+> Consulte o [índice atual](../../README.md) e o
+> [modelo físico](../../MODELO_FISICO_ATUAL.md) antes de implementar.
+
 ## 1. Tabelas centrais do sistema
 
 ### paciente

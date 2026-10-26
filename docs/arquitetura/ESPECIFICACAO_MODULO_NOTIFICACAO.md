@@ -12,7 +12,7 @@ Fontes usadas, em ordem de precedência:
 
 1. `docs/evidencias/schema_atual_ambulatorio.sql`, como evidência do schema aplicado;
 2. `docs/dados/COBERTURA_COLUNAS_PLANILHA.md` e decisões arquiteturais atuais;
-3. `planejamento/relação de cada tabela com cada coluna da planilha.md` e `planejamento/Dicionário de Dados Técnico.md`, como intenção de modelagem;
+3. `docs/historico/planejamento/MAPEAMENTO_TABELAS_COLUNAS.md` e `docs/historico/planejamento/DICIONARIO_TECNICO.md`, como intenção de modelagem;
 4. o escopo desta especificação, que confirma `Caso não, justifique` como informação a ser suportada pelo módulo.
 
 Nenhuma regra de notificação sanitária, prazo, obrigatoriedade legal, formato oficial ou unicidade global do número foi inferida. Esses temas exigem fonte normativa ou requisito funcional próprio.

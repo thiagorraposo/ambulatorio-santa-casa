@@ -1,3 +1,10 @@
+# Mapeamento original de tabelas e colunas
+
+> Documento histórico, movido de `planejamento/relação de cada tabela com cada coluna da planilha.md` em 2026-10-23.
+> Propostas e comandos abaixo descrevem a origem e não o estado vigente.
+> Consulte o [índice atual](../../README.md) e o
+> [modelo físico](../../MODELO_FISICO_ATUAL.md) antes de implementar.
+
 paciente
 Cobre:
 ID
@@ -310,4 +317,3 @@ Controle da importação como processo.
 importacao_linha
 Cobre:
 Todas as colunas originais da planilha em formato bruto para auditoria.
-

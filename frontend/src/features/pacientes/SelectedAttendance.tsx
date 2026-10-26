@@ -1,11 +1,12 @@
 import { useEffect, useId, useRef } from 'react';
-import { Link, useSearchParams } from 'react-router';
+import { Link, useLocation, useSearchParams } from 'react-router';
 import type { AtendimentoDetalheResponse, AtendimentoResumoResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
 import { formatClinicalDate } from '../../shared/formatters';
 import { Card, EmptyState, QueryState } from '../../shared/ui';
 import { AttendanceChagasDiagnosis, AttendanceClinicalAssessment } from './AttendanceClinicalPanels';
 import { pagePath, Pagination, usePage } from './pagination';
+import { attendanceDetailPath } from './attendance-navigation';
 
 export type AttendanceClinicalSection = 'chagas' | 'avaliacao';
 
@@ -16,7 +17,9 @@ function validAttendanceId(value: string): boolean {
 function SelectedAttendanceDetail({ pacienteId, atendimentoId, section }: {
   pacienteId: string; atendimentoId: string; section: AttendanceClinicalSection;
 }) {
-  const path = `/pacientes/${encodeURIComponent(pacienteId)}/atendimentos/${encodeURIComponent(atendimentoId)}`;
+  const location = useLocation();
+  const patientPath = `/pacientes/${encodeURIComponent(pacienteId)}`;
+  const path = `${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}`;
   const query = useApiQuery<AtendimentoDetalheResponse>(`${path}?limit=1&offset=0`);
   return <QueryState query={query}>{record => record.atendimentoId !== atendimentoId
     ? <Card><p role="alert">A consulta não confirmou o atendimento selecionado. Confira a seleção antes de continuar.</p></Card>
@@ -25,7 +28,9 @@ function SelectedAttendanceDetail({ pacienteId, atendimentoId, section }: {
         <h2>Consulta selecionada</h2>
         <p>Atendimento <span className="mono">{record.atendimentoId}</span> · Data: {formatClinicalDate(record.dataAtendimento)}.</p>
         <p className="muted">Os dados abaixo pertencem somente a este atendimento.</p>
-        <Link to={path}>Abrir detalhe do atendimento <span className="mono">{record.atendimentoId}</span></Link>
+        <Link to={attendanceDetailPath(patientPath, atendimentoId, `${location.pathname}${location.search}${location.hash}`)}>
+          Abrir detalhe do atendimento <span className="mono">{record.atendimentoId}</span>
+        </Link>
       </Card>
       {section === 'chagas' ? <AttendanceChagasDiagnosis diagnosis={record.diagnosticoChagas} />
         : <AttendanceClinicalAssessment clinical={record.dadosClinicos} />}

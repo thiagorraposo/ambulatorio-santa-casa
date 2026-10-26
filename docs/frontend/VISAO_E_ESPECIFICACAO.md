@@ -1,7 +1,8 @@
 # Visão e especificação do produto frontend
 
 Data da análise: 2026-10-05. Base: `29b3186`, branch `etapa7-commits`, árvore
-limpa antes desta entrega. **Documento de produto proposto; não é aceite de
+limpa antes desta entrega. **Especificação de produto com escopo ampliado aprovado em 23/10; detalhes
+propostos permanecem sujeitos às decisões identificadas. Não é aceite de
 implementação nem autorização de uso real.**
 
 **Continuidade de 15/10:** a análise abaixo preserva a fotografia de 05/10.
@@ -11,15 +12,36 @@ pacotes propostos de UX/VU1 nem a revisão com a equipe.
 
 **Continuidade de 17/10:** cabeçalho/último atendimento (U3.1) e
 diagnóstico/avaliação por consulta selecionada (U3.2) receberam implementação e
-validação técnica, registradas no [roadmap](../PROXIMOS_PASSOS.md#7d-u3).
+validação técnica, registradas no [roadmap](ENTREGAS_DO_PRODUTO.md#7d-u3).
 Os demais recortes continuam sujeitos aos próprios critérios e decisões.
 
 Este documento é a fonte da experiência pretendida. A
 [matriz ponto a ponto](MATRIZ_FIGMA_FRONTEND.md) define os requisitos de cada
 elemento, sua implementação, lacuna e destino. O
-[roadmap oficial](../PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend)
+[roadmap oficial](ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend)
 define a ordem e o aceite das entregas; [FRONTEND.md](../FRONTEND.md) continua
 sendo a fonte do setup e do funcionamento técnico existente.
+
+**Continuidade de 20/10:** [U3.3](../validacoes/VALIDACAO_7D_U3_3.md) acrescenta
+retorno à ficha/página de origem, agrupamento/expansão dos exames da página e
+links aos recursos canônicos do paciente. A comparação visual geral, as etapas
+de cadastro/atendimento e a revisão humana continuam pendentes; esta entrega
+não declara fidelidade integral ao protótipo.
+
+**Continuidade de 21/10:** [U4.1](../validacoes/VALIDACAO_7D_U4_1.md) implementa
+menu compacto em tela menor, sidebar desktop e foco/retorno em navegação e erros.
+Conta e identidade continuam em leitura pelo contrato vigente. U4.2, etapas de
+cadastro/atendimento e parecer clínico não são aceitos por esta continuidade.
+
+**Revisão de escopo de 23/10 — vigente:** o objetivo aprovado é o protótipo
+como produto completo, incluindo funcionalidades, experiência e fidelidade
+visual. Todos os destinos VU1/MVP/PC estão incluídos na entrega final; PC
+substitui a antiga classificação VP (visão posterior). As evidências de código
+abaixo continuam históricas, salvo continuidades explícitas. As decisões P-01–09
+ainda abertas definem comportamento e implementação, sem condicionar a inclusão
+das famílias já aprovada. EX conserva somente exclusões justificadas pelas
+regras vigentes. Marcos, sequência e novos aceites 8V1/8V2 estão no
+[roadmap vigente](../PROXIMOS_PASSOS.md#referência-de-conclusão--produto-completo).
 
 ## Objetivo e fronteiras da análise
 
@@ -44,13 +66,13 @@ Foram examinados todos os componentes do protótipo, `App`, `context`, `types`,
 cliente HTTP, rascunhos e estilos da aplicação; controllers/DTOs/autorização e
 SQL de persistência dos recursos; testes de leitura/escrita e fontes abaixo.
 O histórico recente contém os 13 commits de organização da Etapa 7 posteriores
-a `adf2fd5`. O [relatório de 05/10](../RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md)
+a `adf2fd5`. O [relatório de 05/10](../historico/RELATORIO_ETAPA_7_2026_10_05.md)
 descreve alterações então locais, hoje incorporadas a `HEAD`; não representa
 o status Git desta nova entrega. Nenhum código, contrato ou migration é alterado.
 
 ### Fontes e precedência
 
-1. [Respostas clínicas vigentes](../Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+1. [Respostas clínicas vigentes](../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md#respostas-clínicas-originais-de-28092026)
    e [decisões D1–D12](../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md) definem semântica.
 2. [ADR-017–024](../DECISOES_ARQUITETURAIS.md),
    [contratos clínicos](../arquitetura/CONTRATOS_CLINICOS_ETAPA_5.md),
@@ -62,7 +84,7 @@ o status Git desta nova entrega. Nenhum código, contrato ou migration é altera
    [roadmap](../PROXIMOS_PASSOS.md) e relatórios das
    [Etapas 6](../validacoes/VALIDACAO_ETAPA_6.md) e
    [7](../validacoes/VALIDACAO_ETAPA_7.md) distinguem estágio e evidência.
-5. [Análise de integração anterior](../arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
+5. [Análise de integração anterior](../historico/ANALISE_FIGMA_MAKE_2026_10_03.md)
    preserva a fotografia de planejamento; esta especificação e a matriz a
    sucedem para a avaliação de produto. O Figma orienta a interface, subordinado
    às fontes acima.
@@ -93,17 +115,17 @@ suportado e histórico. Exige fechamento das sete lacunas, recuperação verific
 de escrita e percurso completo na interface, teclado e tela menor. A VU1 é um
 recorte de uso; não substitui integralmente a planilha nem conclui o MVP oficial.
 
-**MVP operacional do roadmap:** VU1 + complementos priorizados da Etapa 8,
-produção autorizada na 9 e homologação/release na 10. CSV de página, lotes,
-simulação e indicadores pequenos têm entregas próprias. Aprovar o recorte
-clínico e os indicadores é condição para congelar esse marco.
+**MVP operacional histórico:** VU1 + complementos priorizados da Etapa 8,
+produção autorizada na 9 e homologação/release na 10. Essa fatia é um marco
+intermediário e não define mais a conclusão do projeto.
 
-**VP — visão posterior:** sorologias individuais, condição/complicações,
+**PC — produto completo:** inclui sorologias individuais, condição/complicações,
 comorbidades, eventos/dispositivos/óbito, medicamentos, resultados detalhados,
-correção de recursos existentes, upload, fila global e gestão de usuários.
-Todos têm pacotes ou decisões explícitas; ausência de API é dependência de
-construção, não motivo de exclusão do produto. P-01 pode promover um módulo
-indispensável ao primeiro uso, com revisão das dependências antes de implementá-lo.
+correção de recursos existentes, upload, fila global, gestão de usuários e todas
+as unidades operacionais inventariadas. Recursos VU1/MVP também pertencem ao
+produto completo. Falta de API exige implementação de contrato/dados/backend;
+não adia a família para depois da entrega final. M3 exige cobertura funcional
+e visual aceita; produção e homologação continuam obrigatórias em M4/M5.
 
 **EX — excluído funcionalmente:** `Localizado`, AIM3/P Digitar neste ciclo,
 fusão automática, recomendações clínicas, IDs/datas/totais fictícios e sucesso
@@ -111,7 +133,7 @@ simulado. Preservação de proveniência continua. Exclusão de usuário definit
 não integra a visão proposta. MFA/SSO e aplicação mobile nativa não são definidos
 neste recorte; a interface web deve funcionar em tela menor.
 
-A coluna **Destino** da matriz atribui VU1, MVP, VP ou EX a cada item. Não há
+A coluna **Destino** da matriz atribui VU1, MVP, PC ou EX a cada item. Não há
 item implicitamente entregue porque seu grupo possui uma rota.
 
 ## Regras clínicas e de representação que a interface deve preservar
@@ -183,7 +205,7 @@ da mesma API agregada usada pelo dashboard, com instante de atualização.
 Busca em destaque, filtros rotulados, Buscar/Limpar, resultado e paginação. VU1
 usa nome/sexo e ID/nome; ID secundário, Ver ficha explícito, cadastrar após
 capacidade confirmada. Resultado vazio significa vazio desta página/escopo.
-VP acrescenta nascimento, código e origem com semântica definida, último
+PC acrescenta nascimento, código e origem com semântica definida, último
 atendimento e projetos por projeção própria do backend, sem uma chamada por linha.
 Editar deve abrir edição real, Novo atendimento deve preservar paciente; ambos
 condicionados à operação autorizada. CSV de MVP informa filtros e página.
@@ -253,7 +275,7 @@ acompanhamento**. Cada operação posterior tem resultado próprio e não desfaz
 a consulta anterior. Essa fronteira deve ser compreensível sem citar endpoints
 ou transações na tela.
 
-VP integra condição/complicações, comorbidades, eventos/dispositivos/óbito,
+PC integra condição/complicações, comorbidades, eventos/dispositivos/óbito,
 medicamentos e sorologias em seções progressivas, quando tiverem destino público.
 A revisão deve impedir perda de valores condicionais. No protótipo condição,
 sintomas, AVC/dispositivos/óbito são preenchíveis e descartados; isso é defeito
@@ -299,7 +321,7 @@ leitura, status/data; observação/responsável de revisão ainda precisam de AP
 
 VU1: lista no contexto da pessoa/atendimento e ações de criação/resolução/
 reabertura com data explícita. Diferenciar desconhecido de `nao_informado`.
-MVP/VP: fila autorizada com filtros status/origem/período, contadores agregados,
+MVP/PC: fila autorizada com filtros status/origem/período, contadores agregados,
 tabela com descrição/contexto/data e Abrir revisão. Não construir fila percorrendo
 todos os pacientes. Revisão mostra fato atual, origem sanitizada, informação
 sem interpretação segura e decisão humana; novo registro de revisão deve ser
@@ -328,7 +350,7 @@ retomada, além dos POST existentes. Não inferir entitlement por perfil.
 
 MVP: KPIs pequenos aprovados com definição, população autorizada, período e
 referência temporal explícitos. Gráfico de atendimentos por período e tabela
-acessível equivalente. VP: origem/projetos após semântica e contagens aprovadas;
+acessível equivalente. PC: origem/projetos após semântica e contagens aprovadas;
 projetos podem sobrepor pacientes, portanto soma não é população única.
 Não calcular totais percorrendo páginas clínicas nem apresentar ausência como 0
 quando a API falhou. Filtro de período só afeta indicadores definidos como tais.
@@ -340,7 +362,7 @@ dashboard. Exportação ampliada de métricas/colunas é P-05 e contrato futuro.
 
 ### Usuários, minha conta e erros — USR, CTA, ERR
 
-VP de usuários: listagem paginada nome/login/perfil/status, seleção de perfil e
+PC de usuários: listagem paginada nome/login/perfil/status, seleção de perfil e
 confirmação de ativação/inativação. Sem autoalterar perfil, exclusão definitiva
 ou vincular digitador antigo. Exige API, concorrência, auditoria e política para
 evitar perda do último administrador; não substituir por gestão de vínculo
@@ -426,13 +448,13 @@ flowchart TD
   F --> O
   O --> F
   F --> M[Chagas e avaliação por consulta; exames; BZN; projetos; notificação; pendências; anual]
-  I -. MVP ou VP .-> Q[Fila global autorizada]
+  I -. MVP ou PC .-> Q[Fila global autorizada]
   Q --> F
   I -. MVP .-> IM[Lotes e nova importação]
-  IM -. VP .-> RT[Revisão temporal e reprocessamento distintos]
+  IM -. PC .-> RT[Revisão temporal e reprocessamento distintos]
   I -. MVP .-> D[Dashboard aprovado]
   P -. MVP .-> X[CSV da página]
-  I -. VP e administração .-> U[Gestão de usuários]
+  I -. PC e administração .-> U[Gestão de usuários]
   C --> S[Sair e limpar sessão]
 ```
 
@@ -568,22 +590,28 @@ Os 106 unitários e 30 cenários Chromium/API/PostgreSQL registrados em 04/10
 permanecem evidência histórica dos cenários executados. Não foram repetidos em
 uma mudança documental. CI remota e revisão com a equipe continuam pendentes.
 
-## Decisões de produto ainda pendentes
+## Decisões de produto e limites ainda pendentes
+
+A solução técnica de correlação de operações recebeu implementação posterior
+([ADR-025](../DECISOES_ARQUITETURAIS.md#adr-025) e [protocolo](../arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md)).
+P-02 abaixo preserva a proposta de origem; verificar separadamente o limite de
+recuperação após nova sessão, sem tratar todo o mecanismo como não implementado.
+
 
 São propostas abertas, não decisões clínicas novas ou mudanças aprovadas de
 contrato. Pacotes dependentes permanecem planejados até a escolha necessária.
 
 | ID | Proposta e decisão solicitada | Impacto no roadmap |
 | --- | --- | --- |
-| P-01 | Aprovar VU1 restrita aos contratos clínicos atuais recuperados; indicar quais módulos adicionais são indispensáveis para substituir a planilha no primeiro uso. | Define promoção de pacotes 7B-E/7C-E e congelamento do MVP; ausência de API continua trabalho necessário. |
+| P-01 | Inclusão de todos os módulos não EX aprovada em 23/10; definir a ordem e o recorte intermediário da VU1, além dos contratos e detalhes clínicos ainda necessários. | 7B-E/7C-E obrigatórios no produto completo; decidir dependências e primeiro uso, sem exclusão por ausência de API. |
 | P-02 | Aprovar desenho de recuperação por correlação de operação consultável, inclusive após nova sessão. Alternativa de reenvio cego não atende o produto. | 7D-R6D escolhe solução técnica e eventual idempotência/registro, sem alterar nada nesta análise. |
 | P-03 | Adotar etapas/revisão e confirmação separada do acompanhamento; tornar versão/concorrência explícita nos PUT de projeto/notificação e revisão de pendência. | 7D-U1/U2 e 7C-E4B/U; controles atuais não detectam toda concorrência. |
 | P-04 | Definir se fila global agrupa pendências assistenciais e inconsistências de importação ou as apresenta em grupos relacionados; definir responsabilidade e registro de decisão. | 8A2D/B/U, 8A3B/U. Não classificar texto automaticamente. |
-| P-05 | Priorizar filtros/colunas/código e procedência; aprovar KPIs, população/período e exportação ampliada. Proposta inicial: nome/sexo, ID secundário e CSV da página. | 8A1, 8B1D/B/U, 8B2B/U, 8B3D/B/U. API sintética atual de CSV permite três perfis, Figma restringe a admin. |
+| P-05 | Filtros/colunas/código, procedência, indicadores e exportação inventariados incluídos; definir semântica e aprovar KPIs, população/período e contrato da exportação ampliada. Proposta inicial: nome/sexo, ID secundário e CSV da página. | 8A1, 8B1D/B/U, 8B2B/U, 8B3D/B/U. API sintética atual de CSV permite três perfis, Figma restringe a admin. |
 | P-06 | Confirmar destino de D9: planejamento de retorno futuro/desfecho e eventual retirada do campo legado. Proposta: separado de comparecimento efetivo. | 7C-E5D/B/U. Não fabricar retorno, excluir texto ou consolidar silenciosamente. |
-| P-07 | Priorizar upload de contrarreferência e decidir documento/estado/armazenamento/retenção e acesso. | 8C3D/B/U; permanece posterior salvo promoção explícita. |
-| P-08 | Priorizar gestão de usuários e aprovar política institucional de identidade/acesso; definir proteção do último administrador, suporte e dados de Minha conta. | 8D1D/B/U, 8D2B/U, Etapas 9B/9D. Não presumir acesso irrestrito real por perfil. |
-| P-09 | Aprovar reprocessamento encadeado na interface e prioridade da revisão entre arquivos alterados; definir leitura e retomada desses processos. | 8C4D/B/U e 8C5B/U; reenvio ordinário é outra ação. |
+| P-07 | Upload incluído; decidir documento/estado/armazenamento/retenção e acesso. | 8C3D/B/U; obrigatório no produto completo; detalhes pendentes. |
+| P-08 | Gestão de usuários incluída; aprovar política institucional de identidade/acesso; definir proteção do último administrador, suporte e dados de Minha conta. | 8D1D/B/U, 8D2B/U, Etapas 9B/9D. Não presumir acesso irrestrito real por perfil. |
+| P-09 | Reprocessamento e revisão incluídos; definir autorização, leitura, retomada e ordem de implementação desses processos. | 8C4D/B/U e 8C5B/U; reenvio ordinário é outra ação. |
 
 ## Conclusão documental e condição de aceite do produto
 

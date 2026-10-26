@@ -38,6 +38,24 @@ describe('escrita cadastral e atendimento composto', () => {
     expect(attendanceBody({ ...draft(), values: { ...initial, observacoes: 'Alteração sintética' },
       initial, original: attendance, clinical: { pesoKg: '60' } })).toEqual({ versao: attendance.versao, observacoes: 'Alteração sintética' });
   });
+  it('edita legado sem data preservando desconhecido e a versão textual original', () => {
+    const original = { ...attendance, dataAtendimento: null };
+    const initial = attendanceInitial(original);
+    expect(attendanceBody({ ...draft(), initial, original,
+      values: { ...initial, observacoes: 'Correção sem estimar data' } })).toEqual({
+      versao: original.versao, observacoes: 'Correção sem estimar data',
+    });
+    expect(attendanceBody({ ...draft(), initial, original,
+      values: { ...initial, dataAtendimento: '2020-01-01' } })).toEqual({
+      versao: original.versao, dataAtendimento: '2020-01-01',
+    });
+  });
+  it('continua exigindo data em criação e impede apagar data conhecida na edição', () => {
+    const initial = attendanceInitial(attendance);
+    expect(() => attendanceBody({ ...draft(), values: { ...draft().values, dataAtendimento: '' } })).toThrow(/Data do atendimento/);
+    expect(() => attendanceBody({ ...draft(), original: attendance, initial,
+      values: { ...initial, dataAtendimento: '', observacoes: 'Outra alteração' } })).toThrow(/Data do atendimento/);
+  });
   it('envia criação transacional com descoberta distinta, exame solicitado sem resultado e familiar identificado', () => {
     const value = draft();
     value.clinical = { pesoKg: '65.50', frequenciaCardiacaBpm: '70' };

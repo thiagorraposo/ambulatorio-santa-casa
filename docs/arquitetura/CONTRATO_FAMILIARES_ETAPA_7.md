@@ -2,7 +2,7 @@
 
 Data inicial: 2026-10-14. Atualização: 2026-10-15. Correção de R7-01;
 unidades 7B-R1B/7B-R1U do
-[roadmap](../PROXIMOS_PASSOS.md#7b-r1b), contrato H5 da
+[roadmap](../frontend/ENTREGAS_DO_PRODUTO.md#7b-r1b), contrato H5 da
 [matriz](../frontend/MATRIZ_FIGMA_FRONTEND.md).
 
 O modelo existente conserva snapshots de rastreio associados à consulta e pares

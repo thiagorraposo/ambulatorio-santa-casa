@@ -278,7 +278,7 @@ banco são resíduos previstos de teste, não evidência do ambiente persistente
 
 ## Decisões incorporadas
 
-As seis respostas de [`Perguntas pendentes sobre campos e regras clínicas.md`](../Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+As seis respostas de [`Perguntas pendentes sobre campos e regras clínicas.md`](../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md#respostas-clínicas-originais-de-28092026)
 foram incorporadas em 2026-09-28: idade derivada da data de nascimento; data do
 autorelato de Chagas como descoberta pelo paciente, independente da sorologia;
 familiares com identificação e resultado, sem data de sorologia; identificação

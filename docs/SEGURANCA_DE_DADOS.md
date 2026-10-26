@@ -2,7 +2,8 @@
 
 Atualizado em: 2026-08-31
 
-O threat model técnico vigente está em `docs/THREAT_MODEL.md`; ele não autoriza dados reais.
+O [modelo de ameaças](THREAT_MODEL.md) identifica a cobertura e a data da
+avaliação preservada; ele não autoriza dados reais.
 
 ## Por que Dados Clínicos São Sensíveis
 

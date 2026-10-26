@@ -1,5 +1,10 @@
 # Validação do Tratamento com Benzonidazol
 
+> Evidência histórica do módulo e da execução identificados abaixo. As menções
+> a estado “atual”, tabelas e quantidades pertencem à data do relatório.
+> Para executar verificações hoje, consulte o [workflow](../WORKFLOW_DE_DESENVOLVIMENTO.md#validação-proporcional)
+> e o [índice de validações](README.md); este registro não é nova homologação.
+
 Atualizado em: 2026-08-13
 
 ## Escopo

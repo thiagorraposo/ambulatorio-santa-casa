@@ -1,5 +1,10 @@
 # Dicionário de Dados Técnico — Sistema Ambulatorial
 
+> Documento histórico, movido de `planejamento/Dicionário de Dados Técnico.md` em 2026-10-23.
+> Propostas e comandos abaixo descrevem a origem e não o estado vigente.
+> Consulte o [índice atual](../../README.md) e o
+> [modelo físico](../../MODELO_FISICO_ATUAL.md) antes de implementar.
+
 ## 1. Convenções gerais
 
 Banco recomendado: PostgreSQL.
@@ -11,16 +16,16 @@ Tipo padrão para chaves primárias: `UUID`.
 Campos de data:
 
 - `DATE`: quando importa apenas a data.
-    
+
 - `TIMESTAMP`: quando importa data e hora.
-    
+
 
 Campos booleanos:
 
 - Usar `BOOLEAN` para respostas do tipo sim/não.
-    
+
 - Quando a planilha tiver valores ambíguos, como “sim”, “não”, “pendente”, “não sabe”, “não informado”, considerar `VARCHAR` ou criar campo de observação complementar.
-    
+
 
 Campos de auditoria recomendados nas principais tabelas:
 
@@ -39,34 +44,34 @@ Quando houver necessidade de rastrear usuário:
 
 ---
 
-# 2. Tabela: paciente
+## 2. Tabela: paciente
 
-## Finalidade
+### Finalidade
 
 Armazenar os dados principais do paciente. Esta tabela representa a entidade central do sistema.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - ID
-    
-- Nome
-    
-- Data de Nascimento
-    
-- Idade
-    
-- Sexo
-    
-- Raça
-    
-- Pertence a comunidade Quilombola ou indígena
-    
-- Qual? Indígena ou quilombola?
-    
-- Origem da aba: portador ou não portador de DC
-    
 
-## Campos
+- Nome
+
+- Data de Nascimento
+
+- Idade
+
+- Sexo
+
+- Raça
+
+- Pertence a comunidade Quilombola ou indígena
+
+- Qual? Indígena ou quilombola?
+
+- Origem da aba: portador ou não portador de DC
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -84,56 +89,56 @@ Armazenar os dados principais do paciente. Esta tabela representa a entidade cen
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o paciente está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `paciente` 1:N `paciente_endereco`
-    
-- `paciente` 1:N `paciente_contato`
-    
-- `paciente` 1:N `atendimento`
-    
-- `paciente` N:N `programa`, via `paciente_programa`
-    
-- `paciente` N:N `comorbidade`, via `paciente_comorbidade`
-    
-- `paciente` N:N `classe_medicamento`, via `paciente_medicamento`
-    
-- `paciente` 1:N `diagnostico_chagas`
-    
-- `paciente` 1:N `sorologia_chagas`
-    
-- `paciente` 1:N `exame`
-    
-- `paciente` 1:N `exame_complementar`
-    
-- `paciente` 1:N `tratamento_benzonidazol`
-    
 
-## Regras
+- `paciente` 1:N `paciente_contato`
+
+- `paciente` 1:N `atendimento`
+
+- `paciente` N:N `programa`, via `paciente_programa`
+
+- `paciente` N:N `comorbidade`, via `paciente_comorbidade`
+
+- `paciente` N:N `classe_medicamento`, via `paciente_medicamento`
+
+- `paciente` 1:N `diagnostico_chagas`
+
+- `paciente` 1:N `sorologia_chagas`
+
+- `paciente` 1:N `exame`
+
+- `paciente` 1:N `exame_complementar`
+
+- `paciente` 1:N `tratamento_benzonidazol`
+
+
+### Regras
 
 - `codigo_planilha` deve ser preservado para rastreabilidade.
-    
+
 - `idade_importada` não deve substituir o cálculo de idade pelo sistema. Ela serve para auditoria.
-    
+
 - `origem_aba` é obrigatória porque diferencia pacientes portadores e não portadores de DC no arquivo original.
-    
+
 
 ---
 
-# 3. Tabela: paciente_endereco
+## 3. Tabela: paciente_endereco
 
-## Finalidade
+### Finalidade
 
 Armazenar endereço e cidade do paciente.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Endereço
-    
-- Cidade
-    
 
-## Campos
+- Cidade
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -146,32 +151,32 @@ Armazenar endereço e cidade do paciente.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o endereço está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `paciente_endereco.paciente_id` referencia `paciente.id`.
-    
 
-## Regras
+
+### Regras
 
 - Um paciente pode ter mais de um endereço.
-    
+
 - Durante a importação da planilha, o endereço importado deve ser marcado como `principal = true`.
-    
+
 
 ---
 
-# 4. Tabela: paciente_contato
+## 4. Tabela: paciente_contato
 
-## Finalidade
+### Finalidade
 
 Armazenar dados de contato do paciente.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Telefone de Contato
-    
 
-## Campos
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -185,32 +190,32 @@ Armazenar dados de contato do paciente.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o contato está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `paciente_contato.paciente_id` referencia `paciente.id`.
-    
 
-## Regras
+
+### Regras
 
 - Um paciente pode ter vários contatos.
-    
+
 - O telefone importado da planilha deve ser registrado como `tipo_contato = 'telefone'`.
-    
+
 
 ---
 
-# 5. Tabela: usuario
+## 5. Tabela: usuario
 
-## Finalidade
+### Finalidade
 
 Cadastrar usuários do sistema, especialmente responsáveis por digitação, importação e manutenção dos dados.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Responsavel pela digitacao
-    
 
-## Campos
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -223,40 +228,40 @@ Cadastrar usuários do sistema, especialmente responsáveis por digitação, imp
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o usuário está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `usuario` pode ser referenciado por `atendimento`.
-    
-- `usuario` pode ser referenciado por `importacao_planilha`.
-    
 
-## Regras
+- `usuario` pode ser referenciado por `importacao_planilha`.
+
+
+### Regras
 
 - Quando a planilha trouxer apenas o nome do responsável, o sistema deve criar ou reaproveitar um usuário com aquele nome.
-    
+
 - `email` pode ser nulo na importação inicial, mas deve ser obrigatório para usuários que acessarem o sistema.
-    
+
 
 ---
 
-# 6. Tabela: atendimento
+## 6. Tabela: atendimento
 
-## Finalidade
+### Finalidade
 
 Registrar cada atendimento realizado com o paciente.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Data do atendimento
-    
-- Localização do prontuário
-    
-- Responsavel pela digitacao
-    
-- Pendencias/Observação
-    
 
-## Campos
+- Localização do prontuário
+
+- Responsavel pela digitacao
+
+- Pendencias/Observação
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -270,60 +275,60 @@ Registrar cada atendimento realizado com o paciente.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o atendimento está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `atendimento.paciente_id` referencia `paciente.id`.
-    
-- `atendimento.usuario_digitacao_id` referencia `usuario.id`.
-    
-- `atendimento` pode estar ligado a exames, dados clínicos, observações, encaminhamentos e notificações.
-    
 
-## Regras
+- `atendimento.usuario_digitacao_id` referencia `usuario.id`.
+
+- `atendimento` pode estar ligado a exames, dados clínicos, observações, encaminhamentos e notificações.
+
+
+### Regras
 
 - Todo atendimento deve estar vinculado a um paciente.
-    
+
 - A data do atendimento deve ser obrigatória quando existir na planilha.
-    
+
 - `pendencias_observacao` também pode ser replicado em `atendimento_observacao` para tratamento estruturado de observações.
-    
+
 
 ---
 
-# 7. Tabela: programa
+## 7. Tabela: programa
 
-## Finalidade
+### Finalidade
 
 Cadastrar os programas, projetos ou grupos institucionais associados aos pacientes.
 
-## Colunas da planilha cobertas como cadastro
+### Colunas da planilha cobertas como cadastro
 
 - SaMi-Trop AIM3
-    
-- SaMi-Trop 1.1
-    
-- Parachute
-    
-- BenBrasil
-    
-- Ambulatório unicamente
-    
-- Ambulatório anexo ao projeto
-    
-- EPOCA
-    
-- Santa Casa DICA
-    
-- Santa Casa RENOMICA
-    
-- Santa Casa ARCHIMEDES
-    
-- Santa Casa CHARM
-    
-- LXE Novartis
-    
 
-## Campos
+- SaMi-Trop 1.1
+
+- Parachute
+
+- BenBrasil
+
+- Ambulatório unicamente
+
+- Ambulatório anexo ao projeto
+
+- EPOCA
+
+- Santa Casa DICA
+
+- Santa Casa RENOMICA
+
+- Santa Casa ARCHIMEDES
+
+- Santa Casa CHARM
+
+- LXE Novartis
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -334,90 +339,90 @@ Cadastrar os programas, projetos ou grupos institucionais associados aos pacient
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o programa está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `programa` N:N `paciente`, via `paciente_programa`.
-    
 
-## Regras
+
+### Regras
 
 Devem existir registros iniciais para:
 
 - SaMi-Trop AIM3
-    
+
 - SaMi-Trop 1.1
-    
+
 - Parachute
-    
+
 - BenBrasil
-    
+
 - Ambulatório unicamente
-    
+
 - Ambulatório anexo ao projeto
-    
+
 - EPOCA
-    
+
 - Santa Casa DICA
-    
+
 - Santa Casa RENOMICA
-    
+
 - Santa Casa ARCHIMEDES
-    
+
 - Santa Casa CHARM
-    
+
 - LXE Novartis
-    
+
 
 ---
 
-# 8. Tabela: paciente_programa
+## 8. Tabela: paciente_programa
 
-## Finalidade
+### Finalidade
 
 Registrar o vínculo entre paciente e programa/projeto.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - SaMi-Trop AIM3
-    
-- SaMi-Trop AIM3 PENDÊNCIA
-    
-- SaMi-Trop 1.1
-    
-- Parachute
-    
-- Parachute falha
-    
-- Benbrasil
-    
-- BenBrasil
-    
-- BenBrasil FALHA
-    
-- Ambulatório unicamente
-    
-- Ambulatório anexo ao projeto
-    
-- EPOCA
-    
-- Falha EPOCA
-    
-- EPOCA FALHA
-    
-- Santa Casa DICA
-    
-- Santa Casa RENOMICA
-    
-- Santa Casa ARCHIMEDES
-    
-- Santa Casa CHARM
-    
-- LXE Novartis
-    
-- LXE Novartis falha
-    
 
-## Campos
+- SaMi-Trop AIM3 PENDÊNCIA
+
+- SaMi-Trop 1.1
+
+- Parachute
+
+- Parachute falha
+
+- Benbrasil
+
+- BenBrasil
+
+- BenBrasil FALHA
+
+- Ambulatório unicamente
+
+- Ambulatório anexo ao projeto
+
+- EPOCA
+
+- Falha EPOCA
+
+- EPOCA FALHA
+
+- Santa Casa DICA
+
+- Santa Casa RENOMICA
+
+- Santa Casa ARCHIMEDES
+
+- Santa Casa CHARM
+
+- LXE Novartis
+
+- LXE Novartis falha
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -435,44 +440,44 @@ Registrar o vínculo entre paciente e programa/projeto.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o vínculo está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `paciente_programa.paciente_id` referencia `paciente.id`.
-    
-- `paciente_programa.programa_id` referencia `programa.id`.
-    
-- `paciente_programa.atendimento_id` referencia `atendimento.id`.
-    
 
-## Regras
+- `paciente_programa.programa_id` referencia `programa.id`.
+
+- `paciente_programa.atendimento_id` referencia `atendimento.id`.
+
+
+### Regras
 
 - Um paciente pode participar de vários programas.
-    
+
 - Um programa pode ter vários pacientes.
-    
+
 - Deve existir restrição de unicidade preferencial: `paciente_id + programa_id + atendimento_id`.
-    
+
 - Campos duplicados como `Benbrasil` e `BenBrasil` devem ser normalizados para o mesmo programa: `BenBrasil`.
-    
+
 - `Falha EPOCA` e `EPOCA FALHA` devem alimentar o mesmo programa, com `possui_falha = true`.
-    
+
 
 ---
 
-# 9. Tabela: encaminhamento
+## 9. Tabela: encaminhamento
 
-## Finalidade
+### Finalidade
 
 Registrar informações de encaminhamento do paciente.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Trouxe encaminhamento
-    
-- Origem encaminhamento
-    
 
-## Campos
+- Origem encaminhamento
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -486,27 +491,27 @@ Registrar informações de encaminhamento do paciente.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o registro está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `encaminhamento.paciente_id` referencia `paciente.id`.
-    
+
 - `encaminhamento.atendimento_id` referencia `atendimento.id`.
-    
+
 
 ---
 
-# 10. Tabela: encaminhamento_projeto
+## 10. Tabela: encaminhamento_projeto
 
-## Finalidade
+### Finalidade
 
 Registrar para qual projeto o paciente foi encaminhado.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Encaminhado a qual projeto?
-    
 
-## Campos
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -520,29 +525,29 @@ Registrar para qual projeto o paciente foi encaminhado.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o registro está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `encaminhamento_projeto.paciente_id` referencia `paciente.id`.
-    
+
 - `encaminhamento_projeto.atendimento_id` referencia `atendimento.id`.
-    
+
 - `encaminhamento_projeto.programa_id` referencia `programa.id`.
-    
+
 
 ---
 
-# 11. Tabela: contrarreferencia
+## 11. Tabela: contrarreferencia
 
-## Finalidade
+### Finalidade
 
 Registrar se a contrarreferência foi realizada.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Paciente com contrarreferencia realizada?
-    
 
-## Campos
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -557,22 +562,22 @@ Registrar se a contrarreferência foi realizada.
 
 ---
 
-# 12. Tabela: diagnostico_chagas
+## 12. Tabela: diagnostico_chagas
 
-## Finalidade
+### Finalidade
 
 Registrar o diagnóstico consolidado de doença de Chagas.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Diagnóstico da DC por sorologia
-    
-- Resultado final da sorologia
-    
-- Autorelato diagnóstico de Chagas do participante (data)
-    
 
-## Campos
+- Resultado final da sorologia
+
+- Autorelato diagnóstico de Chagas do participante (data)
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -588,44 +593,44 @@ Registrar o diagnóstico consolidado de doença de Chagas.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o registro está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `diagnostico_chagas.paciente_id` referencia `paciente.id`.
-    
-- `diagnostico_chagas.atendimento_id` referencia `atendimento.id`.
-    
 
-## Regras
+- `diagnostico_chagas.atendimento_id` referencia `atendimento.id`.
+
+
+### Regras
 
 - Esta tabela representa o diagnóstico consolidado, não cada teste sorológico individual.
-    
+
 - Os métodos e datas das sorologias ficam em `sorologia_chagas`.
-    
+
 
 ---
 
-# 13. Tabela: sorologia_chagas
+## 13. Tabela: sorologia_chagas
 
-## Finalidade
+### Finalidade
 
 Registrar os métodos e datas das sorologias realizadas para doença de Chagas.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Caso seja sorologia: Metodo 1
-    
-- Data da Sorologia 01
-    
-- Caso seja sorologia: Metodo 2
-    
-- Data sorologia 2
-    
-- Caso seja sorologia: Metodo 3
-    
-- Data sorologia 3
-    
 
-## Campos
+- Data da Sorologia 01
+
+- Caso seja sorologia: Metodo 2
+
+- Data sorologia 2
+
+- Caso seja sorologia: Metodo 3
+
+- Data sorologia 3
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -641,38 +646,38 @@ Registrar os métodos e datas das sorologias realizadas para doença de Chagas.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o registro está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `sorologia_chagas.paciente_id` referencia `paciente.id`.
-    
-- `sorologia_chagas.atendimento_id` referencia `atendimento.id`.
-    
 
-## Regras
+- `sorologia_chagas.atendimento_id` referencia `atendimento.id`.
+
+
+### Regras
 
 - Cada método da planilha deve virar um registro separado.
-    
+
 - `numero_sorologia` deve aceitar preferencialmente os valores 1, 2 e 3.
-    
+
 - A combinação `paciente_id + atendimento_id + numero_sorologia` deve ser única, quando houver atendimento vinculado.
-    
+
 
 ---
 
-# 14. Tabela: sorologia_solicitacao
+## 14. Tabela: sorologia_solicitacao
 
-## Finalidade
+### Finalidade
 
 Registrar solicitações de sorologia ainda que o exame não tenha resultado informado.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Ou solicitado sorologia
-    
-- Se sim, data solicitada
-    
 
-## Campos
+- Se sim, data solicitada
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -689,18 +694,18 @@ Registrar solicitações de sorologia ainda que o exame não tenha resultado inf
 
 ---
 
-# 15. Tabela: historico_familiar_chagas
+## 15. Tabela: historico_familiar_chagas
 
-## Finalidade
+### Finalidade
 
 Registrar histórico familiar relacionado à doença de Chagas.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Familiares diretos (mãe, pai, irmãos) realizaram o exame de Chagas?
-    
 
-## Campos
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -715,20 +720,20 @@ Registrar histórico familiar relacionado à doença de Chagas.
 
 ---
 
-# 16. Tabela: condicao_chagas
+## 16. Tabela: condicao_chagas
 
-## Finalidade
+### Finalidade
 
 Registrar a forma clínica e a classificação da cardiopatia chagásica.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Forma da DC
-    
-- Classificacao da cardiopatia chagasica
-    
 
-## Campos
+- Classificacao da cardiopatia chagasica
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -744,24 +749,24 @@ Registrar a forma clínica e a classificação da cardiopatia chagásica.
 
 ---
 
-# 17. Tabela: complicacao_chagas
+## 17. Tabela: complicacao_chagas
 
-## Finalidade
+### Finalidade
 
 Registrar complicações relacionadas à doença de Chagas.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Complicações relacionadas a DC
-    
-- Complicações cardiacas relacioadas a DC
-    
-- Complicações do trato digestivo relacioadas a DC
-    
-- Outras complicações relacionadas a DC, qual?
-    
 
-## Campos
+- Complicações cardiacas relacioadas a DC
+
+- Complicações do trato digestivo relacioadas a DC
+
+- Outras complicações relacionadas a DC, qual?
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -778,40 +783,40 @@ Registrar complicações relacionadas à doença de Chagas.
 
 ---
 
-# 18. Tabela: comorbidade
+## 18. Tabela: comorbidade
 
-## Finalidade
+### Finalidade
 
 Cadastrar tipos de comorbidades não relacionadas diretamente à doença de Chagas.
 
-## Colunas da planilha cobertas como cadastro
+### Colunas da planilha cobertas como cadastro
 
 - Doenças do sistema cardiovascular
-    
-- Hipertensão arterial
-    
-- Doenças do sistema imunológico
-    
-- Doenças do sistema nervoso
-    
-- Doenças psicológicas
-    
-- Doenças do sistema respiratório
-    
-- Doenças do sistema digestório
-    
-- Doenças do sistema endócrino
-    
-- Doenças do sistema tegumentar
-    
-- Diabetes
-    
-- Doença renal
-    
-- Outras doenças
-    
 
-## Campos
+- Hipertensão arterial
+
+- Doenças do sistema imunológico
+
+- Doenças do sistema nervoso
+
+- Doenças psicológicas
+
+- Doenças do sistema respiratório
+
+- Doenças do sistema digestório
+
+- Doenças do sistema endócrino
+
+- Doenças do sistema tegumentar
+
+- Diabetes
+
+- Doença renal
+
+- Outras doenças
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -823,73 +828,73 @@ Cadastrar tipos de comorbidades não relacionadas diretamente à doença de Chag
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se a comorbidade está ativa.|
 
-## Regras
+### Regras
 
 Devem existir registros iniciais para:
 
 - Doenças do sistema cardiovascular
-    
+
 - Hipertensão arterial
-    
+
 - Doenças do sistema imunológico
-    
+
 - Doenças do sistema nervoso
-    
+
 - Doenças psicológicas
-    
+
 - Doenças do sistema respiratório
-    
+
 - Doenças do sistema digestório
-    
+
 - Doenças do sistema endócrino
-    
+
 - Doenças do sistema tegumentar
-    
+
 - Diabetes
-    
+
 - Doença renal
-    
+
 - Outras doenças
-    
+
 
 ---
 
-# 19. Tabela: paciente_comorbidade
+## 19. Tabela: paciente_comorbidade
 
-## Finalidade
+### Finalidade
 
 Registrar quais comorbidades o paciente possui.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Comorbidades não relacionadas a DC?
-    
-- Doenças do sistema cardiovascular
-    
-- Hipertensão arterial
-    
-- Doenças do sistema imunológico
-    
-- Doenças do sistema nervoso
-    
-- Doenças psicológicas
-    
-- Doenças do sistema respiratório
-    
-- Doenças do sistema digestório
-    
-- Doenças do sistema endócrino
-    
-- Doenças do sistema tegumentar
-    
-- Diabetes
-    
-- Doença renal
-    
-- Outras doenças
-    
 
-## Campos
+- Doenças do sistema cardiovascular
+
+- Hipertensão arterial
+
+- Doenças do sistema imunológico
+
+- Doenças do sistema nervoso
+
+- Doenças psicológicas
+
+- Doenças do sistema respiratório
+
+- Doenças do sistema digestório
+
+- Doenças do sistema endócrino
+
+- Doenças do sistema tegumentar
+
+- Diabetes
+
+- Doença renal
+
+- Outras doenças
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -904,44 +909,44 @@ Registrar quais comorbidades o paciente possui.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o registro está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `paciente_comorbidade.paciente_id` referencia `paciente.id`.
-    
-- `paciente_comorbidade.comorbidade_id` referencia `comorbidade.id`.
-    
-- `paciente_comorbidade.atendimento_id` referencia `atendimento.id`.
-    
 
-## Regras
+- `paciente_comorbidade.comorbidade_id` referencia `comorbidade.id`.
+
+- `paciente_comorbidade.atendimento_id` referencia `atendimento.id`.
+
+
+### Regras
 
 - Um paciente pode ter várias comorbidades.
-    
+
 - Uma comorbidade pode estar associada a vários pacientes.
-    
+
 - A coluna “Comorbidades não relacionadas a DC?” pode ser usada como indicador geral, enquanto as demais detalham quais são.
-    
+
 
 ---
 
-# 20. Tabela: tipo_exame_laboratorial
+## 20. Tabela: tipo_exame_laboratorial
 
-## Finalidade
+### Finalidade
 
 Cadastrar tipos de exames laboratoriais.
 
-## Colunas da planilha cobertas como cadastro
+### Colunas da planilha cobertas como cadastro
 
 - Glicemia
-    
-- Colesterol HDL
-    
-- Colesterol LDL
-    
-- Triglicerídeos
-    
 
-## Campos
+- Colesterol HDL
+
+- Colesterol LDL
+
+- Triglicerídeos
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -953,41 +958,41 @@ Cadastrar tipos de exames laboratoriais.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o tipo está ativo.|
 
-## Regras
+### Regras
 
 Devem existir registros iniciais para:
 
 - Glicemia
-    
+
 - Colesterol HDL
-    
+
 - Colesterol LDL
-    
+
 - Triglicerídeos
-    
+
 
 ---
 
-# 21. Tabela: resultado_laboratorial
+## 21. Tabela: resultado_laboratorial
 
-## Finalidade
+### Finalidade
 
 Registrar resultados de exames laboratoriais do paciente.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Valor da glicemia
-    
-- Valor de colesterol HDL
-    
-- Valor de colesterol LDL
-    
-- Triglicerideos
-    
-- Data do Exame Colesterol
-    
 
-## Campos
+- Valor de colesterol HDL
+
+- Valor de colesterol LDL
+
+- Triglicerideos
+
+- Data do Exame Colesterol
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1004,42 +1009,42 @@ Registrar resultados de exames laboratoriais do paciente.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o registro está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `resultado_laboratorial.paciente_id` referencia `paciente.id`.
-    
-- `resultado_laboratorial.atendimento_id` referencia `atendimento.id`.
-    
-- `resultado_laboratorial.tipo_exame_laboratorial_id` referencia `tipo_exame_laboratorial.id`.
-    
 
-## Regras
+- `resultado_laboratorial.atendimento_id` referencia `atendimento.id`.
+
+- `resultado_laboratorial.tipo_exame_laboratorial_id` referencia `tipo_exame_laboratorial.id`.
+
+
+### Regras
 
 - Cada resultado laboratorial deve virar uma linha.
-    
+
 - A coluna “Data do Exame Colesterol” deve ser aplicada aos exames de colesterol HDL, LDL e triglicerídeos quando for a única data disponível.
-    
+
 - Para glicemia, se não houver data própria na planilha, `data_exame` pode ficar nulo ou receber a data do atendimento, conforme regra decidida pelo projeto.
-    
+
 
 ---
 
-# 22. Tabela: evento_clinico
+## 22. Tabela: evento_clinico
 
-## Finalidade
+### Finalidade
 
 Registrar eventos clínicos relevantes.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - teve AVC
-    
-- Ano do ultimo AVC
-    
-- teve reação adversa?
-    
 
-## Campos
+- Ano do ultimo AVC
+
+- teve reação adversa?
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1054,33 +1059,33 @@ Registrar eventos clínicos relevantes.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o evento está ativo.|
 
-## Regras
+### Regras
 
 - “teve AVC” deve gerar registro com `tipo_evento = 'AVC'`.
-    
+
 - “Ano do ultimo AVC” deve preencher `ano_evento`.
-    
+
 - “teve reação adversa?” deve gerar registro com `tipo_evento = 'Reação adversa'`.
-    
+
 - Se houver mais detalhes futuramente, devem entrar em `descricao`.
-    
+
 
 ---
 
-# 23. Tabela: dispositivo_implantado
+## 23. Tabela: dispositivo_implantado
 
-## Finalidade
+### Finalidade
 
 Registrar dispositivos implantados no paciente.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - portador de marcapasso?
-    
-- portador de CDI?
-    
 
-## Campos
+- portador de CDI?
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1094,51 +1099,51 @@ Registrar dispositivos implantados no paciente.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o registro está ativo.|
 
-## Regras
+### Regras
 
 - “portador de marcapasso?” deve gerar registro com `tipo_dispositivo = 'Marcapasso'`.
-    
+
 - “portador de CDI?” deve gerar registro com `tipo_dispositivo = 'CDI'`.
-    
+
 
 ---
 
-# 24. Tabela: classe_medicamento
+## 24. Tabela: classe_medicamento
 
-## Finalidade
+### Finalidade
 
 Cadastrar classes de medicamentos.
 
-## Colunas da planilha cobertas como cadastro
+### Colunas da planilha cobertas como cadastro
 
 - Anti- hipertensivo
-    
-- Diuréticos
-    
-- Anti-coagulantes
-    
-- Anti-arritmicos
-    
-- Anti- depressivos
-    
-- IECA/BRA
-    
-- INRA
-    
-- Alfa/Betabloqueador
-    
-- Vasodilatador
-    
-- Hipoglicemiante
-    
-- Estatinas
-    
-- Bloqueador de cálcio
-    
-- Outros medicamentos
-    
 
-## Campos
+- Diuréticos
+
+- Anti-coagulantes
+
+- Anti-arritmicos
+
+- Anti- depressivos
+
+- IECA/BRA
+
+- INRA
+
+- Alfa/Betabloqueador
+
+- Vasodilatador
+
+- Hipoglicemiante
+
+- Estatinas
+
+- Bloqueador de cálcio
+
+- Outros medicamentos
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1149,48 +1154,48 @@ Cadastrar classes de medicamentos.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se a classe está ativa.|
 
-## Regras
+### Regras
 
 Devem existir registros iniciais para todas as classes listadas.
 
 ---
 
-# 25. Tabela: paciente_medicamento
+## 25. Tabela: paciente_medicamento
 
-## Finalidade
+### Finalidade
 
 Registrar medicamentos ou classes de medicamentos em uso pelo paciente.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Anti- hipertensivo
-    
-- Diuréticos
-    
-- Anti-coagulantes
-    
-- Anti-arritmicos
-    
-- Anti- depressivos
-    
-- IECA/BRA
-    
-- INRA
-    
-- Alfa/Betabloqueador
-    
-- Vasodilatador
-    
-- Hipoglicemiante
-    
-- Estatinas
-    
-- Bloqueador de cálcio
-    
-- Outros medicamentos
-    
 
-## Campos
+- Diuréticos
+
+- Anti-coagulantes
+
+- Anti-arritmicos
+
+- Anti- depressivos
+
+- IECA/BRA
+
+- INRA
+
+- Alfa/Betabloqueador
+
+- Vasodilatador
+
+- Hipoglicemiante
+
+- Estatinas
+
+- Bloqueador de cálcio
+
+- Outros medicamentos
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1206,31 +1211,31 @@ Registrar medicamentos ou classes de medicamentos em uso pelo paciente.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o registro está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `paciente_medicamento.paciente_id` referencia `paciente.id`.
-    
+
 - `paciente_medicamento.classe_medicamento_id` referencia `classe_medicamento.id`.
-    
+
 - `paciente_medicamento.atendimento_id` referencia `atendimento.id`.
-    
+
 
 ---
 
-# 26. Tabela: tipo_exame
+## 26. Tabela: tipo_exame
 
-## Finalidade
+### Finalidade
 
 Cadastrar tipos gerais de exames.
 
-## Colunas da planilha cobertas como cadastro
+### Colunas da planilha cobertas como cadastro
 
 - ECG
-    
-- ECO
-    
 
-## Campos
+- ECO
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1241,37 +1246,37 @@ Cadastrar tipos gerais de exames.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o tipo está ativo.|
 
-## Regras
+### Regras
 
 Devem existir registros iniciais para:
 
 - ECG
-    
+
 - ECO
-    
+
 
 ---
 
-# 27. Tabela: exame
+## 27. Tabela: exame
 
-## Finalidade
+### Finalidade
 
 Registrar exames gerais realizados ou solicitados.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - ECG
-    
-- Resultado ecg
-    
-- Data do ecg
-    
-- ECG solicitado
-    
-- ECO
-    
 
-## Campos
+- Resultado ecg
+
+- Data do ecg
+
+- ECG solicitado
+
+- ECO
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1288,44 +1293,44 @@ Registrar exames gerais realizados ou solicitados.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o exame está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `exame.paciente_id` referencia `paciente.id`.
-    
-- `exame.atendimento_id` referencia `atendimento.id`.
-    
-- `exame.tipo_exame_id` referencia `tipo_exame.id`.
-    
 
-## Regras
+- `exame.atendimento_id` referencia `atendimento.id`.
+
+- `exame.tipo_exame_id` referencia `tipo_exame.id`.
+
+
+### Regras
 
 - `ECG` deve gerar exame do tipo ECG.
-    
+
 - `Resultado ecg` deve preencher `resultado`.
-    
+
 - `Data do ecg` deve preencher `data_exame`.
-    
+
 - `ECG solicitado` deve preencher `solicitado`.
-    
+
 - `ECO` deve gerar exame do tipo ECO.
-    
+
 - Detalhes específicos do ecocardiograma devem ser registrados em `ecocardiograma`.
-    
+
 
 ---
 
-# 28. Tabela: ecocardiograma
+## 28. Tabela: ecocardiograma
 
-## Finalidade
+### Finalidade
 
 Registrar dados específicos do ecocardiograma.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - FEVE%
-    
 
-## Campos
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1340,54 +1345,54 @@ Registrar dados específicos do ecocardiograma.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o registro está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `ecocardiograma.exame_id` referencia `exame.id`.
-    
-- `ecocardiograma.paciente_id` referencia `paciente.id`.
-    
-- `ecocardiograma.atendimento_id` referencia `atendimento.id`.
-    
 
-## Regras
+- `ecocardiograma.paciente_id` referencia `paciente.id`.
+
+- `ecocardiograma.atendimento_id` referencia `atendimento.id`.
+
+
+### Regras
 
 - `exame_id` deve apontar para um exame do tipo ECO.
-    
+
 - `feve_percentual` deve receber apenas valor numérico.
-    
+
 - Caso a planilha tenha texto, símbolo ou anotação ambígua, preservar em `feve_texto_original`.
-    
+
 
 ---
 
-# 29. Tabela: tipo_exame_complementar
+## 29. Tabela: tipo_exame_complementar
 
-## Finalidade
+### Finalidade
 
 Cadastrar tipos de exames complementares.
 
-## Colunas da planilha cobertas como cadastro
+### Colunas da planilha cobertas como cadastro
 
 - Laboratoriais
-    
-- De imagem
-    
-- Holter
-    
-- Endoscopia
-    
-- Colonoscopia
-    
-- Teste Ergometrico
-    
-- Mapa
-    
-- ECO
-    
-- Outros
-    
 
-## Campos
+- De imagem
+
+- Holter
+
+- Endoscopia
+
+- Colonoscopia
+
+- Teste Ergometrico
+
+- Mapa
+
+- ECO
+
+- Outros
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1398,79 +1403,79 @@ Cadastrar tipos de exames complementares.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o tipo está ativo.|
 
-## Regras
+### Regras
 
 Devem existir registros iniciais para:
 
 - Laboratoriais
-    
+
 - De imagem
-    
+
 - Holter
-    
+
 - Endoscopia
-    
+
 - Colonoscopia
-    
+
 - Teste Ergométrico
-    
+
 - MAPA
-    
+
 - ECO
-    
+
 - Outros
-    
+
 
 ---
 
-# 30. Tabela: exame_complementar
+## 30. Tabela: exame_complementar
 
-## Finalidade
+### Finalidade
 
 Registrar exames complementares trazidos ou solicitados.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Paciente trouxe outros exames complementares?
-    
-- Laboratoriais
-    
-- De imagem
-    
-- Holter
-    
-- Endoscopia
-    
-- Colonoscopia
-    
-- Teste Ergometrico
-    
-- Mapa
-    
-- Outros
-    
-- Solicitado exames complementares?
-    
-- Laboratoriais
-    
-- ECO
-    
-- De imagem
-    
-- Holter
-    
-- Endoscopia
-    
-- Colonoscopia
-    
-- Teste Ergometrico
-    
-- Mapa
-    
-- Outros
-    
 
-## Campos
+- Laboratoriais
+
+- De imagem
+
+- Holter
+
+- Endoscopia
+
+- Colonoscopia
+
+- Teste Ergometrico
+
+- Mapa
+
+- Outros
+
+- Solicitado exames complementares?
+
+- Laboratoriais
+
+- ECO
+
+- De imagem
+
+- Holter
+
+- Endoscopia
+
+- Colonoscopia
+
+- Teste Ergometrico
+
+- Mapa
+
+- Outros
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1486,56 +1491,56 @@ Registrar exames complementares trazidos ou solicitados.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o registro está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `exame_complementar.paciente_id` referencia `paciente.id`.
-    
-- `exame_complementar.atendimento_id` referencia `atendimento.id`.
-    
-- `exame_complementar.tipo_exame_complementar_id` referencia `tipo_exame_complementar.id`.
-    
 
-## Regras
+- `exame_complementar.atendimento_id` referencia `atendimento.id`.
+
+- `exame_complementar.tipo_exame_complementar_id` referencia `tipo_exame_complementar.id`.
+
+
+### Regras
 
 - `origem_registro` deve aceitar preferencialmente: `trazido`, `solicitado`.
-    
+
 - As colunas de exames trazidos devem gerar registros com `origem_registro = 'trazido'`.
-    
+
 - As colunas de exames solicitados devem gerar registros com `origem_registro = 'solicitado'`.
-    
+
 - A coluna “Paciente trouxe outros exames complementares?” funciona como indicador geral.
-    
+
 - A coluna “Solicitado exames complementares?” funciona como indicador geral.
-    
+
 - Como os nomes de exames aparecem tanto no bloco de trazidos quanto no bloco de solicitados, a distinção deve ser feita por `origem_registro`.
-    
+
 
 ---
 
-# 31. Tabela: tratamento_benzonidazol
+## 31. Tabela: tratamento_benzonidazol
 
-## Finalidade
+### Finalidade
 
 Registrar tratamento com benzonidazol para doença de Chagas.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Uso do benzonidazol para tratamento da DC?
-    
-- tratamento pelo ambulatorio?
-    
-- Por quanto tempo foi usado?
-    
-- Em qual ano tomou a medicação (Benzonidazol)?
-    
-- Tem indicação de BZN?
-    
-- Prescrição do BZN (data)
-    
-- Se não, descreva o motivo
-    
 
-## Campos
+- tratamento pelo ambulatorio?
+
+- Por quanto tempo foi usado?
+
+- Em qual ano tomou a medicação (Benzonidazol)?
+
+- Tem indicação de BZN?
+
+- Prescrição do BZN (data)
+
+- Se não, descreva o motivo
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1554,29 +1559,29 @@ Registrar tratamento com benzonidazol para doença de Chagas.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o tratamento está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `tratamento_benzonidazol.paciente_id` referencia `paciente.id`.
-    
+
 - `tratamento_benzonidazol.atendimento_id` referencia `atendimento.id`.
-    
+
 
 ---
 
-# 32. Tabela: retorno_tratamento
+## 32. Tabela: retorno_tratamento
 
-## Finalidade
+### Finalidade
 
 Registrar retornos relacionados ao tratamento com benzonidazol.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Retorno 30 dias de tratamento
-    
-- Retorno final de tratamento
-    
 
-## Campos
+- Retorno final de tratamento
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1591,31 +1596,31 @@ Registrar retornos relacionados ao tratamento com benzonidazol.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o registro está ativo.|
 
-## Regras
+### Regras
 
 - “Retorno 30 dias de tratamento” deve gerar `tipo_retorno = '30_dias'`.
-    
+
 - “Retorno final de tratamento” deve gerar `tipo_retorno = 'final'`.
-    
+
 
 ---
 
-# 33. Tabela: notificacao
+## 33. Tabela: notificacao
 
-## Finalidade
+### Finalidade
 
 Registrar notificação do paciente.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Paciente notificado?
-    
-- Número notificação
-    
-- Caso não, justifique
-    
 
-## Campos
+- Número notificação
+
+- Caso não, justifique
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1629,41 +1634,41 @@ Registrar notificação do paciente.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o registro está ativo.|
 
-## Regras
+### Regras
 
 - Se `paciente_notificado = true`, preferencialmente `numero_notificacao` deve ser preenchido.
-    
+
 - Se `paciente_notificado = false`, preferencialmente `justificativa_nao_notificacao` deve ser preenchida.
-    
+
 
 ---
 
-# 34. Tabela: dados_clinicos_atendimento
+## 34. Tabela: dados_clinicos_atendimento
 
-## Finalidade
+### Finalidade
 
 Registrar dados clínicos objetivos coletados no atendimento.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Altura
-    
-- Peso
-    
-- Circunferencia Abdominal
-    
-- Frequencia cardiaca
-    
-- Saturacao
-    
-- PA sistolica
-    
-- PA diastolica
-    
-- NYHA
-    
 
-## Campos
+- Peso
+
+- Circunferencia Abdominal
+
+- Frequencia cardiaca
+
+- Saturacao
+
+- PA sistolica
+
+- PA diastolica
+
+- NYHA
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1683,38 +1688,38 @@ Registrar dados clínicos objetivos coletados no atendimento.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o registro está ativo.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `dados_clinicos_atendimento.paciente_id` referencia `paciente.id`.
-    
-- `dados_clinicos_atendimento.atendimento_id` referencia `atendimento.id`.
-    
 
-## Regras
+- `dados_clinicos_atendimento.atendimento_id` referencia `atendimento.id`.
+
+
+### Regras
 
 - Deve existir no máximo um registro de dados clínicos por atendimento, salvo se o sistema futuramente permitir múltiplas medições.
-    
+
 - Sugestão de restrição única: `atendimento_id`.
-    
+
 
 ---
 
-# 35. Tabela: obito
+## 35. Tabela: obito
 
-## Finalidade
+### Finalidade
 
 Registrar óbito do paciente.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Óbito
-    
-- Data do óbito
-    
-- causa do óbito
-    
 
-## Campos
+- Data do óbito
+
+- causa do óbito
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1728,29 +1733,29 @@ Registrar óbito do paciente.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o registro está ativo.|
 
-## Regras
+### Regras
 
 - Um paciente deve ter no máximo um óbito ativo.
-    
+
 - Se `houve_obito = true`, idealmente `data_obito` ou `causa_obito` deve ser preenchido quando a informação existir.
-    
+
 
 ---
 
-# 36. Tabela: retorno_anual
+## 36. Tabela: retorno_anual
 
-## Finalidade
+### Finalidade
 
 Registrar retorno anual do paciente.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Retorno anual realizado
-    
-- Desfecho do retorno
-    
 
-## Campos
+- Desfecho do retorno
+
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1764,27 +1769,27 @@ Registrar retorno anual do paciente.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se o registro está ativo.|
 
-## Regras
+### Regras
 
 - Se a planilha não trouxer ano específico, `ano_referencia` pode ser derivado da data do atendimento.
-    
+
 - Um paciente pode ter vários retornos anuais ao longo do tempo.
-    
+
 
 ---
 
-# 37. Tabela: atendimento_observacao
+## 37. Tabela: atendimento_observacao
 
-## Finalidade
+### Finalidade
 
 Registrar observações e pendências associadas ao atendimento.
 
-## Colunas da planilha cobertas
+### Colunas da planilha cobertas
 
 - Pendencias/Observação
-    
 
-## Campos
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1797,36 +1802,36 @@ Registrar observações e pendências associadas ao atendimento.
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 |ativo|BOOLEAN|Sim||Indica se a observação está ativa.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `atendimento_observacao.atendimento_id` referencia `atendimento.id`.
-    
-- `atendimento_observacao.paciente_id` referencia `paciente.id`.
-    
 
-## Regras
+- `atendimento_observacao.paciente_id` referencia `paciente.id`.
+
+
+### Regras
 
 - A coluna “Pendencias/Observação” também pode aparecer em `atendimento.pendencias_observacao`.
-    
+
 - Para evitar perda de informação, recomenda-se salvar o texto em `atendimento_observacao`.
-    
+
 - A tabela `atendimento` pode manter uma cópia resumida, mas a fonte estruturada de observações deve ser esta tabela.
-    
+
 
 ---
 
-# 38. Tabela: importacao_planilha
+## 38. Tabela: importacao_planilha
 
-## Finalidade
+### Finalidade
 
 Controlar cada processo de importação da planilha.
 
-## Colunas cobertas
+### Colunas cobertas
 
 - Controle da importação como processo.
-    
 
-## Campos
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1843,27 +1848,27 @@ Controlar cada processo de importação da planilha.
 |criado_em|TIMESTAMP|Sim||Data de criação.|
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `importacao_planilha.usuario_id` referencia `usuario.id`.
-    
+
 - `importacao_planilha` 1:N `importacao_linha`.
-    
+
 
 ---
 
-# 39. Tabela: importacao_linha
+## 39. Tabela: importacao_linha
 
-## Finalidade
+### Finalidade
 
 Guardar cada linha original da planilha em formato bruto para auditoria e rastreabilidade.
 
-## Colunas cobertas
+### Colunas cobertas
 
 - Todas as colunas originais da planilha em formato bruto para auditoria.
-    
 
-## Campos
+
+### Campos
 
 |Campo|Tipo|Obrigatório|Chave|Descrição|
 |---|--:|--:|--:|---|
@@ -1878,27 +1883,27 @@ Guardar cada linha original da planilha em formato bruto para auditoria e rastre
 |criado_em|TIMESTAMP|Sim||Data de criação.|
 |atualizado_em|TIMESTAMP|Sim||Data de atualização.|
 
-## Relacionamentos
+### Relacionamentos
 
 - `importacao_linha.importacao_planilha_id` referencia `importacao_planilha.id`.
-    
-- `importacao_linha.paciente_id` referencia `paciente.id`.
-    
-- `importacao_linha.atendimento_id` referencia `atendimento.id`.
-    
 
-## Regras
+- `importacao_linha.paciente_id` referencia `paciente.id`.
+
+- `importacao_linha.atendimento_id` referencia `atendimento.id`.
+
+
+### Regras
 
 - `dados_originais` deve armazenar a linha inteira da planilha.
-    
+
 - Essa tabela é a principal garantia contra perda de dados.
-    
+
 - Mesmo que uma coluna ainda não tenha campo estruturado definitivo, ela permanece preservada em `dados_originais`.
-    
+
 
 ---
 
-# 40. Matriz de cobertura das colunas da planilha
+## 40. Matriz de cobertura das colunas da planilha
 
 |Grupo de colunas da planilha|Tabela destino|
 |---|---|
@@ -1943,22 +1948,22 @@ Guardar cada linha original da planilha em formato bruto para auditoria e rastre
 
 ---
 
-# 41. Observação final sobre garantia de não perda de dados
+## 41. Observação final sobre garantia de não perda de dados
 
 Este modelo cobre todas as colunas listadas na relação fornecida.
 
 A garantia prática contra perda de informação depende de duas decisões técnicas:
 
 1. Toda coluna original deve ter destino estruturado em uma das tabelas acima.
-    
+
 2. Toda linha da planilha deve ser salva integralmente em `importacao_linha.dados_originais` como `JSONB`.
-    
+
 
 Com isso, o sistema permite duas camadas de segurança:
 
 - Camada estruturada: dados normalizados para CRUD, busca, relatórios e dashboards.
-    
+
 - Camada bruta: dados originais preservados para auditoria, conferência e correção futura.
-    
+
 
 A tabela `importacao_linha` não substitui a modelagem normalizada, mas impede perda definitiva de dados durante a migração.

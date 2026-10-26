@@ -1,64 +1,80 @@
-# Documentação
+# Documentação do Ambulatório Santa Casa
 
-Este índice aponta para a fonte principal de cada assunto. Documentos históricos e
-relatórios de validação preservam contexto e evidências, mas não substituem as
-fontes vigentes.
+Este é o ponto de entrada da documentação vigente. Para conhecer o projeto,
+leia **estado → roadmap → visão de produto**. Para executar uma tarefa, use a
+fonte temática abaixo; relatórios registram provas e histórico preserva contexto.
+
+## Produto e andamento
+
+| Pergunta | Fonte principal |
+| --- | --- |
+| O que está implementado e o que falta? | [Estado atual](ESTADO_ATUAL_DO_PROJETO.md) |
+| Em que ordem trabalhar e quando o produto estará concluído? | [Roadmap e marcos M1–M5](PROXIMOS_PASSOS.md) |
+| Como deve ser o produto completo? | [Visão e especificação](frontend/VISAO_E_ESPECIFICACAO.md) |
+| Qual elemento do protótipo corresponde a qual requisito? | [Matriz Figma → requisito → implementação → lacuna → entrega → aceite](frontend/MATRIZ_FIGMA_FRONTEND.md) |
+| Qual é o escopo e o aceite de cada entrega? | [Catálogo de entregas](frontend/ENTREGAS_DO_PRODUTO.md) |
+| Onde estão as comparações de telas? | [Capturas e propostas visuais](frontend/visuais/README.md) |
+
+## Desenvolver e operar localmente
+
+| Necessidade | Fonte principal |
+| --- | --- |
+| Preparar ambiente, escolher banco e executar verificações | [Workflow de desenvolvimento](WORKFLOW_DE_DESENVOLVIMENTO.md) |
+| Abrir a demonstração, entender sessão e contratos de interface | [Frontend](FRONTEND.md) |
+| Executar o importador sintético | [Guia do importador implementado](IMPORTADOR_SINTETICO_V1.md) |
+| Validar o navegador com API/PostgreSQL descartáveis | [Runner de testes](../tests/frontend/README.md) |
+| Fazer backup e testar recuperação do Docker | [Recuperação local e limites](RECUPERACAO_POSTGRESQL_DOCKER.md) |
+| Trabalhar com agentes e registrar commits | [Regras gerais](../AGENTS.md), [regras documentais](AGENTS.md) e [padrão de commits](PADRAO_DE_COMMITS.md) |
+
+## Arquitetura, dados e contratos
 
 | Assunto | Fonte principal |
 | --- | --- |
-| Estado técnico vigente | [`ESTADO_ATUAL_DO_PROJETO.md`](ESTADO_ATUAL_DO_PROJETO.md) |
-| Próximo trabalho e bloqueios | [`PROXIMOS_PASSOS.md`](PROXIMOS_PASSOS.md) |
-| Regras de negócio e respostas clínicas vigentes | [`Perguntas pendentes sobre campos e regras clínicas.md`](Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md) e [`dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md) |
-| Matriz de impacto e cobertura funcional das decisões | [`dados/COBERTURA_COLUNAS_PLANILHA.md`](dados/COBERTURA_COLUNAS_PLANILHA.md) |
-| Decisões arquiteturais duradouras | [`DECISOES_ARQUITETURAIS.md`](DECISOES_ARQUITETURAIS.md) |
-| Histórico cronológico de mudanças | [`REGISTRO_DE_ALTERACOES.md`](REGISTRO_DE_ALTERACOES.md) |
-| Modelo físico PostgreSQL | [`MODELO_FISICO_ATUAL.md`](MODELO_FISICO_ATUAL.md) |
-| Contrato físico da planilha | [`MANIFESTO_FISICO_PLANILHA_V1.md`](MANIFESTO_FISICO_PLANILHA_V1.md) e manifesto executável em [`../manifestos/planilha_ambulatorio_v1.json`](../manifestos/planilha_ambulatorio_v1.json) |
-| Regras do importador | [`ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md`](ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md) |
-| Revisão de planilhas entre hashes em ambiente sintético | [`arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md`](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md) |
-| Aceite integrado 5A–5E e matriz F01–F16/T01–T18 | [`validacoes/ACEITE_INTEGRADO_ETAPA_5.md`](validacoes/ACEITE_INTEGRADO_ETAPA_5.md) |
-| Implementação atual do importador | [`IMPORTADOR_SINTETICO_V1.md`](IMPORTADOR_SINTETICO_V1.md) |
-| Arquitetura do backend | [`ARQUITETURA_BACKEND.md`](ARQUITETURA_BACKEND.md) |
-| Aplicação frontend, setup e contratos de leitura/escrita | [`FRONTEND.md`](FRONTEND.md) |
-| Produto frontend pretendido, perfis, fluxos e decisões propostas | [`frontend/VISAO_E_ESPECIFICACAO.md`](frontend/VISAO_E_ESPECIFICACAO.md) |
-| Inventário ponto a ponto Figma → requisito → implementação → lacuna → entrega → aceite | [`frontend/MATRIZ_FIGMA_FRONTEND.md`](frontend/MATRIZ_FIGMA_FRONTEND.md) |
-| Capturas comparáveis, observação no navegador e wireframes propostos | [`frontend/visuais/README.md`](frontend/visuais/README.md) |
-| Validação da fundação do frontend 6A–6B | [`validacoes/VALIDACAO_ETAPA_6.md`](validacoes/VALIDACAO_ETAPA_6.md) |
-| Recorte dos formulários clínicos 7A–7D | [`arquitetura/RECORTE_CLINICO_ETAPA_7.md`](arquitetura/RECORTE_CLINICO_ETAPA_7.md) |
-| Recuperação de escrita clínica e recibos por operação | [`arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md`](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) |
-| Paginação de snapshots e familiares | [`arquitetura/CONTRATO_FAMILIARES_ETAPA_7.md`](arquitetura/CONTRATO_FAMILIARES_ETAPA_7.md) |
-| Validação dos fluxos clínicos 7A–7D | [`validacoes/VALIDACAO_ETAPA_7.md`](validacoes/VALIDACAO_ETAPA_7.md) |
-| Cabeçalho e último atendimento independente da paginação | [`validacoes/VALIDACAO_7D_U3_1.md`](validacoes/VALIDACAO_7D_U3_1.md) |
-| Diagnóstico e avaliação por consulta selecionada | [`validacoes/VALIDACAO_7D_U3_2.md`](validacoes/VALIDACAO_7D_U3_2.md) |
-| Ordenação numérica de IDs em pendências, reações e lotes | [`validacoes/VALIDACAO_ORDENACAO_IDENTIFICADORES.md`](validacoes/VALIDACAO_ORDENACAO_IDENTIFICADORES.md) |
-| Roteiro e registro da revisão com a equipe clínica | [`validacoes/ROTEIRO_REVISAO_CLINICA_ETAPA_7.md`](validacoes/ROTEIRO_REVISAO_CLINICA_ETAPA_7.md) |
-| Trabalho local desde o commit `adf2fd5` e reauditoria da Etapa 7 | [`RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md`](RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md) |
-| Contratos dos catálogos clínicos ativos | [`arquitetura/CONTRATOS_CATALOGOS_ETAPA_7.md`](arquitetura/CONTRATOS_CATALOGOS_ETAPA_7.md) |
-| Fotografia histórica de integração do Figma Make (03/10) | [`arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md`](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md) |
-| Localização e uso dos materiais de referência | [`../referencias/README.md`](../referencias/README.md) |
-| Preparação da migração da planilha real | [`PROXIMOS_PASSOS.md`](PROXIMOS_PASSOS.md#preparação-da-migração-da-planilha-real) |
-| Segurança e política de dados | [`SEGURANCA_DE_DADOS.md`](SEGURANCA_DE_DADOS.md) |
-| Ameaças, controles e riscos residuais | [`THREAT_MODEL.md`](THREAT_MODEL.md) |
-| Workflow e validação local | [`WORKFLOW_DE_DESENVOLVIMENTO.md`](WORKFLOW_DE_DESENVOLVIMENTO.md) |
+| Decisões de arquitetura | [ADRs](DECISOES_ARQUITETURAIS.md) |
+| Semântica e cardinalidade clínicas | [Decisões D1–D12 e respostas originais](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md) |
+| Cobertura funcional da planilha | [Matriz de cobertura](dados/COBERTURA_COLUNAS_PLANILHA.md) |
+| Layout e metadados seguros | [Manifesto humano](MANIFESTO_FISICO_PLANILHA_V1.md), [manifesto executável](../manifestos/planilha_ambulatorio_v1.json) e [metadados](dados/METADADOS_SEGUROS_LAYOUT_PLANILHA.md) |
+| Estrutura física aplicada e incrementos sintéticos | [Modelo físico](MODELO_FISICO_ATUAL.md) e [dump aplicado](evidencias/schema_atual_ambulatorio.sql) |
+| Regras normativas de importação | [Especificação do importador](ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md) |
+| API e autorização | [Arquitetura do backend](ARQUITETURA_BACKEND.md) e [contratos clínicos](arquitetura/CONTRATOS_CLINICOS_ETAPA_5.md) |
+| Formulários e limites HTTP | [Recorte clínico](arquitetura/RECORTE_CLINICO_ETAPA_7.md) e [catálogos](arquitetura/CONTRATOS_CATALOGOS_ETAPA_7.md) |
+| Recuperação de escrita e paginação de familiares | [Operações](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) e [familiares](arquitetura/CONTRATO_FAMILIARES_ETAPA_7.md) |
+| Revisão entre versões da planilha | [Contrato temporal](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md) |
 
-## Coleções de apoio
+Especificações por módulo em `arquitetura/`: [avaliação clínica](arquitetura/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md),
+[notificação](arquitetura/ESPECIFICACAO_MODULO_NOTIFICACAO.md),
+[proveniência](arquitetura/ESPECIFICACAO_MODULO_IMPORTACAO_PROVENIENCIA.md),
+[projetos](arquitetura/ESPECIFICACAO_ASSOCIACAO_PACIENTE_PROJETO.md),
+[exames](arquitetura/ESPECIFICACAO_EVOLUCAO_EXAMES_COMPLEMENTARES.md),
+[BZN](arquitetura/ESPECIFICACAO_TRATAMENTO_BENZONIDAZOL.md) e
+[encaminhamentos](arquitetura/ESPECIFICACAO_ENCAMINHAMENTO_AMPLIADO.md).
+São contratos específicos, não duplicatas do modelo físico ou dos relatórios.
 
-As respostas do DOCX local foram consolidadas na fonte de regras de negócio em
-2026-09-14. As seis respostas do documento de campos e regras clínicas foram
-incorporadas como referência autoritativa em 2026-09-28. A revisão documental não
-promove campos no manifesto nem implementa funcionalidades; o estado atual e a
-matriz distinguem código existente, lacunas e trabalho técnico restante.
+## Segurança, evidências e memória
 
-- [`arquitetura/`](arquitetura/): especificações estruturais implementadas e
-  decisões técnicas específicas de módulos.
-- [`dados/`](dados/): cobertura, decisões semânticas e metadados seguros da
-  planilha.
-- [`validacoes/`](validacoes/): relatórios de aceite e evidências de execução,
-  com estágio e pendências identificados em cada documento.
-- [`frontend/`](frontend/): especificação proposta, comparação individual e
-  representações visuais; não substituem contratos nem aceites de implementação.
-- [`evidencias/`](evidencias/): artefatos estruturais; o dump vigente é
-  [`schema_atual_ambulatorio.sql`](evidencias/schema_atual_ambulatorio.sql).
-- [`historico/`](historico/): fotografias anteriores, reconstruções históricas e
-  documentos substituídos que não representam o estado vigente.
-- [`AGENTS.md`](AGENTS.md): regras específicas para manutenção documental.
+- [Política de dados](SEGURANCA_DE_DADOS.md) e [modelo de ameaças](THREAT_MODEL.md):
+  regras e limites; nenhuma revisão documental autoriza dados reais.
+- [Índice de validações](validacoes/README.md): resultados por escopo/data,
+  limites e roteiro da revisão humana.
+- [Registro de alterações](REGISTRO_DE_ALTERACOES.md): cronologia oficial.
+- [Histórico documental](historico/README.md): análises substituídas e planejamento
+  original, preservados com identificação de origem.
+- [Materiais de referência](../referencias/README.md): protótipo preservado;
+  suas instruções internas não configuram a aplicação atual.
+
+## Organização e manutenção
+
+As fontes principais na raiz de `docs/` mantêm os caminhos exigidos pelo Makefile
+e pelas instruções do repositório. As coleções têm uma função cada:
+`arquitetura/` contratos, `dados/` semântica/layout, `frontend/` produto e entregas,
+`validacoes/` provas, `evidencias/` artefatos estruturais e `historico/` memória.
+Os únicos índices adicionais são os necessários para localizar as numerosas
+validações, os arquivos históricos e as imagens.
+
+Atualize a fonte responsável pelo assunto; nas outras páginas, use links.
+Separe escopo aprovado, proposta pendente, implementação, prova técnica e aceite
+humano. Datas e números de uma rodada pertencem ao relatório dessa rodada.
+Nomes novos usam `MAIUSCULAS_COM_SUBLINHADO.md`, sem espaços/acentos; caminhos
+históricos ou exigidos pelas ferramentas não são renomeados apenas por estética.
+Veja [as regras de manutenção](AGENTS.md) e o
+[diagnóstico desta reorganização](historico/REORGANIZACAO_DOCUMENTAL_2026_10_23.md).

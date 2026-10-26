@@ -1,0 +1,128 @@
+import { expect, test } from '@playwright/test';
+import { assertNoPersistentClinicalState, fixture, resumePage } from './fixtures';
+import { assertAccessible, assertFitsViewport, signIn } from './stage7-helpers';
+
+const menu = (page: import('@playwright/test').Page) => page.getByRole('navigation', { name: 'Menu principal', exact: true });
+
+test('7D-U4.1: menu compacto opera por teclado, conserva destino e responde ao breakpoint', async ({ page }, info) => {
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.goto('/login');
+  await expect(page.getByLabel('Usuário', { exact: true })).toBeFocused();
+  await assertAccessible(page); await assertFitsViewport(page);
+  await page.screenshot({ path: info.outputPath('login-320.png'), fullPage: true });
+  const source = `/pacientes/${fixture.main.pacienteId}?aba=atendimentos&atendimentosLimit=1&atendimentosOffset=1`;
+  const writes: string[] = [];
+  page.on('request', request => {
+    if (/^\/v1\/pacientes/.test(new URL(request.url()).pathname) && ['POST', 'PATCH', 'PUT', 'DELETE'].includes(request.method())) writes.push(request.url());
+  });
+  await signIn(page, 'consulta', source);
+  await expect(page.getByRole('heading', { name: 'Histórico de atendimentos', exact: true })).toBeVisible();
+  const control = page.getByRole('button', { name: 'Menu', exact: true });
+  await expect(control).toHaveAttribute('aria-expanded', 'false');
+  await expect(menu(page)).toBeHidden();
+  expect((await page.locator('.sidebar').boundingBox())!.height).toBeLessThan(110);
+  const main = page.getByRole('main');
+  await page.getByRole('link', { name: 'Ir para o conteúdo', exact: true }).focus();
+  await page.keyboard.press('Enter'); await expect(main).toBeFocused();
+  const returnTo = page.url();
+  await control.focus(); await page.keyboard.press('Enter');
+  const close = page.getByRole('button', { name: 'Fechar menu', exact: true });
+  await expect(close).toHaveAttribute('aria-expanded', 'true');
+  await expect(menu(page)).toBeVisible();
+  await assertFitsViewport(page);
+  await page.screenshot({ path: info.outputPath('menu-aberto-320.png'), fullPage: true });
+  await page.keyboard.press('Tab');
+  await expect(menu(page).getByRole('link', { name: 'Início', exact: true })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(menu(page).getByRole('link', { name: 'Pacientes', exact: true })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(control).toBeFocused(); await expect(menu(page)).toBeHidden();
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab'); await page.keyboard.press('Tab'); await page.keyboard.press('Tab');
+  await expect(menu(page).getByRole('link', { name: 'Minha conta', exact: true })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('heading', { name: 'Minha conta', exact: true })).toBeVisible();
+  await expect(main).toBeFocused(); await expect(menu(page)).toBeHidden();
+  await expect(main.getByText(fixture.users.consulta.usuarioId, { exact: true })).toBeVisible();
+  await assertFitsViewport(page); await assertAccessible(page);
+  await page.screenshot({ path: info.outputPath('conta-320.png'), fullPage: true });
+  await page.goBack(); await expect(page).toHaveURL(returnTo);
+  await expect(page.getByRole('heading', { name: 'Histórico de atendimentos', exact: true })).toBeVisible();
+  await expect(menu(page)).toBeHidden();
+  await control.focus();
+  await page.setViewportSize({ width: 1440, height: 960 });
+  await expect(control).toBeHidden(); await expect(menu(page)).toBeVisible();
+  await expect(main).toBeFocused();
+  await expect(menu(page).getByRole('link', { name: 'Pacientes', exact: true })).toHaveAttribute('aria-current', 'page');
+  await menu(page).getByRole('link', { name: 'Pacientes', exact: true }).focus();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(control).toBeFocused(); await expect(menu(page)).toBeHidden();
+  await page.screenshot({ path: info.outputPath('menu-fechado-390.png'), fullPage: true });
+  await page.keyboard.press('Enter');
+  await assertFitsViewport(page); await assertAccessible(page);
+  await page.screenshot({ path: info.outputPath('menu-aberto-390.png'), fullPage: true });
+  // Disclosure: Tab can leave it for the content; it does not trap focus.
+  await page.keyboard.press('Tab'); await page.keyboard.press('Tab'); await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: 'Sair', exact: true })).toBeFocused();
+  await page.keyboard.press('Tab');
+  expect(await page.getByRole('complementary').evaluate(element => element.contains(document.activeElement))).toBe(false);
+  await page.setViewportSize({ width: 1440, height: 960 });
+  await menu(page).getByRole('link', { name: 'Minha conta', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Minha conta', exact: true })).toBeVisible();
+  await page.screenshot({ path: info.outputPath('conta-desktop.png'), fullPage: true });
+  await page.evaluate(() => { document.documentElement.style.zoom = '2'; });
+  await assertFitsViewport(page);
+  await page.evaluate(() => { document.documentElement.style.zoom = ''; });
+  await page.getByRole('button', { name: 'Sair da conta', exact: true }).click();
+  await expect(page.getByLabel('Usuário', { exact: true })).toBeFocused();
+  await expect(page.getByText(fixture.users.consulta.usuarioId, { exact: true })).toHaveCount(0);
+  expect(writes).toEqual([]); await assertNoPersistentClinicalState(page);
+});
+
+test('7D-U4.1: endereço desconhecido oferece destinos reais em 320 px e foco após navegação', async ({ page }, info) => {
+  await page.setViewportSize({ width: 320, height: 844 });
+  await signIn(page, 'consulta', '/pagina-sintetica-inexistente');
+  const main = page.getByRole('main');
+  await expect(main.getByRole('heading', { name: 'Página não disponível', exact: true })).toBeVisible();
+  expect((await page.locator('.sidebar').boundingBox())!.height).toBeLessThan(110);
+  await expect(main).toBeFocused();
+  await expect(main).not.toContainText(/removid|excluíd/i);
+  await assertFitsViewport(page); await assertAccessible(page);
+  await page.screenshot({ path: info.outputPath('pagina-inexistente-320.png'), fullPage: true });
+  const search = main.getByRole('link', { name: 'Consultar pacientes', exact: true });
+  await search.focus(); await page.keyboard.press('Enter');
+  await expect(page).toHaveURL('/pacientes');
+  await expect(page.getByRole('searchbox', { name: 'Nome', exact: true })).toBeVisible();
+  await expect(main).toBeFocused();
+  await page.goBack();
+  await main.getByRole('link', { name: 'Ir para o início', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Início', exact: true })).toBeVisible();
+  await assertNoPersistentClinicalState(page);
+});
+
+test('7D-U4.1: falha transitória de identidade oculta a conta e devolve foco após recuperação por leitura', async ({ page }, info) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signIn(page, 'consulta', '/minha-conta');
+  const main = page.getByRole('main');
+  await expect(main.getByText(fixture.users.consulta.usuarioId, { exact: true })).toBeVisible();
+  // Only this response delivery fails. Login, recovery and the other requests
+  // use the real API; this is evidence of a simulated transient read failure.
+  await page.route('**/v1/auth/me', route => route.fulfill({ status: 503, contentType: 'application/json', body: '{}' }));
+  await resumePage(page);
+  const title = page.getByRole('heading', { name: 'Não foi possível verificar seu acesso', exact: true });
+  await expect(title).toBeVisible();
+  expect((await page.locator('.sidebar').boundingBox())!.height).toBeLessThan(110);
+  await expect(title.locator('..').locator('..')).toBeFocused();
+  await expect(main.getByText(fixture.users.consulta.usuarioId, { exact: true })).toHaveCount(0);
+  await assertAccessible(page); await assertFitsViewport(page);
+  await page.screenshot({ path: info.outputPath('identidade-indisponivel-390.png'), fullPage: true });
+  await page.unroute('**/v1/auth/me');
+  const recovered = page.waitForResponse(response => new URL(response.url()).pathname === '/v1/auth/me' && response.status() === 200);
+  await page.getByRole('button', { name: 'Tentar novamente', exact: true }).click(); await recovered;
+  await expect(main.getByText(fixture.users.consulta.usuarioId, { exact: true })).toBeVisible();
+  await expect(main).toBeFocused(); await expect(page).toHaveURL('/minha-conta');
+  await page.getByRole('button', { name: 'Sair da conta', exact: true }).click();
+  await expect(page.getByLabel('Usuário', { exact: true })).toBeVisible();
+  await assertNoPersistentClinicalState(page);
+});

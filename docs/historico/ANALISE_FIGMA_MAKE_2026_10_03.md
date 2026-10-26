@@ -1,5 +1,8 @@
 # Análise do Figma Make e planejamento da integração do frontend
 
+> Documento histórico. Preserva a fotografia indicada pela data; não substitui
+> o [estado vigente](../ESTADO_ATUAL_DO_PROJETO.md) nem o [roadmap](../PROXIMOS_PASSOS.md).
+
 Data: 2026-10-03. Status: avaliação e planejamento concluídos; implementação do
 frontend não iniciada. A análise é estática, sobre o código disponibilizado em
 `referencias/frontend/figma-make-prototipo/`; não representa homologação visual
@@ -10,8 +13,8 @@ posterior da Etapa 6 está descrita em [FRONTEND.md](../FRONTEND.md), com estág
 vigente em [ESTADO_ATUAL_DO_PROJETO.md](../ESTADO_ATUAL_DO_PROJETO.md) e evidências
 no [relatório de validação](../validacoes/VALIDACAO_ETAPA_6.md).
 A evolução dos formulários da Etapa 7 está no
-[recorte clínico vigente](RECORTE_CLINICO_ETAPA_7.md) e no
-[contrato dos catálogos ativos](CONTRATOS_CATALOGOS_ETAPA_7.md). As lacunas da
+[recorte clínico vigente](../arquitetura/RECORTE_CLINICO_ETAPA_7.md) e no
+[contrato dos catálogos ativos](../arquitetura/CONTRATOS_CATALOGOS_ETAPA_7.md). As lacunas da
 matriz abaixo preservam a fotografia anterior à implementação.
 As provas de execução pertencem ao
 [relatório da Etapa 7](../validacoes/VALIDACAO_ETAPA_7.md).
@@ -21,7 +24,7 @@ e a [matriz ponto a ponto](../frontend/MATRIZ_FIGMA_FRONTEND.md) reavaliaram o
 protótipo, frontend e backend atuais, com observações no navegador delimitadas.
 Elas são as fontes vigentes do inventário/destino e da experiência pretendida;
 este documento preserva a fotografia histórica. A sequência vigente está nos
-[pacotes do roadmap](../PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend).
+[pacotes do roadmap](../frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend).
 
 ## Objetivo, limites e fontes
 
@@ -40,12 +43,12 @@ Fontes de verdade:
 
 - [Estado atual](../ESTADO_ATUAL_DO_PROJETO.md) e
   [roadmap](../PROXIMOS_PASSOS.md): estágio e escopo das Etapas 6–8.
-- [Respostas clínicas](../Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md),
+- [Respostas clínicas](../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md#respostas-clínicas-originais-de-28092026),
   [decisões humanas](../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md) e
-  [contratos clínicos](CONTRATOS_CLINICOS_ETAPA_5.md): significado dos dados.
+  [contratos clínicos](../arquitetura/CONTRATOS_CLINICOS_ETAPA_5.md): significado dos dados.
 - [Arquitetura do backend](../ARQUITETURA_BACKEND.md),
   [ADRs](../DECISOES_ARQUITETURAIS.md) e controllers/DTOs/services em
-  [`backend/src/`](../../backend/src/): contrato executável e autorização.
+  [`backend/src/`](../../backend/src): contrato executável e autorização.
 - [Modelo físico](../MODELO_FISICO_ATUAL.md) e
   [dump aplicado](../evidencias/schema_atual_ambulatorio.sql): estrutura
   persistente, distinta das migrations validadas em bancos descartáveis.

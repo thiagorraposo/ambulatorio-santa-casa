@@ -1,5 +1,149 @@
 # Registro de Alterações
 
+## 2026-10-26 — organizar documentação pendente em commits
+
+Criada a branch `organizar-docs` a partir de `organizar-frontend`, no commit
+`2f42d78`, preservando as alterações locais. Separados os contextos de escopo
+e catálogo de produto, orientações operacionais e reorganização das fontes
+documentais. Nenhuma alteração de código, configuração, schema ou dados.
+
+Conferidos os 580 IDs FM e 580 IDs RQ, as 74 âncoras anteriores de pacotes e
+as duas novas, a transcrição das respostas clínicas e a identidade de bytes do
+DER movido. A auditoria local cobriu 80 documentos, 1.953 links e 1.237
+fragmentos Markdown, sem destinos ou âncoras ausentes. Whitespace dos novos
+Markdown e `git diff --check` aprovados. URLs externas e logs temporários não
+foram verificados. Sem merge ou push.
+
+## 2026-10-26 — consolidar orientações de ambiente e recuperação
+
+Versionadas as orientações pendentes de setup, seleção do PostgreSQL e efeitos
+dos alvos de validação, incluindo testes com COMMIT e exigência de ambiente
+descartável. Preservados os limites históricos da avaliação de ameaças e do
+check de backup/restore, sem mudar ferramentas ou controles. Corrigido o
+fechamento de um bloco Markdown no workflow.
+
+Validação: `make docs-check COMPACT=1` e `git diff --check` aprovados.
+Suítes SQL, importador, backend e frontend não executadas: escopo exclusivamente
+documental, conforme a matriz de validação proporcional.
+
+## 2026-10-23 — reorganizar e consolidar a documentação
+
+Inventariados 85 documentos Markdown e as referências/artefatos associados,
+preservando as seis alterações documentais preexistentes de produto completo.
+README e estado atual reduzidos a suas funções; setup/comandos consolidados no
+workflow. Catálogo de entregas extraído do roadmap sem renumerar os pacotes.
+Respostas clínicas originais incorporadas à fonte D1–D12; planejamento/DER,
+análise Figma e reauditoria movidos para o histórico. Três arquivos sem conteúdo
+técnico tiveram sua existência consolidada no índice histórico.
+
+Criados índices de validações e histórico e documentadas as fontes principais,
+convenções e limites de vigência. Atualizados links, âncoras e referências;
+explicitadas limitações antigas da avaliação de ameaças e dos testes de restore,
+sem alterar controles ou ferramentas. Diagnóstico, inventário e pendências em
+[reorganização de 23/10](historico/REORGANIZACAO_DOCUMENTAL_2026_10_23.md).
+
+Validação exclusivamente documental: `make docs-check COMPACT=1`, auditoria de
+links/âncoras e navegação, `git diff --check`, whitespace dos documentos novos,
+comparação de conteúdo/IDs e hashes dos 381 arquivos não Markdown. Código,
+configurações, dados, banco e instruções internas do protótipo preservados.
+Sem commit ou push nesta entrega.
+
+## 2026-10-23 — adotar o protótipo como escopo de produto completo
+
+Por instrução explícita do responsável pelo produto, o roadmap passa a ter como
+referência a cobertura funcional, a experiência de uso e a fidelidade visual do
+protótipo completo. Preservadas as dez etapas, os IDs e os aceites históricos;
+antigos destinos VP passam a PC e integram a entrega final. Incluídos módulos
+clínicos, correções, fila, indicadores, importação/revisão/reprocessamento,
+anexos e gestão de usuários, com decisões específicas ainda abertas.
+
+Definidos marcos M1–M5, dependências por frente, aceite visual por tela (8V1) e
+aceite funcional integral (8V2). Atualizados visão, destinos da matriz, estado
+vigente e README. O recorte enxuto e as estimativas anteriores de percentual,
+quantidade de entregas e prazo não representam o novo objetivo. Exclusões por
+regras clínicas/segurança permanecem; falta de API exige construção.
+
+Validação documental: `make docs-check COMPACT=1`, revisão de cobertura dos
+pacotes/destinos, conferência de 1.300 links locais sem arquivos de destino
+inexistentes, verificação das novas âncoras, `git diff --check` e status. Nenhuma alteração
+de código/schema, execução de testes clínicos, acesso a dados reais, commit ou
+push nesta revisão.
+
+## 2026-10-21 — organizar alterações pendentes em commits
+
+Criada a branch `organizar-frontend` a partir de `docs-frontend`, no commit
+`84b1a32`, preservando todas as alterações locais. Organização em cinco commits:
+correção da edição com data legada desconhecida; implementação/testes U3.3;
+documentação/capturas U3.3; implementação/testes U4.1; documentação/capturas U4.1
+e este registro. Os trechos compartilhados de CSS e documentação foram
+selecionados pelo índice, preservando o conteúdo final dos arquivos.
+
+Revisados status, diff e histórico antes da organização. Validações anteriores
+de frontend reaproveitadas conforme os relatórios U3.3/U4.1; integração HTTP
+focada de data legada executada com sucesso nesta organização. Verificação de
+documentação e whitespace aprovada. Nenhuma migration, dado real, merge ou push.
+As pendências funcionais e de aceite permanecem registradas no roadmap.
+
+## 2026-10-21 — preservar data desconhecida em atendimento legado
+
+A edição permite corrigir outros campos quando a data original do atendimento
+é desconhecida, sem exigir estimativa nem enviar uma data fabricada. Criação e
+atendimentos com data conhecida continuam exigindo data. Testes de contrato e
+formulário cobrem esses casos; a integração HTTP confirma autorização, versão,
+conflito e preservação de `NULL` após corrigir observações.
+
+Validação focada do backend aprovada em banco exclusivamente sintético:
+`bash tests/backend/test_clinical_integration.sh test/clinical/clinical.http.spec.ts
+--testNamePattern 'ordena histórico por data decrescente'`, com um caso aprovado.
+Log: `/tmp/ambulatorio-check-m0dyevhw/output.log`. A organização dos commits
+reaproveita as validações de frontend registradas nas entregas posteriores.
+Sem alteração de schema ou contrato público da API.
+
+## 2026-10-21 — navegação, conta e erros em telas menores (7D-U4.1)
+
+Selecionada a próxima unidade independente de decisão de produto após U3.3.
+Criado `AppNavigation`: sidebar desktop, menu compacto até 800 px, controle
+acessível, Escape, Tab sem aprisionamento e fechamento após navegação efetiva.
+Nome/perfil vêm da identidade vigente. Redimensionar recupera foco de controles
+que o CSS oculta; o cabeçalho compacto evita repetir a marca no celular.
+
+Minha conta mantém identidade em leitura e saída explícita, com orientação à
+equipe responsável, sem inventar canal institucional. Endereço desconhecido
+oferece início/busca; falha de identidade foca a orientação e devolve foco após
+recuperar por leitura, conservando destino e política de rascunhos/recibos.
+
+Componentes e navegador verificam teclado, breakpoint, 320/390 px, zoom 200%,
+Axe, sessão/conta e erros. Build e componentes aprovados; rodada final com
+11/11 cenários de navegador aprovados após corrigir CSS/foco e altura móvel.
+Falhas intermediárias e resultados estão na
+[validação U4.1](validacoes/VALIDACAO_7D_U4_1.md). Alterações anteriores
+preservadas. Sem API nova, migration, dado real, commit ou push. U4.2, etapas de
+cadastro/atendimento, fidelidade visual integral e revisão clínica continuam
+pendentes.
+
+## 2026-10-20 — histórico, detalhe e exames com retorno à ficha (7D-U3.3)
+
+Revisadas as fontes vigentes de estado, roadmap, experiência, matriz Figma,
+contratos, segurança e validação. Selecionada U3.3, sucessora de U3.1/U3.2,
+preservando as alterações locais anteriores de navegação e datas legadas.
+
+Histórico mostra contexto da consulta; links de atendimento conservam retorno
+validado à ficha do mesmo paciente, aba, seleção e páginas. Exames trazidos e
+solicitados são agrupados por página e expandem por `exameId` na URL, mantendo
+identificação, resultado, observações e vínculo disponível. Detalhe oferece
+links às áreas canônicas, sem atribuir estados atuais do paciente ao passado.
+Cabeçalho e último atendimento ficaram mais compactos; paginação foca o título.
+
+Testes de componentes e navegador/API/PostgreSQL sintéticos verificam navegação,
+exames, consulta/edição, carga/vazio/recusa, revogação, teclado e tela estreita.
+Fechamento documental em 21/10: build, componentes e 13 cenários focados
+aprovados; seis falhas da rodada completa inicial foram corrigidas e revalidadas.
+Resultados, falhas intermediárias e evidências estão na
+[validação U3.3](validacoes/VALIDACAO_7D_U3_3.md).
+Sem migration, API nova, alteração de dados persistentes, commit ou push.
+Aceite clínico, demais pacotes de UX e fidelidade visual integral permanecem
+pendentes.
+
 ## 2026-10-17 — diagnóstico e avaliação por consulta selecionada
 
 Implementada a unidade técnica U3.2 com abas Chagas/Avaliação clínica, seleção
@@ -138,7 +282,7 @@ decisões/destinos, aceite e rastreabilidade. Protótipo, intenção original,
 implementação atual, proposta e evidência são distinguidos. Regras clínicas
 vigentes prevalecem; ausência de API vira dependência, sem exclusão automática.
 
-O [roadmap oficial](PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend)
+O [roadmap oficial](frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend)
 preserva as dez etapas e 7A–7D, com pacotes e unidades separadamente aceitáveis,
 dependências por camada e evidência proporcional. Sete lacunas continuam abertas;
 recuperação após 403/409/resposta perdida, confirmação/contexto/desconhecido e
@@ -180,7 +324,7 @@ Nenhuma das sete lacunas foi corrigida nesta organização. Sem merge ou push.
 
 ## 2026-10-05 — relatório do trabalho local e reauditoria da Etapa 7
 
-Gerado o [relatório desde o último commit](RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md),
+Gerado o [relatório desde o último commit](historico/RELATORIO_ETAPA_7_2026_10_05.md),
 com base em `adf2fd5`: fotografia de 42 arquivos modificados e 34 novos antes
 do relatório. O documento distingue APIs já existentes, implementação local,
 validações executadas e limites, com inventário completo e evidências.
@@ -299,7 +443,7 @@ React/TypeScript com apresentação revisada do Figma Make: 6A entrega base/sess
 e 6B integra leitura. Etapas 7–8 explicitam catálogos, cobertura HTTP, versões,
 fronteiras transacionais, rascunhos e condições para funcionalidades complementares.
 Sequência e critérios de aceite ficam no roadmap; o
-[plano de integração](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md) concentra
+[plano de integração](historico/ANALISE_FIGMA_MAKE_2026_10_03.md) concentra
 compatibilidade, reaproveitamento e pendências técnicas.
 
 Registrada a preparação de migração em paralelo ao frontend, com matriz por
@@ -322,7 +466,7 @@ de runtime e navegador na Etapa 6.
 ## 2026-10-03 — análise do Figma Make e planejamento do frontend
 
 Concluída a análise estática de `figma-make-prototipo/`, preservando o diretório
-preexistente não versionado. O [plano de integração](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
+preexistente não versionado. O [plano de integração](historico/ANALISE_FIGMA_MAKE_2026_10_03.md)
 inventaria telas, componentes, formulários, tabelas, filtros, estados e fluxos;
 compara controllers/DTOs/services e regras vigentes; distingue apresentação
 reutilizável, adaptações e referências sem suporte HTTP. A ADR-024 registra a

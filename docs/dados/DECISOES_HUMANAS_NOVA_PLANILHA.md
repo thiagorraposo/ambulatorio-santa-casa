@@ -1,6 +1,7 @@
-# Decisões Humanas para a Nova Planilha
+# Decisões de negócio e respostas clínicas
 
-Atualizado em: 2026-09-28
+Respostas incorporadas em: 2026-09-14 e 2026-09-28.
+Organização e referências revisadas em: 2026-10-23.
 
 ## Finalidade e precedência
 
@@ -15,11 +16,10 @@ disponibilidade do DOCX local. O manifesto executável registra o layout físico
 37 clínicas/de proveniência e `usuario_aplicacao`, alheia ao contrato da planilha.
 A descrição vigente está em `docs/MODELO_FISICO_ATUAL.md`.
 
-As seis respostas de [Perguntas pendentes sobre campos e regras clínicas](../Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
-são a referência autoritativa desde 2026-09-28. D1–D6 estão confirmadas nesse
-arquivo; as decisões anteriores de D7–D12 continuam preservadas. A escolha de
-data de referência e das estruturas físicas é técnica e deve ser explícita,
-sem apresentar novas respostas da equipe.
+As seis [respostas clínicas originais](#respostas-clínicas-originais-de-28092026)
+são autoritativas desde 2026-09-28 e confirmam D1–D6; D7–D12 preservam as
+respostas anteriores. As escolhas técnicas de referência de data e estrutura
+física são identificadas como tais, sem apresentar novas respostas da equipe.
 
 Nenhuma decisão deste documento altera o banco por si só. Mudanças físicas deverão
 ser especificadas e implementadas em migrations incrementais futuras.
@@ -27,7 +27,8 @@ ser especificadas e implementadas em migrations incrementais futuras.
 O manifesto executável `manifestos/planilha_ambulatorio_v1.json` representa agora
 126 rótulos plenos, nove parciais e `Localizado` excluído. D11 foi promovida na
 v1.2.0 do importador para `pendencia_atendimento`, sem classificação automática;
-as demais decisões continuam dependendo de evolução explícita.
+as demais promoções só existem quando comprovadas nos contratos e relatórios
+atuais; a aprovação de semântica não comprova implementação.
 As regras operacionais e suas divergências de implementação estão em
 `docs/ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md` e
 `docs/IMPORTADOR_SINTETICO_V1.md`. Incompatibilidades exigem evolução explícita
@@ -54,7 +55,13 @@ de entrega são propostas técnicas do roadmap, não respostas adicionais da equ
 | D11 | O campo misto pode ficar apenas como pendências, preferencialmente textuais, relativas principalmente a notificação ou solicitação de BZN. Segundo a equipe, as observações desse campo repetem informações do desfecho do retorno. | Não há resposta explícita sobre quantidade por atendimento nem autorização para classificar automaticamente todo texto antigo. A coluna separada `observação` e observações clínicas gerais não foram abolidas. |
 | D12 | `Localizado` pode ser excluído; indica se a equipe encontrou o prontuário físico. | Exclusão funcional não é purga da proveniência nem exclusão de `atendimento.localizacao_prontuario`, que é outro campo. |
 
-### Consequências técnicas
+### Consequências técnicas registradas em 28/09/2026
+
+> Registro da situação técnica na data das respostas. As expressões “pendente”
+> e “acrescentar” abaixo são históricas; não reabrem implementações posteriores.
+> D8 e revisão temporal receberam implementação/provas sintéticas na Etapa 5;
+> consulte o [importador vigente](../IMPORTADOR_SINTETICO_V1.md) e o
+> [aceite integrado](../validacoes/ACEITE_INTEGRADO_ETAPA_5.md).
 
 - Reutilizar nascimento para idade; exames por paciente para D4/D5 e
   acompanhamento para datas/tipos de retorno. D11 já reutiliza
@@ -360,3 +367,45 @@ manifesto e metadados físicos consultados somente em leitura na análise de
 Validação: `make docs-check`, `make manifest-check` e `git diff --check`.
 `make project-check` foi dispensado nesta tarefa para não executar escrita de
 testes no banco. Nenhum dado clínico real foi utilizado.
+
+## Respostas clínicas originais de 28/09/2026
+
+Transcrição preservada do antigo documento “Perguntas pendentes sobre campos e
+regras clínicas”. São respostas incorporadas, não uma nova lista de perguntas
+abertas. As consequências técnicas e os limites estão na tabela D1–D12 acima.
+
+## Onze campos parcialmente estruturados
+
+1. **Idade:** a idade registrada na planilha deve ser preservada como informação original ou calculada pelo sistema a partir da data de nascimento? Se for calculada, qual deve ser a data de referência?
+
+	Resposta: calculada pelo sistema a partir da data de nascimento
+
+
+
+2. **Autorelato de diagnóstico de Chagas — data:** essa data representa quando o participante informou o diagnóstico, quando tomou conhecimento dele ou outro evento? Ela pode ser diferente da data do resultado da sorologia?
+
+    Resposta: A data do autorelato se refere a descoberta do paciente de que possui a doença de chagas, podendo sim ser diferente da data da sorologia.
+
+
+
+3. **Familiares** **diretos** **realizaram** **exame** **de** **Chagas:** deve ser registrado apenas “sim” ou “não”, ou também quais familiares realizaram o exame, a data e o resultado?
+
+    Resposta: Deve ser registrado como sim e não, e se sim, qual familiar realizou a sorologia e seu resultado. Data da sorologia do familiar não precisa
+
+
+
+4. **Paciente** **trouxe** **outros** **exames** **complementares:** basta registrar “sim” ou “não” ou é obrigatório identificar cada exame apresentado?
+
+    Resposta: É obrigatório identificar quais exames complementares o paciente trouxe.
+
+
+
+5. **Foram** **solicitados** **exames** **complementares:** basta registrar “sim” ou “não” ou é obrigatório identificar cada exame solicitado?
+
+    Resposta: É obrigatório identificar quais exames foram solicitados.
+
+
+
+6. **Retorno** **de** **30** **dias** **de** **tratamento:** o que deve ser registrado nesse campo: realização do retorno, data, resultado da avaliação, observações ou uma combinação dessas informações? Esse retorno está sempre relacionado ao tratamento com benznidazol?
+
+    Resposta: O retorno de 30 dias está sempre relacionado ao tratamento com benznidazol, e a informação registrada é a data em que o paciente veio para esse retorno.

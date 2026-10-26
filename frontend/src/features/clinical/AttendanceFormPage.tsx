@@ -49,7 +49,9 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
         state: { saved: 'Atendimento salvo. Tratamento, retornos e encaminhamentos têm confirmação própria.' },
       }); }}>
       <FormSection title="Dados básicos do atendimento">
-        <InputField label="Data do atendimento" type="date" value={draft.values.dataAtendimento!} required onChange={value => field('dataAtendimento', value)} />
+        <InputField label="Data do atendimento" type="date" value={draft.values.dataAtendimento!} required={!draft.original || draft.original.dataAtendimento !== null} onChange={value => field('dataAtendimento', value)} />
+        {draft.original?.dataAtendimento === null && <p className="muted">A data deste atendimento legado é desconhecida.
+          Você pode corrigir os outros dados mantendo a data em branco, sem estimar uma data.</p>}
         <InputField label="Localização do prontuário" value={draft.values.localizacaoProntuario!} maxLength={120} onChange={value => field('localizacaoProntuario', value)} />
         <SelectField label="Somente ambulatório" value={draft.values.ambulatorioUnicamente!} options={booleanOptions} onChange={value => field('ambulatorioUnicamente', value)} />
         <SelectField label="Ambulatório anexo a projeto" value={draft.values.ambulatorioAnexoProjeto!} options={booleanOptions} onChange={value => field('ambulatorioAnexoProjeto', value)} />

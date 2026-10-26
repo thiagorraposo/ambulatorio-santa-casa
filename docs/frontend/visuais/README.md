@@ -144,3 +144,62 @@ visual e contexto; gravação exige UI/API/PostgreSQL reais do runner sintético
 Não repetir automaticamente o envio para produzir sucesso, nem considerar
 primeira página vazia como prova de não aplicação. Atualizar destino/estado do
 requisito somente com evidência correspondente e aceite registrado.
+
+
+## Continuidade de 2026-10-20 — exames da unidade U3.3
+
+Estas capturas sucedem a fotografia de 05/10 somente no recorte indicado.
+Chromium com API/PostgreSQL reais do runner descartável, perfil consulta,
+1440×960 e 390×844; imagens da página inteira. Paciente e dados exclusivamente
+sintéticos. O cabeçalho mantém identidade e referência de idade; o último
+atendimento usa composição mais compacta. A página de exames agrupa trazidos e
+solicitados, com identificação/expansão e contagens restritas à página.
+
+| Desktop | 390 px |
+| --- | --- |
+| ![Exames agrupados e expandidos, U3.3](u33-exames-desktop.png) | ![Exames agrupados em tela estreita, U3.3](u33-exames-390.png) |
+
+Origem: `tests/frontend/u33-navigation.spec.ts`, execução de 20/10 em
+`/tmp/etapa6-frontend-zg3qMF`; paciente `9007199254778759`, consultas `23/24`,
+exames `25/26`. A [validação U3.3](../../validacoes/VALIDACAO_7D_U3_3.md)
+registra percursos, falhas e limites. Imagens revisadas sem corte horizontal;
+Axe, teclado, 320/390 px e zoom 200% passaram nos cenários descritos. As imagens
+não constituem aceite clínico nem comprovam fidelidade visual integral.
+
+Diferenças visuais restantes: cabeçalho/último atendimento ainda ocupam mais
+espaço que a referência, especialmente em mobile; abas, densidade dos painéis e
+composição geral continuam distintas. Cadastro em etapas e atendimento guiado
+pertencem a unidades próprias. Esta continuidade comprova agrupamento/expansão e
+navegação do recorte, sem declarar o produto visual concluído.
+
+
+## Continuidade de 2026-10-21 — navegação e erros da unidade U4.1
+
+Capturas da aplicação com Chromium/API/PostgreSQL sintéticos do runner,
+perfil consulta. Desktop 1440×960; mobile 320×844 e 390×844, página inteira.
+O teste de identidade indisponível intercepta somente a resposta de leitura
+`/auth/me` com 503; recuperação usa a API real. A sessão vem do login real.
+Não há dado clínico real, token ou senha preenchida nas capturas versionadas.
+
+| Tela/estado | Evidência visual |
+| --- | --- |
+| Login, campos vazios e foco inicial | [320 px](u41-login-320.png) |
+| Menu recolhido, conteúdo liberado | [390 px](u41-menu-fechado-390.png) |
+| Menu aberto, marca e saída sem corte | [320 px](u41-menu-aberto-320.png) |
+| Conta e identidade/perfil do servidor | [Desktop](u41-conta-desktop.png) |
+| Endereço desconhecido, início e busca | [320 px](u41-pagina-inexistente-320.png) |
+| Falha transitória de identidade e recuperação | [390 px](u41-identidade-indisponivel-390.png) |
+
+Origem: `tests/frontend/shell-navigation.spec.ts`, artefatos
+`/tmp/etapa6-frontend-jXkZXY`; ficha da fixture sintética `1`, usuário consulta
+`1`, histórico na página de deslocamento `1`. O
+[relatório U4.1](../../validacoes/VALIDACAO_7D_U4_1.md) registra teclado, Escape,
+Tab sem aprisionamento, foco no breakpoint, salto ao conteúdo, conta/logout,
+reflow, zoom e Axe. A inspeção corrigiu excesso de altura do cabeçalho em
+páginas curtas, colisão do botão com a marca e quebra do texto Sair.
+
+**Limite visual observado:** a tabela do histórico ainda quebra palavras em
+colunas muito estreitas a 320/390 px. Ausência de rolagem horizontal da página
+não comprova legibilidade dessa tabela; controles/tabelas de U4.2 precisam de
+revisão própria. A densidade da ficha e o atendimento guiado também não foram
+aceitos por esta entrega. Não declarar fidelidade integral ou aceite clínico.

@@ -2,7 +2,7 @@
 
 Data: 2026-10-17. Estado: implementação e validação técnica aprovadas.
 
-Escopo derivado da [unidade U3.1 do roadmap](../PROXIMOS_PASSOS.md#7d-u3):
+Escopo derivado da [unidade U3.1 do roadmap](../frontend/ENTREGAS_DO_PRODUTO.md#7d-u3):
 identificar paciente, nascimento, idade/referência e último atendimento por data
 registrada, sem depender da página de telefones/atendimentos dos dados cadastrais.
 Não inclui diagnóstico/avaliação selecionados (U3.2), reorganização completa do
