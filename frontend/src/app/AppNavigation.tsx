@@ -52,6 +52,7 @@ export function AppNavigation({ user, logout }: { user: AuthUser; logout: () => 
       <nav aria-label="Menu principal">
         <NavLink to="/" end><span aria-hidden="true">⌂</span> Início</NavLink>
         <NavLink to="/pacientes"><span aria-hidden="true">◎</span> Pacientes</NavLink>
+        <NavLink to="/importacoes"><span aria-hidden="true">▤</span> Importações</NavLink>
         <NavLink to="/minha-conta"><span aria-hidden="true">○</span> Minha conta</NavLink>
       </nav>
       <div className="sidebar-account"><span className="muted">{user.nome}</span>

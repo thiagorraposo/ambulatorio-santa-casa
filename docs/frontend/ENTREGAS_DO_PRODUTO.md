@@ -1013,7 +1013,7 @@ cada contrato antecede sua UI, preservando as decisões clínicas vigentes.
 
 #### 8C1 — Consultar lotes e linhas sanitizados pela interface
 
-**Estado e cobertura:** Planejado; não aceito. RQ-NAV-05; RQ-IMP-01–11, 19–24 (telas/elementos na matriz).
+**Estado e cobertura:** Implementação técnica validada em ambiente sintético; pacote não aceito. RQ-NAV-05; RQ-IMP-01–11, 19–24 (telas/elementos na matriz). A revisão clínica humana da Etapa 7 continua pendente.
 
 **Escopo:** Lista → detalhe → linhas/erros paginados e voltar; somente metadados já publicados. Não publicar arquivo/hash/candidatos/motivo bruto ausentes no DTO.
 

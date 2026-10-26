@@ -46,12 +46,36 @@ try {
   fixture.patients.push(fixture.main);
   await grant(fixture.main, 'consulta');
   await grant(fixture.main, 'edicao');
+  const visibleLot = (await owner.query(`INSERT INTO ambulatorio.importacao_lote
+    (codigo_lote,hash_arquivo_sha256,layout_versao,status_lote)
+    VALUES('frontend-lote-sanitizado-' || txid_current(),repeat('d',64),'teste_sintetico','concluido')
+    RETURNING importacao_lote_id::text`)).rows[0].importacao_lote_id;
+  const visibleLines = (await owner.query(`INSERT INTO ambulatorio.importacao_linha
+    (importacao_lote_id,aba_nome_original,aba_ordem,numero_linha,dados_brutos,status_linha,mensagem_processamento)
+    SELECT $1,'Sintetica',1,n,jsonb_build_array(jsonb_build_object('valor','SEGREDO_CLINICO_SINTETICO')),
+      CASE WHEN n=21 THEN 'importada' ELSE 'rejeitada' END,
+      CASE WHEN n=21 THEN NULL ELSE 'domínio inválido: SEGREDO_CLINICO_SINTETICO' END
+    FROM generate_series(1,21) n RETURNING importacao_linha_id::text`, [visibleLot])).rows;
+  await owner.query(`INSERT INTO ambulatorio.importacao_registro(importacao_linha_id,tabela_destino,registro_id,acao)
+    SELECT linha_id,'paciente',$2,'associado' FROM unnest($1::bigint[]) linha_id`,
+  [visibleLines.map(line => line.importacao_linha_id), fixture.main.pacienteId]);
+  fixture.importacoes = { loteId: visibleLot, loteSemVinculoId: null };
   for (let i = 1; i <= 22; i++) {
     const patient = await createPatient(`Paciente Paginação ${String(i).padStart(2, '0')} Sintético`, i % 2 ? 'feminino' : 'masculino');
     fixture.patients.push(patient);
     await grant(patient, 'consulta');
   }
   fixture.reserved = await createPatient('Paciente Reservado Sintético', 'nao_informado');
+  const deniedLot = (await owner.query(`INSERT INTO ambulatorio.importacao_lote
+    (codigo_lote,hash_arquivo_sha256,layout_versao,status_lote)
+    VALUES('frontend-lote-sem-vinculo-' || txid_current(),repeat('e',64),'teste_sintetico','concluido')
+    RETURNING importacao_lote_id::text`)).rows[0].importacao_lote_id;
+  const deniedLine = (await owner.query(`INSERT INTO ambulatorio.importacao_linha
+    (importacao_lote_id,aba_nome_original,aba_ordem,numero_linha,dados_brutos,status_linha)
+    VALUES($1,'Sintetica',1,1,'[]','importada') RETURNING importacao_linha_id::text`, [deniedLot])).rows[0].importacao_linha_id;
+  await owner.query(`INSERT INTO ambulatorio.importacao_registro(importacao_linha_id,tabela_destino,registro_id,acao)
+    VALUES($1,'paciente',$2,'associado')`, [deniedLine, fixture.reserved.pacienteId]);
+  fixture.importacoes.loteSemVinculoId = deniedLot;
   // Ajusta apenas a sequência no banco descartável, sem mudar o schema. O ID
   // grande é gerado pela API e lido via RETURNING, nunca assumido como fixture.
   const sequenceStart = (9_007_199_254_740_991n + BigInt(randomInt(2, 99_999))).toString();

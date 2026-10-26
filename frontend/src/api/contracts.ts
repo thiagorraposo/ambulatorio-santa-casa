@@ -216,6 +216,28 @@ export interface ClinicalEventResponse {
   precisao: 'ano';
 }
 
+export type ImportacaoCodigoErro = 'falha_operacional' | 'campo_obrigatorio_ausente' | 'data_invalida'
+  | 'booleano_invalido' | 'numero_invalido' | 'ano_invalido' | 'duracao_ambigua'
+  | 'dominio_invalido' | 'identidade_ambigua' | 'dados_conflitantes'
+  | 'catalogo_indisponivel' | 'proveniencia_ambigua' | 'dados_divergentes'
+  | 'cadeia_reprocessamento_invalida' | 'linha_rejeitada' | 'pendencia_nao_promovida';
+
+export interface ImportacaoLoteResponse {
+  loteId: string; codigo: string; layout: string; status: string; reprocessadoDe: string | null;
+  iniciadoEm: string | null; finalizadoEm: string | null; criadoEm: string; atualizadoEm: string;
+  possuiErro: boolean; codigoErro: ImportacaoCodigoErro | null; totalLinhas: number;
+  linhasImportadas: number; linhasComPendencia: number; linhasRejeitadas: number;
+}
+
+export interface ImportacaoLinhaResponse {
+  linhaId: string; aba: string; abaOrdem: number; numero: number; status: string;
+  possuiErro: boolean; codigoErro: ImportacaoCodigoErro | null; criadoEm: string; atualizadoEm: string;
+}
+
+export interface ImportacaoLoteDetalheResponse extends ImportacaoLoteResponse {
+  paginacaoLinhas: ColecaoPaginaResponse; linhas: ImportacaoLinhaResponse[];
+}
+
 export interface AnnualReturnResponse {
   retornoId: string;
   atendimentoId: string;

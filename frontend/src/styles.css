@@ -61,6 +61,8 @@ p:last-child { margin-bottom: 0; }
 .button:disabled { background: #e5e7eb; border-color: #b8c1ce; color: #4b5563; cursor: default; }
 .form-field { display: grid; gap: .4rem; min-width: 0; }
 .form-field label { font-weight: 600; font-size: .9rem; }
+.checkbox-field { display: flex; align-items: center; gap: .65rem; width: fit-content; margin-bottom: 1rem; }
+.checkbox-field input { width: 1.1rem; min-height: 1.1rem; padding: 0; accent-color: var(--primary); }
 input, select, textarea { width: 100%; min-width: 0; min-height: 2.75rem; padding: .6rem .8rem; border: 1px solid #97a7bf; border-radius: .35rem; background: #fff; color: #111827; }
 input:disabled, select:disabled, textarea:disabled { background: #eef1f6; color: #4b5563; }
 textarea { resize: vertical; }

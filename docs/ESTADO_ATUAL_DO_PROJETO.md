@@ -1,7 +1,7 @@
 # Estado atual do projeto
 
-Atualizado em: 2026-10-23. Síntese de implementação e evidências existentes;
-esta reorganização documental não executou novas suítes da aplicação.
+Atualizado em: 2026-10-26. Síntese de implementação e evidências existentes;
+esta atualização documental não reexecuta as suítes da aplicação.
 
 ## Escopo e estágio
 
@@ -45,9 +45,10 @@ ao [roadmap](PROXIMOS_PASSOS.md#próximo-trabalho).
   Recibos/rascunhos têm limites de sessão; não há garantia geral de idempotência
   de POST entre sessões. [Guia técnico](FRONTEND.md) e
   [protocolo de recuperação](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md).
-- **CI:** configuração versionada contempla manifesto, importador, SQL, backend,
-  workflow e frontend com Chromium/API/PostgreSQL descartável. Os relatórios
-  consultados não comprovam nova execução remota nesta entrega.
+- **CI:** Quality, Database, Backend e Frontend passaram no GitHub Actions na
+  `main` (`40411698727`, commit `9c98595`); a execução inclui Chromium/API e
+  PostgreSQL descartável. A branch atual pode conter trabalho posterior ainda
+  não integrado.
 
 ## Regras e limites vigentes
 

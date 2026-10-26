@@ -39,6 +39,8 @@ test('7D-U4.1: menu compacto opera por teclado, conserva destino e responde ao b
   await expect(control).toBeFocused(); await expect(menu(page)).toBeHidden();
   await page.keyboard.press('Enter');
   await page.keyboard.press('Tab'); await page.keyboard.press('Tab'); await page.keyboard.press('Tab');
+  await expect(menu(page).getByRole('link', { name: 'Importações', exact: true })).toBeFocused();
+  await page.keyboard.press('Tab');
   await expect(menu(page).getByRole('link', { name: 'Minha conta', exact: true })).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Minha conta', exact: true })).toBeVisible();
@@ -63,7 +65,7 @@ test('7D-U4.1: menu compacto opera por teclado, conserva destino e responde ao b
   await page.screenshot({ path: info.outputPath('menu-aberto-390.png'), fullPage: true });
   // Disclosure: Tab can leave it for the content; it does not trap focus.
   await page.keyboard.press('Tab'); await page.keyboard.press('Tab'); await page.keyboard.press('Tab');
-  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab'); await page.keyboard.press('Tab');
   await expect(page.getByRole('button', { name: 'Sair', exact: true })).toBeFocused();
   await page.keyboard.press('Tab');
   expect(await page.getByRole('complementary').evaluate(element => element.contains(document.activeElement))).toBe(false);
