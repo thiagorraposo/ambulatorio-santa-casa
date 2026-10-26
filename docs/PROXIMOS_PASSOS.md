@@ -1,6 +1,6 @@
 # Roadmap do Projeto
 
-Atualizado em: 2026-10-23
+Atualizado em: 2026-10-26
 
 **Continuidade de 2026-10-15:** as sete lacunas da reauditoria de 05/10 receberam
 correções de código e novas provas sintéticas. O percurso integrado original 7D
@@ -53,9 +53,9 @@ Nenhuma semântica clínica é inferida pela autorização de escopo.
 
 ### Marcos e dependências de entrega
 
-| Marco | Conteúdo e critério de saída | Estado em 23/10 |
+| Marco | Conteúdo e critério de saída | Estado em 26/10 |
 | --- | --- | --- |
-| M1 — Fluxo original revisado | Executar roteiro clínico, registrar parecer, corrigir impedimentos e validar novamente os pontos afetados. | Implementação/validação técnica disponíveis; revisão humana pendente. |
+| M1 — Fluxo original revisado | Executar roteiro clínico, registrar parecer, corrigir impedimentos e validar novamente os pontos afetados. | Aprovado em 2026-10-26, conforme confirmação do responsável do projeto; sem impedimentos reportados. |
 | M2 — VU1 sintética | Entregar 7A-U1, 7D-U1/U2/U4.2, verificar evidências U3/U4.1 e recuperação nas operações usadas; aceitar 7D-A1 com a equipe. | Pendentes decisões específicas P-01/P-03, entregas e aceite. |
 | M3 — Produto completo em ambiente sintético | Concluir todas as famílias 7B-E/7C-E e 8A–8D incluídas, correção 7C-R2B/U, comparação visual 8V1 e aceite integral 8V2. | Implementações adicionais, decisões e aceites pendentes. |
 | M4 — Operação institucional | Concluir 9A–9D: implantação, segurança, continuidade e liberação explícita para dados reais. | Futuro; não é consequência automática de M3. |

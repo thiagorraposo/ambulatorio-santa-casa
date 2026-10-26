@@ -17,13 +17,12 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | Etapas 1–4 | Contratos de dados, importador original, fundação do backend e núcleo físico entregues. | Aceites históricos não implicam operação real. |
 | Etapa 5 | 5A–5E concluídas em ambiente sintético em 03/10. | [Matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md); incrementos não aplicados ao persistente nesta entrega. |
 | Etapa 6 | 6A–6B concluídas em ambiente sintético em 04/10. | [Relatório](validacoes/VALIDACAO_ETAPA_6.md). |
-| Etapa 7 original | Implementação e validação técnica sintética concluídas em 15/10, com correções R7-01–07. | [Relatório vigente](validacoes/VALIDACAO_ETAPA_7.md); revisão clínica humana pendente. |
+| Etapa 7 original | Implementação e validação técnica sintética concluídas em 15/10, com correções R7-01–07; M1 aprovado em 26/10 conforme confirmação do responsável do projeto. | [Relatório vigente](validacoes/VALIDACAO_ETAPA_7.md) e [registro do parecer](validacoes/ROTEIRO_REVISAO_CLINICA_ETAPA_7.md). |
 | Melhorias U3.1/U3.2/U3.3/U4.1 | Implementação e validação técnica próprias. | [Índice de evidências](validacoes/README.md); não concluem automaticamente U3/U4, VU1 ou fidelidade integral. |
 | Produto completo e Etapas 8–10 | Escopo planejado e critérios definidos. | Implementações adicionais, decisões específicas, implantação e homologação pendentes. |
 
-O próximo trabalho é executar o [roteiro de revisão clínica](validacoes/ROTEIRO_REVISAO_CLINICA_ETAPA_7.md),
-registrar o parecer e tratar impedimentos (M1). Depois, fechar as escolhas
-necessárias e entregar os pacotes restantes de M2. A sequência detalhada pertence
+O próximo trabalho é fechar as escolhas necessárias para M2 e entregar seus
+pacotes. A sequência detalhada pertence
 ao [roadmap](PROXIMOS_PASSOS.md#próximo-trabalho).
 
 ## Componentes e ambientes
