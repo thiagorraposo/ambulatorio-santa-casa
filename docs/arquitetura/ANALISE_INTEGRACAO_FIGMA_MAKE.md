@@ -21,7 +21,7 @@ e a [matriz ponto a ponto](../frontend/MATRIZ_FIGMA_FRONTEND.md) reavaliaram o
 protótipo, frontend e backend atuais, com observações no navegador delimitadas.
 Elas são as fontes vigentes do inventário/destino e da experiência pretendida;
 este documento preserva a fotografia histórica. A sequência vigente está nos
-[pacotes do roadmap](../PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend).
+[pacotes do roadmap](../frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend).
 
 ## Objetivo, limites e fontes
 

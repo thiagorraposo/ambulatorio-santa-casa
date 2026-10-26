@@ -53,7 +53,7 @@ passou integralmente pela interface. A regressão técnica foi concluída; a rev
 de usabilidade com a equipe ainda é necessária. O
 [relatório vigente](validacoes/VALIDACAO_ETAPA_7.md) reúne as evidências novas;
 o [relatório de 05/10](RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md) é histórico.
-Os [pacotes do roadmap](PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend)
+Os [pacotes do roadmap](frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend)
 definem decisões e aceites próprios para a evolução de UX/VU1.
 
 ## Escopo e estágio

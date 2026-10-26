@@ -7,9 +7,9 @@ As evidências e seus limites pertencem ao relatório da entrega.
 Aceite integral, revisão com a equipe e VU1
 não são declarados aqui.
 
-A aplicação própria está em [`frontend/`](../frontend/). Consome os contratos
+A aplicação própria está em [`frontend/`](../frontend). Consome os contratos
 públicos `/v1` do backend, com React/TypeScript, Vite, roteamento e consultas por
-recurso. O [roadmap](PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend) define o
+recurso. O [roadmap](frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend) define o
 escopo e os critérios de aceite; os relatórios da
 [Etapa 6](validacoes/VALIDACAO_ETAPA_6.md) e da
 [Etapa 7](validacoes/VALIDACAO_ETAPA_7.md) registram evidências e limites,
@@ -20,7 +20,7 @@ vigente está em
 Este documento descreve setup e comportamento existente. A experiência
 pretendida está na [visão de produto](frontend/VISAO_E_ESPECIFICACAO.md);
 a [matriz Figma/frontend](frontend/MATRIZ_FIGMA_FRONTEND.md) inventaria campos,
-ações e destinos, e os [pacotes do roadmap](PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend)
+ações e destinos, e os [pacotes do roadmap](frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend)
 definem dependências e aceite. Proposta não é contrato publicado.
 
 ## Preparação e comandos
@@ -338,7 +338,7 @@ declarados implementados pela correção de recuperação.
 
 A identidade visual, a organização do layout e as abas da ficha foram
 revisadas a partir do
-[protótipo Figma Make](../referencias/frontend/figma-make-prototipo/). Os componentes
+[protótipo Figma Make](../referencias/frontend/figma-make-prototipo). Os componentes
 e CSS da aplicação ficam em `frontend/`, sem importar a referência no build.
 O protótipo não fornece persistência, autorização, identidade ou regras clínicas.
 

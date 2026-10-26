@@ -2,7 +2,7 @@
 
 Data: 2026-10-21. Estado: implementação e validação técnica aprovadas no recorte descrito.
 
-Unidade do [roadmap](../PROXIMOS_PASSOS.md#7d-u4), após o fechamento técnico de
+Unidade do [roadmap](../frontend/ENTREGAS_DO_PRODUTO.md#7d-u4), após o fechamento técnico de
 [U3.3](VALIDACAO_7D_U3_3.md). U4.1 usa as rotas e a sessão existentes e não
 introduz diálogos. Por isso não depende da decisão P-03 sobre novos diálogos
 ou atendimento guiado. Cadastro/etapas, U4.2 e revisão clínica mantêm seus

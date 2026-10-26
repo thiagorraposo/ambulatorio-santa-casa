@@ -4,7 +4,9 @@ Regras permanentes para agentes trabalhando neste repositório.
 
 ## Objetivo
 
-O projeto `ambulatorio-santa-casa` organiza dados do ambulatório em PostgreSQL, com importador e backend em evolução incremental.
+O projeto `ambulatorio-santa-casa` organiza o trabalho do ambulatório com
+PostgreSQL, importador, backend e frontend. O escopo e os marcos vigentes estão
+em `docs/PROXIMOS_PASSOS.md`; o índice documental é `docs/README.md`.
 
 ## Estrutura Relevante
 

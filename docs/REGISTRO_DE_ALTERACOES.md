@@ -1,5 +1,26 @@
 # Registro de Alterações
 
+## 2026-10-23 — adotar o protótipo como escopo de produto completo
+
+Por instrução explícita do responsável pelo produto, o roadmap passa a ter como
+referência a cobertura funcional, a experiência de uso e a fidelidade visual do
+protótipo completo. Preservadas as dez etapas, os IDs e os aceites históricos;
+antigos destinos VP passam a PC e integram a entrega final. Incluídos módulos
+clínicos, correções, fila, indicadores, importação/revisão/reprocessamento,
+anexos e gestão de usuários, com decisões específicas ainda abertas.
+
+Definidos marcos M1–M5, dependências por frente, aceite visual por tela (8V1) e
+aceite funcional integral (8V2). Atualizados visão, destinos da matriz, estado
+vigente e README. O recorte enxuto e as estimativas anteriores de percentual,
+quantidade de entregas e prazo não representam o novo objetivo. Exclusões por
+regras clínicas/segurança permanecem; falta de API exige construção.
+
+Validação documental: `make docs-check COMPACT=1`, revisão de cobertura dos
+pacotes/destinos, conferência de 1.300 links locais sem arquivos de destino
+inexistentes, verificação das novas âncoras, `git diff --check` e status. Nenhuma alteração
+de código/schema, execução de testes clínicos, acesso a dados reais, commit ou
+push nesta revisão.
+
 ## 2026-10-21 — organizar alterações pendentes em commits
 
 Criada a branch `organizar-frontend` a partir de `docs-frontend`, no commit
@@ -213,7 +234,7 @@ decisões/destinos, aceite e rastreabilidade. Protótipo, intenção original,
 implementação atual, proposta e evidência são distinguidos. Regras clínicas
 vigentes prevalecem; ausência de API vira dependência, sem exclusão automática.
 
-O [roadmap oficial](PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend)
+O [roadmap oficial](frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend)
 preserva as dez etapas e 7A–7D, com pacotes e unidades separadamente aceitáveis,
 dependências por camada e evidência proporcional. Sete lacunas continuam abertas;
 recuperação após 403/409/resposta perdida, confirmação/contexto/desconhecido e

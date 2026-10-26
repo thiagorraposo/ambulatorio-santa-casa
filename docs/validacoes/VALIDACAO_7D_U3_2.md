@@ -2,7 +2,7 @@
 
 Data: 2026-10-17. Estado: implementação e validação técnica aprovadas.
 
-Unidade do [roadmap](../PROXIMOS_PASSOS.md#7d-u3), usando os contratos de leitura
+Unidade do [roadmap](../frontend/ENTREGAS_DO_PRODUTO.md#7d-u3), usando os contratos de leitura
 já existentes. Não acrescenta regra clínica, escrita independente, consolidação
 entre consultas ou preenchimento por último valor não nulo.
 

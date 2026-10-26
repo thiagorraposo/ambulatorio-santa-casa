@@ -3,7 +3,7 @@
 Implementação e execuções: 2026-10-20. Encerramento documental: 2026-10-21.
 Estado: implementação e validação técnica aprovadas no recorte descrito.
 
-Unidade do [roadmap](../PROXIMOS_PASSOS.md#7d-u3), continuando
+Unidade do [roadmap](../frontend/ENTREGAS_DO_PRODUTO.md#7d-u3), continuando
 [U3.1](VALIDACAO_7D_U3_1.md) e [U3.2](VALIDACAO_7D_U3_2.md).
 A seleção deste próximo trabalho segue a sequência documentada e os contratos
 H3/H5–H12 existentes. Não depende das decisões abertas sobre etapas de cadastro,

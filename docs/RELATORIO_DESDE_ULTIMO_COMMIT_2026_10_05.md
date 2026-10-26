@@ -7,7 +7,7 @@ Nota de continuidade: esta fotografia compara o trabalho então local com
 as contagens abaixo não descrevem a árvore da nova entrega documental. A
 [reavaliação atual](frontend/VISAO_E_ESPECIFICACAO.md#reavaliação-das-sete-lacunas-e-cobertura-de-validação)
 e a [matriz individual](frontend/MATRIZ_FIGMA_FRONTEND.md) confirmam os limites
-e vinculam cada lacuna aos [pacotes do roadmap](PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend).
+e vinculam cada lacuna aos [pacotes do roadmap](frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend).
 
 Foi acrescentada uma implementação substancial dos fluxos clínicos 7A–7D,
 com formulários, integração HTTP, proteção de rascunhos, catálogos e testes.

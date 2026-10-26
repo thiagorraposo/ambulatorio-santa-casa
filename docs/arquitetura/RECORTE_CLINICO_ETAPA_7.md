@@ -130,5 +130,5 @@ PATCH versionado de paciente/atendimento confere também o ID original. Uma UUID
 ausente/desconhecida, uma falha de verificação ou a coincidência com valores
 atuais não prova não aplicação. Recarregar ou encerrar a sessão perde a intenção
 local; o ledger não oferece enumeração para reconstruí-la. O
-[roadmap](../PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend) e o
+[roadmap](../frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend) e o
 relatório mantêm o aceite individual e as extensões posteriores.

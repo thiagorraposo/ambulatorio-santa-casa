@@ -4,7 +4,7 @@ Data inicial: 2026-10-14. Atualização técnica: 2026-10-15.
 
 Fonte de verdade do protocolo R6D/R6B/R6B-A, adotado pela
 [ADR-025](../DECISOES_ARQUITETURAIS.md#adr-025). A especificação do produto e seus
-critérios individuais continuam no [roadmap](../PROXIMOS_PASSOS.md#7d-r6d).
+critérios individuais continuam no [roadmap](../frontend/ENTREGAS_DO_PRODUTO.md#7d-r6d).
 
 ## Decisão revisada
 

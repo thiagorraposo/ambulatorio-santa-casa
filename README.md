@@ -27,7 +27,7 @@ Consulte a
 
 A [visão proposta do produto](docs/frontend/VISAO_E_ESPECIFICACAO.md), a
 [matriz ponto a ponto](docs/frontend/MATRIZ_FIGMA_FRONTEND.md) e os
-[pacotes do roadmap](docs/PROXIMOS_PASSOS.md#pacotes-verificáveis-do-produto-frontend)
+[pacotes do roadmap](docs/frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend)
 explicitam a experiência pretendida, diferenças, dependências e aceite;
 [capturas e wireframes](docs/frontend/visuais/README.md) distinguem observação
 da interface e proposta.
