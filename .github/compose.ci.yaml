@@ -1,0 +1,24 @@
+# Nunca usa os volumes persistentes de compose.yaml.
+services:
+  postgres:
+    image: postgres:16.15
+    restart: "no"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT}:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  backend:
+    extends:
+      # Resolvido a partir de --project-directory (raiz do repositório).
+      file: compose.yaml
+      service: backend

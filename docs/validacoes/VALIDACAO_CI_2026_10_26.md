@@ -1,8 +1,32 @@
 # Diagnóstico e validação do CI — 26/10/2026
 
 Base: `3854a06`, branch local `fix/ci-validacoes`, inicialmente limpa.
-Escopo funcional: `.github/workflows/validacoes.yml`. Makefile, runner compacto,
-testes, migrations e aplicação não foram alterados.
+Escopo da primeira correção: `.github/workflows/validacoes.yml`. Naquela fase,
+Makefile, runner compacto, testes, migrations e aplicação não foram alterados.
+O fechamento da missão evolui essa correção conforme a seção seguinte.
+
+## Estabilização por componente
+
+A continuação autorizada preserva o diagnóstico e a primeira correção no commit
+`cd60910`, e separa o CI em Quality, Database, Backend e Frontend. A arquitetura,
+comandos, versões, manutenção e diagnóstico ficam no
+[workflow de desenvolvimento](../WORKFLOW_DE_DESENVOLVIMENTO.md); não são duplicados
+neste relatório. Banco/importação usam composição exclusiva com tmpfs; os jobs
+SQL verificam destino e armazenamento antes do bootstrap.
+
+A auditoria encontrou duas lacunas estruturais: o comando unitário do backend
+descobria suítes clínicas reais e as marcava como ignoradas; o whitespace era
+conferido somente no working tree limpo, sem examinar o diff commitado. O mock
+HTTP de revisão foi movido, sem alteração de conteúdo, para `test/unit`, e os
+comandos agora descobrem diretórios disjuntos: 18 suítes unitárias, 12 clínicas
+e uma de integração. `repository-check` valida scripts sem executá-los e também
+o diff do PR/push; sete regressões sintéticas cobrem falhas e status. Outra
+regressão verifica o diagnóstico interno do frontend, limitado e filtrado,
+preservando a falha sem executar SQL. Quality reúne 27 testes aprovados.
+
+As execuções remotas associadas ao PR de `fix/ci-validacoes` e o resumo final da
+missão registram o aceite do pipeline e, após merge autorizado pelas regras,
+da `main`. A existência deste diagnóstico não substitui esses resultados.
 
 ## Evidências remotas e primeira falha
 
@@ -109,17 +133,16 @@ ficam em `/tmp/ambulatorio-actions-ID.log`. São artefatos temporários, sem
 garantia de retenção; não foram versionados. O servidor exclusivo foi removido
 ao concluir a validação.
 
-## Limitações e confirmação no PR
+## Limitações da primeira fase e confirmação remota
 
-A execução completa do workflow corrigido no GitHub permanece pendente.
-Backend, frontend, navegador e imagem backend não foram reexecutados nesta
-reprodução local: não há alteração desses componentes; suas etapas passaram
-nas três execuções remotas analisadas. O runner GitHub deve confirmar também
-essas etapas com a nova porta. A instalação em Ubuntu limpo não simula toda a
-imagem hospedada nem a disponibilidade futura dos repositórios apt.
+A primeira fase não executou o workflow corrigido no GitHub nem reexecutou
+backend/frontend/container localmente. Essas limitações motivaram a continuação
+integral da missão; não são aprovação desses componentes. A instalação em Ubuntu
+limpo não simula toda a imagem hospedada nem a disponibilidade futura dos
+repositórios apt. A validação remota deve conferir todos os componentes.
 
-Após autorização para commit/push e abertura do PR de `fix/ci-validacoes` para
-`main`, acompanhar e localizar a execução de pull request:
+Na continuação, commit/push, PR e merge condicionado aos checks e regras foram
+autorizados. Para acompanhar e localizar a execução de pull request:
 
 ```bash
 gh pr checks fix/ci-validacoes --watch
@@ -132,4 +155,4 @@ Substituir `ID_DA_EXECUCAO` pelo ID do resultado referente ao commit do PR.
 Aceite remoto: instalação/verificação de ripgrep e todas as etapas aprovadas,
 incluindo os quatro alvos separados, backend, frontend, container e whitespace.
 Qualquer falha deve manter o job vermelho e ser investigada pelo primeiro erro
-da etapa correspondente. Sem commit, push, merge ou deploy nesta entrega.
+da etapa correspondente. Não há autorização para deploy nesta missão.

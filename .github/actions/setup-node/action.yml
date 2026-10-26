@@ -1,0 +1,23 @@
+name: Node e npm reproduzíveis
+description: Instala as versões Node/npm adotadas pelo projeto e configura cache dos lockfiles
+inputs:
+  lockfiles:
+    description: Lockfiles utilizados neste job
+    required: false
+    default: |
+      backend/package-lock.json
+      frontend/package-lock.json
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: "24.15.0"
+        cache: npm
+        cache-dependency-path: ${{ inputs.lockfiles }}
+    - name: Fixar npm do projeto
+      shell: bash
+      run: |
+        npm install --global npm@11.16.0 --ignore-scripts
+        node --version
+        npm --version

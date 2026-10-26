@@ -37,7 +37,7 @@ COMPACT ?= 0
 # Uma chamada interna mantém o grafo de dependências e as opções do Make.
 COMPACT_GOALS := $(if $(filter 1,$(COMPACT)),$(if $(_COMPACT_RUNNING),,$(MAKECMDGOALS)))
 ifneq ($(strip $(COMPACT_GOALS)),)
-COMPACT_TARGETS := git-status docs-check manifest-check manifest-source-check \
+COMPACT_TARGETS := git-status docs-check manifest-check manifest-source-check repository-check \
 	db-check db-test project-check docker-config-check docker-db-check docker-db-test \
 	docker-project-check docker-restore-check docker-restore-test importer-test \
 	backend-build backend-unit-test backend-integration-test backend-foundation-e2e \
@@ -56,7 +56,7 @@ _compact-run:
 		-- $(MAKE) --no-print-directory _COMPACT_RUNNING=1 $(COMPACT_GOALS)
 else
 
-.PHONY: help git-status db-check db-test db-migrate db-migrate-one docs-check project-check \
+.PHONY: help git-status db-check db-test db-migrate db-migrate-one docs-check project-check repository-check \
 	db-schema-dump docker-config-check docker-up docker-status docker-wait \
 	docker-stop docker-recreate docker-logs docker-migrate docker-db-check docker-db-test \
 	docker-schema-dump docker-project-check docker-destroy \
@@ -99,8 +99,9 @@ help:
 	@echo "  make frontend-check  Executa build, unitários e E2E do frontend"
 	@echo "  make project-check   Executa docs-check, testes SQL, diff e status Git"
 	@echo "  make workflow-test   Testa saída compacta e propagação de falhas com dados sintéticos"
+	@echo "  make repository-check Verifica sintaxe Python/Bash e whitespace local/commitado sem executar SQL"
 	@echo "  make <validação> COMPACT=1 Resume o resultado e guarda log filtrado em /tmp"
-	@echo "    Disponível para docs/manifest/db/project-check, db-test, importer-test,"
+	@echo "    Disponível para docs/manifest/db/project-check, repository-check, db-test, importer-test,"
 	@echo "    backend-{build,unit-test,integration-test,foundation-e2e,clinical-test,check,container-check},"
 	@echo "    frontend-{build,unit-test,e2e,check},"
 	@echo "    docker-{config-check,db-check,db-test,project-check,restore-check,restore-test},"
@@ -135,6 +136,9 @@ endif
 
 workflow-test:
 	@python3 -m unittest discover -s tests/workflow -p 'test_*.py'
+
+repository-check:
+	@python3 scripts/check_repository.py
 
 db-check:
 	@command -v psql >/dev/null 2>&1 || { echo "Erro: psql não encontrado."; exit 1; }

@@ -2,39 +2,63 @@
 
 Atualizado em: 2026-10-26
 
-O CI em `.github/workflows/validacoes.yml` usa credenciais sintéticas descartáveis,
-PostgreSQL 16.15 e executa migrations em banco limpo, manifesto, importador,
-testes SQL, backend (build, unitários, integração e container), frontend (build,
-unitários e Chromium/API/PostgreSQL sintéticos), documentação, workflow e
-`git diff --check`. Node.js 24 e lockfiles são usados para a instalação
-reproduzível. A seleção local por escopo não reduz essa cobertura do CI.
+O CI em `.github/workflows/validacoes.yml` executa em PRs para `main`, pushes em
+`main` e manualmente por `workflow_dispatch`. Quatro jobs estáveis usam runners
+Ubuntu 24.04 independentes; falha em um componente não impede os outros de
+produzir seu diagnóstico. Uma nova execução do mesmo evento/ref cancela a anterior.
 
-O CI também executa `backend-clinical-test COMPACT=1` com `SYNTHETIC_PG_*`
-apontando ao servidor efêmero e banco próprio criado pelo runner. Esse alvo cobre
-os endpoints clínicos/revisões; a fundação não substitui sua execução. O runner
-usa as permissões instaladas pelas migrations, sem conceder wrappers manualmente.
+| Job | Verificações | Limite |
+| --- | --- | --- |
+| Quality | `docs-check`, `manifest-check`, `repository-check`, `workflow-test` e actionlint | 10 minutos; não usa banco. |
+| Database | Migrations 00–64, `importer-test` e `docker-db-test` | 15 minutos; instala ripgrep explicitamente; SQL e importação sintéticos. |
+| Backend | `npm ci`, `backend-check`, `backend-clinical-test` e `backend-container-check` | 25 minutos; build, unitários, integração, contratos/autenticação/RBAC, fluxos clínicos, saúde e usuário não-root. |
+| Frontend | `npm ci` em ambas as aplicações, Chromium e `frontend-check` | 25 minutos; TypeScript/Vite, componentes e navegador com API/PostgreSQL reais sintéticos. |
 
-Os checks de backend, recursos clínicos e frontend são combinados na mesma
-chamada do Make no CI, compartilhando `backend-build`. O navegador é instalado
-com Playwright/Chromium. O runner do frontend usa seu próprio banco descartável e
-não aponta ao banco persistente do projeto.
+Cada job com SQL usa `.github/compose.ci.yaml`: PostgreSQL 16.15 em `tmpfs`,
+sem volumes persistentes. O composite `synthetic-postgres` confere portas,
+armazenamento e identidade antes de aplicar o bootstrap. As portas
+`POSTGRES_PORT`, `APP_DB_PORT` e `SYNTHETIC_PG_PORT` são `55457`, exigidas por
+D3/D8; o Compose persistente local continua em `5433`. Backend e frontend
+criam bancos e logins próprios para suas suítes. O job Frontend prepara somente
+a role de origem com SQL00; seu runner aplica 02–64 no banco exclusivo.
+Nenhuma permissão clínica é concedida manualmente para fazer teste passar.
 
-O runner instala `ripgrep` explicitamente: os cenários de recusa e de segurança
-do importador usam `rg`. O PostgreSQL efêmero do CI publica a porta `55457`,
-exigida pelas guardas D3/D8; `POSTGRES_PORT`, `APP_DB_PORT` e
-`SYNTHETIC_PG_PORT` devem permanecer alinhadas. Isso não altera a porta `5433`
-do Compose persistente local.
+O composite `setup-node` fixa Node 24.15.0/npm 11.16.0; instalações usam lockfiles
+e `npm ci`. A imagem backend segue o Dockerfile e é validada separadamente.
+Actions oficiais são fixadas por SHA, usam Node 24 e checkout sem persistência
+de credenciais. `GITHUB_TOKEN` recebe apenas `contents: read`. Actionlint
+1.7.12 é baixado com SHA-256 conferido. Não há lint/formatter de aplicação
+configurado; `repository-check` valida sintaxe Python/Bash sem executar scripts
+e verifica whitespace do working tree, index e diff commitado do PR/push.
+Na execução manual, compara o commit anterior; histórico completo fica no Quality.
 
-Manifesto, importador, `docker-project-check` e `workflow-test` possuem etapas
-separadas no Actions, com `COMPACT=1` e interrupção na primeira falha. O runner
-compacto mantém o log filtrado e o código de saída; erro de receita continua
-resultando em erro 2 do Make. Evidências, reprodução e procedimento de aceite
-remoto estão na [validação do CI de 26/10](validacoes/VALIDACAO_CI_2026_10_26.md).
+As suítes unitária, clínica e de integração do backend são separadas, com
+descoberta por diretório. O mock HTTP de revisão pertence a `test/unit`;
+`test/clinical` é executado com banco real, sem marcar suas suítes como ignoradas
+no comando unitário. O frontend já descobre os arquivos Vitest e Playwright.
+O build do backend no job Frontend fornece sua API; não repete as suítes backend.
+
+Os checks mantêm `COMPACT=1` e preservam o status de falha do Make. Logs completos
+filtrados são preservados por sete dias em artefatos `ci-<job>-logs` somente em
+falha. Não são publicados `.env`, fixtures, traces nem screenshots de navegador.
+Em falha, o runner frontend acrescenta caudas limitadas dos seus quatro logs
+internos, redigidas no ambiente que conhece as senhas/JWT aleatórios, sem
+alterar o resultado do teste nem o cleanup.
+A seleção local por escopo não reduz a cobertura do CI. Evidências e limites
+estão na [validação de 26/10](validacoes/VALIDACAO_CI_2026_10_26.md).
+
+Para diagnosticar, use `gh pr checks --watch`, `gh run view ID --log-failed` e,
+se necessário, `gh run download ID --name ci-NOME_DO_JOB-logs`. Para executar
+manualmente, `gh workflow run validacoes.yml --ref main`; confira todos os quatro
+jobs, sem tratar cancelado/ignorado como aprovado. Ao atualizar actions, Node/npm,
+PostgreSQL ou actionlint, confira versões oficiais e checksums, teste a alteração
+no PR e confirme novamente o workflow da `main` após merge. Não introduza
+`continue-on-error` nem contorne regras de aprovação humana.
 
 ## Preparar o ambiente
 
 Pré-requisitos gerais: GNU Make, Git, Docker Engine com Compose, Python 3,
-Node.js 24/npm 11 e clientes PostgreSQL (`psql` e `pg_dump`). Instale as
+Node.js 24.15.0/npm 11.16.0 e clientes PostgreSQL (`psql` e `pg_dump`). Instale as
 dependências pelos lockfiles. Chromium do Playwright é necessário para os testes
 automatizados de navegador, não para abrir a aplicação manualmente.
 
@@ -182,6 +206,7 @@ Use os alvos do `Makefile` como interface local padrão:
 | `make backend-up` | Provisionar o login técnico e subir o backend no Compose; não aplica migrations. |
 | `make dev-sintetico-start` / `dev-sintetico-status` / `dev-sintetico-stop` | Criar, consultar ou descartar a demonstração isolada; dados temporários são perdidos no stop. |
 | `make workflow-test` | Verificar saída compacta, logs e propagação de falhas com comandos sintéticos. |
+| `make repository-check` | Verificar sintaxe dos scripts versionados e whitespace local/commitado, sem executar aplicação ou SQL. |
 | `make db-schema-dump` | Atualizar a evidência estrutural após mudança física aplicada e autorizada. |
 | `make docker-up` / `docker-stop` | Subir ou parar o PostgreSQL Docker sem remover o volume. |
 | `make docker-status` / `docker-logs` | Inspecionar health, status e logs. |

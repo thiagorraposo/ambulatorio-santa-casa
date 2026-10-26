@@ -1,5 +1,26 @@
 # Registro de Alterações
 
+## 2026-10-26 — estruturar o CI por componente
+
+Preservada e commitada a correção de ripgrep/portas. CI reorganizado em Quality,
+Database, Backend e Frontend independentes, com PRs para main, push em main e
+execução manual. Actions oficiais fixadas por SHA, Node/npm fixados, PostgreSQL
+em tmpfs e confirmação de destino antes do bootstrap; nenhum volume persistente
+é usado. Logs compactos filtrados são preservados em falha, com retenção curta.
+
+Acrescentados `repository-check` e regressões sintéticas para sintaxe e whitespace
+commitado. Separadas as suítes do backend por diretório: o mock de revisão foi
+movido para unitários sem alterar seus casos; descoberta clínica preserva todos
+os arquivos e inclui novos testes automaticamente. Unitários: 18 suítes,
+121 testes aprovados, sem ignorados. O diagnóstico frontend agora inclui caudas
+internas filtradas em falha, com regressão sem SQL que verifica status e redação.
+Quality passou com 27 testes. A configuração passou em actionlint e na
+revisão dos scripts de inicialização. Evidências locais anteriores não foram
+repetidas sem motivo; validação integral e revisão do PR fazem parte da missão.
+Resultados remotos e critérios de aceite serão registrados no PR da branch
+`fix/ci-validacoes`; o procedimento está no workflow de desenvolvimento e no
+[relatório existente](validacoes/VALIDACAO_CI_2026_10_26.md).
+
 ## 2026-10-26 — corrigir dependência e porta do CI
 
 Consultados os logs das execuções 40369782887, 40369517682 e 37256017821:
