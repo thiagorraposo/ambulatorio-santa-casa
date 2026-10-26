@@ -176,5 +176,10 @@ sincroniza a mesma expectativa de exatamente uma chamada, sem alterar seu valor
 ou relaxar a proteção contra reenvio. A suíte frontend local passou com 21
 arquivos e 202 testes; workflow-test passou 30 e repository-check passou. O aviso
 do Vitest sobre custo de criação de jsdom é de desempenho e não bloqueia o job.
+O E2E que falhou passou quatro vezes em execução isolada no servidor descartável
+confirmado; o CI expirou no limite de espera HTTP configurado em 10 s. A espera
+do helper foi ajustada para 30 s, permanecendo limitada e exigindo a resposta e
+o status esperados. Isso não repete nem oculta a escrita; se ela não ocorrer, o
+teste continua falhando.
 A nova execução remota, revisão do PR, merge e CI subsequente de `main` ainda
 estão pendentes.

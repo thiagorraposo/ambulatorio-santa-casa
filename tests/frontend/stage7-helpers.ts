@@ -36,7 +36,7 @@ export const readAttendance = (path: string) => apiJson<AtendimentoDetalheRespon
 
 export async function submitWrite(page: Page, method: string, path: string, button: string, expectedStatus = method === 'POST' ? 201 : 200) {
   const waiting = page.waitForResponse(response => response.request().method() === method
-    && new URL(response.url()).pathname === `/v1${path}`);
+    && new URL(response.url()).pathname === `/v1${path}`, { timeout: 30_000 });
   await page.getByRole('button', { name: button, exact: true }).click();
   const response = await waiting;
   expect(response.status()).toBe(expectedStatus);

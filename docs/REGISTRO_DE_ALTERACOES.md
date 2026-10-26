@@ -4,14 +4,16 @@
 
 Corrigido falso sucesso em `backend-container-check`: a consulta do UID agora
 propaga o código de erro do `docker compose exec` e rejeita saída vazia ou não
-numérica antes de aceitar somente UID diferente de zero. Adicionada regressão
-regressão sintética cobre UID válido, root, saída inválida e falha do exec nos
+numérica antes de aceitar somente UID diferente de zero. A regressão sintética
+cobre UID válido, root, saída inválida e falha do exec nos
 modos normal e compacto, sem Docker ou SQL. O PR #9 revelou também uma condição
 de corrida em um teste frontend: ele verificava a chamada única antes de o hash
 assíncrono e o registro da intenção despacharem a requisição. A asserção agora
 aguarda a mesma condição de chamada exatamente uma vez; comportamento e
 expectativa não mudaram. `frontend-unit-test` passou os 202 testes,
 `workflow-test` passou 30, `repository-check` passou e `git diff --check` passou.
+O E2E 7D-R1 passou quatro execuções sintéticas; sua espera por resposta HTTP no
+runner foi ampliada de 10 para 30 segundos, mantendo status e endpoint esperados.
 
 ## 2026-10-26 — estruturar o CI por componente
 
