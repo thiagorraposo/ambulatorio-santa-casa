@@ -9,6 +9,7 @@ de testes não é uma contagem atual e aceite sintético não autoriza dados rea
 
 | Escopo | Evidência | Leitura correta |
 | --- | --- | --- |
+| CI — dependências e conexão sintética | [Diagnóstico de 26/10](VALIDACAO_CI_2026_10_26.md) | Falha remota de `rg` e bloqueio posterior de porta reproduzidos; validação do workflow corrigido no GitHub ainda pendente. |
 | Etapa 5 — backend/importação | [Aceite integrado](ACEITE_INTEGRADO_ETAPA_5.md) | Matriz F01–F16/T01–T18 e limites sintéticos. |
 | Execução incremental da Etapa 5 | [Continuidade](CONTINUIDADE_ETAPA_5.md) | Diário de tentativas e resultados; o fechamento de 03/10 prevalece sobre pendências de entradas anteriores. |
 | Etapa 6 — fundação da interface | [Validação](VALIDACAO_ETAPA_6.md) | Aceite sintético da fundação, não de todo o produto. |

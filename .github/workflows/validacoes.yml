@@ -19,9 +19,10 @@ jobs:
       POSTGRES_DB: ambulatorio_santa_casa
       POSTGRES_USER: ambulatorio_ci
       POSTGRES_PASSWORD: senha_exclusivamente_sintetica_ci
-      POSTGRES_PORT: "5433"
+      # D3/D8 do importador exigem a porta reservada ao servidor descartável.
+      POSTGRES_PORT: "55457"
       APP_DB_HOST: localhost
-      APP_DB_PORT: "5433"
+      APP_DB_PORT: "55457"
       APP_DB_NAME: ambulatorio_santa_casa
       APP_DB_USER: ambulatorio_backend_ci
       APP_DB_PASSWORD: senha_exclusivamente_sintetica_backend_ci
@@ -31,7 +32,7 @@ jobs:
       AUTH_JWT_SECRET: segredo_jwt_exclusivamente_sintetico_ci_com_mais_de_32_caracteres
       AUTH_JWT_EXPIRES_IN_SECONDS: "900"
       SYNTHETIC_PG_HOST: localhost
-      SYNTHETIC_PG_PORT: "5433"
+      SYNTHETIC_PG_PORT: "55457"
       SYNTHETIC_PG_USER: ambulatorio_ci
     steps:
       - uses: actions/checkout@v4
@@ -42,6 +43,11 @@ jobs:
           cache-dependency-path: |
             backend/package-lock.json
             frontend/package-lock.json
+      - name: Instalar ripgrep para os testes do importador
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends ripgrep
+          rg --version
       - name: Criar configuracao local sintetica
         run: |
           umask 077
@@ -60,8 +66,14 @@ jobs:
         run: make backend-check backend-clinical-test frontend-check COMPACT=1
       - name: Validar imagem e container backend
         run: make backend-container-check
-      - name: Validar manifesto, importador e projeto
-        run: make manifest-check importer-test docker-project-check workflow-test COMPACT=1
+      - name: Validar manifesto versionado
+        run: make manifest-check COMPACT=1
+      - name: Validar importador sintético
+        run: make importer-test COMPACT=1
+      - name: Validar documentação e SQL no PostgreSQL descartável
+        run: make docker-project-check COMPACT=1
+      - name: Validar saída compacta e propagação de falhas
+        run: make workflow-test COMPACT=1
       - name: Verificar whitespace do diff
         run: git diff --check
       - name: Diagnostico do PostgreSQL em falha

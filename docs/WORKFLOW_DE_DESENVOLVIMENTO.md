@@ -1,6 +1,6 @@
 # Workflow de Desenvolvimento
 
-Atualizado em: 2026-10-23
+Atualizado em: 2026-10-26
 
 O CI em `.github/workflows/validacoes.yml` usa credenciais sintéticas descartáveis,
 PostgreSQL 16.15 e executa migrations em banco limpo, manifesto, importador,
@@ -18,6 +18,18 @@ Os checks de backend, recursos clínicos e frontend são combinados na mesma
 chamada do Make no CI, compartilhando `backend-build`. O navegador é instalado
 com Playwright/Chromium. O runner do frontend usa seu próprio banco descartável e
 não aponta ao banco persistente do projeto.
+
+O runner instala `ripgrep` explicitamente: os cenários de recusa e de segurança
+do importador usam `rg`. O PostgreSQL efêmero do CI publica a porta `55457`,
+exigida pelas guardas D3/D8; `POSTGRES_PORT`, `APP_DB_PORT` e
+`SYNTHETIC_PG_PORT` devem permanecer alinhadas. Isso não altera a porta `5433`
+do Compose persistente local.
+
+Manifesto, importador, `docker-project-check` e `workflow-test` possuem etapas
+separadas no Actions, com `COMPACT=1` e interrupção na primeira falha. O runner
+compacto mantém o log filtrado e o código de saída; erro de receita continua
+resultando em erro 2 do Make. Evidências, reprodução e procedimento de aceite
+remoto estão na [validação do CI de 26/10](validacoes/VALIDACAO_CI_2026_10_26.md).
 
 ## Preparar o ambiente
 
