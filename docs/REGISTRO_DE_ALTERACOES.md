@@ -1,5 +1,19 @@
 # Registro de Alterações
 
+## 2026-10-26 — implementar consulta de lotes de importação na interface
+
+Adicionadas rotas, menu e telas de lista/detalhe reaproveitando H14. A interface
+mostra somente os campos publicados pelos DTOs sanitizados, permite paginar e
+filtrar linhas com erro e oculta os dados anteriores quando uma consulta é
+recusada. Fixtures E2E criam lotes e proveniência sintéticos apenas no banco
+exclusivo do runner. Build e 205 testes unitários passaram; 3 cenários E2E de
+importação e o percurso de navegação por teclado passaram. `docs-check`,
+`repository-check`, `workflow-test` (30 testes) e `git diff --check` passaram.
+A execução integral Playwright local foi interrompida após detectar falhas de
+expectativa no novo percurso e no foco do menu; os cenários pertinentes foram
+corrigidos e reexecutados isoladamente. Revisão humana da Etapa 7 continua
+pendente, portanto 8C1 não foi marcado como aceito.
+
 ## 2026-10-26 — estabilizar verificações de CI
 
 Corrigido falso sucesso em `backend-container-check`: a consulta do UID agora
