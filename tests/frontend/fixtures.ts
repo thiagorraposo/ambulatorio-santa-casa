@@ -13,6 +13,7 @@ interface Fixture {
   main: Patient & { atendimentos: Array<{ atendimentoId: string; dataAtendimento: string }>; encaminhamento: { encaminhamentoId: string } };
   reserved: Patient;
   large: Patient;
+  importacoes: { loteId: string; loteSemVinculoId: string };
 }
 
 if (!/^etapa6_frontend_\d+_\d+_[a-f0-9]{6}$/.test(process.env.FRONTEND_E2E_DB ?? '')) {
