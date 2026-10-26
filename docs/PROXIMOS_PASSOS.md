@@ -7,7 +7,7 @@ correções de código e novas provas sintéticas. O percurso integrado original
 passou pela interface e a regressão técnica foi concluída. A revisão clínica com
 a equipe continua necessária ao aceite integral. Evidências atuais estão no
 [relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md); o
-[relatório de 05/10](RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md) preserva a
+[relatório de 05/10](historico/RELATORIO_ETAPA_7_2026_10_05.md) preserva a
 fotografia anterior. Pacotes adicionais de UX/VU1 mantêm decisões e aceites próprios.
 
 Este é o roadmap oficial do projeto. Em 2026-10-23, o responsável pelo
@@ -156,7 +156,7 @@ os recursos necessários para a interface.
 **Avanço em 2026-09-22:** definido o
 [contrato temporal de revisão entre hashes](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md)
 (ADR-022), distinguindo correção, nova visita e atualização consolidada. Em
-2026-09-28, as respostas de [respostas clínicas originais](Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+2026-09-28, as respostas de [respostas clínicas originais](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md#respostas-clínicas-originais-de-28092026)
 foram incorporadas como referência autoritativa para idade, Chagas, familiares,
 exames e retorno de 30 dias. A implementação técnica desses contratos continua
 separada da decisão clínica.
@@ -263,7 +263,7 @@ integrado F01–F16/T01–T18 comprovado. Não equivale a implantação ou homol
 
 ## Etapa 6 — Fundação do frontend
 
-A [análise do Figma Make e plano de integração](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
+A [análise do Figma Make e plano de integração](historico/ANALISE_FIGMA_MAKE_2026_10_03.md)
 foi concluída em 2026-10-03. A fundação foi implementada e validada em
 2026-10-04: aplicação própria em `frontend/`, com React/TypeScript, usando o
 protótipo como referência visual e funcional. Sessão, rotas e consultas seguem

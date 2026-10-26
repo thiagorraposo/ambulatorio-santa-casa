@@ -7,14 +7,14 @@ O [roteiro da equipe](ROTEIRO_REVISAO_CLINICA_ETAPA_7.md) prepara a demonstraç�
 e o registro do parecer; seus campos continuam pendentes até a revisão humana.
 
 **Limite de aceite, atualizado em 2026-10-05:** a
-[reauditoria](../RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md) confirmou sete
+[reauditoria](../historico/RELATORIO_ETAPA_7_2026_10_05.md) confirmou sete
 lacunas funcionais sem correção e limites na cobertura integrada. Os resultados
 registrados neste documento permanecem evidências históricas dos cenários executados.
 A continuidade de 15/10 abaixo registra as correções e suas novas provas.
 
 Escopo: 7A–7D do [roadmap](../PROXIMOS_PASSOS.md#etapa-7--fluxos-clínicos),
 [ADR-024](../DECISOES_ARQUITETURAIS.md#adr-024) e
-[matriz de integração](../arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md).
+[matriz de integração](../historico/ANALISE_FIGMA_MAKE_2026_10_03.md).
 O [recorte clínico](../arquitetura/RECORTE_CLINICO_ETAPA_7.md) registra destinos
 de campos, extensões HTTP e áreas que exigem contrato posterior.
 

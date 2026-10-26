@@ -1,6 +1,11 @@
 # Arquitetura do Backend — Fundação e incrementos clínicos sintéticos
 
-Atualizado em: 2026-10-04
+Base da descrição: 2026-10-04. Referências revisadas em: 2026-10-23.
+
+A recuperação de escrita acrescentada na Etapa 7 é definida pelo
+[protocolo de operações](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) e pela
+ADR-025. Esta descrição da Etapa 5 não substitui esses incrementos nem os
+[relatórios posteriores](validacoes/README.md).
 
 Status: implementação e aceite integrado sintético da Etapa 5 concluídos até a
 migration 63, exclusivamente com dados sintéticos. A execução HTTP de revisão
@@ -241,14 +246,14 @@ JWT, Authorization, secret, connection string, SQL/valores, nome de paciente,
 telefone, endereço, conteúdo clínico ou JSONB bruto. Erros internos registram
 somente tipo sanitizado.
 
-## Docker, healthcheck e futuro React
+## Docker, healthcheck e integração com o frontend
 
 O backend depende somente do health do PostgreSQL, não executa migrations nem
 interfere no importador. A imagem roda como `node`, portas ficam em loopback e
 segredos são externos. `/health` funciona como prontidão de processo+banco; uma
 liveness separada só será criada se um orquestrador exigir outra semântica.
 
-O futuro React deverá enviar `Authorization: Bearer <JWT>`, obter token no login
+O frontend React deve enviar `Authorization: Bearer <JWT>`, obter token no login
 e reler identidade em `/auth/me`. O backend não decide armazenamento do token,
 navegação ou estado da interface. CORS está desabilitado; uma origem distinta
 exigirá allowlist explícita por ambiente.
@@ -257,7 +262,7 @@ A [ADR-024](DECISOES_ARQUITETURAIS.md#adr-024) orienta construir frontend própr
 usando o Figma Make como referência de apresentação. Sessão, consultas e
 rascunhos ficam separados; regras clínicas, autorização, transações e versões
 permanecem no monólito modular. A
-[análise de integração](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md) detalha os
+[análise de integração](historico/ANALISE_FIGMA_MAKE_2026_10_03.md) detalha os
 contratos disponíveis e as lacunas; o [roadmap](PROXIMOS_PASSOS.md#etapa-6--fundação-do-frontend)
 define a execução. A avaliação não altera módulos, banco ou contratos HTTP.
 
@@ -271,7 +276,7 @@ preservam as garantias das Etapas 1–4B.
 ## Contratos clínicos seguintes
 
 Os [contratos clínicos](arquitetura/CONTRATOS_CLINICOS_ETAPA_5.md), as
-[respostas autoritativas](Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+[respostas autoritativas](dados/DECISOES_HUMANAS_NOVA_PLANILHA.md#respostas-clínicas-originais-de-28092026)
 e a [matriz de impacto](dados/COBERTURA_COLUNAS_PLANILHA.md) separam a semântica
 confirmada da implementação restante. D2 e D3 possuem migrations 28 e 25,
 validadas somente em bancos descartáveis. O roadmap e o registro de continuidade

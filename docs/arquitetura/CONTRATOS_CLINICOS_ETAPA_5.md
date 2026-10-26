@@ -1,7 +1,7 @@
 # Contratos clínicos da Etapa 5
 
 Atualizado em: 2026-09-28. Escolhas técnicas desta execução, subordinadas às
-[respostas clínicas vigentes](../Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+[respostas clínicas vigentes](../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md#respostas-clínicas-originais-de-28092026)
 e às [decisões humanas anteriores](../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md). Este documento não
 representa novas respostas clínicas da equipe nem liberação para dados reais.
 
@@ -112,7 +112,7 @@ avaliação é escolhida ou consolidada implicitamente por ID/data.
 
 ## Decisões humanas incorporadas
 
-As respostas de [`Perguntas pendentes sobre campos e regras clínicas.md`](../Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+As respostas de [respostas clínicas originais](../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md#respostas-clínicas-originais-de-28092026)
 são a referência autoritativa para estes campos:
 
 - **Idade:** é calculada pelo sistema a partir da data de nascimento. A API deve

@@ -1,5 +1,10 @@
 # Estrutura esperada do dicionário de dados
 
+> Documento histórico, movido de `planejamento/Estrutura Esperada do Dicionário de Dados.md` em 2026-10-23.
+> Propostas e comandos abaixo descrevem a origem e não o estado vigente.
+> Consulte o [índice atual](../../README.md) e o
+> [modelo físico](../../MODELO_FISICO_ATUAL.md) antes de implementar.
+
 O dicionário final deve ser validado como se fosse uma planilha com 6 abas:
 
 ## Aba 1: Tabelas

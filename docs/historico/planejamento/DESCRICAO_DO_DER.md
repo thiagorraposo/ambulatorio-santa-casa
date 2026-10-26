@@ -1,3 +1,10 @@
+# Descrição do DER — planejamento original
+
+> Documento histórico, movido de `planejamento/DER Definitivo.md` em 2026-10-23.
+> Propostas e comandos abaixo descrevem a origem e não o estado vigente.
+> Consulte o [índice atual](../../README.md) e o
+> [modelo físico](../../MODELO_FISICO_ATUAL.md) antes de implementar.
+
 O DER organiza o sistema do ambulatório em módulos relacionados. As entidades centrais são `paciente` e `atendimento`: um paciente pode possuir vários atendimentos, enquanto cada atendimento pertence a um único paciente.
 
 A partir dessas entidades, o modelo se divide em áreas como dados pessoais e contato, informações clínicas, exames, programas de pesquisa, encaminhamentos, comorbidades, medicamentos, tratamento, seguimento e auditoria de importações.
@@ -16,4 +23,4 @@ O modelo procura evitar repetição de dados. Informações do paciente ficam vi
 
 Em resumo, o DER apresenta como os dados da planilha serão distribuídos em tabelas normalizadas, preservando o histórico dos pacientes, reduzindo redundâncias e permitindo consultas, relatórios, controle de usuários e futuras funcionalidades do sistema web.
 
-![[DER_organizado_paineis.svg]]
+![DER_organizado_paineis.svg](DER_ORGANIZADO_PAINEIS.svg)

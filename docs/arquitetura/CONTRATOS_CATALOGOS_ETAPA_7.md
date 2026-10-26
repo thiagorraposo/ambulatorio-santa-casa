@@ -2,7 +2,7 @@
 
 Este documento define as consultas públicas de catálogo necessárias aos
 formulários das Etapas 7B–7C. Complementa a
-[matriz de integração](ANALISE_INTEGRACAO_FIGMA_MAKE.md) e os
+[matriz de integração](../historico/ANALISE_FIGMA_MAKE_2026_10_03.md) e os
 [contratos clínicos](CONTRATOS_CLINICOS_ETAPA_5.md). O schema físico permanece o
 registrado em [schema aplicado](../evidencias/schema_atual_ambulatorio.sql);
 nenhuma migration é necessária para essas consultas.

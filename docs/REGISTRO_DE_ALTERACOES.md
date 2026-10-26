@@ -1,5 +1,19 @@
 # Registro de Alterações
 
+## 2026-10-26 — organizar documentação pendente em commits
+
+Criada a branch `organizar-docs` a partir de `organizar-frontend`, no commit
+`2f42d78`, preservando as alterações locais. Separados os contextos de escopo
+e catálogo de produto, orientações operacionais e reorganização das fontes
+documentais. Nenhuma alteração de código, configuração, schema ou dados.
+
+Conferidos os 580 IDs FM e 580 IDs RQ, as 74 âncoras anteriores de pacotes e
+as duas novas, a transcrição das respostas clínicas e a identidade de bytes do
+DER movido. A auditoria local cobriu 80 documentos, 1.953 links e 1.237
+fragmentos Markdown, sem destinos ou âncoras ausentes. Whitespace dos novos
+Markdown e `git diff --check` aprovados. URLs externas e logs temporários não
+foram verificados. Sem merge ou push.
+
 ## 2026-10-26 — consolidar orientações de ambiente e recuperação
 
 Versionadas as orientações pendentes de setup, seleção do PostgreSQL e efeitos
@@ -11,6 +25,28 @@ fechamento de um bloco Markdown no workflow.
 Validação: `make docs-check COMPACT=1` e `git diff --check` aprovados.
 Suítes SQL, importador, backend e frontend não executadas: escopo exclusivamente
 documental, conforme a matriz de validação proporcional.
+
+## 2026-10-23 — reorganizar e consolidar a documentação
+
+Inventariados 85 documentos Markdown e as referências/artefatos associados,
+preservando as seis alterações documentais preexistentes de produto completo.
+README e estado atual reduzidos a suas funções; setup/comandos consolidados no
+workflow. Catálogo de entregas extraído do roadmap sem renumerar os pacotes.
+Respostas clínicas originais incorporadas à fonte D1–D12; planejamento/DER,
+análise Figma e reauditoria movidos para o histórico. Três arquivos sem conteúdo
+técnico tiveram sua existência consolidada no índice histórico.
+
+Criados índices de validações e histórico e documentadas as fontes principais,
+convenções e limites de vigência. Atualizados links, âncoras e referências;
+explicitadas limitações antigas da avaliação de ameaças e dos testes de restore,
+sem alterar controles ou ferramentas. Diagnóstico, inventário e pendências em
+[reorganização de 23/10](historico/REORGANIZACAO_DOCUMENTAL_2026_10_23.md).
+
+Validação exclusivamente documental: `make docs-check COMPACT=1`, auditoria de
+links/âncoras e navegação, `git diff --check`, whitespace dos documentos novos,
+comparação de conteúdo/IDs e hashes dos 381 arquivos não Markdown. Código,
+configurações, dados, banco e instruções internas do protótipo preservados.
+Sem commit ou push nesta entrega.
 
 ## 2026-10-23 — adotar o protótipo como escopo de produto completo
 
@@ -288,7 +324,7 @@ Nenhuma das sete lacunas foi corrigida nesta organização. Sem merge ou push.
 
 ## 2026-10-05 — relatório do trabalho local e reauditoria da Etapa 7
 
-Gerado o [relatório desde o último commit](RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md),
+Gerado o [relatório desde o último commit](historico/RELATORIO_ETAPA_7_2026_10_05.md),
 com base em `adf2fd5`: fotografia de 42 arquivos modificados e 34 novos antes
 do relatório. O documento distingue APIs já existentes, implementação local,
 validações executadas e limites, com inventário completo e evidências.
@@ -407,7 +443,7 @@ React/TypeScript com apresentação revisada do Figma Make: 6A entrega base/sess
 e 6B integra leitura. Etapas 7–8 explicitam catálogos, cobertura HTTP, versões,
 fronteiras transacionais, rascunhos e condições para funcionalidades complementares.
 Sequência e critérios de aceite ficam no roadmap; o
-[plano de integração](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md) concentra
+[plano de integração](historico/ANALISE_FIGMA_MAKE_2026_10_03.md) concentra
 compatibilidade, reaproveitamento e pendências técnicas.
 
 Registrada a preparação de migração em paralelo ao frontend, com matriz por
@@ -430,7 +466,7 @@ de runtime e navegador na Etapa 6.
 ## 2026-10-03 — análise do Figma Make e planejamento do frontend
 
 Concluída a análise estática de `figma-make-prototipo/`, preservando o diretório
-preexistente não versionado. O [plano de integração](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
+preexistente não versionado. O [plano de integração](historico/ANALISE_FIGMA_MAKE_2026_10_03.md)
 inventaria telas, componentes, formulários, tabelas, filtros, estados e fluxos;
 compara controllers/DTOs/services e regras vigentes; distingue apresentação
 reutilizável, adaptações e referências sem suporte HTTP. A ADR-024 registra a

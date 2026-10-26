@@ -66,13 +66,13 @@ Foram examinados todos os componentes do protótipo, `App`, `context`, `types`,
 cliente HTTP, rascunhos e estilos da aplicação; controllers/DTOs/autorização e
 SQL de persistência dos recursos; testes de leitura/escrita e fontes abaixo.
 O histórico recente contém os 13 commits de organização da Etapa 7 posteriores
-a `adf2fd5`. O [relatório de 05/10](../RELATORIO_DESDE_ULTIMO_COMMIT_2026_10_05.md)
+a `adf2fd5`. O [relatório de 05/10](../historico/RELATORIO_ETAPA_7_2026_10_05.md)
 descreve alterações então locais, hoje incorporadas a `HEAD`; não representa
 o status Git desta nova entrega. Nenhum código, contrato ou migration é alterado.
 
 ### Fontes e precedência
 
-1. [Respostas clínicas vigentes](../Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+1. [Respostas clínicas vigentes](../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md#respostas-clínicas-originais-de-28092026)
    e [decisões D1–D12](../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md) definem semântica.
 2. [ADR-017–024](../DECISOES_ARQUITETURAIS.md),
    [contratos clínicos](../arquitetura/CONTRATOS_CLINICOS_ETAPA_5.md),
@@ -84,7 +84,7 @@ o status Git desta nova entrega. Nenhum código, contrato ou migration é altera
    [roadmap](../PROXIMOS_PASSOS.md) e relatórios das
    [Etapas 6](../validacoes/VALIDACAO_ETAPA_6.md) e
    [7](../validacoes/VALIDACAO_ETAPA_7.md) distinguem estágio e evidência.
-5. [Análise de integração anterior](../arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
+5. [Análise de integração anterior](../historico/ANALISE_FIGMA_MAKE_2026_10_03.md)
    preserva a fotografia de planejamento; esta especificação e a matriz a
    sucedem para a avaliação de produto. O Figma orienta a interface, subordinado
    às fontes acima.

@@ -11,7 +11,7 @@ atual de funcionalidades. Revisão temporal, autorização clínica, frontend e
 recuperação de operações evoluíram depois dela; consulte a
 [arquitetura](ARQUITETURA_BACKEND.md), o [frontend](FRONTEND.md), o
 [protocolo de recuperação](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) e os
-[aceites](validacoes/VALIDACAO_ETAPA_7.md) para os controles efetivamente comprovados.
+[aceites](validacoes/README.md) para os controles efetivamente comprovados.
 
 A inclusão de upload/gestão/fluxos completos no roadmap não implementa controles.
 Reavaliar ameaças e riscos residuais por módulo e antes da liberação 9D, incluindo

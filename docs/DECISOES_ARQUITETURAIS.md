@@ -1,6 +1,6 @@
 # Decisões Arquiteturais
 
-Atualizado em: 2026-09-25
+Datas e status pertencem a cada ADR; organização revisada em: 2026-10-23.
 
 Este documento registra decisões duradouras do projeto. Mudanças cronológicas continuam em `docs/REGISTRO_DE_ALTERACOES.md`.
 
@@ -376,7 +376,7 @@ Documentos relacionados:
 `docs/dados/DECISOES_HUMANAS_NOVA_PLANILHA.md`,
 `docs/dados/COBERTURA_COLUNAS_PLANILHA.md`.
 
-# ADR-016
+## ADR-016
 
 ID: ADR-016
 
@@ -755,7 +755,7 @@ API/PostgreSQL exclusivamente sintéticos e descartáveis. Versões instaladas
 pertencem a `frontend/package.json` e ao lockfile.
 
 Documentos relacionados:
-[análise e planejamento da integração](arquitetura/ANALISE_INTEGRACAO_FIGMA_MAKE.md)
+[análise e planejamento da integração](historico/ANALISE_FIGMA_MAKE_2026_10_03.md)
 e [sequência oficial de execução](PROXIMOS_PASSOS.md#etapa-6--fundação-do-frontend),
 [implementação do frontend](FRONTEND.md) e
 [validação da Etapa 6](validacoes/VALIDACAO_ETAPA_6.md) e

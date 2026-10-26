@@ -662,7 +662,7 @@ cenário sintético. Naquele marco, revisões permaneciam bloqueadas até o acei
 integrado; criar tabelas não concluía a Etapa 5B.
 
 As respostas clínicas vigentes estão em
-[`Perguntas pendentes sobre campos e regras clínicas.md`](../Perguntas%20pendentes%20sobre%20campos%20e%20regras%20cl%C3%ADnicas.md)
+[respostas clínicas originais](../dados/DECISOES_HUMANAS_NOVA_PLANILHA.md#respostas-clínicas-originais-de-28092026)
 e nos contratos de 5A; não há resposta humana pendente nesse conjunto. Papéis
 sintéticos não definem responsabilidade institucional de produção nem autorizam
 dados reais. As pendências deste executor são técnicas e de aceite, registradas
