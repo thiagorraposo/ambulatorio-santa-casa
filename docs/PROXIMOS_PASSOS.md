@@ -568,8 +568,12 @@ explícita de escopo pelo responsável pelo produto.
 
 Continuidade de 27/10: o responsável solicitou a frente preparada de sorologias.
 O recorte individual 7B-E1B tem [contrato e validação técnica](validacoes/VALIDACAO_7B_E1B.md)
-de GET/POST, auditoria 65 e recuperação. Próximo passo: 7B-E1U com formulário,
-revisão, lista por atendimento e releitura; preservar null e as datas próprias.
+de GET/POST, auditoria 65 e recuperação, integrado no PR #19 com os quatro jobs
+da main aprovados. A [interface 7B-E1U](validacoes/VALIDACAO_7B_E1U.md) implementa
+formulário, revisão, lista por atendimento e releitura, preservando ausência e
+datas próprias; build, 228 componentes e E2E proporcionais aprovados. Próxima
+candidata técnica: examinar modelo/requisitos de 7B-E2B (condição/complicações),
+sem classificação automática ou decisão clínica inventada.
 Solicitação geral e correções persistidas mantêm seus contratos/aceites pendentes.
 Esse avanço não substitui o aceite humano de M2 nem define a ordem de todas as
 famílias restantes de M3.

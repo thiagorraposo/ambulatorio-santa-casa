@@ -25,13 +25,15 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | Melhorias U3.1/U3.2/U3.3/U4.1 | Implementação e validação técnica próprias. | [Índice de evidências](validacoes/README.md); não concluem automaticamente U3/U4, VU1 ou fidelidade integral. |
 | Produto completo e Etapas 8–10 | Escopo planejado e critérios definidos. | Implementações adicionais, decisões específicas, implantação e homologação pendentes. |
 | M3 — 8C2U.1 | Seleção e simulação mínima XLSX pela interface, com worker real e dados sintéticos; build, 219 testes de componentes e quatro E2E passaram em rodadas proporcionais. | [Evidência e consulta do CI remoto](validacoes/VALIDACAO_8C2_U1.md); aceite pendente. Dry-run não persiste registros, mas consome sequências; C2B.1 continua pendente. |
-| M3 — 7B-E1B | API de episódios individuais de sorologia por atendimento, auditoria prospectiva 65 e recuperação; validações locais HTTP/SQL/importador aprovadas. | [Contrato](arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md) e [evidência/CI remoto](validacoes/VALIDACAO_7B_E1B.md); interface 7B-E1U, solicitação geral e aceite pendentes. |
+| M3 — 7B-E1B | API de episódios individuais de sorologia por atendimento, auditoria prospectiva 65 e recuperação; validações locais HTTP/SQL/importador aprovadas. | [Contrato](arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md) e [evidência/CI remoto](validacoes/VALIDACAO_7B_E1B.md); interface tem unidade própria; solicitação geral e aceite pendentes. |
+| M3 — 7B-E1U | Interface por atendimento implementada: lista paginada, formulário e revisão de sete campos, rascunho/recibo recuperável; build, 228 componentes e 63 cenários E2E em rodadas proporcionais. | [Evidência](validacoes/VALIDACAO_7B_E1U.md); CI remoto próprio, solicitação geral e aceite humano permanecem separados. |
 
 O próximo trabalho de M2 é concluir a comparação visual de U4.2 e obter aceite
 humano do percurso A1. U3/U4.1 foram reexercitadas pela suíte completa local e
 pelo CI do PR #16. Em M3, C2B.1 exige resolver o consumo de sequências antes de
-declarar a garantia ampliada de simulação. A próxima unidade da frente de
-sorologias é 7B-E1U, consumindo o contrato publicado sem inferir diagnóstico.
+declarar a garantia ampliada de simulação. A frente de sorologias individuais tem API e interface implementadas, sem
+inferir diagnóstico. Solicitação geral exige contrato próprio; 7B-E2B é a
+próxima candidata técnica do catálogo, sujeita à leitura de modelo e requisitos.
 A sequência detalhada pertence
 ao [roadmap](PROXIMOS_PASSOS.md#próximo-trabalho).
 
