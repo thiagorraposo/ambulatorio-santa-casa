@@ -83,6 +83,7 @@ export interface MutationFormProps<T = Record<string, unknown>> {
   verificationPath?: string;
   verificationLabel?: string;
   disabled?: boolean;
+  submitVisible?: boolean;
   operationKey?: string;
   responseId?: string;
   expectedId?: string;
@@ -93,6 +94,7 @@ export interface MutationFormProps<T = Record<string, unknown>> {
 
 export function MutationForm<T = Record<string, unknown>>({ title, path, method, buildBody, onSaved, children, dirty,
   submitLabel = 'Salvar registro', verificationPath, verificationLabel = 'Verificar registro salvo', disabled = false,
+  submitVisible = true,
   operationKey = '', responseId, expectedId, conflictReview, intentionReview, onConflict }: MutationFormProps<T>) {
   const session = useSession();
   const queries = useQueryClient();
@@ -265,10 +267,10 @@ export function MutationForm<T = Record<string, unknown>>({ title, path, method,
         setState({ status: 'idle' });
       })}
       <fieldset disabled={locked} className="form-body"><legend className="sr-only">{title}</legend>{children}</fieldset>
-      <div className="form-actions"><button type="submit" className="button" disabled={locked || disabled || !dirty}>
+      {submitVisible && <div className="form-actions"><button type="submit" className="button" disabled={locked || disabled || !dirty}>
         {busy ? 'Salvando…' : submitLabel}</button>
         {dirty && state.status !== 'saved' && <span className="muted">Alterações em rascunho; ainda não confirmadas.</span>}
-      </div>
+      </div>}
     </form>
     {blocked.state === 'blocked' && createPortal(<dialog ref={dialog} className="draft-dialog" aria-labelledby="draft-title"
       onKeyDown={event => {

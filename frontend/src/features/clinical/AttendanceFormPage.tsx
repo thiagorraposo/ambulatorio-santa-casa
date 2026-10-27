@@ -1,15 +1,68 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import type { AtendimentoDetalheResponse, PacienteDetalheResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
 import { ApiErrorState, Card, PageHeading } from '../../shared/ui';
+import { clinicalLabel } from '../../shared/formatters';
 import { DraftQueryState, EditingGate, MutationForm, useClinicalDraft, type CatalogItem } from '../../shared/writing';
 import { booleanOptions, FormSection, InputField, SelectField, TextAreaField } from './CoreFields';
 import { attendanceBody, attendanceInitial, clinicalNumbers, dirtyFields, type AttendanceDraft } from './core-contracts';
 import { VersionComparison } from './VersionComparison';
 
+const attendanceSteps = ['Atendimento', 'Avaliação e Chagas', 'Exames e familiares', 'Pendências', 'Revisão'] as const;
+
+function StepPanel({ active, title, panelRef, children }: { active: boolean; title: string;
+  panelRef?: (node: HTMLFieldSetElement | null) => void; children: ReactNode }) {
+  return <fieldset ref={panelRef} className="form-section" hidden={!active} disabled={!active}>
+    <legend>{title}</legend>{children}
+  </fieldset>;
+}
+
+function ReviewSection({ title, values }: { title: string; values: Array<[string, string | null | undefined]> }) {
+  return <section className="form-section"><h3>{title}</h3><dl>{values.map(([label, value]) =>
+    <div key={label}><dt>{label}</dt><dd>{value?.trim() ? clinicalLabel(value) : 'Não informado'}</dd></div>)}</dl></section>;
+}
+
+function AttendanceReview({ draft }: { draft: AttendanceDraft }) {
+  return <>
+    <p>Confira os dados e registros vinculados. A confirmação grava somente o atendimento e os filhos mostrados aqui; acompanhamento é uma ação separada.</p>
+    <ReviewSection title="Atendimento" values={[
+      ['Data', draft.values.dataAtendimento], ['Localização do prontuário', draft.values.localizacaoProntuario],
+      ['Somente ambulatório', draft.values.ambulatorioUnicamente], ['Anexo a projeto', draft.values.ambulatorioAnexoProjeto],
+      ['Observações', draft.values.observacoes],
+    ]} />
+    <ReviewSection title="Avaliação clínica" values={[
+      ...clinicalNumbers.map(([key, label]) => [label, draft.clinical[key]] as [string, string | undefined]),
+      ['NYHA', draft.clinical.nyha], ['Observações clínicas', draft.clinical.observacoes],
+    ]} />
+    <ReviewSection title="Diagnóstico e Chagas" values={[
+      ['Possui diagnóstico', draft.diagnosis.possuiDiagnosticoChagas], ['Status', draft.diagnosis.statusDiagnostico],
+      ['Resultado final', draft.diagnosis.resultadoFinal], ['Data do resultado final', draft.diagnosis.dataResultadoFinal],
+      ['Descoberta por autorrelato', draft.diagnosis.dataDescobertaAutorelato], ['Critério de confirmação', draft.diagnosis.criterioConfirmacao],
+      ['Observações', draft.diagnosis.observacoes],
+    ]} />
+    <section className="form-section"><h3>Exames</h3>{draft.exams.length ? <ul>{draft.exams.map((exam, index) =>
+      <li key={index}>Exame {index + 1}: {clinicalLabel(exam.bloco)} · {exam.catalog?.nome ?? 'Tipo não selecionado'} · {exam.identificacao || 'Identificação não informada'} · Resultado: {exam.resultado || 'Não informado'} · Observações: {exam.observacoes || 'Não informadas'}</li>)}</ul> : <p>Nenhum exame informado.</p>}</section>
+    <section className="form-section"><h3>Familiares</h3><p>Examinados: {draft.familyStatus ? clinicalLabel(draft.familyStatus) : 'Sem registro de rastreio'}</p>
+      {draft.families.length ? <ul>{draft.families.map((family, index) => <li key={index}>{family.familiar} · Resultado: {family.resultado}</li>)}</ul> : <p>Nenhum familiar detalhado.</p>}
+    </section>
+    <section className="form-section"><h3>Pendências</h3>{draft.pending.length ? <ul>{draft.pending.map((pending, index) =>
+      <li key={index}>{pending.descricao} · Status: {clinicalLabel(pending.status || 'Desconhecido')} · Data de resolução: {pending.dataResolucao || 'Não informada'}</li>)}</ul> : <p>Nenhuma pendência informada.</p>}</section>
+  </>;
+}
+
 function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: AtendimentoDetalheResponse }) {
   const navigate = useNavigate();
+  const [step, setStep] = useState(0);
+  const [stepError, setStepError] = useState('');
+  const panelRefs = useRef<Array<HTMLFieldSetElement | null>>([]);
+  const stepHeading = useRef<HTMLHeadingElement>(null);
+  const stepErrorRef = useRef<HTMLDivElement>(null);
+  const navigatedStep = useRef(false);
+  useEffect(() => {
+    if (navigatedStep.current) stepHeading.current?.focus();
+  }, [step]);
+  useEffect(() => { if (stepError) stepErrorRef.current?.focus(); }, [stepError]);
   const initial = attendanceInitial(data);
   const [draft, setDraft, clearDraft] = useClinicalDraft<AttendanceDraft>(`attendance:${pacienteId}:${data?.atendimentoId ?? 'new'}`, {
     values: initial, initial, original: data, clinical: {}, diagnosis: {}, exams: [], families: [], familyStatus: '', pending: [], operationKey: crypto.randomUUID(),
@@ -26,10 +79,30 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
   const updateExam = (index: number, next: Partial<AttendanceDraft['exams'][number]>) => setDraft(previous => ({
     ...previous, exams: previous.exams.map((exam, i) => i === index ? { ...exam, ...next } : exam),
   }));
+  function moveTo(next: number) {
+    setStepError('');
+    if (next > step && panelRefs.current[step]?.closest('form')?.reportValidity() === false) return;
+    if (next === 4) {
+      try { attendanceBody(draft); }
+      catch (error) {
+        const message = error instanceof Error ? error.message : 'Revise os dados antes de continuar.';
+        setStepError(message);
+        if (/^Pendência|descrição de cada pendência/i.test(message)) setStep(3);
+        else if (/^Exame|familiar/i.test(message)) setStep(2);
+        else if (/^Data do atendimento/i.test(message)) setStep(0);
+        else setStep(1);
+        navigatedStep.current = true;
+        return;
+      }
+    }
+    navigatedStep.current = true;
+    setStep(next);
+  }
   return <Card>
     {data && <p className="notice">Esta edição altera os dados básicos do atendimento. Medidas, diagnóstico, exames, familiares e pendências já salvos são preservados; sua edição não está disponível neste formulário.</p>}
     <MutationForm title={data ? 'Editar atendimento' : 'Novo atendimento'} path={path} method={data ? 'PATCH' : 'POST'}
-      dirty={dirty} submitLabel="Salvar atendimento" buildBody={() => attendanceBody(draft)}
+      dirty={dirty} submitLabel={data ? 'Salvar atendimento' : 'Confirmar atendimento'}
+      submitVisible={Boolean(data) || step === 4} disabled={!data && step !== 4} buildBody={() => attendanceBody(draft)}
       operationKey={draft.operationKey}
       responseId="atendimentoId" expectedId={data?.atendimentoId}
       conflictReview={data ? abandon => <VersionComparison<AtendimentoDetalheResponse> path={path}
@@ -48,6 +121,11 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
       onSaved={(response: { atendimentoId: string }) => { clearDraft(); navigate(`${patientPath}/atendimentos/${response.atendimentoId}`, {
         state: { saved: 'Atendimento salvo. Tratamento, retornos e encaminhamentos têm confirmação própria.' },
       }); }}>
+      {!data && <p className="notice" role="status">Etapa {step + 1} de 5: {attendanceSteps[step]}</p>}
+      {!data && stepError && <div ref={stepErrorRef} role="alert" className="error-state" tabIndex={-1}>{stepError}</div>}
+      <StepPanel active={Boolean(data) || step === 0} title={data ? 'Dados básicos do atendimento' : 'Etapa 1 — Atendimento'}
+        panelRef={!data ? node => { panelRefs.current[0] = node; } : undefined}>
+      {!data && <h2 ref={step === 0 ? stepHeading : undefined} tabIndex={-1}>Atendimento</h2>}
       <FormSection title="Dados básicos do atendimento">
         <InputField label="Data do atendimento" type="date" value={draft.values.dataAtendimento!} required={!draft.original || draft.original.dataAtendimento !== null} onChange={value => field('dataAtendimento', value)} />
         {draft.original?.dataAtendimento === null && <p className="muted">A data deste atendimento legado é desconhecida.
@@ -57,7 +135,11 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
         <SelectField label="Ambulatório anexo a projeto" value={draft.values.ambulatorioAnexoProjeto!} options={booleanOptions} onChange={value => field('ambulatorioAnexoProjeto', value)} />
         <TextAreaField label="Observações do atendimento" value={draft.values.observacoes!} onChange={value => field('observacoes', value)} />
       </FormSection>
+      </StepPanel>
       {!data && <>
+        <StepPanel active={step === 1} title="Etapa 2 — Avaliação e Chagas"
+          panelRef={node => { panelRefs.current[1] = node; }}>
+        <h2 ref={step === 1 ? stepHeading : undefined} tabIndex={-1}>Avaliação e Chagas</h2>
         <FormSection title="Avaliação clínica">
           {clinicalNumbers.map(([key, label, integer]) => <InputField key={key} label={label} type="number"
             step={integer ? '1' : '0.01'} value={draft.clinical[key] ?? ''} onChange={value => sectionField('clinical', key, value)} />)}
@@ -79,6 +161,10 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
           <TextAreaField label="Observações do diagnóstico" value={draft.diagnosis.observacoes ?? ''} onChange={value => sectionField('diagnosis', 'observacoes', value)} />
         </FormSection>
         <p className="muted">Descoberta por autorrelato e resultado final são informações distintas. Sorologias detalhadas, comorbidades, medicamentos e eventos clínicos ainda não estão disponíveis para registro aqui.</p>
+        </StepPanel>
+        <StepPanel active={step === 2} title="Etapa 3 — Exames e familiares"
+          panelRef={node => { panelRefs.current[2] = node; }}>
+        <h2 ref={step === 2 ? stepHeading : undefined} tabIndex={-1}>Exames e familiares</h2>
         <fieldset className="form-section"><legend>Exames trazidos e solicitados</legend>
           <p>Um exame solicitado pode ser registrado sem resultado. Identifique os exames de categorias genéricas.</p>
           {draft.exams.length > 0 && <>
@@ -115,17 +201,21 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
           {draft.families.map((family, index) => <fieldset key={index} className="form-section"><legend>Familiar {index + 1}</legend>
             <div className="form-grid"><InputField label={`Identificação do familiar ${index + 1}`} value={family.familiar} required maxLength={1000}
               onChange={value => setDraft(previous => ({ ...previous, families: previous.families.map((item, i) => i === index ? { ...item, familiar: value } : item) }))} />
-              <TextAreaField label={`Resultado do familiar ${index + 1}`} value={family.resultado}
+              <TextAreaField label={`Resultado do familiar ${index + 1}`} required={draft.familyStatus === 'sim'} value={family.resultado}
                 onChange={value => setDraft(previous => ({ ...previous, families: previous.families.map((item, i) => i === index ? { ...item, resultado: value } : item) }))} /></div>
             <button type="button" className="button button-secondary" onClick={() => setDraft(previous => ({ ...previous, families: previous.families.filter((_, i) => i !== index) }))}>Remover familiar {index + 1}</button>
           </fieldset>)}
           <button type="button" className="button button-secondary" disabled={draft.families.length >= 50}
             onClick={() => setDraft(previous => ({ ...previous, families: [...previous.families, { familiar: '', resultado: '' }] }))}>Adicionar familiar examinado</button>
         </fieldset>
+        </StepPanel>
+        <StepPanel active={step === 3} title="Etapa 4 — Pendências"
+          panelRef={node => { panelRefs.current[3] = node; }}>
+        <h2 ref={step === 3 ? stepHeading : undefined} tabIndex={-1}>Pendências</h2>
         <fieldset className="form-section"><legend>Pendências na criação</legend>
           <p>Pendência resolvida exige a data de resolução informada. A criação de cada pendência faz parte da mesma gravação do atendimento.</p>
           {draft.pending.map((pending, index) => <fieldset key={index} className="form-section"><legend>Pendência {index + 1}</legend>
-            <TextAreaField label={`Descrição da pendência ${index + 1}`} value={pending.descricao}
+            <TextAreaField label={`Descrição da pendência ${index + 1}`} required value={pending.descricao}
               onChange={value => setDraft(previous => ({ ...previous, pending: previous.pending.map((item, i) => i === index ? { ...item, descricao: value } : item) }))} />
             <SelectField label={`Status da pendência ${index + 1}`} value={pending.status} blank="Desconhecido"
               options={[["aberta", "Aberta"], ["em_andamento", "Em andamento"], ["resolvida", "Resolvida"], ["cancelada", "Cancelada"], ["nao_informado", "Não informado"]]}
@@ -138,6 +228,17 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
           <button type="button" className="button button-secondary" disabled={draft.pending.length >= 30}
             onClick={() => setDraft(previous => ({ ...previous, pending: [...previous.pending, { descricao: '', status: 'aberta' }] }))}>Adicionar pendência</button>
         </fieldset>
+        </StepPanel>
+        <StepPanel active={step === 4} title="Etapa 5 — Revisão">
+          <h2 ref={step === 4 ? stepHeading : undefined} tabIndex={-1}>Revisão</h2>
+          <AttendanceReview draft={draft} />
+        </StepPanel>
+        <div className="form-actions" aria-label="Navegação entre etapas">
+          {step > 0 && <button type="button" className="button button-secondary" onClick={() => moveTo(step - 1)}>Etapa anterior</button>}
+          {step < 3 && <button type="button" className="button button-secondary" onClick={() => moveTo(step + 1)}>Próxima etapa</button>}
+          {step === 3 && <button type="button" className="button button-secondary" onClick={() => moveTo(4)}>Revisar atendimento</button>}
+          <button type="button" className="button button-secondary" onClick={() => navigate(patientPath)}>Cancelar atendimento</button>
+        </div>
       </>}
     </MutationForm>
   </Card>;

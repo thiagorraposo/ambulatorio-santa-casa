@@ -18,12 +18,13 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | Etapa 5 | 5A–5E concluídas em ambiente sintético em 03/10. | [Matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md); incrementos não aplicados ao persistente nesta entrega. |
 | Etapa 6 | 6A–6B concluídas em ambiente sintético em 04/10. | [Relatório](validacoes/VALIDACAO_ETAPA_6.md). |
 | Etapa 7 original | Implementação e validação técnica sintética concluídas em 15/10, com correções R7-01–07; M1 aprovado em 26/10 conforme confirmação do responsável do projeto. | [Relatório vigente](validacoes/VALIDACAO_ETAPA_7.md) e [registro do parecer](validacoes/ROTEIRO_REVISAO_CLINICA_ETAPA_7.md). |
-| M2 — 7A-U1 | Cadastro precedido por busca implementado e validado tecnicamente em 26/10. | [Evidência](validacoes/VALIDACAO_7A_U1.md); aceite da VU1, etapas/revisão e percurso integrado permanecem pendentes. |
+| M2 — 7A-U1 | Cadastro precedido por busca implementado e validado tecnicamente em 26/10. | [Evidência](validacoes/VALIDACAO_7A_U1.md); aceite da VU1 e do percurso integrado permanecem pendentes. |
+| M2 — 7D-U1/U2 | Formulário em cinco etapas, revisão e confirmação única implementados e validados tecnicamente em 26/10. | [Evidência](validacoes/VALIDACAO_7D_U1_U2.md); aceite de produto/equipe, U4.2 e validação integrada completa permanecem pendentes. |
 | Melhorias U3.1/U3.2/U3.3/U4.1 | Implementação e validação técnica próprias. | [Índice de evidências](validacoes/README.md); não concluem automaticamente U3/U4, VU1 ou fidelidade integral. |
 | Produto completo e Etapas 8–10 | Escopo planejado e critérios definidos. | Implementações adicionais, decisões específicas, implantação e homologação pendentes. |
 
-O próximo trabalho é fechar as escolhas necessárias para M2 e entregar seus
-pacotes. A sequência detalhada pertence
+O próximo trabalho é entregar U4.2, verificar U3/U4.1 após as mudanças e fechar
+a validação integrada de M2. A sequência detalhada pertence
 ao [roadmap](PROXIMOS_PASSOS.md#próximo-trabalho).
 
 ## Componentes e ambientes

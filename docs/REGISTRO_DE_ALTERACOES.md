@@ -1,5 +1,15 @@
 # Registro de Alterações
 
+## 2026-10-26 — atendimento em cinco etapas e revisão (7D-U1/U2)
+
+O cadastro de atendimento agora segue cinco etapas com validação por etapa,
+resumo revisável, confirmação explícita e cancelamento consciente do rascunho.
+Os testes cobrem retorno de erros, filhos, prevenção de duplicidade e recuperação
+de resposta incerta, sem alterar os contratos de acompanhamento. Build, 205
+testes unitários e os cenários E2E sintéticos registrados em
+[7D-U1/U2](validacoes/VALIDACAO_7D_U1_U2.md) passaram. Aceite de produto/equipe
+continua pendente.
+
 ## 2026-10-26 — cadastro precedido por busca (7A-U1)
 
 O formulário de novo paciente agora exige busca autorizada e declaração

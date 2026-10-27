@@ -22,11 +22,11 @@ export function SelectField({ label, value, onChange, options, blank = 'Não inf
   </select></div>;
 }
 
-export function TextAreaField({ label, value, onChange, maxLength = 10000 }: {
-  label: string; value: string; onChange: (value: string) => void; maxLength?: number;
+export function TextAreaField({ label, value, onChange, maxLength = 10000, required = false }: {
+  label: string; value: string; onChange: (value: string) => void; maxLength?: number; required?: boolean;
 }) {
   const id = useId();
-  return <div className="form-field"><label htmlFor={id}>{label}</label><textarea id={id} value={value}
+  return <div className="form-field"><label htmlFor={id}>{label}</label><textarea id={id} required={required} value={value}
     maxLength={maxLength} rows={3} onChange={event => onChange(event.target.value)} /></div>;
 }
 

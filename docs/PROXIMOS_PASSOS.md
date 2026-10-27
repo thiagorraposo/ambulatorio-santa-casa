@@ -56,7 +56,7 @@ Nenhuma semântica clínica é inferida pela autorização de escopo.
 | Marco | Conteúdo e critério de saída | Estado em 26/10 |
 | --- | --- | --- |
 | M1 — Fluxo original revisado | Executar roteiro clínico, registrar parecer, corrigir impedimentos e validar novamente os pontos afetados. | Aprovado em 2026-10-26, conforme confirmação do responsável do projeto; sem impedimentos reportados. |
-| M2 — VU1 sintética | Entregar 7A-U1, 7D-U1/U2/U4.2, verificar evidências U3/U4.1 e recuperação nas operações usadas; aceitar 7D-A1 com a equipe. | 7A-U1 implementada e validada tecnicamente; demais unidades e aceite integrado pendentes. Recorte de trabalho M2 definido pela instrução do responsável em 26/10; escolhas fora desse recorte permanecem abertas. |
+| M2 — VU1 sintética | Entregar 7A-U1, 7D-U1/U2/U4.2, verificar evidências U3/U4.1 e recuperação nas operações usadas; aceitar 7D-A1 com a equipe. | 7A-U1 e 7D-U1/U2 implementadas e validadas tecnicamente; U4.2, regressões integradas restantes e aceite humano permanecem pendentes. Recorte de trabalho M2 definido pela instrução do responsável em 26/10; escolhas fora desse recorte permanecem abertas. |
 | M3 — Produto completo em ambiente sintético | Concluir todas as famílias 7B-E/7C-E e 8A–8D incluídas, correção 7C-R2B/U, comparação visual 8V1 e aceite integral 8V2. | Implementações adicionais, decisões e aceites pendentes. |
 | M4 — Operação institucional | Concluir 9A–9D: implantação, segurança, continuidade e liberação explícita para dados reais. | Futuro; não é consequência automática de M3. |
 | M5 — Produto completo entregue | Concluir 10A–10D, reconciliar migração autorizada, resolver defeitos impeditivos e registrar release/aceite final. | Futuro; conclusão do objetivo depende de M3, M4 e M5. |
