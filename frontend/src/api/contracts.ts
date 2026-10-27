@@ -222,6 +222,16 @@ export type ImportacaoCodigoErro = 'falha_operacional' | 'campo_obrigatorio_ause
   | 'catalogo_indisponivel' | 'proveniencia_ambigua' | 'dados_divergentes'
   | 'cadeia_reprocessamento_invalida' | 'linha_rejeitada' | 'pendencia_nao_promovida';
 
+export type ImportacaoFinalidade = 'carga_inicial' | 'mesmo_conteudo' | 'revisao';
+
+export interface ImportacaoSubmitResponse {
+  codigoLote: string;
+  codigoLoteSolicitado: string;
+  dryRun: boolean;
+  loteId: string | null;
+  status: string;
+}
+
 export interface ImportacaoLoteResponse {
   loteId: string; codigo: string; layout: string; status: string; reprocessadoDe: string | null;
   iniciadoEm: string | null; finalizadoEm: string | null; criadoEm: string; atualizadoEm: string;

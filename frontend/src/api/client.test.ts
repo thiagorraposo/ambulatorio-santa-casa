@@ -8,6 +8,36 @@ function deferred<T>() {
 }
 
 describe('cliente HTTP /v1', () => {
+  it('envia FormData intacto sem Content-Type e preserva o envio JSON', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockImplementation(async () => Response.json({ ok: true }));
+    const client = new ApiClient(fetcher);
+    client.authenticate('token-sintetico', 60);
+    const body = new FormData();
+    body.append('arquivo', new File(['sintético'], 'sintetico.xlsx'));
+    body.append('dryRun', 'true');
+    await client.request('/importacoes', { method: 'POST', body });
+    const multipart = fetcher.mock.calls[0]![1]!;
+    expect(multipart.body).toBe(body);
+    expect(multipart.headers).toEqual({ Accept: 'application/json', Authorization: 'Bearer token-sintetico' });
+    expect(multipart).toMatchObject({ cache: 'no-store', credentials: 'omit' });
+    await client.request('/pacientes', { method: 'POST', body: { nome: 'Sintético' } });
+    expect(fetcher.mock.calls[1]![1]).toMatchObject({ body: JSON.stringify({ nome: 'Sintético' }),
+      headers: { 'Content-Type': 'application/json' } });
+  });
+
+  it('descarta multipart atrasado após abort e troca de identidade', async () => {
+    const late = deferred<Response>();
+    const fetcher = vi.fn<typeof fetch>().mockReturnValue(late.promise);
+    const client = new ApiClient(fetcher);
+    client.authenticate('anterior', 60);
+    const controller = new AbortController();
+    const result = client.request('/importacoes', { method: 'POST', body: new FormData(), signal: controller.signal });
+    controller.abort();
+    client.authenticate('atual', 60);
+    expect(fetcher.mock.calls[0]![1]!.signal!.aborted).toBe(true);
+    late.resolve(Response.json({ dryRun: true }));
+    await expect(result).rejects.toMatchObject({ name: 'AbortError' });
+  });
   it('envia Bearer apenas pela rota local versionada, sem cache HTTP ou cookies', async () => {
     const fetcher = vi.fn<typeof fetch>().mockResolvedValue(Response.json([{ pacienteId: '9007199254740997', nome: 'Sintético' }]));
     const client = new ApiClient(fetcher);

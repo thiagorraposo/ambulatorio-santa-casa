@@ -1,6 +1,7 @@
 import { Link, useLocation, useParams, useSearchParams } from 'react-router';
 import type { ImportacaoLoteDetalheResponse, ImportacaoLoteResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
+import { useSession } from '../../app/session';
 import { Card, EmptyState, PageHeading, QueryState, TableScroll } from '../../shared/ui';
 import { Pagination, usePage } from '../pacientes/pagination';
 
@@ -11,11 +12,13 @@ function date(value: string | null) {
 }
 
 export function ImportacoesPage() {
+  const session = useSession();
   const page = usePage('lotes');
   const query = useApiQuery<ImportacaoLoteResponse[]>(`/importacoes/lotes?limit=${page.limit}&offset=${page.offset}`);
   const location = useLocation();
   return <>
     <PageHeading title="Importações" description="Consulte os lotes e as linhas disponíveis para seu acesso." />
+    {session.user && session.user.perfil !== 'consulta' && <Link className="button" to="/importacoes/simular">Simular planilha</Link>}
     <Card>
       <h2>Lotes disponíveis</h2>
       <QueryState query={query} emptyMessage="Nenhum lote disponível nesta página para seu acesso.">

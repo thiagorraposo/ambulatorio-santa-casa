@@ -29,6 +29,7 @@ class FrontendDiagnosticsTest(unittest.TestCase):
                 "SYNTHETIC_PG_USER": "syntheticuser",
                 "PGPASSWORD": "senha-postgres-sintetica-diagnostico",
                 "APP_DB_PASSWORD": "senha-backend-sintetica-diagnostico",
+                "IMPORT_DB_PASSWORD": "senha-worker-sintetica-diagnostico",
                 "AUTH_JWT_SECRET": "jwt-sintetico-diagnostico",
                 "FRONTEND_E2E_API_PORT": "invalid",
                 "FRONTEND_DIAG_TEST_DIR": str(evidence),
@@ -56,7 +57,7 @@ class FrontendDiagnosticsTest(unittest.TestCase):
                 content = "fora-da-cauda\n" + "linha sintética " * 500 + "\n"
                 content += "\n".join(f"linha {number} " + "x" * 300 for number in range(40)) + "\n"
                 content += "\n".join(environment[key] for key in (
-                    "PGPASSWORD", "APP_DB_PASSWORD", "AUTH_JWT_SECRET")) + "\n"
+                    "PGPASSWORD", "APP_DB_PASSWORD", "IMPORT_DB_PASSWORD", "AUTH_JWT_SECRET")) + "\n"
                 content += f"postgresql://synthetic:{url_secret}@synthetic.invalid/test\n"
                 (evidence / name).write_text(content, encoding="utf-8")
             (evidence / "fixture.json").write_text(fixture_secret, encoding="utf-8")
@@ -70,7 +71,7 @@ class FrontendDiagnosticsTest(unittest.TestCase):
             self.assertFalse(trace.exists(), "Nenhum comando de banco pode executar")
             self.assertFalse((evidence / "fixture.json").exists())
             for secret in [environment[key] for key in (
-                    "PGPASSWORD", "APP_DB_PASSWORD", "AUTH_JWT_SECRET")
+                    "PGPASSWORD", "APP_DB_PASSWORD", "IMPORT_DB_PASSWORD", "AUTH_JWT_SECRET")
                     ] + [url_secret, fixture_secret, ignored_secret, "fora-da-cauda"]:
                 self.assertNotIn(secret, output)
             self.assertIn("[REDACTED]", output)

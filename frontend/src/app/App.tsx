@@ -12,6 +12,7 @@ import FollowupPage from '../features/clinical/FollowupPage';
 import { DraftProvider } from '../shared/writing';
 import { AppNavigation } from './AppNavigation';
 import { ImportacaoDetalhePage, ImportacoesPage } from '../features/importacoes/ImportacoesPage';
+import ImportacaoSimulacaoPage from '../features/importacoes/ImportacaoSimulacaoPage';
 
 const profiles = { consulta: 'Consulta', edicao: 'Edição', administracao: 'Administração' };
 
@@ -176,6 +177,7 @@ export default function App() {
       <Route path="/pacientes/:pacienteId" element={<PatientPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId" element={<AttendancePage />} />
       <Route path="/importacoes" element={<ImportacoesPage />} />
+      <Route path="/importacoes/simular" element={<ImportacaoSimulacaoPage />} />
       <Route path="/importacoes/lotes/:loteId" element={<ImportacaoDetalhePage />} />
       <Route path="/minha-conta" element={<AccountPage />} />
       <Route path="*" element={<NotFoundPage />} />

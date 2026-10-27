@@ -80,12 +80,14 @@ export class ApiClient {
     try {
       current();
       const headers: Record<string, string> = { Accept: 'application/json' };
+      const multipart = options.body instanceof FormData;
       if (!options.public && credential) headers.Authorization = `Bearer ${credential.token}`;
-      if (options.body !== undefined) headers['Content-Type'] = 'application/json';
+      // The browser supplies the multipart boundary for FormData.
+      if (options.body !== undefined && !multipart) headers['Content-Type'] = 'application/json';
       if (options.operationId) headers['X-Operacao-Id'] = options.operationId;
       const response = await this.fetcher(`/v1${path}`, {
         method: options.method ?? 'GET', headers, credentials: 'omit', cache: 'no-store',
-        body: options.body === undefined ? undefined : JSON.stringify(options.body), signal: controller.signal,
+        body: options.body === undefined ? undefined : multipart ? options.body as FormData : JSON.stringify(options.body), signal: controller.signal,
       });
       current();
       if (!response.ok) {

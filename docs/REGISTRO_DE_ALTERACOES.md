@@ -11,6 +11,8 @@ O primeiro CI completo do estado integrado encontrou timeout em acompanhamento
 preexistente (54/55 E2E, remoção aprovada). Após três repetições locais aprovadas,
 o helper recebeu diagnóstico sanitizado e checagem de validade HTML; a causa
 remota ainda não foi comprovada. Nenhum teste/status/timeout foi relaxado.
+Depois, a suíte local completa passou 55/55 e o run final `40448281960` passou
+nos quatro jobs; PR #16 integrado em `a2dbd30`.
 
 ## 2026-10-27 — sincronização da limpeza de processos no teste de workflow
 
@@ -19,6 +21,19 @@ do PR #15. O teste confirma prontidão do filho e usa um handle de processo para
 verificar término e limpar sem atingir PID reciclado. Workflow passou 30 testes
 e o caso focado passou 100 repetições; a falha natural anterior não se reproduziu
 localmente. Evidência e limites no [relatório do CI](validacoes/VALIDACAO_CI_2026_10_26.md).
+O PR #17 e o pós-merge da `main` passaram nos quatro jobs (`40445313791` e
+`40446442622`, commit integrado `0603259`).
+
+## 2026-10-27 — seleção e simulação mínima de XLSX (8C2U.1)
+
+A interface seleciona XLSX sintético, finalidade e código e envia simulação
+explícita pelo contrato H14; não oferece confirmação da importação. Cancelar,
+trocar a escolha ou a identidade invalida respostas anteriores. Build, 218
+testes unitários e quatro E2E com worker/PostgreSQL descartáveis passaram em
+rodadas proporcionais. A
+[evidência](validacoes/VALIDACAO_8C2_U1.md) registra zero registros persistidos e
+o limite comprovado de consumo de sequências, pendente em C2B.1. Sem aceite humano.
+Após incorporar o foco/CI da `main`, build e 219 testes unitários passaram.
 
 ## 2026-10-27 — jornada integrada e confirmação única (7D-A1)
 
