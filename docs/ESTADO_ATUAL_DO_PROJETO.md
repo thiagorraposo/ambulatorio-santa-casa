@@ -25,8 +25,9 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | Melhorias U3.1/U3.2/U3.3/U4.1 | Implementação e validação técnica próprias. | [Índice de evidências](validacoes/README.md); não concluem automaticamente U3/U4, VU1 ou fidelidade integral. |
 | Produto completo e Etapas 8–10 | Escopo planejado e critérios definidos. | Implementações adicionais, decisões específicas, implantação e homologação pendentes. |
 
-O próximo trabalho é entregar U4.2, verificar U3/U4.1 após as mudanças e fechar
-a validação integrada de M2. A sequência detalhada pertence
+O próximo trabalho é estabilizar o teste de processos no CI pós-merge de A1,
+concluir a revisão de U4.2 e obter aceite humano de M2. U3/U4.1 foram
+reexercitadas pela suíte frontend do PR #15. A sequência detalhada pertence
 ao [roadmap](PROXIMOS_PASSOS.md#próximo-trabalho).
 
 ## Componentes e ambientes
@@ -48,10 +49,12 @@ ao [roadmap](PROXIMOS_PASSOS.md#próximo-trabalho).
   Recibos/rascunhos têm limites de sessão; não há garantia geral de idempotência
   de POST entre sessões. [Guia técnico](FRONTEND.md) e
   [protocolo de recuperação](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md).
-- **CI:** Quality, Database, Backend e Frontend passaram na `main` após integrar
-  U1/U2 (run `40440050791`, commit `4ee8ec1`), U4.2 (run pós-merge
-  `40442523647`) e A1 (run do PR `40442560575`). O workflow usa Chromium/API e
-  PostgreSQL descartável. A extensão A1 aguarda integração e execução pós-merge.
+- **CI:** Quality, Database, Backend e Frontend passaram no PR #15 final
+  (run `40443651122`); A1 foi integrada em `c496615`. A execução pós-merge
+  `40444653135` revelou `ProcessLookupError` na limpeza do teste de workflow
+  de Quality; correção e limites estão no [relatório do CI](validacoes/VALIDACAO_CI_2026_10_26.md).
+  O workflow usa Chromium/API e PostgreSQL descartável. O run pós-merge anterior
+  de U4.2 (`40442523647`) passou nos quatro jobs.
 
 ## Regras e limites vigentes
 

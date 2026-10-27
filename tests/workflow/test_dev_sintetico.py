@@ -7,9 +7,9 @@ import os
 from pathlib import Path
 import socket
 import secrets
+import select
 import signal
 import sys
-import time
 import subprocess
 import unittest
 from unittest.mock import Mock, patch
@@ -75,22 +75,35 @@ class SyntheticDevelopmentTest(unittest.TestCase):
         token = secrets.token_hex(32)
         environment = dict(os.environ, **{dev.PROCESS_MARKER: token})
         runner = subprocess.Popen([sys.executable, '-c',
-            'import subprocess,sys,time; child=subprocess.Popen([sys.executable,"-c","import time; time.sleep(60)"]); print(child.pid,flush=True); time.sleep(60)'],
+            'import subprocess,sys,time; subprocess.Popen([sys.executable,"-c","import os,time; print(os.getpid(),flush=True); time.sleep(60)"]); time.sleep(60)'],
             env=environment, stdout=subprocess.PIPE, text=True)
-        orphan = int(runner.stdout.readline())
-        expected_identity = dev.identity(orphan)
+        descriptor = None
         try:
+            # O próprio filho confirma que iniciou; o PID anunciado pelo pai
+            # antes do exec não comprova prontidão nem uma identidade válida.
+            self.assertTrue(select.select([runner.stdout], [], [], 5)[0], 'Filho não iniciou')
+            orphan = int(runner.stdout.readline())
+            descriptor = os.pidfd_open(orphan)
+            expected_identity = dev.identity(orphan)
+            self.assertIsNotNone(expected_identity)
             runner.kill()
             runner.wait(timeout=5)
             dev.cleanup_marked_processes({'pid': runner.pid, 'process_token': token})
-            deadline = time.monotonic() + 5
-            while dev.identity(orphan) == expected_identity and time.monotonic() < deadline:
-                time.sleep(.05)
+            self.assertTrue(select.select([descriptor], [], [], 5)[0], 'Filho sobreviveu à limpeza')
             self.assertNotEqual(dev.identity(orphan), expected_identity)
         finally:
+            if runner.poll() is None:
+                runner.kill()
+                runner.wait(timeout=5)
             runner.stdout.close()
-            if dev.identity(orphan) == expected_identity:
-                os.kill(orphan, signal.SIGKILL)
+            if descriptor is not None:
+                try:
+                    # O filho pode já ter saído; o handle nunca sinaliza PID reciclado.
+                    signal.pidfd_send_signal(descriptor, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                finally:
+                    os.close(descriptor)
 
     def test_preflight_rejects_unavailable_kernel_before_resources(self):
         with patch.object(dev.os, 'pidfd_open', side_effect=OSError('not supported')), patch.object(dev, 'docker') as docker:
