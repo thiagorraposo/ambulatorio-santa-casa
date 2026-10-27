@@ -40,6 +40,7 @@ for (const profile of ['consulta', 'edicao'] as const) {
       const scroll = page.getByRole('region', { name: 'Histórico de atendimentos; tabela rolável horizontalmente quando necessário', exact: true });
       await expect(scroll).toBeVisible();
       expect(await scroll.evaluate(node => node.scrollWidth > node.clientWidth)).toBe(true);
+      await expect(history.locator('tbody tr').first().locator('td').first()).toHaveCSS('white-space', 'nowrap');
       await scroll.focus();
       await page.keyboard.press('ArrowRight');
       await expect.poll(() => scroll.evaluate(node => node.scrollLeft)).toBeGreaterThan(0);
