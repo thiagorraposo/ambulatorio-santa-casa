@@ -1,5 +1,17 @@
 # Registro de Alterações
 
+## 2026-10-27 — episódios individuais de sorologia (7B-E1B)
+
+Publicados GET paginado e POST por paciente/atendimento, com métodos repetidos,
+datas próprias, null e âncora diagnóstica sem inferência clínica. A migration 65
+ativa auditoria prospectiva dos sete campos e mantém revisão temporal fechada;
+não altera migrations antigas nem faz backfill. O recibo `sorologiaId` participa
+do protocolo existente. Build, 142 unitários, 76 testes HTTP clínicos, 36 scripts
+SQL, upgrade 64→65 e regressões do importador passaram em bancos descartáveis.
+[Contrato](arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md) e
+[evidência](validacoes/VALIDACAO_7B_E1B.md) preservam os limites: interface,
+solicitação geral, correções persistidas e aceite humano continuam separados.
+
 ## 2026-10-27 — foco após remover itens de formulário (7D-U4.2)
 
 Remover exames, familiares, pendências, novos telefones e reações devolve foco

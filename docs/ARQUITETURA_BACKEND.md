@@ -7,6 +7,11 @@ A recuperação de escrita acrescentada na Etapa 7 é definida pelo
 ADR-025. Esta descrição da Etapa 5 não substitui esses incrementos nem os
 [relatórios posteriores](validacoes/README.md).
 
+A extensão [7B-E1B](arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md) publica consulta e
+criação de episódios de sorologia por atendimento, reutilizando módulo de
+pacientes, autorização, transação e correlação existentes. A migration 65 ativa
+somente captura auditável prospectiva desse recurso em ambiente sintético.
+
 Status: implementação e aceite integrado sintético da Etapa 5 concluídos até a
 migration 63, exclusivamente com dados sintéticos. A execução HTTP de revisão
 permanece desligada por padrão, disponível somente com opt-in em `development`

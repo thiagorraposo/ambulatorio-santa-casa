@@ -189,6 +189,7 @@ Todos os caminhos abaixo têm prefixo `/v1`; `:id` é o paciente.
 | R6B.1 | `PATCH /pacientes/:id` | `pacienteId`, `versao` |
 | R6B.2 | `POST /pacientes/:id/atendimentos` | `atendimentoId` (inclui filhos do mesmo COMMIT) |
 | R6B.2 | `PATCH /pacientes/:id/atendimentos/:atendimentoId` | `atendimentoId`, `versao` |
+| 7B-E1B | `POST /pacientes/:id/atendimentos/:atendimentoId/sorologias` | `sorologiaId` (inclui âncora diagnóstica quando necessária) |
 | R6B-A.1 | `POST /pacientes/:id/tratamento-bzn` | `tratamentoId` (inclui reações da criação) |
 | R6B-A.1 | `POST /pacientes/:id/retornos-bzn` | `retornoId` |
 | R6B-A.3 | `PUT /pacientes/:id/projetos` | `projetoId` |

@@ -566,6 +566,14 @@ fidelidade visual para o fim. Etapas 9/10 e 8V2 encerram operação e produto;
 nenhuma família incluída pode ser postergada além de M5 sem nova mudança
 explícita de escopo pelo responsável pelo produto.
 
+Continuidade de 27/10: o responsável solicitou a frente preparada de sorologias.
+O recorte individual 7B-E1B tem [contrato e validação técnica](validacoes/VALIDACAO_7B_E1B.md)
+de GET/POST, auditoria 65 e recuperação. Próximo passo: 7B-E1U com formulário,
+revisão, lista por atendimento e releitura; preservar null e as datas próprias.
+Solicitação geral e correções persistidas mantêm seus contratos/aceites pendentes.
+Esse avanço não substitui o aceite humano de M2 nem define a ordem de todas as
+famílias restantes de M3.
+
 ### Preparação da migração da planilha real
 
 A preparação pode ocorrer em paralelo à construção do frontend, sem exigir a
