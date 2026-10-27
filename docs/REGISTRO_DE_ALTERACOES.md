@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-10-26 — cadastro precedido por busca (7A-U1)
+
+O formulário de novo paciente agora exige busca autorizada e declaração
+explícita antes de permitir cadastro. Resultados antigos são invalidados quando
+o nome muda; abrir correspondência e cancelar não escrevem. Busca vazia, erro,
+homônimos e capacidade negada têm testes E2E. Build, 205 testes unitários e sete
+cenários sintéticos 7A/7B/7D passaram. A [validação](validacoes/VALIDACAO_7A_U1.md)
+registra o banco descartável e os limites. Não declara aceite de produto/equipe.
+
 ## 2026-10-26 — implementar consulta de lotes de importação na interface
 
 Adicionadas rotas, menu e telas de lista/detalhe reaproveitando H14. A interface

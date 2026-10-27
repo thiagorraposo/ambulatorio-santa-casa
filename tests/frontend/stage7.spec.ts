@@ -15,14 +15,33 @@ test('7A: cadastro exige nome, usa busca prévia e mantém homônimos separados'
   await signIn(page, 'administracao', '/pacientes/novo');
   expect(await (await capability).json()).toEqual({ podeCadastrar: true });
   await expect(page.getByRole('heading', { name: 'Cadastrar paciente', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Nome completo', { exact: true })).toHaveCount(0);
+  let writes = 0;
+  page.on('request', request => { if (request.method() === 'POST' && new URL(request.url()).pathname === '/v1/pacientes') writes++; });
   await page.getByLabel('Nome para busca prévia', { exact: true }).fill(original.nome);
   const searched = page.waitForResponse(response => response.request().method() === 'GET'
     && new URL(response.url()).pathname === '/v1/pacientes' && new URL(response.url()).searchParams.get('nome') === original.nome);
   await page.getByRole('button', { name: 'Consultar possíveis cadastros', exact: true }).click();
   expect((await searched).status()).toBe(200);
   await expect(page.getByRole('link', { name: `${original.nome} · ID ${existing.pacienteId}`, exact: true })).toBeVisible();
-  let writes = 0;
-  page.on('request', request => { if (request.method() === 'POST' && new URL(request.url()).pathname === '/v1/pacientes') writes++; });
+  await expect(page.getByLabel('Nome completo', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Cadastrar paciente', exact: true })).toHaveCount(0);
+  expect(writes).toBe(0);
+  await page.getByRole('link', { name: `${original.nome} · ID ${existing.pacienteId}`, exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`${existing.path}$`));
+  await expect(page.getByRole('heading', { name: 'Ficha do paciente', exact: true })).toBeVisible();
+  expect(writes).toBe(0);
+  await page.goBack();
+  await expect(page.getByLabel('Nome para busca prévia', { exact: true })).toBeVisible();
+  await page.getByLabel('Nome para busca prévia', { exact: true }).fill('Outra consulta sintética');
+  await expect(page.getByRole('button', { name: /Nenhuma correspondência serve/ })).toHaveCount(0);
+  await page.getByLabel('Nome para busca prévia', { exact: true }).fill(original.nome);
+  const searchedAgain = page.waitForResponse(response => response.request().method() === 'GET'
+    && new URL(response.url()).pathname === '/v1/pacientes' && new URL(response.url()).searchParams.get('nome') === original.nome);
+  await page.getByRole('button', { name: 'Consultar possíveis cadastros', exact: true }).click();
+  expect((await searchedAgain).status()).toBe(200);
+  await page.getByRole('button', { name: 'Nenhuma correspondência serve — continuar para cadastro' }).click();
+  await expect(page.getByLabel('Nome completo', { exact: true })).toBeVisible();
   await page.getByLabel('Nome completo', { exact: true }).fill('   ');
   await page.getByRole('button', { name: 'Cadastrar paciente', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText(/nome.*obrigatório/i);
@@ -46,6 +65,36 @@ test('7A: cadastro exige nome, usa busca prévia e mantém homônimos separados'
   expect(homonyms.map(row => row.pacienteId)).toEqual(expect.arrayContaining([existing.pacienteId, created.pacienteId]));
   expect((await readPatient(existing.path)).versao).toBe(original.versao);
   expect(writes).toBe(1);
+});
+
+test('7A: resultado vazio exige confirmação e falha de busca não libera cadastro', async ({ page }) => {
+  await signIn(page, 'administracao', '/pacientes/novo');
+  let writes = 0;
+  page.on('request', request => { if (request.method() === 'POST' && new URL(request.url()).pathname === '/v1/pacientes') writes++; });
+  await page.getByLabel('Nome para busca prévia', { exact: true }).fill('Sem correspondência sintética 77291');
+  const searched = page.waitForResponse(response => response.request().method() === 'GET'
+    && new URL(response.url()).pathname === '/v1/pacientes'
+    && new URL(response.url()).searchParams.get('nome') === 'Sem correspondência sintética 77291');
+  await page.getByRole('button', { name: 'Consultar possíveis cadastros', exact: true }).click();
+  expect((await searched).status()).toBe(200);
+  await expect(page.getByText('Nenhum paciente nesta página. Isso não comprova ausência de cadastro.')).toBeVisible();
+  await expect(page.getByLabel('Nome completo', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Nenhuma correspondência serve/ })).toBeVisible();
+  expect(writes).toBe(0);
+
+  await page.getByRole('button', { name: 'Nenhuma correspondência serve — continuar para cadastro' }).click();
+  await expect(page.getByLabel('Nome completo', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Voltar à busca', exact: true }).click();
+  await expect(page.getByLabel('Nome completo', { exact: true })).toHaveCount(0);
+  expect(writes).toBe(0);
+
+  await page.route('**/v1/pacientes?*', route => route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ message: 'Acesso não autorizado' }) }));
+  await page.getByLabel('Nome para busca prévia', { exact: true }).fill('Busca recusada sintética');
+  await page.getByRole('button', { name: 'Consultar possíveis cadastros', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Acesso não autorizado', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Nome completo', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Nenhuma correspondência serve/ })).toHaveCount(0);
+  expect(writes).toBe(0);
 });
 
 test('7A: edição preserva contatos, endereço, estados desconhecidos e IDs textuais', async ({ page }) => {

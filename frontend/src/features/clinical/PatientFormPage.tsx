@@ -10,20 +10,31 @@ import { dirtyFields, patientBody, patientInitial } from './core-contracts';
 import { PatientCreateGate } from './PatientCreateGate';
 import { VersionComparison } from './VersionComparison';
 
-function PriorSearch() {
+function PriorSearch({ onSearch, onNoMatchConfirmed }: { onSearch: () => void; onNoMatchConfirmed: () => void }) {
   const [name, setName] = useState('');
   const [search, setSearch] = useState('');
   const query = useApiQuery<PacienteResponse[]>(`/pacientes?nome=${encodeURIComponent(search)}&limit=20&offset=0`, !!search);
+  const showingCurrentSearch = search !== '' && name.trim() === search;
   return <Card><h2>Busque antes de cadastrar</h2>
     <p>Confira possíveis cadastros pelo nome. Os resultados dependem do seu acesso e da página consultada.</p>
     <form className="filters" aria-label="Busca prévia de pacientes" onSubmit={event => {
-      event.preventDefault(); setSearch(name.trim());
+      event.preventDefault();
+      const normalized = name.trim();
+      if (!normalized) return;
+      onSearch();
+      setSearch(normalized);
     }}><InputField label="Nome para busca prévia" type="search" value={name} maxLength={120} required onChange={setName} />
-      <button type="submit" className="button button-secondary">Consultar possíveis cadastros</button></form>
-    {search && <QueryState query={query}>{rows => rows.length ? <>
-      <ul>{rows.map(row => <li key={row.pacienteId}><Link to={`/pacientes/${row.pacienteId}`}>{row.nome} · ID {row.pacienteId}</Link></li>)}</ul>
-      <Link to={`/pacientes?nome=${encodeURIComponent(search)}`}>Consultar outras páginas da busca</Link>
-    </> : <EmptyState>Nenhum paciente nesta página. Isso não comprova ausência de cadastro.</EmptyState>}</QueryState>}
+      <button type="submit" className="button button-secondary" disabled={!name.trim()}>Consultar possíveis cadastros</button></form>
+    {showingCurrentSearch && <QueryState query={query}>{rows => <>
+      {rows.length ? <>
+        <ul>{rows.map(row => <li key={row.pacienteId}><Link to={`/pacientes/${row.pacienteId}`}>{row.nome} · ID {row.pacienteId}</Link></li>)}</ul>
+        <p>Revise as correspondências. Para ampliar a consulta, confira também as outras páginas antes de prosseguir.</p>
+        <p><Link to={`/pacientes?nome=${encodeURIComponent(search)}`}>Consultar outras páginas da busca</Link></p>
+      </> : <EmptyState>Nenhum paciente nesta página. Isso não comprova ausência de cadastro.</EmptyState>}
+      <button type="button" className="button button-secondary" onClick={onNoMatchConfirmed}>
+        Nenhuma correspondência serve — continuar para cadastro
+      </button>
+    </>}</QueryState>}
   </Card>;
 }
 
@@ -95,10 +106,18 @@ function ExistingPatientForm({ id }: { id: string }) {
 
 export default function PatientFormPage() {
   const { pacienteId } = useParams<{ pacienteId: string }>();
+  const [createAfterSearch, setCreateAfterSearch] = useState(false);
   return <>
     <nav className="breadcrumb" aria-label="Caminho da página"><Link to="/pacientes">Pacientes</Link>
       {pacienteId && <Link to={`/pacientes/${pacienteId}`}>Ficha do paciente</Link>}</nav>
     <PageHeading title={pacienteId ? 'Editar paciente' : 'Cadastrar paciente'} />
-    <EditingGate>{pacienteId ? <ExistingPatientForm id={pacienteId} /> : <PatientCreateGate><PriorSearch /><PatientForm key="new" /></PatientCreateGate>}</EditingGate>
+    <EditingGate>{pacienteId ? <ExistingPatientForm id={pacienteId} /> : <PatientCreateGate>
+      <PriorSearch onSearch={() => setCreateAfterSearch(false)} onNoMatchConfirmed={() => setCreateAfterSearch(true)} />
+      {createAfterSearch && <>
+        <p role="status">Cadastro autorizado após sua revisão. Prosseguir não funde registros; nomes iguais podem pertencer a pessoas diferentes.</p>
+        <button type="button" className="button button-secondary" onClick={() => setCreateAfterSearch(false)}>Voltar à busca</button>
+        <PatientForm key="new" />
+      </>}
+    </PatientCreateGate>}</EditingGate>
   </>;
 }

@@ -1,10 +1,10 @@
 # Validação da Etapa 7 — fluxos clínicos
 
-Atualização: 2026-10-15. **Implementação e validação técnica sintética do recorte 7A–7D concluídas.**
-O aceite integral depende também da revisão de usabilidade com a equipe clínica,
-que permanece sem evidência. Não há aceite da VU1 nem autorização de dados reais.
-O [roteiro da equipe](ROTEIRO_REVISAO_CLINICA_ETAPA_7.md) prepara a demonstração
-e o registro do parecer; seus campos continuam pendentes até a revisão humana.
+Atualização técnica: 2026-10-15. **Implementação e validação técnica sintética do recorte 7A–7D concluídas.**
+M1 (revisão humana do fluxo original) foi aprovado em 2026-10-26 conforme
+confirmação do responsável registrada no [roteiro da equipe](ROTEIRO_REVISAO_CLINICA_ETAPA_7.md).
+Isso não representa aceite da VU1 nem autorização de dados reais; os metadados
+detalhados da sessão não foram fornecidos neste repositório.
 
 **Limite de aceite, atualizado em 2026-10-05:** a
 [reauditoria](../historico/RELATORIO_ETAPA_7_2026_10_05.md) confirmou sete
