@@ -121,7 +121,7 @@ printf 'Aplicando migrations 02–65 no banco descartável %s\n' "$task_db"
 for task_migration in "$task_root"/sql/[0-9][0-9]_*.sql; do
   task_name="$(basename "$task_migration")"
   [[ "$task_name" == 00_* || "$task_name" == 01_* ]] && continue
-  if [[ "${task_name:0:2}" > 64 ]]; then
+  if [[ "${task_name:0:2}" > 65 ]]; then
     printf 'Migration fora da base esperada da Etapa 6: %s\n' "$task_name" >&2
     exit 1
   fi

@@ -55,3 +55,12 @@ Próxima unidade: 7B-E1U, integrando formulário/revisão/lista por episódio e
 recuperação ao atendimento/ficha. Solicitação geral e correções persistidas
 continuam pendentes de suas unidades/contratos; não se declara o pacote clínico
 completo nem aceite de M3. P-03 de projeto/notificação/pendências permanece aberto.
+
+## Validação remota
+
+O primeiro CI do [PR #19](https://github.com/thiagorraposo/ambulatorio-santa-casa/pull/19)
+aprovou Quality, Database e Backend, mas recusou a migration 65 no preparador
+E2E do frontend: seu limite explícito permanecia em 64. Os 219 testes de
+componentes passaram; os testes de navegador não chegaram a executar nessa
+tentativa. O limite foi atualizado para 65, preservando a recusa de migrations
+fora da base esperada. A execução posterior deve comprovar a jornada completa.
