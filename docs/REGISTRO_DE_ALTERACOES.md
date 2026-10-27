@@ -1,5 +1,17 @@
 # Registro de Alterações
 
+## 2026-10-27 — jornada integrada e confirmação única (7D-A1)
+
+O percurso de cadastro, atendimento, acompanhamentos, notificação e histórico
+foi executado pela interface em PostgreSQL descartável; paciente e atendimento
+não foram pré-criados por helpers. Uma regressão de clique repetido confirmou
+uma única gravação. O relatório [7D-A1](validacoes/VALIDACAO_7D_A1.md) registra
+os IDs sintéticos, releituras e limites; o aceite clínico/produto permanece
+pendente.
+
+Atualização: o PR #15 passou Quality, Database, Backend e Frontend no run
+[`40442560575`](https://github.com/thiagorraposo/ambulatorio-santa-casa/actions/runs/40442560575).
+
 ## 2026-10-26 — acessibilidade de tabelas e validação U4.2
 
 As tabelas compartilhadas passaram a oferecer uma região focável e nomeada

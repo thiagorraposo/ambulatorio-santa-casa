@@ -722,6 +722,22 @@ test('7D-U1: cancelar pede decisão e preserva o rascunho sem escrever', async (
   expect(writes).toBe(0);
 });
 
+test('7D-U2: cliques repetidos na confirmação gravam um atendimento apenas', async ({ page }) => {
+  const patient = await seedPatient('Confirmação repetida');
+  await signIn(page, 'edicao', `${patient.path}/atendimentos/novo`);
+  await page.getByLabel('Data do atendimento', { exact: true }).fill('2026-04-13');
+  await moveAttendanceToReview(page);
+  let writes = 0;
+  page.on('request', request => {
+    if (request.method() === 'POST' && new URL(request.url()).pathname === `/v1${patient.path}/atendimentos`) writes++;
+  });
+  const confirm = page.getByRole('button', { name: 'Confirmar atendimento', exact: true });
+  await confirm.evaluate(node => { (node as HTMLButtonElement).click(); (node as HTMLButtonElement).click(); });
+  await expect(page.getByText(/Atendimento salvo.*confirmação própria/)).toBeVisible();
+  expect(writes).toBe(1);
+  expect(await apiJson<unknown[]>('GET', `${patient.path}/atendimentos`)).toHaveLength(1);
+});
+
 test('7D-U4.2: etapas do atendimento e diálogo funcionam por teclado em telas estreitas e zoom', async ({ page }) => {
   const patient = await seedPatient('Acessibilidade em etapas');
   await signIn(page, 'edicao', `${patient.path}/atendimentos/novo`);
