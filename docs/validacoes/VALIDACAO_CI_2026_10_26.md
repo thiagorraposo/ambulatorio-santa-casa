@@ -190,3 +190,25 @@ de logs em falha foram ignorados por não haver falhas. O PR #9 está limpo e fo
 revisado quanto ao escopo: sete arquivos diretamente ligados ao CI, sem mudanças
 de aplicação ou migrations. O merge e a execução da versão integrada na `main`
 continuam pendentes.
+
+## Continuidade de 27/10 — limpeza de processos no teste de workflow
+
+Após integrar A1 pelo PR #15, Quality falhou na execução
+[`40444653135`](https://github.com/thiagorraposo/ambulatorio-santa-casa/actions/runs/40444653135),
+em `test_cleanup_finds_orphan_after_runner_killed`: o `finally` verificava uma
+identidade de processo e depois enviava `SIGKILL` por PID, recebendo
+`ProcessLookupError`. O processo pode terminar entre a verificação e o sinal;
+essa exceção também pode encobrir a asserção original. A hipótese de identidade
+nula durante o início não foi comprovada: 100 repetições locais do teste antigo
+passaram, portanto não se declara reprodução natural da falha remota.
+
+O teste agora recebe prontidão do próprio filho, exige identidade não nula e
+abre um `pidfd` antes de encerrar o runner. O término do filho é comprovado pelo
+handle e a limpeza final usa esse mesmo handle, aceitando somente o caso de
+processo já encerrado. As asserções de término e identidade são preservadas;
+nenhum script de produção, teste clínico ou expectativa foi desativado.
+
+`make workflow-test COMPACT=1` passou 30/30, o teste focado corrigido passou
+100 repetições e `git diff --check` passou. Todos usam processos sintéticos,
+sem Docker, SQL ou dados clínicos. A publicação e o CI da correção ainda precisam
+ser conferidos antes de considerar a `main` estabilizada.
