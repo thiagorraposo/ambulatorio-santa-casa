@@ -1,6 +1,6 @@
 # Catálogo de entregas do produto
 
-Atualizado em: 2026-10-23. Fonte dos escopos e critérios por unidade; sequência
+Atualizado em: 2026-10-27. Fonte dos escopos e critérios por unidade; sequência
 e marcos pertencem ao [roadmap](../PROXIMOS_PASSOS.md). Estados históricos não
 equivalem a aceite atual: consultar as continuidades e relatórios citados.
 
@@ -401,9 +401,9 @@ agregado não declara U4 integral, VU1 ou aceite clínico concluídos.
 
 #### 7D-A1 — Comprovar cadastro → atendimento → acompanhamento → histórico pela interface
 
-**Estado e cobertura:** Planejado; não aceito. RQ-LOG-04, 07; RQ-NAV-11; RQ-CAD-21–22, 24; RQ-FIC-07–09, 13, 15, 18–19; RQ-HIS-13; RQ-PRO-01–09; RQ-TRA-01–11; RQ-ENC-01–06, 08; RQ-NOT-01–05; RQ-ATD-14; RQ-MED-10; RQ-PRJ-01; RQ-BZN-01–08, 21; RQ-ECR-01–15; RQ-NTF-01–03; RQ-ACO-12–44; RQ-CTA-05–06; RQ-ERR-01; RQ-EST-12, 16–17 (telas/elementos na matriz).
+**Estado e cobertura:** Percurso positivo e confirmação única validados tecnicamente em 27/10/2026; aceite de produto/equipe pendente. Evidências e limites em [7D-A1](../validacoes/VALIDACAO_7D_A1.md). RQ-LOG-04, 07; RQ-NAV-11; RQ-CAD-21–22, 24; RQ-FIC-07–09, 13, 15, 18–19; RQ-HIS-13; RQ-PRO-01–09; RQ-TRA-01–11; RQ-ENC-01–06, 08; RQ-NOT-01–05; RQ-ATD-14; RQ-MED-10; RQ-PRJ-01; RQ-BZN-01–08, 21; RQ-ECR-01–15; RQ-NTF-01–03; RQ-ACO-12–44; RQ-CTA-05–06; RQ-ERR-01; RQ-EST-12, 16–17 (telas/elementos na matriz).
 
-**Escopo:** Um cenário integrado positivo: buscar/criar paciente, atendimento com avaliação/diagnóstico/exames/família/pendência, BZN/reação, retorno efetivo, encaminhamento/contrarreferência, resolver pendência, reler ficha/histórico. Não preparar paciente/consulta com helpers de API.
+**Escopo:** Um cenário integrado positivo: buscar/criar paciente, atendimento com avaliação/diagnóstico/exames/família/pendência, BZN/reação, retorno efetivo, encaminhamento/contrarreferência, notificação, resolver pendência, reler ficha/histórico. Não preparar paciente/consulta com helpers de API.
 
 **Dependências/decisões:** Correções R7-01–07 aceitas nas classes utilizadas, 7A-U1, 7D-U1/U2/U3/U4; P-01/P-03. 7C-R2 pode ocorrer depois de M2, mas é obrigatório em M3.
 

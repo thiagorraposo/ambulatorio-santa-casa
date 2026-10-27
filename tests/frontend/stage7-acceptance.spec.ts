@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { assertNoPersistentClinicalState } from './fixtures';
 import { apiJson, assertAccessible, assertFitsViewport, nextAttendanceStep, reviewAttendance,
-  readAttendance, readPatient, signIn, submitWrite } from './stage7-helpers';
-import type { CounterReferralResponse, PendenciaResponse, ReferralResponse, RetornoBznResponse, TratamentoBznResponse } from '../../frontend/src/api/contracts';
+  readAttendance, readPatient, signIn, submitWrite, visitByLink } from './stage7-helpers';
+import type { CounterReferralResponse, NotificationResponse, PendenciaResponse, ReferralResponse, RetornoBznResponse, TratamentoBznResponse } from '../../frontend/src/api/contracts';
 
 test('7D: cadastro → atendimento composto → acompanhamentos → resolução → histórico pela interface', async ({ page }, info) => {
   test.setTimeout(180_000);
@@ -116,6 +116,16 @@ test('7D: cadastro → atendimento composto → acompanhamentos → resolução 
   await page.getByRole('link', { name: 'BZN e retornos', exact: true }).click();
   await expect(page.getByText('BZN integrado exclusivamente sintético', { exact: true })).toBeVisible();
   await expect(page.getByText('Retorno integrado realizado, sem data calculada', { exact: true })).toBeVisible();
+  await visitByLink(page, `${patientPath}?aba=notificacao`);
+  await visitByLink(page, `${patientPath}/registrar?tipo=notificacao`);
+  await page.getByLabel('Número da notificação', { exact: true }).fill('SINTETICO-A1-001');
+  await page.getByLabel('Justificativa de não notificação', { exact: true }).fill('Registro sintético usado na validação integrada');
+  await page.getByLabel('Observações da notificação', { exact: true }).fill('Notificação sintética vinculada ao mesmo paciente');
+  await submitWrite(page, 'PUT', `${patientPath}/notificacao`, 'Salvar registro');
+  const notification = await apiJson<NotificationResponse>('GET', `${patientPath}/notificacao`);
+  expect(notification).toMatchObject({ pacienteNotificado: null, numeroNotificacao: 'SINTETICO-A1-001',
+    justificativaNaoNotificacao: 'Registro sintético usado na validação integrada',
+    observacoes: 'Notificação sintética vinculada ao mesmo paciente' });
   await page.setViewportSize({ width: 390, height: 844 });
   await assertFitsViewport(page);
   await assertAccessible(page);
@@ -139,9 +149,11 @@ test('7D: cadastro → atendimento composto → acompanhamentos → resolução 
   ]);
   expect(requests.map(request => request.path)).toEqual(['/v1/pacientes', `/v1${patientPath}/atendimentos`,
     `/v1${patientPath}/tratamento-bzn`, `/v1${patientPath}/retornos-bzn`, `/v1${patientPath}/encaminhamentos`,
-    `/v1${patientPath}/encaminhamentos/${encaminhamentoId}/contrarreferencias`, `/v1${patientPath}/pendencias/${pendenciaId}`]);
-  expect(new Set(requests.map(request => request.operation)).size).toBe(7);
+    `/v1${patientPath}/encaminhamentos/${encaminhamentoId}/contrarreferencias`, `/v1${patientPath}/pendencias/${pendenciaId}`,
+    `/v1${patientPath}/notificacao`]);
+  expect(new Set(requests.map(request => request.operation)).size).toBe(8);
   expect(requests.every(request => /^[a-f0-9-]{36}$/.test(request.operation ?? ''))).toBe(true);
-  info.annotations.push({ type: 'IDs sintéticos', description: JSON.stringify({ pacienteId, atendimentoId }) });
+  info.annotations.push({ type: 'IDs sintéticos', description: JSON.stringify({ pacienteId, atendimentoId,
+    notificacaoId: notification.notificacaoId }) });
   await assertNoPersistentClinicalState(page);
 });

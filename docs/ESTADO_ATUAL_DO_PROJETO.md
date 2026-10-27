@@ -1,6 +1,6 @@
 # Estado atual do projeto
 
-Atualizado em: 2026-10-26. Síntese de implementação e evidências existentes;
+Atualizado em: 2026-10-27. Síntese de implementação e evidências existentes;
 esta atualização documental não reexecuta as suítes da aplicação.
 
 ## Escopo e estágio
@@ -19,8 +19,9 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | Etapa 6 | 6A–6B concluídas em ambiente sintético em 04/10. | [Relatório](validacoes/VALIDACAO_ETAPA_6.md). |
 | Etapa 7 original | Implementação e validação técnica sintética concluídas em 15/10, com correções R7-01–07; M1 aprovado em 26/10 conforme confirmação do responsável do projeto. | [Relatório vigente](validacoes/VALIDACAO_ETAPA_7.md) e [registro do parecer](validacoes/ROTEIRO_REVISAO_CLINICA_ETAPA_7.md). |
 | M2 — 7A-U1 | Cadastro precedido por busca implementado e validado tecnicamente em 26/10. | [Evidência](validacoes/VALIDACAO_7A_U1.md); aceite da VU1 e do percurso integrado permanecem pendentes. |
-| M2 — 7D-U1/U2 | Formulário em cinco etapas, revisão e confirmação única implementados e validados tecnicamente em 26/10. | [Evidência](validacoes/VALIDACAO_7D_U1_U2.md); aceite de produto/equipe e validação integrada completa permanecem pendentes; comparação visual de U4.2 segue em aberto. |
+| M2 — 7D-U1/U2 | Formulário em cinco etapas, revisão e confirmação única implementados e validados tecnicamente em 26/10. | [Evidência](validacoes/VALIDACAO_7D_U1_U2.md); aceite de produto/equipe permanece pendente. |
 | M2 — 7D-U4.2 | Tabelas com região rolável focável e legibilidade preservada no histórico; formulários e diálogo exercitados em 320/390 px e zoom 200%. | [Evidência](validacoes/VALIDACAO_7D_U4_2.md); comparação visual integral, revisão humana e aceite do pacote permanecem pendentes. |
+| M2 — 7D-A1 | Jornada sintética pela interface, releitura de recursos, notificação e confirmação única validadas tecnicamente em 27/10. | [Evidência](validacoes/VALIDACAO_7D_A1.md); CI remoto desta extensão e aceite da equipe clínica/produto pendentes. P-03 segue bloqueando qualquer mudança em semântica de concorrência. |
 | Melhorias U3.1/U3.2/U3.3/U4.1 | Implementação e validação técnica próprias. | [Índice de evidências](validacoes/README.md); não concluem automaticamente U3/U4, VU1 ou fidelidade integral. |
 | Produto completo e Etapas 8–10 | Escopo planejado e critérios definidos. | Implementações adicionais, decisões específicas, implantação e homologação pendentes. |
 
@@ -47,10 +48,11 @@ ao [roadmap](PROXIMOS_PASSOS.md#próximo-trabalho).
   Recibos/rascunhos têm limites de sessão; não há garantia geral de idempotência
   de POST entre sessões. [Guia técnico](FRONTEND.md) e
   [protocolo de recuperação](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md).
-- **CI:** Quality, Database, Backend e Frontend passaram no GitHub Actions na
-  `main` (`40411698727`, commit `9c98595`); a execução inclui Chromium/API e
-  PostgreSQL descartável. A branch atual pode conter trabalho posterior ainda
-  não integrado.
+- **CI:** Quality, Database, Backend e Frontend passaram na `main` após integrar
+  U1/U2 (run `40440050791`, commit `4ee8ec1`). A branch U4.2 também passou os
+  quatro jobs (run `40440449766`); integração e execução pós-merge ainda pendem.
+  A extensão A1 desta branch ainda aguarda CI remoto. O workflow usa Chromium/API
+  e PostgreSQL descartável.
 
 ## Regras e limites vigentes
 

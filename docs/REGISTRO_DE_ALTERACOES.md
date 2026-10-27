@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-10-27 — jornada integrada e confirmação única (7D-A1)
+
+O percurso de cadastro, atendimento, acompanhamentos, notificação e histórico
+foi executado pela interface em PostgreSQL descartável; paciente e atendimento
+não foram pré-criados por helpers. Uma regressão de clique repetido confirmou
+uma única gravação. O relatório [7D-A1](validacoes/VALIDACAO_7D_A1.md) registra
+os IDs sintéticos, releituras e limites; a extensão ainda aguarda CI remoto e
+aceite clínico/produto.
+
 ## 2026-10-26 — acessibilidade de tabelas e validação U4.2
 
 As tabelas compartilhadas passaram a oferecer uma região focável e nomeada
