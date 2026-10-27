@@ -67,3 +67,14 @@ Destino confirmado antes do SQL: `postgres|ambulatorio_ci|5432` no container
 `ambulatorio-m2-focus-20261027`, PostgreSQL 16.15 em tmpfs publicado em 55459.
 O runner criou e removeu seus bancos/logins aleatórios; dados somente sintéticos.
 Comparação visual integral e aceite humano continuam pendentes.
+
+O CI do PR #16 (`40446523662`) passou build/componentes e 54/55 E2E, incluindo
+o novo cenário de remoção. O cenário existente de troca BZN → retorno anual
+expirou esperando a resposta do POST em `submitWrite`. Três repetições locais
+passaram (`/tmp/etapa6-frontend-s1MTh5`); a causa desse episódio remoto não foi
+comprovada. O helper agora exige validade HTML antes de confirmar e, em falha,
+registra somente labels inválidos, estado ocupado e método/caminho/status das
+últimas respostas. Não registra valores, headers ou corpos, não reenvia e mantém
+o timeout/status esperado. A suíte completa local e a nova execução remota
+precisam confirmar o estado final; essa instrumentação não é declarada correção
+de causa raiz do timeout.

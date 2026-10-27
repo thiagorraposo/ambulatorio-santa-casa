@@ -7,6 +7,11 @@ ao botão Adicionar da mesma coleção. Isso impede perder a posição ou apagar
 próximo rascunho por Enter repetido. Build, 206 testes unitários e a regressão
 E2E sintética passaram; detalhes e limites na [evidência U4.2](validacoes/VALIDACAO_7D_U4_2.md).
 
+O primeiro CI completo do estado integrado encontrou timeout em acompanhamento
+preexistente (54/55 E2E, remoção aprovada). Após três repetições locais aprovadas,
+o helper recebeu diagnóstico sanitizado e checagem de validade HTML; a causa
+remota ainda não foi comprovada. Nenhum teste/status/timeout foi relaxado.
+
 ## 2026-10-27 — sincronização da limpeza de processos no teste de workflow
 
 Corrigida a corrida de `ProcessLookupError` registrada em Quality após o merge

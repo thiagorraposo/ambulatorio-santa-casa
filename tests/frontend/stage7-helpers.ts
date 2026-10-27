@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, type APIResponse, type Page } from '@playwright/test';
+import { expect, type APIResponse, type Page, type Response as BrowserResponse } from '@playwright/test';
 import type { AtendimentoDetalheResponse, PacienteDetalheResponse } from '../../frontend/src/api/contracts';
 import { apiAs, fixture, type Perfil } from './fixtures';
 export { signIn } from './fixtures';
@@ -51,12 +51,38 @@ export const readPatient = (path: string) => apiJson<PacienteDetalheResponse>('G
 export const readAttendance = (path: string) => apiJson<AtendimentoDetalheResponse>('GET', `${path}?limit=100&offset=0`);
 
 export async function submitWrite(page: Page, method: string, path: string, button: string, expectedStatus = method === 'POST' ? 201 : 200) {
-  const waiting = page.waitForResponse(response => response.request().method() === method
-    && new URL(response.url()).pathname === `/v1${path}`, { timeout: 30_000 });
-  await page.getByRole('button', { name: button, exact: true }).click();
-  const response = await waiting;
-  expect(response.status()).toBe(expectedStatus);
-  return { response, body: response.request().postDataJSON() as Record<string, unknown> };
+  const traffic: string[] = [];
+  const observe = (response: BrowserResponse) => {
+    const pathname = new URL(response.url()).pathname;
+    if (pathname.startsWith('/v1/')) {
+      traffic.push(`${response.request().method()} ${pathname} ${response.status()}`);
+      if (traffic.length > 12) traffic.shift();
+    }
+  };
+  page.on('response', observe);
+  const control = page.getByRole('button', { name: button, exact: true });
+  try {
+    expect(await control.evaluate(node => node.closest('form')?.checkValidity()), 'Formulário válido antes da confirmação').toBe(true);
+    const [response] = await Promise.all([
+      page.waitForResponse(item => item.request().method() === method
+        && new URL(item.url()).pathname === `/v1${path}`, { timeout: 30_000 }),
+      control.click(),
+    ]);
+    expect(response.status()).toBe(expectedStatus);
+    return { response, body: response.request().postDataJSON() as Record<string, unknown> };
+  } catch (error) {
+    // No values, headers, bodies or arbitrary server diagnostics enter this report.
+    const form = await control.evaluate(node => {
+      const form = node.closest('form');
+      return { disabled: (node as HTMLButtonElement).disabled, busy: form?.getAttribute('aria-busy'),
+        invalid: Array.from(form?.elements ?? []).filter(item => 'validity' in item && !(item as HTMLInputElement).validity.valid)
+          .map(item => ({ type: (item as HTMLInputElement).type,
+            label: Array.from((item as HTMLInputElement).labels ?? []).map(label => label.textContent?.trim()).join(' ').slice(0, 120) })),
+        alerts: Array.from(form?.querySelectorAll('[role="alert"]') ?? []).map(item => item.textContent?.slice(0, 500)) };
+    }).catch(() => ({ unavailable: true }));
+    console.error('Diagnóstico da confirmação sintética:', JSON.stringify({ method, path, traffic, form }));
+    throw error;
+  } finally { page.off('response', observe); }
 }
 
 export async function visitByLink(page: Page, path: string) {
