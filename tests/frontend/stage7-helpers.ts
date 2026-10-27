@@ -4,6 +4,22 @@ import type { AtendimentoDetalheResponse, PacienteDetalheResponse } from '../../
 import { apiAs, fixture, type Perfil } from './fixtures';
 export { signIn } from './fixtures';
 
+export async function nextAttendanceStep(page: Page) {
+  await page.getByRole('button', { name: 'Próxima etapa', exact: true }).click();
+}
+
+export async function reviewAttendance(page: Page) {
+  await page.getByRole('button', { name: 'Revisar atendimento', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Revisão', exact: true })).toBeVisible();
+}
+
+export async function moveAttendanceToReview(page: Page) {
+  await nextAttendanceStep(page);
+  await nextAttendanceStep(page);
+  await nextAttendanceStep(page);
+  await reviewAttendance(page);
+}
+
 export async function apiJson<T>(method: string, path: string, body?: unknown, perfil: Perfil = 'administracao'): Promise<T> {
   const response = await apiAs(perfil, method, path, body);
   expect(response.status, `${method} ${path}`).toBe(method === 'POST' ? 201 : 200);

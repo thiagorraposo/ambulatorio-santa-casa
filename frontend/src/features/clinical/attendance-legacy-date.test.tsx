@@ -59,8 +59,9 @@ describe('edição de atendimento legado com data desconhecida', () => {
     expect(date).toBeRequired();
     if (!creation) await user.clear(date);
     await user.type(screen.getByLabelText('Observações do atendimento'), 'Correção sintética');
-    await user.click(screen.getByRole('button', { name: 'Salvar atendimento' }));
+    await user.click(screen.getByRole('button', { name: creation ? 'Próxima etapa' : 'Salvar atendimento' }));
     expect(writes).not.toHaveBeenCalled();
-    expect(date).toBeInvalid();
+    if (creation) expect(screen.getByRole('status')).toHaveTextContent('Etapa 1 de 5: Atendimento');
+    expect(date).toBeRequired();
   });
 });

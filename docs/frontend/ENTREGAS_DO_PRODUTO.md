@@ -318,7 +318,7 @@ Este catálogo define as unidades, sem manter uma segunda lista de prioridades.
 
 #### 7D-U1 — Preencher atendimento em cinco etapas sem perder dados
 
-**Estado e cobertura:** Planejado; não aceito. RQ-ATD-01–04, 16–19; RQ-DIA-01–07, 22; RQ-MED-01–09; RQ-EXN-01–09; RQ-OBS-01–02; RQ-EST-10 (telas/elementos na matriz).
+**Estado e cobertura:** Implementado e validado tecnicamente em 26/10/2026; aceite de produto/equipe pendente. Evidências e limites em [7D-U1/U2](../validacoes/VALIDACAO_7D_U1_U2.md). RQ-ATD-01–10, 12–19; RQ-DIA-01–07, 22; RQ-MED-01–09; RQ-EXN-01–09; RQ-OBS-01–03; RQ-EST-10 (telas/elementos na matriz).
 
 **Escopo:** Atendimento, Avaliação/Chagas, Exames/familiares, Pendências e Revisão; somente campos hoje aceitos. Prévia de resumo não confirma ainda; etapa de revisão completa pertence a U2.
 
@@ -334,7 +334,7 @@ Este catálogo define as unidades, sem manter uma segunda lista de prioridades.
 
 #### 7D-U2 — Revisar atendimento e reconhecer cada confirmação separada
 
-**Estado e cobertura:** Planejado; não aceito. RQ-ATD-05–10, 12–14; RQ-DIA-01–07; RQ-MED-01–09; RQ-PRJ-01; RQ-EXN-01–09; RQ-NTF-01–03; RQ-OBS-01–03 (telas/elementos na matriz).
+**Estado e cobertura:** Implementado e validado tecnicamente em 26/10/2026; aceite de produto/equipe pendente. Evidências e limites em [7D-U1/U2](../validacoes/VALIDACAO_7D_U1_U2.md). RQ-ATD-05–10, 12–14; RQ-DIA-01–07; RQ-MED-01–09; RQ-PRJ-01; RQ-EXN-01–09; RQ-NTF-01–03; RQ-OBS-01–03 (telas/elementos na matriz).
 
 **Escopo:** Revisão de todos os valores/filhos aceitos, links Voltar e editar, confirmação única do atendimento e ação Continuar acompanhamento. Acompanhamento não integra o POST composto.
 

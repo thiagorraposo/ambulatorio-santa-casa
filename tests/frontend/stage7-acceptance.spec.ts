@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { assertNoPersistentClinicalState } from './fixtures';
-import { apiJson, assertAccessible, assertFitsViewport, readAttendance, readPatient, signIn, submitWrite } from './stage7-helpers';
+import { apiJson, assertAccessible, assertFitsViewport, nextAttendanceStep, reviewAttendance,
+  readAttendance, readPatient, signIn, submitWrite } from './stage7-helpers';
 import type { CounterReferralResponse, PendenciaResponse, ReferralResponse, RetornoBznResponse, TratamentoBznResponse } from '../../frontend/src/api/contracts';
 
 test('7D: cadastro → atendimento composto → acompanhamentos → resolução → histórico pela interface', async ({ page }, info) => {
@@ -32,8 +33,10 @@ test('7D: cadastro → atendimento composto → acompanhamentos → resolução 
   await page.getByRole('link', { name: 'Novo atendimento', exact: true }).click();
   await page.getByLabel('Data do atendimento', { exact: true }).fill('2026-04-10');
   await page.getByLabel('Observações do atendimento', { exact: true }).fill('Consulta integrada exclusivamente sintética');
+  await nextAttendanceStep(page);
   await page.getByLabel('Peso (kg)', { exact: true }).fill('65.50');
   await page.getByLabel('Data de descoberta por autorrelato', { exact: true }).fill('2012-05-06');
+  await nextAttendanceStep(page);
   await page.getByRole('button', { name: 'Adicionar exame', exact: true }).click();
   const exam = page.getByLabel('Tipo de exame 1', { exact: true });
   await expect(exam.locator('option')).not.toHaveCount(1);
@@ -43,11 +46,19 @@ test('7D: cadastro → atendimento composto → acompanhamentos → resolução 
   await page.getByRole('button', { name: 'Adicionar familiar examinado', exact: true }).click();
   await page.getByLabel('Identificação do familiar 1', { exact: true }).fill('Familiar integrado sintético');
   await page.getByLabel('Resultado do familiar 1', { exact: true }).fill('Resultado sintético');
+  await nextAttendanceStep(page);
   await page.getByRole('button', { name: 'Adicionar pendência', exact: true }).click();
   await page.getByLabel('Descrição da pendência 1', { exact: true }).fill('Pendência integrada de estado desconhecido');
   await page.getByLabel('Status da pendência 1', { exact: true }).selectOption('');
+  await reviewAttendance(page);
+  const review = page.getByRole('group', { name: 'Etapa 5 — Revisão' });
+  await expect(review.getByText('Consulta integrada exclusivamente sintética', { exact: true })).toBeVisible();
+  await expect(review.getByText(/Exame solicitado sintético identificado/)).toBeVisible();
+  await expect(review.getByText(/Pendência integrada de estado desconhecido/)).toBeVisible();
   await assertAccessible(page);
-  const consultation = await submitWrite(page, 'POST', `${patientPath}/atendimentos`, 'Salvar atendimento');
+  expect(requests.filter(request => request.method === 'POST' && request.path === `/v1${patientPath}/atendimentos`)).toHaveLength(0);
+  const consultation = await submitWrite(page, 'POST', `${patientPath}/atendimentos`, 'Confirmar atendimento');
+  expect(requests.filter(request => request.method === 'POST' && request.path === `/v1${patientPath}/atendimentos`)).toHaveLength(1);
   const { atendimentoId } = await consultation.response.json() as { atendimentoId: string };
   const attendancePath = `${patientPath}/atendimentos/${atendimentoId}`;
   expect(consultation.body).toMatchObject({ pendencias: [{ status: null }] });
