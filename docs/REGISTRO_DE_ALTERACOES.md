@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-10-27 — seleção e simulação mínima de XLSX (8C2U.1)
+
+A interface seleciona XLSX sintético, finalidade e código e envia simulação
+explícita pelo contrato H14; não oferece confirmação da importação. Cancelar,
+trocar a escolha ou a identidade invalida respostas anteriores. Build, 218
+testes unitários e três E2E com worker/PostgreSQL descartáveis passaram. A
+[evidência](validacoes/VALIDACAO_8C2_U1.md) registra zero registros persistidos e
+o limite comprovado de consumo de sequências, pendente em C2B.1. Sem aceite humano.
+
 ## 2026-10-27 — jornada integrada e confirmação única (7D-A1)
 
 O percurso de cadastro, atendimento, acompanhamentos, notificação e histórico

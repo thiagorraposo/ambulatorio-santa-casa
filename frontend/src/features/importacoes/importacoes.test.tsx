@@ -8,8 +8,10 @@ import { ApiError } from '../../api/client';
 import type { ImportacaoLoteDetalheResponse, ImportacaoLoteResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
 import { ImportacaoDetalhePage, ImportacoesPage } from './ImportacoesPage';
+import { useSession } from '../../app/session';
 
 vi.mock('../../api/useApiQuery', () => ({ useApiQuery: vi.fn() }));
+vi.mock('../../app/session', () => ({ useSession: vi.fn() }));
 
 const secret = 'SEGREDO_SINTETICO_NAO_EXIBIR';
 const lote: ImportacaoLoteResponse = {
@@ -31,6 +33,7 @@ function setup(element: ReactElement, url: string, route: string) {
 function ok<T>(data: T) { return { data, isSuccess: true, isPending: false, isFetching: false, isError: false, refetch: vi.fn() } as unknown as UseQueryResult<T, ApiError>; }
 
 beforeEach(() => {
+  vi.mocked(useSession).mockReturnValue({ user: { usuarioId: '1', nome: 'Sintético', perfil: 'consulta' } } as ReturnType<typeof useSession>);
   answers.clear();
   answers.set('/importacoes/lotes?limit=20&offset=0', [lote]);
   answers.set(`/importacoes/lotes/${lote.loteId}?limit=20&offset=0&apenasComErro=false`, detail);
@@ -45,6 +48,13 @@ beforeEach(() => {
 });
 
 describe('consulta sanitizada de importações', () => {
+  it('oferece link de simulação para edição e oculta para consulta', () => {
+    const view = setup(<ImportacoesPage />, '/importacoes', '/importacoes');
+    expect(screen.queryByRole('link', { name: 'Simular planilha' })).not.toBeInTheDocument();
+    vi.mocked(useSession).mockReturnValue({ user: { usuarioId: '1', nome: 'Sintético', perfil: 'edicao' } } as ReturnType<typeof useSession>);
+    view.rerender(<MemoryRouter><ImportacoesPage /></MemoryRouter>);
+    expect(screen.getByRole('link', { name: 'Simular planilha' })).toHaveAttribute('href', '/importacoes/simular');
+  });
   it('lista metadados em página, mantém lote ID textual e abre o detalhe', async () => {
     const user = userEvent.setup();
     setup(<ImportacoesPage />, '/importacoes', '/importacoes');

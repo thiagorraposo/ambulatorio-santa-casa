@@ -25,9 +25,18 @@ orienta a execução e o registro do parecer da equipe.
 
 Migrations 02–64 são aplicadas explicitamente no banco `etapa6_frontend_*`;
 00/01 são substituídas pela criação do banco/schema exclusivos. O login técnico
-dedicado usa `scripts/configurar_login_aplicacao.sql`, `vinculo_explicito` e
-importação/revisão desligadas. Senhas do servidor, login técnico e JWT são
+dedicado usa `scripts/configurar_login_aplicacao.sql` e `vinculo_explicito`.
+Importação HTTP sintética usa worker real com outro login, limitado à role
+`ambulatorio_importador` e ao banco aleatório configurado pelo runner. A fixture
+XLSX é gerada em seu diretório temporário; arquivo e login são removidos no final.
+Revisão temporal permanece desligada. Senhas do servidor, logins e JWT são
 recebidas/geradas no ambiente, sem entrar no bundle ou nos argumentos de comandos.
+
+`importacao-simulacao.spec.ts` verifica multipart/dry-run, perfis, confirmação
+única, cancelamento, resposta perdida sem reenvio e integridade de todas as
+tabelas após a simulação. O H14 mínimo faz rollback de registros, mas consome
+sequências; a garantia ampliada de não consumir IDs pertence a C2B.1 e está
+pendente. Não usar este runner com planilhas reais.
 
 Fixtures usam IDs retornados pelo banco/API: três perfis, pacientes com escopos
 distintos, ID acima do limite seguro de JavaScript e coleções com mais de uma

@@ -1050,6 +1050,12 @@ cada contrato antecede sua UI, preservando as decisões clínicas vigentes.
 
 **Estado e cobertura:** Planejado; não aceito. RQ-HOM-09; RQ-IMP-01–51; RQ-EST-17 (telas/elementos na matriz).
 
+**Continuidade de 27/10:** C2U.1 recebeu seleção/cancelamento, finalidade/código
+e simulação mínima H14, com [validação sintética](../validacoes/VALIDACAO_8C2_U1.md).
+Não implementa confirmação, relatório rico ou conflito. O dry-run atual não
+persiste registros, mas consome sequências; C2B.1 e seu aceite ampliado continuam
+pendentes. CI remoto e aceite da unidade ainda precisam ser conferidos.
+
 **Escopo:** C2U.1 seleção real/finalidade/código/cancelar/dry-run mínimo; C2U.2 confirmação e lote efetivo; C2U.3 relatório rico/metadados; C2U.4 conflito autorizado. Quatro unidades; não bloquear U.1/U.2 pelo relatório ainda ausente.
 
 **Dependências/decisões:** H14 para U.1/U.2; 8C1; C2B correspondente para U.3/U.4; P-04/P-05; recuperação de operação não reenvia importação cegamente.
