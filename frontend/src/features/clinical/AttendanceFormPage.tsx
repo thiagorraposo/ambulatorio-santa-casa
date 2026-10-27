@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 import type { AtendimentoDetalheResponse, PacienteDetalheResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
 import { ApiErrorState, Card, PageHeading } from '../../shared/ui';
+import { useCollectionRemovalFocus } from '../../shared/useCollectionRemovalFocus';
 import { clinicalLabel } from '../../shared/formatters';
 import { DraftQueryState, EditingGate, MutationForm, useClinicalDraft, type CatalogItem } from '../../shared/writing';
 import { booleanOptions, FormSection, InputField, SelectField, TextAreaField } from './CoreFields';
@@ -53,6 +54,9 @@ function AttendanceReview({ draft }: { draft: AttendanceDraft }) {
 
 function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: AtendimentoDetalheResponse }) {
   const navigate = useNavigate();
+  const examFocus = useCollectionRemovalFocus();
+  const familyFocus = useCollectionRemovalFocus();
+  const pendingFocus = useCollectionRemovalFocus();
   const [step, setStep] = useState(0);
   const [stepError, setStepError] = useState('');
   const panelRefs = useRef<Array<HTMLFieldSetElement | null>>([]);
@@ -188,9 +192,9 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
               <TextAreaField label={`Resultado do exame ${index + 1}`} value={exam.resultado} onChange={value => updateExam(index, { resultado: value })} />
               <TextAreaField label={`Observações do exame ${index + 1}`} value={exam.observacoes} onChange={value => updateExam(index, { observacoes: value })} />
             </div>
-            <button type="button" className="button button-secondary" onClick={() => setDraft(previous => ({ ...previous, exams: previous.exams.filter((_, i) => i !== index) }))}>Remover exame {index + 1}</button>
+            <button type="button" className="button button-secondary" onClick={() => examFocus.remove(() => setDraft(previous => ({ ...previous, exams: previous.exams.filter((_, i) => i !== index) })))}>Remover exame {index + 1}</button>
           </fieldset>)}
-          <button type="button" className="button button-secondary" disabled={draft.exams.length >= 30}
+          <button ref={examFocus.addButtonRef} type="button" className="button button-secondary" disabled={draft.exams.length >= 30}
             onClick={() => setDraft(previous => ({ ...previous, exams: [...previous.exams, { tipoExameId: '', bloco: 'solicitado', identificacao: '', resultado: '', observacoes: '' }] }))}>Adicionar exame</button>
         </fieldset>
         <fieldset className="form-section"><legend>Rastreio familiar</legend>
@@ -203,9 +207,9 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
               onChange={value => setDraft(previous => ({ ...previous, families: previous.families.map((item, i) => i === index ? { ...item, familiar: value } : item) }))} />
               <TextAreaField label={`Resultado do familiar ${index + 1}`} required={draft.familyStatus === 'sim'} value={family.resultado}
                 onChange={value => setDraft(previous => ({ ...previous, families: previous.families.map((item, i) => i === index ? { ...item, resultado: value } : item) }))} /></div>
-            <button type="button" className="button button-secondary" onClick={() => setDraft(previous => ({ ...previous, families: previous.families.filter((_, i) => i !== index) }))}>Remover familiar {index + 1}</button>
+            <button type="button" className="button button-secondary" onClick={() => familyFocus.remove(() => setDraft(previous => ({ ...previous, families: previous.families.filter((_, i) => i !== index) })))}>Remover familiar {index + 1}</button>
           </fieldset>)}
-          <button type="button" className="button button-secondary" disabled={draft.families.length >= 50}
+          <button ref={familyFocus.addButtonRef} type="button" className="button button-secondary" disabled={draft.families.length >= 50}
             onClick={() => setDraft(previous => ({ ...previous, families: [...previous.families, { familiar: '', resultado: '' }] }))}>Adicionar familiar examinado</button>
         </fieldset>
         </StepPanel>
@@ -223,9 +227,9 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
             <InputField label={`Data de resolução da pendência ${index + 1}`} type="date" value={pending.dataResolucao ?? ''}
               required={pending.status === 'resolvida'} onChange={value => setDraft(previous => ({ ...previous,
                 pending: previous.pending.map((item, i) => i === index ? { ...item, dataResolucao: value } : item) }))} />
-            <button type="button" className="button button-secondary" onClick={() => setDraft(previous => ({ ...previous, pending: previous.pending.filter((_, i) => i !== index) }))}>Remover pendência {index + 1}</button>
+            <button type="button" className="button button-secondary" onClick={() => pendingFocus.remove(() => setDraft(previous => ({ ...previous, pending: previous.pending.filter((_, i) => i !== index) })))}>Remover pendência {index + 1}</button>
           </fieldset>)}
-          <button type="button" className="button button-secondary" disabled={draft.pending.length >= 30}
+          <button ref={pendingFocus.addButtonRef} type="button" className="button button-secondary" disabled={draft.pending.length >= 30}
             onClick={() => setDraft(previous => ({ ...previous, pending: [...previous.pending, { descricao: '', status: 'aberta' }] }))}>Adicionar pendência</button>
         </fieldset>
         </StepPanel>

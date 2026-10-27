@@ -1,5 +1,12 @@
 # Registro de Alterações
 
+## 2026-10-27 — foco após remover itens de formulário (7D-U4.2)
+
+Remover exames, familiares, pendências, novos telefones e reações devolve foco
+ao botão Adicionar da mesma coleção. Isso impede perder a posição ou apagar o
+próximo rascunho por Enter repetido. Build, 206 testes unitários e a regressão
+E2E sintética passaram; detalhes e limites na [evidência U4.2](validacoes/VALIDACAO_7D_U4_2.md).
+
 ## 2026-10-27 — jornada integrada e confirmação única (7D-A1)
 
 O percurso de cadastro, atendimento, acompanhamentos, notificação e histórico
