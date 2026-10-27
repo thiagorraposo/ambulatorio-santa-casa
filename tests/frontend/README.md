@@ -33,7 +33,7 @@ Revisão temporal permanece desligada. Senhas do servidor, logins e JWT são
 recebidas/geradas no ambiente, sem entrar no bundle ou nos argumentos de comandos.
 
 `importacao-simulacao.spec.ts` verifica multipart/dry-run, perfis, confirmação
-única, cancelamento, resposta perdida sem reenvio e integridade de todas as
+única, cancelamento, XLSX adulterado, resposta perdida sem reenvio e integridade de todas as
 tabelas após a simulação. O H14 mínimo faz rollback de registros, mas consome
 sequências; a garantia ampliada de não consumir IDs pertence a C2B.1 e está
 pendente. Não usar este runner com planilhas reais.

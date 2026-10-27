@@ -69,6 +69,23 @@ test('8C2U.1: consulta não tem formulário de simulação', async ({ page }) =>
   await expect(page.getByLabel('Arquivo XLSX sintético', { exact: true })).toHaveCount(0);
 });
 
+test('8C2U.1: arquivo adulterado é recusado pelo worker sem persistir registros', async ({ page }) => {
+  await signIn(page, 'administracao', '/importacoes/simular');
+  await page.getByLabel('Arquivo XLSX sintético', { exact: true }).setInputFiles({ name: 'invalido.xlsx',
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', buffer: Buffer.from('Conteúdo sintético que não é XLSX') });
+  await page.getByLabel('Código do lote', { exact: true }).fill('frontend-arquivo-invalido');
+  const before = await snapshot();
+  const response = page.waitForResponse(item => item.request().method() === 'POST' && new URL(item.url()).pathname === '/v1/importacoes');
+  await page.getByRole('button', { name: 'Simular planilha', exact: true }).click();
+  expect((await response).status()).toBe(400);
+  const error = page.getByRole('alert');
+  await expect(error).toContainText('A solicitação não é válida');
+  await expect(error).toBeFocused();
+  await expect(error).not.toContainText(/Traceback|zipfile|SELECT|IMPORT_DB_PASSWORD/);
+  await expect(page.getByRole('heading', { name: 'Simulação concluída', exact: true })).toHaveCount(0);
+  expect((await snapshot()).contents).toEqual(before.contents);
+});
+
 test('8C2U.1: resposta perdida de simulação não gera reenvio automático ou falso sucesso', async ({ page }) => {
   test.setTimeout(120_000);
   await signIn(page, 'administracao', '/importacoes/simular');

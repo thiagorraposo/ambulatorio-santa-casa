@@ -28,6 +28,10 @@ desabilitada e a configuração de produção não foi alterada.
   consulta sem formulário e perda da resposta real após HTTP 201, sem reenvio.
   Axe e layout 320 px passaram. As três regressões de consulta de lotes também
   passaram na rodada anterior; não foram repetidas sem mudança no seu fluxo.
+- Um quarto cenário recusou XLSX adulterado no worker real (HTTP 400), com erro
+  sanitizado/focado e nenhuma alteração nas tabelas; passou em
+  `/tmp/etapa6-frontend-0sQ0JL`. Total: quatro cenários novos aprovados em rodadas
+  proporcionais; não se declara rodada única de quatro neste estado local.
 - Docs, consistência, 30 testes de workflow e `git diff --check` passaram.
   O bootstrap do worker foi refinado para receber sua senha via ambiente/stdin,
   sem argumento de processo; o E2E positivo passou novamente em

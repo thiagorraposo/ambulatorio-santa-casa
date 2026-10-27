@@ -13,7 +13,8 @@ localmente. Evidência e limites no [relatório do CI](validacoes/VALIDACAO_CI_2
 A interface seleciona XLSX sintético, finalidade e código e envia simulação
 explícita pelo contrato H14; não oferece confirmação da importação. Cancelar,
 trocar a escolha ou a identidade invalida respostas anteriores. Build, 218
-testes unitários e três E2E com worker/PostgreSQL descartáveis passaram. A
+testes unitários e quatro E2E com worker/PostgreSQL descartáveis passaram em
+rodadas proporcionais. A
 [evidência](validacoes/VALIDACAO_8C2_U1.md) registra zero registros persistidos e
 o limite comprovado de consumo de sequências, pendente em C2B.1. Sem aceite humano.
 

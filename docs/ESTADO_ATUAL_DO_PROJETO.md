@@ -24,7 +24,7 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | M2 — 7D-A1 | Jornada sintética pela interface, releitura de recursos, notificação e confirmação única validadas tecnicamente em 27/10; PR #15 passou Quality, Database, Backend e Frontend no run `40442560575`. | [Evidência](validacoes/VALIDACAO_7D_A1.md); aceite da equipe clínica/produto pendente. P-03 segue bloqueando qualquer mudança em semântica de concorrência. |
 | Melhorias U3.1/U3.2/U3.3/U4.1 | Implementação e validação técnica próprias. | [Índice de evidências](validacoes/README.md); não concluem automaticamente U3/U4, VU1 ou fidelidade integral. |
 | Produto completo e Etapas 8–10 | Escopo planejado e critérios definidos. | Implementações adicionais, decisões específicas, implantação e homologação pendentes. |
-| M3 — 8C2U.1 | Seleção e simulação mínima XLSX pela interface, com worker real e dados sintéticos; build, 218 testes de componentes e três E2E passaram. | [Evidência](validacoes/VALIDACAO_8C2_U1.md); CI/aceite pendentes. Dry-run não persiste registros, mas consome sequências; C2B.1 continua pendente. |
+| M3 — 8C2U.1 | Seleção e simulação mínima XLSX pela interface, com worker real e dados sintéticos; build, 218 testes de componentes e quatro E2E passaram em rodadas proporcionais. | [Evidência](validacoes/VALIDACAO_8C2_U1.md); CI/aceite pendentes. Dry-run não persiste registros, mas consome sequências; C2B.1 continua pendente. |
 
 O próximo trabalho é estabilizar o teste de processos no CI pós-merge de A1,
 concluir a revisão de U4.2 e obter aceite humano de M2. U3/U4.1 foram
