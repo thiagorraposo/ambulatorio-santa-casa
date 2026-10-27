@@ -1,7 +1,7 @@
 import { Link, useLocation, useParams, useSearchParams } from 'react-router';
 import type { ImportacaoLoteDetalheResponse, ImportacaoLoteResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
-import { Card, EmptyState, PageHeading, QueryState } from '../../shared/ui';
+import { Card, EmptyState, PageHeading, QueryState, TableScroll } from '../../shared/ui';
 import { Pagination, usePage } from '../pacientes/pagination';
 
 function date(value: string | null) {
@@ -20,14 +20,14 @@ export function ImportacoesPage() {
       <h2>Lotes disponíveis</h2>
       <QueryState query={query} emptyMessage="Nenhum lote disponível nesta página para seu acesso.">
         {rows => rows.length === 0 ? <EmptyState>Nenhum lote disponível nesta página para seu acesso.</EmptyState> :
-          <div className="table-scroll"><table className="data-table">
+          <TableScroll label="Lotes de importação"><table className="data-table">
             <caption className="sr-only">Lotes disponíveis nesta página</caption>
             <thead><tr><th scope="col">Código</th><th scope="col">Estado</th><th scope="col">Linhas</th><th scope="col">Atualizado</th><th scope="col">Detalhe</th></tr></thead>
             <tbody>{rows.map(row => <tr key={row.loteId}>
               <td>{row.codigo}</td><td>{row.status}</td><td>{row.totalLinhas}</td><td>{date(row.atualizadoEm)}</td>
               <td><Link to={`/importacoes/lotes/${encodeURIComponent(row.loteId)}`} state={{ from: `${location.pathname}${location.search}` }}>Consultar</Link></td>
             </tr>)}</tbody>
-          </table></div>}
+          </table></TableScroll>}
       </QueryState>
       <Pagination label="lotes" {...page} count={query.isSuccess && !query.isFetching ? query.data.length : undefined}
         onChange={page.changePage} />
@@ -66,13 +66,13 @@ export function ImportacaoDetalhePage() {
             <div><dt>Código do erro do lote</dt><dd>{batch.codigoErro ?? '—'}</dd></div>
           </dl>
           {batch.linhas.length === 0 ? <EmptyState>Nenhuma linha nesta página para o filtro e o acesso atuais.</EmptyState> :
-            <div className="table-scroll"><table className="data-table">
+            <TableScroll label="Linhas do lote de importação"><table className="data-table">
               <caption className="sr-only">Linhas disponíveis nesta página</caption>
               <thead><tr><th scope="col">Aba</th><th scope="col">Linha</th><th scope="col">Estado</th><th scope="col">Código do erro</th></tr></thead>
               <tbody>{batch.linhas.map(line => <tr key={line.linhaId}>
                 <td>{line.aba}</td><td>{line.numero}</td><td>{line.status}</td><td>{line.codigoErro ?? '—'}</td>
               </tr>)}</tbody>
-            </table></div>}
+            </table></TableScroll>}
           <Pagination label="linhas" {...page} count={query.isSuccess && !query.isFetching ? batch.linhas.length : undefined}
             onChange={page.changePage} />
           <p className="muted">São exibidos apenas campos sanitizados. Conteúdo original e detalhes internos de processamento não são publicados nesta tela.</p>

@@ -17,6 +17,7 @@ de testes não é uma contagem atual e aceite sintético não autoriza dados rea
 | Revisão humana da Etapa 7 | [Roteiro e registro](ROTEIRO_REVISAO_CLINICA_ETAPA_7.md) | Parecer M1 aprovado em 26/10 por confirmação do responsável; metadados detalhados da sessão não fornecidos. |
 | 7A-U1 — busca antes do cadastro | [Validação técnica](VALIDACAO_7A_U1.md) | Homônimos, declaração explícita, vazio, recusa, cancelamento e ausência de POST indevido; sem aceite adicional de produto/equipe. |
 | 7D-U1/U2 — etapas e revisão do atendimento | [Validação técnica](VALIDACAO_7D_U1_U2.md) | Cinco etapas, revisão, confirmação única, cancelamento consciente e recuperação em banco descartável; aceite de produto/equipe pendente. |
+| 7D-U4.2 — controles de formulários, tabelas e diálogo | [Validação técnica parcial](VALIDACAO_7D_U4_2.md) | Axe, teclado, rolagem acessível e reflow sintéticos; revisão visual e aceite de produto/equipe pendentes. |
 | U3.1 — cabeçalho/último atendimento | [Validação](VALIDACAO_7D_U3_1.md) | Inclui a ocorrência de seleção de ambiente e seus limites. |
 | U3.2 — diagnóstico/avaliação por consulta | [Validação](VALIDACAO_7D_U3_2.md) | Seleção explícita e paginação; sem herança entre visitas. |
 | U3.3 — histórico/detalhe/exames | [Validação](VALIDACAO_7D_U3_3.md) | Provas técnicas encerradas em 21/10; não é fidelidade integral. |

@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import type { PacienteResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
-import { Card, EmptyState, PageHeading, QueryState } from '../../shared/ui';
+import { Card, EmptyState, PageHeading, QueryState, TableScroll } from '../../shared/ui';
 import { pagePath, Pagination, usePage } from './pagination';
 import { PatientCreateLink } from '../clinical/PatientCreateGate';
 
@@ -66,7 +66,7 @@ export default function PatientsPage() {
           {rows => rows.length === 0 ? (
             <EmptyState>Nenhum paciente nesta página para os filtros e o acesso atuais.</EmptyState>
           ) : (
-            <div className="table-scroll">
+            <TableScroll label="Pacientes disponíveis">
               <table className="data-table">
                 <caption className="sr-only">Pacientes desta página</caption>
                 <thead><tr><th scope="col">ID</th><th scope="col">Nome</th><th scope="col">Ficha</th></tr></thead>
@@ -79,7 +79,7 @@ export default function PatientsPage() {
                   </tr>
                 ))}</tbody>
               </table>
-            </div>
+            </TableScroll>
           )}
         </QueryState>
         <Pagination label="pacientes" {...page} onChange={page.changePage}

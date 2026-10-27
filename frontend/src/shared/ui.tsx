@@ -6,6 +6,11 @@ export function Card({ children, className = '' }: { children: ReactNode; classN
   return <section className={`card ${className}`}>{children}</section>;
 }
 
+export function TableScroll({ label, children, wide = false }: { label: string; children: ReactNode; wide?: boolean }) {
+  return <div className={`table-scroll${wide ? ' table-scroll-wide' : ''}`} role="region" tabIndex={0}
+    aria-label={`${label}; tabela rolável horizontalmente quando necessário`}>{children}</div>;
+}
+
 export function PageHeading({ title, description }: { title: string; description?: string }) {
   return <div className="page-heading"><h1 tabIndex={-1}>{title}</h1>
     {description && <p className="muted">{description}</p>}</div>;

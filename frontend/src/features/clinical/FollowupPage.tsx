@@ -5,7 +5,7 @@ import type { AtendimentoDetalheResponse, AtendimentoResumoResponse, Notificatio
 import { useApiQuery } from '../../api/useApiQuery';
 import { useSession } from '../../app/session';
 import { formatClinicalDate } from '../../shared/formatters';
-import { Card, EmptyState, PageHeading } from '../../shared/ui';
+import { Card, EmptyState, PageHeading, TableScroll } from '../../shared/ui';
 import { MutationForm, useClinicalDraft } from '../../shared/writing';
 import { FollowupChoice, FollowupRead, useFollowupAll } from './FollowupChoices';
 import { FollowupBoolean, FollowupSelect, FollowupText, useFollowupDraft } from './FollowupFields';
@@ -221,12 +221,12 @@ function BznComparison({ canonical, draft, onDiscard }: {
     <h2>Confira o tratamento registrado e o seu rascunho</h2>
     <p>O tratamento registrado é único. Este rascunho não o substitui e não será enviado novamente.
       Consulte os dados ou copie o rascunho antes de descartá-lo.</p>
-    <div className="table-scroll"><table className="data-table"><caption>Tratamento registrado e valores do rascunho BZN</caption>
+    <TableScroll label="Tratamento registrado e rascunho BZN"><table className="data-table"><caption>Tratamento registrado e valores do rascunho BZN</caption>
       <thead><tr><th scope="col">Informação</th><th scope="col">Tratamento registrado</th><th scope="col">Seu rascunho</th></tr></thead>
       <tbody>{[{ name: 'atendimentoId', label: 'Atendimento de registro' }, ...bznFields].map(field => <tr key={field.name}>
         <th scope="row">{field.label}</th><td>{readable(canonical[field.name as keyof TratamentoBznResponse])}</td>
         <td>{readable(draft.values[field.name])}</td></tr>)}</tbody>
-    </table></div>
+    </table></TableScroll>
     <h3>Reações do tratamento registrado</h3>
     {canonical.reacoes.length === 0 ? <p>Nenhuma reação registrada.</p> : canonical.reacoes.map(reaction => <dl key={reaction.reacaoId}>
       <dt>Descrição</dt><dd>{reaction.descricao}</dd><dt>Gravidade</dt><dd>{readable(reaction.gravidade)}</dd>
