@@ -56,7 +56,7 @@ Nenhuma semântica clínica é inferida pela autorização de escopo.
 | Marco | Conteúdo e critério de saída | Estado em 26/10 |
 | --- | --- | --- |
 | M1 — Fluxo original revisado | Executar roteiro clínico, registrar parecer, corrigir impedimentos e validar novamente os pontos afetados. | Aprovado em 2026-10-26, conforme confirmação do responsável do projeto; sem impedimentos reportados. |
-| M2 — VU1 sintética | Entregar 7A-U1, 7D-U1/U2/U4.2, verificar evidências U3/U4.1 e recuperação nas operações usadas; aceitar 7D-A1 com a equipe. | Pendentes decisões específicas P-01/P-03, entregas e aceite. |
+| M2 — VU1 sintética | Entregar 7A-U1, 7D-U1/U2/U4.2, verificar evidências U3/U4.1 e recuperação nas operações usadas; aceitar 7D-A1 com a equipe. | 7A-U1 implementada e validada tecnicamente; demais unidades e aceite integrado pendentes. Recorte de trabalho M2 definido pela instrução do responsável em 26/10; escolhas fora desse recorte permanecem abertas. |
 | M3 — Produto completo em ambiente sintético | Concluir todas as famílias 7B-E/7C-E e 8A–8D incluídas, correção 7C-R2B/U, comparação visual 8V1 e aceite integral 8V2. | Implementações adicionais, decisões e aceites pendentes. |
 | M4 — Operação institucional | Concluir 9A–9D: implantação, segurança, continuidade e liberação explícita para dados reais. | Futuro; não é consequência automática de M3. |
 | M5 — Produto completo entregue | Concluir 10A–10D, reconciliar migração autorizada, resolver defeitos impeditivos e registrar release/aceite final. | Futuro; conclusão do objetivo depende de M3, M4 e M5. |
@@ -317,7 +317,7 @@ A evidência da execução está no
 **Estado:** 7A–7D têm implementação e evidências sintéticas de 04/10 e 15/10.
 O [relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md) reúne provas dos cenários
 executados. As sete lacunas receberam correções e o percurso integrado passou;
-a revisão com a equipe permanece pendente. Os pacotes de
+M1 foi aprovado em 26/10 conforme o registro no roteiro clínico. Os pacotes de
 produto abaixo mantêm suas dependências e aceites próprios, sem aceite implícito pela inclusão no escopo.
 
 **Objetivo:** tornar utilizáveis as telas efetivamente usadas pela equipe.
@@ -552,9 +552,12 @@ mantém a sequência, os marcos e o próximo trabalho; não duplicar aqui as fic
 
 ## Próximo trabalho
 
-Executar M1 com o roteiro de revisão clínica do recorte original. Em seguida,
-fechar as escolhas P-01/P-03 que afetam M2 e entregar 7A-U1, 7D-U1/U2/U4.2 e
-7D-A1. O aceite do recorte original não equivale a M2 ou ao produto completo.
+M1 foi aprovado em 26/10 conforme registro do responsável. A sequência de M2
+foi delimitada pelo responsável para 7A-U1, 7D-U1/U2/U4.2, verificação de
+U3/U4.1 e 7D-A1, sem excluir famílias não EX do produto completo. A instrução
+de M2 adota cinco etapas, revisão antes da confirmação e acompanhamento como
+operação separada; alterações de concorrência dos PUT de projeto/notificação e
+revisão de pendências continuam bloqueadas até contrato aprovado.
 
 Preparar as decisões específicas e o detalhamento das frentes obrigatórias de
 M3, incluindo todos os antigos destinos VP. Manter o inventário ligado aos

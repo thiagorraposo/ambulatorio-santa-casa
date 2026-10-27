@@ -13,8 +13,9 @@ de testes não é uma contagem atual e aceite sintético não autoriza dados rea
 | Etapa 5 — backend/importação | [Aceite integrado](ACEITE_INTEGRADO_ETAPA_5.md) | Matriz F01–F16/T01–T18 e limites sintéticos. |
 | Execução incremental da Etapa 5 | [Continuidade](CONTINUIDADE_ETAPA_5.md) | Diário de tentativas e resultados; o fechamento de 03/10 prevalece sobre pendências de entradas anteriores. |
 | Etapa 6 — fundação da interface | [Validação](VALIDACAO_ETAPA_6.md) | Aceite sintético da fundação, não de todo o produto. |
-| Etapa 7 — fluxo clínico original | [Validação vigente](VALIDACAO_ETAPA_7.md) | Correções R7-01–07 e provas técnicas; parecer clínico pendente. |
-| Revisão humana da Etapa 7 | [Roteiro e registro](ROTEIRO_REVISAO_CLINICA_ETAPA_7.md) | Campos pendentes até a equipe executar e registrar o parecer. |
+| Etapa 7 — fluxo clínico original | [Validação vigente](VALIDACAO_ETAPA_7.md) | Correções R7-01–07 e provas técnicas; parecer M1 aprovado conforme roteiro. |
+| Revisão humana da Etapa 7 | [Roteiro e registro](ROTEIRO_REVISAO_CLINICA_ETAPA_7.md) | Parecer M1 aprovado em 26/10 por confirmação do responsável; metadados detalhados da sessão não fornecidos. |
+| 7A-U1 — busca antes do cadastro | [Validação técnica](VALIDACAO_7A_U1.md) | Homônimos, declaração explícita, vazio, recusa, cancelamento e ausência de POST indevido; sem aceite adicional de produto/equipe. |
 | U3.1 — cabeçalho/último atendimento | [Validação](VALIDACAO_7D_U3_1.md) | Inclui a ocorrência de seleção de ambiente e seus limites. |
 | U3.2 — diagnóstico/avaliação por consulta | [Validação](VALIDACAO_7D_U3_2.md) | Seleção explícita e paginação; sem herança entre visitas. |
 | U3.3 — histórico/detalhe/exames | [Validação](VALIDACAO_7D_U3_3.md) | Provas técnicas encerradas em 21/10; não é fidelidade integral. |

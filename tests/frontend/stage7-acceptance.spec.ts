@@ -17,6 +17,7 @@ test('7D: cadastro → atendimento composto → acompanhamentos → resolução 
   await page.getByLabel('Nome para busca prévia', { exact: true }).fill(name);
   await page.getByRole('button', { name: 'Consultar possíveis cadastros', exact: true }).click();
   await expect(page.getByText(/Nenhum paciente nesta página/)).toBeVisible();
+  await page.getByRole('button', { name: 'Nenhuma correspondência serve — continuar para cadastro' }).click();
   await page.getByLabel('Nome completo', { exact: true }).fill(name);
   await page.getByLabel('Data de nascimento', { exact: true }).fill('1980-03-04');
   await page.getByLabel('Endereço', { exact: true }).fill('Rua exclusivamente sintética 000');

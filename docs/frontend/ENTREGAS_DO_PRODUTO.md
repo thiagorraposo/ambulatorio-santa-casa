@@ -76,7 +76,7 @@ Este catálogo define as unidades, sem manter uma segunda lista de prioridades.
 
 #### 7A-U1 — Cadastro precedido por busca e escolha consciente
 
-**Estado e cobertura:** Planejado; não aceito. RQ-HOM-07; RQ-LIS-07; RQ-CAD-01–02, 04–08, 10–18, 23, 25–30 (telas/elementos na matriz).
+**Estado e cobertura:** Implementado e validado tecnicamente em 2026-10-26; aceite de produto/equipe não declarado. RQ-HOM-07; RQ-LIS-07; RQ-CAD-01–02, 04–08, 10–18, 23, 25–30 (telas/elementos na matriz).
 
 **Escopo:** Busca por nome → correspondências autorizadas → declaração de nenhuma correspondente → cadastro; edição existente fica fora deste fluxo. Não impedir criação por homônimo nem fundir pessoas.
 
@@ -87,6 +87,8 @@ Este catálogo define as unidades, sem manter uma segunda lista de prioridades.
 **Aceite — cenário principal e falhas:** Pessoa existente abre ficha sem POST; pessoa nova só envia após escolha explícita. Nome obrigatório, nascimento/sexo opcionais; 403/capacidade recusada, homônimos, vazio, falha na busca e cancelar não produzem duplicação.
 
 **Validação/evidência e conclusão:** VF. Roteiro com os dois caminhos, contagem de POST e releitura do cadastro com contatos/endereço. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+**Evidência técnica:** [VALIDACAO_7A_U1](../validacoes/VALIDACAO_7A_U1.md). Busca concluída com confirmação explícita, sem formulário antes da escolha; cadastro autorizado e abertura de correspondência sem POST; homônimos mantidos; busca vazia/403 e cancelamento sem escrita.
 
 <a id="7b-r1b"></a>
 
