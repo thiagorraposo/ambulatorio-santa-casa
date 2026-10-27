@@ -6,6 +6,7 @@ import { useApiQuery } from '../../api/useApiQuery';
 import { useSession } from '../../app/session';
 import { formatClinicalDate } from '../../shared/formatters';
 import { Card, EmptyState, PageHeading, TableScroll } from '../../shared/ui';
+import { useCollectionRemovalFocus } from '../../shared/useCollectionRemovalFocus';
 import { MutationForm, useClinicalDraft } from '../../shared/writing';
 import { FollowupChoice, FollowupRead, useFollowupAll } from './FollowupChoices';
 import { FollowupBoolean, FollowupSelect, FollowupText, useFollowupDraft } from './FollowupFields';
@@ -250,6 +251,7 @@ function BznComparison({ canonical, draft, onDiscard }: {
 function FollowupBznForm({ context, canonical, refresh }: {
   context: FollowupContext; canonical: TratamentoBznResponse | null; refresh: () => void;
 }) {
+  const reactionFocus = useCollectionRemovalFocus();
   const draftKey = `${context.pacienteId}:bzn:novo:${context.originAttendanceId}`;
   const { model, setModel, setField, clearDraft, dirty } = useFollowupDraft(draftKey, {
     ...Object.fromEntries(bznFields.map(field => [field.name, ''])), atendimentoId: context.attendanceId,
@@ -299,10 +301,10 @@ function FollowupBznForm({ context, canonical, refresh }: {
             <FollowupText label={`Observações da reação ${index + 1}`} value={reaction.value.observacoes} multiline
               onChange={value => updateReaction(reaction.key, 'observacoes', value)} />
           </div><button type="button" className="button button-secondary" onClick={() => {
-            setModel(previous => ({ ...previous, reactions: previous.reactions.filter(item => item.key !== reaction.key) }));
+            reactionFocus.remove(() => setModel(previous => ({ ...previous, reactions: previous.reactions.filter(item => item.key !== reaction.key) })));
           }}>Remover reação {index + 1}</button>
         </fieldset>)}
-        <button type="button" className="button button-secondary" disabled={model.reactions.length >= 30}
+        <button ref={reactionFocus.addButtonRef} type="button" className="button button-secondary" disabled={model.reactions.length >= 30}
           onClick={addReaction}>Adicionar reação</button>
       </section>
     </fieldset>

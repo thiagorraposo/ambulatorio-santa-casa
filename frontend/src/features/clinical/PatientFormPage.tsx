@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 import type { PacienteDetalheResponse, PacienteResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
 import { Card, EmptyState, PageHeading, QueryState } from '../../shared/ui';
+import { useCollectionRemovalFocus } from '../../shared/useCollectionRemovalFocus';
 import { DraftQueryState, EditingGate, MutationForm, useClinicalDraft } from '../../shared/writing';
 import { formatAge } from '../../shared/formatters';
 import { booleanOptions, FormSection, InputField, SelectField } from './CoreFields';
@@ -40,6 +41,7 @@ function PriorSearch({ onSearch, onNoMatchConfirmed }: { onSearch: () => void; o
 
 function PatientForm({ data }: { data?: PacienteDetalheResponse }) {
   const navigate = useNavigate();
+  const phoneFocus = useCollectionRemovalFocus();
   const initial = patientInitial(data);
   const [draft, setDraft, clearDraft] = useClinicalDraft(`patient:${data?.pacienteId ?? 'new'}`, {
     values: initial, original: data, initial, phones: [] as string[], operationKey: crypto.randomUUID(),
@@ -90,9 +92,9 @@ function PatientForm({ data }: { data?: PacienteDetalheResponse }) {
           <InputField label={index === 0 ? 'Novo telefone' : `Novo telefone ${index + 1}`} type="tel" required maxLength={30}
             value={phone} onChange={value => setDraft(previous => ({ ...previous, phones: previous.phones.map((item, i) => i === index ? value : item) }))} />
           <button type="button" className="button button-secondary" aria-label={`Remover novo telefone ${index + 1}`}
-            onClick={() => setDraft(previous => ({ ...previous, phones: previous.phones.filter((_, i) => i !== index) }))}>Remover</button>
+            onClick={() => phoneFocus.remove(() => setDraft(previous => ({ ...previous, phones: previous.phones.filter((_, i) => i !== index) })))}>Remover</button>
         </div>)}
-        <button type="button" className="button button-secondary" disabled={draft.phones.length >= 10}
+        <button ref={phoneFocus.addButtonRef} type="button" className="button button-secondary" disabled={draft.phones.length >= 10}
           onClick={() => setDraft(previous => ({ ...previous, phones: [...previous.phones, ''] }))}>Adicionar telefone</button>
       </fieldset>
     </MutationForm>
