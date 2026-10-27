@@ -2759,3 +2759,10 @@ consulta/edição/administração, guards globais com negação por padrão, log
 allowlist. Testes sintéticos cobrem autenticação, autorização, configuração, logs
 e privilégios PostgreSQL; CI e workflow foram ampliados. Não foram criados CRUD
 clínico, frontend ou provisionamento de produção.
+
+# 2026-10-26 - Aceite do Marco 1
+
+Registrada a aprovação de M1 confirmada pelo responsável do projeto após a
+execução de todos os testes necessários. Nenhum impedimento foi reportado. O
+roadmap e o estado atual foram atualizados; detalhes individuais da sessão
+(revisores, ambiente e IDs sintéticos) não foram fornecidos.

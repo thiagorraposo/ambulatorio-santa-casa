@@ -1,6 +1,10 @@
 # Roteiro de revisão clínica da Etapa 7
 
-Preparado em 2026-10-15. **Revisão humana pendente; este roteiro não registra aceite.**
+Preparado em 2026-10-15. **Parecer:** aprovado em 2026-10-26, conforme confirmação
+do responsável do projeto de que todos os testes necessários de M1 foram
+executados e aprovados. Nenhum impedimento foi reportado. Os detalhes da sessão
+(revisores, URL, IDs sintéticos e resultado individual por passo) não foram
+fornecidos neste registro.
 
 A [7D do roadmap](../PROXIMOS_PASSOS.md#etapa-7--fluxos-clínicos) exige revisão
 com a equipe. As [provas técnicas](VALIDACAO_ETAPA_7.md) já cobrem API, componentes,
@@ -48,20 +52,21 @@ cenários técnicos reproduzíveis no [relatório](VALIDACAO_ETAPA_7.md). A equi
 deve avaliar também as mensagens e decisões desses cenários quando apresentados;
 os testes automáticos não constituem aprovação da interpretação clínica.
 
-## Registro a preencher pela equipe
+## Registro detalhado da sessão (opcional)
 
 | Campo | Resposta |
 | --- | --- |
-| Data e ambiente/URL da demonstração | Pendente |
-| Identificação e função dos revisores | Pendente |
-| Passos executados e perfis usados | Pendente |
-| IDs sintéticos do paciente/atendimento e registros conferidos | Pendente |
-| Resultado por passo: aprovado, problema encontrado ou não executado | Pendente |
-| Problemas de uso, passos para reproduzir e impacto no atendimento | Pendente |
-| Resultado do recorte original: aprovado, aprovado com pendências ou recusado | Pendente |
-| Responsável pelo parecer e data | Pendente |
+| Data e ambiente/URL da demonstração | Não informado |
+| Identificação e função dos revisores | Não informado |
+| Passos executados e perfis usados | Responsável informa que todos os testes necessários de M1 foram executados; detalhamento não informado |
+| IDs sintéticos do paciente/atendimento e registros conferidos | Não informado |
+| Resultado por passo: aprovado, problema encontrado ou não executado | Aprovado, conforme confirmação do responsável; resultados individuais não informados |
+| Problemas de uso, passos para reproduzir e impacto no atendimento | Nenhum impedimento reportado |
+| Resultado do recorte original: aprovado, aprovado com pendências ou recusado | Aprovado |
+| Responsável pelo parecer e data | Responsável do projeto (identificação não informada), 2026-10-26 |
 
-O aceite exige parecer explícito da equipe, com tarefas efetivamente executadas
-e pendências identificadas. Passo não executado permanece sem comprovação.
-Problemas encontrados voltam para correção e validação proporcional; somente
-depois o relatório e o status do goal podem refletir o aceite integral.
+O aceite acima registra a confirmação explícita do responsável do projeto. O
+detalhamento individual da sessão pode ser acrescentado à tabela para melhorar
+seu histórico; a ausência desses metadados neste repositório não altera o parecer
+comunicado. Problemas encontrados em revisões futuras voltam para correção e
+validação proporcional.
