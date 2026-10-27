@@ -33,6 +33,8 @@ atendimento `22`, notificação `2`.
   `/tmp/etapa6-frontend-xvPtud/results.json`.
 - `make docs-check COMPACT=1`, `make repository-check COMPACT=1` e
   `git diff --check` — passaram após atualizar os documentos desta entrega.
+- CI remoto do PR #15: Quality, Database, Backend e Frontend aprovados no run
+  [`40442560575`](https://github.com/thiagorraposo/ambulatorio-santa-casa/actions/runs/40442560575).
 - As regressões de 403, 409 e perda de resposta já existentes foram exercitadas
   pela suíte completa do PR #13 e pela execução pós-merge na `main`; ambas
   passaram nos quatro jobs. Entre elas: revogação antes da escrita, resposta

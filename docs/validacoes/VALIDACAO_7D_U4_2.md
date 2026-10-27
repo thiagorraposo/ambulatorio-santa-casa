@@ -25,8 +25,7 @@ foram alterados contratos ou dados.
   consulta testa que a tabela de histórico em 320 px é região nomeada/focável,
   rola com ArrowRight e mantém a página dentro da viewport.
 - `make docs-check COMPACT=1`, `make repository-check COMPACT=1` e
-  `git diff --check` — aprovados na revisão documental após a alteração inicial;
-  a revalidação final deste refinamento está em execução.
+  `git diff --check` — aprovados na revisão documental após a alteração inicial.
 
 O runner criou banco e login aleatórios descartáveis, aplicou migrations apenas
 nesse banco e os removeu. O destino SQL foi confirmado como
@@ -41,7 +40,7 @@ U4.1 documenta uma limitação anterior de legibilidade do histórico em telas
 estreitas; a primeira captura ainda mostrou a data quebrada, então a primeira e
 a segunda coluna passaram a impedir essa quebra e a regressão verificou o
 contrato visual de `white-space`. A recaptura mostrou data e link íntegros e a
-rolagem permanece por teclado.
-teclado, mas a aceitação da composição visual ainda exige revisão. O novo
-cenário U4.2 e as regressões de tabela também precisam passar no CI remoto da
-branch que os contém.
+rolagem permanece por teclado, mas a aceitação da composição visual ainda exige
+revisão. O novo cenário U4.2 e as regressões de tabela passaram nos quatro jobs
+do PR #14 (run `40440449766`), e a execução pós-merge na `main` também passou
+(run `40442523647`).

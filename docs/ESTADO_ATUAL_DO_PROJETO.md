@@ -21,7 +21,7 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | M2 — 7A-U1 | Cadastro precedido por busca implementado e validado tecnicamente em 26/10. | [Evidência](validacoes/VALIDACAO_7A_U1.md); aceite da VU1 e do percurso integrado permanecem pendentes. |
 | M2 — 7D-U1/U2 | Formulário em cinco etapas, revisão e confirmação única implementados e validados tecnicamente em 26/10. | [Evidência](validacoes/VALIDACAO_7D_U1_U2.md); aceite de produto/equipe permanece pendente. |
 | M2 — 7D-U4.2 | Tabelas com região rolável focável e legibilidade preservada no histórico; formulários e diálogo exercitados em 320/390 px e zoom 200%. | [Evidência](validacoes/VALIDACAO_7D_U4_2.md); comparação visual integral, revisão humana e aceite do pacote permanecem pendentes. |
-| M2 — 7D-A1 | Jornada sintética pela interface, releitura de recursos, notificação e confirmação única validadas tecnicamente em 27/10. | [Evidência](validacoes/VALIDACAO_7D_A1.md); CI remoto desta extensão e aceite da equipe clínica/produto pendentes. P-03 segue bloqueando qualquer mudança em semântica de concorrência. |
+| M2 — 7D-A1 | Jornada sintética pela interface, releitura de recursos, notificação e confirmação única validadas tecnicamente em 27/10; PR #15 passou Quality, Database, Backend e Frontend no run `40442560575`. | [Evidência](validacoes/VALIDACAO_7D_A1.md); aceite da equipe clínica/produto pendente. P-03 segue bloqueando qualquer mudança em semântica de concorrência. |
 | Melhorias U3.1/U3.2/U3.3/U4.1 | Implementação e validação técnica próprias. | [Índice de evidências](validacoes/README.md); não concluem automaticamente U3/U4, VU1 ou fidelidade integral. |
 | Produto completo e Etapas 8–10 | Escopo planejado e critérios definidos. | Implementações adicionais, decisões específicas, implantação e homologação pendentes. |
 
@@ -49,10 +49,9 @@ ao [roadmap](PROXIMOS_PASSOS.md#próximo-trabalho).
   de POST entre sessões. [Guia técnico](FRONTEND.md) e
   [protocolo de recuperação](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md).
 - **CI:** Quality, Database, Backend e Frontend passaram na `main` após integrar
-  U1/U2 (run `40440050791`, commit `4ee8ec1`). A branch U4.2 também passou os
-  quatro jobs (run `40440449766`); integração e execução pós-merge ainda pendem.
-  A extensão A1 desta branch ainda aguarda CI remoto. O workflow usa Chromium/API
-  e PostgreSQL descartável.
+  U1/U2 (run `40440050791`, commit `4ee8ec1`), U4.2 (run pós-merge
+  `40442523647`) e A1 (run do PR `40442560575`). O workflow usa Chromium/API e
+  PostgreSQL descartável. A extensão A1 aguarda integração e execução pós-merge.
 
 ## Regras e limites vigentes
 
