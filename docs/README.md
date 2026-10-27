@@ -39,6 +39,7 @@ fonte temática abaixo; relatórios registram provas e histórico preserva conte
 | API e autorização | [Arquitetura do backend](ARQUITETURA_BACKEND.md) e [contratos clínicos](arquitetura/CONTRATOS_CLINICOS_ETAPA_5.md) |
 | Formulários e limites HTTP | [Recorte clínico](arquitetura/RECORTE_CLINICO_ETAPA_7.md) e [catálogos](arquitetura/CONTRATOS_CATALOGOS_ETAPA_7.md) |
 | Recuperação de escrita e paginação de familiares | [Operações](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) e [familiares](arquitetura/CONTRATO_FAMILIARES_ETAPA_7.md) |
+| Episódios individuais de sorologia | [Contrato 7B-E1B](arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md) |
 | Revisão entre versões da planilha | [Contrato temporal](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md) |
 
 Especificações por módulo em `arquitetura/`: [avaliação clínica](arquitetura/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md),

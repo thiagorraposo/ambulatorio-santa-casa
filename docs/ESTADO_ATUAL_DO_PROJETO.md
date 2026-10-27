@@ -25,18 +25,21 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | Melhorias U3.1/U3.2/U3.3/U4.1 | Implementação e validação técnica próprias. | [Índice de evidências](validacoes/README.md); não concluem automaticamente U3/U4, VU1 ou fidelidade integral. |
 | Produto completo e Etapas 8–10 | Escopo planejado e critérios definidos. | Implementações adicionais, decisões específicas, implantação e homologação pendentes. |
 | M3 — 8C2U.1 | Seleção e simulação mínima XLSX pela interface, com worker real e dados sintéticos; build, 219 testes de componentes e quatro E2E passaram em rodadas proporcionais. | [Evidência e consulta do CI remoto](validacoes/VALIDACAO_8C2_U1.md); aceite pendente. Dry-run não persiste registros, mas consome sequências; C2B.1 continua pendente. |
+| M3 — 7B-E1B | API de episódios individuais de sorologia por atendimento, auditoria prospectiva 65 e recuperação; validações locais HTTP/SQL/importador aprovadas. | [Contrato](arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md) e [evidência/CI remoto](validacoes/VALIDACAO_7B_E1B.md); interface 7B-E1U, solicitação geral e aceite pendentes. |
 
 O próximo trabalho de M2 é concluir a comparação visual de U4.2 e obter aceite
 humano do percurso A1. U3/U4.1 foram reexercitadas pela suíte completa local e
 pelo CI do PR #16. Em M3, C2B.1 exige resolver o consumo de sequências antes de
-declarar a garantia ampliada de simulação. A sequência detalhada pertence
+declarar a garantia ampliada de simulação. A próxima unidade da frente de
+sorologias é 7B-E1U, consumindo o contrato publicado sem inferir diagnóstico.
+A sequência detalhada pertence
 ao [roadmap](PROXIMOS_PASSOS.md#próximo-trabalho).
 
 ## Componentes e ambientes
 
 - **PostgreSQL:** schema `ambulatorio`. A evidência persistente versionada cobre
   migrations 00–20 e 38 tabelas; incrementos posteriores foram validados em bancos
-  descartáveis, incluindo a migration 64 de correlação de operações. O
+  descartáveis, incluindo a migration 65 de captura prospectiva de sorologias. O
   [modelo físico](MODELO_FISICO_ATUAL.md) separa os ambientes; o
   [dump aplicado](evidencias/schema_atual_ambulatorio.sql) é a prova estrutural.
 - **Importador Python:** v1.7.0, manifesto semântico v1.4; reconciliação BZN,

@@ -1190,3 +1190,19 @@ Instalação limpa 02–63, atualizações 61→62→63, 34 testes SQL e suítes
 passaram somente em bancos descartáveis. A [matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md)
 registra a conclusão sintética de 5A–5E. Nada nesta seção descreve migrations
 aplicadas ao banco persistente nem justifica regenerar sua evidência estrutural.
+
+## Captura de sorologias individuais — migration 65
+
+A 65 reutiliza `sorologia_chagas` da migration 05 e ativa captura prospectiva de
+método, datas próprias, resultado, laboratório e observações. Acrescenta a
+resolução sorologia → diagnóstico → atendimento → paciente à auditoria existente.
+Não modifica linhas legadas, não faz backfill e não altera descoberta/resultado
+final. O upgrade 64→65 com uma linha anterior à captura tem teste reproduzível
+em `make db-sorologia-upgrade-test COMPACT=1`.
+
+A aplicação fica limitada a SELECT/INSERT no episódio; privilégios próprios do
+importador são preservados. Um guard mantém revisão temporal de sorologia
+fechada, apesar do catálogo compartilhado de captura. O
+[contrato 7B-E1B](arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md) e a
+[evidência](validacoes/VALIDACAO_7B_E1B.md) delimitam o recorte. Este incremento foi
+aplicado somente em bancos descartáveis; o dump persistente continua inalterado.

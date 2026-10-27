@@ -10,7 +10,7 @@ produzir seu diagnóstico. Uma nova execução do mesmo evento/ref cancela a ant
 | Job | Verificações | Limite |
 | --- | --- | --- |
 | Quality | `docs-check`, `manifest-check`, `repository-check`, `workflow-test` e actionlint | 10 minutos; não usa banco. |
-| Database | Migrations 00–64, `importer-test` e `docker-db-test` | 15 minutos; instala ripgrep explicitamente; SQL e importação sintéticos. |
+| Database | Migrations 00–65, `importer-test`, `docker-db-test` e `db-sorologia-upgrade-test` | 15 minutos; instala ripgrep explicitamente; SQL, importação e upgrade sem backfill sintéticos. |
 | Backend | `npm ci`, `backend-check`, `backend-clinical-test` e `backend-container-check` | 25 minutos; build, unitários, integração, contratos/autenticação/RBAC, fluxos clínicos, saúde e usuário não-root. |
 | Frontend | `npm ci` em ambas as aplicações, Chromium e `frontend-check` | 25 minutos; TypeScript/Vite, componentes e navegador com API/PostgreSQL reais sintéticos. |
 
@@ -20,8 +20,13 @@ armazenamento e identidade antes de aplicar o bootstrap. As portas
 `POSTGRES_PORT`, `APP_DB_PORT` e `SYNTHETIC_PG_PORT` são `55457`, exigidas por
 D3/D8; o Compose persistente local continua em `5433`. Backend e frontend
 criam bancos e logins próprios para suas suítes. O job Frontend prepara somente
-a role de origem com SQL00; seu runner aplica 02–64 no banco exclusivo.
+a role de origem com SQL00; seu runner aplica 02–65 no banco exclusivo.
 Nenhuma permissão clínica é concedida manualmente para fazer teste passar.
+
+`db-sorologia-upgrade-test` requer `SYNTHETIC_PG_HOST`, `SYNTHETIC_PG_PORT`,
+`SYNTHETIC_PG_USER` e `PGPASSWORD` de um servidor descartável confirmado.
+Cria/remove banco próprio, instala 02–64, prepara legado sintético e aplica 65,
+comprovando linha intacta, ausência de backfill e captura da alteração posterior.
 
 O composite `setup-node` fixa Node 24.15.0/npm 11.16.0; instalações usam lockfiles
 e `npm ci`. A imagem backend segue o Dockerfile e é validada separadamente.

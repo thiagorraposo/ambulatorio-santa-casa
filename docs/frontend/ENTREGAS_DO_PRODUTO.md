@@ -424,6 +424,12 @@ cada contrato antecede sua UI, preservando as decisões clínicas vigentes.
 
 **Estado e cobertura:** Planejado; não aceito. RQ-FIC-12; RQ-CHA-07–14; RQ-DIA-08–18 (telas/elementos na matriz).
 
+**Continuidade de 27/10:** GET paginado/POST de episódios individuais publicados
+tecnicamente, com [contrato próprio](../arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md),
+auditoria incremental 65 e recibo recuperável. [Validação sintética](../validacoes/VALIDACAO_7B_E1B.md)
+cobre autorização, repetição, null, concorrência e rollback. Interface 7B-E1U,
+solicitação geral (RQ-DIA-15–18), correções e aceite do pacote permanecem pendentes.
+
 **Escopo:** Método, solicitação/coleta/resultado com datas próprias, laboratório/observação; solicitação geral separada quando aprovada. Não reinterpretar resultados.
 
 **Dependências/decisões:** P-01 para prioridade; campos/modelo físico e fontes clínicas examinados antes do DTO; D2–D5 quando pertinentes.
