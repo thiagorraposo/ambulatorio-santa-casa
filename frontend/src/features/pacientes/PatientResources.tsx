@@ -6,7 +6,7 @@ import type {
   RetornoBznResponse, TratamentoBznResponse, RastreioFamiliarResponse,
 } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
-import { Card, EmptyState, QueryState } from '../../shared/ui';
+import { Card, EmptyState, QueryState, TableScroll } from '../../shared/ui';
 import { clinicalLabel, displayText, formatClinicalDate, formatNumeric, triState } from '../../shared/formatters';
 import { AttendanceLink, Collection, ExamList, Fields } from './components';
 import { pagePath, Pagination, usePage } from './pagination';
@@ -30,13 +30,13 @@ function FamilyResults({ path, snapshot }: { path: string; snapshot: RastreioFam
   return <div ref={content} role="region" tabIndex={-1} aria-label={`Resultados do rastreio ${snapshot.rastreioFamiliarId}`}>
     <QueryState query={query}>
       {data => data.familiares.length === 0 ? <EmptyState>Nenhum familiar nesta página do rastreio.</EmptyState> : (
-        <div className="table-scroll"><table className="data-table">
+        <TableScroll label={`Familiares do rastreio ${snapshot.rastreioFamiliarId}`}><table className="data-table">
           <caption>Familiares desta página do rastreio {snapshot.rastreioFamiliarId}</caption>
           <thead><tr><th scope="col">Identificação do familiar</th><th scope="col">Resultado de sorologia</th></tr></thead>
           <tbody>{data.familiares.map(family => <tr key={family.resultadoId}>
             <td>{displayText(family.identificacaoFamiliar)}</td><td>{clinicalLabel(family.resultadoSorologia)}</td>
           </tr>)}</tbody>
-        </table></div>
+        </table></TableScroll>
       )}
     </QueryState>
     <Pagination label={`familiares do rastreio ${snapshot.rastreioFamiliarId}`} {...page}
@@ -78,7 +78,7 @@ export function AttendanceFamilies({ path }: { path: string }) {
 
 export function AttendanceHistory({ pacienteId, path }: { pacienteId: string; path: string }) {
   return <Collection<AtendimentoResumoResponse> title="Histórico de atendimentos" path={`${path}/atendimentos`} pageScope="atendimentos">
-    {rows => <div className="table-scroll"><table className="data-table">
+    {rows => <TableScroll label="Histórico de atendimentos" wide><table className="data-table">
       <caption className="sr-only">Atendimentos desta página</caption>
       <thead><tr><th scope="col">Data</th><th scope="col">Atendimento</th><th scope="col">Contexto</th><th scope="col">Localização do prontuário</th><th scope="col">Observações</th></tr></thead>
       <tbody>{rows.map(item => <tr key={item.atendimentoId}>
@@ -88,7 +88,7 @@ export function AttendanceHistory({ pacienteId, path }: { pacienteId: string; pa
           Anexo a projeto: {triState(item.ambulatorioAnexoProjeto)}</td>
         <td>{displayText(item.localizacaoProntuario)}</td><td>{displayText(item.observacoes)}</td>
       </tr>)}</tbody>
-    </table></div>}
+    </table></TableScroll>}
   </Collection>;
 }
 

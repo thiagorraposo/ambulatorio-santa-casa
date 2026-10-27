@@ -377,7 +377,7 @@ O estado agregado acima não declara U3 integral, VU1 ou aceite clínico conclu�
 
 #### 7D-U4 — Layout, controles e mensagens são operáveis em telas menores e teclado
 
-**Estado e cobertura:** Planejado; não aceito. RQ-LOG-01–03, 05–06; RQ-NAV-01–02, 08–10, 13; RQ-LIS-12; RQ-ATD-15; RQ-CTA-01–02, 05–06; RQ-ERR-03, 05, 07; RQ-EST-01–07, 09–10 (telas/elementos na matriz).
+**Estado e cobertura:** Controles compartilhados implementados e validados tecnicamente no recorte abaixo em 26/10/2026; comparação visual e aceite humano pendentes. Evidências e limites em [U4.2](../validacoes/VALIDACAO_7D_U4_2.md). RQ-LOG-01–03, 05–06; RQ-NAV-01–02, 08–10, 13; RQ-LIS-12; RQ-ATD-15; RQ-CTA-01–02, 05–06; RQ-ERR-03, 05, 07; RQ-EST-01–07, 09–10 (telas/elementos na matriz).
 
 **Escopo:** U4.1 shell/login/conta/erros: navegação, foco e layout 320/390; U4.2 controles compartilhados de formulário/tabela/diálogo: rótulo, erro, status, Escape, foco. Aplicar a telas atuais sem copiar modais inseguros do Figma.
 
@@ -385,7 +385,8 @@ O estado agregado acima não declara U3 integral, VU1 ou aceite clínico conclu�
 sidebar desktop, foco de navegação/breakpoint, conta e erros; a
 [validação própria](../validacoes/VALIDACAO_7D_U4_1.md) registra o aceite técnico,
 11 cenários finais de navegador aprovados e os limites.
-Não introduz diálogo nem resolve P-01/P-03; U4.2 permanece pendente. O estado
+Não introduz diálogo nem resolve P-01/P-03. A evidência parcial de U4.2 está
+registrada separadamente. O estado
 agregado não declara U4 integral, VU1 ou aceite clínico concluídos.
 
 **Dependências/decisões:** P-03 para novos diálogos; 6A/7 atuais; conteúdo U1/U2/U3 quando afetado.

@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-10-26 — acessibilidade de tabelas e validação U4.2
+
+As tabelas compartilhadas passaram a oferecer uma região focável e nomeada
+para navegação/rolagem por teclado; a tabela larga do histórico preserva melhor
+a leitura em telas estreitas sem expandir a página. Regressões E2E de Axe,
+teclado, 320/390 px e zoom 200% passaram em PostgreSQL descartável. Comparação
+visual e aceite humano permanecem pendentes; detalhes em
+[U4.2](validacoes/VALIDACAO_7D_U4_2.md).
+
 ## 2026-10-26 — atendimento em cinco etapas e revisão (7D-U1/U2)
 
 O cadastro de atendimento agora segue cinco etapas com validação por etapa,

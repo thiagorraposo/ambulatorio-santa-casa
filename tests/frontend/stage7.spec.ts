@@ -722,6 +722,44 @@ test('7D-U1: cancelar pede decisão e preserva o rascunho sem escrever', async (
   expect(writes).toBe(0);
 });
 
+test('7D-U4.2: etapas do atendimento e diálogo funcionam por teclado em telas estreitas e zoom', async ({ page }) => {
+  const patient = await seedPatient('Acessibilidade em etapas');
+  await signIn(page, 'edicao', `${patient.path}/atendimentos/novo`);
+  await page.getByLabel('Data do atendimento', { exact: true }).fill('2026-04-12');
+  const cancel = page.getByRole('button', { name: 'Cancelar atendimento', exact: true });
+  let writes = 0;
+  page.on('request', request => {
+    if (request.method() === 'POST' && new URL(request.url()).pathname === `/v1${patient.path}/atendimentos`) writes++;
+  });
+
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    await assertFitsViewport(page);
+    await assertAccessible(page);
+    await page.getByRole('button', { name: 'Próxima etapa', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 2, name: 'Avaliação e Chagas' })).toBeFocused();
+    await assertFitsViewport(page);
+    await assertAccessible(page);
+    await page.getByRole('button', { name: 'Etapa anterior', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 2, name: 'Atendimento' })).toBeFocused();
+  }
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.evaluate(() => { document.documentElement.style.zoom = '2'; });
+  await assertFitsViewport(page);
+  await assertAccessible(page);
+  await cancel.focus();
+  await page.keyboard.press('Enter');
+  const dialog = page.getByRole('dialog', { name: 'Alterações não salvas', exact: true });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Continuar editando', exact: true })).toBeFocused();
+  await assertAccessible(page);
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(cancel).toBeFocused();
+  expect(writes).toBe(0);
+});
+
 test('7D: resposta perdida após commit exige verificação e não repete atendimento', async ({ page }) => {
   const patient = await seedPatient('Resposta perdida');
   await signIn(page, 'edicao', `${patient.path}/atendimentos/novo`);

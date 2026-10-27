@@ -33,6 +33,19 @@ for (const profile of ['consulta', 'edicao'] as const) {
     await signIn(page, profile, source);
     await expect(page.getByText('Observação exclusiva da consulta anterior U3.3', { exact: true })).toBeVisible();
     const history = page.getByRole('table');
+    if (profile === 'consulta') {
+      await page.setViewportSize({ width: 320, height: 844 });
+      await assertFitsViewport(page);
+      await assertAccessible(page);
+      const scroll = page.getByRole('region', { name: 'Histórico de atendimentos; tabela rolável horizontalmente quando necessário', exact: true });
+      await expect(scroll).toBeVisible();
+      expect(await scroll.evaluate(node => node.scrollWidth > node.clientWidth)).toBe(true);
+      await expect(history.locator('tbody tr').first().locator('td').first()).toHaveCSS('white-space', 'nowrap');
+      await scroll.focus();
+      await page.keyboard.press('ArrowRight');
+      await expect.poll(() => scroll.evaluate(node => node.scrollLeft)).toBeGreaterThan(0);
+      await page.setViewportSize({ width: 1280, height: 960 });
+    }
     await expect(history).toContainText('Unicamente pelo ambulatório: Não');
     await expect(history).toContainText('Anexo a projeto: Sim');
     await history.getByRole('link', { name: `Atendimento ${first.atendimentoId}`, exact: true }).click();

@@ -71,6 +71,9 @@ textarea { resize: vertical; }
 .filters .form-field { flex: 0 1 11rem; }
 .filters .button { flex: 0 0 auto; }
 .table-scroll { overflow-x: auto; max-width: 100%; }
+.table-scroll-wide .data-table { min-width: 48rem; }
+.table-scroll-wide td { overflow-wrap: break-word; }
+.table-scroll-wide td:nth-child(-n + 2) { white-space: nowrap; }
 .data-table { width: 100%; border-collapse: collapse; text-align: left; }
 .data-table th { background: #f6f8fb; color: #374151; font-size: .85rem; font-weight: 650; }
 .data-table th, .data-table td { padding: .85rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; overflow-wrap: anywhere; }
