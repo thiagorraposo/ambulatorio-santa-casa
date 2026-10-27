@@ -14,6 +14,7 @@ describe('Correlação de operações: contrato', () => {
   it.each([
     ['POST','/v1/pacientes','pacienteId'], ['PATCH','/v1/pacientes/9007199254740993','pacienteId'],
     ['POST','/v1/pacientes/1/atendimentos','atendimentoId'], ['PATCH','/v1/pacientes/1/atendimentos/2','atendimentoId'],
+    ['POST','/v1/pacientes/1/atendimentos/2/sorologias','sorologiaId'],
     ['POST','/v1/pacientes/1/tratamento-bzn','tratamentoId'], ['POST','/v1/pacientes/1/retornos-bzn','retornoId'],
     ['PUT','/v1/pacientes/1/projetos','projetoId'], ['PUT','/v1/pacientes/1/notificacao','notificacaoId'],
     ['POST','/v1/pacientes/1/encaminhamentos','encaminhamentoId'],
@@ -31,6 +32,9 @@ describe('Correlação de operações: contrato', () => {
     ['POST','/v1/pacientes/1/encaminhamentos/2/contrarreferencias/3'],
     ['POST','/v1/pacientes/9223372036854775808/atendimentos'],
     ['PATCH','/v1/pacientes/1/atendimentos/9999999999999999999'],
+    ['POST','/v1/pacientes/1/atendimentos/9223372036854775808/sorologias'],
+    ['PATCH','/v1/pacientes/1/atendimentos/2/sorologias/3'],
+    ['POST','/v1/pacientes/1/atendimentos/2/sorologias/3'],
   ])('recusa rota sem contrato %s %s', (method,path) => {
     expect(() => clinicalRoute(method,path)).toThrow(BadRequestException);
   });
@@ -49,5 +53,8 @@ describe('Correlação de operações: contrato', () => {
     expect(operationReceipt(clinicalRoute('PATCH','/v1/pacientes/1/pendencias/2'), {
       pendenciaId: '2', status: null, descricao: 'Não guardar',
     })).toEqual({ pendenciaId: '2', status: null });
+    expect(operationReceipt(clinicalRoute('POST','/v1/pacientes/1/atendimentos/2/sorologias'), {
+      sorologiaId: '9007199254740993', resultado: 'reagente', observacoes: 'Não guardar',
+    })).toEqual({ sorologiaId: '9007199254740993' });
   });
 });
