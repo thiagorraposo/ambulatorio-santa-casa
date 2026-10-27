@@ -39,8 +39,10 @@ atendimento `22`, notificação `2`.
   pela suíte completa do PR #13 e pela execução pós-merge na `main`; ambas
   passaram nos quatro jobs. Entre elas: revogação antes da escrita, resposta
   perdida após commit do atendimento, conflito de acompanhamento e troca de
-  identidade durante escrita. A validação remota do commit desta extensão ainda
-  depende do CI da PR que a contém.
+  identidade durante escrita. O conteúdo final do PR #15 passou nos quatro jobs
+  no run `40443651122` e foi integrado em `c496615`. O pós-merge
+  `40444653135` revelou falha de limpeza de processos em Quality, tratada
+  separadamente no [relatório do CI](VALIDACAO_CI_2026_10_26.md).
 
 O SQL-alvo foi confirmado com
 `SELECT current_database(), current_user, inet_server_port()` como
