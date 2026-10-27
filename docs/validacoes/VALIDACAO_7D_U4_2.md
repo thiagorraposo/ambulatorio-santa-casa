@@ -44,3 +44,37 @@ rolagem permanece por teclado, mas a aceitação da composição visual ainda ex
 revisão. O novo cenário U4.2 e as regressões de tabela passaram nos quatro jobs
 do PR #14 (run `40440449766`), e a execução pós-merge na `main` também passou
 (run `40442523647`).
+
+## Continuidade de 27/10 — remoção de itens por teclado
+
+A revisão encontrou perda de foco ao remover o último item e reutilização do
+botão ativo pelo item seguinte nas coleções indexadas. Um segundo Enter podia
+remover outro rascunho. A regressão do formulário de atendimento reproduziu o
+problema antes da correção. Exames, familiares, pendências, novos telefones e
+reações agora devolvem foco ao botão Adicionar da própria coleção após a
+atualização do DOM, inclusive quando esse botão estava desabilitado pelo limite.
+
+Build e 206 testes de componentes passaram. O E2E novo passou em 320 px,
+preservando valores distintos, removendo o último item, atingindo o limite de
+dez telefones e verificando que outro Enter adiciona em vez de apagar o próximo
+item. Axe e ausência de overflow passaram; nenhuma escrita clínica foi enviada
+pelo navegador. A primeira execução parou por tentar um link indisponível na
+página de edição; o teste foi corrigido para navegar pela ficha e passou em
+`/tmp/etapa6-frontend-G7uuCC`. O cenário anterior de etapas/diálogo também passou
+na execução inicial. CI remoto desta continuidade ainda pendente.
+
+Destino confirmado antes do SQL: `postgres|ambulatorio_ci|5432` no container
+`ambulatorio-m2-focus-20261027`, PostgreSQL 16.15 em tmpfs publicado em 55459.
+O runner criou e removeu seus bancos/logins aleatórios; dados somente sintéticos.
+Comparação visual integral e aceite humano continuam pendentes.
+
+O CI do PR #16 (`40446523662`) passou build/componentes e 54/55 E2E, incluindo
+o novo cenário de remoção. O cenário existente de troca BZN → retorno anual
+expirou esperando a resposta do POST em `submitWrite`. Três repetições locais
+passaram (`/tmp/etapa6-frontend-s1MTh5`); a causa desse episódio remoto não foi
+comprovada. O helper agora exige validade HTML antes de confirmar e, em falha,
+registra somente labels inválidos, estado ocupado e método/caminho/status das
+últimas respostas. Não registra valores, headers ou corpos, não reenvia e mantém
+o timeout/status esperado. A suíte completa local e a nova execução remota
+precisam confirmar o estado final; essa instrumentação não é declarada correção
+de causa raiz do timeout.

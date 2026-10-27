@@ -65,3 +65,23 @@ describe('edição de atendimento legado com data desconhecida', () => {
     expect(date).toBeRequired();
   });
 });
+
+it('restaura foco ao adicionar após remover pendências por teclado e preserva os outros valores', async () => {
+  const { user, writes } = await setup(null, true);
+  await user.type(screen.getByLabelText('Data do atendimento'), '2026-04-14');
+  for (let step = 0; step < 3; step++) await user.click(screen.getByRole('button', { name: 'Próxima etapa' }));
+  const add = screen.getByRole('button', { name: 'Adicionar pendência' });
+  await user.click(add);
+  await user.type(screen.getByLabelText('Descrição da pendência 1'), 'Primeira sintética');
+  await user.click(add);
+  await user.type(screen.getByLabelText('Descrição da pendência 2'), 'Segunda sintética');
+  screen.getByRole('button', { name: 'Remover pendência 1' }).focus();
+  await user.keyboard('{Enter}');
+  expect(screen.getByLabelText('Descrição da pendência 1')).toHaveValue('Segunda sintética');
+  expect(add).toHaveFocus();
+  screen.getByRole('button', { name: 'Remover pendência 1' }).focus();
+  await user.keyboard('{Enter}');
+  expect(screen.queryByLabelText('Descrição da pendência 1')).not.toBeInTheDocument();
+  expect(add).toHaveFocus();
+  expect(writes).not.toHaveBeenCalled();
+});
