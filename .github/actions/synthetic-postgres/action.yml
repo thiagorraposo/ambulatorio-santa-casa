@@ -40,7 +40,7 @@ runs:
         if [ "$FULL_MIGRATIONS" = true ]; then
           make docker-migrate COMPOSE="$CI_COMPOSE"
         else
-          # O runner frontend criará seu próprio banco e aplicará 02–64 nele.
+          # O runner frontend criará seu próprio banco e aplicará 02–65 nele.
           # Somente a role de origem global precisa existir neste servidor novo.
           test "$FULL_MIGRATIONS" = false
           psql -X -h "$SYNTHETIC_PG_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1 -f sql/00_criar_banco.sql

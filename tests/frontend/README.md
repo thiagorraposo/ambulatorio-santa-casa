@@ -23,7 +23,7 @@ os testes automáticos continuam fixados em 60 segundos. O
 [roteiro clínico](../../docs/validacoes/ROTEIRO_REVISAO_CLINICA_ETAPA_7.md)
 orienta a execução e o registro do parecer da equipe.
 
-Migrations 02–64 são aplicadas explicitamente no banco `etapa6_frontend_*`;
+Migrations 02–65 são aplicadas explicitamente no banco `etapa6_frontend_*`;
 00/01 são substituídas pela criação do banco/schema exclusivos. O login técnico
 dedicado usa `scripts/configurar_login_aplicacao.sql` e `vinculo_explicito`.
 Importação HTTP sintética usa worker real com outro login, limitado à role
