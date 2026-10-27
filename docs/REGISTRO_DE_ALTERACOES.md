@@ -7,6 +7,14 @@ ao botão Adicionar da mesma coleção. Isso impede perder a posição ou apagar
 próximo rascunho por Enter repetido. Build, 206 testes unitários e a regressão
 E2E sintética passaram; detalhes e limites na [evidência U4.2](validacoes/VALIDACAO_7D_U4_2.md).
 
+## 2026-10-27 — sincronização da limpeza de processos no teste de workflow
+
+Corrigida a corrida de `ProcessLookupError` registrada em Quality após o merge
+do PR #15. O teste confirma prontidão do filho e usa um handle de processo para
+verificar término e limpar sem atingir PID reciclado. Workflow passou 30 testes
+e o caso focado passou 100 repetições; a falha natural anterior não se reproduziu
+localmente. Evidência e limites no [relatório do CI](validacoes/VALIDACAO_CI_2026_10_26.md).
+
 ## 2026-10-27 — jornada integrada e confirmação única (7D-A1)
 
 O percurso de cadastro, atendimento, acompanhamentos, notificação e histórico
