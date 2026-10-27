@@ -1,7 +1,8 @@
 # 8C2U.1 — seleção e simulação mínima de XLSX
 
-Data: 2026-10-27. Implementação e provas locais sintéticas; CI remoto e aceite
-humano pendentes. Unidade independente de M3 baseada no H14 existente, sem nova
+Data: 2026-10-27. Implementação e provas locais sintéticas; aceite humano
+pendente. Resultados remotos estão no [CI da branch](https://github.com/thiagorraposo/ambulatorio-santa-casa/actions?query=branch%3Afeat%2Fimportacao-simulacao).
+Unidade independente de M3 baseada no H14 existente, sem nova
 decisão clínica, confirmação da importação ou relatório ampliado.
 
 ## Comportamento e contrato
@@ -23,6 +24,8 @@ desabilitada e a configuração de produção não foi alterada.
 - Build TypeScript/Vite aprovado; 23 arquivos/218 testes unitários passaram.
   Há testes de arquivo/limite, perfil, código, cancelamento/troca, resposta tardia,
   resposta idempotente, segredo sanitizado e transporte JSON/multipart.
+- Após integrar o foco/CI da `main` (`a2dbd30`), build e a suíte de componentes
+  passaram novamente: 23 arquivos/219 testes, log `/tmp/ambulatorio-check-ojfdx5ck/output.log`.
 - Três E2E `8C2U.1` passaram sem retry/skip em
   `/tmp/etapa6-frontend-xhfU1l/results.json`: simulação real/duplo clique,
   consulta sem formulário e perda da resposta real após HTTP 201, sem reenvio.

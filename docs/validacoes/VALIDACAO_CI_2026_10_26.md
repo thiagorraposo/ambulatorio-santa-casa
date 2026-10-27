@@ -210,5 +210,7 @@ nenhum script de produção, teste clínico ou expectativa foi desativado.
 
 `make workflow-test COMPACT=1` passou 30/30, o teste focado corrigido passou
 100 repetições e `git diff --check` passou. Todos usam processos sintéticos,
-sem Docker, SQL ou dados clínicos. A publicação e o CI da correção ainda precisam
-ser conferidos antes de considerar a `main` estabilizada.
+sem Docker, SQL ou dados clínicos. O PR #17 passou nos quatro jobs (run
+`40445313791`) e foi integrado em `0603259`. O pós-merge na `main` também passou
+nos quatro jobs (run `40446442622`). A ocorrência posterior de timeout de
+acompanhamento e sua instrumentação estão na [evidência U4.2](VALIDACAO_7D_U4_2.md).

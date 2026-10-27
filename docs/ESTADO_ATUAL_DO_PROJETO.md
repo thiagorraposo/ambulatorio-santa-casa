@@ -20,15 +20,16 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | Etapa 7 original | Implementação e validação técnica sintética concluídas em 15/10, com correções R7-01–07; M1 aprovado em 26/10 conforme confirmação do responsável do projeto. | [Relatório vigente](validacoes/VALIDACAO_ETAPA_7.md) e [registro do parecer](validacoes/ROTEIRO_REVISAO_CLINICA_ETAPA_7.md). |
 | M2 — 7A-U1 | Cadastro precedido por busca implementado e validado tecnicamente em 26/10. | [Evidência](validacoes/VALIDACAO_7A_U1.md); aceite da VU1 e do percurso integrado permanecem pendentes. |
 | M2 — 7D-U1/U2 | Formulário em cinco etapas, revisão e confirmação única implementados e validados tecnicamente em 26/10. | [Evidência](validacoes/VALIDACAO_7D_U1_U2.md); aceite de produto/equipe permanece pendente. |
-| M2 — 7D-U4.2 | Tabelas com região rolável focável e legibilidade preservada no histórico; formulários e diálogo exercitados em 320/390 px e zoom 200%. | [Evidência](validacoes/VALIDACAO_7D_U4_2.md); comparação visual integral, revisão humana e aceite do pacote permanecem pendentes. |
+| M2 — 7D-U4.2 | Tabelas com região rolável focável e legibilidade preservada no histórico; remoção de itens devolve foco à coleção. Formulários e diálogo exercitados em 320/390 px e zoom 200%; 55 E2E locais e quatro jobs do PR #16 passaram. | [Evidência](validacoes/VALIDACAO_7D_U4_2.md); comparação visual integral, revisão humana e aceite do pacote permanecem pendentes. |
 | M2 — 7D-A1 | Jornada sintética pela interface, releitura de recursos, notificação e confirmação única validadas tecnicamente em 27/10; PR #15 passou Quality, Database, Backend e Frontend no run `40442560575`. | [Evidência](validacoes/VALIDACAO_7D_A1.md); aceite da equipe clínica/produto pendente. P-03 segue bloqueando qualquer mudança em semântica de concorrência. |
 | Melhorias U3.1/U3.2/U3.3/U4.1 | Implementação e validação técnica próprias. | [Índice de evidências](validacoes/README.md); não concluem automaticamente U3/U4, VU1 ou fidelidade integral. |
 | Produto completo e Etapas 8–10 | Escopo planejado e critérios definidos. | Implementações adicionais, decisões específicas, implantação e homologação pendentes. |
-| M3 — 8C2U.1 | Seleção e simulação mínima XLSX pela interface, com worker real e dados sintéticos; build, 218 testes de componentes e quatro E2E passaram em rodadas proporcionais. | [Evidência](validacoes/VALIDACAO_8C2_U1.md); CI/aceite pendentes. Dry-run não persiste registros, mas consome sequências; C2B.1 continua pendente. |
+| M3 — 8C2U.1 | Seleção e simulação mínima XLSX pela interface, com worker real e dados sintéticos; build, 219 testes de componentes e quatro E2E passaram em rodadas proporcionais. | [Evidência e consulta do CI remoto](validacoes/VALIDACAO_8C2_U1.md); aceite pendente. Dry-run não persiste registros, mas consome sequências; C2B.1 continua pendente. |
 
-O próximo trabalho é estabilizar o teste de processos no CI pós-merge de A1,
-concluir a revisão de U4.2 e obter aceite humano de M2. U3/U4.1 foram
-reexercitadas pela suíte frontend do PR #15. A sequência detalhada pertence
+O próximo trabalho de M2 é concluir a comparação visual de U4.2 e obter aceite
+humano do percurso A1. U3/U4.1 foram reexercitadas pela suíte completa local e
+pelo CI do PR #16. Em M3, C2B.1 exige resolver o consumo de sequências antes de
+declarar a garantia ampliada de simulação. A sequência detalhada pertence
 ao [roadmap](PROXIMOS_PASSOS.md#próximo-trabalho).
 
 ## Componentes e ambientes
@@ -50,12 +51,12 @@ ao [roadmap](PROXIMOS_PASSOS.md#próximo-trabalho).
   Recibos/rascunhos têm limites de sessão; não há garantia geral de idempotência
   de POST entre sessões. [Guia técnico](FRONTEND.md) e
   [protocolo de recuperação](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md).
-- **CI:** Quality, Database, Backend e Frontend passaram no PR #15 final
-  (run `40443651122`); A1 foi integrada em `c496615`. A execução pós-merge
-  `40444653135` revelou `ProcessLookupError` na limpeza do teste de workflow
-  de Quality; correção e limites estão no [relatório do CI](validacoes/VALIDACAO_CI_2026_10_26.md).
-  O workflow usa Chromium/API e PostgreSQL descartável. O run pós-merge anterior
-  de U4.2 (`40442523647`) passou nos quatro jobs.
+- **CI:** Quality, Database, Backend e Frontend passaram na `main` após a
+  correção de processos (run `40446442622`, commit `0603259`) e no PR #16 final
+  (run `40448281960`, integrado em `a2dbd30`). O workflow usa Chromium/API e
+  PostgreSQL descartável. A falha de processos e o timeout isolado de acompanhamento
+  mantêm evidências/limites nos relatórios de [CI](validacoes/VALIDACAO_CI_2026_10_26.md)
+  e [U4.2](validacoes/VALIDACAO_7D_U4_2.md); não se declara causa comprovada do timeout.
 
 ## Regras e limites vigentes
 

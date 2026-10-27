@@ -61,7 +61,7 @@ item. Axe e ausência de overflow passaram; nenhuma escrita clínica foi enviada
 pelo navegador. A primeira execução parou por tentar um link indisponível na
 página de edição; o teste foi corrigido para navegar pela ficha e passou em
 `/tmp/etapa6-frontend-G7uuCC`. O cenário anterior de etapas/diálogo também passou
-na execução inicial. CI remoto desta continuidade ainda pendente.
+na execução inicial. O resultado remoto final está registrado abaixo.
 
 Destino confirmado antes do SQL: `postgres|ambulatorio_ci|5432` no container
 `ambulatorio-m2-focus-20261027`, PostgreSQL 16.15 em tmpfs publicado em 55459.
@@ -75,6 +75,8 @@ passaram (`/tmp/etapa6-frontend-s1MTh5`); a causa desse episódio remoto não fo
 comprovada. O helper agora exige validade HTML antes de confirmar e, em falha,
 registra somente labels inválidos, estado ocupado e método/caminho/status das
 últimas respostas. Não registra valores, headers ou corpos, não reenvia e mantém
-o timeout/status esperado. A suíte completa local e a nova execução remota
-precisam confirmar o estado final; essa instrumentação não é declarada correção
-de causa raiz do timeout.
+o timeout/status esperado. A suíte local completa passou 55/55 sem retry/skip
+(`make frontend-e2e COMPACT=1`, log `/tmp/ambulatorio-check-qditye4y/output.log`,
+artefatos `/tmp/etapa6-frontend-iVL1Sw`); Quality, Database, Backend e Frontend
+passaram no run final `40448281960`. O PR #16 foi integrado em `a2dbd30`.
+Essa instrumentação não é declarada correção de causa raiz do timeout.

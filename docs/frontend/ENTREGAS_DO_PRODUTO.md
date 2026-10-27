@@ -1054,7 +1054,8 @@ cada contrato antecede sua UI, preservando as decisões clínicas vigentes.
 e simulação mínima H14, com [validação sintética](../validacoes/VALIDACAO_8C2_U1.md).
 Não implementa confirmação, relatório rico ou conflito. O dry-run atual não
 persiste registros, mas consome sequências; C2B.1 e seu aceite ampliado continuam
-pendentes. CI remoto e aceite da unidade ainda precisam ser conferidos.
+pendentes. Resultados remotos estão vinculados na evidência; a unidade não tem
+aceite humano registrado.
 
 **Escopo:** C2U.1 seleção real/finalidade/código/cancelar/dry-run mínimo; C2U.2 confirmação e lote efetivo; C2U.3 relatório rico/metadados; C2U.4 conflito autorizado. Quatro unidades; não bloquear U.1/U.2 pelo relatório ainda ausente.
 
