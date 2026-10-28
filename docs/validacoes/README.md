@@ -24,7 +24,8 @@ de testes não é uma contagem atual e aceite sintético não autoriza dados rea
 | U3.3 — histórico/detalhe/exames | [Validação](VALIDACAO_7D_U3_3.md) | Provas técnicas encerradas em 21/10; não é fidelidade integral. |
 | U4.1 — navegação/conta/erros | [Validação](VALIDACAO_7D_U4_1.md) | Não aceita controles/diálogos de U4.2 por associação. |
 | 8C2U.1 — seleção/simulação mínima XLSX | [Validação](VALIDACAO_8C2_U1.md) | Worker real, zero registros persistidos, permissões e resposta perdida; consome sequências (limite C2B.1), sem confirmação da importação/aceite humano. |
-| 7B-E1B — episódios individuais de sorologia | [Validação](VALIDACAO_7B_E1B.md) | Contrato GET/POST, auditoria prospectiva, upgrade sem backfill, autorização e recuperação; interface, solicitação geral e aceite pendentes. |
+| 7B-E1B — episódios individuais de sorologia | [Validação](VALIDACAO_7B_E1B.md) | Contrato GET/POST, auditoria prospectiva, upgrade sem backfill, autorização e recuperação; interface tem evidência própria; solicitação geral e aceite pendentes. |
+| 7B-E1U — interface de episódios de sorologia | [Validação](VALIDACAO_7B_E1U.md) | Escopo, isolamento e evidências específicas da interface; solicitação geral e aceite clínico permanecem separados. |
 | Ordenação numérica de identificadores | [Validação](VALIDACAO_ORDENACAO_IDENTIFICADORES.md) | Recursos e cenários expressamente cobertos. |
 
 ## Evidências de origem por módulo

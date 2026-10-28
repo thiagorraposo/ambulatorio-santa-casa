@@ -207,6 +207,8 @@ Minha conta mostra a identidade retornada pela API.
 | `/pacientes/:pacienteId/registrar?tipo=...` | Salvamento independente por módulo clínico. |
 | `/pacientes/:pacienteId?aba=...` | Ficha com aba representada na URL. |
 | `/pacientes/:pacienteId/atendimentos/:atendimentoId` | Detalhe de atendimento e coleções paginadas por limit/offset. |
+| `/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias` | Episódios individuais, lista paginada e leitura dos sete campos. |
+| `/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias/nova` | Rascunho, revisão, confirmação independente e recibo recuperável. |
 | `/minha-conta` | Identidade e perfil obtidos da API. |
 
 Sessão, cache de consultas e estado local de filtros têm responsabilidades
@@ -267,6 +269,17 @@ por vínculo; um perfil de edição não garante cadastro em qualquer política.
 `GET /v1/pacientes/capacidades` informa somente `podeCadastrar`, segundo a mesma
 política revalidada no POST. Cadastro e seu formulário só aparecem após essa
 confirmação; carga/falha não concede capacidade implicitamente.
+
+Sorologias individuais têm [contrato próprio](arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md)
+e rotas por atendimento. O formulário revisa sete campos antes de confirmar;
+não altera descoberta, diagnóstico ou resultado final. O resultado ausente é
+apresentado como desconhecido/não registrado, distinto de “não informado”.
+Cada confirmação cria um episódio, mesmo que o método se repita. O rascunho pode
+ser preservado ao sair ou descartado conscientemente antes do envio; a intenção
+incerta continua bloqueada até verificação. Recibos permanecem na sessão ao
+iniciar outro episódio. Consulta somente lê; solicitação geral, edição e exclusão
+de episódios persistidos não foram habilitadas. O retorno se limita ao mesmo
+paciente/atendimento. [Evidência da interface](validacoes/VALIDACAO_7B_E1U.md).
 
 Os tipos de `/registrar` são `bzn`, `retorno-bzn`, `projeto`, `notificacao`,
 `encaminhamento`, `contrarreferencia`, `retorno-anual`, `ocorrencia-anual` e

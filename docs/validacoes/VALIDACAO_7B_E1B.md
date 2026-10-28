@@ -51,8 +51,8 @@ testes, passaram seis de seis; o protocolo de produção não foi flexibilizado.
 
 ## Continuidade
 
-Próxima unidade: 7B-E1U, integrando formulário/revisão/lista por episódio e
-recuperação ao atendimento/ficha. Solicitação geral e correções persistidas
+A [unidade 7B-E1U](VALIDACAO_7B_E1U.md) registra a continuidade de
+formulário/revisão/lista por episódio e recuperação ao atendimento/ficha. Solicitação geral e correções persistidas
 continuam pendentes de suas unidades/contratos; não se declara o pacote clínico
 completo nem aceite de M3. P-03 de projeto/notificação/pendências permanece aberto.
 
@@ -63,4 +63,9 @@ aprovou Quality, Database e Backend, mas recusou a migration 65 no preparador
 E2E do frontend: seu limite explícito permanecia em 64. Os 219 testes de
 componentes passaram; os testes de navegador não chegaram a executar nessa
 tentativa. O limite foi atualizado para 65, preservando a recusa de migrations
-fora da base esperada. A execução posterior deve comprovar a jornada completa.
+fora da base esperada. A [execução posterior](https://github.com/thiagorraposo/ambulatorio-santa-casa/actions/runs/40555326593)
+aprovou os quatro jobs, incluindo o navegador com API real. O PR #19 foi
+integrado em `b4a2c4b`, e os quatro jobs da
+[`main`](https://github.com/thiagorraposo/ambulatorio-santa-casa/actions/runs/40557422707)
+passaram. Nenhuma alteração na base persistente. A continuidade da interface
+é documentada na unidade 7B-E1U, sem transformar esta prova em aceite clínico.

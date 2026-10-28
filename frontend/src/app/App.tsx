@@ -13,6 +13,8 @@ import { DraftProvider } from '../shared/writing';
 import { AppNavigation } from './AppNavigation';
 import { ImportacaoDetalhePage, ImportacoesPage } from '../features/importacoes/ImportacoesPage';
 import ImportacaoSimulacaoPage from '../features/importacoes/ImportacaoSimulacaoPage';
+import SorologiasPage from '../features/sorologias/SorologiasPage';
+import SorologiaCreatePage from '../features/sorologias/SorologiaCreatePage';
 
 const profiles = { consulta: 'Consulta', edicao: 'Edição', administracao: 'Administração' };
 
@@ -176,6 +178,8 @@ export default function App() {
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/editar" element={<AttendanceFormPage />} />
       <Route path="/pacientes/:pacienteId" element={<PatientPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId" element={<AttendancePage />} />
+      <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias" element={<SorologiasPage />} />
+      <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias/nova" element={<SorologiaCreatePage />} />
       <Route path="/importacoes" element={<ImportacoesPage />} />
       <Route path="/importacoes/simular" element={<ImportacaoSimulacaoPage />} />
       <Route path="/importacoes/lotes/:loteId" element={<ImportacaoDetalhePage />} />

@@ -1,5 +1,17 @@
 # Registro de Alterações
 
+## 2026-10-27 — interface de sorologias por atendimento (7B-E1U)
+
+Lista paginada própria, sete campos independentes, revisão e confirmação única
+consomem H17. Rascunho, descarte consciente, recibos e recuperação por UUID usam
+os mecanismos existentes; consulta permanece somente leitura. Build e 228
+componentes passaram com dois workers. A rodada E2E teve 62/63 aprovados; o
+seletor incorreto de um teste foi corrigido e seu cenário inteiro passou em
+banco novo. Zero testes ignorados. [Evidência](validacoes/VALIDACAO_7B_E1U.md)
+registra carga local/timeouts, rodadas, IDs sintéticos e avisos não bloqueantes.
+A API foi integrada no PR #19 e validada na main. Solicitação geral, correções
+persistidas, comparação visual integral e aceite humano permanecem pendentes.
+
 ## 2026-10-27 — episódios individuais de sorologia (7B-E1B)
 
 Publicados GET paginado e POST por paciente/atendimento, com métodos repetidos,

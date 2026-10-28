@@ -427,8 +427,9 @@ cada contrato antecede sua UI, preservando as decisões clínicas vigentes.
 **Continuidade de 27/10:** GET paginado/POST de episódios individuais publicados
 tecnicamente, com [contrato próprio](../arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md),
 auditoria incremental 65 e recibo recuperável. [Validação sintética](../validacoes/VALIDACAO_7B_E1B.md)
-cobre autorização, repetição, null, concorrência e rollback. Interface 7B-E1U,
-solicitação geral (RQ-DIA-15–18), correções e aceite do pacote permanecem pendentes.
+cobre autorização, repetição, null, concorrência e rollback. A interface tem
+[evidência própria 7B-E1U](../validacoes/VALIDACAO_7B_E1U.md). Solicitação geral
+(RQ-DIA-15–18), correções e aceite do pacote permanecem pendentes.
 
 **Escopo:** Método, solicitação/coleta/resultado com datas próprias, laboratório/observação; solicitação geral separada quando aprovada. Não reinterpretar resultados.
 
@@ -445,6 +446,14 @@ solicitação geral (RQ-DIA-15–18), correções e aceite do pacote permanecem 
 #### 7B-E1U — Registrar e consultar sorologias por episódio
 
 **Estado e cobertura:** Planejado; não aceito. RQ-FIC-12; RQ-CHA-07–14; RQ-DIA-08–21 (telas/elementos na matriz).
+
+**Continuidade de 27/10:** interface implementada sobre H17, com lista por
+atendimento, sete campos, revisão, confirmação única, rascunhos e recibos.
+Build e 228 testes de componentes passaram; os 63 cenários E2E foram cobertos
+em rodadas proporcionais, com o seletor de um cenário corrigido e repetido.
+[Validação integrada](../validacoes/VALIDACAO_7B_E1U.md) registra as tentativas.
+Solicitação geral, alteração de episódios salvos e aceite humano permanecem
+pendentes; esta implementação não concede aceite do pacote agregado.
 
 **Escopo:** Método, solicitação/coleta/resultado com datas próprias, laboratório/observação; solicitação geral separada quando aprovada. Não reinterpretar resultados. Uma seção/formulário por módulo; revisão lista todos os campos.
 
