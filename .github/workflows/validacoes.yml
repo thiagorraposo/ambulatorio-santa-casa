@@ -91,6 +91,10 @@ jobs:
         env:
           PGPASSWORD: ${{ env.POSTGRES_PASSWORD }}
         run: make db-sorologia-upgrade-test COMPACT=1
+      - name: Validar upgrade da captura de condição sem backfill
+        env:
+          PGPASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        run: make db-condicao-upgrade-test COMPACT=1
       - name: Preservar logs filtrados em falha
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

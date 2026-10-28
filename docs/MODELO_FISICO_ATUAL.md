@@ -1206,3 +1206,15 @@ fechada, apesar do catálogo compartilhado de captura. O
 [contrato 7B-E1B](arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md) e a
 [evidência](validacoes/VALIDACAO_7B_E1B.md) delimitam o recorte. Este incremento foi
 aplicado somente em bancos descartáveis; o dump persistente continua inalterado.
+
+## Incremento 66 — condição por atendimento (sintético)
+
+A migration 66 reutiliza `condicao_chagas` da SQL06 e habilita captura prospectiva
+de seis campos, sem backfill ou novos campos clínicos. Preserva unicidade por
+atendimento e concessões próprias do importador; aplicação somente cria/consulta.
+Revisão temporal fica bloqueada. Corrige somente o alias TRUNCATE da função de
+auditoria vigente, preservando seus patches39/42, proprietário e ACL.
+
+Validada em servidor descartável; não aplicada ao persistente. A evidência
+estrutural versionada permanece intacta. [Contrato](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md)
+e [validação](validacoes/VALIDACAO_7B_E2B_1.md).

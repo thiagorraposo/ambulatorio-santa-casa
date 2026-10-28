@@ -1,5 +1,17 @@
 # Registro de Alterações
 
+## 2026-10-28 — condição de Chagas por atendimento (7B-E2B.1)
+
+GET/POST de seis campos existentes, criação única sem sobrescrita e recibo
+`condicaoChagasId`. A migration 66 ativa auditoria prospectiva sem backfill e
+mantém revisão temporal fechada. Corrige o alias TRUNCATE na definição vigente,
+preservando os patches39/42 e proprietário/ACL; históricas intactas.
+Build, 177 unidades, 83 HTTP, 37 scripts SQL, upgrade 65→66 e importador passaram em
+ambientes descartáveis. [Contrato](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md)
+e [evidência](validacoes/VALIDACAO_7B_E2B_1.md) registram falhas/correções e
+limites. Interface, complicações, sintomas específicos sem contrato e aceite
+humano permanecem separados; nenhuma base persistente alterada.
+
 ## 2026-10-28 — isolamento das asserções do ledger HTTP
 
 Três testes de publicação/simulação exigem o ledger integral inalterado antes e

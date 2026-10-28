@@ -1,6 +1,6 @@
 # Roadmap do Projeto
 
-Atualizado em: 2026-10-27
+Atualizado em: 2026-10-28
 
 **Continuidade de 2026-10-15:** as sete lacunas da reauditoria de 05/10 receberam
 correções de código e novas provas sintéticas. O percurso integrado original 7D
@@ -577,6 +577,15 @@ sem classificação automática ou decisão clínica inventada.
 Solicitação geral e correções persistidas mantêm seus contratos/aceites pendentes.
 Esse avanço não substitui o aceite humano de M2 nem define a ordem de todas as
 famílias restantes de M3.
+
+Continuidade de 28/10: 7B-E1U foi integrada no PR #20. Seu CI de main encontrou
+uma falha antiga de sincronização do teste anual, tratada no [PR #21](https://github.com/thiagorraposo/ambulatorio-santa-casa/pull/21);
+os quatro cenários novos de sorologia passaram. A API [7B-E2B.1](validacoes/VALIDACAO_7B_E2B_1.md)
+cobre somente condição (CON-01–06), sem classificação automática. Próximo
+recorte técnico da família: contrato de complicações repetíveis CON-07–10.
+Sintomas específicos ainda sem campos/domínios aprovados exigem decisão própria;
+não declarar 7B-E2B/E2U completos. Aceite humano de M2 permanece separado. A branch `feat/condicao-chagas` incorporou a estabilização em `8736b0d` e passou
+83/83 HTTP; publicação/integração exigem CI remoto e conferência na main.
 
 ### Preparação da migração da planilha real
 

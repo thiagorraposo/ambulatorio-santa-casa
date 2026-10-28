@@ -38,7 +38,7 @@ COMPACT ?= 0
 COMPACT_GOALS := $(if $(filter 1,$(COMPACT)),$(if $(_COMPACT_RUNNING),,$(MAKECMDGOALS)))
 ifneq ($(strip $(COMPACT_GOALS)),)
 COMPACT_TARGETS := git-status docs-check manifest-check manifest-source-check repository-check \
-	db-check db-test db-sorologia-upgrade-test project-check docker-config-check docker-db-check docker-db-test \
+	db-check db-test db-sorologia-upgrade-test db-condicao-upgrade-test project-check docker-config-check docker-db-check docker-db-test \
 	docker-project-check docker-restore-check docker-restore-test importer-test \
 	backend-build backend-unit-test backend-integration-test backend-foundation-e2e \
 	backend-check backend-container-check backend-clinical-test workflow-test \
@@ -56,7 +56,7 @@ _compact-run:
 		-- $(MAKE) --no-print-directory _COMPACT_RUNNING=1 $(COMPACT_GOALS)
 else
 
-.PHONY: help git-status db-check db-test db-sorologia-upgrade-test db-migrate db-migrate-one docs-check project-check repository-check \
+.PHONY: help git-status db-check db-test db-sorologia-upgrade-test db-condicao-upgrade-test db-migrate db-migrate-one docs-check project-check repository-check \
 	db-schema-dump docker-config-check docker-up docker-status docker-wait \
 	docker-stop docker-recreate docker-logs docker-migrate docker-db-check docker-db-test \
 	docker-schema-dump docker-project-check docker-destroy \
@@ -77,6 +77,7 @@ help:
 	@echo "  make db-check        Valida conexão, banco, schema e usuário"
 	@echo "  make db-test         Executa todos os testes em tests/sql/"
 	@echo "  make db-sorologia-upgrade-test Valida upgrade 64→65 em banco descartável (SYNTHETIC_PG_*)"
+	@echo "  make db-condicao-upgrade-test Valida upgrade 65→66 em banco descartável (SYNTHETIC_PG_*)"
 	@echo "  make docs-check      Verifica documentos obrigatórios e não vazios"
 	@echo "  make manifest-check  Valida o manifesto físico v1 versionado"
 	@echo "  make manifest-source-check Compara manifesto com cabeçalhos da fonte local ignorada"
@@ -143,6 +144,9 @@ repository-check:
 
 db-sorologia-upgrade-test:
 	@bash tests/backend/test_sorologia_upgrade.sh
+
+db-condicao-upgrade-test:
+	@bash tests/backend/test_condicao_upgrade.sh
 
 db-check:
 	@command -v psql >/dev/null 2>&1 || { echo "Erro: psql não encontrado."; exit 1; }

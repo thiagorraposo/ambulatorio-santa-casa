@@ -117,11 +117,11 @@ fi
 createdb "$task_db"
 task_db_created=true
 psql -X -q -d "$task_db" -v ON_ERROR_STOP=1 -c "CREATE SCHEMA ambulatorio AUTHORIZATION $PGUSER; ALTER DATABASE $task_db SET search_path TO ambulatorio,public" >"$task_dir/migrations.log" 2>&1
-printf 'Aplicando migrations 02–65 no banco descartável %s\n' "$task_db"
+printf 'Aplicando migrations 02–66 no banco descartável %s\n' "$task_db"
 for task_migration in "$task_root"/sql/[0-9][0-9]_*.sql; do
   task_name="$(basename "$task_migration")"
   [[ "$task_name" == 00_* || "$task_name" == 01_* ]] && continue
-  if [[ "${task_name:0:2}" > 65 ]]; then
+  if [[ "${task_name:0:2}" > 66 ]]; then
     printf 'Migration fora da base esperada da Etapa 6: %s\n' "$task_name" >&2
     exit 1
   fi
