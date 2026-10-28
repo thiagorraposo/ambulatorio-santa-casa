@@ -1,5 +1,28 @@
 # Registro de Alterações
 
+## 2026-10-28 — isolamento das asserções do ledger HTTP
+
+Três testes de publicação/simulação exigem o ledger integral inalterado antes e
+depois, em vez de assumir banco globalmente vazio. Outra suíte pode criar
+aplicações legítimas no mesmo banco sintético. A comparação de todos os registros
+preserva a exigência de nenhum efeito e remove dependência de ordem; não limpa
+fixtures nem ignora mutações. [Diagnóstico e validação](validacoes/VALIDACAO_CI_2026_10_26.md).
+
+## 2026-10-28 — sincronização do cenário de retorno anual no CI
+
+O CI da main `40696736224` recusou o cenário 7D-R1 antes do POST por data HTML
+inválida. O teste não distinguia a tela anterior de retorno BZN ao preencher a
+data. Repetição original 20/20 não reproduziu a falha natural; interleaving
+forçado comprovou que o preenchimento podia atingir o formulário antigo e
+deixar a data anual vazia, sem provar exclusivamente a causa histórica remota.
+Aguardar/escopar o formulário anual e verificar a data após o resumo fortalece
+o cenário. Diagnóstico acrescenta flags de validade sem valores clínicos;
+aplicação, contratos, timeouts e expectativas de gravação não foram alterados.
+A versão corrigida passou 20/20 repetições e 5/5 cenários do arquivo, sem retries;
+documentação, consistência e diff check passaram. Validação remota permanece
+condicionada ao pipeline completo do PR e da main.
+[Evidência e limites](validacoes/VALIDACAO_CI_2026_10_26.md).
+
 ## 2026-10-27 — interface de sorologias por atendimento (7B-E1U)
 
 Lista paginada própria, sete campos independentes, revisão e confirmação única
