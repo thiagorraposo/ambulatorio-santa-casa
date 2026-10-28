@@ -1,6 +1,6 @@
 # Estado atual do projeto
 
-Atualizado em: 2026-10-27. Síntese de implementação e evidências existentes;
+Atualizado em: 2026-10-28. Síntese de implementação e evidências existentes;
 esta atualização documental não reexecuta as suítes da aplicação.
 
 ## Escopo e estágio
@@ -27,13 +27,14 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | M3 — 8C2U.1 | Seleção e simulação mínima XLSX pela interface, com worker real e dados sintéticos; build, 219 testes de componentes e quatro E2E passaram em rodadas proporcionais. | [Evidência e consulta do CI remoto](validacoes/VALIDACAO_8C2_U1.md); aceite pendente. Dry-run não persiste registros, mas consome sequências; C2B.1 continua pendente. |
 | M3 — 7B-E1B | API de episódios individuais de sorologia por atendimento, auditoria prospectiva 65 e recuperação; validações locais HTTP/SQL/importador aprovadas. | [Contrato](arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md) e [evidência/CI remoto](validacoes/VALIDACAO_7B_E1B.md); interface tem unidade própria; solicitação geral e aceite pendentes. |
 | M3 — 7B-E1U | Interface por atendimento implementada: lista paginada, formulário e revisão de sete campos, rascunho/recibo recuperável; build, 228 componentes e 63 cenários E2E em rodadas proporcionais. | [Evidência](validacoes/VALIDACAO_7B_E1U.md); CI remoto próprio, solicitação geral e aceite humano permanecem separados. |
+| M3 — 7B-E2B.1 | API de condição única por atendimento implementada sobre seis campos; auditoria 66, sem backfill e recibo. | [Contrato](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md)/[evidência](validacoes/VALIDACAO_7B_E2B_1.md); 177 unidades,83 HTTP,37 SQL,upgrade/importador locais aprovados; CI remoto, interface, complicações e aceite humano separados. |
 
 O próximo trabalho de M2 é concluir a comparação visual de U4.2 e obter aceite
 humano do percurso A1. U3/U4.1 foram reexercitadas pela suíte completa local e
 pelo CI do PR #16. Em M3, C2B.1 exige resolver o consumo de sequências antes de
 declarar a garantia ampliada de simulação. A frente de sorologias individuais tem API e interface implementadas, sem
-inferir diagnóstico. Solicitação geral exige contrato próprio; 7B-E2B é a
-próxima candidata técnica do catálogo, sujeita à leitura de modelo e requisitos.
+inferir diagnóstico. Solicitação geral exige contrato próprio; 7B-E2B.1 tem a API de condição; o próximo recorte da família é o contrato de
+complicações repetíveis, preservando pendências de sintomas específicos.
 A sequência detalhada pertence
 ao [roadmap](PROXIMOS_PASSOS.md#próximo-trabalho).
 

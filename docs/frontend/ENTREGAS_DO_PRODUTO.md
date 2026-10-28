@@ -471,6 +471,14 @@ pendentes; esta implementação não concede aceite do pacote agregado.
 
 **Estado e cobertura:** Planejado; não aceito. RQ-CON-01–10 (telas/elementos na matriz).
 
+**Continuidade de 28/10 — 7B-E2B.1:** seis campos de condição por atendimento
+(RQ-CON-01–06) têm [contrato](../arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md),
+GET/POST, criação única e auditoria 66. Build e 177 unidades, SQL/importador e
+83 HTTP (sete novos) passaram; [evidência](../validacoes/VALIDACAO_7B_E2B_1.md)
+registra a regressão final após incorporar a correção de isolamento do CI.
+Complicações repetíveis (CON-07–10), interface e sintomas específicos sem
+campos/domínios aprovados continuam separados; não há aceite do pacote agregado.
+
 **Escopo:** Forma clínica/cardíaca/digestiva, classificação e sintomas/regurgitação/constipação/disfagia/dor/dispneia; sem classificação automática.
 
 **Dependências/decisões:** P-01 para prioridade; campos/modelo físico e fontes clínicas examinados antes do DTO; D2–D5 quando pertinentes.

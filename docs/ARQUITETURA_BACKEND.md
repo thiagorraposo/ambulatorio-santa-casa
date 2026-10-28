@@ -20,6 +20,10 @@ persistente. Provisionamento institucional e autorização para implantação
 continuam fora do escopo. Evidências finais estão registradas na matriz
 `docs/validacoes/ACEITE_INTEGRADO_ETAPA_5.md`.
 
+A extensão [7B-E2B.1](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md) publica condição única por atendimento,
+com seis campos independentes, auditoria prospectiva 66 e recuperação; não
+habilita complicações, edição ou regras clínicas novas.
+
 ## Escopo e fluxo
 
 O backend é um monólito modular NestJS/TypeScript com módulos `health`, `auth` e

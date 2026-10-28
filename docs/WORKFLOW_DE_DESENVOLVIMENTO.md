@@ -10,7 +10,7 @@ produzir seu diagnóstico. Uma nova execução do mesmo evento/ref cancela a ant
 | Job | Verificações | Limite |
 | --- | --- | --- |
 | Quality | `docs-check`, `manifest-check`, `repository-check`, `workflow-test` e actionlint | 10 minutos; não usa banco. |
-| Database | Migrations 00–65, `importer-test`, `docker-db-test` e `db-sorologia-upgrade-test` | 15 minutos; instala ripgrep explicitamente; SQL, importação e upgrade sem backfill sintéticos. |
+| Database | Migrations 00–66, `importer-test`, `docker-db-test` e os upgrades `db-sorologia-upgrade-test`/`db-condicao-upgrade-test` | 15 minutos; instala ripgrep explicitamente; SQL, importação e upgrade sem backfill sintéticos. |
 | Backend | `npm ci`, `backend-check`, `backend-clinical-test` e `backend-container-check` | 25 minutos; build, unitários, integração, contratos/autenticação/RBAC, fluxos clínicos, saúde e usuário não-root. |
 | Frontend | `npm ci` em ambas as aplicações, Chromium e `frontend-check` | 25 minutos; TypeScript/Vite, componentes e navegador com API/PostgreSQL reais sintéticos. |
 
@@ -20,7 +20,7 @@ armazenamento e identidade antes de aplicar o bootstrap. As portas
 `POSTGRES_PORT`, `APP_DB_PORT` e `SYNTHETIC_PG_PORT` são `55457`, exigidas por
 D3/D8; o Compose persistente local continua em `5433`. Backend e frontend
 criam bancos e logins próprios para suas suítes. O job Frontend prepara somente
-a role de origem com SQL00; seu runner aplica 02–65 no banco exclusivo.
+a role de origem com SQL00; seu runner aplica 02–66 no banco exclusivo.
 Nenhuma permissão clínica é concedida manualmente para fazer teste passar.
 
 `db-sorologia-upgrade-test` requer `SYNTHETIC_PG_HOST`, `SYNTHETIC_PG_PORT`,
@@ -520,3 +520,7 @@ dados sintéticos e remove seu banco, logins e arquivo ao terminar. O subprocess
 não recebe credenciais da aplicação nem segredo JWT. Os alvos `importer-test` e
 `backend-integration-test` respeitam `PGPASSWORD` fornecida, permitindo direcionar
 as verificações ao servidor descartável com `DB_HOST`/`DB_PORT` explícitos.
+
+O alvo `db-condicao-upgrade-test` usa o mesmo contrato `SYNTHETIC_PG_*` e
+`PGPASSWORD` do upgrade de sorologia: cria banco próprio, valida65→66 com
+registro legado e remove somente seu banco. Não realiza backfill.
