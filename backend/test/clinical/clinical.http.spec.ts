@@ -323,6 +323,8 @@ suite('Fluxos clínicos HTTP em banco descartável', () => {
   }, 60000);
 
   it('serializa publicação concorrente da mesma versão temporal em duas sessões', async () => {
+    // Other suites share this disposable database; only new effects are forbidden.
+    const applicationsBefore = (await owner.query('SELECT * FROM ambulatorio.importacao_revisao_aplicacao ORDER BY aplicacao_id')).rows;
     const seed = await owner.connect();
     let revision: string; let authorization: string; let baseLine: string; let revisedLine: string;
     let targetPatient: string; let targetAttendance: string; let fields: unknown[];
@@ -399,8 +401,8 @@ suite('Fluxos clínicos HTTP em banco descartável', () => {
     const stored = await owner.query(`SELECT count(*)::int AS n FROM ambulatorio.importacao_revisao_decisao
       WHERE revisao_id=$1 AND linha_revisada_id=$2`, [revision!,revisedLine!]);
     expect(stored.rows[0].n).toBe(1);
-    const effects = await owner.query('SELECT count(*)::int AS n FROM ambulatorio.importacao_revisao_aplicacao');
-    expect(effects.rows[0].n).toBe(0);
+    const effects = await owner.query('SELECT * FROM ambulatorio.importacao_revisao_aplicacao ORDER BY aplicacao_id');
+    expect(effects.rows).toEqual(applicationsBefore);
     // Captura habilitada apenas no banco de teste: A->B->A preserva dois eventos.
     const initial = await http().get(`/pacientes/${targetPatient!}`).auth(tokens.administracao, { type: 'bearer' }).expect(200);
     let version = initial.body.versao;
@@ -421,6 +423,8 @@ suite('Fluxos clínicos HTTP em banco descartável', () => {
     expect(approved.rows).toEqual([{ ultimo_evento_avaliado_id: null, cobertura_historica: 'desconhecida' }]);
   }, 60000);
   it('aprova correção apenas com captura atribuível desde a base sem aplicar fatos clínicos', async () => {
+    // Other suites share this disposable database; only new effects are forbidden.
+    const applicationsBefore = (await owner.query('SELECT * FROM ambulatorio.importacao_revisao_aplicacao ORDER BY aplicacao_id')).rows;
     const session = await owner.connect();
     const beforeName = 'Paciente cobertura sintetico';
     const afterName = 'Paciente corrigido cobertura sintetico';
@@ -519,10 +523,12 @@ suite('Fluxos clínicos HTTP em banco descartável', () => {
     expect(fields.every(field => field.cobertura_historica === 'desde_base' && field.ultimo_evento_avaliado_id)).toBe(true);
     expect((await owner.query('SELECT nome FROM ambulatorio.paciente WHERE paciente_id=$1', [target!])).rows[0].nome).toBe(beforeName);
     expect((await owner.query('SELECT data_atendimento::text AS data FROM ambulatorio.atendimento WHERE atendimento_id=$1', [attendance!])).rows[0].data).toBe('2026-01-01');
-    expect((await owner.query('SELECT count(*)::int AS n FROM ambulatorio.importacao_revisao_aplicacao')).rows[0].n).toBe(0);
+    expect((await owner.query('SELECT * FROM ambulatorio.importacao_revisao_aplicacao ORDER BY aplicacao_id')).rows).toEqual(applicationsBefore);
   }, 30000);
 
   it('simula plano em READ ONLY sem mudar tabelas/sequências e detecta token obsoleto após A→B→A', async () => {
+    // Other suites share this disposable database; only new effects are forbidden.
+    const applicationsBefore = (await owner.query('SELECT * FROM ambulatorio.importacao_revisao_aplicacao ORDER BY aplicacao_id')).rows;
     const reviewer = new Pool({ host: process.env.TEST_OWNER_HOST, port: Number(process.env.TEST_OWNER_PORT),
       user: process.env.TEST_REVIEW_DB_USER, password: process.env.TEST_REVIEW_DB_PASSWORD, database: process.env.TEST_CLINICAL_DB });
     const simulate = async (actor = ids.administracao) => {
@@ -561,7 +567,7 @@ suite('Fluxos clínicos HTTP em banco descartável', () => {
       const afterEdit = await footprint();
       expect(await simulate()).toMatchObject({ resultado: 'obsoleta', codigo: 'revisao_alvo_alterado' });
       expect(await footprint()).toEqual(afterEdit);
-      expect((await owner.query('SELECT count(*)::int AS n FROM ambulatorio.importacao_revisao_aplicacao')).rows[0].n).toBe(0);
+      expect((await owner.query('SELECT * FROM ambulatorio.importacao_revisao_aplicacao ORDER BY aplicacao_id')).rows).toEqual(applicationsBefore);
     } finally { await reviewer.end(); }
   }, 30000);
 
