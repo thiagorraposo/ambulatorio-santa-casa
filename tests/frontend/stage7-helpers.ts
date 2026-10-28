@@ -71,13 +71,22 @@ export async function submitWrite(page: Page, method: string, path: string, butt
     expect(response.status()).toBe(expectedStatus);
     return { response, body: response.request().postDataJSON() as Record<string, unknown> };
   } catch (error) {
-    // No values, headers, bodies or arbitrary server diagnostics enter this report.
+    // No field values, headers, bodies or arbitrary server diagnostics enter this report.
     const form = await control.evaluate(node => {
       const form = node.closest('form');
       return { disabled: (node as HTMLButtonElement).disabled, busy: form?.getAttribute('aria-busy'),
         invalid: Array.from(form?.elements ?? []).filter(item => 'validity' in item && !(item as HTMLInputElement).validity.valid)
-          .map(item => ({ type: (item as HTMLInputElement).type,
-            label: Array.from((item as HTMLInputElement).labels ?? []).map(label => label.textContent?.trim()).join(' ').slice(0, 120) })),
+          .map(item => {
+            const input = item as HTMLInputElement;
+            const validity = input.validity;
+            return { type: input.type, hasValue: typeof input.value === 'string' && input.value !== '', min: input.min, max: input.max, step: input.step,
+              validity: { valueMissing: validity.valueMissing, badInput: validity.badInput,
+                rangeUnderflow: validity.rangeUnderflow, rangeOverflow: validity.rangeOverflow,
+                stepMismatch: validity.stepMismatch, patternMismatch: validity.patternMismatch,
+                typeMismatch: validity.typeMismatch, tooLong: validity.tooLong, tooShort: validity.tooShort,
+                customError: validity.customError },
+              label: Array.from(input.labels ?? []).map(label => label.textContent?.trim()).join(' ').slice(0, 120) };
+          }),
         alerts: Array.from(form?.querySelectorAll('[role="alert"]') ?? []).map(item => item.textContent?.slice(0, 500)) };
     }).catch(() => ({ unavailable: true }));
     console.error('Diagnóstico da confirmação sintética:', JSON.stringify({ method, path, traffic, form }));
