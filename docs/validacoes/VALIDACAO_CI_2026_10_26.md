@@ -214,3 +214,74 @@ sem Docker, SQL ou dados clínicos. O PR #17 passou nos quatro jobs (run
 `40445313791`) e foi integrado em `0603259`. O pós-merge na `main` também passou
 nos quatro jobs (run `40446442622`). A ocorrência posterior de timeout de
 acompanhamento e sua instrumentação estão na [evidência U4.2](VALIDACAO_7D_U4_2.md).
+
+
+## Continuidade de 28/10 — identidade da tela antes de preencher retorno anual
+
+O [CI da main em `3cd24a9`](https://github.com/thiagorraposo/ambulatorio-santa-casa/actions/runs/40696736224)
+aprovou Quality, Database e Backend, mas o Frontend terminou com 62/63 E2E.
+A primeira falha real foi a validade HTML antes do POST no cenário 7D-R1
+(`stage7-followup-recovery.spec.ts:8`): botão habilitado, sem envio em curso,
+nenhum tráfego de mutação e somente “Data efetiva do comparecimento” inválida.
+Não se atribui a falha a SQL ou aos avisos não bloqueantes do frontend.
+
+O teste saía de retorno BZN para retorno anual através de um diálogo de
+rascunho. Ambas as telas tinham “Atendimento de registro” com o mesmo ID,
+o mesmo link de origem e “Data efetiva do comparecimento”. As duas asserções
+anteriores ao preenchimento, portanto, também podiam ser satisfeitas pela
+tela antiga enquanto a navegação ainda estava pendente. Somente o preenchimento
+seguinte (“Resumo do retorno anual”) exigia a tela nova. O input da data não
+tem min/max/step ou validação customizada: é um campo date obrigatório.
+
+A repetição original em servidor descartável passou 20/20, sem reproduzir a
+falha natural. Um experimento dirigido, temporário e não versionado, clicou
+“Sair e manter rascunho” e preencheu a data no mesmo turno JS. O elemento ainda pertencia
+ao formulário **Registrar retorno BZN**, estava conectado e tinha valor. Após
+a transição, o formulário anual tinha data vazia e `valueMissing=true` (1/1).
+Isso comprova um interleaving capaz de gerar o mesmo efeito e a insuficiência
+da barreira antiga; sem trace/screenshot remoto no artefato coletado, não
+reconstitui inequivocamente a causa histórica dessa execução.
+
+O ajuste aguarda o formulário anual pelo nome acessível único, escopa nele os
+preenchimentos e confirma a data após preencher o resumo. Nenhum timeout,
+expectativa de payload, validação ou mecanismo clínico foi relaxado. O helper
+agora registra somente presença de valor, atributos de limite e flags de
+ValidityState para distinguir falhas futuras; não registra valores dos campos,
+headers ou credenciais. O experimento foi removido, preservando o teste real.
+
+Ambiente confirmado pelo coordenador antes de SQL: PostgreSQL 16 em tmpfs,
+projeto `ambulatorio-ci-date`, `127.0.0.1:55459`, usuário `ambulatorio_ci`, banco
+de bootstrap `ambulatorio_santa_casa`. Cada runner criou/removeu seu banco e
+logins aleatórios. API `6062`, frontend `4177`, somente dados sintéticos;
+nenhuma base persistente utilizada. Build próprio aprovado. Logs:
+
+- Original 20/20: `/tmp/ambulatorio-check-2y7ggbci/output.log`.
+- Interleaving dirigido 1/1: `/tmp/ambulatorio-check-15nxywuj/output.log`.
+- Barreira corrigida 20/20, sem retries: `/tmp/ambulatorio-check-u0mhdyke/output.log`.
+- Cinco cenários do arquivo, 5/5: `/tmp/ambulatorio-check-ihjcibj0/output.log`.
+- Documentação, consistência do repositório e `git diff --check` aprovados.
+
+Os resultados remotos do ajuste ficam no
+[histórico da branch](https://github.com/thiagorraposo/ambulatorio-santa-casa/actions?query=branch%3Afix%2Fci-followup-date).
+Publicação/integração exigem revisão do diff e os quatro jobs aprovados;
+as repetições locais não substituem esse resultado nem o CI após merge.
+
+### Independência da ordem das suítes HTTP
+
+Na regressão de condição (branch separada), `revisoes.staging.http.spec.ts`
+executou antes de `clinical.http.spec.ts` e criou quatro aplicações de revisão
+legítimas. Três testes de publicação/simulação comparavam a contagem global a
+zero, embora nenhuma dessas quatro aplicações pertencesse aos efeitos testados.
+O resultado foi esperado 0/recebido 4; 80/83 testes passaram e os sete novos
+passaram. Evidência: `/tmp/ambulatorio-check-yctmbywg/output.log`.
+
+As três asserções agora capturam o ledger completo, ordenado por ID, antes da
+operação e exigem igualdade integral depois. Isso verifica tanto ausência de
+novos efeitos quanto preservação dos registros anteriores, sem limpar o banco,
+filtrar efeitos ou depender de qual suíte executa primeiro. As expectativas de
+nenhuma mutação são preservadas e fortalecidas. No baseline da main, os 76 testes HTTP completos passaram
+(`/tmp/ambulatorio-check-rl1md6ri/output.log`). Uma rodada dirigida forçou staging
+antes da suíte clínica com sequencer temporário não versionado:27/27 passaram,
+nessa ordem (`/tmp/ambulatorio-check-o7jc1maa/output.log`). Nenhum teste ignorado.
+Documentação, consistência do repositório e diff check foram conferidos antes
+da publicação; o PR precisa ainda dos quatro jobs remotos.
