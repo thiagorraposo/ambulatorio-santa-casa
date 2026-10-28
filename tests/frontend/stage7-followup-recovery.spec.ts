@@ -22,10 +22,16 @@ test('7D-R1: atalhos mantêm atendimento e origem e a troca de consulta é expl�
   await page.getByRole('navigation', { name: 'Operações clínicas', exact: true })
     .getByRole('link', { name: 'Registrar retorno anual', exact: true }).click();
   await page.getByRole('button', { name: 'Sair e manter rascunho', exact: true }).click();
+  // Both screens contain the same attendance/date fields. Wait for the new
+  // form so a pending navigation cannot receive the date in the previous one.
+  const annual = page.getByRole('form', { name: 'Registrar retorno anual', exact: true });
+  await expect(annual).toBeVisible();
   await expect(page.getByLabel('Atendimento de registro', { exact: true })).toHaveValue(second.atendimentoId);
   await expect(page.getByRole('link', { name: 'Voltar à origem', exact: true })).toHaveAttribute('href', origin);
-  await page.getByLabel('Data efetiva do comparecimento', { exact: true }).fill('2026-04-05');
-  await page.getByLabel('Resumo do retorno anual', { exact: true }).fill('Consulta escolhida explicitamente');
+  const date = annual.getByLabel('Data efetiva do comparecimento', { exact: true });
+  await date.fill('2026-04-05');
+  await annual.getByLabel('Resumo do retorno anual', { exact: true }).fill('Consulta escolhida explicitamente');
+  await expect(date).toHaveValue('2026-04-05');
   const saved = await submitWrite(page, 'POST', `${patient.path}/retornos-anuais`, 'Salvar registro');
   expect(saved.body.atendimentoId).toBe(second.atendimentoId);
   const records = await apiJson<AnnualReturnResponse[]>('GET', `${patient.path}/retornos-anuais`);
