@@ -291,6 +291,14 @@ informado permanecem distintos; descrição não é apagada ao mudar o indicador
 Consulta só lê; não há edição/remoção, complicações ou classificação automática.
 
 
+A busca de pacientes oferece Exportar CSV desta página: confirma ID/nome,
+filtros/página aplicados e recebe o arquivo do H16. Mantém os três perfis
+existentes; não usa filtros apenas digitados nem exporta todas as páginas.
+Cancelar/Escape não requisitam; erros/respostas tardias não geram download ou
+sucesso fictício. UTF-8/BOM, nome neutro e URL de Blob revogada; não se afirma
+que o arquivo foi salvo no disco. [Evidência 8A1](validacoes/VALIDACAO_8A1.md).
+
+
 Os tipos de `/registrar` são `bzn`, `retorno-bzn`, `projeto`, `notificacao`,
 `encaminhamento`, `contrarreferencia`, `retorno-anual`, `ocorrencia-anual` e
 `pendencia`. O atendimento do contexto pode ser levado em `atendimentoId`;

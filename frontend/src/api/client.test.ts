@@ -130,3 +130,49 @@ describe('cliente HTTP /v1', () => {
     await expect(client.get('/pacientes')).rejects.toMatchObject({ status: 502 });
   });
 });
+
+describe('CSV autenticado pelo mesmo cliente', () => {
+  it('recebe texto UTF-8 sem JSON e exige o tipo CSV', async () => {
+    const csv = 'paciente_id,nome\n"9007199254740997","Sintético com acento"\n';
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(new Response(csv, { headers: { 'Content-Type': 'text/csv; charset=utf-8' } }))
+      .mockResolvedValueOnce(new Response('<html>erro bruto</html>', { headers: { 'Content-Type': 'text/html' } }));
+    const client = new ApiClient(fetcher);
+    client.authenticate('token-sintetico', 60);
+    expect(await client.getCsv('/pacientes/export.csv?limit=1&offset=0')).toBe(csv);
+    expect(fetcher.mock.calls[0]).toEqual(['/v1/pacientes/export.csv?limit=1&offset=0', expect.objectContaining({
+      cache: 'no-store', credentials: 'omit', headers: { Accept: 'text/csv', Authorization: 'Bearer token-sintetico' },
+    })]);
+    await expect(client.getCsv('/pacientes/export.csv')).rejects.toMatchObject({ status: 502 });
+  });
+
+  it('descarta corpo CSV que termina após trocar sessão e não expõe conteúdo da identidade anterior', async () => {
+    const body = deferred<string>();
+    const response = new Response('', { headers: { 'Content-Type': 'text/csv' } });
+    vi.spyOn(response, 'text').mockReturnValue(body.promise);
+    const client = new ApiClient(vi.fn<typeof fetch>().mockResolvedValue(response));
+    client.authenticate('anterior', 60);
+    const result = client.getCsv('/pacientes/export.csv');
+    await vi.waitFor(() => expect(response.text).toHaveBeenCalledOnce());
+    client.authenticate('atual', 60);
+    body.resolve('paciente_id,nome\n"1","Sintético anterior"\n');
+    await expect(result).rejects.toMatchObject({ name: 'AbortError' });
+  });
+
+  it('cancela download e sanitiza recusas sem produzir texto indevido', async () => {
+    const unauthorized = vi.fn();
+    const late = deferred<Response>();
+    const fetcher = vi.fn<typeof fetch>().mockReturnValueOnce(late.promise)
+      .mockResolvedValueOnce(new Response('erro técnico bruto', { status: 403 }))
+      .mockResolvedValueOnce(new Response('erro técnico bruto', { status: 401 }));
+    const client = new ApiClient(fetcher, unauthorized);
+    client.authenticate('token-sintetico', 60);
+    const controller = new AbortController();
+    const result = client.getCsv('/pacientes/export.csv', controller.signal);
+    controller.abort();
+    late.resolve(new Response('paciente_id,nome\n', { headers: { 'Content-Type': 'text/csv' } }));
+    await expect(result).rejects.toMatchObject({ name: 'AbortError' });
+    await expect(client.getCsv('/pacientes/export.csv')).rejects.toMatchObject({ status: 403 });
+    await expect(client.getCsv('/pacientes/export.csv')).rejects.toMatchObject({ status: 401 });
+    expect(unauthorized).toHaveBeenCalledExactlyOnceWith('unauthorized');
+  });
+});

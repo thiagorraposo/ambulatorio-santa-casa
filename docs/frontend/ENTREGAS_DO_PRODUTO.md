@@ -823,11 +823,11 @@ pendentes. Não se atribui aceite humano à validação técnica.
 
 #### 8A1 — Baixar CSV real da página de pacientes
 
-**Estado e cobertura:** Planejado; não aceito. RQ-DAS-12–17; RQ-EST-17 (telas/elementos na matriz).
+**Estado e cobertura:** Implementado e validado tecnicamente em 31/10/2026 no H16 existente; aceite humano pendente. [Evidência](../validacoes/VALIDACAO_8A1.md). RQ-DAS-12–17 no recorte de ID/nome/página; RQ-EST-17. Não conclui exportação ampliada do dashboard.
 
 **Escopo:** ID/nome com filtros/página atuais e aviso de escopo; sem relatório do dashboard/exportação completa.
 
-**Dependências/decisões:** H16 publicado; Etapa 7 aceita; P-05 para manter política dos três perfis.
+**Dependências/decisões:** H16 publicado; Etapa 7 original aceita. Este incremento mantém a política HTTP existente dos três perfis; P-05 continua necessário para exportação ampliada, sem nova decisão de autorização nesta interface.
 
 **Trabalho por camada:** Frontend: ação de download, nome de arquivo, carga/erro/sucesso só após arquivo recebido; backend existente preservado.
 

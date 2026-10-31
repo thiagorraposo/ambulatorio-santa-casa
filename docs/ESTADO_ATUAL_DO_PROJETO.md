@@ -29,6 +29,7 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | M3 — 7B-E1U | Interface por atendimento implementada: lista paginada, formulário e revisão de sete campos, rascunho/recibo recuperável; build, 228 componentes e 63 cenários E2E em rodadas proporcionais. | [Evidência](validacoes/VALIDACAO_7B_E1U.md); CI remoto próprio, solicitação geral e aceite humano permanecem separados. |
 | M3 — 7B-E2B.1 | API de condição única por atendimento implementada sobre seis campos; auditoria 66, sem backfill e recibo. | [Contrato](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md)/[evidência](validacoes/VALIDACAO_7B_E2B_1.md); 177 unidades,83 HTTP,37 SQL,upgrade/importador locais aprovados; CI remoto, complicações e aceite humano separados; interface com evidência própria abaixo. |
 | M3 — 7B-E2U.1 | Interface dos seis campos de condição: leitura por consulta, formulário/revisão, confirmação única, rascunho e recibo; ficha/histórico conservam o contexto. | [Evidência](validacoes/VALIDACAO_7B_E2U_1.md); complicações, sintomas específicos sem contrato e aceite humano separados. |
+| M3 — 8A1 | CSV real de ID/nome da página/filtros aplicados, confirmação de escopo e tratamento de respostas tardias; mantém H16 e seus três perfis. | [Evidência](validacoes/VALIDACAO_8A1.md); exportação ampliada, aceite humano e dados reais separados. |
 
 M2 está tecnicamente pronto para aceite no recorte revisado em 31/10: controles
 U4.2 comparados à referência executável e percurso A1 revalidado. O próximo

@@ -1,5 +1,15 @@
 # Registro de Alterações
 
+## 2026-10-31 — exportação CSV da página de pacientes (8A1)
+
+Interface de H16 sem mudança de backend/autorização: ID/nome, filtros/página
+aplicados, confirmação de escopo, UTF-8/BOM e nome neutro. Cliente compartilha
+autenticação/cancelamento e descarta respostas tardias; falhas não geram arquivo
+ou sucesso. Cliente/componente e quatro E2E passaram, com seis downloads reais
+nos três perfis, fórmulas neutralizadas e escopo de acesso preservado.
+[Validação e limites](validacoes/VALIDACAO_8A1.md). Exportação ampliada, aceite
+humano e liberação institucional continuam separados.
+
 ## 2026-10-31 — interface da condição de Chagas (7B-E2U.1)
 
 Leitura e criação dos seis campos do contrato H18, com revisão antes da

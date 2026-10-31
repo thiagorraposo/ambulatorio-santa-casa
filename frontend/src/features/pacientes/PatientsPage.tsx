@@ -4,6 +4,7 @@ import type { PacienteResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
 import { Card, EmptyState, PageHeading, QueryState, TableScroll } from '../../shared/ui';
 import { pagePath, Pagination, usePage } from './pagination';
+import PatientCsvExport from './PatientCsvExport';
 import { PatientCreateLink } from '../clinical/PatientCreateGate';
 
 export default function PatientsPage() {
@@ -62,6 +63,8 @@ export default function PatientsPage() {
       </Card>
       <Card className="collection-section">
         <h2>Resultado da busca</h2>
+        <PatientCsvExport key={`${path}:${page.limit}:${page.offset}`} nome={currentName} sexo={currentSex}
+          limit={page.limit} offset={page.offset} available={query.isSuccess && !query.isFetching} />
         <QueryState query={query} emptyMessage="Nenhum paciente nesta página para os filtros e o acesso atuais.">
           {rows => rows.length === 0 ? (
             <EmptyState>Nenhum paciente nesta página para os filtros e o acesso atuais.</EmptyState>

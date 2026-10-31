@@ -28,6 +28,7 @@ de testes não é uma contagem atual e aceite sintético não autoriza dados rea
 | 7B-E1U — interface de episódios de sorologia | [Validação](VALIDACAO_7B_E1U.md) | Escopo, isolamento e evidências específicas da interface; solicitação geral e aceite clínico permanecem separados. |
 | 7B-E2B.1 — condição por atendimento | [Validação](VALIDACAO_7B_E2B_1.md) | Seis campos, criação única, auditoria prospectiva e recuperação; interface, complicações e aceite humano separados. |
 | 7B-E2U.1 — interface da condição por atendimento | [Validação](VALIDACAO_7B_E2U_1.md) | Seis campos, revisão, isolamento, rascunho e recuperação; complicações e aceite humano pendentes. |
+| 8A1 — CSV da página de pacientes | [Validação](VALIDACAO_8A1.md) | Download real ID/nome/filtros/página e três perfis H16; não é exportação completa/dashboard nem aceite humano. |
 | Ordenação numérica de identificadores | [Validação](VALIDACAO_ORDENACAO_IDENTIFICADORES.md) | Recursos e cenários expressamente cobertos. |
 
 ## Evidências de origem por módulo

@@ -59,8 +59,12 @@ export class ApiClient {
     return this.request<T>(path, { signal });
   }
 
+  getCsv(path: string, signal?: AbortSignal): Promise<string> {
+    return this.request<string>(path, { signal, responseType: 'csv' });
+  }
+
   async request<T>(path: string, options: { method?: 'GET' | 'POST' | 'PATCH' | 'PUT'; body?: unknown;
-    signal?: AbortSignal; public?: boolean; operationId?: string } = {}): Promise<T> {
+    signal?: AbortSignal; public?: boolean; operationId?: string; responseType?: 'csv' } = {}): Promise<T> {
     // Only application-relative, versioned URLs may receive the credential.
     if (!path.startsWith('/') || path.startsWith('//') || path.includes('\\')) throw new ApiError(400);
     const epoch = this.epoch;
@@ -79,7 +83,7 @@ export class ApiClient {
     };
     try {
       current();
-      const headers: Record<string, string> = { Accept: 'application/json' };
+      const headers: Record<string, string> = { Accept: options.responseType === 'csv' ? 'text/csv' : 'application/json' };
       const multipart = options.body instanceof FormData;
       if (!options.public && credential) headers.Authorization = `Bearer ${credential.token}`;
       // The browser supplies the multipart boundary for FormData.
@@ -95,7 +99,10 @@ export class ApiClient {
         // Arbitrary server text, SQL errors and clinical processing details are not displayed.
         throw new ApiError(response.status);
       }
-      const data: T = await response.json();
+      if (options.responseType === 'csv' && !/^text\/csv(?:\s*;|$)/i.test(response.headers.get('content-type') ?? '')) {
+        throw new ApiError(502);
+      }
+      const data: T = options.responseType === 'csv' ? await response.text() as T : await response.json();
       current();
       return data;
     } catch (error) {

@@ -594,6 +594,11 @@ físico, mas ainda precisam de contrato HTTP/auditoria/recuperação aprovado;
 CON-11 e sintomas específicos sem destino continuam pendentes. Não se declara
 7B-E2B/E2U ou M3 completos. A preparação/revisão de M2 continua independente.
 
+Também em 31/10, 8A1 acrescentou download CSV da página de pacientes usando
+somente H16 e a política existente dos três perfis; [evidência](validacoes/VALIDACAO_8A1.md).
+Escopo informado, filtros/página aplicados, UTF-8 e falhas sem falso sucesso;
+exportação ampliada permanece fora deste contrato e o aceite humano pendente.
+
 ### Preparação da migração da planilha real
 
 A preparação pode ocorrer em paralelo à construção do frontend, sem exigir a
