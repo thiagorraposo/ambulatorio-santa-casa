@@ -158,3 +158,11 @@ com servidor descartável e o comando focado acima. Reutilizar os resultados A1
 descritos no [relatório próprio](VALIDACAO_7D_A1.md), sem repetir suíte integral
 sobre o mesmo estado. Zoom CSS é a técnica automatizada existente e não substitui
 a revisão humana com zoom nativo do navegador.
+
+## Aceite do marco M2 em 31/10/2026
+
+O responsável confirmou a aprovação de M2 em todos os testes de aceite humano.
+O [parecer oficial](VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026)
+sucede a pendência humana do recorte U4.2 em M2. As limitações técnicas e as
+diferenças registradas para 8V1/8V2 permanecem explícitas; não se declara aceite
+visual integral do produto ou liberação de dados reais.

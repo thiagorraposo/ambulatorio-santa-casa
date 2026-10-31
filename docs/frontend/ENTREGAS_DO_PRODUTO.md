@@ -72,6 +72,13 @@ Este catálogo define as unidades, sem manter uma segunda lista de prioridades.
 
 ### Recuperação e experiência da Etapa 7
 
+**Aceite de marco em 31/10/2026:** M2/VU1 aprovado pelo responsável, que confirmou
+a aprovação de todos os testes de aceite humano; [parecer oficial](../validacoes/VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026).
+Este registro sucede as pendências históricas de aceite do recorte M2 delimitado
+no roadmap; não aceita automaticamente os pacotes agregados U3/U4, extensões de
+M3 ou fidelidade integral 8V1/8V2.
+
+
 <a id="7a-u1"></a>
 
 #### 7A-U1 — Cadastro precedido por busca e escolha consciente

@@ -18,10 +18,10 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | Etapa 5 | 5A–5E concluídas em ambiente sintético em 03/10. | [Matriz de aceite](validacoes/ACEITE_INTEGRADO_ETAPA_5.md); incrementos não aplicados ao persistente nesta entrega. |
 | Etapa 6 | 6A–6B concluídas em ambiente sintético em 04/10. | [Relatório](validacoes/VALIDACAO_ETAPA_6.md). |
 | Etapa 7 original | Implementação e validação técnica sintética concluídas em 15/10, com correções R7-01–07; M1 aprovado em 26/10 conforme confirmação do responsável do projeto. | [Relatório vigente](validacoes/VALIDACAO_ETAPA_7.md) e [registro do parecer](validacoes/ROTEIRO_REVISAO_CLINICA_ETAPA_7.md). |
-| M2 — 7A-U1 | Cadastro precedido por busca implementado e validado tecnicamente em 26/10. | [Evidência](validacoes/VALIDACAO_7A_U1.md); aceite da VU1 e do percurso integrado permanecem pendentes. |
-| M2 — 7D-U1/U2 | Formulário em cinco etapas, revisão e confirmação única implementados e validados tecnicamente em 26/10. | [Evidência](validacoes/VALIDACAO_7D_U1_U2.md); aceite de produto/equipe permanece pendente. |
-| M2 — 7D-U4.2 | Tabelas com região rolável focável e legibilidade preservada no histórico; remoção de itens devolve foco à coleção. Formulários e diálogo exercitados em 320/390 px e zoom 200%; 55 E2E locais e quatro jobs do PR #16 passaram. | [Evidência](validacoes/VALIDACAO_7D_U4_2.md); comparação do recorte U4.2 executada em 31/10, com adaptações acessíveis e diferenças baixas registradas; fidelidade integral 8V1 e aceite humano permanecem pendentes. |
-| M2 — 7D-A1 | Jornada sintética pela interface, releitura de recursos, notificação e confirmação única validadas tecnicamente em 27/10; PR #15 passou Quality, Database, Backend e Frontend no run `40442560575`. | [Evidência](validacoes/VALIDACAO_7D_A1.md); aceite da equipe clínica/produto pendente. P-03 segue bloqueando qualquer mudança em semântica de concorrência. |
+| M2 — 7A-U1 | Cadastro precedido por busca implementado e validado tecnicamente em 26/10. | [Evidência](validacoes/VALIDACAO_7A_U1.md); M2/VU1 e percurso integrado aceitos pelo responsável em 31/10; ver parecer em 7D-A1. |
+| M2 — 7D-U1/U2 | Formulário em cinco etapas, revisão e confirmação única implementados e validados tecnicamente em 26/10. | [Evidência](validacoes/VALIDACAO_7D_U1_U2.md); aceite de M2 confirmado pelo responsável em 31/10, conforme parecer em 7D-A1. |
+| M2 — 7D-U4.2 | Tabelas com região rolável focável e legibilidade preservada no histórico; remoção de itens devolve foco à coleção. Formulários e diálogo exercitados em 320/390 px e zoom 200%; 55 E2E locais e quatro jobs do PR #16 passaram. | [Evidência](validacoes/VALIDACAO_7D_U4_2.md); comparação do recorte U4.2 executada em 31/10, com adaptações acessíveis e diferenças baixas registradas; aceite humano de M2 confirmado em 31/10; fidelidade integral 8V1 permanece pendente. |
+| M2 — 7D-A1 | Jornada sintética pela interface, releitura de recursos, notificação e confirmação única validadas tecnicamente em 27/10; PR #15 passou Quality, Database, Backend e Frontend no run `40442560575`. | [Evidência](validacoes/VALIDACAO_7D_A1.md); M2 aprovado pelo responsável em 31/10, conforme parecer oficial no relatório. P-03 segue bloqueando qualquer mudança em semântica de concorrência. |
 | Melhorias U3.1/U3.2/U3.3/U4.1 | Implementação e validação técnica próprias. | [Índice de evidências](validacoes/README.md); não concluem automaticamente U3/U4, VU1 ou fidelidade integral. |
 | Produto completo e Etapas 8–10 | Escopo planejado e critérios definidos. | Implementações adicionais, decisões específicas, implantação e homologação pendentes. |
 | M3 — 8C2U.1 | Seleção e simulação mínima XLSX pela interface, com worker real e dados sintéticos; build, 219 testes de componentes e quatro E2E passaram em rodadas proporcionais. | [Evidência e consulta do CI remoto](validacoes/VALIDACAO_8C2_U1.md); aceite pendente. Dry-run não persiste registros, mas consome sequências; C2B.1 continua pendente. |
@@ -31,10 +31,11 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | M3 — 7B-E2U.1 | Interface dos seis campos de condição: leitura por consulta, formulário/revisão, confirmação única, rascunho e recibo; ficha/histórico conservam o contexto. | [Evidência](validacoes/VALIDACAO_7B_E2U_1.md); complicações, sintomas específicos sem contrato e aceite humano separados. |
 | M3 — 8A1 | CSV real de ID/nome da página/filtros aplicados, confirmação de escopo e tratamento de respostas tardias; mantém H16 e seus três perfis. | [Evidência](validacoes/VALIDACAO_8A1.md); exportação ampliada, aceite humano e dados reais separados. |
 
-M2 está tecnicamente pronto para aceite no recorte revisado em 31/10: controles
-U4.2 comparados à referência executável e percurso A1 revalidado. O próximo
-trabalho de M2 é executar com a equipe o roteiro de aceite preparado; nenhum
-parecer humano de M2 foi registrado nesta sessão. U3/U4.1 foram reexercitadas pela suíte completa local e
+M2/VU1 está **aprovado por aceite humano em 31/10/2026**, conforme confirmação
+expressa do responsável de que passou em todos os testes de aceite humano.
+O [parecer oficial](validacoes/VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026)
+registra a origem e os detalhes não informados; não amplia o aceite a M3 ou à
+operação com dados reais. U3/U4.1 foram reexercitadas pela suíte completa local e
 pelo CI do PR #16. Em M3, C2B.1 exige resolver o consumo de sequências antes de
 declarar a garantia ampliada de simulação. A frente de sorologias individuais tem API e interface implementadas, sem
 inferir diagnóstico. Solicitação geral exige contrato próprio; 7B-E2B.1 tem a API de condição e 7B-E2U.1 sua interface de seis campos; o próximo recorte da família é o contrato de

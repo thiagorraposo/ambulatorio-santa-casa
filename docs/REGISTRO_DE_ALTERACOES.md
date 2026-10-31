@@ -1,5 +1,17 @@
 # Registro de Alterações
 
+## 2026-10-31 — aceite humano oficial de M2 e encerramento da execução
+
+O responsável confirmou expressamente que M2 passou em todos os testes de
+aceite humano. [Parecer oficial](validacoes/VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026),
+estado, roadmap, catálogo e índice de validações atualizados, sem inventar
+revisores, IDs ou resultados individuais não informados. M2/VU1 aprovado no
+recorte vigente; M3, 8V1/8V2, operação institucional e dados reais não foram
+aceitos por consequência. Ambientes sintéticos encerrados. A investigação do
+400 ficou preservada, sem integração, no worktree separado indicado no parecer;
+a causa do envio específico não foi confirmada. Nenhuma funcionalidade foi
+incorporada nesta atualização documental. Execução encerrada por solicitação.
+
 ## 2026-10-31 — exportação CSV da página de pacientes (8A1)
 
 Interface de H16 sem mudança de backend/autorização: ID/nome, filtros/página

@@ -111,3 +111,33 @@ login é esperado; o rascunho não sobrevive à nova sessão.
 
 O facilitador deve registrar reprodução e impacto antes de devolver um defeito
 para correção. Ausência de resposta/observação não equivale a aprovação.
+
+## Aceite humano oficial de M2 — 31/10/2026
+
+**Parecer: APROVADO.** O responsável pelo projeto confirmou expressamente nesta
+conversa: “a M2 passou em todos os testes de aceite humano”. Este registro
+oficializa o aceite de M2/VU1 no recorte definido no roadmap, incluindo U4.2 e
+o percurso A1. Não foram informadas ressalvas nessa confirmação.
+
+| Registro oficial | Informação disponível |
+| --- | --- |
+| Data do registro/parecer | 31/10/2026, confirmação nesta conversa |
+| Responsável | Responsável pelo projeto; nomes/funções dos demais revisores não informados |
+| Resultado dos testes | Todos aprovados, conforme declaração expressa; detalhamento por passo não fornecido |
+| Ambiente disponibilizado | Demonstração sintética em `http://127.0.0.1:4182`, código `fc51390`, branch `feat/continuidade-m2-condicao`; encerrada após o parecer |
+| Perfis e IDs usados pela equipe | Não informados no parecer; não se reutilizam IDs das provas automáticas como se fossem da revisão humana |
+| Parecer final | M2 aprovado; M1 mantém seu aceite anterior |
+
+A tabela de roteiro anterior preserva a fotografia da preparação, anterior a
+esta confirmação. Este parecer a sucede quanto ao estado do marco, sem inventar
+resultados individuais, revisores ou passos de interação não detalhados.
+A aprovação de M2 não aceita as extensões de M3, 8V1/8V2, M4/M5 nem libera dados
+reais. P-03 e os demais contratos ainda abertos mantêm seus limites.
+
+O erro 400 relatado antes do parecer iniciou investigação em worktree separado
+`/tmp/ambulatorio-contexto-fix-20261031`, branch
+`fix/validacao-contexto-atendimento`. A hipótese de dois contextos afirmativos
+foi reproduzida, mas a causa do envio específico da equipe não foi confirmada.
+O patch experimental ficou preservado sem commit ou integração e não participou
+do ambiente aceito. A investigação foi interrompida a pedido do responsável;
+este aceite não apresenta a hipótese como causa resolvida ou correção entregue.
