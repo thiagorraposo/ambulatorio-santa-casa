@@ -39,6 +39,14 @@ das famílias já aprovada. EX conserva somente exclusões justificadas pelas
 regras vigentes. Marcos, sequência e novos aceites 8V1/8V2 estão no
 [roadmap vigente](../PROXIMOS_PASSOS.md#referência-de-conclusão--produto-completo).
 
+**Estado vigente em 31/10:** M2/VU1 tem [aceite humano oficial](../validacoes/VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026).
+As células históricas com “aceite do pacote pendente” não reabrem esse marco,
+nem o aceite de M2 conclui automaticamente todas as linhas/pacotes agregados.
+Sorologias, condição de seis campos, lotes/simulação mínima e CSV têm evidências
+próprias de M3 no [estado atual](../ESTADO_ATUAL_DO_PROJETO.md), sem aceite humano
+transferido por associação. O quadro HTTP abaixo incorpora esses contratos;
+as observações de 05/10 nas linhas individuais permanecem datadas salvo atualização explícita.
+
 ## Como ler e manter a rastreabilidade
 
 Cada linha tem ID estável `FM-FAMÍLIA-NN`. Seu requisito individual é
@@ -56,7 +64,7 @@ seu comportamento; os contratos devem preceder a UI. P-01–P-09 registram decis
 na visão/roadmap; a inclusão das famílias não EX foi aprovada em 23/10,
 sem aprovação automática dos detalhes de implementação.
 
-Destino: **VU1** primeira versão utilizável sintética proposta; **MVP** complementos
+Destino: **VU1** primeira versão utilizável sintética, com recorte M2 aceito; **MVP** complementos
 operacionais das dez etapas; **PC** produto completo obrigatório, anteriormente VP;
 **EX** excluído funcionalmente. Linhas compostas dizem quais partes já servem à
 VU1 e quais dependem de evolução. A ausência de API não exclui produto.
@@ -117,7 +125,7 @@ recurso já publicado. Caminhos propostos não são criados nesta entrega.
 | H2 | `GET /pacientes?nome&sexo&limit&offset`: somente ID/nome; autorização antes da paginação; sem total/código/nascimento/origem/projetos. |
 | H3 | `GET /pacientes/capacidades`, `GET/POST/PATCH /pacientes[/:id]`: POST com política explícita, PATCH com versão original, contatos adicionados e endereço em snapshot, transação. |
 | H4 | `POST /pacientes/:id/atendimentos`: núcleo + avaliação/diagnóstico/exames/rastreio/pendências numa transação; `PATCH /.../:atendimentoId` só núcleo/versão. |
-| H5 | `GET /pacientes/:id/atendimentos` e `/:atendimentoId`: consulta autorizada e coleções paginadas. Diagnóstico/avaliação por consulta. Família usa offset compartilhado defeituoso R7-01. |
+| H5 | `GET /pacientes/:id/atendimentos` e `/:atendimentoId`: consulta autorizada e coleções paginadas. Diagnóstico/avaliação por consulta. Snapshots e resultados familiares têm endpoints/paginação independentes; R7-01 corrigida no recorte original. |
 | H6 | `GET /pacientes/:id/exames`: bloco/identificação/resultado textual/observações; criação em H4; sem datas/status/parâmetros ou correção independente. |
 | H7 | `GET/PUT /pacientes/:id/projetos`: upsert por paciente/projeto, somente campos informados; catálogo ativo. Sem versão/conflito de edição concorrente. |
 | H8 | `GET/POST /pacientes/:id/tratamento-bzn`: um canônico por paciente, reações juntas na criação, transação/lock; conflito de unicidade 409. Sem PATCH/reação isolada. |
@@ -130,7 +138,7 @@ recurso já publicado. Caminhos propostos não são criados nesta entrega.
 | H15 | `/importacoes/revisoes/*`: POST fonte/autorização/recebimento/simulações/publicação/aplicação/encerramento existentes em ambiente sintético. Gestão exige entitlement; fonte exige autorização. Consulta pública/capacidades para retomada ainda necessárias. |
 | H16 | `GET /pacientes/export.csv`: ID/nome da página/filtros, três perfis autorizados ao recurso; fórmulas neutralizadas. UI 8A1 na busca; sem CSV de dashboard. |
 | H17 | `GET/POST /pacientes/:id/atendimentos/:atendimentoId/sorologias`: episódios individuais, métodos repetidos, datas próprias e null, auditoria 65 e recibo `sorologiaId`. Vínculo/perfil/contexto verificados; sem solicitação geral ou edição persistida; interface 7B-E1U em rotas próprias. [Contrato](../arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md). |
-| H18 | `GET/POST /pacientes/:id/atendimentos/:atendimentoId/condicao-chagas`: condição única, seis campos independentes, ausência JSON null, duplicidade 409, auditoria 66 e recibo `condicaoChagasId`; sem interface, edição ou complicações. [Contrato](../arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md). |
+| H18 | `GET/POST /pacientes/:id/atendimentos/:atendimentoId/condicao-chagas`: condição única, seis campos independentes, ausência JSON null, duplicidade 409, auditoria 66 e recibo `condicaoChagasId`; interface de seis campos 7B-E2U.1; sem edição ou complicações. [Contrato](../arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md). |
 
 Fontes backend: [pacientes.controller](../../backend/src/pacientes/pacientes.controller.ts),
 [recursos.controller](../../backend/src/pacientes/recursos-clinicos.controller.ts),
@@ -902,9 +910,9 @@ V: fila/modal global vs aba/formulário por paciente. F: status clínicos/datas 
 
 ### IMP — Importações, histórico, detalhe, etapas e modais
 
-Localização: **P9 · Imports; texto §33–38**. Correspondente: **F0 · nenhuma tela atual; backend H14/H15**.
+Localização: **P9 · Imports; texto §33–38**. Correspondente atual: **8C1 e 8C2U.1; backend H14/H15**.
 
-V/F/N: não há tela atual; Figma simula todo fluxo em memória. H14/H15 permitem partes reais, sem relatório/metadados/candidatos/novo elo completos.
+V/F/N: consulta de lotes/linhas sanitizados e simulação mínima XLSX têm interface real e evidências próprias. O protótipo simula em memória. Confirmação, relatório rico/metadados/candidatos/novo elo e revisão temporal pela interface permanecem pendentes. Linhas individuais não atualizadas preservam a fotografia de 05/10.
 
 | Elemento / requisito | Objetivo | Observado no protótipo | Atual e diferença específica | Produto, decisão e destino | HTTP / lacuna | Entrega | Aceite e evidência |
 | --- | --- | --- | --- | --- | --- | --- | --- |

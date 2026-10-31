@@ -1,4 +1,9 @@
-# Validação técnica parcial de 7D-U4.2 — controles compartilhados
+# Validação de 7D-U4.2 — controles compartilhados
+
+**Estado vigente:** comparação do recorte executada em 31/10 e aceite humano
+de M2 confirmado pelo responsável; [parecer oficial](VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026).
+Fidelidade integral 8V1/8V2 permanece separada. Os resultados e as pendências das
+rodadas anteriores abaixo preservam suas datas.
 
 Data: 2026-10-26. Implementação e validação técnica aprovadas no recorte
 descrito; comparação visual integral, revisão humana e aceite de produto/equipe

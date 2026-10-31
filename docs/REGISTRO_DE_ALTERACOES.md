@@ -1,5 +1,16 @@
 # Registro de Alterações
 
+## 2026-10-31 — consistência documental após aceite de M2
+
+README, guia frontend, visão, catálogo, matriz, roadmap e relatórios M2 alinhados
+ao parecer oficial. Sínteses vigentes distinguem M1/M2 aceitos das extensões de
+M3 e da fidelidade integral pendentes; fotografias históricas foram identificadas
+sem promover aceites individuais não informados. Quadro HTTP corrige referências
+ultrapassadas de familiares/condição; contexto de importações reconhece lotes e
+simulação mínima já implementados. Datas/cabeçalhos e fontes roadmap versus
+catálogo ajustados. Somente documentação; a investigação experimental do 400 no
+worktree separado não foi integrada nem declarada entregue.
+
 ## 2026-10-31 — aceite humano oficial de M2 e encerramento da execução
 
 O responsável confirmou expressamente que M2 passou em todos os testes de

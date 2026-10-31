@@ -4,8 +4,9 @@ Atualizado em: 2026-10-31
 
 **Continuidade de 2026-10-15:** as sete lacunas da reauditoria de 05/10 receberam
 correções de código e novas provas sintéticas. O percurso integrado original 7D
-passou pela interface e a regressão técnica foi concluída. A revisão clínica com
-a equipe continua necessária ao aceite integral. Evidências atuais estão no
+passou pela interface e a regressão técnica foi concluída. Essa fotografia
+antecede o aceite de M1 em 26/10 e o aceite humano de M2 em 31/10, registrados
+nos marcos abaixo; o aceite integral do produto é separado. Evidências estão no
 [relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md); o
 [relatório de 05/10](historico/RELATORIO_ETAPA_7_2026_10_05.md) preserva a
 fotografia anterior. Pacotes adicionais de UX/VU1 mantêm decisões e aceites próprios.
@@ -53,11 +54,11 @@ Nenhuma semântica clínica é inferida pela autorização de escopo.
 
 ### Marcos e dependências de entrega
 
-| Marco | Conteúdo e critério de saída | Estado em 27/10 |
+| Marco | Conteúdo e critério de saída | Estado em 31/10/2026 |
 | --- | --- | --- |
 | M1 — Fluxo original revisado | Executar roteiro clínico, registrar parecer, corrigir impedimentos e validar novamente os pontos afetados. | Aprovado em 2026-10-26, conforme confirmação do responsável do projeto; sem impedimentos reportados. |
 | M2 — VU1 sintética | Entregar 7A-U1, 7D-U1/U2/U4.2, verificar evidências U3/U4.1 e recuperação nas operações usadas; aceitar 7D-A1 com a equipe. | 7A-U1, 7D-U1/U2 e o cenário positivo 7D-A1 validados tecnicamente; CI dos quatro jobs do PR A1 aprovado (run `40442560575`). U4.2 foi comparada à referência executada em 31/10, com diferenças/adaptações registradas. M2 aprovado por aceite humano em 31/10, conforme confirmação expressa do responsável de que todos os testes passaram; [parecer oficial](validacoes/VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026). Recorte de trabalho definido em 26/10; escolhas fora desse recorte permanecem abertas. |
-| M3 — Produto completo em ambiente sintético | Concluir todas as famílias 7B-E/7C-E e 8A–8D incluídas, correção 7C-R2B/U, comparação visual 8V1 e aceite integral 8V2. | 8C2U.1 implementada e validada localmente no H14 mínimo; [evidência e consulta do CI remoto](validacoes/VALIDACAO_8C2_U1.md), sem aceite humano. C2B.1 mantém o limite comprovado de consumo de sequências no dry-run. Demais implementações, decisões e aceites pendentes. |
+| M3 — Produto completo em ambiente sintético | Concluir todas as famílias 7B-E/7C-E e 8A–8D incluídas, correção 7C-R2B/U, comparação visual 8V1 e aceite integral 8V2. | 8C2U.1, sorologias 7B-E1B/U, condição 7B-E2B.1/E2U.1 e CSV 8A1 têm implementações e provas sintéticas, conforme o [estado atual](ESTADO_ATUAL_DO_PROJETO.md). Não concluem os pacotes agregados ou seu aceite humano. C2B.1 mantém consumo de sequências no dry-run; demais unidades/decisões e 8V1/8V2 pendentes. |
 | M4 — Operação institucional | Concluir 9A–9D: implantação, segurança, continuidade e liberação explícita para dados reais. | Futuro; não é consequência automática de M3. |
 | M5 — Produto completo entregue | Concluir 10A–10D, reconciliar migração autorizada, resolver defeitos impeditivos e registrar release/aceite final. | Futuro; conclusão do objetivo depende de M3, M4 e M5. |
 

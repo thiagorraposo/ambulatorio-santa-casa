@@ -1,15 +1,14 @@
 # Frontend — leitura e fluxos clínicos
 
-Atualizado em: 2026-10-21. Fundação 6A–6B concluída; recorte original 7A–7D
-implementado e validado tecnicamente com dados sintéticos, com 41 cenários de
-navegador verificados após os incrementos U3.1/U3.2.
-As evidências e seus limites pertencem ao relatório da entrega.
-Aceite integral, revisão com a equipe e VU1
-não são declarados aqui.
+Atualizado em: 2026-10-31. Fundação 6A–6B e recorte clínico original
+implementados e validados com dados sintéticos. M1 e M2/VU1 possuem aceite
+humano registrado; o [parecer de M2](validacoes/VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026)
+não aceita as extensões de M3 ou o produto completo. Contagens e limites de cada
+rodada de testes pertencem aos relatórios das entregas.
 
 A aplicação própria está em [`frontend/`](../frontend). Consome os contratos
 públicos `/v1` do backend, com React/TypeScript, Vite, roteamento e consultas por
-recurso. O [roadmap](frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend) define o
+recurso. O [catálogo](frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend) define o
 escopo e os critérios de aceite; os relatórios da
 [Etapa 6](validacoes/VALIDACAO_ETAPA_6.md) e da
 [Etapa 7](validacoes/VALIDACAO_ETAPA_7.md) registram evidências e limites,

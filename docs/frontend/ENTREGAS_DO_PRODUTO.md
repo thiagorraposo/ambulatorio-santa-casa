@@ -1,6 +1,6 @@
 # Catálogo de entregas do produto
 
-Atualizado em: 2026-10-27. Fonte dos escopos e critérios por unidade; sequência
+Atualizado em: 2026-10-31. Fonte dos escopos e critérios por unidade; sequência
 e marcos pertencem ao [roadmap](../PROXIMOS_PASSOS.md). Estados históricos não
 equivalem a aceite atual: consultar as continuidades e relatórios citados.
 
@@ -14,13 +14,13 @@ desenho. As [linhas da matriz](MATRIZ_FIGMA_FRONTEND.md) ligam elemento
 FM e requisito RQ aos pacotes abaixo; a [visão](VISAO_E_ESPECIFICACAO.md)
 define VU1/MVP/PC/EX e decisões P-01–09. Todos os destinos não EX integram o produto completo.
 
-**Estado:** código correspondente presente é implementação, relatórios antigos
+**Leitura dos estados:** código correspondente presente é implementação, relatórios antigos
 são validação parcial dos seus cenários, contrato/decisão ausente é dependência
-identificada, e conclusão exige aceite do pacote. Nenhum pacote novo de código
-foi implementado/aceito por esta análise. `DOC-EX` registra disposição documental.
-Essa era a fotografia de 05/10. As correções e a prova integrada de 15/10 estão
-no relatório vigente; a revisão de usabilidade e o aceite dos pacotes propostos
-continuam separados. Não avançar para dashboard como se esse aceite já estivesse dado.
+identificada, e conclusão exige aceite do pacote. A decomposição original de
+05/10 era documental; as continuidades datadas abaixo registram entregas reais
+posteriores. M2/VU1 foi aceito em 31/10 no recorte delimitado pelo roadmap; os
+aceites dos demais pacotes continuam separados. Dashboard ainda depende das
+definições P-05 e de contratos próprios. `DOC-EX` registra disposição documental.
 
 **Unidade de entrega:** onde um ID agrega unidades `.1`, `.2` etc., abrir trabalho,
 revisar, validar e aceitar cada unidade separadamente. Os critérios nomeiam a
@@ -83,7 +83,7 @@ M3 ou fidelidade integral 8V1/8V2.
 
 #### 7A-U1 — Cadastro precedido por busca e escolha consciente
 
-**Estado e cobertura:** Implementado e validado tecnicamente em 2026-10-26; aceite de produto/equipe não declarado. RQ-HOM-07; RQ-LIS-07; RQ-CAD-01–02, 04–08, 10–18, 23, 25–30 (telas/elementos na matriz).
+**Estado e cobertura:** Implementado e validado tecnicamente em 2026-10-26; aceito no recorte M2 em 31/10/2026, conforme parecer oficial 7D-A1. RQ-HOM-07; RQ-LIS-07; RQ-CAD-01–02, 04–08, 10–18, 23, 25–30 (telas/elementos na matriz).
 
 **Escopo:** Busca por nome → correspondências autorizadas → declaração de nenhuma correspondente → cadastro; edição existente fica fora deste fluxo. Não impedir criação por homônimo nem fundir pessoas.
 
@@ -325,7 +325,7 @@ M3 ou fidelidade integral 8V1/8V2.
 
 #### 7D-U1 — Preencher atendimento em cinco etapas sem perder dados
 
-**Estado e cobertura:** Implementado e validado tecnicamente em 26/10/2026; aceite de produto/equipe pendente. Evidências e limites em [7D-U1/U2](../validacoes/VALIDACAO_7D_U1_U2.md). RQ-ATD-01–10, 12–19; RQ-DIA-01–07, 22; RQ-MED-01–09; RQ-EXN-01–09; RQ-OBS-01–03; RQ-EST-10 (telas/elementos na matriz).
+**Estado e cobertura:** Implementado e validado tecnicamente em 26/10/2026; aceito no recorte M2 em 31/10/2026, conforme parecer oficial 7D-A1. Evidências e limites em [7D-U1/U2](../validacoes/VALIDACAO_7D_U1_U2.md). RQ-ATD-01–10, 12–19; RQ-DIA-01–07, 22; RQ-MED-01–09; RQ-EXN-01–09; RQ-OBS-01–03; RQ-EST-10 (telas/elementos na matriz).
 
 **Escopo:** Atendimento, Avaliação/Chagas, Exames/familiares, Pendências e Revisão; somente campos hoje aceitos. Prévia de resumo não confirma ainda; etapa de revisão completa pertence a U2.
 
@@ -341,7 +341,7 @@ M3 ou fidelidade integral 8V1/8V2.
 
 #### 7D-U2 — Revisar atendimento e reconhecer cada confirmação separada
 
-**Estado e cobertura:** Implementado e validado tecnicamente em 26/10/2026; aceite de produto/equipe pendente. Evidências e limites em [7D-U1/U2](../validacoes/VALIDACAO_7D_U1_U2.md). RQ-ATD-05–10, 12–14; RQ-DIA-01–07; RQ-MED-01–09; RQ-PRJ-01; RQ-EXN-01–09; RQ-NTF-01–03; RQ-OBS-01–03 (telas/elementos na matriz).
+**Estado e cobertura:** Implementado e validado tecnicamente em 26/10/2026; aceito no recorte M2 em 31/10/2026, conforme parecer oficial 7D-A1. Evidências e limites em [7D-U1/U2](../validacoes/VALIDACAO_7D_U1_U2.md). RQ-ATD-05–10, 12–14; RQ-DIA-01–07; RQ-MED-01–09; RQ-PRJ-01; RQ-EXN-01–09; RQ-NTF-01–03; RQ-OBS-01–03 (telas/elementos na matriz).
 
 **Escopo:** Revisão de todos os valores/filhos aceitos, links Voltar e editar, confirmação única do atendimento e ação Continuar acompanhamento. Acompanhamento não integra o POST composto.
 
@@ -384,7 +384,7 @@ O estado agregado acima não declara U3 integral, VU1 ou aceite clínico conclu�
 
 #### 7D-U4 — Layout, controles e mensagens são operáveis em telas menores e teclado
 
-**Estado e cobertura:** Controles compartilhados implementados e validados tecnicamente no recorte abaixo em 26/10/2026; comparação de controles executada em 31/10, com diferenças/adaptações registradas; aceite humano pendente. Evidências e limites em [U4.2](../validacoes/VALIDACAO_7D_U4_2.md). RQ-LOG-01–03, 05–06; RQ-NAV-01–02, 08–10, 13; RQ-LIS-12; RQ-ATD-15; RQ-CTA-01–02, 05–06; RQ-ERR-03, 05, 07; RQ-EST-01–07, 09–10 (telas/elementos na matriz).
+**Estado e cobertura:** Controles compartilhados implementados e validados tecnicamente no recorte abaixo em 26/10/2026; comparação de controles executada em 31/10, com diferenças/adaptações registradas; recorte U4.2 aceito em M2 em 31/10; pacote agregado U4 e 8V1/8V2 permanecem separados. Evidências e limites em [U4.2](../validacoes/VALIDACAO_7D_U4_2.md). RQ-LOG-01–03, 05–06; RQ-NAV-01–02, 08–10, 13; RQ-LIS-12; RQ-ATD-15; RQ-CTA-01–02, 05–06; RQ-ERR-03, 05, 07; RQ-EST-01–07, 09–10 (telas/elementos na matriz).
 
 **Escopo:** U4.1 shell/login/conta/erros: navegação, foco e layout 320/390; U4.2 controles compartilhados de formulário/tabela/diálogo: rótulo, erro, status, Escape, foco. Aplicar a telas atuais sem copiar modais inseguros do Figma.
 
@@ -408,7 +408,7 @@ agregado não declara U4 integral, VU1 ou aceite clínico concluídos.
 
 #### 7D-A1 — Comprovar cadastro → atendimento → acompanhamento → histórico pela interface
 
-**Estado e cobertura:** Percurso positivo e confirmação única validados tecnicamente em 27/10/2026; CI do PR #15 aprovado nos quatro jobs (run `40442560575`); aceite de produto/equipe pendente. Evidências e limites em [7D-A1](../validacoes/VALIDACAO_7D_A1.md). RQ-LOG-04, 07; RQ-NAV-11; RQ-CAD-21–22, 24; RQ-FIC-07–09, 13, 15, 18–19; RQ-HIS-13; RQ-PRO-01–09; RQ-TRA-01–11; RQ-ENC-01–06, 08; RQ-NOT-01–05; RQ-ATD-14; RQ-MED-10; RQ-PRJ-01; RQ-BZN-01–08, 21; RQ-ECR-01–15; RQ-NTF-01–03; RQ-ACO-12–44; RQ-CTA-05–06; RQ-ERR-01; RQ-EST-12, 16–17 (telas/elementos na matriz).
+**Estado e cobertura:** Percurso positivo e confirmação única validados tecnicamente em 27/10/2026; CI do PR #15 aprovado nos quatro jobs (run `40442560575`); aceito no recorte M2 em 31/10/2026, conforme parecer oficial 7D-A1. Evidências e limites em [7D-A1](../validacoes/VALIDACAO_7D_A1.md). RQ-LOG-04, 07; RQ-NAV-11; RQ-CAD-21–22, 24; RQ-FIC-07–09, 13, 15, 18–19; RQ-HIS-13; RQ-PRO-01–09; RQ-TRA-01–11; RQ-ENC-01–06, 08; RQ-NOT-01–05; RQ-ATD-14; RQ-MED-10; RQ-PRJ-01; RQ-BZN-01–08, 21; RQ-ECR-01–15; RQ-NTF-01–03; RQ-ACO-12–44; RQ-CTA-05–06; RQ-ERR-01; RQ-EST-12, 16–17 (telas/elementos na matriz).
 
 **Escopo:** Um cenário integrado positivo: buscar/criar paciente, atendimento com avaliação/diagnóstico/exames/família/pendência, BZN/reação, retorno efetivo, encaminhamento/contrarreferência, notificação, resolver pendência, reler ficha/histórico. Não preparar paciente/consulta com helpers de API.
 

@@ -1,5 +1,9 @@
 # Validação técnica de 7D-A1 — percurso integrado pela interface
 
+**Estado vigente:** M2 aprovado por aceite humano em 31/10/2026, conforme o
+[parecer oficial](#aceite-humano-oficial-de-m2--31102026). As pendências abaixo
+pertencem às execuções técnicas anteriores à confirmação; não reabrem o marco.
+
 Data: 2026-10-27. Resultado: **cenário integrado positivo e confirmação única
 validados tecnicamente em ambiente sintético**. Aceite da equipe clínica/produto
 permanece pendente.
@@ -55,7 +59,7 @@ Na primeira execução, o cenário terminou em `ReferenceError: visitByLink is n
 defined`; a importação faltante do helper de navegação foi corrigida. Os dois
 cenários foram então repetidos e passaram.
 
-## Limites e decisões abertas
+## Limites e decisões abertas na execução de 27/10
 
 Este resultado técnico não é aceite clínico nem conclusão de M2. Os casos de
 403/409/resposta perdida são provas focadas separadas, não injetadas na mesma
@@ -78,8 +82,8 @@ rodada e suas correções estão no [relatório U4.2](VALIDACAO_7D_U4_2.md#compa
 As provas válidas de 401/403/409/resposta perdida citadas acima são reutilizadas;
 não foram reinjetadas na jornada positiva nesta rodada.
 
-**Estado: percurso validado tecnicamente e preparado para aceite humano; nenhum
-aceite humano de M2 registrado nesta sessão.** A comparação executada de
+**Estado antes da confirmação humana: percurso validado tecnicamente e
+preparado para aceite; até esse ponto, o parecer ainda não havia sido recebido.** A comparação executada de
 controles U4.2 registra adaptações acessíveis e diferenças de baixa severidade;
 não conclui fidelidade integral 8V1/8V2.
 
@@ -100,7 +104,7 @@ login é esperado; o rascunho não sobrevive à nova sessão.
 | 7 — Interação | Repetir controles por teclado em 320/390 px e zoom nativo 200%; abrir cancelamento, Escape e voltar ao campo. Verificar tabela rolável, foco visível, mensagens e reconhecimento do rascunho. | Não executado pela equipe nesta sessão |
 | 8 — Falhas apresentadas | Rever com facilitador os cenários técnicos 403, 409 e resposta perdida. Usuário distingue recusa, conflito e resultado incerto; confirmação anterior permanece e não há reenvio automático. | Não executado pela equipe nesta sessão |
 
-| Registro da sessão humana M2 | Preencher |
+| Modelo de registro preparado antes do parecer | Situação na preparação |
 | --- | --- |
 | Data, revisores/funções, ambiente/URL e commit | Pendente |
 | Perfil e IDs de paciente/atendimento/acompanhamentos | Pendente |

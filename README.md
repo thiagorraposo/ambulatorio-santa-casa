@@ -6,8 +6,8 @@ importador Python, API NestJS/TypeScript e frontend React/TypeScript.
 
 O objetivo é entregar o protótipo como produto completo, incluindo cobertura
 funcional, experiência de uso e fidelidade visual. O fluxo clínico original foi
-implementado e validado com dados sintéticos; a revisão clínica e a operação
-institucional ainda estão pendentes. Consulte o [estado atual](docs/ESTADO_ATUAL_DO_PROJETO.md)
+implementado e validado com dados sintéticos; M1 e M2 possuem aceite humano
+registrado. O produto completo e a operação institucional permanecem em construção. Consulte o [estado atual](docs/ESTADO_ATUAL_DO_PROJETO.md)
 e o [roadmap](docs/PROXIMOS_PASSOS.md).
 
 ## Experimentar no navegador
