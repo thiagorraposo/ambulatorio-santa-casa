@@ -1,5 +1,17 @@
 # Registro de Alterações
 
+## 2026-10-31 — comparação de controles M2 e preparação do aceite
+
+Referência original executada em cópia temporária, comparada ao frontend com
+API/PostgreSQL sintéticos. Capturas e diferenças por requisito/severidade estão
+na [validação U4.2](validacoes/VALIDACAO_7D_U4_2.md#comparação-executada-em-31102026).
+Reflow acessível e diálogo atual preservados; sem alteração de CSS/contratos.
+Novo E2E cobre formulário/tabela/diálogo/carga/erro, teclado, Axe, 320/390 px e
+zoom CSS 200%. Percurso A1 e confirmação única passaram novamente; o
+[roteiro M2](validacoes/VALIDACAO_7D_A1.md#continuidade-técnica-de-31102026-e-roteiro-de-aceite-m2)
+está preparado com parecer humano pendente. M2 tecnicamente pronto para aceite
+no recorte revisado; não declara fidelidade integral 8V1 ou aprovação humana.
+
 ## 2026-10-28 — condição de Chagas por atendimento (7B-E2B.1)
 
 GET/POST de seis campos existentes, criação única sem sobrescrita e recibo
