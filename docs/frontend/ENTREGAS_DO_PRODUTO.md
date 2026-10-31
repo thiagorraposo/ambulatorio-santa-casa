@@ -377,7 +377,7 @@ O estado agregado acima não declara U3 integral, VU1 ou aceite clínico conclu�
 
 #### 7D-U4 — Layout, controles e mensagens são operáveis em telas menores e teclado
 
-**Estado e cobertura:** Controles compartilhados implementados e validados tecnicamente no recorte abaixo em 26/10/2026; comparação visual e aceite humano pendentes. Evidências e limites em [U4.2](../validacoes/VALIDACAO_7D_U4_2.md). RQ-LOG-01–03, 05–06; RQ-NAV-01–02, 08–10, 13; RQ-LIS-12; RQ-ATD-15; RQ-CTA-01–02, 05–06; RQ-ERR-03, 05, 07; RQ-EST-01–07, 09–10 (telas/elementos na matriz).
+**Estado e cobertura:** Controles compartilhados implementados e validados tecnicamente no recorte abaixo em 26/10/2026; comparação de controles executada em 31/10, com diferenças/adaptações registradas; aceite humano pendente. Evidências e limites em [U4.2](../validacoes/VALIDACAO_7D_U4_2.md). RQ-LOG-01–03, 05–06; RQ-NAV-01–02, 08–10, 13; RQ-LIS-12; RQ-ATD-15; RQ-CTA-01–02, 05–06; RQ-ERR-03, 05, 07; RQ-EST-01–07, 09–10 (telas/elementos na matriz).
 
 **Escopo:** U4.1 shell/login/conta/erros: navegação, foco e layout 320/390; U4.2 controles compartilhados de formulário/tabela/diálogo: rótulo, erro, status, Escape, foco. Aplicar a telas atuais sem copiar modais inseguros do Figma.
 
@@ -494,6 +494,14 @@ campos/domínios aprovados continuam separados; não há aceite do pacote agrega
 #### 7B-E2U — Registrar e consultar condição e complicações
 
 **Estado e cobertura:** Planejado; não aceito. RQ-CON-01–11 (telas/elementos na matriz).
+
+**Continuidade de 31/10 — 7B-E2U.1:** interface dos seis campos CON-01–06
+implementada sobre o contrato 7B-E2B.1: leitura por atendimento, formulário,
+revisão, confirmação única, rascunho e recibo recuperável. Ficha e histórico
+preservam a seleção ao abrir o recurso. [Evidência e limites](../validacoes/VALIDACAO_7B_E2U_1.md).
+Complicações CON-07–10 e adição CON-11 continuam sem contrato HTTP aprovado;
+sintomas específicos, edição/remoção e aceite do pacote agregado permanecem
+pendentes. Não se atribui aceite humano à validação técnica.
 
 **Escopo:** Forma clínica/cardíaca/digestiva, classificação e sintomas/regurgitação/constipação/disfagia/dor/dispneia; sem classificação automática. Uma seção/formulário por módulo; revisão lista todos os campos.
 

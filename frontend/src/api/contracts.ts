@@ -269,3 +269,15 @@ export interface SorologiaResponse {
   observacoes: string | null;
 }
 export interface SorologiaCriadaResponse { sorologiaId: string }
+
+export interface CondicaoChagasResponse {
+  condicaoChagasId: string;
+  atendimentoId: string;
+  formaClinica: string | null;
+  faseDoenca: string | null;
+  classificacaoClinica: string | null;
+  possuiSintomas: boolean | null;
+  descricaoSintomas: string | null;
+  observacoes: string | null;
+}
+export interface CondicaoChagasCriadaResponse { condicaoChagasId: string }

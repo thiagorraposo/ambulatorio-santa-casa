@@ -14,6 +14,8 @@ import { AppNavigation } from './AppNavigation';
 import { ImportacaoDetalhePage, ImportacoesPage } from '../features/importacoes/ImportacoesPage';
 import ImportacaoSimulacaoPage from '../features/importacoes/ImportacaoSimulacaoPage';
 import SorologiasPage from '../features/sorologias/SorologiasPage';
+import CondicaoPage from '../features/condicao/CondicaoPage';
+import CondicaoCreatePage from '../features/condicao/CondicaoCreatePage';
 import SorologiaCreatePage from '../features/sorologias/SorologiaCreatePage';
 
 const profiles = { consulta: 'Consulta', edicao: 'Edição', administracao: 'Administração' };
@@ -180,6 +182,8 @@ export default function App() {
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId" element={<AttendancePage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias" element={<SorologiasPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias/nova" element={<SorologiaCreatePage />} />
+      <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/condicao-chagas" element={<CondicaoPage />} />
+      <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/condicao-chagas/nova" element={<CondicaoCreatePage />} />
       <Route path="/importacoes" element={<ImportacoesPage />} />
       <Route path="/importacoes/simular" element={<ImportacaoSimulacaoPage />} />
       <Route path="/importacoes/lotes/:loteId" element={<ImportacaoDetalhePage />} />

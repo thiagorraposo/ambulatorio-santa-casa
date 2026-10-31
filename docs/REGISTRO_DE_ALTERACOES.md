@@ -1,5 +1,18 @@
 # Registro de Alterações
 
+## 2026-10-31 — interface da condição de Chagas (7B-E2U.1)
+
+Leitura e criação dos seis campos do contrato H18, com revisão antes da
+confirmação, recibo e rascunho recuperáveis. Ficha/histórico abrem o recurso da
+consulta selecionada e conservam o retorno. Sintomas Não/desconhecidos não
+apagam descrição; nenhum diagnóstico é inferido. Oito testes de componentes e
+cinco cenários E2E proporcionais passaram com API/PostgreSQL descartáveis,
+incluindo resposta perdida, 403, 409 e isolamento entre consultas.
+[Validação e limites](validacoes/VALIDACAO_7B_E2U_1.md). Complicações CON-07–10/11
+continuam pendentes de contrato HTTP/auditoria/recuperação; sintomas específicos,
+edição/remoção, aceite humano e dados reais permanecem separados. Nenhuma
+migration ou backend alterados.
+
 ## 2026-10-31 — comparação de controles M2 e preparação do aceite
 
 Referência original executada em cópia temporária, comparada ao frontend com

@@ -62,7 +62,7 @@ O runner [`tests/frontend/test_e2e.sh`](../tests/frontend/test_e2e.sh) recebe
 `SYNTHETIC_PG_HOST`, `SYNTHETIC_PG_PORT`, `SYNTHETIC_PG_USER` e `PGPASSWORD` pelo
 ambiente, todos obrigatórios. O usuário deve poder criar banco e login de teste.
 Ele cria seu banco e roles de teste, aplica as
-migrations 02–64 apenas nesse banco, inicia API/Vite e encerra os recursos que
+migrations 02–66 apenas nesse banco, inicia API/Vite e encerra os recursos que
 criou.
 Não lê `.env` para selecionar o banco de teste. Não exige build do frontend para
 servir Vite; o build de produção é verificado separadamente por `frontend-check`.
@@ -209,6 +209,8 @@ Minha conta mostra a identidade retornada pela API.
 | `/pacientes/:pacienteId/atendimentos/:atendimentoId` | Detalhe de atendimento e coleções paginadas por limit/offset. |
 | `/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias` | Episódios individuais, lista paginada e leitura dos sete campos. |
 | `/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias/nova` | Rascunho, revisão, confirmação independente e recibo recuperável. |
+| `/pacientes/:pacienteId/atendimentos/:atendimentoId/condicao-chagas` | Condição única da consulta selecionada, inclusive ausência explícita. |
+| `/pacientes/:pacienteId/atendimentos/:atendimentoId/condicao-chagas/nova` | Seis campos, revisão, confirmação única e recibo recuperável. |
 | `/minha-conta` | Identidade e perfil obtidos da API. |
 
 Sessão, cache de consultas e estado local de filtros têm responsabilidades
@@ -280,6 +282,14 @@ incerta continua bloqueada até verificação. Recibos permanecem na sessão ao
 iniciar outro episódio. Consulta somente lê; solicitação geral, edição e exclusão
 de episódios persistidos não foram habilitadas. O retorno se limita ao mesmo
 paciente/atendimento. [Evidência da interface](validacoes/VALIDACAO_7B_E1U.md).
+
+Condição de Chagas tem [contrato de seis campos](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md)
+e [evidência de interface](validacoes/VALIDACAO_7B_E2U_1.md). Ficha e histórico
+abrem o recurso do atendimento selecionado. O registro é separado da confirmação
+do núcleo; os seis campos são revisados antes do POST. Desconhecido, Não e Não
+informado permanecem distintos; descrição não é apagada ao mudar o indicador.
+Consulta só lê; não há edição/remoção, complicações ou classificação automática.
+
 
 Os tipos de `/registrar` são `bzn`, `retorno-bzn`, `projeto`, `notificacao`,
 `encaminhamento`, `contrarreferencia`, `retorno-anual`, `ocorrencia-anual` e

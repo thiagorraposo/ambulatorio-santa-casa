@@ -59,8 +59,9 @@ incerta; nunca reenviar automaticamente. Reaplicar intenção confirmada recebe
 
 ## Limites
 
-Interface, complicações repetíveis (CON-07–10), edição, exclusão e revisão temporal
-são unidades distintas. Os sintomas específicos citados no catálogo (dispneia,
+Complicações repetíveis (CON-07–10), edição, exclusão e revisão temporal
+são unidades distintas. A interface dos seis campos tem evidência própria
+[7B-E2U.1](../validacoes/VALIDACAO_7B_E2U_1.md). Os sintomas específicos citados no catálogo (dispneia,
 disfagia, constipação, regurgitação e dor) não têm campos/domínios aprovados nas
 fontes examinadas: não serão convertidos silenciosamente em flags ou texto.
 P-03 dos PUT e pendências permanece inalterado. Este recorte não aceita M2/M3.
@@ -68,3 +69,27 @@ P-03 dos PUT e pendências permanece inalterado. Este recorte não aceita M2/M3.
 Fontes: [SQL06](../../sql/06_tabelas_condicoes_comorbidades.sql),
 [catálogo](../frontend/ENTREGAS_DO_PRODUTO.md#7b-e2b),
 [matriz CON](../frontend/MATRIZ_FIGMA_FRONTEND.md#con--condição-clínica-e-complicações).
+
+## Interface dos seis campos — 7B-E2U.1 (31/10/2026)
+
+A ficha na aba Chagas e o detalhe do histórico oferecem acesso à condição do
+atendimento selecionado. As rotas `/condicao-chagas` e `/condicao-chagas/nova`,
+sob o mesmo paciente/atendimento, permitem leitura e criação com revisão dos
+seis campos. A confirmação continua sendo operação separada do núcleo do
+atendimento; não se declara atomicidade entre as duas gravações.
+
+Select vazio e texto vazio de um novo formulário enviam null; `nao_informado`
+é escolha explícita distinta. Espaços e quebras de linha são preservados.
+A leitura distingue texto vazio legado de null. Alterar o indicador de sintomas
+não limpa a descrição nem deriva diagnóstico/forma/fase. O formulário não edita
+registros existentes nem permite segundo registro após o próprio recibo; uma
+criação concorrente recebe 409 sem sobrescrever o recurso ou apagar o rascunho.
+Rascunhos e recibos usam o escopo de sessão já existente; uma intenção incerta
+permanece bloqueada até verificação por UUID. Retornos se limitam ao mesmo
+recurso e conservam os parâmetros da consulta de origem.
+
+CON-07–10 têm colunas na SQL06 (tipo livre, presença anulável, descrição e
+gravidade do domínio físico), mas não têm contrato HTTP/auditoria/recuperação
+aprovado nesta entrega. D1–D12 não acrescentam resposta sobre essa publicação.
+O planejamento do contrato continua obrigatório antes da implementação; não se
+infere ligação obrigatória à condição nem novos tipos a partir de sintomas.

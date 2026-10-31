@@ -1,6 +1,6 @@
 # Roadmap do Projeto
 
-Atualizado em: 2026-10-28
+Atualizado em: 2026-10-31
 
 **Continuidade de 2026-10-15:** as sete lacunas da reauditoria de 05/10 receberam
 correções de código e novas provas sintéticas. O percurso integrado original 7D
@@ -56,7 +56,7 @@ Nenhuma semântica clínica é inferida pela autorização de escopo.
 | Marco | Conteúdo e critério de saída | Estado em 27/10 |
 | --- | --- | --- |
 | M1 — Fluxo original revisado | Executar roteiro clínico, registrar parecer, corrigir impedimentos e validar novamente os pontos afetados. | Aprovado em 2026-10-26, conforme confirmação do responsável do projeto; sem impedimentos reportados. |
-| M2 — VU1 sintética | Entregar 7A-U1, 7D-U1/U2/U4.2, verificar evidências U3/U4.1 e recuperação nas operações usadas; aceitar 7D-A1 com a equipe. | 7A-U1, 7D-U1/U2 e o cenário positivo 7D-A1 validados tecnicamente; CI dos quatro jobs do PR A1 aprovado (run `40442560575`). U4.2 tem implementação/validação parcial e comparação visual pendente. Aceite humano permanece pendente. Recorte de trabalho definido em 26/10; escolhas fora desse recorte permanecem abertas. |
+| M2 — VU1 sintética | Entregar 7A-U1, 7D-U1/U2/U4.2, verificar evidências U3/U4.1 e recuperação nas operações usadas; aceitar 7D-A1 com a equipe. | 7A-U1, 7D-U1/U2 e o cenário positivo 7D-A1 validados tecnicamente; CI dos quatro jobs do PR A1 aprovado (run `40442560575`). U4.2 foi comparada à referência executada em 31/10, com diferenças/adaptações registradas. M2 tecnicamente pronto para aceite no recorte revisado; roteiro A1 preparado e aceite humano pendente. Recorte de trabalho definido em 26/10; escolhas fora desse recorte permanecem abertas. |
 | M3 — Produto completo em ambiente sintético | Concluir todas as famílias 7B-E/7C-E e 8A–8D incluídas, correção 7C-R2B/U, comparação visual 8V1 e aceite integral 8V2. | 8C2U.1 implementada e validada localmente no H14 mínimo; [evidência e consulta do CI remoto](validacoes/VALIDACAO_8C2_U1.md), sem aceite humano. C2B.1 mantém o limite comprovado de consumo de sequências no dry-run. Demais implementações, decisões e aceites pendentes. |
 | M4 — Operação institucional | Concluir 9A–9D: implantação, segurança, continuidade e liberação explícita para dados reais. | Futuro; não é consequência automática de M3. |
 | M5 — Produto completo entregue | Concluir 10A–10D, reconciliar migração autorizada, resolver defeitos impeditivos e registrar release/aceite final. | Futuro; conclusão do objetivo depende de M3, M4 e M5. |
@@ -586,6 +586,13 @@ recorte técnico da família: contrato de complicações repetíveis CON-07–10
 Sintomas específicos ainda sem campos/domínios aprovados exigem decisão própria;
 não declarar 7B-E2B/E2U completos. Aceite humano de M2 permanece separado. A branch `feat/condicao-chagas` incorporou a estabilização em `8736b0d` e passou
 83/83 HTTP; publicação/integração exigem CI remoto e conferência na main.
+
+Continuidade de 31/10: 7B-E2U.1 implementa a interface dos seis campos de
+condição sobre H18, com revisão, recibo e retorno à ficha/histórico da consulta
+selecionada; [evidência](validacoes/VALIDACAO_7B_E2U_1.md). CON-07–10 têm modelo
+físico, mas ainda precisam de contrato HTTP/auditoria/recuperação aprovado;
+CON-11 e sintomas específicos sem destino continuam pendentes. Não se declara
+7B-E2B/E2U ou M3 completos. A preparação/revisão de M2 continua independente.
 
 ### Preparação da migração da planilha real
 

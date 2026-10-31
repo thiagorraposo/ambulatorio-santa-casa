@@ -36,6 +36,7 @@ export default function AttendancePage() {
             <h2>Atendimento de {formatClinicalDate(data.dataAtendimento)}</h2>
             <p className="muted">Avaliação, diagnóstico, exames e pendências abaixo pertencem a este atendimento.</p>
             <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/sorologias?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Sorologias deste atendimento</Link></p>
+            <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/condicao-chagas?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Condição de Chagas deste atendimento</Link></p>
             {location.state?.saved && <p className="notice" role="status">{String(location.state.saved)}</p>}
             {session.user?.perfil !== 'consulta' && <div className="form-actions">
               <Link to={`${patientPath}/atendimentos/${atendimentoId}/editar`} className="button button-secondary">Editar atendimento</Link>
