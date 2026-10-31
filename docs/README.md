@@ -41,6 +41,7 @@ fonte temática abaixo; relatórios registram provas e histórico preserva conte
 | Recuperação de escrita e paginação de familiares | [Operações](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) e [familiares](arquitetura/CONTRATO_FAMILIARES_ETAPA_7.md) |
 | Episódios individuais de sorologia | [Contrato 7B-E1B](arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md) |
 | Condição de Chagas por atendimento | [Contrato 7B-E2B.1](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md) |
+| Complicações repetíveis por atendimento | [Proposta técnica 7B-E2B.2](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md) — CON-07–10; sem API publicada ou aceite. |
 | Revisão entre versões da planilha | [Contrato temporal](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md) |
 
 Especificações por módulo em `arquitetura/`: [avaliação clínica](arquitetura/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md),

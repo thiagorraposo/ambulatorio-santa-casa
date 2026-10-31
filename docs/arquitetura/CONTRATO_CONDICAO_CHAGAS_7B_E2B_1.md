@@ -93,3 +93,10 @@ gravidade do domínio físico), mas não têm contrato HTTP/auditoria/recuperaç
 aprovado nesta entrega. D1–D12 não acrescentam resposta sobre essa publicação.
 O planejamento do contrato continua obrigatório antes da implementação; não se
 infere ligação obrigatória à condição nem novos tipos a partir de sintomas.
+
+## Proposta da continuação CON-07–10 — 31/10/2026
+
+O [contrato proposto 7B-E2B.2](CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md)
+especifica os quatro campos existentes de complicação e suas dependências de
+publicação. Está preparado para revisão, sem alterar este recurso de condição,
+implementar rotas ou conceder aprovação de DTO/semântica por associação.

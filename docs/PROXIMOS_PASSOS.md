@@ -557,7 +557,7 @@ M2/VU1 foi aprovado pelo responsável em 31/10/2026: todos os testes de aceite
 humano passaram, conforme [parecer oficial](validacoes/VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026).
 Os parágrafos datados abaixo preservam a sequência histórica; suas pendências
 de aceite M2 foram sucedidas por esse parecer. A continuidade passa às unidades
-desbloqueadas de M3; a execução foi encerrada a pedido do responsável.
+desbloqueadas de M3; a execução anterior foi encerrada a pedido do responsável.
 
 M1 foi aprovado em 26/10 conforme registro do responsável. A sequência de M2
 foi delimitada pelo responsável para 7A-U1, 7D-U1/U2/U4.2, verificação de
@@ -605,6 +605,15 @@ Também em 31/10, 8A1 acrescentou download CSV da página de pacientes usando
 somente H16 e a política existente dos três perfis; [evidência](validacoes/VALIDACAO_8A1.md).
 Escopo informado, filtros/página aplicados, UTF-8 e falhas sem falso sucesso;
 exportação ampliada permanece fora deste contrato e o aceite humano pendente.
+
+Continuidade da preparação de CON-07–10 em 31/10: a [proposta 7B-E2B.2](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md)
+especifica GET/POST de complicações sobre a SQL06, com quatro campos existentes,
+múltiplas ocorrências e captura/recuperação prospectivas. Não publica rotas nem
+aprova DTO/semântica por consequência. Próxima unidade: revisar o contrato e,
+após aprovação, implementar backend/migration e provas em ambiente descartável;
+interface CON-11 é posterior. Mantidos os commits documentais após `fc51390`,
+o aceite oficial de M2 e a baseline histórica de 252 testes/73 E2E, sem repetição
+por mudança exclusivamente documental.
 
 ### Preparação da migração da planilha real
 

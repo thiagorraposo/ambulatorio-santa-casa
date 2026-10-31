@@ -1,5 +1,19 @@
 # Registro de Alterações
 
+## 2026-10-31 — proposta de contrato das complicações (7B-E2B.2)
+
+CON-07–10 especificados em [proposta técnica](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md)
+sobre a tabela SQL06: tipo livre, presença anulável, descrição e gravidade do
+domínio existente, múltiplas ocorrências, autorização, paginação, auditoria e
+recuperação por intenção. Distinguem-se escolhas técnicas para revisão de
+regras clínicas já vigentes; preparação não equivale a DTO/semântica aprovados
+ou API implementada. Fontes estado/roadmap/catálogo/matriz e índice atualizadas.
+Nenhum backend, frontend, migration ou dado alterado; baseline 252/73 histórica
+preservada sem reexecução. Mantidos HEAD documental e aceite humano M2 oficiais,
+sem retroceder ao prompt de retomada desatualizado. Sem push ou alteração da main.
+Validação documental: `make docs-check COMPACT=1`, diff sem whitespace inválido
+e 24 links/âncoras locais conferidos. Nenhuma suíte da aplicação reexecutada.
+
 ## 2026-10-31 — consistência documental após aceite de M2
 
 README, guia frontend, visão, catálogo, matriz, roadmap e relatórios M2 alinhados

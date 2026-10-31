@@ -486,6 +486,12 @@ registra a regressão final após incorporar a correção de isolamento do CI.
 Complicações repetíveis (CON-07–10), interface e sintomas específicos sem
 campos/domínios aprovados continuam separados; não há aceite do pacote agregado.
 
+**Preparação de 31/10 — 7B-E2B.2:** [contrato técnico proposto](../arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md)
+para tipo/presença/descrição/gravidade CON-07–10, reutilizando a SQL06 sem inferir
+condição ou diagnóstico. Rotas, DTO, captura prospectiva e critérios de prova
+especificados para revisão; nenhuma API/migration implementada ou aprovação
+clínica registrada nesta preparação. CON-11/interface têm unidade posterior.
+
 **Escopo:** Forma clínica/cardíaca/digestiva, classificação e sintomas/regurgitação/constipação/disfagia/dor/dispneia; sem classificação automática.
 
 **Dependências/decisões:** P-01 para prioridade; campos/modelo físico e fontes clínicas examinados antes do DTO; D2–D5 quando pertinentes.
