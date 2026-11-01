@@ -93,3 +93,5 @@ Veja [as regras de manutenção](AGENTS.md) e o
 - [Medicamentos E5U: consulta integrada e provas](validacoes/VALIDACAO_7B_E5U_LEITURA.md).
 
 - [Reação isolada BZN E1.2: contrato e evidências](arquitetura/CONTRATO_REACOES_BZN_7C_E1B.md).
+
+- [Reações BZN E1.2: interface, testes e limites visuais](validacoes/VALIDACAO_7C_E1U_REACOES.md).

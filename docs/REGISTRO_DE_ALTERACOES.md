@@ -1,5 +1,15 @@
 # Registro de Alterações
 
+## 2026-11-01 — 7C-E1U E1.2 interface de reação isolada
+
+- Cinco campos literais, revisão, rascunho, lista paginada e recuperação sem
+  repetir envio; retorno exato da ficha e tratamento canônico preservado.
+- Build, cobertura unitária composta265 e2 E2E reais aprovados; teste de timeout
+  isolado revalidado. [Evidência e limites](validacoes/VALIDACAO_7C_E1U_REACOES.md).
+- Referência BZN renderizada; não existe nela formulário de reação equivalente.
+  Sem aceite humano; continuar contrato E6B de resultados canônicos.
+
+
 ## 2026-11-01 — 7C-E1B E1.2 reação isolada no BZN
 
 - Leitura/criação no tratamento existente, sem alterar indicadores; captura72

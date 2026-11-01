@@ -145,3 +145,8 @@ com captura72; [contrato](arquitetura/CONTRATO_REACOES_BZN_7C_E1B.md) e
 E1.1 não incluída. E6 exige contrato para resultados no exame canônico H6:
 SQL07 liga resultados à estrutura legada; não equiparar IDs nem migrar legado.
 Essa lacuna técnica não foi declarada decisão clínica aprovada ou bloqueio humano.
+
+7C-E1U E1.2, reação isolada BZN: interface VALIDADA TECNICAMENTE com cinco
+campos/revisão/rascunho/recuperação e múltiplas intenções; [provas/limites](validacoes/VALIDACAO_7C_E1U_REACOES.md).
+E1.1/aceite continuam pendentes. Próxima: contrato7B-E6B para parâmetros no exame
+canônico, sem reutilizar a FK legada SQL07 ou inferir resultados/datas/diagnóstico.

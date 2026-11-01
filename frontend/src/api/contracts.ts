@@ -337,3 +337,9 @@ export interface MedicamentoResponse {
   motivo: string | null;
   observacoes: string | null;
 }
+
+export interface ReacaoBznOcorrenciaResponse {
+  reacaoId:string; tratamentoId:string; descricao:string|null; gravidade:string|null;
+  dataReacao:string|null; consequencia:string|null; observacoes:string|null;
+}
+export interface ReacaoBznCriadaResponse { reacaoId:string }

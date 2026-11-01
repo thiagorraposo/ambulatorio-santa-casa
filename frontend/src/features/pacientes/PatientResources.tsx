@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router';
+import { Link, useLocation, useSearchParams } from 'react-router';
 import type {
   AnnualReturnResponse, AtendimentoResumoResponse, ClinicalEventResponse, CounterReferralResponse,
   ExameResponse, NotificationResponse, PendenciaResponse, ProjectResponse, ReferralResponse,
@@ -129,6 +129,8 @@ export function PatientNotification({ path }: { path: string }) {
 }
 
 export function PatientBzn({ pacienteId, path }: { pacienteId: string; path: string }) {
+  const location = useLocation();
+  const origin = `${location.pathname}${location.search}${location.hash}`;
   const query = useApiQuery<TratamentoBznResponse | null>(`${path}/tratamento-bzn`);
   return <div className="record-grid">
     <Card>
@@ -147,6 +149,7 @@ export function PatientBzn({ pacienteId, path }: { pacienteId: string; path: str
             ['Motivo de não início', displayText(item.motivoNaoInicio)],
             ['Teve reação adversa', triState(item.teveReacaoAdversa)], ['Observações', displayText(item.observacoes)],
           ]} />
+          <p><Link to={`${path}/tratamento-bzn/reacoes?retorno=${encodeURIComponent(origin)}`}>Reações do tratamento BZN</Link></p>
           <h3>Reações adversas registradas</h3>
           {item.reacoes.length === 0 ? <EmptyState>Nenhuma reação registrada.</EmptyState> : (
             <div className="resource-list">{item.reacoes.map(reaction => <details className="resource-item" key={reaction.reacaoId}>
