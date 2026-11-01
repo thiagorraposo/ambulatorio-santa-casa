@@ -64,3 +64,5 @@ sistema; sua menção preserva rastreabilidade, não garante disponibilidade atu
 - [Backend AVC longitudinal — recorte E4B](VALIDACAO_7B_E4B_AVC.md).
 
 - [Interface AVC — E4U, provas e pendência visual](VALIDACAO_7B_E4U_AVC.md).
+
+- [Catálogo mínimo da demonstração M3](VALIDACAO_FIXTURE_DEMO_M3.md).

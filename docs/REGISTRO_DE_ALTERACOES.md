@@ -1,5 +1,12 @@
 # Registro de Alterações
 
+## 2026-11-01 — Fixture mínima de comorbidades para demonstração M3
+
+- Seed do runner/--serve inclui dois nomes canônicos do importador, sem vínculos
+  clínicos fabricados. Novo E2E e sete regressões de comorbidades/importações
+  aprovados; [evidência e limites](validacoes/VALIDACAO_FIXTURE_DEMO_M3.md).
+- Não equivale a ensaio integral nem conclusão/aceite de 8V2.
+
 ## 2026-11-01 — Interface longitudinal de AVC (E4U parcial)
 
 - Lista, formulário/revisão, recibos e retorno seguro à origem; sem snapshot de consulta.

@@ -16,6 +16,9 @@ const owner = new Pool({ host: process.env.PGHOST, port: Number(process.env.PGPO
   user: process.env.PGUSER, password: process.env.PGPASSWORD, database: db });
 const fixture = { password: 'Etapa6-sintetica!', users: {}, patients: [], main: null, reserved: null, large: null };
 try {
+  // Nomes canônicos já consumidos por Importer.comorbidities, sem paciente associado.
+  await owner.query(`INSERT INTO ambulatorio.comorbidade(nome_comorbidade)
+    VALUES ('hipertensao_arterial'),('diabetes') ON CONFLICT (nome_comorbidade) DO NOTHING`);
   const passwordHash = await hash(fixture.password, 12);
   for (const perfil of ['consulta', 'edicao', 'administracao']) {
     const login = `frontend-${perfil}@example.invalid`;

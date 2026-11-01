@@ -401,3 +401,6 @@ explícito e permite Sim/Não. Itens não selecionados não são registrados. Re
 familiar livre permanece separado dos exames; campos e escolhas passam por
 revisão. [Contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) e
 [validação proporcional](validacoes/VALIDACAO_7B_E3U.md), sem aceite humano presumido.
+
+O seed sintético do runner/--serve inclui os nomes canônicos hipertensao_arterial
+e diabetes, sem associação clínica pré-preenchida. [Prova de fixture e limites](validacoes/VALIDACAO_FIXTURE_DEMO_M3.md).
