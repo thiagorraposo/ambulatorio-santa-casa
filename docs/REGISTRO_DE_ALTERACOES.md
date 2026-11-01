@@ -1,5 +1,13 @@
 # Registro de Alterações
 
+## 2026-11-01 — E5U leitura de medicamentos
+
+- Lista paginada por atendimento, campos literais, origem preservada e somente
+  leitura; nenhum formulário de prescrição ou efeito em SQL/importador.
+- Build/264 unidades e dois E2E reais aprovados; [provas/limites](validacoes/VALIDACAO_7B_E5U_LEITURA.md).
+- Continuar na fila, contrato7B-E6B antes da implementação.
+
+
 ## 2026-11-01 — E5B consulta de medicamentos
 
 - Catálogo ativo e medicamentos por atendimento com autorização/paginação e

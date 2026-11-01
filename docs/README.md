@@ -89,3 +89,5 @@ Veja [as regras de manutenção](AGENTS.md) e o
 - [Interface de óbito: provas técnicas e limites](validacoes/VALIDACAO_7B_E4U_OBITO.md).
 
 - [Medicamentos E5B: contrato de consulta e decisões de escrita](arquitetura/CONTRATO_MEDICAMENTOS_7B_E5B.md).
+
+- [Medicamentos E5U: consulta integrada e provas](validacoes/VALIDACAO_7B_E5U_LEITURA.md).

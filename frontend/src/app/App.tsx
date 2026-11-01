@@ -1,3 +1,4 @@
+import MedicamentosPage from '../features/medicamentos/MedicamentosPage';
 import ObitoPage from '../features/obito/ObitoPage';
 import ObitoCreatePage from '../features/obito/ObitoCreatePage';
 import DispositivosPage from '../features/dispositivos/DispositivosPage';
@@ -190,6 +191,7 @@ export default function App() {
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/editar" element={<AttendanceFormPage />} />
       <Route path="/pacientes/:pacienteId" element={<PatientPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId" element={<AttendancePage />} />
+      <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/medicamentos" element={<MedicamentosPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias" element={<SorologiasPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias/nova" element={<SorologiaCreatePage />} />
       <Route path="/pacientes/:pacienteId/obito" element={<ObitoPage />} />

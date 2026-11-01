@@ -35,6 +35,7 @@ export default function AttendancePage() {
           <Card>
             <h2>Atendimento de {formatClinicalDate(data.dataAtendimento)}</h2>
             <p className="muted">Avaliação, diagnóstico, exames e pendências abaixo pertencem a este atendimento.</p>
+            <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/medicamentos?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Medicamentos deste atendimento</Link></p>
             <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/sorologias?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Sorologias deste atendimento</Link></p>
             <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/condicao-chagas?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Condição de Chagas deste atendimento</Link></p>
             <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/comorbidades?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Comorbidades deste atendimento</Link></p>

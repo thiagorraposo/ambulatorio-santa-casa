@@ -133,3 +133,8 @@ TECNICAMENTE (186 unidades e15 HTTP reais). [Contrato](arquitetura/CONTRATO_MEDI
 e [provas](validacoes/VALIDACAO_7B_E5B_LEITURA.md). Escrita integral depende de
 identificação/apresentação/unidade/cronologia definidas; leitura E5U pode avançar
 independentemente, sem prescrição ou alterações de legado.
+
+7B-E5U consulta de medicamentos VALIDADA TECNICAMENTE, sobre cfcdf60:
+[build/264 unidades/dois E2E reais](validacoes/VALIDACAO_7B_E5U_LEITURA.md).
+Cadastro de medicamentos e aceite integral seguem pendentes; próximo passo da
+fila é conferir o contrato7B-E6B de resultados antes de implementar a escrita.
