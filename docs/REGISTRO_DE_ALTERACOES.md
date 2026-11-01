@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-01 — Comparação AVC renderizada e interações restantes
+
+- Referência original executada e capturas comparáveis em1440/390/320;
+  diferenças e adaptações por contrato/acessibilidade documentadas, sem aceite
+  visual fictício. Diferenças de densidade/estilo permanecem para8V1.
+- Novo E2E de teclado/rascunho/foco/zoom200%/duas intenções passou com API/PG reais.
+  [Provas e limites](validacoes/VALIDACAO_7B_E4U_AVC.md). Próxima frente técnica:
+  recorte E4B marcapasso/CDI conforme contrato vigente, sem resincronizador presumido.
+
 ## 2026-11-01 — Fixture mínima de comorbidades para demonstração M3
 
 - Seed do runner/--serve inclui dois nomes canônicos do importador, sem vínculos
