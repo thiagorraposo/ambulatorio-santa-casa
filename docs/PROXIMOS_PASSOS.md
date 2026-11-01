@@ -767,3 +767,7 @@ Continuidade da Janela1: após AVC, backend marcapasso/CDI de criação inicial
 e leitura implementado; [contrato](arquitetura/CONTRATO_EVENTOS_7B_E4B.md) e
 [provas](validacoes/VALIDACAO_7B_E4B_DISPOSITIVOS.md). Próximo recorte E4U
 correspondente após validação completa; sem substituir estado existente.
+
+E4U marcapasso/CDI implementada e validada tecnicamente no recorte inicial:
+[build/262 unidades/dois E2E/comparação renderizada](validacoes/VALIDACAO_7B_E4U_DISPOSITIVOS.md).
+Aceite humano/visual integral e demais EVT permanecem separados.

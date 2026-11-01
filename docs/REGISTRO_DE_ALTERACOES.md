@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-01 — E4U marcapasso/CDI, revisão e recibos
+
+- Interface de leitura/criação inicial por paciente/tipo, rascunho, revisão,
+  recibos e consulta só lê. Build/262 unidades e dois E2E reais passaram.
+- Comparação renderizada em1440/390/320 registrada com capturas e adaptações;
+  [provas e diferenças remanescentes](validacoes/VALIDACAO_7B_E4U_DISPOSITIVOS.md).
+- Continuar na mesma Janela1 para recorte inicial de óbito conforme contrato,
+  sem resolver precisão parcial ou resincronizador por suposição.
+
 ## 2026-11-01 — E4B marcapasso/CDI, estados iniciais
 
 - GET/POST sobre SQL10, estado consolidado com409 em existente, sem upsert ou

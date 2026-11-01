@@ -38,7 +38,7 @@ export default function AttendancePage() {
             <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/sorologias?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Sorologias deste atendimento</Link></p>
             <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/condicao-chagas?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Condição de Chagas deste atendimento</Link></p>
             <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/comorbidades?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Comorbidades deste atendimento</Link></p>
-            <p><Link to={`${patientPath}/avcs?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>AVC do paciente (longitudinal)</Link></p>
+            <p><Link to={`${patientPath}/dispositivos?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Marcapasso e CDI do paciente</Link></p>
             <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/complicacoes-chagas?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Complicações deste atendimento</Link></p>
             {location.state?.saved && <p className="notice" role="status">{String(location.state.saved)}</p>}
             {session.user?.perfil !== 'consulta' && <div className="form-actions">

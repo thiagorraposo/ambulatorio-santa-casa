@@ -113,3 +113,7 @@ comparação visual renderizada e aceite humano permanecem pendentes.
 E4B marcapasso/CDI: backend de leitura/criação inicial implementado sobre SQL10,
 com captura70 e409 em existente; [provas](validacoes/VALIDACAO_7B_E4B_DISPOSITIVOS.md).
 Interface e aceite humano próprios, sem presumir resincronizador ou correção.
+
+E4U marcapasso/CDI implementada e validada tecnicamente no recorte inicial:
+[build/262 unidades/dois E2E/comparação renderizada](validacoes/VALIDACAO_7B_E4U_DISPOSITIVOS.md).
+Aceite humano/visual integral e demais EVT permanecem separados.

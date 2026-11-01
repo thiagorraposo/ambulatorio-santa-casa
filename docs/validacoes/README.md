@@ -68,3 +68,5 @@ sistema; sua menção preserva rastreabilidade, não garante disponibilidade atu
 - [Catálogo mínimo da demonstração M3](VALIDACAO_FIXTURE_DEMO_M3.md).
 
 - [Backend marcapasso/CDI — criação inicial](VALIDACAO_7B_E4B_DISPOSITIVOS.md).
+
+- [Interface marcapasso/CDI — recorte E4U](VALIDACAO_7B_E4U_DISPOSITIVOS.md).

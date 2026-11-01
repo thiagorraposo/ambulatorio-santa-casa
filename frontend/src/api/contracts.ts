@@ -307,3 +307,6 @@ export interface AvaliacaoComorbidadesResponse {
 
 export interface AvcResponse { eventoId: string; pacienteId: string; tipo: 'avc'; ocorreu: boolean | null; anoEvento: number | null; descricao: string | null; observacoes: string | null }
 export interface AvcCriadoResponse { eventoId: string }
+
+export interface DispositivoResponse { dispositivoId: string; pacienteId: string; tipoDispositivo: 'marcapasso' | 'cdi'; possuiDispositivo: boolean | null; observacoes: string | null }
+export interface DispositivoCriadoResponse { dispositivoId: string }

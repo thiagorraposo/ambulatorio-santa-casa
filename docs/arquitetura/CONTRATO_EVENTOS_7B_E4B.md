@@ -101,3 +101,5 @@ SQL70 ativa captura prospectiva dos três campos em tabela existente; preserva
 ACLs/funções/gatilhos, sem backfill. Guard dos novos campos não habilita revisão
 temporal de estado consolidado. Isso não define correção/inventário de múltiplos
 implantes, resincronizador ou reinterpretação do legado.
+
+[Interface marcapasso/CDI e provas](../validacoes/VALIDACAO_7B_E4U_DISPOSITIVOS.md): criação inicial/revisão/recibos, sem alteração de estados existentes.
