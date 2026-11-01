@@ -1,11 +1,12 @@
 # Roadmap do Projeto
 
-Atualizado em: 2026-10-28
+Atualizado em: 2026-11-01
 
 **Continuidade de 2026-10-15:** as sete lacunas da reauditoria de 05/10 receberam
 correções de código e novas provas sintéticas. O percurso integrado original 7D
-passou pela interface e a regressão técnica foi concluída. A revisão clínica com
-a equipe continua necessária ao aceite integral. Evidências atuais estão no
+passou pela interface e a regressão técnica foi concluída. Essa fotografia
+antecede o aceite de M1 em 26/10 e o aceite humano de M2 em 31/10, registrados
+nos marcos abaixo; o aceite integral do produto é separado. Evidências estão no
 [relatório da Etapa 7](validacoes/VALIDACAO_ETAPA_7.md); o
 [relatório de 05/10](historico/RELATORIO_ETAPA_7_2026_10_05.md) preserva a
 fotografia anterior. Pacotes adicionais de UX/VU1 mantêm decisões e aceites próprios.
@@ -51,30 +52,55 @@ revisão; não depende mais de promoção de VP ao MVP. As escolhas específicas
 não respondidas continuam abertas e bloqueiam somente a implementação afetada.
 Nenhuma semântica clínica é inferida pela autorização de escopo.
 
+### Como usar o roadmap integrado
+
+Este documento é a referência única de **sequência, frentes e marcos**, incluindo
+o frontend a alcançar. Cada frente abaixo reúne resultado de produto, unidades
+de dados/backend/interface e a próxima lacuna; não há um roadmap de frontend
+independente. Os documentos especializados detalham esse mesmo trabalho:
+
+| Necessidade | Fonte de verdade |
+| --- | --- |
+| Comportamento esperado e precedência clínica sobre a referência visual | [Visão do produto](frontend/VISAO_E_ESPECIFICACAO.md#fontes-e-precedência) |
+| Tela, campo, estado ou interação do protótipo e seu requisito FM/RQ | [Matriz Figma/frontend](frontend/MATRIZ_FIGMA_FRONTEND.md#como-ler-e-manter-a-rastreabilidade) |
+| Escopo e critérios objetivos de cada unidade B/U/D | [Catálogo de entregas](frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend) |
+| Implementação e limites vigentes, com provas por recorte | [Estado atual](ESTADO_ATUAL_DO_PROJETO.md) e [validações](validacoes/README.md) |
+| Referência visual acessível e comparações anteriores | [Fontes F da matriz](frontend/MATRIZ_FIGMA_FRONTEND.md#fontes-de-localização) e [caderno visual datado](frontend/visuais/README.md) |
+
+As capturas antigas são evidência do recorte/data indicados, não prova de que a
+interface atual já corresponde ao modelo. Use a referência original efetivamente
+acessível e registre sua versão; se indisponível, explicite o impedimento.
+
 ### Marcos e dependências de entrega
 
-| Marco | Conteúdo e critério de saída | Estado em 27/10 |
+| Marco | Conteúdo e critério de saída | Estado em 01/11/2026 |
 | --- | --- | --- |
 | M1 — Fluxo original revisado | Executar roteiro clínico, registrar parecer, corrigir impedimentos e validar novamente os pontos afetados. | Aprovado em 2026-10-26, conforme confirmação do responsável do projeto; sem impedimentos reportados. |
-| M2 — VU1 sintética | Entregar 7A-U1, 7D-U1/U2/U4.2, verificar evidências U3/U4.1 e recuperação nas operações usadas; aceitar 7D-A1 com a equipe. | 7A-U1, 7D-U1/U2 e o cenário positivo 7D-A1 validados tecnicamente; CI dos quatro jobs do PR A1 aprovado (run `40442560575`). U4.2 tem implementação/validação parcial e comparação visual pendente. Aceite humano permanece pendente. Recorte de trabalho definido em 26/10; escolhas fora desse recorte permanecem abertas. |
-| M3 — Produto completo em ambiente sintético | Concluir todas as famílias 7B-E/7C-E e 8A–8D incluídas, correção 7C-R2B/U, comparação visual 8V1 e aceite integral 8V2. | 8C2U.1 implementada e validada localmente no H14 mínimo; [evidência e consulta do CI remoto](validacoes/VALIDACAO_8C2_U1.md), sem aceite humano. C2B.1 mantém o limite comprovado de consumo de sequências no dry-run. Demais implementações, decisões e aceites pendentes. |
+| M2 — VU1 sintética | Entregar 7A-U1, 7D-U1/U2/U4.2, verificar evidências U3/U4.1 e recuperação nas operações usadas; aceitar 7D-A1 com a equipe. | 7A-U1, 7D-U1/U2 e o cenário positivo 7D-A1 validados tecnicamente; CI dos quatro jobs do PR A1 aprovado (run `40442560575`). U4.2 foi comparada à referência executada em 31/10, com diferenças/adaptações registradas. M2 aprovado por aceite humano em 31/10, conforme confirmação expressa do responsável de que todos os testes passaram; [parecer oficial](validacoes/VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026). Recorte de trabalho definido em 26/10; escolhas fora desse recorte permanecem abertas. |
+| M3 — Produto completo em ambiente sintético | Concluir todas as famílias 7B-E/7C-E e 8A–8D incluídas, correção 7C-R2B/U, comparação visual 8V1 e aceite integral 8V2. | 8C2U.1, sorologias 7B-E1B/U, condição 7B-E2B.1/E2U.1, complicações 7B-E2B.2/E2U.2, comorbidades 7B-E3B/U e CSV 8A1 têm implementações e provas sintéticas, conforme o [estado atual](ESTADO_ATUAL_DO_PROJETO.md). Não concluem os pacotes agregados ou seu aceite humano. C2B.1 mantém consumo de sequências no dry-run; demais unidades/decisões e 8V1/8V2 pendentes. |
 | M4 — Operação institucional | Concluir 9A–9D: implantação, segurança, continuidade e liberação explícita para dados reais. | Futuro; não é consequência automática de M3. |
 | M5 — Produto completo entregue | Concluir 10A–10D, reconciliar migração autorizada, resolver defeitos impeditivos e registrar release/aceite final. | Futuro; conclusão do objetivo depende de M3, M4 e M5. |
 
 ### Cobertura obrigatória e ordem de trabalho
 
-| Frente | Pacotes preservados | Entrega obrigatória e dependências |
-| --- | --- | --- |
-| Experiência clínica inicial | 7A-U1; 7D-U1/U2/U3/U4; 7D-A1 | Busca antes do cadastro, etapas, revisão, ficha temporal, navegação e acessibilidade. Concluir M1/M2; reaproveitar provas técnicas existentes sem presumir aceite humano. |
-| Correção de pendência | 7C-R2B/U | Permitir retorno ao estado desconhecido com contrato PATCH explícito; depende da semântica e auditoria de 8A3B. Pode ocorrer após M2, obrigatório em M3. |
-| Cobertura clínica completa | 7B-E1B/U a 7B-E7B/U | Sorologias, condições/complicações, comorbidades, eventos/dispositivos/óbito, medicamentos, resultados de exames e correções dos filhos do atendimento. Cada contrato/persistência precede sua interface. |
-| Tratamento e acompanhamento | 7C-E1B/U, E2B/U, E4B/U, E5D/B/U | Correção de BZN/reações e encaminhamentos; concorrência de projeto/notificação; planejamento/desfecho D9 separado de visitas. E5 depende da decisão semântica P-06. |
-| Exportação e pendências | 8A1; 8A2D/B/U; 8A3B/U | CSV autorizado, fila global e revisão auditável. Definir grupos/responsáveis em P-04 antes dos contratos e telas. |
-| Início, dashboard e busca | 8B1D/B/U; 8B2B/U; 8B3D/B/U | Indicadores, atividade recente, séries, origem/projetos, timeline, filtros e colunas. Incluir todas as unidades; P-05 define fórmulas, população, períodos e semântica de origem antes do backend. |
-| Importação e documentos | 8C1; 8C2B/U; 8C3D/B/U; 8C4D/B/U; 8C5B/U | Lotes, simulação/relatório, confirmação, conflitos autorizados, anexos, reprocessamento e revisão temporal. Incluir todas as unidades; decisões P-04/P-05/P-07/P-09 e autorização por fonte precedem os comandos afetados. |
-| Identidade e administração | 8D1D/B/U; 8D2B/U | Usuários, conta ampliada, perfil e ativação/inativação com auditoria, concorrência e revalidação de sessão. P-08 define política antes dos comandos. |
-| Fidelidade e integração integral | 8V1; 8V2 | Comparar todas as telas/estados com a referência e aceitar percursos completos com API/PostgreSQL sintéticos; concluir antes de M3. |
-| Implantação e entrega | 9A–9D; 10A–10D | Ambiente, HTTPS/segredos, restore, governança, migração autorizada, homologação e release do produto completo. |
+As dez frentes numeradas abaixo são a referência para planejamento, relatos de
+progresso e retomadas do workflow. Ao indicar trabalho, citar **frente + unidade**
+(por exemplo, **frente 3 · 7B-E4B**), mantendo os IDs existentes dos pacotes.
+A numeração preserva a ordem do roadmap; não atribui pesos iguais, não mede
+percentual de conclusão e não substitui dependências ou critérios de aceite.
+
+| Nº · Frente | Unidades e dependências | Resultado integrado de produto e frontend | Situação e critério para avançar |
+| --- | --- | --- | --- |
+| <a id="frente-01"></a>**1 · Experiência clínica inicial** | 7A-U1; 7D-U1/U2/U3/U4; 7D-A1 | Busca antes do cadastro, etapas e revisão do atendimento, ficha temporal, navegação e acessibilidade. Modelo: [CAD](frontend/MATRIZ_FIGMA_FRONTEND.md#fm-cad-01), [ATD](frontend/MATRIZ_FIGMA_FRONTEND.md#fm-atd-01), demais famílias de ficha/navegação na matriz. | M1/M2 aceitos no recorte registrado. Melhorias agregadas e fidelidade integral não são aceitas por associação; preservar provas e limites de [7D-A1](validacoes/VALIDACAO_7D_A1.md). |
+| <a id="frente-02"></a>**2 · Correção de pendência** | [7C-R2B/U](frontend/ENTREGAS_DO_PRODUTO.md#7c-r2b) | Retornar ao estado desconhecido pela interface, com revisão clara e releitura persistida. Original e decisão devem continuar distinguíveis; não apenas acrescentar PATCH. Modelo: OBS/PEN na matriz. | Pacote completo pendente; depende da semântica e auditoria de [8A3B](frontend/ENTREGAS_DO_PRODUTO.md#8a3b). Exige prova de desconhecido, autorização, conflito e recuperação; obrigatório em M3. |
+| <a id="frente-03"></a>**3 · Cobertura clínica completa** | [7B-E1B/U](frontend/ENTREGAS_DO_PRODUTO.md#7b-e1b) a [7B-E7B/U](frontend/ENTREGAS_DO_PRODUTO.md#7b-e7b) | Sorologias, condições/complicações, comorbidades, eventos/dispositivos/óbito, medicamentos, resultados e correções dos filhos. Entrega inclui formulário, revisão, ficha e histórico por consulta. Modelo: DIA/CON/COM/MED/[EVT](frontend/MATRIZ_FIGMA_FRONTEND.md#fm-evt-01)/EXN/BZN e leituras correspondentes. | Frente atual de M3. Recortes de sorologias, condição, complicações e comorbidades implementados e tecnicamente validados; aceites próprios separados. Próximo: [7B-E4B](frontend/ENTREGAS_DO_PRODUTO.md#7b-e4b), contratos/dados antes de [7B-E4U](frontend/ENTREGAS_DO_PRODUTO.md#7b-e4u); não oferecer campo sem destino HTTP. |
+| <a id="frente-04"></a>**4 · Tratamento e acompanhamento** | 7C-E1B/U, E2B/U, E4B/U, E5D/B/U | Corrigir BZN/reações e encaminhamentos, controlar concorrência de projeto/notificação e representar planejamento/desfecho D9 separado de visitas. UI deve preservar episódio, fato original, revisão e retorno. Modelo: TRA/BZN/ENC/ECR/PRO/PRJ/NOT/NTF/[ACO](frontend/MATRIZ_FIGMA_FRONTEND.md#fm-aco-01). | Extensões pendentes além dos fluxos existentes. E5 depende de P-06; contratos e concorrência precedem a interface. Concluir por unidade com prova persistida e recuperação, sem inferir desfecho a partir de comparecimento. |
+| <a id="frente-05"></a>**5 · Exportação e pendências** | [8A1](frontend/ENTREGAS_DO_PRODUTO.md#8a1); 8A2D/B/U; 8A3B/U | Exportar escopo autorizado, encontrar fila global preservando filtros e revisar fato original/decisão. Modelo: LIS e [PEN](frontend/MATRIZ_FIGMA_FRONTEND.md#fm-pen-01); CSV de dashboard pertence também à frente 6. | CSV da página de pacientes implementado/validado, sem exportação ampliada presumida. Fila global e revisão dependem de grupos/responsáveis P-04 e contratos; UI não deve varrer pacientes para simular API global. |
+| <a id="frente-06"></a>**6 · Início, dashboard e busca** | 8B1D/B/U; 8B2B/U; 8B3D/B/U | Indicadores com definição/período, atividade recente, séries com tabela equivalente, origem/projetos, timeline, filtros e colunas. Modelo: [HOM](frontend/MATRIZ_FIGMA_FRONTEND.md#fm-hom-01), LIS e [DAS](frontend/MATRIZ_FIGMA_FRONTEND.md#fm-das-01). | Cobertura ampliada pendente; [8B1D](frontend/ENTREGAS_DO_PRODUTO.md#8b1d)/P-05 define fórmulas, população, períodos e origem antes da API/UI. Não reproduzir números fictícios do protótipo como indicadores reais. |
+| <a id="frente-07"></a>**7 · Importação e documentos** | 8C1; 8C2B/U; 8C3D/B/U; 8C4D/B/U; 8C5B/U | Lotes, simulação/relatório, confirmação, conflitos autorizados, anexos, reprocessamento e revisão temporal em etapas compreensíveis e retomáveis. Modelo: [IMP](frontend/MATRIZ_FIGMA_FRONTEND.md#fm-imp-01) e ECR/ACO para documentos/contrarreferências. | Seleção/simulação mínima XLSX implementada e validada, pacote completo pendente. C2B.1 deve resolver consumo de sequências do dry-run. P-04/P-05/P-07/P-09 e autorização por fonte precedem comandos afetados; sem carga real. |
+| <a id="frente-08"></a>**8 · Identidade e administração** | [8D1D/B/U](frontend/ENTREGAS_DO_PRODUTO.md#8d1d); 8D2B/U | Usuários, conta ampliada e diálogos de perfil/ativação com auditoria, concorrência e efeitos sobre a sessão compreensíveis. Modelo: [USR](frontend/MATRIZ_FIGMA_FRONTEND.md#fm-usr-01) e [CTA](frontend/MATRIZ_FIGMA_FRONTEND.md#fm-cta-01). | Ampliação pendente além da identidade mínima existente. P-08 define política antes dos comandos; perfil e estado mostrados precisam vir da API, com revalidação de sessão e autorização. |
+| <a id="frente-09"></a>**9 · Fidelidade e integração integral** | [8V1](frontend/ENTREGAS_DO_PRODUTO.md#8v1); [8V2](frontend/ENTREGAS_DO_PRODUTO.md#8v2) | Consolidar comparações feitas em cada incremento e revisar todas as telas/estados/percursos com API/PostgreSQL sintéticos. Abrange todas as famílias não EX, inclusive login, erros, conta, modais e estados vazios. | 8V1/8V2 pendentes; comparação do recorte M2 não encerra a frente. Revisão visual é incremental desde as frentes 1–8; aqui reconciliar cobertura, fechar diferenças e obter aceite integral antes de concluir M3. |
+| <a id="frente-10"></a>**10 · Implantação e entrega** | [9A–9D](#etapa-9--produção); [10A–10D](#etapa-10--homologação-e-estabilização) | Disponibilizar o mesmo produto integrado em ambiente autorizado: HTTPS/segredos, restore, governança, migração autorizada, homologação, documentação e release. Validar percursos da UI também nesse ambiente. | M4/M5 pendentes; não decorrem automaticamente dos testes sintéticos de M3. Liberação explícita para dados reais e aceite institucional próprios; não reabrir ou substituir aceites históricos por associação. |
 
 Dentro de cada frente, executar decisões → contrato/dados → backend → interface
 → prova integrada → aceite. Frentes independentes podem avançar após suas
@@ -82,6 +108,39 @@ próprias dependências; a tabela não exige um pacote monolítico. As extensõe
 clínicas devem integrar formulário, revisão, ficha e histórico, não apenas
 adicionar endpoints ou telas isoladas. Controles compartilhados e recuperação
 devem cobrir também os novos módulos.
+
+### Critério de execução e conclusão por incremento
+
+Aplicar este roteiro às unidades da frente selecionada, usando os critérios
+específicos do [catálogo](frontend/ENTREGAS_DO_PRODUTO.md) e a
+[validação proporcional](WORKFLOW_DE_DESENVOLVIMENTO.md#validação-proporcional):
+
+1. **Delimitar:** citar frente, unidade B/U/D, FM/RQ e tela/estado da referência.
+   Conferir contrato e implementação atuais; não recriar API existente nem
+   introduzir regra clínica porque um campo aparece no protótipo.
+2. **Entregar o comportamento:** decisões → contrato/dados → backend → interface
+   → prova integrada → aceite. Backend isolado pode estar validado, mas a unidade
+   U continua pendente até o percurso funcionar com persistência e autorização.
+3. **Comparar a interface no próprio incremento:** confrontar a referência real
+   com hierarquia, conteúdo, componentes, ações e estados alterados; registrar
+   versão, viewport, cenário e diferenças por severidade/FM/RQ. Exercitar teclado,
+   foco, 320/390 px, zoom de 200% e acessibilidade conforme impacto. Falta de acesso
+   à referência deixa comparação pendente; teste funcional não a substitui.
+4. **Preservar o comportamento aprovado:** segurança, acessibilidade, origem
+   temporal e contratos clínicos prevalecem sobre simulações do protótipo.
+   Registrar a adaptação e a decisão/justificativa correspondente; diferenças que
+   exigem aprovação permanecem abertas. Não deixar todo ajuste visual para 8V1.
+5. **Registrar o estágio correto:** implementação, validação técnica funcional,
+   comparação visual e aceite humano têm evidências/limites separados. Atualizar
+   estado e linhas afetadas da matriz, reutilizando provas válidas. Não repetir
+   suítes sem alteração relevante nem declarar pacote agregado aceito por uma
+   entrega parcial. A frente 9 consolida as provas e fecha lacunas do conjunto.
+
+**Retomada vigente:** frente 3 · **7B-E4B** (reconhecimento dirigido de contratos,
+SQL10 e HTTP existentes), seguida do recorte correspondente de **7B-E4U** quando
+o backend estiver validado e as decisões suficientes. As entregas E3B/E3U já
+validadas não devem ser reimplementadas; seus aceites humanos continuam separados.
+A presente integração é documental e não inicia essa próxima unidade.
 
 ### Medição de avanço
 
@@ -552,6 +611,12 @@ mantém a sequência, os marcos e o próximo trabalho; não duplicar aqui as fic
 
 ## Próximo trabalho
 
+M2/VU1 foi aprovado pelo responsável em 31/10/2026: todos os testes de aceite
+humano passaram, conforme [parecer oficial](validacoes/VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026).
+Os parágrafos datados abaixo preservam a sequência histórica; suas pendências
+de aceite M2 foram sucedidas por esse parecer. A continuidade passa às unidades
+desbloqueadas de M3; a execução anterior foi encerrada a pedido do responsável.
+
 M1 foi aprovado em 26/10 conforme registro do responsável. A sequência de M2
 foi delimitada pelo responsável para 7A-U1, 7D-U1/U2/U4.2, verificação de
 U3/U4.1 e 7D-A1, sem excluir famílias não EX do produto completo. A instrução
@@ -586,6 +651,65 @@ recorte técnico da família: contrato de complicações repetíveis CON-07–10
 Sintomas específicos ainda sem campos/domínios aprovados exigem decisão própria;
 não declarar 7B-E2B/E2U completos. Aceite humano de M2 permanece separado. A branch `feat/condicao-chagas` incorporou a estabilização em `8736b0d` e passou
 83/83 HTTP; publicação/integração exigem CI remoto e conferência na main.
+
+Continuidade de 31/10: 7B-E2U.1 implementa a interface dos seis campos de
+condição sobre H18, com revisão, recibo e retorno à ficha/histórico da consulta
+selecionada; [evidência](validacoes/VALIDACAO_7B_E2U_1.md). CON-07–10 têm modelo
+físico, mas ainda precisam de contrato HTTP/auditoria/recuperação aprovado;
+CON-11 e sintomas específicos sem destino continuam pendentes. Não se declara
+7B-E2B/E2U ou M3 completos. A preparação/revisão de M2 continua independente.
+
+Também em 31/10, 8A1 acrescentou download CSV da página de pacientes usando
+somente H16 e a política existente dos três perfis; [evidência](validacoes/VALIDACAO_8A1.md).
+Escopo informado, filtros/página aplicados, UTF-8 e falhas sem falso sucesso;
+exportação ampliada permanece fora deste contrato e o aceite humano pendente.
+
+Continuidade da preparação de CON-07–10 em 31/10: a [proposta 7B-E2B.2](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md)
+especifica GET/POST de complicações sobre a SQL06, com quatro campos existentes,
+múltiplas ocorrências e captura/recuperação prospectivas. Não publica rotas nem
+aprova DTO/semântica por consequência. Próxima unidade: revisar o contrato e,
+após aprovação, implementar backend/migration e provas em ambiente descartável;
+interface CON-11 é posterior. Mantidos os commits documentais após `fc51390`,
+o aceite oficial de M2 e a baseline histórica de 252 testes/73 E2E, sem repetição
+por mudança exclusivamente documental.
+
+Continuidade da implementação de 7B-E2B.2 em 31/10: após solicitação de
+continuidade, o contrato técnico foi adotado sem nova regra clínica. GET/POST de
+complicações, quatro campos SQL06, captura prospectiva 67 e recuperação por
+intenção têm [provas próprias](validacoes/VALIDACAO_7B_E2B_2.md). Isso sucede a
+etapa de preparação acima; não é aceite clínico. A próxima unidade desbloqueada
+é 7B-E2U.2 (CON-07–11), com lista/formulário/revisão e recuperação pela interface.
+
+Continuidade de 7B-E2U.2 em 31/10: lista, formulário e revisão das complicações
+CON-07–11 implementados sobre H19, com rascunho, episódios separados e recibos.
+[Validação](validacoes/VALIDACAO_7B_E2U_2.md) registra provas focadas e regressão
+final aprovada (256 componentes/cliente, 76 E2E); aceite humano, sintomas específicos, correções persistidas e 8V1/8V2
+continuam próprios. Isso sucede a indicação de próxima unidade acima.
+Após encerrar a validação de E2U.2, a próxima frente clínica independente é
+preparar 7B-E3B (comorbidades): conferir catálogo e a unicidade física por
+paciente/comorbidade antes de definir o contexto de atendimento no HTTP.
+Ausência de registro não autoriza inferir negativa ou criar episódios legados.
+Aceites dos recortes E2 e decisões de sintomas específicos permanecem separados.
+
+Continuidade E3B.1/E3B.2 em 01/11: catálogo ativo e avaliação única por atendimento
+implementados e [validados tecnicamente](validacoes/VALIDACAO_7B_E3B_2.md).
+O responsável delegou a escolha das decisões: snapshots por consulta, triestado
+explícito e histórico familiar livre separado dos exames; ver [contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md).
+SQL68 preserva legado/importador, sem backfill. **7B-E3U** também foi implementada
+e [validada tecnicamente](validacoes/VALIDACAO_7B_E3U.md): seleção paginada,
+revisão, leitura por consulta, rascunho e recuperação. E3B/E3U aguardam aceite
+humano; M2 mantém o aceite já registrado. Baseline frontend vigente: 259 unidades
+na composição 256+3; 80 cenários E2E cadastrados (76 anteriores preservados + 4
+novos validados em rodadas focadas), sem alegar nova suíte completa de 80.
+
+**Encerramento solicitado em 01/11:** parar após o commit da interface e deste
+registro. Não iniciar outra unidade. Próxima unidade técnica exata: **7B-E4B**,
+conferindo catálogo, SQL10 e contratos HTTP já existentes de eventos/dispositivos/
+óbito para escolher o menor recorte faltante. Correções de comorbidades exigem
+contrato próprio; nenhuma migration persistente, push ou alteração da main foi
+autorizada. Retomada: continuar do commit da interface, consultar estado, este
+roadmap, contrato E3B e validação E3U; preservar validações de código inalterado.
+
 
 ### Preparação da migração da planilha real
 

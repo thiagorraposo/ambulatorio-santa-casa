@@ -1,15 +1,14 @@
 # Frontend — leitura e fluxos clínicos
 
-Atualizado em: 2026-10-21. Fundação 6A–6B concluída; recorte original 7A–7D
-implementado e validado tecnicamente com dados sintéticos, com 41 cenários de
-navegador verificados após os incrementos U3.1/U3.2.
-As evidências e seus limites pertencem ao relatório da entrega.
-Aceite integral, revisão com a equipe e VU1
-não são declarados aqui.
+Atualizado em: 2026-10-31. Fundação 6A–6B e recorte clínico original
+implementados e validados com dados sintéticos. M1 e M2/VU1 possuem aceite
+humano registrado; o [parecer de M2](validacoes/VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026)
+não aceita as extensões de M3 ou o produto completo. Contagens e limites de cada
+rodada de testes pertencem aos relatórios das entregas.
 
 A aplicação própria está em [`frontend/`](../frontend). Consome os contratos
 públicos `/v1` do backend, com React/TypeScript, Vite, roteamento e consultas por
-recurso. O [roadmap](frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend) define o
+recurso. O [catálogo](frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend) define o
 escopo e os critérios de aceite; os relatórios da
 [Etapa 6](validacoes/VALIDACAO_ETAPA_6.md) e da
 [Etapa 7](validacoes/VALIDACAO_ETAPA_7.md) registram evidências e limites,
@@ -62,7 +61,7 @@ O runner [`tests/frontend/test_e2e.sh`](../tests/frontend/test_e2e.sh) recebe
 `SYNTHETIC_PG_HOST`, `SYNTHETIC_PG_PORT`, `SYNTHETIC_PG_USER` e `PGPASSWORD` pelo
 ambiente, todos obrigatórios. O usuário deve poder criar banco e login de teste.
 Ele cria seu banco e roles de teste, aplica as
-migrations 02–64 apenas nesse banco, inicia API/Vite e encerra os recursos que
+migrations 02–66 apenas nesse banco, inicia API/Vite e encerra os recursos que
 criou.
 Não lê `.env` para selecionar o banco de teste. Não exige build do frontend para
 servir Vite; o build de produção é verificado separadamente por `frontend-check`.
@@ -209,6 +208,12 @@ Minha conta mostra a identidade retornada pela API.
 | `/pacientes/:pacienteId/atendimentos/:atendimentoId` | Detalhe de atendimento e coleções paginadas por limit/offset. |
 | `/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias` | Episódios individuais, lista paginada e leitura dos sete campos. |
 | `/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias/nova` | Rascunho, revisão, confirmação independente e recibo recuperável. |
+| `/pacientes/:pacienteId/atendimentos/:atendimentoId/condicao-chagas` | Condição única da consulta selecionada, inclusive ausência explícita. |
+| `/pacientes/:pacienteId/atendimentos/:atendimentoId/condicao-chagas/nova` | Seis campos, revisão, confirmação única e recibo recuperável. |
+| `/pacientes/:pacienteId/atendimentos/:atendimentoId/comorbidades` | Avaliação própria da consulta, itens e histórico familiar; ausência não significa negativa. |
+| `/pacientes/:pacienteId/atendimentos/:atendimentoId/comorbidades/nova` | Catálogo paginado, triestado explícito, revisão, rascunho e recibo. |
+| `/pacientes/:pacienteId/atendimentos/:atendimentoId/complicacoes-chagas` | Complicações deste atendimento, lista com paginação própria. |
+| `/pacientes/:pacienteId/atendimentos/:atendimentoId/complicacoes-chagas/nova` | Quatro campos, revisão, confirmação de uma ocorrência e recibos recuperáveis. |
 | `/minha-conta` | Identidade e perfil obtidos da API. |
 
 Sessão, cache de consultas e estado local de filtros têm responsabilidades
@@ -281,6 +286,30 @@ iniciar outro episódio. Consulta somente lê; solicitação geral, edição e e
 de episódios persistidos não foram habilitadas. O retorno se limita ao mesmo
 paciente/atendimento. [Evidência da interface](validacoes/VALIDACAO_7B_E1U.md).
 
+Condição de Chagas tem [contrato de seis campos](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md)
+e [evidência de interface](validacoes/VALIDACAO_7B_E2U_1.md). Ficha e histórico
+abrem o recurso do atendimento selecionado. O registro é separado da confirmação
+do núcleo; os seis campos são revisados antes do POST. Desconhecido, Não e Não
+informado permanecem distintos; descrição não é apagada ao mudar o indicador.
+Consulta só lê; não há edição/remoção, complicações ou classificação automática.
+
+
+A busca de pacientes oferece Exportar CSV desta página: confirma ID/nome,
+filtros/página aplicados e recebe o arquivo do H16. Mantém os três perfis
+existentes; não usa filtros apenas digitados nem exporta todas as páginas.
+Cancelar/Escape não requisitam; erros/respostas tardias não geram download ou
+sucesso fictício. UTF-8/BOM, nome neutro e URL de Blob revogada; não se afirma
+que o arquivo foi salvo no disco. [Evidência 8A1](validacoes/VALIDACAO_8A1.md).
+
+
+Complicações repetíveis usam [H19](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md):
+tipo livre, presença anulável, descrição independente e gravidade do domínio
+existente. Revisão de quatro campos antes da confirmação; nova ocorrência é
+explícita e preserva recibos. Ficha/histórico mantêm o contexto. Consulta só lê;
+sem edição/remoção, classificação automática ou gravação junto do núcleo.
+[Evidência E2U.2](validacoes/VALIDACAO_7B_E2U_2.md).
+
+
 Os tipos de `/registrar` são `bzn`, `retorno-bzn`, `projeto`, `notificacao`,
 `encaminhamento`, `contrarreferencia`, `retorno-anual`, `ocorrencia-anual` e
 `pendencia`. O atendimento do contexto pode ser levado em `atendimentoId`;
@@ -316,7 +345,7 @@ Saída, 401, expiração e troca de identidade/perfil limpam cache e rascunhos.
 
 `MutationForm` registra uma UUID com método, caminho e hash SHA-256 do corpo em
 `POST /v1/operacoes`; em seguida envia a escrita uma vez com `X-Operacao-Id`.
-O protocolo cobre as 14 mutações de cadastro, atendimento e acompanhamento
+O protocolo cobre as 18 mutações de cadastro, atendimento e acompanhamento
 enumeradas no [contrato de recuperação](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md).
 O recibo mínimo de IDs/versão é confirmado na mesma transação da clínica e seus
 filhos. Rede, resposta inválida, 5xx ou cancelamento após envio clínico mantêm a
@@ -366,3 +395,9 @@ o nome acessível dos links.
 Importação/revisão, métricas, fila global e gestão de usuários permanecem fora
 destes formulários. As lacunas clínicas específicas estão no recorte; produção
 e uso de dados reais dependem das Etapas 9–10.
+
+Comorbidades E3U usa o catálogo ativo real; selecionar um item inicia desconhecido
+explícito e permite Sim/Não. Itens não selecionados não são registrados. Relato
+familiar livre permanece separado dos exames; campos e escolhas passam por
+revisão. [Contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) e
+[validação proporcional](validacoes/VALIDACAO_7B_E3U.md), sem aceite humano presumido.

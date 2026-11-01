@@ -24,6 +24,15 @@ A extensão [7B-E2B.1](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md) publica
 com seis campos independentes, auditoria prospectiva 66 e recuperação; não
 habilita complicações, edição ou regras clínicas novas.
 
+A extensão [7B-E2B.2](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md)
+publica GET/POST de complicações repetíveis por atendimento sobre SQL06, sem
+exigir condição ou diagnóstico. Quatro campos independentes, captura 67,
+autorização e recibo usam a infraestrutura existente; sem edição/revisão temporal.
+
+A extensão [7B-E3B.1](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) acrescenta
+somente GET do catálogo ativo de comorbidades: id/nome/ativo, sem fabricar codigo
+ou alterar os três DTOs anteriores. Não publica escrita de paciente ou família.
+
 ## Escopo e fluxo
 
 O backend é um monólito modular NestJS/TypeScript com módulos `health`, `auth` e
@@ -379,3 +388,8 @@ acompanhamento para todos os perfis. A política de paciente `todos_sinteticos`
 não amplia a visibilidade dos lotes; `desabilitada` também desabilita estas
 consultas. Cabeçalho, contagens e linhas paginadas são projetados explicitamente
 em uma consulta SQL, com o mesmo snapshot, sem expor bruto ou mensagens livres.
+
+7B-E3B.2 publica GET/POST `.../atendimentos/:atendimentoId/comorbidades`, com
+avaliação única, filhos e relato familiar numa transação. SQL68 preserva o legado;
+[contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) e
+[validação](validacoes/VALIDACAO_7B_E3B_2.md). Interface e aceite separados.

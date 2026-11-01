@@ -1,6 +1,6 @@
 # Workflow de Desenvolvimento
 
-Atualizado em: 2026-10-26
+Atualizado em: 2026-11-01
 
 O CI em `.github/workflows/validacoes.yml` executa em PRs para `main`, pushes em
 `main` e manualmente por `workflow_dispatch`. Quatro jobs estáveis usam runners
@@ -10,7 +10,7 @@ produzir seu diagnóstico. Uma nova execução do mesmo evento/ref cancela a ant
 | Job | Verificações | Limite |
 | --- | --- | --- |
 | Quality | `docs-check`, `manifest-check`, `repository-check`, `workflow-test` e actionlint | 10 minutos; não usa banco. |
-| Database | Migrations 00–66, `importer-test`, `docker-db-test` e os upgrades `db-sorologia-upgrade-test`/`db-condicao-upgrade-test` | 15 minutos; instala ripgrep explicitamente; SQL, importação e upgrade sem backfill sintéticos. |
+| Database | Migrations 00–68, `importer-test`, `docker-db-test` e os upgrades de sorologia, condição, complicação e comorbidades | 15 minutos; instala ripgrep explicitamente; SQL, importação e upgrade sem backfill sintéticos. |
 | Backend | `npm ci`, `backend-check`, `backend-clinical-test` e `backend-container-check` | 25 minutos; build, unitários, integração, contratos/autenticação/RBAC, fluxos clínicos, saúde e usuário não-root. |
 | Frontend | `npm ci` em ambas as aplicações, Chromium e `frontend-check` | 25 minutos; TypeScript/Vite, componentes e navegador com API/PostgreSQL reais sintéticos. |
 
@@ -20,13 +20,18 @@ armazenamento e identidade antes de aplicar o bootstrap. As portas
 `POSTGRES_PORT`, `APP_DB_PORT` e `SYNTHETIC_PG_PORT` são `55457`, exigidas por
 D3/D8; o Compose persistente local continua em `5433`. Backend e frontend
 criam bancos e logins próprios para suas suítes. O job Frontend prepara somente
-a role de origem com SQL00; seu runner aplica 02–66 no banco exclusivo.
+a role de origem com SQL00; seu runner aplica 02–68 no banco exclusivo.
 Nenhuma permissão clínica é concedida manualmente para fazer teste passar.
 
 `db-sorologia-upgrade-test` requer `SYNTHETIC_PG_HOST`, `SYNTHETIC_PG_PORT`,
 `SYNTHETIC_PG_USER` e `PGPASSWORD` de um servidor descartável confirmado.
 Cria/remove banco próprio, instala 02–64, prepara legado sintético e aplica 65,
 comprovando linha intacta, ausência de backfill e captura da alteração posterior.
+
+`db-condicao-upgrade-test` (65→66), `db-complicacao-upgrade-test` (66→67)
+e `db-comorbidades-upgrade-test` (67→68) usam o mesmo isolamento sintético.
+Os testes preservam legado/captura e verificam a ausência de backfill; o último
+não converte associações legadas em avaliações por atendimento.
 
 O composite `setup-node` fixa Node 24.15.0/npm 11.16.0; instalações usam lockfiles
 e `npm ci`. A imagem backend segue o Dockerfile e é validada separadamente.
@@ -180,7 +185,7 @@ versão original, rollback, episódios repetíveis e falha de resposta após com
 Famílias exigem evidência de páginas independentes de snapshots e filhos;
 recuperação usa UUID/método/caminho/hash, registro, uma escrita e verificação ou
 encerramento sem reaplicar clínica. O
-[protocolo](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) enumera as 14 mutações;
+[protocolo](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) enumera as 18 mutações;
 infraestrutura comum não dispensa comprovação das classes utilizadas. Recibos,
 rascunhos e contexto precisam sobreviver às navegações/reconsultas previstas,
 preservando a limpeza de sessão e a distinção de `null` na criação de pendências.
@@ -524,3 +529,15 @@ as verificações ao servidor descartável com `DB_HOST`/`DB_PORT` explícitos.
 O alvo `db-condicao-upgrade-test` usa o mesmo contrato `SYNTHETIC_PG_*` e
 `PGPASSWORD` do upgrade de sorologia: cria banco próprio, valida65→66 com
 registro legado e remove somente seu banco. Não realiza backfill.
+
+Incremento 7B-E2B.2: `make db-complicacao-upgrade-test COMPACT=1` valida upgrade
+66→67 em banco próprio descartável com `SYNTHETIC_PG_*`. SQL39 e os testes HTTP
+cobrem captura/recuperação de complicações; combinar com backend/project/importer
+quando essas camadas forem alteradas, sem repetir provas aprovadas sem motivo.
+
+Ao direcionar o Make para banco descartável fora do Compose padrão, passe
+`DB_*` e `APP_DB_*` como argumentos (`make ... DB_PORT=... APP_DB_PORT=...`):
+o `.env` incluído pelo Make pode sobrescrever valores exportados no ambiente.
+Confira o destino efetivo antes da execução. Se usar `-o docker-wait`, confirme
+manualmente a prontidão/identidade do servidor sintético; não use isso para
+ignorar a verificação do destino. Alguns testes do importador exigem 55457.

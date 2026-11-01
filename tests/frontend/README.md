@@ -23,7 +23,7 @@ os testes automáticos continuam fixados em 60 segundos. O
 [roteiro clínico](../../docs/validacoes/ROTEIRO_REVISAO_CLINICA_ETAPA_7.md)
 orienta a execução e o registro do parecer da equipe.
 
-Migrations 02–66 são aplicadas explicitamente no banco `etapa6_frontend_*`;
+Migrations 02–67 são aplicadas explicitamente no banco `etapa6_frontend_*`;
 00/01 são substituídas pela criação do banco/schema exclusivos. O login técnico
 dedicado usa `scripts/configurar_login_aplicacao.sql` e `vinculo_explicito`.
 Importação HTTP sintética usa worker real com outro login, limitado à role
@@ -85,7 +85,7 @@ Os novos cenários separam as provas de recuperação:
 
 As escritas da interface registram UUID/método/caminho/hash antes da mutação e
 usam `X-Operacao-Id`. Verificação/encerramento consultam o protocolo de operação
-sem repetir a mutação. A infraestrutura cobre 14 rotas; cada cenário comprova
+sem repetir a mutação. A infraestrutura cobre 18 rotas; cada cenário comprova
 somente as classes que exercita. Suporte e estados estão no
 [contrato de recuperação](../../docs/arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md).
 

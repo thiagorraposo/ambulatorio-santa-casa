@@ -68,3 +68,12 @@ precisão de JavaScript, desempate, paginação e revogação de identidade.
 A integração compõe `make backend-clinical-test COMPACT=1` e exige as variáveis
 sintéticas previstas no [workflow](../WORKFLOW_DE_DESENVOLVIMENTO.md).
 Unitários não substituem essa evidência de integração.
+
+## Catálogo de comorbidades — extensão E3B.1 (31/10/2026)
+
+`GET /v1/catalogos/comorbidades` usa a autenticação/perfis e PageQuery já vigentes,
+mas retorna somente `{ id, nome, ativo }`: a SQL06 não tem coluna codigo.
+O [contrato E3B](CONTRATO_COMORBIDADES_7B_E3B.md) define esse recorte e as decisões
+pendentes da escrita clínica; [validação](../validacoes/VALIDACAO_7B_E3B_1.md).
+Os três DTOs anteriores continuam inalterados. Ler categorias não habilita
+avaliação/edição de paciente, criação de categorias ou histórico familiar.

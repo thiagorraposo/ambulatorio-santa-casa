@@ -269,3 +269,38 @@ export interface SorologiaResponse {
   observacoes: string | null;
 }
 export interface SorologiaCriadaResponse { sorologiaId: string }
+
+export interface CondicaoChagasResponse {
+  condicaoChagasId: string;
+  atendimentoId: string;
+  formaClinica: string | null;
+  faseDoenca: string | null;
+  classificacaoClinica: string | null;
+  possuiSintomas: boolean | null;
+  descricaoSintomas: string | null;
+  observacoes: string | null;
+}
+export interface CondicaoChagasCriadaResponse { condicaoChagasId: string }
+
+export interface ComplicacaoResponse {
+  complicacaoChagasId: string;
+  atendimentoId: string;
+  tipoComplicacao: string | null;
+  possuiComplicacao: boolean | null;
+  descricao: string | null;
+  gravidade: string | null;
+}
+export interface ComplicacaoCriadaResponse { complicacaoChagasId: string }
+
+export interface ComorbidadeCatalogoResponse { id: string; nome: string; ativo: boolean }
+export interface AvaliacaoComorbidadesBody {
+  itens?: Array<{ comorbidadeId: string; possuiComorbidade: boolean | null; observacoes: string | null }>;
+  historicoFamiliar?: { possuiDoenca: boolean | null; descricao: string | null };
+}
+export interface AvaliacaoComorbidadesResponse {
+  avaliacaoComorbidadesId: string;
+  atendimentoId: string;
+  itens: Array<{ itemId: string; comorbidadeId: string; nomeComorbidade: string;
+    possuiComorbidade: boolean | null; observacoes: string | null }>;
+  historicoFamiliar: { possuiDoenca: boolean | null; descricao: string | null } | null;
+}

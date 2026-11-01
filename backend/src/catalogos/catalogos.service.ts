@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../common/database/database.service';
 import { PageQuery } from '../clinico/dto/clinico.dto';
-import { CatalogoResponse } from './dto/catalogo.response';
+import { CatalogoResponse, ComorbidadeCatalogoResponse } from './dto/catalogo.response';
 
 // Identificadores fixos; nenhum nome de tabela/coluna vem da requisição.
 const CATALOGOS = {
@@ -27,4 +27,11 @@ export class CatalogosService {
       ORDER BY ${fonte.nome},${fonte.id} LIMIT $1 OFFSET $2`, [query.limit, query.offset]);
     return result.rows.map((row) => ({ id: row.id, codigo: row.codigo, nome: row.nome, ativo: row.ativo }));
   }
+  async listComorbidades(query: PageQuery): Promise<ComorbidadeCatalogoResponse[]> {
+    const result = await this.database.query<ComorbidadeCatalogoResponse>(`SELECT comorbidade_id::text AS id,
+      nome_comorbidade AS nome,ativo FROM ambulatorio.comorbidade WHERE ativo
+      ORDER BY nome_comorbidade,comorbidade_id LIMIT $1 OFFSET $2`, [query.limit, query.offset]);
+    return result.rows.map(row => ({ id: row.id, nome: row.nome, ativo: row.ativo }));
+  }
+
 }

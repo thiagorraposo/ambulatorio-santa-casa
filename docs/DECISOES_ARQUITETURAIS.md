@@ -797,3 +797,27 @@ Erro ao registrar/consultar, UUID desconhecida ou valor clínico coincidente nã
 permite presumir não aplicação. Inventário, estados, alternativas, diagramas de falha,
 autorização e retenção estão no
 [protocolo de recuperação](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md).
+
+## ADR-026
+
+Título: Avaliação de comorbidades por atendimento sem reinterpretar legado
+
+Data: 2026-11-01. Status: adotada por delegação explícita do responsável nesta
+sessão; não equivale a aceite humano ou homologação institucional.
+
+Decisão: snapshots independentes por atendimento em tabelas novas da SQL68,
+sem alterar a unicidade paciente/comorbidade da SQL06 nem o importador.
+Ausência não significa negativa: item explicitamente avaliado tem true/false/null;
+histórico familiar também distingue não avaliado de desconhecido explícito e
+usa relato livre de doenças, inclusive Chagas, separado dos exames familiares.
+Não há cópia entre consultas ou inferência de diagnóstico. Nomes do catálogo
+são preservados no snapshot, mesmo com renomeação/inativação posterior.
+
+Justificativa: o catálogo de entregas exige snapshots e triestado, incompatíveis
+com o booleano NOT NULL/default true e a unicidade legada. Uma migração do legado
+fabricaria temporalidade ou destruiria reconciliação do importador.
+
+Consequências: gravação atômica e única por atendimento, auditoria prospectiva,
+recibo por intenção e conflito 409 em repetição. Correções/versionamento precisam
+unidade própria; captura não habilita revisão temporal. Contrato e limites em
+[comorbidades E3B](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md).

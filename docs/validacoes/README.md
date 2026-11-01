@@ -17,8 +17,8 @@ de testes não é uma contagem atual e aceite sintético não autoriza dados rea
 | Revisão humana da Etapa 7 | [Roteiro e registro](ROTEIRO_REVISAO_CLINICA_ETAPA_7.md) | Parecer M1 aprovado em 26/10 por confirmação do responsável; metadados detalhados da sessão não fornecidos. |
 | 7A-U1 — busca antes do cadastro | [Validação técnica](VALIDACAO_7A_U1.md) | Homônimos, declaração explícita, vazio, recusa, cancelamento e ausência de POST indevido; sem aceite adicional de produto/equipe. |
 | 7D-U1/U2 — etapas e revisão do atendimento | [Validação técnica](VALIDACAO_7D_U1_U2.md) | Cinco etapas, revisão, confirmação única, cancelamento consciente e recuperação em banco descartável; aceite de produto/equipe pendente. |
-| 7D-U4.2 — controles de formulários, tabelas e diálogo | [Validação técnica parcial](VALIDACAO_7D_U4_2.md) | Axe, teclado, rolagem acessível e reflow sintéticos; revisão visual e aceite de produto/equipe pendentes. |
-| 7D-A1 — jornada clínica integrada pela interface | [Validação técnica](VALIDACAO_7D_A1.md) | Cadastro, atendimento, acompanhamentos, notificação e histórico com IDs sintéticos; quatro jobs do CI do PR passaram (run `40442560575`); aceite clínico/produto pendente. |
+| 7D-U4.2 — controles de formulários, tabelas e diálogo | [Validação técnica](VALIDACAO_7D_U4_2.md) | Controles comparados à referência executada em 31/10, Axe/teclado/reflow; aceite humano de M2 aprovado em 31/10; fidelidade integral 8V1 pendente. |
+| 7D-A1 — jornada clínica integrada pela interface | [Validação técnica](VALIDACAO_7D_A1.md) | Cadastro, atendimento, acompanhamentos, notificação e histórico com IDs sintéticos; quatro jobs do CI do PR passaram (run `40442560575`); aceite humano de M2 aprovado pelo responsável em 31/10, conforme parecer oficial no relatório. |
 | U3.1 — cabeçalho/último atendimento | [Validação](VALIDACAO_7D_U3_1.md) | Inclui a ocorrência de seleção de ambiente e seus limites. |
 | U3.2 — diagnóstico/avaliação por consulta | [Validação](VALIDACAO_7D_U3_2.md) | Seleção explícita e paginação; sem herança entre visitas. |
 | U3.3 — histórico/detalhe/exames | [Validação](VALIDACAO_7D_U3_3.md) | Provas técnicas encerradas em 21/10; não é fidelidade integral. |
@@ -27,6 +27,11 @@ de testes não é uma contagem atual e aceite sintético não autoriza dados rea
 | 7B-E1B — episódios individuais de sorologia | [Validação](VALIDACAO_7B_E1B.md) | Contrato GET/POST, auditoria prospectiva, upgrade sem backfill, autorização e recuperação; interface tem evidência própria; solicitação geral e aceite pendentes. |
 | 7B-E1U — interface de episódios de sorologia | [Validação](VALIDACAO_7B_E1U.md) | Escopo, isolamento e evidências específicas da interface; solicitação geral e aceite clínico permanecem separados. |
 | 7B-E2B.1 — condição por atendimento | [Validação](VALIDACAO_7B_E2B_1.md) | Seis campos, criação única, auditoria prospectiva e recuperação; interface, complicações e aceite humano separados. |
+| 7B-E2U.1 — interface da condição por atendimento | [Validação](VALIDACAO_7B_E2U_1.md) | Seis campos, revisão, isolamento, rascunho e recuperação; complicações e aceite humano pendentes. |
+| 8A1 — CSV da página de pacientes | [Validação](VALIDACAO_8A1.md) | Download real ID/nome/filtros/página e três perfis H16; não é exportação completa/dashboard nem aceite humano. |
+| 7B-E2B.2 — complicações por atendimento | [Validação](VALIDACAO_7B_E2B_2.md) | Quatro campos, multiplicidade, paginação, captura prospectiva, rollback e recuperação; interface com evidência própria, aceite humano separado. |
+| 7B-E2U.2 — interface de complicações | [Validação](VALIDACAO_7B_E2U_2.md) | Lista/revisão, multiplicidade, paginação, rascunhos e recuperação após COMMIT; aceite humano separado. |
+| 7B-E3B.1 — catálogo de comorbidades | [Validação](VALIDACAO_7B_E3B_1.md) | Ativos, três perfis e paginação; não publica estado clínico, seleção ou escrita de paciente. |
 | Ordenação numérica de identificadores | [Validação](VALIDACAO_ORDENACAO_IDENTIFICADORES.md) | Recursos e cenários expressamente cobertos. |
 
 ## Evidências de origem por módulo
@@ -51,3 +56,7 @@ e um ambiente descartável compatível.
 A reauditoria de 05/10 está no [histórico](../historico/RELATORIO_ETAPA_7_2026_10_05.md).
 Logs e capturas em `/tmp` citados nos relatórios podem ter sido removidos pelo
 sistema; sua menção preserva rastreabilidade, não garante disponibilidade atual.
+
+- [Avaliação de comorbidades por atendimento — E3B.2](VALIDACAO_7B_E3B_2.md).
+
+- [Interface de comorbidades — E3U](VALIDACAO_7B_E3U.md).

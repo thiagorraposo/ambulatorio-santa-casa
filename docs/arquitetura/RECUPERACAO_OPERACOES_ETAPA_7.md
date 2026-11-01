@@ -181,6 +181,10 @@ sem retomar ou repetir o comando.
 
 ## Inventário exaustivo da entrega
 
+O inventário atual contém 18 mutações, incluindo sorologia, condição,
+complicações e avaliação de comorbidades. As provas datadas da entrega original abaixo continuam cobrindo
+suas 14 mutações; as extensões têm evidências próprias nos relatórios 7B-E.
+
 Todos os caminhos abaixo têm prefixo `/v1`; `:id` é o paciente.
 
 | Unidade | Método/caminho | Recibo mínimo |
@@ -191,6 +195,8 @@ Todos os caminhos abaixo têm prefixo `/v1`; `:id` é o paciente.
 | R6B.2 | `PATCH /pacientes/:id/atendimentos/:atendimentoId` | `atendimentoId`, `versao` |
 | 7B-E1B | `POST /pacientes/:id/atendimentos/:atendimentoId/sorologias` | `sorologiaId` (inclui âncora diagnóstica quando necessária) |
 | 7B-E2B.1 | `POST /pacientes/:id/atendimentos/:atendimentoId/condicao-chagas` | `condicaoChagasId` (criação única, sem upsert) |
+| 7B-E2B.2 | `POST /pacientes/:id/atendimentos/:atendimentoId/complicacoes-chagas` | `complicacaoChagasId` (ocorrências repetíveis, uma por intenção) |
+| 7B-E3B.2 | `POST /pacientes/:id/atendimentos/:atendimentoId/comorbidades` | `avaliacaoComorbidadesId` (snapshot e filhos no mesmo COMMIT) |
 | R6B-A.1 | `POST /pacientes/:id/tratamento-bzn` | `tratamentoId` (inclui reações da criação) |
 | R6B-A.1 | `POST /pacientes/:id/retornos-bzn` | `retornoId` |
 | R6B-A.3 | `PUT /pacientes/:id/projetos` | `projetoId` |

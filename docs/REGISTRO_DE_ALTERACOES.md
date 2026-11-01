@@ -1,5 +1,172 @@
 # Registro de Alterações
 
+## 2026-11-01 — Isolamento do upgrade de comorbidades no CI
+
+- Primeira execução da PR #23 (`41306700817`) falhou em Quality porque o upgrade
+  de comorbidades estava nesse job sem PostgreSQL. Movido para Database, após
+  o bootstrap e os demais upgrades; nenhuma verificação removida/ignorada.
+- Regressão de workflow exige que todos os upgrades pertençam a Database e
+  ocorram após a preparação sintética. Validar workflow-test, actionlint e docs.
+  Aprovação remota da nova revisão deve ser confirmada na PR antes do merge.
+
+## 2026-11-01 — Preparação da integração pela pipeline CI
+
+- Guia de desenvolvimento alinhado ao workflow existente: migrations até 68 e
+  testes de upgrade de complicações/comorbidades. Sem alterar a pipeline.
+- Integração da branch de continuidade deve executar Quality, Database, Backend
+  e Frontend; merge autorizado pelo responsável somente após CI aprovado.
+  Resultados remotos pertencem à PR/run, sem aprovação antecipada nesta entrada.
+
+## 2026-11-01 — Roadmap integrado de produto, backend e frontend
+
+- Quadro das dez frentes passou a reunir unidades, interface esperada,
+  dependências, situação e critério para avançar; preservados números e IDs.
+- Roadmap define sequência e leitura das fontes; catálogo mantém escopo/aceite
+  por unidade, matriz mantém FM/RQ e evidências. Links recíprocos atualizados.
+- Comparação visual passa a ser explícita em cada incremento afetado; 8V1/8V2
+  consolidam revisão/aceite integral. Referência inacessível ou diferença sem
+  aprovação permanece pendente, sem confundir testes funcionais com aceite.
+- Continuidade técnica permanece frente 3 · 7B-E4B, depois E4U conforme contrato;
+  nenhuma funcionalidade, comparação nova ou aceite foi produzido nesta revisão.
+- Validação documental: docs-check, repository-check, links/âncoras e diff;
+  sem repetir suítes da aplicação para alteração exclusivamente textual.
+
+## 2026-11-01 — Referência numerada das frentes do workflow
+
+- Enumeradas de 1 a 10 as frentes existentes no [roadmap](PROXIMOS_PASSOS.md#cobertura-obrigatória-e-ordem-de-trabalho),
+  preservando ordem, pacotes e escopos. Numeração adotada como referência de
+  continuidade, com indicação conjunta de frente e unidade, sem pesos ou
+  percentuais fabricados. Próximo recorte recomendado: frente 3 · 7B-E4B.
+- Alteração exclusivamente documental; validar com docs-check, repository-check
+  e git diff --check. Nenhuma suíte da aplicação precisa ser repetida.
+
+## 2026-11-01 — Interface de comorbidades e encerramento solicitado (7B-E3U)
+
+- Catálogo paginado, seleção explícita triestado, observações e relato familiar;
+  revisão, rascunho/descarte e recibo sobre E3B.2, por atendimento.
+- Build, 259 unidades na composição 256+3, quatro E2E novos e uma regressão
+  anterior aprovados em rodadas proporcionais. [Evidência, falhas de fixture e
+  limites](validacoes/VALIDACAO_7B_E3U.md); baseline 76 E2E preservada sem repetição
+  integral. Total cadastrado agora 80; não equivale a uma suíte completa executada.
+- Estado/roadmap/contrato/matriz atualizados para retomada. Encerrar após este
+  commit por solicitação do responsável; próxima unidade 7B-E4B, ainda não iniciada.
+  Aceite humano E3B/E3U e implantação permanecem separados; M2 conserva seu aceite.
+
+## 2026-11-01 — Avaliação de comorbidades por consulta (7B-E3B.2)
+
+- Responsável delegou as decisões antes da escrita: snapshots por consulta e
+  relato familiar livre separado dos exames; contrato/ADR-026 registram origem.
+- SQL68 incremental preserva legado/importador, sem backfill; GET/POST transacionais
+  com itens triestado, nome congelado, autorização, captura e recibo por operação.
+- Validação: build, 182 unidades, 102 HTTP na composição 101+9 focados,
+  39 scripts SQL na composição 38+1 e upgrade 67→68 aprovados.
+  [Evidência e limitação da fixture corrigida](validacoes/VALIDACAO_7B_E3B_2.md).
+- Interface/aceite humano e aplicação no persistente permanecem separados.
+
+## 2026-10-31 — catálogo de comorbidades (7B-E3B.1)
+
+GET de metadados ativos, ID textual/nome/ativo, paginação e autenticação nos
+três perfis, sem código clínico inventado ou comandos de escrita. DTOs dos
+catálogos anteriores preservados; nenhuma migration ou vínculo de paciente
+alterado. [Validação](validacoes/VALIDACAO_7B_E3B_1.md): 181 unidades, 8 de fundação,
+93 HTTP e checks documentais aprovados. Frontend/SQL/importador inalterados,
+provas anteriores reutilizadas. [Contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md)
+registra decisões sobre estado por consulta/paciente e histórico familiar;
+perguntas apresentadas sem resposta presumida. Não conclui E3B/E3U ou M3.
+
+## 2026-10-31 — interface de complicações (7B-E2U.2)
+
+CON-07–11 com lista/formulário/revisão, paginação, múltiplas ocorrências,
+rascunho e recibos. Quatro campos independentes sobre H19, sem classificação
+ou presença inferida. Quatro testes de componentes e três E2E focados passaram,
+incluindo resposta perdida após COMMIT, confirmação única e leitura recusada.
+[Validação](validacoes/VALIDACAO_7B_E2U_2.md): build, 256 testes de componentes/cliente
+e 76 E2E finais aprovados, sem skips/retries; aceite humano e fidelidade integral continuam pendentes.
+
+## 2026-10-31 — API de complicações repetíveis (7B-E2B.2)
+
+Continuidade técnica do contrato sobre SQL06: quatro campos independentes,
+GET/POST por atendimento, paginação, autorização e recibo por UUID. Migration 67
+ativa captura prospectiva/guard temporal sem backfill e sem alterar a função
+compartilhada de auditoria. Sem nova classificação clínica ou tabela.
+[Validação](validacoes/VALIDACAO_7B_E2B_2.md): 180 unidades, 8 de fundação, 91 HTTP, 38 SQL,
+upgrade/importador/workflow e 2 percursos frontend. Relatório registra falhas de
+configuração/asserção e suas correções, sem apresentar rodadas recusadas como
+sucesso. Runner/CI incluem 67 e upgrade. Interface/aceite humano são separados;
+nenhuma migration persistente, push ou alteração da main.
+
+## 2026-10-31 — proposta de contrato das complicações (7B-E2B.2)
+
+CON-07–10 especificados em [proposta técnica](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md)
+sobre a tabela SQL06: tipo livre, presença anulável, descrição e gravidade do
+domínio existente, múltiplas ocorrências, autorização, paginação, auditoria e
+recuperação por intenção. Distinguem-se escolhas técnicas para revisão de
+regras clínicas já vigentes; preparação não equivale a DTO/semântica aprovados
+ou API implementada. Fontes estado/roadmap/catálogo/matriz e índice atualizadas.
+Nenhum backend, frontend, migration ou dado alterado; baseline 252/73 histórica
+preservada sem reexecução. Mantidos HEAD documental e aceite humano M2 oficiais,
+sem retroceder ao prompt de retomada desatualizado. Sem push ou alteração da main.
+Validação documental: `make docs-check COMPACT=1`, diff sem whitespace inválido
+e 24 links/âncoras locais conferidos. Nenhuma suíte da aplicação reexecutada.
+
+## 2026-10-31 — consistência documental após aceite de M2
+
+README, guia frontend, visão, catálogo, matriz, roadmap e relatórios M2 alinhados
+ao parecer oficial. Sínteses vigentes distinguem M1/M2 aceitos das extensões de
+M3 e da fidelidade integral pendentes; fotografias históricas foram identificadas
+sem promover aceites individuais não informados. Quadro HTTP corrige referências
+ultrapassadas de familiares/condição; contexto de importações reconhece lotes e
+simulação mínima já implementados. Datas/cabeçalhos e fontes roadmap versus
+catálogo ajustados. Somente documentação; a investigação experimental do 400 no
+worktree separado não foi integrada nem declarada entregue.
+
+## 2026-10-31 — aceite humano oficial de M2 e encerramento da execução
+
+O responsável confirmou expressamente que M2 passou em todos os testes de
+aceite humano. [Parecer oficial](validacoes/VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026),
+estado, roadmap, catálogo e índice de validações atualizados, sem inventar
+revisores, IDs ou resultados individuais não informados. M2/VU1 aprovado no
+recorte vigente; M3, 8V1/8V2, operação institucional e dados reais não foram
+aceitos por consequência. Ambientes sintéticos encerrados. A investigação do
+400 ficou preservada, sem integração, no worktree separado indicado no parecer;
+a causa do envio específico não foi confirmada. Nenhuma funcionalidade foi
+incorporada nesta atualização documental. Execução encerrada por solicitação.
+
+## 2026-10-31 — exportação CSV da página de pacientes (8A1)
+
+Interface de H16 sem mudança de backend/autorização: ID/nome, filtros/página
+aplicados, confirmação de escopo, UTF-8/BOM e nome neutro. Cliente compartilha
+autenticação/cancelamento e descarta respostas tardias; falhas não geram arquivo
+ou sucesso. Cliente/componente e quatro E2E passaram, com seis downloads reais
+nos três perfis, fórmulas neutralizadas e escopo de acesso preservado.
+[Validação e limites](validacoes/VALIDACAO_8A1.md). Exportação ampliada, aceite
+humano e liberação institucional continuam separados.
+
+## 2026-10-31 — interface da condição de Chagas (7B-E2U.1)
+
+Leitura e criação dos seis campos do contrato H18, com revisão antes da
+confirmação, recibo e rascunho recuperáveis. Ficha/histórico abrem o recurso da
+consulta selecionada e conservam o retorno. Sintomas Não/desconhecidos não
+apagam descrição; nenhum diagnóstico é inferido. Oito testes de componentes e
+cinco cenários E2E proporcionais passaram com API/PostgreSQL descartáveis,
+incluindo resposta perdida, 403, 409 e isolamento entre consultas.
+[Validação e limites](validacoes/VALIDACAO_7B_E2U_1.md). Complicações CON-07–10/11
+continuam pendentes de contrato HTTP/auditoria/recuperação; sintomas específicos,
+edição/remoção, aceite humano e dados reais permanecem separados. Nenhuma
+migration ou backend alterados.
+
+## 2026-10-31 — comparação de controles M2 e preparação do aceite
+
+Referência original executada em cópia temporária, comparada ao frontend com
+API/PostgreSQL sintéticos. Capturas e diferenças por requisito/severidade estão
+na [validação U4.2](validacoes/VALIDACAO_7D_U4_2.md#comparação-executada-em-31102026).
+Reflow acessível e diálogo atual preservados; sem alteração de CSS/contratos.
+Novo E2E cobre formulário/tabela/diálogo/carga/erro, teclado, Axe, 320/390 px e
+zoom CSS 200%. Percurso A1 e confirmação única passaram novamente; o
+[roteiro M2](validacoes/VALIDACAO_7D_A1.md#continuidade-técnica-de-31102026-e-roteiro-de-aceite-m2)
+está preparado com parecer humano pendente. M2 tecnicamente pronto para aceite
+no recorte revisado; não declara fidelidade integral 8V1 ou aprovação humana.
+
 ## 2026-10-28 — condição de Chagas por atendimento (7B-E2B.1)
 
 GET/POST de seis campos existentes, criação única sem sobrescrita e recibo

@@ -9,7 +9,7 @@ fonte temática abaixo; relatórios registram provas e histórico preserva conte
 | Pergunta | Fonte principal |
 | --- | --- |
 | O que está implementado e o que falta? | [Estado atual](ESTADO_ATUAL_DO_PROJETO.md) |
-| Em que ordem trabalhar e quando o produto estará concluído? | [Roadmap e marcos M1–M5](PROXIMOS_PASSOS.md) |
+| Em que ordem trabalhar, qual frontend alcançar e quando concluir? | [Roadmap integrado: dez frentes e M1–M5](PROXIMOS_PASSOS.md#cobertura-obrigatória-e-ordem-de-trabalho), com [critério por incremento](PROXIMOS_PASSOS.md#critério-de-execução-e-conclusão-por-incremento) |
 | Como deve ser o produto completo? | [Visão e especificação](frontend/VISAO_E_ESPECIFICACAO.md) |
 | Qual elemento do protótipo corresponde a qual requisito? | [Matriz Figma → requisito → implementação → lacuna → entrega → aceite](frontend/MATRIZ_FIGMA_FRONTEND.md) |
 | Qual é o escopo e o aceite de cada entrega? | [Catálogo de entregas](frontend/ENTREGAS_DO_PRODUTO.md) |
@@ -41,6 +41,8 @@ fonte temática abaixo; relatórios registram provas e histórico preserva conte
 | Recuperação de escrita e paginação de familiares | [Operações](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) e [familiares](arquitetura/CONTRATO_FAMILIARES_ETAPA_7.md) |
 | Episódios individuais de sorologia | [Contrato 7B-E1B](arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md) |
 | Condição de Chagas por atendimento | [Contrato 7B-E2B.1](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md) |
+| Complicações repetíveis por atendimento | [Contrato 7B-E2B.2](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md) — CON-07–10, API sintética com evidência própria; sem aceite humano. |
+| Comorbidades: catálogo, avaliação e histórico familiar | [Contrato 7B-E3B](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) — decisões delegadas, API E3B.2 e interface E3U com validação técnica; aceite humano separado. |
 | Revisão entre versões da planilha | [Contrato temporal](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md) |
 
 Especificações por módulo em `arquitetura/`: [avaliação clínica](arquitetura/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md),

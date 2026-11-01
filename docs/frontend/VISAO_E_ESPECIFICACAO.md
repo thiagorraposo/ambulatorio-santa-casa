@@ -18,8 +18,9 @@ Os demais recortes continuam sujeitos aos próprios critérios e decisões.
 Este documento é a fonte da experiência pretendida. A
 [matriz ponto a ponto](MATRIZ_FIGMA_FRONTEND.md) define os requisitos de cada
 elemento, sua implementação, lacuna e destino. O
-[roadmap oficial](ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend)
-define a ordem e o aceite das entregas; [FRONTEND.md](../FRONTEND.md) continua
+[roadmap oficial](../PROXIMOS_PASSOS.md)
+define a ordem e os marcos; o [catálogo](ENTREGAS_DO_PRODUTO.md) define escopos
+e critérios por unidade; [FRONTEND.md](../FRONTEND.md) continua
 sendo a fonte do setup e do funcionamento técnico existente.
 
 **Continuidade de 20/10:** [U3.3](../validacoes/VALIDACAO_7D_U3_3.md) acrescenta
@@ -42,6 +43,12 @@ ainda abertas definem comportamento e implementação, sem condicionar a inclus�
 das famílias já aprovada. EX conserva somente exclusões justificadas pelas
 regras vigentes. Marcos, sequência e novos aceites 8V1/8V2 estão no
 [roadmap vigente](../PROXIMOS_PASSOS.md#referência-de-conclusão--produto-completo).
+
+**Continuidade de 31/10 — estado vigente:** M1 e M2/VU1 possuem aceite humano;
+consultar o [parecer de M2](../validacoes/VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026).
+As pendências datadas de UX/VU1 acima preservam a fotografia de cada rodada.
+M3, fidelidade integral 8V1/8V2 e operação institucional têm aceites próprios;
+o marco M2 não aprova todos os requisitos desta especificação por associação.
 
 ## Objetivo e fronteiras da análise
 

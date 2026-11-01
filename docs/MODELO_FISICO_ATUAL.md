@@ -1218,3 +1218,24 @@ auditoria vigente, preservando seus patches39/42, proprietário e ACL.
 Validada em servidor descartável; não aplicada ao persistente. A evidência
 estrutural versionada permanece intacta. [Contrato](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md)
 e [validação](validacoes/VALIDACAO_7B_E2B_1.md).
+
+## Incremento sintético 67 — complicações por atendimento (31/10/2026)
+
+A migration 67 reutiliza `complicacao_chagas` da SQL06 e sua FK para atendimento,
+sem nova tabela ou vínculo obrigatório com condição. Registra captura prospectiva
+de tipo/presença/descrição/gravidade, privilégios mínimos e guard de revisão
+temporal, preservando a captura compartilhada. Não altera legado nem faz backfill.
+[Contrato](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md) e
+[validação](validacoes/VALIDACAO_7B_E2B_2.md) distinguem esses testes descartáveis da
+evidência persistente 00–20, que não foi atualizada.
+
+## Evolução SQL68 — somente ambientes descartáveis
+
+A SQL68 adiciona `avaliacao_comorbidades` (única por atendimento) e
+`avaliacao_comorbidade_item` (único por avaliação/catálogo). Família não avaliada
+difere de indicador desconhecido; itens são triestado e preservam o nome do
+catálogo. Captura prospectiva em sete campos, resolução de paciente e bloqueio
+de revisão temporal; aplicação somente SELECT/INSERT e sequências USAGE.
+Não altera SQL06/importador, não copia legado nem atualiza este dump persistente.
+[Contrato/ADR-026](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) e
+[evidência](validacoes/VALIDACAO_7B_E3B_2.md).

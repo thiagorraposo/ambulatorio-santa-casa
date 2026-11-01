@@ -16,6 +16,8 @@ describe('Correlação de operações: contrato', () => {
     ['POST','/v1/pacientes/1/atendimentos','atendimentoId'], ['PATCH','/v1/pacientes/1/atendimentos/2','atendimentoId'],
     ['POST','/v1/pacientes/1/atendimentos/2/sorologias','sorologiaId'],
     ['POST','/v1/pacientes/1/atendimentos/2/condicao-chagas','condicaoChagasId'],
+    ['POST','/v1/pacientes/1/atendimentos/2/complicacoes-chagas','complicacaoChagasId'],
+    ['POST','/v1/pacientes/1/atendimentos/2/comorbidades','avaliacaoComorbidadesId'],
     ['POST','/v1/pacientes/1/tratamento-bzn','tratamentoId'], ['POST','/v1/pacientes/1/retornos-bzn','retornoId'],
     ['PUT','/v1/pacientes/1/projetos','projetoId'], ['PUT','/v1/pacientes/1/notificacao','notificacaoId'],
     ['POST','/v1/pacientes/1/encaminhamentos','encaminhamentoId'],
@@ -37,7 +39,9 @@ describe('Correlação de operações: contrato', () => {
     ['PATCH','/v1/pacientes/1/atendimentos/2/sorologias/3'],
     ['POST','/v1/pacientes/1/atendimentos/2/sorologias/3'],
     ['PUT','/v1/pacientes/1/atendimentos/2/condicao-chagas'],
+    ['PUT','/v1/pacientes/1/atendimentos/2/complicacoes-chagas'],
     ['POST','/v1/pacientes/1/atendimentos/2/condicao-chagas/3'],
+    ['POST','/v1/pacientes/1/atendimentos/2/complicacoes-chagas/3'],
   ])('recusa rota sem contrato %s %s', (method,path) => {
     expect(() => clinicalRoute(method,path)).toThrow(BadRequestException);
   });
