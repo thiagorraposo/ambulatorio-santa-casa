@@ -343,7 +343,7 @@ Saída, 401, expiração e troca de identidade/perfil limpam cache e rascunhos.
 
 `MutationForm` registra uma UUID com método, caminho e hash SHA-256 do corpo em
 `POST /v1/operacoes`; em seguida envia a escrita uma vez com `X-Operacao-Id`.
-O protocolo cobre as 17 mutações de cadastro, atendimento e acompanhamento
+O protocolo cobre as 18 mutações de cadastro, atendimento e acompanhamento
 enumeradas no [contrato de recuperação](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md).
 O recibo mínimo de IDs/versão é confirmado na mesma transação da clínica e seus
 filhos. Rede, resposta inválida, 5xx ou cancelamento após envio clínico mantêm a

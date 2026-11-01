@@ -32,7 +32,9 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | M3 — 8A1 | CSV real de ID/nome da página/filtros aplicados, confirmação de escopo e tratamento de respostas tardias; mantém H16 e seus três perfis. | [Evidência](validacoes/VALIDACAO_8A1.md); exportação ampliada, aceite humano e dados reais separados. |
 | M3 — 7B-E2B.2 | API GET/POST de complicações repetíveis por atendimento, quatro campos SQL06, captura prospectiva 67 e recibo por UUID. | [Contrato](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md) e [validação](validacoes/VALIDACAO_7B_E2B_2.md); interface CON-11, edição/revisão temporal e aceite humano separados. |
 | M3 — 7B-E2U.2 | Interface de complicações CON-07–11: lista paginada, quatro campos revistos, episódios separados, rascunho e recibos. | [Validação](validacoes/VALIDACAO_7B_E2U_2.md); build, 256 testes de componentes/cliente e 76 E2E finais aprovados; aceite humano separado. |
-| M3 — 7B-E3B.1 | GET autenticado de comorbidades ativas, ID/nome/ativo, paginação e DTO sem código inventado. | [Contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md)/[validação](validacoes/VALIDACAO_7B_E3B_1.md); sem escrita/seleção clínica. Semântica por paciente/consulta e histórico familiar aguardam definição. |
+| M3 — 7B-E3B.1 | GET autenticado de comorbidades ativas, ID/nome/ativo, paginação e DTO sem código inventado. | [Contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md)/[validação](validacoes/VALIDACAO_7B_E3B_1.md); sem escrita/seleção clínica. Decisões delegadas e escrita E3B.2 registradas abaixo. |
+
+| M3 — 7B-E3B.2 | Avaliação própria por atendimento, itens triestado e histórico familiar livre; SQL68 sem backfill, autorização, captura e recibo atômico. | [Contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md)/[validação](validacoes/VALIDACAO_7B_E3B_2.md); tecnicamente validada, interface/aceite separados. |
 
 M2/VU1 está **aprovado por aceite humano em 31/10/2026**, conforme confirmação
 expressa do responsável de que passou em todos os testes de aceite humano.
@@ -43,8 +45,9 @@ pelo CI do PR #16. Em M3, C2B.1 exige resolver o consumo de sequências antes de
 declarar a garantia ampliada de simulação. A frente de sorologias individuais tem API e interface implementadas, sem
 inferir diagnóstico. Solicitação geral exige contrato próprio; 7B-E2B.1 tem a API de condição e 7B-E2U.1 sua interface de seis campos; 7B-E2B.2 acrescenta a API de complicações repetíveis; a interface CON-07–11 tem o incremento E2U.2, sem acrescentar sintomas
 específicos ou aceitar o pacote agregado por associação. E3B.1 publica somente
-o catálogo de comorbidades; o contrato identifica duas decisões necessárias
-antes da escrita clínica e não converte o default físico true em resposta ausente.
+o catálogo de comorbidades; E3B.2 acrescenta snapshots por consulta e histórico
+familiar livre, após delegação explícita das decisões em 01/11. O legado e seu
+default físico true permanecem intactos; a interface ainda tem unidade própria.
 A sequência detalhada pertence
 ao [roadmap](PROXIMOS_PASSOS.md#próximo-trabalho).
 

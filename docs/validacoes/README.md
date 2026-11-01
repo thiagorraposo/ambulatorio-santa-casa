@@ -56,3 +56,5 @@ e um ambiente descartável compatível.
 A reauditoria de 05/10 está no [histórico](../historico/RELATORIO_ETAPA_7_2026_10_05.md).
 Logs e capturas em `/tmp` citados nos relatórios podem ter sido removidos pelo
 sistema; sua menção preserva rastreabilidade, não garante disponibilidade atual.
+
+- [Avaliação de comorbidades por atendimento — E3B.2](VALIDACAO_7B_E3B_2.md).

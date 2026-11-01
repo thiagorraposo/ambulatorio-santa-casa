@@ -2,8 +2,8 @@
 
 Data: 2026-10-31. Base `0a2884c`, branch `feat/continuidade-m2-condicao`.
 **E3B.1: catálogo somente leitura implementado e validado tecnicamente.**
-Escrita clínica e interface de seleção permanecem planejadas, com as decisões
-pendentes abaixo; esta especificação não as aprova por associação.
+E3B.2: avaliação por atendimento implementada e validada tecnicamente em
+01/11/2026; decisões delegadas abaixo. Interface E3U e aceite humano separados.
 
 ## Evidência e conflito a resolver antes da escrita
 
@@ -25,20 +25,57 @@ interface. Não reinterpretar legado nem transformar o atendimento opcional em
 histórico completo. A seleção das dez categorias do protótipo também não
 estabelece identidade automática com todos os nomes atuais do catálogo.
 
-Antes de criar DTO/migration/escrita, confirmar:
+## Decisões adotadas em 01/11/2026 — delegação explícita do responsável
 
-1. Avaliação própria por atendimento preservando consultas anteriores, ou
-   estado atual único do paciente com histórico auditável? O primeiro exige
-   compatibilizar a cardinalidade física com os snapshots pedidos; o segundo
-   exige esclarecer o critério do catálogo que pede consultas distintas.
-2. “Histórico de doença familiar” refere-se somente a Chagas ou também a outras
-   doenças, e quais informações são necessárias? D3 trata exames de familiares,
-   não autoriza convertê-los em histórico de doença. Não inventar categorias,
-   cardinalidades ou obrigatoriedades desse bloco.
+O responsável autorizou escolher as respostas pelo contexto antes da escrita.
+Isso autoriza o desenho abaixo; não equivale a aceite humano da funcionalidade.
 
-Essas perguntas foram apresentadas ao responsável nesta sessão. Nenhuma
-resposta foi registrada até a preparação deste documento. Não há escolha
-implícita por silêncio; as opções são alternativas em revisão, não regras novas.
+1. Avaliação própria por atendimento, sem herança automática. SQL06 e importador
+   continuam sendo o legado por paciente; não são convertidos nem sobrescritos.
+2. Histórico familiar cobre doenças relatadas, inclusive Chagas, em texto livre,
+   separado dos resultados de exames. Não inferir parentesco, doença, resultado
+   ou diagnóstico. O indicador familiar é triestado e admite descrição mesmo
+   quando negativo/desconhecido; não há lista fechada de doenças.
+3. Uma avaliação imutável por atendimento contém itens de catálogo e/ou histórico
+   familiar. Ausência de avaliação é GET null; ausência de item é não avaliado;
+   item presente exige indicador explícito true/false/null. Não há default true.
+   Ausência de bloco familiar é não avaliado; bloco com indicador null é
+   desconhecido explícito. Observações são independentes do indicador.
+4. Correções/versionamento são unidade posterior, sem PATCH/PUT nesta entrega.
+   Segundo POST recebe 409, sem substituir a avaliação anterior. Cadastro não
+   propaga diagnósticos, condições ou associação legada de paciente.
+
+## E3B.2 — contrato de criação e leitura por atendimento
+
+`GET|POST /v1/pacientes/:id/atendimentos/:atendimentoId/comorbidades`.
+GET admite consulta/edição/administração, POST edição/administração; ambos exigem
+vínculo clínico vigente (administração segue política existente) e atendimento
+pertencente ao paciente. IDs são texto decimal positivo na faixa bigint.
+
+POST: `{ itens?: [{ comorbidadeId: string, possuiComorbidade: boolean|null,
+observacoes?: string|null }], historicoFamiliar?: {
+possuiDoenca: boolean|null, descricao?: string|null } }`.
+Pelo menos um item ou bloco familiar. Array, quando presente, 1–100 itens,
+sem IDs repetidos; null no lugar do array/bloco é inválido. Indicadores são
+obrigatórios dentro dos objetos, inclusive para informar null explicitamente.
+Textos até 10000 caracteres, sem trim/normalização clínica. IDs precisam existir
+e estar ativos no momento da gravação. Nomes atuais são copiados para o snapshot;
+inativação/renomeação posterior não oculta nem reinterpreta registros existentes.
+
+POST 201: `{ avaliacaoComorbidadesId: string }`. GET 200: null ou
+`{ avaliacaoComorbidadesId, atendimentoId, itens: [{ itemId, comorbidadeId,
+nomeComorbidade, possuiComorbidade, observacoes }], historicoFamiliar: null|{
+possuiDoenca, descricao } }`. Itens em ordem de ID de catálogo, máximo 100 por
+avaliação; não truncar nem paginar silenciosamente. Nenhum campo bruto do
+importador, credencial ou identificador interno de auditoria é publicado.
+
+400 para DTO/catálogo inválido; 401/403/404 seguem as políticas existentes;
+409 para avaliação já registrada. A avaliação, todos os filhos, captura atribuível
+e recibo `avaliacaoComorbidadesId` usam uma transação; falha de filho reverte tudo.
+Lock do atendimento serializa concorrência e UNIQUE impede substituição. Protocolo
+vigente de UUID/hash recupera confirmação sem repetir POST. Captura prospectiva
+não habilita revisão temporal destes campos. SQL68 é incremental, sem backfill,
+sem alterar migrations antigas ou permissões de escrita do legado/importador.
 
 ## E3B.1 — catálogo ativo publicado no código
 
@@ -66,17 +103,7 @@ Não precisou migration/grant: SELECT da tabela existente já pertence à role
 limitada usada pela API. [Validação](../validacoes/VALIDACAO_7B_E3B_1.md) com
 PostgreSQL real sintético comprova esse acesso e a ausência de escrita clínica.
 
-## Próximas unidades, após as definições
+## Próximas unidades
 
-Definir contrato da avaliação clínica e histórico familiar sem usar default true
-como resposta ausente. Conferir vínculo paciente/atendimento, gravação
-transacional, origem temporal, concorrência, auditoria prospectiva/guarda de
-revisão e recuperação por intenção conforme o protocolo vigente. Qualquer
-alteração estrutural deve ser incremental, sem modificar SQL06 ou fazer
-backfill sem semântica aprovada. A nova leitura de catálogo não habilita esses
-comandos nem autoriza construir campo editável sem destino HTTP.
-
-Provas futuras devem distinguir ausência/negativa/desconhecido, duas consultas,
-catálogo inativo, autorização, rollback e recuperação. Essas são condições de
-aceite planejadas, não resultados executados da escrita. M2 mantém aceite
-próprio; este recorte não conclui E3B/E3U ou M3.
+Integrar E3U sobre a evidência HTTP/SQL de E3B.2. Aceite humano permanece separado. Não apresentar esta decisão delegada
+como homologação clínica institucional, nem encerrar M3 pela API isolada.

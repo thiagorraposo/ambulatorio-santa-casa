@@ -1228,3 +1228,14 @@ temporal, preservando a captura compartilhada. Não altera legado nem faz backfi
 [Contrato](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md) e
 [validação](validacoes/VALIDACAO_7B_E2B_2.md) distinguem esses testes descartáveis da
 evidência persistente 00–20, que não foi atualizada.
+
+## Evolução SQL68 — somente ambientes descartáveis
+
+A SQL68 adiciona `avaliacao_comorbidades` (única por atendimento) e
+`avaliacao_comorbidade_item` (único por avaliação/catálogo). Família não avaliada
+difere de indicador desconhecido; itens são triestado e preservam o nome do
+catálogo. Captura prospectiva em sete campos, resolução de paciente e bloqueio
+de revisão temporal; aplicação somente SELECT/INSERT e sequências USAGE.
+Não altera SQL06/importador, não copia legado nem atualiza este dump persistente.
+[Contrato/ADR-026](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) e
+[evidência](validacoes/VALIDACAO_7B_E3B_2.md).

@@ -388,3 +388,8 @@ acompanhamento para todos os perfis. A política de paciente `todos_sinteticos`
 não amplia a visibilidade dos lotes; `desabilitada` também desabilita estas
 consultas. Cabeçalho, contagens e linhas paginadas são projetados explicitamente
 em uma consulta SQL, com o mesmo snapshot, sem expor bruto ou mensagens livres.
+
+7B-E3B.2 publica GET/POST `.../atendimentos/:atendimentoId/comorbidades`, com
+avaliação única, filhos e relato familiar numa transação. SQL68 preserva o legado;
+[contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) e
+[validação](validacoes/VALIDACAO_7B_E3B_2.md). Interface e aceite separados.

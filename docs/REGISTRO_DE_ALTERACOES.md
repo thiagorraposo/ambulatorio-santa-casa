@@ -1,5 +1,16 @@
 # Registro de Alterações
 
+## 2026-11-01 — Avaliação de comorbidades por consulta (7B-E3B.2)
+
+- Responsável delegou as decisões antes da escrita: snapshots por consulta e
+  relato familiar livre separado dos exames; contrato/ADR-026 registram origem.
+- SQL68 incremental preserva legado/importador, sem backfill; GET/POST transacionais
+  com itens triestado, nome congelado, autorização, captura e recibo por operação.
+- Validação: build, 182 unidades, 102 HTTP na composição 101+9 focados,
+  39 scripts SQL na composição 38+1 e upgrade 67→68 aprovados.
+  [Evidência e limitação da fixture corrigida](validacoes/VALIDACAO_7B_E3B_2.md).
+- Interface/aceite humano e aplicação no persistente permanecem separados.
+
 ## 2026-10-31 — catálogo de comorbidades (7B-E3B.1)
 
 GET de metadados ativos, ID textual/nome/ativo, paginação e autenticação nos

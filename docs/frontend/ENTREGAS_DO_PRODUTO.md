@@ -535,12 +535,11 @@ Sintomas específicos, edição/remoção e aceite do pacote continuam pendentes
 
 **Estado e cobertura:** Planejado; não aceito. RQ-ATD-11; RQ-COM-01–02 (telas/elementos na matriz).
 
-**Continuidade de 31/10 — 7B-E3B.1:** catálogo ativo somente leitura
-[implementado e validado](../validacoes/VALIDACAO_7B_E3B_1.md), sem código clínico
-fabricado. O [contrato](../arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) identifica
-decisões pendentes de estado por paciente versus avaliação por atendimento e
-conteúdo de histórico familiar. Não conclui COM-01/02 ou ATD-11, não publica
-escrita clínica e não modifica o default true para acomodar ausência.
+**Continuidade de 01/11 — E3B.1/E3B.2:** catálogo ativo e avaliação própria por
+atendimento [implementados e validados tecnicamente](../validacoes/VALIDACAO_7B_E3B_2.md).
+O responsável delegou as decisões; o [contrato](../arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md)
+adota snapshots, triestado explícito e relato familiar livre separado dos exames.
+SQL68 não altera legado nem faz backfill. Interface e aceite humano separados.
 
 **Escopo:** Hipertensão/diabetes e histórico de doença familiar separados do rastreio de exames; representação triestado e observações.
 

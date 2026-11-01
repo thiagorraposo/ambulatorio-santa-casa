@@ -85,7 +85,7 @@ Os novos cenários separam as provas de recuperação:
 
 As escritas da interface registram UUID/método/caminho/hash antes da mutação e
 usam `X-Operacao-Id`. Verificação/encerramento consultam o protocolo de operação
-sem repetir a mutação. A infraestrutura cobre 17 rotas; cada cenário comprova
+sem repetir a mutação. A infraestrutura cobre 18 rotas; cada cenário comprova
 somente as classes que exercita. Suporte e estados estão no
 [contrato de recuperação](../../docs/arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md).
 
