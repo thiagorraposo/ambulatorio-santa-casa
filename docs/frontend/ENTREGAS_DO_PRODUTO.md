@@ -1,6 +1,6 @@
 # Catálogo de entregas do produto
 
-Atualizado em: 2026-10-31. Fonte dos escopos e critérios por unidade; sequência
+Atualizado em: 2026-11-01. Fonte dos escopos e critérios por unidade; sequência
 e marcos pertencem ao [roadmap](../PROXIMOS_PASSOS.md). Estados históricos não
 equivalem a aceite atual: consultar as continuidades e relatórios citados.
 
@@ -69,6 +69,12 @@ todos os campos por associação a um teste.
 A sequência M1–M5 e a cobertura obrigatória estão no
 [roadmap](../PROXIMOS_PASSOS.md#marcos-e-dependências-de-entrega).
 Este catálogo define as unidades, sem manter uma segunda lista de prioridades.
+O [quadro integrado das dez frentes](../PROXIMOS_PASSOS.md#cobertura-obrigatória-e-ordem-de-trabalho)
+reúne os resultados de backend/interface e a próxima lacuna. O
+[critério por incremento](../PROXIMOS_PASSOS.md#critério-de-execução-e-conclusão-por-incremento)
+exige comparar a interface afetada com a referência durante a própria entrega;
+8V1 consolida essas provas e fecha diferenças, sem adiar toda comparação para o
+final. Validação técnica, comparação visual e aceite humano continuam distintos.
 
 ### Recuperação e experiência da Etapa 7
 

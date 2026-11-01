@@ -1,5 +1,19 @@
 # Registro de Alterações
 
+## 2026-11-01 — Roadmap integrado de produto, backend e frontend
+
+- Quadro das dez frentes passou a reunir unidades, interface esperada,
+  dependências, situação e critério para avançar; preservados números e IDs.
+- Roadmap define sequência e leitura das fontes; catálogo mantém escopo/aceite
+  por unidade, matriz mantém FM/RQ e evidências. Links recíprocos atualizados.
+- Comparação visual passa a ser explícita em cada incremento afetado; 8V1/8V2
+  consolidam revisão/aceite integral. Referência inacessível ou diferença sem
+  aprovação permanece pendente, sem confundir testes funcionais com aceite.
+- Continuidade técnica permanece frente 3 · 7B-E4B, depois E4U conforme contrato;
+  nenhuma funcionalidade, comparação nova ou aceite foi produzido nesta revisão.
+- Validação documental: docs-check, repository-check, links/âncoras e diff;
+  sem repetir suítes da aplicação para alteração exclusivamente textual.
+
 ## 2026-11-01 — Referência numerada das frentes do workflow
 
 - Enumeradas de 1 a 10 as frentes existentes no [roadmap](PROXIMOS_PASSOS.md#cobertura-obrigatória-e-ordem-de-trabalho),

@@ -9,7 +9,7 @@ fonte temática abaixo; relatórios registram provas e histórico preserva conte
 | Pergunta | Fonte principal |
 | --- | --- |
 | O que está implementado e o que falta? | [Estado atual](ESTADO_ATUAL_DO_PROJETO.md) |
-| Em que ordem trabalhar e quando o produto estará concluído? | [Roadmap e marcos M1–M5](PROXIMOS_PASSOS.md) |
+| Em que ordem trabalhar, qual frontend alcançar e quando concluir? | [Roadmap integrado: dez frentes e M1–M5](PROXIMOS_PASSOS.md#cobertura-obrigatória-e-ordem-de-trabalho), com [critério por incremento](PROXIMOS_PASSOS.md#critério-de-execução-e-conclusão-por-incremento) |
 | Como deve ser o produto completo? | [Visão e especificação](frontend/VISAO_E_ESPECIFICACAO.md) |
 | Qual elemento do protótipo corresponde a qual requisito? | [Matriz Figma → requisito → implementação → lacuna → entrega → aceite](frontend/MATRIZ_FIGMA_FRONTEND.md) |
 | Qual é o escopo e o aceite de cada entrega? | [Catálogo de entregas](frontend/ENTREGAS_DO_PRODUTO.md) |

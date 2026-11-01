@@ -47,6 +47,13 @@ próprias de M3 no [estado atual](../ESTADO_ATUAL_DO_PROJETO.md), sem aceite hum
 transferido por associação. O quadro HTTP abaixo incorpora esses contratos;
 as observações de 05/10 nas linhas individuais permanecem datadas salvo atualização explícita.
 
+**Integração com o roadmap em 01/11:** as [dez frentes](../PROXIMOS_PASSOS.md#cobertura-obrigatória-e-ordem-de-trabalho)
+organizam a sequência de produto/backend/frontend. Esta matriz conserva os
+requisitos e as evidências por FM/RQ; não mantém prioridades concorrentes.
+A [comparação por incremento](../PROXIMOS_PASSOS.md#critério-de-execução-e-conclusão-por-incremento)
+alimenta 8V1, sem converter testes funcionais ou capturas históricas em aceite
+visual vigente. Esta revisão documental não declara novas telas comparadas.
+
 ## Como ler e manter a rastreabilidade
 
 Cada linha tem ID estável `FM-FAMÍLIA-NN`. Seu requisito individual é
