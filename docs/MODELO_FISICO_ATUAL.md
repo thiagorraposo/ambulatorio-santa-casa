@@ -1254,3 +1254,10 @@ Captura prospectiva de tipo_dispositivo/possui_dispositivo/observacoes na tabela
 existente, com guard temporal específico. Sem backfill, alteração de ACLs,
 funções/gatilhos anteriores, cardinalidade ou FK de atendimento. Upgrade69→70
 confere legado e segurança. [Evidência](validacoes/VALIDACAO_7B_E4B_DISPOSITIVOS.md).
+
+## Evolução SQL71 — somente descartáveis
+
+Captura prospectiva de houve_obito/data_obito/causa_obito/observacoes em obito
+existente, guard temporal específico e nenhuma alteração de ACL/função/gatilho
+compartilhado. Sem backfill, snapshot por consulta ou data parcial fabricada.
+[Contrato/provas](validacoes/VALIDACAO_7B_E4B_OBITO.md).

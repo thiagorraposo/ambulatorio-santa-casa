@@ -10,7 +10,7 @@ produzir seu diagnóstico. Uma nova execução do mesmo evento/ref cancela a ant
 | Job | Verificações | Limite |
 | --- | --- | --- |
 | Quality | `docs-check`, `manifest-check`, `repository-check`, `workflow-test` e actionlint | 10 minutos; não usa banco. |
-| Database | Migrations 00–70, `importer-test`, `docker-db-test` e os upgrades de sorologia, condição, complicação, comorbidades, AVC e dispositivos | 15 minutos; instala ripgrep explicitamente; SQL, importação e upgrade sem backfill sintéticos. |
+| Database | Migrations 00–71, `importer-test`, `docker-db-test` e os upgrades de sorologia, condição, complicação, comorbidades, AVC, dispositivos e óbito | 15 minutos; instala ripgrep explicitamente; SQL, importação e upgrade sem backfill sintéticos. |
 | Backend | `npm ci`, `backend-check`, `backend-clinical-test` e `backend-container-check` | 25 minutos; build, unitários, integração, contratos/autenticação/RBAC, fluxos clínicos, saúde e usuário não-root. |
 | Frontend | `npm ci` em ambas as aplicações, Chromium e `frontend-check` | 25 minutos; TypeScript/Vite, componentes e navegador com API/PostgreSQL reais sintéticos. |
 
@@ -20,7 +20,7 @@ armazenamento e identidade antes de aplicar o bootstrap. As portas
 `POSTGRES_PORT`, `APP_DB_PORT` e `SYNTHETIC_PG_PORT` são `55457`, exigidas por
 D3/D8; o Compose persistente local continua em `5433`. Backend e frontend
 criam bancos e logins próprios para suas suítes. O job Frontend prepara somente
-a role de origem com SQL00; seu runner aplica 02–70 no banco exclusivo.
+a role de origem com SQL00; seu runner aplica 02–71 no banco exclusivo.
 Nenhuma permissão clínica é concedida manualmente para fazer teste passar.
 
 `db-sorologia-upgrade-test` requer `SYNTHETIC_PG_HOST`, `SYNTHETIC_PG_PORT`,
@@ -29,7 +29,7 @@ Cria/remove banco próprio, instala 02–64, prepara legado sintético e aplica 
 comprovando linha intacta, ausência de backfill e captura da alteração posterior.
 
 `db-condicao-upgrade-test` (65→66), `db-complicacao-upgrade-test` (66→67)
-, `db-comorbidades-upgrade-test` (67→68) e `db-avc-upgrade-test` (68→69) e `db-dispositivo-upgrade-test` (69→70) usam o mesmo isolamento sintético.
+, `db-comorbidades-upgrade-test` (67→68) e `db-avc-upgrade-test` (68→69) e `db-dispositivo-upgrade-test` (69→70) e `db-obito-upgrade-test` (70→71) usam o mesmo isolamento sintético.
 Os testes preservam legado/captura e verificam a ausência de backfill; o último
 não converte associações legadas em avaliações por atendimento.
 
@@ -190,7 +190,7 @@ versão original, rollback, episódios repetíveis e falha de resposta após com
 Famílias exigem evidência de páginas independentes de snapshots e filhos;
 recuperação usa UUID/método/caminho/hash, registro, uma escrita e verificação ou
 encerramento sem reaplicar clínica. O
-[protocolo](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) enumera as 20 mutações;
+[protocolo](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) enumera as 21 mutações;
 infraestrutura comum não dispensa comprovação das classes utilizadas. Recibos,
 rascunhos e contexto precisam sobreviver às navegações/reconsultas previstas,
 preservando a limpeza de sessão e a distinção de `null` na criação de pendências.

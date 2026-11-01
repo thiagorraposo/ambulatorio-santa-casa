@@ -771,3 +771,7 @@ correspondente após validação completa; sem substituir estado existente.
 E4U marcapasso/CDI implementada e validada tecnicamente no recorte inicial:
 [build/262 unidades/dois E2E/comparação renderizada](validacoes/VALIDACAO_7B_E4U_DISPOSITIVOS.md).
 Aceite humano/visual integral e demais EVT permanecem separados.
+
+E4B óbito inicial com data completa implementado conforme SQL10, sem upsert ou
+inferência; [provas e limites](validacoes/VALIDACAO_7B_E4B_OBITO.md). Interface,
+precisão parcial, aceite e conclusão do agregado permanecem separados.

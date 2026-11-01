@@ -17,6 +17,7 @@ describe('Correlação de operações: contrato', () => {
     ['POST','/v1/pacientes/1/atendimentos/2/sorologias','sorologiaId'],
     ['POST','/v1/pacientes/1/atendimentos/2/condicao-chagas','condicaoChagasId'],
     ['POST','/v1/pacientes/1/atendimentos/2/complicacoes-chagas','complicacaoChagasId'],
+    ['POST','/v1/pacientes/1/obito','obitoId'],
     ['POST','/v1/pacientes/1/dispositivos','dispositivoId'],
     ['POST','/v1/pacientes/1/avcs','eventoId'],
     ['POST','/v1/pacientes/1/atendimentos/2/comorbidades','avaliacaoComorbidadesId'],

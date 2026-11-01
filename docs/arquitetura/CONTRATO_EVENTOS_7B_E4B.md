@@ -103,3 +103,25 @@ temporal de estado consolidado. Isso não define correção/inventário de múlt
 implantes, resincronizador ou reinterpretação do legado.
 
 [Interface marcapasso/CDI e provas](../validacoes/VALIDACAO_7B_E4U_DISPOSITIVOS.md): criação inicial/revisão/recibos, sem alteração de estados existentes.
+
+## Óbito — criação inicial com data completa
+
+Recorte RQ-EVT-06–08 sobre SQL10. `GET|POST /v1/pacientes/:id/obito`, vínculo
+por paciente e mesmas regras JWT/RBAC. GET devolve JSON null explícito quando
+não há estado; caso contrário `{ obitoId, pacienteId, houveObito, dataObito,
+causaObito, observacoes }`, IDs textuais e data DATE como texto ISO sem fuso.
+Ausência não é negativa. POST201 `{ obitoId }`, segundo registro (inclusive
+legado)409, sem upsert/substituição/correção nem bloqueio automático de outros
+fluxos clínicos do paciente.
+
+POST admite quatro campos opcionais anuláveis e independentes: houveObito
+boolean, dataObito data completa válida YYYY-MM-DD, causaObito/observacoes texto
+literal até10000 caracteres. Corpo vazio400; null explícito válido. Não exigir
+causa/data quando positivo, inferir óbito pela data/causa, associar causa à
+Chagas, fabricar dia/mês para uma data parcial ou alterar booleano ao preenchê-las.
+Precisão parcial e novas regras de consistência clínica exigem contrato próprio.
+
+Transação/recibo UUID/hash obitoId e concorrência seguem protocolo vigente;
+falha reverte estado/captura/recibo. SQL71 ativa captura dos quatro campos
+prospectivamente, sem backfill/ACL nova ou alteração de gatilhos/funções, e
+bloqueia revisão temporal desses campos até contrato específico.

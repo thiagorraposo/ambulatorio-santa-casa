@@ -597,6 +597,12 @@ com409 para existente, [contrato](../arquitetura/CONTRATO_EVENTOS_7B_E4B.md) e
 [provas](../validacoes/VALIDACAO_7B_E4B_DISPOSITIVOS.md). Estado consolidado por
 paciente/tipo; sem upsert, snapshot por consulta ou resincronizador presumido.
 
+**Continuidade óbito em01/11:** leitura/criação inicial consolidada com data
+completa sobre SQL10, [contrato](../arquitetura/CONTRATO_EVENTOS_7B_E4B.md) e
+[provas](../validacoes/VALIDACAO_7B_E4B_OBITO.md). Precisão parcial e correção
+continuam separadas; sem causa/data obrigatórias quando positivo ou vínculo
+artificial de atendimento. Interface/aceite não são concluídos pela API.
+
 **Escopo:** AVC prévio, marcapasso/CDI/resincronizador e óbito/causa/data/precisão; escolher contrato clínico antes de campo inferido.
 
 **Dependências/decisões:** P-01 para prioridade; campos/modelo físico e fontes clínicas examinados antes do DTO; D2–D5 quando pertinentes.

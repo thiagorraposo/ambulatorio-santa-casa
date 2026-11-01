@@ -1,5 +1,13 @@
 # Registro de Alterações
 
+## 2026-11-01 — E4B óbito consolidado inicial
+
+- GET JSON null/estado e POST inicial único com recibo, quatro campos independentes,
+  sem data parcial fabricada, upsert ou regra causal nova. Captura71 sem backfill.
+- Build/185 unidades, seis novos HTTP,42 SQL/upgrade70→71/importador/31 workflow
+  aprovados; [evidência completa e limites](validacoes/VALIDACAO_7B_E4B_OBITO.md).
+- Interface/visual/aceite e decisões de precisão parcial seguem separados.
+
 ## 2026-11-01 — E4U marcapasso/CDI, revisão e recibos
 
 - Interface de leitura/criação inicial por paciente/tipo, rascunho, revisão,
