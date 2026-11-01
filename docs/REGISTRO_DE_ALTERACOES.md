@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-01 — Isolamento do upgrade de comorbidades no CI
+
+- Primeira execução da PR #23 (`41306700817`) falhou em Quality porque o upgrade
+  de comorbidades estava nesse job sem PostgreSQL. Movido para Database, após
+  o bootstrap e os demais upgrades; nenhuma verificação removida/ignorada.
+- Regressão de workflow exige que todos os upgrades pertençam a Database e
+  ocorram após a preparação sintética. Validar workflow-test, actionlint e docs.
+  Aprovação remota da nova revisão deve ser confirmada na PR antes do merge.
+
 ## 2026-11-01 — Preparação da integração pela pipeline CI
 
 - Guia de desenvolvimento alinhado ao workflow existente: migrations até 68 e
