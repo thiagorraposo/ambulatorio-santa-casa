@@ -64,18 +64,24 @@ Nenhuma semântica clínica é inferida pela autorização de escopo.
 
 ### Cobertura obrigatória e ordem de trabalho
 
-| Frente | Pacotes preservados | Entrega obrigatória e dependências |
-| --- | --- | --- |
-| Experiência clínica inicial | 7A-U1; 7D-U1/U2/U3/U4; 7D-A1 | Busca antes do cadastro, etapas, revisão, ficha temporal, navegação e acessibilidade. Concluir M1/M2; reaproveitar provas técnicas existentes sem presumir aceite humano. |
-| Correção de pendência | 7C-R2B/U | Permitir retorno ao estado desconhecido com contrato PATCH explícito; depende da semântica e auditoria de 8A3B. Pode ocorrer após M2, obrigatório em M3. |
-| Cobertura clínica completa | 7B-E1B/U a 7B-E7B/U | Sorologias, condições/complicações, comorbidades, eventos/dispositivos/óbito, medicamentos, resultados de exames e correções dos filhos do atendimento. Cada contrato/persistência precede sua interface. |
-| Tratamento e acompanhamento | 7C-E1B/U, E2B/U, E4B/U, E5D/B/U | Correção de BZN/reações e encaminhamentos; concorrência de projeto/notificação; planejamento/desfecho D9 separado de visitas. E5 depende da decisão semântica P-06. |
-| Exportação e pendências | 8A1; 8A2D/B/U; 8A3B/U | CSV autorizado, fila global e revisão auditável. Definir grupos/responsáveis em P-04 antes dos contratos e telas. |
-| Início, dashboard e busca | 8B1D/B/U; 8B2B/U; 8B3D/B/U | Indicadores, atividade recente, séries, origem/projetos, timeline, filtros e colunas. Incluir todas as unidades; P-05 define fórmulas, população, períodos e semântica de origem antes do backend. |
-| Importação e documentos | 8C1; 8C2B/U; 8C3D/B/U; 8C4D/B/U; 8C5B/U | Lotes, simulação/relatório, confirmação, conflitos autorizados, anexos, reprocessamento e revisão temporal. Incluir todas as unidades; decisões P-04/P-05/P-07/P-09 e autorização por fonte precedem os comandos afetados. |
-| Identidade e administração | 8D1D/B/U; 8D2B/U | Usuários, conta ampliada, perfil e ativação/inativação com auditoria, concorrência e revalidação de sessão. P-08 define política antes dos comandos. |
-| Fidelidade e integração integral | 8V1; 8V2 | Comparar todas as telas/estados com a referência e aceitar percursos completos com API/PostgreSQL sintéticos; concluir antes de M3. |
-| Implantação e entrega | 9A–9D; 10A–10D | Ambiente, HTTPS/segredos, restore, governança, migração autorizada, homologação e release do produto completo. |
+As dez frentes numeradas abaixo são a referência para planejamento, relatos de
+progresso e retomadas do workflow. Ao indicar trabalho, citar **frente + unidade**
+(por exemplo, **frente 3 · 7B-E4B**), mantendo os IDs existentes dos pacotes.
+A numeração preserva a ordem do roadmap; não atribui pesos iguais, não mede
+percentual de conclusão e não substitui dependências ou critérios de aceite.
+
+| Nº | Frente | Pacotes preservados | Entrega obrigatória e dependências |
+| --- | --- | --- | --- |
+| <a id="frente-01"></a>1 | Experiência clínica inicial | 7A-U1; 7D-U1/U2/U3/U4; 7D-A1 | Busca antes do cadastro, etapas, revisão, ficha temporal, navegação e acessibilidade. Concluir M1/M2; reaproveitar provas técnicas existentes sem presumir aceite humano. |
+| <a id="frente-02"></a>2 | Correção de pendência | 7C-R2B/U | Permitir retorno ao estado desconhecido com contrato PATCH explícito; depende da semântica e auditoria de 8A3B. Pode ocorrer após M2, obrigatório em M3. |
+| <a id="frente-03"></a>3 | Cobertura clínica completa | 7B-E1B/U a 7B-E7B/U | Sorologias, condições/complicações, comorbidades, eventos/dispositivos/óbito, medicamentos, resultados de exames e correções dos filhos do atendimento. Cada contrato/persistência precede sua interface. |
+| <a id="frente-04"></a>4 | Tratamento e acompanhamento | 7C-E1B/U, E2B/U, E4B/U, E5D/B/U | Correção de BZN/reações e encaminhamentos; concorrência de projeto/notificação; planejamento/desfecho D9 separado de visitas. E5 depende da decisão semântica P-06. |
+| <a id="frente-05"></a>5 | Exportação e pendências | 8A1; 8A2D/B/U; 8A3B/U | CSV autorizado, fila global e revisão auditável. Definir grupos/responsáveis em P-04 antes dos contratos e telas. |
+| <a id="frente-06"></a>6 | Início, dashboard e busca | 8B1D/B/U; 8B2B/U; 8B3D/B/U | Indicadores, atividade recente, séries, origem/projetos, timeline, filtros e colunas. Incluir todas as unidades; P-05 define fórmulas, população, períodos e semântica de origem antes do backend. |
+| <a id="frente-07"></a>7 | Importação e documentos | 8C1; 8C2B/U; 8C3D/B/U; 8C4D/B/U; 8C5B/U | Lotes, simulação/relatório, confirmação, conflitos autorizados, anexos, reprocessamento e revisão temporal. Incluir todas as unidades; decisões P-04/P-05/P-07/P-09 e autorização por fonte precedem os comandos afetados. |
+| <a id="frente-08"></a>8 | Identidade e administração | 8D1D/B/U; 8D2B/U | Usuários, conta ampliada, perfil e ativação/inativação com auditoria, concorrência e revalidação de sessão. P-08 define política antes dos comandos. |
+| <a id="frente-09"></a>9 | Fidelidade e integração integral | 8V1; 8V2 | Comparar todas as telas/estados com a referência e aceitar percursos completos com API/PostgreSQL sintéticos; concluir antes de M3. |
+| <a id="frente-10"></a>10 | Implantação e entrega | 9A–9D; 10A–10D | Ambiente, HTTPS/segredos, restore, governança, migração autorizada, homologação e release do produto completo. |
 
 Dentro de cada frente, executar decisões → contrato/dados → backend → interface
 → prova integrada → aceite. Frentes independentes podem avançar após suas

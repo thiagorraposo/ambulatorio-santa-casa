@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-01 — Referência numerada das frentes do workflow
+
+- Enumeradas de 1 a 10 as frentes existentes no [roadmap](PROXIMOS_PASSOS.md#cobertura-obrigatória-e-ordem-de-trabalho),
+  preservando ordem, pacotes e escopos. Numeração adotada como referência de
+  continuidade, com indicação conjunta de frente e unidade, sem pesos ou
+  percentuais fabricados. Próximo recorte recomendado: frente 3 · 7B-E4B.
+- Alteração exclusivamente documental; validar com docs-check, repository-check
+  e git diff --check. Nenhuma suíte da aplicação precisa ser repetida.
+
 ## 2026-11-01 — Interface de comorbidades e encerramento solicitado (7B-E3U)
 
 - Catálogo paginado, seleção explícita triestado, observações e relato familiar;
