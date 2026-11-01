@@ -140,6 +140,8 @@ recurso já publicado. Caminhos propostos não são criados nesta entrega.
 | H17 | `GET/POST /pacientes/:id/atendimentos/:atendimentoId/sorologias`: episódios individuais, métodos repetidos, datas próprias e null, auditoria 65 e recibo `sorologiaId`. Vínculo/perfil/contexto verificados; sem solicitação geral ou edição persistida; interface 7B-E1U em rotas próprias. [Contrato](../arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md). |
 | H18 | `GET/POST /pacientes/:id/atendimentos/:atendimentoId/condicao-chagas`: condição única, seis campos independentes, ausência JSON null, duplicidade 409, auditoria 66 e recibo `condicaoChagasId`; interface de seis campos 7B-E2U.1; sem edição ou complicações. [Contrato](../arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md). |
 | H19 | `GET/POST /pacientes/:id/atendimentos/:atendimentoId/complicacoes-chagas`: quatro campos existentes, episódios repetíveis, paginação própria, auditoria 67 e recibo `complicacaoChagasId`; interface 7B-E2U.2 sem condição/diagnóstico inferidos ou edição. [Contrato](../arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md). |
+| H20 | `GET /catalogos/comorbidades`: ativos, ID/nome/ativo sem codigo inventado, três perfis e paginação; não lê/escreve avaliação de paciente. [Contrato E3B](../arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md). |
+
 
 Fontes backend: [pacientes.controller](../../backend/src/pacientes/pacientes.controller.ts),
 [recursos.controller](../../backend/src/pacientes/recursos-clinicos.controller.ts),
@@ -658,9 +660,9 @@ V: seção demonstrativa com valores locais no protótipo. F: H18 preserva seis 
 
 ### COM — Comorbidades
 
-Localização: **P7 · SectionComorbidades; COMORBIDITY_OPTIONS**. Correspondente: **F0 · sem HTTP/frontend**.
+Localização: **P7 · SectionComorbidades; COMORBIDITY_OPTIONS**. Correspondente: **H20 catálogo; sem escrita clínica/frontend**.
 
-V/F/N: seleção local sem API ou equivalente; futura seção conserva desconhecido e contexto.
+V/F/N: catálogo ativo H20 disponível, sem seleção clínica publicada. Escrita depende das decisões de estado por paciente/consulta e histórico familiar no contrato E3B; não inferir desconhecido/negativa do default true.
 
 | Elemento / requisito | Objetivo | Observado no protótipo | Atual e diferença específica | Produto, decisão e destino | HTTP / lacuna | Entrega | Aceite e evidência |
 | --- | --- | --- | --- | --- | --- | --- | --- |

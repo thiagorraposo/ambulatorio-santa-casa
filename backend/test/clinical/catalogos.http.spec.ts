@@ -76,6 +76,41 @@ suite('Catálogos HTTP no banco descartável', () => {
     await http().get(`/v1/catalogos/${c.rota}?ativo=false`).auth(tokens.consulta, { type: 'bearer' }).expect(400);
   });
 
+  it('consulta comorbidades ativas nos três perfis sem fabricar código ou dados de paciente', async () => {
+    const inserted = await owner.query(`INSERT INTO ambulatorio.comorbidade
+      (nome_comorbidade,descricao,ativo) VALUES
+      ('000 A Comorbidade sintética','Descrição interna A',true),
+      ('000 B Comorbidade sintética','Descrição interna B',true),
+      ('000 C Comorbidade inativa sintética','Descrição interna C',false)
+      RETURNING comorbidade_id::text AS id,nome_comorbidade AS nome,ativo`);
+    const expected = (await owner.query(`SELECT comorbidade_id::text AS id,nome_comorbidade AS nome,ativo
+      FROM ambulatorio.comorbidade WHERE ativo ORDER BY nome_comorbidade,comorbidade_id LIMIT 100`)).rows;
+    const before = (await owner.query('SELECT count(*)::int AS n FROM ambulatorio.paciente_comorbidade')).rows[0].n;
+    for (const perfil of ['consulta','edicao','administracao']) {
+      const response = await http().get('/v1/catalogos/comorbidades?limit=100').auth(tokens[perfil], { type: 'bearer' }).expect(200);
+      expect(response.body).toEqual(expected);
+      expect(response.body).toEqual(expect.arrayContaining(inserted.rows.filter(row => row.ativo)));
+      expect(response.body.every((row: Record<string, unknown>) => Object.keys(row).sort().join(',') === 'ativo,id,nome')).toBe(true);
+      expect(response.body.some((row: { id: string }) => row.id === inserted.rows.find(row => !row.ativo).id)).toBe(false);
+    }
+    expect((await owner.query('SELECT count(*)::int AS n FROM ambulatorio.paciente_comorbidade')).rows[0].n).toBe(before);
+  });
+
+  it('pagina comorbidades e recusa entrada extra/credencial ausente sem oferecer escrita', async () => {
+    const expected = (await owner.query(`SELECT comorbidade_id::text AS id FROM ambulatorio.comorbidade
+      WHERE ativo ORDER BY nome_comorbidade,comorbidade_id LIMIT 2`)).rows;
+    const first = await http().get('/v1/catalogos/comorbidades?limit=1').auth(tokens.consulta, { type: 'bearer' }).expect(200);
+    const second = await http().get('/v1/catalogos/comorbidades?limit=1&offset=1').auth(tokens.consulta, { type: 'bearer' }).expect(200);
+    expect([first.body[0].id,second.body[0].id]).toEqual(expected.map(row => row.id));
+    await http().get('/v1/catalogos/comorbidades?offset=100000').auth(tokens.consulta, { type: 'bearer' }).expect(200).expect([]);
+    for (const query of ['limit=0','limit=101','offset=-1','ativo=false','pacienteId=1']) {
+      await http().get(`/v1/catalogos/comorbidades?${query}`).auth(tokens.consulta, { type: 'bearer' }).expect(400);
+    }
+    await http().get('/v1/catalogos/comorbidades').expect(401);
+    await http().get('/v1/catalogos/comorbidades').auth('invalido', { type: 'bearer' }).expect(401);
+    await http().post('/v1/catalogos/comorbidades').auth(tokens.administracao, { type: 'bearer' }).send({ nome: 'Não criar' }).expect(404);
+  });
+
   it('recusa ausência de credencial, token inválido/expirado e usuário desativado', async () => {
     for (const c of catalogos) {
       await http().get(`/v1/catalogos/${c.rota}`).expect(401);

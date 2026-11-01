@@ -633,6 +633,14 @@ paciente/comorbidade antes de definir o contexto de atendimento no HTTP.
 Ausência de registro não autoriza inferir negativa ou criar episódios legados.
 Aceites dos recortes E2 e decisões de sintomas específicos permanecem separados.
 
+Continuidade de 7B-E3B.1 em 31/10: [leitura do catálogo](validacoes/VALIDACAO_7B_E3B_1.md)
+implementada com paginação e DTO próprio sem código clínico fabricado. A
+[especificação](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) separa essa entrega da
+escrita: unicidade por paciente/comorbidade e booleano NOT NULL conflitam com os
+snapshots/triestado pedidos; histórico familiar também precisa de conteúdo
+confirmado. Perguntas apresentadas ao responsável, sem resposta presumida.
+Nenhuma migration ou edição de dados de paciente foi criada para contornar isso.
+
 ### Preparação da migração da planilha real
 
 A preparação pode ocorrer em paralelo à construção do frontend, sem exigir a

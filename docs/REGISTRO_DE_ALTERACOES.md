@@ -1,5 +1,16 @@
 # Registro de Alterações
 
+## 2026-10-31 — catálogo de comorbidades (7B-E3B.1)
+
+GET de metadados ativos, ID textual/nome/ativo, paginação e autenticação nos
+três perfis, sem código clínico inventado ou comandos de escrita. DTOs dos
+catálogos anteriores preservados; nenhuma migration ou vínculo de paciente
+alterado. [Validação](validacoes/VALIDACAO_7B_E3B_1.md): 181 unidades, 8 de fundação,
+93 HTTP e checks documentais aprovados. Frontend/SQL/importador inalterados,
+provas anteriores reutilizadas. [Contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md)
+registra decisões sobre estado por consulta/paciente e histórico familiar;
+perguntas apresentadas sem resposta presumida. Não conclui E3B/E3U ou M3.
+
 ## 2026-10-31 — interface de complicações (7B-E2U.2)
 
 CON-07–11 com lista/formulário/revisão, paginação, múltiplas ocorrências,

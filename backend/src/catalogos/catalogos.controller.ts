@@ -2,7 +2,7 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { Perfis } from '../auth/perfis.decorator';
 import { PageQuery } from '../clinico/dto/clinico.dto';
 import { CatalogosService } from './catalogos.service';
-import { CatalogoResponse } from './dto/catalogo.response';
+import { CatalogoResponse, ComorbidadeCatalogoResponse } from './dto/catalogo.response';
 
 @Perfis('consulta', 'edicao', 'administracao')
 @Controller('catalogos')
@@ -23,4 +23,9 @@ export class CatalogosController {
   tiposEncaminhamento(@Query() query: PageQuery): Promise<CatalogoResponse[]> {
     return this.catalogos.list('tipos-encaminhamento', query);
   }
+  @Get('comorbidades')
+  comorbidades(@Query() query: PageQuery): Promise<ComorbidadeCatalogoResponse[]> {
+    return this.catalogos.listComorbidades(query);
+  }
+
 }

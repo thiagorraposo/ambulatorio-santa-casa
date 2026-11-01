@@ -19,6 +19,16 @@ describe('Catálogos ativos', () => {
     expect(values).toEqual([5, 10]);
   });
 
+  it('lê comorbidades sem inventar codigo ou expor descrição interna', async () => {
+    const query = jest.fn().mockResolvedValue({ rows: [{ id: '9007199254740993', nome: 'Metadado sintético',
+      ativo: true, descricao: 'Não publicar', codigo: 'Não existe no catálogo físico' }] });
+    const service = new CatalogosService({ query } as never);
+    await expect(service.listComorbidades({ limit: 2, offset: 1 })).resolves.toEqual([
+      { id: '9007199254740993', nome: 'Metadado sintético', ativo: true },
+    ]);
+    expect(query.mock.calls[0][1]).toEqual([2, 1]);
+  });
+
   it('mantém resposta vazia sem fabricar opções', async () => {
     const service = new CatalogosService({ query: jest.fn().mockResolvedValue({ rows: [] }) } as never);
     await expect(service.list('exames', { limit: 20, offset: 0 })).resolves.toEqual([]);

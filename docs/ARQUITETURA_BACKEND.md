@@ -29,6 +29,10 @@ publica GET/POST de complicações repetíveis por atendimento sobre SQL06, sem
 exigir condição ou diagnóstico. Quatro campos independentes, captura 67,
 autorização e recibo usam a infraestrutura existente; sem edição/revisão temporal.
 
+A extensão [7B-E3B.1](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) acrescenta
+somente GET do catálogo ativo de comorbidades: id/nome/ativo, sem fabricar codigo
+ou alterar os três DTOs anteriores. Não publica escrita de paciente ou família.
+
 ## Escopo e fluxo
 
 O backend é um monólito modular NestJS/TypeScript com módulos `health`, `auth` e
