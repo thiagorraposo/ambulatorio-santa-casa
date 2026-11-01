@@ -1247,3 +1247,10 @@ Ativa prospectivamente tipo_evento/ocorreu/descricao/observacoes na captura de
 Guard só dos quatro campos novos mantém revisão anual D8. Não cria tabela,
 FK de atendimento, backfill nem altera este dump persistente.
 [Contrato e limites](arquitetura/CONTRATO_EVENTOS_7B_E4B.md).
+
+## Evolução SQL70 — somente descartáveis
+
+Captura prospectiva de tipo_dispositivo/possui_dispositivo/observacoes na tabela
+existente, com guard temporal específico. Sem backfill, alteração de ACLs,
+funções/gatilhos anteriores, cardinalidade ou FK de atendimento. Upgrade69→70
+confere legado e segurança. [Evidência](validacoes/VALIDACAO_7B_E4B_DISPOSITIVOS.md).

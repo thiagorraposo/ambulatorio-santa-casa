@@ -1,5 +1,13 @@
 # Registro de Alterações
 
+## 2026-11-01 — E4B marcapasso/CDI, estados iniciais
+
+- GET/POST sobre SQL10, estado consolidado com409 em existente, sem upsert ou
+  resincronizador presumido. SQL70 captura três campos sem alterar ACL/legado.
+- Build/184 unidades, cinco HTTP focados,41 SQL, upgrade69→70/importador/31 workflow
+  aprovados; composição HTTP/fundação registrada no [relatório](validacoes/VALIDACAO_7B_E4B_DISPOSITIVOS.md).
+- Interface E4U correspondente e aceite humano separados; nenhum push/merge/deploy.
+
 ## 2026-11-01 — Comparação AVC renderizada e interações restantes
 
 - Referência original executada e capturas comparáveis em1440/390/320;

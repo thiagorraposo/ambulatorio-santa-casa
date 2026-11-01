@@ -762,3 +762,8 @@ operacional no [plano das janelas](execucao/PLANO_M3_2026_11_03.md#10-checkpoint
 Continuidade E4U AVC: interface longitudinal implementada, com build/261 unidades
 e dois E2E reais focados aprovados. [Provas e limites](validacoes/VALIDACAO_7B_E4U_AVC.md);
 comparação visual renderizada e aceite humano permanecem pendentes.
+
+Continuidade da Janela1: após AVC, backend marcapasso/CDI de criação inicial
+e leitura implementado; [contrato](arquitetura/CONTRATO_EVENTOS_7B_E4B.md) e
+[provas](validacoes/VALIDACAO_7B_E4B_DISPOSITIVOS.md). Próximo recorte E4U
+correspondente após validação completa; sem substituir estado existente.

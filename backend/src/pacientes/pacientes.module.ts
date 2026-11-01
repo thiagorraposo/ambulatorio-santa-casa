@@ -1,3 +1,5 @@
+import { DispositivosController } from './dispositivos.controller';
+import { DispositivosService } from './dispositivos.service';
 import { AvcsController } from './avcs.controller';
 import { AvcsService } from './avcs.service';
 import { ComorbidadesController } from './comorbidades.controller';
@@ -15,6 +17,6 @@ import { RecursosClinicosService } from './recursos-clinicos.service';
 import { SorologiasController } from './sorologias.controller';
 import { SorologiasService } from './sorologias.service';
 
-@Module({ controllers: [AvcsController, ComorbidadesController, PacientesController, RecursosClinicosController, SorologiasController, CondicaoChagasController, ComplicacoesChagasController],
-  providers: [AvcsService, ComorbidadesService, PacientesService, PacientesRepository, RecursosClinicosService, SorologiasService, CondicaoChagasService, ComplicacoesChagasService] })
+@Module({ controllers: [DispositivosController, AvcsController, ComorbidadesController, PacientesController, RecursosClinicosController, SorologiasController, CondicaoChagasController, ComplicacoesChagasController],
+  providers: [DispositivosService, AvcsService, ComorbidadesService, PacientesService, PacientesRepository, RecursosClinicosService, SorologiasService, CondicaoChagasService, ComplicacoesChagasService] })
 export class PacientesModule {}

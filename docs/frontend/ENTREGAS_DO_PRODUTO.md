@@ -592,6 +592,11 @@ A decisão vigente vincula eventos ao paciente, sem atendimento_id: a consulta
 de origem é contexto de navegação, não snapshot persistido. RQ-EVT-01–02 têm
 backend; interface, demais EVT e aceite agregado separados. Sem renumerar o pacote.
 
+**Continuidade marcapasso/CDI em01/11:** backend de leitura/criação inicial
+com409 para existente, [contrato](../arquitetura/CONTRATO_EVENTOS_7B_E4B.md) e
+[provas](../validacoes/VALIDACAO_7B_E4B_DISPOSITIVOS.md). Estado consolidado por
+paciente/tipo; sem upsert, snapshot por consulta ou resincronizador presumido.
+
 **Escopo:** AVC prévio, marcapasso/CDI/resincronizador e óbito/causa/data/precisão; escolher contrato clínico antes de campo inferido.
 
 **Dependências/decisões:** P-01 para prioridade; campos/modelo físico e fontes clínicas examinados antes do DTO; D2–D5 quando pertinentes.

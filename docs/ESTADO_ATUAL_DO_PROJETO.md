@@ -109,3 +109,7 @@ O [registro de alterações](REGISTRO_DE_ALTERACOES.md) mantém a cronologia ofi
 Continuidade E4U AVC: interface longitudinal implementada, com build/261 unidades
 e dois E2E reais focados aprovados. [Provas e limites](validacoes/VALIDACAO_7B_E4U_AVC.md);
 comparação visual renderizada e aceite humano permanecem pendentes.
+
+E4B marcapasso/CDI: backend de leitura/criação inicial implementado sobre SQL10,
+com captura70 e409 em existente; [provas](validacoes/VALIDACAO_7B_E4B_DISPOSITIVOS.md).
+Interface e aceite humano próprios, sem presumir resincronizador ou correção.

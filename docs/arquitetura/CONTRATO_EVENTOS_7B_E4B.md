@@ -75,3 +75,29 @@ com persistência real, múltiplos registros/tipos, RBAC/vínculo, rollback,
 recuperação, autorização e regressões dos efeitos da captura.
 
 [Evidência do backend AVC](../validacoes/VALIDACAO_7B_E4B_AVC.md). Interface E4U implementada, com [provas funcionais](../validacoes/VALIDACAO_7B_E4U_AVC.md); comparação visual e aceite próprios pendentes.
+
+## Marcapasso/CDI — criação inicial e leitura
+
+Recorte E4B RQ-EVT-03–04 sobre o estado consolidado da SQL10. Recurso
+`GET|POST /v1/pacientes/:id/dispositivos`, JWT/perfil/vínculo e IDs textuais como
+AVC. GET PageQuery lista somente `marcapasso`/`cdi`, ID decrescente; no máximo
+um estado por par paciente/tipo. Tipo desconhecido legado permanece no banco,
+sem ser reinterpretado como um desses tipos nem publicado por associação.
+
+POST `{ tipoDispositivo: 'marcapasso'|'cdi', possuiDispositivo?: boolean|null,
+observacoes?: string|null }`; tipo obrigatório, indicador e texto independentes.
+Observações literais até10000 caracteres; omitidos ficam null, sem default true.
+Não há implante/data inferidos nem vínculo artificial de atendimento. Resposta
+201 `{ dispositivoId: string }`. GET publica ID/paciente/tipo/indicador/observações,
+sem valores brutos ou campos internos. Consulta só lê; edição autorizada/admin
+criam. Erros401/403/404/400 seguem contratos existentes.
+
+Registro existente, inclusive importado, recebe **409**, sem upsert, substituição
+ou correção. Duas criações concorrentes do mesmo tipo têm uma confirmação e
+um conflito sem auditoria parcial. Recibo UUID/hash `dispositivoId` é atômico;
+resposta perdida se verifica por GET da operação, nunca por repetir POST.
+
+SQL70 ativa captura prospectiva dos três campos em tabela existente; preserva
+ACLs/funções/gatilhos, sem backfill. Guard dos novos campos não habilita revisão
+temporal de estado consolidado. Isso não define correção/inventário de múltiplos
+implantes, resincronizador ou reinterpretação do legado.
