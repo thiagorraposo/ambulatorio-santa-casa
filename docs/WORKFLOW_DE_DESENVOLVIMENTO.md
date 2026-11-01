@@ -180,7 +180,7 @@ versão original, rollback, episódios repetíveis e falha de resposta após com
 Famílias exigem evidência de páginas independentes de snapshots e filhos;
 recuperação usa UUID/método/caminho/hash, registro, uma escrita e verificação ou
 encerramento sem reaplicar clínica. O
-[protocolo](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) enumera as 14 mutações;
+[protocolo](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) enumera as 17 mutações;
 infraestrutura comum não dispensa comprovação das classes utilizadas. Recibos,
 rascunhos e contexto precisam sobreviver às navegações/reconsultas previstas,
 preservando a limpeza de sessão e a distinção de `null` na criação de pendências.

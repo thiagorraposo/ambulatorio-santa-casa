@@ -160,3 +160,13 @@ CON-11 e interface de complicações são incremento 7B-E2U posterior, com lista
 formulário, revisão, erro, rascunho e recibo; não oferecer campo sem destino HTTP
 publicado. Edição/remoção, gravação em lote, nova FK, revisão temporal, sintomas
 específicos, M3/8V2 e liberação institucional permanecem fora deste recorte.
+
+## Interface CON-07–11 — 7B-E2U.2 (31/10/2026)
+
+A [interface E2U.2](../validacoes/VALIDACAO_7B_E2U_2.md) acrescenta coleção por
+atendimento, formulário, revisão, confirmação e recibos separados. Campos vazios
+de novo formulário enviam null explícito; false/nao_informado e texto literal
+são preservados. Tipo não é enum e descrição não altera presença. Não modifica
+este DTO ou as transações do núcleo, não implementa edição/remoção e não concede
+aceite clínico. A indicação histórica de interface posterior acima foi sucedida
+somente no recorte CON-07–11.

@@ -622,6 +622,17 @@ intenção têm [provas próprias](validacoes/VALIDACAO_7B_E2B_2.md). Isso suced
 etapa de preparação acima; não é aceite clínico. A próxima unidade desbloqueada
 é 7B-E2U.2 (CON-07–11), com lista/formulário/revisão e recuperação pela interface.
 
+Continuidade de 7B-E2U.2 em 31/10: lista, formulário e revisão das complicações
+CON-07–11 implementados sobre H19, com rascunho, episódios separados e recibos.
+[Validação](validacoes/VALIDACAO_7B_E2U_2.md) registra provas focadas e regressão
+final aprovada (256 componentes/cliente, 76 E2E); aceite humano, sintomas específicos, correções persistidas e 8V1/8V2
+continuam próprios. Isso sucede a indicação de próxima unidade acima.
+Após encerrar a validação de E2U.2, a próxima frente clínica independente é
+preparar 7B-E3B (comorbidades): conferir catálogo e a unicidade física por
+paciente/comorbidade antes de definir o contexto de atendimento no HTTP.
+Ausência de registro não autoriza inferir negativa ou criar episódios legados.
+Aceites dos recortes E2 e decisões de sintomas específicos permanecem separados.
+
 ### Preparação da migração da planilha real
 
 A preparação pode ocorrer em paralelo à construção do frontend, sem exigir a

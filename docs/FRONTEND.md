@@ -210,6 +210,8 @@ Minha conta mostra a identidade retornada pela API.
 | `/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias/nova` | Rascunho, revisão, confirmação independente e recibo recuperável. |
 | `/pacientes/:pacienteId/atendimentos/:atendimentoId/condicao-chagas` | Condição única da consulta selecionada, inclusive ausência explícita. |
 | `/pacientes/:pacienteId/atendimentos/:atendimentoId/condicao-chagas/nova` | Seis campos, revisão, confirmação única e recibo recuperável. |
+| `/pacientes/:pacienteId/atendimentos/:atendimentoId/complicacoes-chagas` | Complicações deste atendimento, lista com paginação própria. |
+| `/pacientes/:pacienteId/atendimentos/:atendimentoId/complicacoes-chagas/nova` | Quatro campos, revisão, confirmação de uma ocorrência e recibos recuperáveis. |
 | `/minha-conta` | Identidade e perfil obtidos da API. |
 
 Sessão, cache de consultas e estado local de filtros têm responsabilidades
@@ -298,6 +300,14 @@ sucesso fictício. UTF-8/BOM, nome neutro e URL de Blob revogada; não se afirma
 que o arquivo foi salvo no disco. [Evidência 8A1](validacoes/VALIDACAO_8A1.md).
 
 
+Complicações repetíveis usam [H19](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md):
+tipo livre, presença anulável, descrição independente e gravidade do domínio
+existente. Revisão de quatro campos antes da confirmação; nova ocorrência é
+explícita e preserva recibos. Ficha/histórico mantêm o contexto. Consulta só lê;
+sem edição/remoção, classificação automática ou gravação junto do núcleo.
+[Evidência E2U.2](validacoes/VALIDACAO_7B_E2U_2.md).
+
+
 Os tipos de `/registrar` são `bzn`, `retorno-bzn`, `projeto`, `notificacao`,
 `encaminhamento`, `contrarreferencia`, `retorno-anual`, `ocorrencia-anual` e
 `pendencia`. O atendimento do contexto pode ser levado em `atendimentoId`;
@@ -333,7 +343,7 @@ Saída, 401, expiração e troca de identidade/perfil limpam cache e rascunhos.
 
 `MutationForm` registra uma UUID com método, caminho e hash SHA-256 do corpo em
 `POST /v1/operacoes`; em seguida envia a escrita uma vez com `X-Operacao-Id`.
-O protocolo cobre as 14 mutações de cadastro, atendimento e acompanhamento
+O protocolo cobre as 17 mutações de cadastro, atendimento e acompanhamento
 enumeradas no [contrato de recuperação](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md).
 O recibo mínimo de IDs/versão é confirmado na mesma transação da clínica e seus
 filhos. Rede, resposta inválida, 5xx ou cancelamento após envio clínico mantêm a

@@ -13,6 +13,8 @@ import { DraftProvider } from '../shared/writing';
 import { AppNavigation } from './AppNavigation';
 import { ImportacaoDetalhePage, ImportacoesPage } from '../features/importacoes/ImportacoesPage';
 import ImportacaoSimulacaoPage from '../features/importacoes/ImportacaoSimulacaoPage';
+import ComplicacoesPage from '../features/complicacoes/ComplicacoesPage';
+import ComplicacaoCreatePage from '../features/complicacoes/ComplicacaoCreatePage';
 import SorologiasPage from '../features/sorologias/SorologiasPage';
 import CondicaoPage from '../features/condicao/CondicaoPage';
 import CondicaoCreatePage from '../features/condicao/CondicaoCreatePage';
@@ -184,6 +186,8 @@ export default function App() {
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias/nova" element={<SorologiaCreatePage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/condicao-chagas" element={<CondicaoPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/condicao-chagas/nova" element={<CondicaoCreatePage />} />
+      <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/complicacoes-chagas" element={<ComplicacoesPage />} />
+      <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/complicacoes-chagas/nova" element={<ComplicacaoCreatePage />} />
       <Route path="/importacoes" element={<ImportacoesPage />} />
       <Route path="/importacoes/simular" element={<ImportacaoSimulacaoPage />} />
       <Route path="/importacoes/lotes/:loteId" element={<ImportacaoDetalhePage />} />

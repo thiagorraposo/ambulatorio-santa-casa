@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-10-31 — interface de complicações (7B-E2U.2)
+
+CON-07–11 com lista/formulário/revisão, paginação, múltiplas ocorrências,
+rascunho e recibos. Quatro campos independentes sobre H19, sem classificação
+ou presença inferida. Quatro testes de componentes e três E2E focados passaram,
+incluindo resposta perdida após COMMIT, confirmação única e leitura recusada.
+[Validação](validacoes/VALIDACAO_7B_E2U_2.md): build, 256 testes de componentes/cliente
+e 76 E2E finais aprovados, sem skips/retries; aceite humano e fidelidade integral continuam pendentes.
+
 ## 2026-10-31 — API de complicações repetíveis (7B-E2B.2)
 
 Continuidade técnica do contrato sobre SQL06: quatro campos independentes,

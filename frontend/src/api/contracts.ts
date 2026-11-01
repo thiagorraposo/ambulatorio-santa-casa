@@ -281,3 +281,13 @@ export interface CondicaoChagasResponse {
   observacoes: string | null;
 }
 export interface CondicaoChagasCriadaResponse { condicaoChagasId: string }
+
+export interface ComplicacaoResponse {
+  complicacaoChagasId: string;
+  atendimentoId: string;
+  tipoComplicacao: string | null;
+  possuiComplicacao: boolean | null;
+  descricao: string | null;
+  gravidade: string | null;
+}
+export interface ComplicacaoCriadaResponse { complicacaoChagasId: string }

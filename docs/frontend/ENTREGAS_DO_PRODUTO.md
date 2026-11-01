@@ -476,7 +476,7 @@ pendentes; esta implementação não concede aceite do pacote agregado.
 
 #### 7B-E2B — Publicar contrato de condição e complicações
 
-**Estado e cobertura:** Planejado; não aceito. RQ-CON-01–10 (telas/elementos na matriz).
+**Estado e cobertura:** Recortes E2B.1/E2B.2 implementados e validados tecnicamente; aceite agregado e sintomas específicos sem destino aprovado permanecem separados. RQ-CON-01–10 (telas/elementos na matriz).
 
 **Continuidade de 28/10 — 7B-E2B.1:** seis campos de condição por atendimento
 (RQ-CON-01–06) têm [contrato](../arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md),
@@ -506,15 +506,18 @@ CON-11/interface, sintomas específicos e correção persistida continuam separa
 
 #### 7B-E2U — Registrar e consultar condição e complicações
 
-**Estado e cobertura:** Planejado; não aceito. RQ-CON-01–11 (telas/elementos na matriz).
+**Estado e cobertura:** Recortes E2U.1/E2U.2 implementados; aceite agregado e sintomas específicos sem destino aprovado permanecem separados. RQ-CON-01–11 (telas/elementos na matriz).
 
 **Continuidade de 31/10 — 7B-E2U.1:** interface dos seis campos CON-01–06
 implementada sobre o contrato 7B-E2B.1: leitura por atendimento, formulário,
 revisão, confirmação única, rascunho e recibo recuperável. Ficha e histórico
 preservam a seleção ao abrir o recurso. [Evidência e limites](../validacoes/VALIDACAO_7B_E2U_1.md).
-CON-07–10 têm API no recorte 7B-E2B.2; a interface CON-07–11 permanece pendente;
-sintomas específicos, edição/remoção e aceite do pacote agregado permanecem
-pendentes. Não se atribui aceite humano à validação técnica.
+
+**Continuidade de 31/10 — 7B-E2U.2:** lista/formulário/revisão de complicações
+CON-07–11, nova ocorrência explícita, rascunho e recibos recuperáveis sobre H19.
+[Provas e limites](../validacoes/VALIDACAO_7B_E2U_2.md). Tipos repetidos permanecem
+separados; ausência/presença negativa/desconhecida não são consolidadas.
+Sintomas específicos, edição/remoção e aceite do pacote continuam pendentes.
 
 **Escopo:** Forma clínica/cardíaca/digestiva, classificação e sintomas/regurgitação/constipação/disfagia/dor/dispneia; sem classificação automática. Uma seção/formulário por módulo; revisão lista todos os campos.
 

@@ -181,6 +181,10 @@ sem retomar ou repetir o comando.
 
 ## Inventário exaustivo da entrega
 
+O inventário atual contém 17 mutações, incluindo sorologia, condição e
+complicações. As provas datadas da entrega original abaixo continuam cobrindo
+suas 14 mutações; as extensões têm evidências próprias nos relatórios 7B-E.
+
 Todos os caminhos abaixo têm prefixo `/v1`; `:id` é o paciente.
 
 | Unidade | Método/caminho | Recibo mínimo |
