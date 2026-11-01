@@ -758,3 +758,7 @@ Próxima entrega: **7B-E4U, recorte AVC**, sobre a API validada, com comparaçã
 visual pertinente. Dispositivos/óbito e resincronizador têm recortes/decisões
 próprios; E4B/E4U agregados e aceite humano permanecem pendentes. Checkpoint
 operacional no [plano das janelas](execucao/PLANO_M3_2026_11_03.md#10-checkpoint-único-e-transferência-de-contexto).
+
+Continuidade E4U AVC: interface longitudinal implementada, com build/261 unidades
+e dois E2E reais focados aprovados. [Provas e limites](validacoes/VALIDACAO_7B_E4U_AVC.md);
+comparação visual renderizada e aceite humano permanecem pendentes.

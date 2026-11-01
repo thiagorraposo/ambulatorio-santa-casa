@@ -1,0 +1,46 @@
+import { expect, test } from '@playwright/test';
+import { apiJson, seedPatient, seedAttendance, signIn, assertAccessible, assertFitsViewport, loseResponseAfterCommit } from './stage7-helpers';
+test('E4U AVC: revisão, negativa/ano, recibo perdido e leitura longitudinal real', async ({ page }) => {
+  const p = await seedPatient('AVC interface sintética'); const a = await seedAttendance(p.path);
+  const path = `${p.path}/avcs`;
+  await signIn(page, 'edicao', a.path);
+  await page.getByRole('link', { name: 'AVC do paciente (longitudinal)', exact: true }).click();
+  await expect(page.getByRole('link', { name: /Voltar à origem/ })).toHaveAttribute('href', a.path);
+  await page.getByRole('link', { name: 'Registrar AVC', exact: true }).click();
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.getByLabel('AVC informado', { exact: true }).selectOption('nao');
+  await page.getByLabel('Ano do último AVC informado', { exact: true }).fill('2020');
+  await page.getByLabel('Descrição do registro', { exact: true }).fill('  Texto literal sintético  ');
+  await page.getByLabel('Observações do registro', { exact: true }).fill('Sem inferência');
+  await assertFitsViewport(page); await assertAccessible(page);
+  await page.getByRole('button', { name: 'Revisar AVC', exact: true }).click();
+  const summary = page.getByRole('region', { name: /Resumo/ });
+  await expect(summary.locator('dt')).toHaveCount(4);
+  await expect(summary.getByText('Não', { exact: true })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 }); await assertFitsViewport(page); await assertAccessible(page);
+  const lost = await loseResponseAfterCommit(page, 'POST', path);
+  await page.getByRole('button', { name: 'Confirmar AVC', exact: true }).click();
+  const response = await lost.committed; expect(response.status()).toBe(201);
+  const id = (await response.json()).eventoId;
+  await page.getByRole('button', { name: 'Verificar resultado do envio', exact: true }).click();
+  await expect(page.getByRole('heading', { name: `Registro confirmado ${id}`, exact: true })).toBeVisible();
+  expect(lost.writes()).toBe(1);
+  expect(await apiJson('GET', path)).toEqual([{ eventoId: id, pacienteId: p.pacienteId, tipo: 'avc', ocorreu: false, anoEvento: 2020, descricao: '  Texto literal sintético  ', observacoes: 'Sem inferência' }]);
+  await page.getByRole('link', { name: 'Conferir episódios do paciente', exact: true }).click();
+  await expect(page.getByText('Sem inferência', { exact: true })).toBeVisible();
+});
+
+test('E4U AVC: consulta pagina 20/1, erro oculta dados e escrita permanece recusada', async ({ page }) => {
+  const p = await seedPatient('AVC paginação sintética'); const path = `${p.path}/avcs`;
+  for (let i = 0; i < 21; i++) await apiJson('POST', path, { observacoes: `Afirmação ${i}` });
+  await signIn(page, 'consulta', path);
+  await expect(page.locator('article.resource-item')).toHaveCount(20);
+  await expect(page.getByRole('link', { name: 'Registrar AVC', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Próxima', exact: true }).click();
+  await expect(page.locator('article.resource-item')).toHaveCount(1);
+  await expect(page.getByText('Afirmação 0', { exact: true })).toBeVisible();
+  await page.route(`**/v1${path}?*`, route => route.fulfill({ status: 503, contentType: 'application/json', body: '{"message":"Falha sintética"}' }));
+  await page.getByRole('button', { name: 'Anterior', exact: true }).click();
+  await expect(page.getByRole('alert')).toBeVisible();
+  await expect(page.locator('article.resource-item')).toHaveCount(0);
+});

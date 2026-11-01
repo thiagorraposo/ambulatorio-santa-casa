@@ -105,3 +105,7 @@ Resultados e limitações por rodada estão no [índice de validações](validac
 A [fotografia anterior à reorganização](historico/ESTADO_2026_10_23.md) preserva
 integralmente as continuidades e contagens antes misturadas a esta síntese.
 O [registro de alterações](REGISTRO_DE_ALTERACOES.md) mantém a cronologia oficial.
+
+Continuidade E4U AVC: interface longitudinal implementada, com build/261 unidades
+e dois E2E reais focados aprovados. [Provas e limites](validacoes/VALIDACAO_7B_E4U_AVC.md);
+comparação visual renderizada e aceite humano permanecem pendentes.

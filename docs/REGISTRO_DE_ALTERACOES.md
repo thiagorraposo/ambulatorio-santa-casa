@@ -1,5 +1,12 @@
 # Registro de Alterações
 
+## 2026-11-01 — Interface longitudinal de AVC (E4U parcial)
+
+- Lista, formulário/revisão, recibos e retorno seguro à origem; sem snapshot de consulta.
+- Build/261 unidades e dois E2E reais focados aprovados; comparação renderizada,
+  revisão integral de interação/zoom e aceite humano pendentes conforme
+  [relatório](validacoes/VALIDACAO_7B_E4U_AVC.md). Backend/SQL inalterados reutilizados.
+
 ## 2026-11-01 — Janela 1: backend AVC longitudinal (recorte E4B)
 
 - API GET/POST por paciente sobre SQL10/contrato vigente, sem FK de atendimento,

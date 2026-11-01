@@ -304,3 +304,6 @@ export interface AvaliacaoComorbidadesResponse {
     possuiComorbidade: boolean | null; observacoes: string | null }>;
   historicoFamiliar: { possuiDoenca: boolean | null; descricao: string | null } | null;
 }
+
+export interface AvcResponse { eventoId: string; pacienteId: string; tipo: 'avc'; ocorreu: boolean | null; anoEvento: number | null; descricao: string | null; observacoes: string | null }
+export interface AvcCriadoResponse { eventoId: string }

@@ -74,4 +74,4 @@ Aceite humano permanece separado. Recorte de AVC só será tecnicamente validado
 com persistência real, múltiplos registros/tipos, RBAC/vínculo, rollback,
 recuperação, autorização e regressões dos efeitos da captura.
 
-[Evidência do backend AVC](../validacoes/VALIDACAO_7B_E4B_AVC.md). Interface E4U ainda não implementada.
+[Evidência do backend AVC](../validacoes/VALIDACAO_7B_E4B_AVC.md). Interface E4U implementada, com [provas funcionais](../validacoes/VALIDACAO_7B_E4U_AVC.md); comparação visual e aceite próprios pendentes.
