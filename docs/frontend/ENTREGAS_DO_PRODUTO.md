@@ -608,6 +608,11 @@ backend; interface, demais EVT e aceite agregado separados. Sem renumerar o paco
 
 **Estado e cobertura:** Planejado; não aceito. RQ-EVT-01–08 (telas/elementos na matriz).
 
+**Continuidade da Janela1:** interface AVC longitudinal implementada, com
+[provas funcionais](../validacoes/VALIDACAO_7B_E4U_AVC.md). Comparação visual
+renderizada, revisão integral de interação/zoom e aceite permanecem pendentes.
+Não encerra todos os EVT nem altera o vínculo clínico por paciente.
+
 **Escopo:** AVC prévio, marcapasso/CDI/resincronizador e óbito/causa/data/precisão; escolher contrato clínico antes de campo inferido. Uma seção/formulário por módulo; revisão lista todos os campos.
 
 **Dependências/decisões:** 7B-E4B aceito; infraestrutura 7D-R1/R4/R6; P-01.
