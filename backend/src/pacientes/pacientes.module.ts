@@ -1,3 +1,5 @@
+import { MedicamentosController } from './medicamentos.controller';
+import { MedicamentosService } from './medicamentos.service';
 import { ObitoController } from './obito.controller';
 import { ObitoService } from './obito.service';
 import { DispositivosController } from './dispositivos.controller';
@@ -19,6 +21,6 @@ import { RecursosClinicosService } from './recursos-clinicos.service';
 import { SorologiasController } from './sorologias.controller';
 import { SorologiasService } from './sorologias.service';
 
-@Module({ controllers: [ObitoController, DispositivosController, AvcsController, ComorbidadesController, PacientesController, RecursosClinicosController, SorologiasController, CondicaoChagasController, ComplicacoesChagasController],
-  providers: [ObitoService, DispositivosService, AvcsService, ComorbidadesService, PacientesService, PacientesRepository, RecursosClinicosService, SorologiasService, CondicaoChagasService, ComplicacoesChagasService] })
+@Module({ controllers: [MedicamentosController, ObitoController, DispositivosController, AvcsController, ComorbidadesController, PacientesController, RecursosClinicosController, SorologiasController, CondicaoChagasController, ComplicacoesChagasController],
+  providers: [MedicamentosService, ObitoService, DispositivosService, AvcsService, ComorbidadesService, PacientesService, PacientesRepository, RecursosClinicosService, SorologiasService, CondicaoChagasService, ComplicacoesChagasService] })
 export class PacientesModule {}

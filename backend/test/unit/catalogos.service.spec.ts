@@ -33,4 +33,16 @@ describe('Catálogos ativos', () => {
     const service = new CatalogosService({ query: jest.fn().mockResolvedValue({ rows: [] }) } as never);
     await expect(service.list('exames', { limit: 20, offset: 0 })).resolves.toEqual([]);
   });
+  it('preserva princípio/classe nullable e limita resposta de medicamentos aos metadados públicos', async () => {
+    const row = { id: '9007199254740993', codigo: 'sintetico', nome: 'Catálogo sintético', ativo: true,
+      principioAtivo: null, classeMedicamento: 'Texto literal', criado_em: 'interno' };
+    const query = jest.fn().mockResolvedValue({ rows: [row] });
+    const service = new CatalogosService({ query } as never);
+    await expect(service.listMedicamentos({ limit: 1, offset: 2 })).resolves.toEqual([
+      { id: row.id, codigo: row.codigo, nome: row.nome, ativo: true,
+        principioAtivo: null, classeMedicamento: 'Texto literal' },
+    ]);
+    expect(query.mock.calls[0][1]).toEqual([1, 2]);
+  });
+
 });

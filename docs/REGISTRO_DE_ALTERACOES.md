@@ -1,5 +1,13 @@
 # Registro de Alterações
 
+## 2026-11-01 — E5B consulta de medicamentos
+
+- Catálogo ativo e medicamentos por atendimento com autorização/paginação e
+  campos literais; nenhuma escrita, regra de dose ou migration adicionada.
+- Build/186 unidades e15 HTTP reais aprovados. [Provas](validacoes/VALIDACAO_7B_E5B_LEITURA.md).
+- Escrita depende de decisões explícitas; continuar com a interface de leitura.
+
+
 ## 2026-11-01 — E4U óbito inicial
 
 - Interface longitudinal de leitura/criação, quatro campos independentes,

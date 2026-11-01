@@ -87,3 +87,5 @@ Veja [as regras de manutenção](AGENTS.md) e o
 [diagnóstico desta reorganização](historico/REORGANIZACAO_DOCUMENTAL_2026_10_23.md).
 
 - [Interface de óbito: provas técnicas e limites](validacoes/VALIDACAO_7B_E4U_OBITO.md).
+
+- [Medicamentos E5B: contrato de consulta e decisões de escrita](arquitetura/CONTRATO_MEDICAMENTOS_7B_E5B.md).

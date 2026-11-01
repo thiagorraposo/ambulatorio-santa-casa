@@ -127,3 +127,9 @@ com build/263 unidades/dois E2E reais, recuperação e comparação renderizada.
 [Provas e limites](validacoes/VALIDACAO_7B_E4U_OBITO.md). Precisão parcial,
 ressincronizador, demais EVT e aceites continuam separados. Próxima: 7B-E5B,
 conferir contrato e modelo de medicamentos antes de publicar escrita.
+
+7B-E5B: recorte de catálogo/consulta de medicamentos por atendimento VALIDADO
+TECNICAMENTE (186 unidades e15 HTTP reais). [Contrato](arquitetura/CONTRATO_MEDICAMENTOS_7B_E5B.md)
+e [provas](validacoes/VALIDACAO_7B_E5B_LEITURA.md). Escrita integral depende de
+identificação/apresentação/unidade/cronologia definidas; leitura E5U pode avançar
+independentemente, sem prescrição ou alterações de legado.

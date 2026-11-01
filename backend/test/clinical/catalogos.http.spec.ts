@@ -111,6 +111,47 @@ suite('Catálogos HTTP no banco descartável', () => {
     await http().post('/v1/catalogos/comorbidades').auth(tokens.administracao, { type: 'bearer' }).send({ nome: 'Não criar' }).expect(404);
   });
 
+
+  it('consulta medicamentos ativos, IDs grandes e metadados nullable sem criar uso clínico', async () => {
+    await owner.query(`INSERT INTO ambulatorio.medicamento
+      (medicamento_id,codigo_medicamento,nome_medicamento,principio_ativo,classe_medicamento,ativo)
+      VALUES(9007199254740993,'med_sint_a','000 Medicamento sintético',null,'Classe literal',true),
+      (9007199254740994,'med_sint_b','000 Medicamento sintético','Princípio literal',null,true),
+      (9007199254740995,'med_sint_inativo','000 Inativo sintético',null,null,false)`);
+    const expected = (await owner.query(`SELECT medicamento_id::text AS id,codigo_medicamento AS codigo,
+      nome_medicamento AS nome,ativo,principio_ativo AS "principioAtivo",classe_medicamento AS "classeMedicamento"
+      FROM ambulatorio.medicamento WHERE ativo ORDER BY nome_medicamento,medicamento_id LIMIT 100`)).rows;
+    const before = (await owner.query('SELECT count(*)::text AS n FROM ambulatorio.atendimento_medicamento')).rows[0].n;
+    for (const perfil of ['consulta','edicao','administracao']) {
+      const response = await http().get('/v1/catalogos/medicamentos?limit=100').auth(tokens[perfil], { type: 'bearer' }).expect(200);
+      expect(response.body).toEqual(expected);
+      expect(response.body.some((r: { id: string }) => r.id === '9007199254740995')).toBe(false);
+    }
+    expect(expected).toEqual(expect.arrayContaining([
+      expect.objectContaining({id:'9007199254740993',principioAtivo:null,classeMedicamento:'Classe literal'}),
+      expect.objectContaining({id:'9007199254740994',principioAtivo:'Princípio literal',classeMedicamento:null}),
+    ]));
+    expect((await owner.query('SELECT count(*)::text AS n FROM ambulatorio.atendimento_medicamento')).rows[0].n).toBe(before);
+    const a = await http().get('/v1/catalogos/medicamentos?limit=1').auth(tokens.consulta,{type:'bearer'}).expect(200);
+    const b = await http().get('/v1/catalogos/medicamentos?limit=1&offset=1').auth(tokens.consulta,{type:'bearer'}).expect(200);
+    expect([a.body[0].id,b.body[0].id]).toEqual(expected.slice(0,2).map(row=>row.id));
+    await http().get('/v1/catalogos/medicamentos?offset=100000').auth(tokens.consulta,{type:'bearer'}).expect(200).expect([]);
+  });
+
+  it('recusa paginação inválida, credenciais e escrita no catálogo de medicamentos', async () => {
+    for (const query of ['limit=0','limit=101','offset=-1','pacienteId=1','ativo=false']) {
+      await http().get(`/v1/catalogos/medicamentos?${query}`).auth(tokens.consulta,{type:'bearer'}).expect(400);
+    }
+    await http().get('/v1/catalogos/medicamentos').expect(401);
+    await http().get('/v1/catalogos/medicamentos').auth('invalido',{type:'bearer'}).expect(401);
+    const expired = await app.get(JwtService).signAsync({sub:ids.consulta,typ:'access'},{expiresIn:-1});
+    await http().get('/v1/catalogos/medicamentos').auth(expired,{type:'bearer'}).expect(401);
+    await owner.query('UPDATE ambulatorio.usuario_aplicacao SET ativo=false WHERE usuario_id=$1',[ids.edicao]);
+    await http().get('/v1/catalogos/medicamentos').auth(tokens.edicao,{type:'bearer'}).expect(401);
+    await owner.query('UPDATE ambulatorio.usuario_aplicacao SET ativo=true WHERE usuario_id=$1',[ids.edicao]);
+    await http().post('/v1/catalogos/medicamentos').auth(tokens.administracao,{type:'bearer'}).send({nome:'Não criar'}).expect(404);
+  });
+
   it('recusa ausência de credencial, token inválido/expirado e usuário desativado', async () => {
     for (const c of catalogos) {
       await http().get(`/v1/catalogos/${c.rota}`).expect(401);
