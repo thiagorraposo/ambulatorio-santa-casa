@@ -37,6 +37,8 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | M3 — 7B-E3B.2 | Avaliação própria por atendimento, itens triestado e histórico familiar livre; SQL68 sem backfill, autorização, captura e recibo atômico. | [Contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md)/[validação](validacoes/VALIDACAO_7B_E3B_2.md); tecnicamente validada, interface/aceite separados. |
 | M3 — 7B-E3U | Interface de avaliação por consulta: catálogo paginado, triestado, relato familiar, revisão, rascunho e recuperação por recibo. | [Validação](validacoes/VALIDACAO_7B_E3U.md); build, 259 unidades na composição 256+3 e quatro E2E novos por rodadas focadas. Baseline anterior de 76 E2E preservada, sem repetir a suíte completa; aceite humano pendente. |
 
+| M3 — 7B-E4B, recorte AVC | GET/POST longitudinal por paciente, quatro campos, captura SQL69, paginação e recibo; sem vínculo artificial com atendimento. | [Contrato](arquitetura/CONTRATO_EVENTOS_7B_E4B.md)/[prova](validacoes/VALIDACAO_7B_E4B_AVC.md); 183 unidades, 8 fundação, 110 HTTP, SQL/importador/upgrade validados. Interface E4U e demais EVT pendentes. |
+
 M2/VU1 está **aprovado por aceite humano em 31/10/2026**, conforme confirmação
 expressa do responsável de que passou em todos os testes de aceite humano.
 O [parecer oficial](validacoes/VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026)

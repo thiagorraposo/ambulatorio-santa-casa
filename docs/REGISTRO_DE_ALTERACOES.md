@@ -1,5 +1,17 @@
 # Registro de Alterações
 
+## 2026-11-01 — Janela 1: backend AVC longitudinal (recorte E4B)
+
+- API GET/POST por paciente sobre SQL10/contrato vigente, sem FK de atendimento,
+  inferência de data/diagnóstico ou consolidação após negativa; recibo por intenção.
+- SQL69 captura quatro campos prospectivamente, preservando ano_evento/D8,
+  ACLs/funções/gatilhos; guard somente dos campos novos. Sem backfill/persistente.
+- Build, 183 unidades, 8 fundação, 110 HTTP e composição de 40 scripts SQL,
+  upgrade68→69, importador e 31 workflow aprovados. [Falhas e correções](validacoes/VALIDACAO_7B_E4B_AVC.md).
+- Próxima entrega E4U AVC; demais EVT/aceite separados. Subagente de SQL atingiu
+  limite de uso durante a correção; principal assumiu os arquivos e validou.
+  Sem push/merge/deploy; checkpoint registra retomada da mesma Janela 1.
+
 ## 2026-11-01 — Preparação do ciclo intensivo M3 para 03/11
 
 - Criado [plano operacional](execucao/PLANO_M3_2026_11_03.md) das seis janelas,

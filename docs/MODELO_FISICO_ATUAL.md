@@ -1239,3 +1239,11 @@ de revisão temporal; aplicação somente SELECT/INSERT e sequências USAGE.
 Não altera SQL06/importador, não copia legado nem atualiza este dump persistente.
 [Contrato/ADR-026](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) e
 [evidência](validacoes/VALIDACAO_7B_E3B_2.md).
+
+## Evolução SQL69 — somente descartáveis
+
+Ativa prospectivamente tipo_evento/ocorreu/descricao/observacoes na captura de
+`evento_clinico`, preservando ano_evento, ACLs, funções e gatilhos anteriores.
+Guard só dos quatro campos novos mantém revisão anual D8. Não cria tabela,
+FK de atendimento, backfill nem altera este dump persistente.
+[Contrato e limites](arquitetura/CONTRATO_EVENTOS_7B_E4B.md).

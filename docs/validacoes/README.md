@@ -60,3 +60,5 @@ sistema; sua menção preserva rastreabilidade, não garante disponibilidade atu
 - [Avaliação de comorbidades por atendimento — E3B.2](VALIDACAO_7B_E3B_2.md).
 
 - [Interface de comorbidades — E3U](VALIDACAO_7B_E3U.md).
+
+- [Backend AVC longitudinal — recorte E4B](VALIDACAO_7B_E4B_AVC.md).

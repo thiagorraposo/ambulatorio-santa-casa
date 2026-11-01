@@ -747,3 +747,14 @@ do repositório. Validar com `make docs-check`, `make manifest-check` e
 incluir testes SQL com escrita transacional. No incremento BZN de 2026-09-15,
 `make project-check` foi executado antes e depois da implementação, além de
 `make importer-test` e `make manifest-check`.
+
+## Continuidade da Janela 1 — 01/11/2026
+
+Frente 3 · 7B-E4B: [recorte AVC](arquitetura/CONTRATO_EVENTOS_7B_E4B.md)
+implementado e [validado tecnicamente](validacoes/VALIDACAO_7B_E4B_AVC.md).
+A especificação vigente define fatos longitudinais por paciente, sem FK de
+atendimento; retorno à consulta na UI não será apresentado como snapshot clínico.
+Próxima entrega: **7B-E4U, recorte AVC**, sobre a API validada, com comparação
+visual pertinente. Dispositivos/óbito e resincronizador têm recortes/decisões
+próprios; E4B/E4U agregados e aceite humano permanecem pendentes. Checkpoint
+operacional no [plano das janelas](execucao/PLANO_M3_2026_11_03.md#10-checkpoint-único-e-transferência-de-contexto).

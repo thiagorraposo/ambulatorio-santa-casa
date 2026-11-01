@@ -586,6 +586,12 @@ de aceite humano.
 
 **Estado e cobertura:** Planejado; não aceito. RQ-EVT-01–08 (telas/elementos na matriz).
 
+**Continuidade de 01/11 — recorte AVC:** [API longitudinal](../arquitetura/CONTRATO_EVENTOS_7B_E4B.md)
+implementada e [validada tecnicamente](../validacoes/VALIDACAO_7B_E4B_AVC.md).
+A decisão vigente vincula eventos ao paciente, sem atendimento_id: a consulta
+de origem é contexto de navegação, não snapshot persistido. RQ-EVT-01–02 têm
+backend; interface, demais EVT e aceite agregado separados. Sem renumerar o pacote.
+
 **Escopo:** AVC prévio, marcapasso/CDI/resincronizador e óbito/causa/data/precisão; escolher contrato clínico antes de campo inferido.
 
 **Dependências/decisões:** P-01 para prioridade; campos/modelo físico e fontes clínicas examinados antes do DTO; D2–D5 quando pertinentes.
