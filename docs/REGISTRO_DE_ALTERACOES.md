@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-01 — E6B parâmetros do exame canônico
+
+- Contrato/destino próprio SQL73 para seis campos humanos, FK canônica, captura
+  e guard; GET/POST com vínculo/recibo, sem interpretação automática ou backfill.
+- Build188, HTTP137, SQL44, upgrade72→73 com legado coexistente e31 workflow
+  aprovados. [Evidência](validacoes/VALIDACAO_7B_E6B_PARAMETROS.md).
+- Continuar E6U do recorte; datas/status/correções do pai não incluídos.
+
+
 ## 2026-11-01 — 7C-E1U E1.2 interface de reação isolada
 
 - Cinco campos literais, revisão, rascunho, lista paginada e recuperação sem

@@ -804,3 +804,9 @@ Essa lacuna técnica não foi declarada decisão clínica aprovada ou bloqueio h
 campos/revisão/rascunho/recuperação e múltiplas intenções; [provas/limites](validacoes/VALIDACAO_7C_E1U_REACOES.md).
 E1.1/aceite continuam pendentes. Próxima: contrato7B-E6B para parâmetros no exame
 canônico, sem reutilizar a FK legada SQL07 ou inferir resultados/datas/diagnóstico.
+
+7B-E6B parâmetros do exame canônico VALIDADO TECNICAMENTE: RQ-EXA-09–13/16,
+SQL73,188 unidades/137 HTTP/44 SQL/upgrade sem backfill. [Contrato e limites](arquitetura/CONTRATO_RESULTADOS_7B_E6B.md).
+Vínculo canônico definido tecnicamente sem reinterpretar legado SQL07; valores
+textuais humanos, nenhum cálculo. Próxima: E6U desse recorte; datas/status do pai,
+correções e aceite integral continuam pendentes.

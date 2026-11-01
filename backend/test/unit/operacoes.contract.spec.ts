@@ -21,6 +21,7 @@ describe('Correlação de operações: contrato', () => {
     ['POST','/v1/pacientes/1/dispositivos','dispositivoId'],
     ['POST','/v1/pacientes/1/avcs','eventoId'],
     ['POST','/v1/pacientes/1/atendimentos/2/comorbidades','avaliacaoComorbidadesId'],
+    ['POST','/v1/pacientes/1/exames/2/resultados','resultadoId'],
     ['POST','/v1/pacientes/1/tratamento-bzn/reacoes','reacaoId'],
     ['POST','/v1/pacientes/1/tratamento-bzn','tratamentoId'], ['POST','/v1/pacientes/1/retornos-bzn','retornoId'],
     ['PUT','/v1/pacientes/1/projetos','projetoId'], ['PUT','/v1/pacientes/1/notificacao','notificacaoId'],

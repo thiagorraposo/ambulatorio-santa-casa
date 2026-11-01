@@ -95,3 +95,5 @@ Veja [as regras de manutenção](AGENTS.md) e o
 - [Reação isolada BZN E1.2: contrato e evidências](arquitetura/CONTRATO_REACOES_BZN_7C_E1B.md).
 
 - [Reações BZN E1.2: interface, testes e limites visuais](validacoes/VALIDACAO_7C_E1U_REACOES.md).
+
+- [Resultados E6B: contrato canônico e evidências dos parâmetros](arquitetura/CONTRATO_RESULTADOS_7B_E6B.md).

@@ -38,7 +38,7 @@ COMPACT ?= 0
 COMPACT_GOALS := $(if $(filter 1,$(COMPACT)),$(if $(_COMPACT_RUNNING),,$(MAKECMDGOALS)))
 ifneq ($(strip $(COMPACT_GOALS)),)
 COMPACT_TARGETS := git-status docs-check manifest-check manifest-source-check repository-check \
-	db-check db-test db-sorologia-upgrade-test db-condicao-upgrade-test db-complicacao-upgrade-test db-comorbidades-upgrade-test db-avc-upgrade-test db-dispositivo-upgrade-test db-obito-upgrade-test db-reacoes-bzn-upgrade-test project-check docker-config-check docker-db-check docker-db-test \
+	db-check db-test db-sorologia-upgrade-test db-condicao-upgrade-test db-complicacao-upgrade-test db-comorbidades-upgrade-test db-avc-upgrade-test db-dispositivo-upgrade-test db-obito-upgrade-test db-reacoes-bzn-upgrade-test db-resultados-upgrade-test project-check docker-config-check docker-db-check docker-db-test \
 	docker-project-check docker-restore-check docker-restore-test importer-test \
 	backend-build backend-unit-test backend-integration-test backend-foundation-e2e \
 	backend-check backend-container-check backend-clinical-test workflow-test \
@@ -56,7 +56,7 @@ _compact-run:
 		-- $(MAKE) --no-print-directory _COMPACT_RUNNING=1 $(COMPACT_GOALS)
 else
 
-.PHONY: help git-status db-check db-test db-sorologia-upgrade-test db-condicao-upgrade-test db-complicacao-upgrade-test db-comorbidades-upgrade-test db-avc-upgrade-test db-dispositivo-upgrade-test db-obito-upgrade-test db-reacoes-bzn-upgrade-test db-migrate db-migrate-one docs-check project-check repository-check \
+.PHONY: help git-status db-check db-test db-sorologia-upgrade-test db-condicao-upgrade-test db-complicacao-upgrade-test db-comorbidades-upgrade-test db-avc-upgrade-test db-dispositivo-upgrade-test db-obito-upgrade-test db-reacoes-bzn-upgrade-test db-resultados-upgrade-test db-migrate db-migrate-one docs-check project-check repository-check \
 	db-schema-dump docker-config-check docker-up docker-status docker-wait \
 	docker-stop docker-recreate docker-logs docker-migrate docker-db-check docker-db-test \
 	docker-schema-dump docker-project-check docker-destroy \
@@ -84,6 +84,7 @@ help:
 	@echo "  make db-dispositivo-upgrade-test Valida upgrade 69→70 sem reinterpretar legado"
 	@echo "  make db-obito-upgrade-test Valida upgrade 70→71 sem reinterpretar legado"
 	@echo "  make db-reacoes-bzn-upgrade-test Valida upgrade 71→72 sem backfill de reações"
+	@echo "  make db-resultados-upgrade-test Valida upgrade 72→73 no exame canônico"
 	@echo "  make docs-check      Verifica documentos obrigatórios e não vazios"
 	@echo "  make manifest-check  Valida o manifesto físico v1 versionado"
 	@echo "  make manifest-source-check Compara manifesto com cabeçalhos da fonte local ignorada"
@@ -171,6 +172,9 @@ db-obito-upgrade-test:
 
 db-reacoes-bzn-upgrade-test:
 	@bash tests/backend/test_reacoes_bzn_upgrade.sh
+
+db-resultados-upgrade-test:
+	@bash tests/backend/test_resultados_upgrade.sh
 
 db-check:
 	@command -v psql >/dev/null 2>&1 || { echo "Erro: psql não encontrado."; exit 1; }

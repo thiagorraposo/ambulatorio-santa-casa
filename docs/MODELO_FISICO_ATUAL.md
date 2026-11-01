@@ -1270,3 +1270,12 @@ anteriores. Captura/proteção histórica compartilhada e guard de revisão espe
 ACLs originais de aplicação/importador preservadas. FKs continuam CASCADE, mas
 reações já auditadas não podem ser apagadas, inclusive pela cascata. Upgrade71→72
 validado; [provas](validacoes/VALIDACAO_7C_E1B_REACOES.md). Dump persistente não atualizado.
+
+## Evolução SQL73 — somente descartáveis
+
+Nova paciente_exame_resultado, FK RESTRICT ao exame canônico do paciente,
+parâmetros textuais humanos repetíveis, sem unicidade clínica. SQL07 preservada.
+Captura seis campos, resolução por FK e guard temporal fechado. Aplicação lê/insere;
+importador não escreve. Sem backfill ou mudança do pai/ACLs antigas. Upgrade72→73
+validado com legado coexistente; [provas](validacoes/VALIDACAO_7B_E6B_PARAMETROS.md).
+Dump persistente não atualizado.
