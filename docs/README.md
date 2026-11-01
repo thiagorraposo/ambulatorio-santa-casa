@@ -42,7 +42,7 @@ fonte temática abaixo; relatórios registram provas e histórico preserva conte
 | Episódios individuais de sorologia | [Contrato 7B-E1B](arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md) |
 | Condição de Chagas por atendimento | [Contrato 7B-E2B.1](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md) |
 | Complicações repetíveis por atendimento | [Contrato 7B-E2B.2](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md) — CON-07–10, API sintética com evidência própria; sem aceite humano. |
-| Comorbidades: catálogo e decisões clínicas pendentes | [Contrato 7B-E3B](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) — E3B.1 somente leitura; escrita ainda não definida. |
+| Comorbidades: catálogo, avaliação e histórico familiar | [Contrato 7B-E3B](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) — decisões delegadas, API E3B.2 e interface E3U com validação técnica; aceite humano separado. |
 | Revisão entre versões da planilha | [Contrato temporal](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md) |
 
 Especificações por módulo em `arquitetura/`: [avaliação clínica](arquitetura/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md),

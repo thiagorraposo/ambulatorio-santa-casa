@@ -533,7 +533,7 @@ Sintomas específicos, edição/remoção e aceite do pacote continuam pendentes
 
 #### 7B-E3B — Publicar contrato de comorbidades
 
-**Estado e cobertura:** Planejado; não aceito. RQ-ATD-11; RQ-COM-01–02 (telas/elementos na matriz).
+**Estado e cobertura:** Implementado e validado tecnicamente; aceite humano pendente. RQ-ATD-11; RQ-COM-01–02 (telas/elementos na matriz).
 
 **Continuidade de 01/11 — E3B.1/E3B.2:** catálogo ativo e avaliação própria por
 atendimento [implementados e validados tecnicamente](../validacoes/VALIDACAO_7B_E3B_2.md).
@@ -555,7 +555,14 @@ SQL68 não altera legado nem faz backfill. Interface e aceite humano separados.
 
 #### 7B-E3U — Registrar e consultar comorbidades
 
-**Estado e cobertura:** Planejado; não aceito. RQ-ATD-11; RQ-COM-01–02 (telas/elementos na matriz).
+**Estado e cobertura:** Implementado e validado tecnicamente; aceite humano pendente. RQ-ATD-11; RQ-COM-01–02 (telas/elementos na matriz).
+
+**Continuidade de 01/11:** interface [implementada e validada tecnicamente](../validacoes/VALIDACAO_7B_E3U.md)
+sobre E3B.2: catálogo paginado, itens triestado com observações, histórico familiar
+livre, revisão, rascunho e recibo. Nomes vêm do catálogo vigente, sem tradução
+automática das dez categorias do protótipo. Aceite humano do pacote permanece
+pendente; dependência funcional satisfeita pela API validada, sem chamar teste
+de aceite humano.
 
 **Escopo:** Hipertensão/diabetes e histórico de doença familiar separados do rastreio de exames; representação triestado e observações. Uma seção/formulário por módulo; revisão lista todos os campos.
 

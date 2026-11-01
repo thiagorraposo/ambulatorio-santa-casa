@@ -1,3 +1,5 @@
+import ComorbidadesPage from '../features/comorbidades/ComorbidadesPage';
+import ComorbidadesCreatePage from '../features/comorbidades/ComorbidadesCreatePage';
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { ApiError, isAbort } from '../api/client';
@@ -184,6 +186,8 @@ export default function App() {
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId" element={<AttendancePage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias" element={<SorologiasPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias/nova" element={<SorologiaCreatePage />} />
+      <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/comorbidades" element={<ComorbidadesPage />} />
+      <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/comorbidades/nova" element={<ComorbidadesCreatePage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/condicao-chagas" element={<CondicaoPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/condicao-chagas/nova" element={<CondicaoCreatePage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/complicacoes-chagas" element={<ComplicacoesPage />} />

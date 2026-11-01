@@ -210,6 +210,8 @@ Minha conta mostra a identidade retornada pela API.
 | `/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias/nova` | Rascunho, revisão, confirmação independente e recibo recuperável. |
 | `/pacientes/:pacienteId/atendimentos/:atendimentoId/condicao-chagas` | Condição única da consulta selecionada, inclusive ausência explícita. |
 | `/pacientes/:pacienteId/atendimentos/:atendimentoId/condicao-chagas/nova` | Seis campos, revisão, confirmação única e recibo recuperável. |
+| `/pacientes/:pacienteId/atendimentos/:atendimentoId/comorbidades` | Avaliação própria da consulta, itens e histórico familiar; ausência não significa negativa. |
+| `/pacientes/:pacienteId/atendimentos/:atendimentoId/comorbidades/nova` | Catálogo paginado, triestado explícito, revisão, rascunho e recibo. |
 | `/pacientes/:pacienteId/atendimentos/:atendimentoId/complicacoes-chagas` | Complicações deste atendimento, lista com paginação própria. |
 | `/pacientes/:pacienteId/atendimentos/:atendimentoId/complicacoes-chagas/nova` | Quatro campos, revisão, confirmação de uma ocorrência e recibos recuperáveis. |
 | `/minha-conta` | Identidade e perfil obtidos da API. |
@@ -393,3 +395,9 @@ o nome acessível dos links.
 Importação/revisão, métricas, fila global e gestão de usuários permanecem fora
 destes formulários. As lacunas clínicas específicas estão no recorte; produção
 e uso de dados reais dependem das Etapas 9–10.
+
+Comorbidades E3U usa o catálogo ativo real; selecionar um item inicia desconhecido
+explícito e permite Sim/Não. Itens não selecionados não são registrados. Relato
+familiar livre permanece separado dos exames; campos e escolhas passam por
+revisão. [Contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) e
+[validação proporcional](validacoes/VALIDACAO_7B_E3U.md), sem aceite humano presumido.

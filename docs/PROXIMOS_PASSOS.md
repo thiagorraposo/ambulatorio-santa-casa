@@ -637,9 +637,21 @@ Continuidade E3B.1/E3B.2 em 01/11: catálogo ativo e avaliação única por aten
 implementados e [validados tecnicamente](validacoes/VALIDACAO_7B_E3B_2.md).
 O responsável delegou a escolha das decisões: snapshots por consulta, triestado
 explícito e histórico familiar livre separado dos exames; ver [contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md).
-SQL68 preserva legado/importador, sem backfill. Próxima unidade: **7B-E3U**, seleção
-do catálogo, revisão, ficha/histórico por consulta e recuperação, sem apresentar
-API isolada como funcionalidade aceita ou M3 concluído.
+SQL68 preserva legado/importador, sem backfill. **7B-E3U** também foi implementada
+e [validada tecnicamente](validacoes/VALIDACAO_7B_E3U.md): seleção paginada,
+revisão, leitura por consulta, rascunho e recuperação. E3B/E3U aguardam aceite
+humano; M2 mantém o aceite já registrado. Baseline frontend vigente: 259 unidades
+na composição 256+3; 80 cenários E2E cadastrados (76 anteriores preservados + 4
+novos validados em rodadas focadas), sem alegar nova suíte completa de 80.
+
+**Encerramento solicitado em 01/11:** parar após o commit da interface e deste
+registro. Não iniciar outra unidade. Próxima unidade técnica exata: **7B-E4B**,
+conferindo catálogo, SQL10 e contratos HTTP já existentes de eventos/dispositivos/
+óbito para escolher o menor recorte faltante. Correções de comorbidades exigem
+contrato próprio; nenhuma migration persistente, push ou alteração da main foi
+autorizada. Retomada: continuar do commit da interface, consultar estado, este
+roadmap, contrato E3B e validação E3U; preservar validações de código inalterado.
+
 
 ### Preparação da migração da planilha real
 

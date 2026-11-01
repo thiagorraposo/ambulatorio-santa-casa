@@ -3,7 +3,8 @@
 Data: 2026-10-31. Base `0a2884c`, branch `feat/continuidade-m2-condicao`.
 **E3B.1: catálogo somente leitura implementado e validado tecnicamente.**
 E3B.2: avaliação por atendimento implementada e validada tecnicamente em
-01/11/2026; decisões delegadas abaixo. Interface E3U e aceite humano separados.
+01/11/2026; decisões delegadas abaixo. Interface E3U também implementada e
+validada tecnicamente; aceite humano permanece separado.
 
 ## Evidência e conflito a resolver antes da escrita
 
@@ -103,7 +104,31 @@ Não precisou migration/grant: SELECT da tabela existente já pertence à role
 limitada usada pela API. [Validação](../validacoes/VALIDACAO_7B_E3B_1.md) com
 PostgreSQL real sintético comprova esse acesso e a ausência de escrita clínica.
 
+## E3U — interface sobre o contrato
+
+Leitura e criação em `/pacientes/:pacienteId/atendimentos/:atendimentoId/comorbidades`
+e `/nova`; acessíveis pelo atendimento e pela consulta selecionada na ficha.
+Origem da consulta preservada em URL. Catálogo paginado de 20 em 20; seleção
+começa vazia, permanece entre páginas e não fabrica negativas. Selecionar um
+item inicia indicador desconhecido explícito, alterável para Sim/Não. Observações
+por item, inclusive Outras quando existente no catálogo, sem mapear automaticamente
+as dez opções do protótipo para identidades diferentes na SQL06.
+
+Histórico familiar começa não avaliado; desconhecido, Sim e Não são escolhas
+explícitas. Relato independente do indicador. Textos não vazios são preservados
+literalmente; textarea vazia é enviada como null. Campos desmarcados não entram
+no corpo; rascunho conserva seus valores em memória. Revisão mostra todos os
+itens selecionados, indicadores, observações e histórico familiar antes do POST.
+Confirmação usa UUID/recibo existente, sem repetição automática; leitura consulta
+somente este atendimento, inclusive após falha. Perfil consulta não escreve.
+
+[Validação da interface](../validacoes/VALIDACAO_7B_E3U.md) distingue provas novas
+da baseline reutilizada. A entrega não habilita edição/revisão temporal, alteração
+de catálogo ou migração do legado, nem implica aceite humano de E3B/E3U/M3.
+
 ## Próximas unidades
 
-Integrar E3U sobre a evidência HTTP/SQL de E3B.2. Aceite humano permanece separado. Não apresentar esta decisão delegada
-como homologação clínica institucional, nem encerrar M3 pela API isolada.
+Aceite humano de E3B/E3U separado da validação técnica. Próxima frente técnica:
+reconhecimento dirigido de **7B-E4B**, eventos/dispositivos/óbito, confrontando
+contratos existentes antes de publicar campos. Não iniciar essa unidade nesta
+sessão: o responsável pediu encerrar após o commit imediato da interface.

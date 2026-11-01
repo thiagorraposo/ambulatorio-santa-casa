@@ -35,6 +35,7 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | M3 — 7B-E3B.1 | GET autenticado de comorbidades ativas, ID/nome/ativo, paginação e DTO sem código inventado. | [Contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md)/[validação](validacoes/VALIDACAO_7B_E3B_1.md); sem escrita/seleção clínica. Decisões delegadas e escrita E3B.2 registradas abaixo. |
 
 | M3 — 7B-E3B.2 | Avaliação própria por atendimento, itens triestado e histórico familiar livre; SQL68 sem backfill, autorização, captura e recibo atômico. | [Contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md)/[validação](validacoes/VALIDACAO_7B_E3B_2.md); tecnicamente validada, interface/aceite separados. |
+| M3 — 7B-E3U | Interface de avaliação por consulta: catálogo paginado, triestado, relato familiar, revisão, rascunho e recuperação por recibo. | [Validação](validacoes/VALIDACAO_7B_E3U.md); build, 259 unidades na composição 256+3 e quatro E2E novos por rodadas focadas. Baseline anterior de 76 E2E preservada, sem repetir a suíte completa; aceite humano pendente. |
 
 M2/VU1 está **aprovado por aceite humano em 31/10/2026**, conforme confirmação
 expressa do responsável de que passou em todos os testes de aceite humano.
@@ -47,7 +48,8 @@ inferir diagnóstico. Solicitação geral exige contrato próprio; 7B-E2B.1 tem 
 específicos ou aceitar o pacote agregado por associação. E3B.1 publica somente
 o catálogo de comorbidades; E3B.2 acrescenta snapshots por consulta e histórico
 familiar livre, após delegação explícita das decisões em 01/11. O legado e seu
-default físico true permanecem intactos; a interface ainda tem unidade própria.
+default físico true permanecem intactos; E3U entrega a interface e sua evidência
+própria, sem aceite humano presumido.
 A sequência detalhada pertence
 ao [roadmap](PROXIMOS_PASSOS.md#próximo-trabalho).
 

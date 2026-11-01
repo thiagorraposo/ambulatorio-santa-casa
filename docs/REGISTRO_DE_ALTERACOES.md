@@ -1,5 +1,17 @@
 # Registro de Alterações
 
+## 2026-11-01 — Interface de comorbidades e encerramento solicitado (7B-E3U)
+
+- Catálogo paginado, seleção explícita triestado, observações e relato familiar;
+  revisão, rascunho/descarte e recibo sobre E3B.2, por atendimento.
+- Build, 259 unidades na composição 256+3, quatro E2E novos e uma regressão
+  anterior aprovados em rodadas proporcionais. [Evidência, falhas de fixture e
+  limites](validacoes/VALIDACAO_7B_E3U.md); baseline 76 E2E preservada sem repetição
+  integral. Total cadastrado agora 80; não equivale a uma suíte completa executada.
+- Estado/roadmap/contrato/matriz atualizados para retomada. Encerrar após este
+  commit por solicitação do responsável; próxima unidade 7B-E4B, ainda não iniciada.
+  Aceite humano E3B/E3U e implantação permanecem separados; M2 conserva seu aceite.
+
 ## 2026-11-01 — Avaliação de comorbidades por consulta (7B-E3B.2)
 
 - Responsável delegou as decisões antes da escrita: snapshots por consulta e

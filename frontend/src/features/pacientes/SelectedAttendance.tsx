@@ -34,6 +34,7 @@ function SelectedAttendanceDetail({ pacienteId, atendimentoId, section }: {
       </Card>
       {section === 'chagas' ? <><AttendanceChagasDiagnosis diagnosis={record.diagnosticoChagas} />
         <Link to={`${path}/condicao-chagas?retorno=${encodeURIComponent(attendanceDetailPath(patientPath, atendimentoId, `${location.pathname}${location.search}${location.hash}`))}`}>Condição de Chagas deste atendimento</Link>
+        <Link to={`${path}/comorbidades?retorno=${encodeURIComponent(attendanceDetailPath(patientPath, atendimentoId, `${location.pathname}${location.search}${location.hash}`))}`}>Comorbidades deste atendimento</Link>
         <Link to={`${path}/complicacoes-chagas?retorno=${encodeURIComponent(attendanceDetailPath(patientPath, atendimentoId, `${location.pathname}${location.search}${location.hash}`))}`}>Complicações deste atendimento</Link></>
         : <AttendanceClinicalAssessment clinical={record.dadosClinicos} />}
     </>}

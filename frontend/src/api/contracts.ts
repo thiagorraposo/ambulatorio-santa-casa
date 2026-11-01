@@ -291,3 +291,16 @@ export interface ComplicacaoResponse {
   gravidade: string | null;
 }
 export interface ComplicacaoCriadaResponse { complicacaoChagasId: string }
+
+export interface ComorbidadeCatalogoResponse { id: string; nome: string; ativo: boolean }
+export interface AvaliacaoComorbidadesBody {
+  itens?: Array<{ comorbidadeId: string; possuiComorbidade: boolean | null; observacoes: string | null }>;
+  historicoFamiliar?: { possuiDoenca: boolean | null; descricao: string | null };
+}
+export interface AvaliacaoComorbidadesResponse {
+  avaliacaoComorbidadesId: string;
+  atendimentoId: string;
+  itens: Array<{ itemId: string; comorbidadeId: string; nomeComorbidade: string;
+    possuiComorbidade: boolean | null; observacoes: string | null }>;
+  historicoFamiliar: { possuiDoenca: boolean | null; descricao: string | null } | null;
+}
