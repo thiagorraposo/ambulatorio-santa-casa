@@ -1261,3 +1261,12 @@ Captura prospectiva de houve_obito/data_obito/causa_obito/observacoes em obito
 existente, guard temporal específico e nenhuma alteração de ACL/função/gatilho
 compartilhado. Sem backfill, snapshot por consulta ou data parcial fabricada.
 [Contrato/provas](validacoes/VALIDACAO_7B_E4B_OBITO.md).
+
+## Evolução SQL72 — somente descartáveis
+
+Reutiliza reacao_adversa_benzonidazol(SQL15), cinco campos prospectivos, sem
+backfill. Resolve paciente pela FK do tratamento, preservando os destinos
+anteriores. Captura/proteção histórica compartilhada e guard de revisão específico;
+ACLs originais de aplicação/importador preservadas. FKs continuam CASCADE, mas
+reações já auditadas não podem ser apagadas, inclusive pela cascata. Upgrade71→72
+validado; [provas](validacoes/VALIDACAO_7C_E1B_REACOES.md). Dump persistente não atualizado.

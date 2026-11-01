@@ -138,3 +138,10 @@ independentemente, sem prescrição ou alterações de legado.
 [build/264 unidades/dois E2E reais](validacoes/VALIDACAO_7B_E5U_LEITURA.md).
 Cadastro de medicamentos e aceite integral seguem pendentes; próximo passo da
 fila é conferir o contrato7B-E6B de resultados antes de implementar a escrita.
+
+7C-E1B E1.2, reação isolada BZN: backend VALIDADO TECNICAMENTE sobre SQL15,
+com captura72; [contrato](arquitetura/CONTRATO_REACOES_BZN_7C_E1B.md) e
+[provas](validacoes/VALIDACAO_7C_E1B_REACOES.md). Próxima elegível: E1.2 de7C-E1U.
+E1.1 não incluída. E6 exige contrato para resultados no exame canônico H6:
+SQL07 liga resultados à estrutura legada; não equiparar IDs nem migrar legado.
+Essa lacuna técnica não foi declarada decisão clínica aprovada ou bloqueio humano.

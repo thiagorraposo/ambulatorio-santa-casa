@@ -91,3 +91,5 @@ Veja [as regras de manutenção](AGENTS.md) e o
 - [Medicamentos E5B: contrato de consulta e decisões de escrita](arquitetura/CONTRATO_MEDICAMENTOS_7B_E5B.md).
 
 - [Medicamentos E5U: consulta integrada e provas](validacoes/VALIDACAO_7B_E5U_LEITURA.md).
+
+- [Reação isolada BZN E1.2: contrato e evidências](arquitetura/CONTRATO_REACOES_BZN_7C_E1B.md).

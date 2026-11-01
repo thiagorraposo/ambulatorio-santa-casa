@@ -1,5 +1,15 @@
 # Registro de Alterações
 
+## 2026-11-01 — 7C-E1B E1.2 reação isolada no BZN
+
+- Leitura/criação no tratamento existente, sem alterar indicadores; captura72
+  prospectiva/guard, recibo, autorização e rollback. Legado intocado.
+- Build187, HTTP132, SQL43, upgrade71→72, importador e31 workflow aprovados;
+  [evidência/falhas corrigidas/limites](validacoes/VALIDACAO_7C_E1B_REACOES.md).
+- SQL07 testes16/22 passam a exigir proteção histórica de reação auditada;
+  nenhuma FK/migration antiga reescrita. Continuar na interface E1.2.
+
+
 ## 2026-11-01 — E5U leitura de medicamentos
 
 - Lista paginada por atendimento, campos literais, origem preservada e somente

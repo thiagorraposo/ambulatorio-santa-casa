@@ -35,6 +35,7 @@ const routes: Array<[ClinicalMethod, RegExp, Omit<ClinicalRoute, 'patientId'>]> 
   ['POST', new RegExp(`^/v1/pacientes/${id}/dispositivos$`), { receiptId: 'dispositivoId' }],
   ['POST', new RegExp(`^/v1/pacientes/${id}/avcs$`), { receiptId: 'eventoId' }],
   ['POST', new RegExp(`^/v1/pacientes/${id}/atendimentos/${id}/comorbidades$`), { receiptId: 'avaliacaoComorbidadesId' }],
+  ['POST', new RegExp(`^/v1/pacientes/${id}/tratamento-bzn/reacoes$`), { receiptId: 'reacaoId' }],
   ['POST', new RegExp(`^/v1/pacientes/${id}/tratamento-bzn$`), { receiptId: 'tratamentoId' }],
   ['POST', new RegExp(`^/v1/pacientes/${id}/retornos-bzn$`), { receiptId: 'retornoId' }],
   ['PUT', new RegExp(`^/v1/pacientes/${id}/projetos$`), { receiptId: 'projetoId' }],
