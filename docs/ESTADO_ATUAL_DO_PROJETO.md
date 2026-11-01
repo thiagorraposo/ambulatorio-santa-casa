@@ -121,3 +121,9 @@ Aceite humano/visual integral e demais EVT permanecem separados.
 E4B óbito inicial com data completa implementado conforme SQL10, sem upsert ou
 inferência; [provas e limites](validacoes/VALIDACAO_7B_E4B_OBITO.md). Interface,
 precisão parcial, aceite e conclusão do agregado permanecem separados.
+
+E4U óbito inicial: interface integrada e VALIDADA TECNICAMENTE sobre fa2329d,
+com build/263 unidades/dois E2E reais, recuperação e comparação renderizada.
+[Provas e limites](validacoes/VALIDACAO_7B_E4U_OBITO.md). Precisão parcial,
+ressincronizador, demais EVT e aceites continuam separados. Próxima: 7B-E5B,
+conferir contrato e modelo de medicamentos antes de publicar escrita.

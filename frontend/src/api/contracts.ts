@@ -310,3 +310,6 @@ export interface AvcCriadoResponse { eventoId: string }
 
 export interface DispositivoResponse { dispositivoId: string; pacienteId: string; tipoDispositivo: 'marcapasso' | 'cdi'; possuiDispositivo: boolean | null; observacoes: string | null }
 export interface DispositivoCriadoResponse { dispositivoId: string }
+
+export interface ObitoResponse { obitoId: string; pacienteId: string; houveObito: boolean | null; dataObito: string | null; causaObito: string | null; observacoes: string | null }
+export interface ObitoCriadoResponse { obitoId: string }

@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-01 — E4U óbito inicial
+
+- Interface longitudinal de leitura/criação, quatro campos independentes,
+  revisão, rascunho, recibo e retorno seguro. Sem novas regras clínicas.
+- Build/263 unidades e dois E2E reais aprovados; comparação original renderizada
+  em três viewports. [Provas e limites](validacoes/VALIDACAO_7B_E4U_OBITO.md).
+- Sem aceite humano; próxima investigação dirigida: contrato7B-E5B medicamentos.
+
+
 ## 2026-11-01 — E4B óbito consolidado inicial
 
 - GET JSON null/estado e POST inicial único com recibo, quatro campos independentes,

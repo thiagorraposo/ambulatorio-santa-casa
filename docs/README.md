@@ -85,3 +85,5 @@ Nomes novos usam `MAIUSCULAS_COM_SUBLINHADO.md`, sem espaços/acentos; caminhos
 históricos ou exigidos pelas ferramentas não são renomeados apenas por estética.
 Veja [as regras de manutenção](AGENTS.md) e o
 [diagnóstico desta reorganização](historico/REORGANIZACAO_DOCUMENTAL_2026_10_23.md).
+
+- [Interface de óbito: provas técnicas e limites](validacoes/VALIDACAO_7B_E4U_OBITO.md).

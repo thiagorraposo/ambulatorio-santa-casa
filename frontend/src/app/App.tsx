@@ -1,3 +1,5 @@
+import ObitoPage from '../features/obito/ObitoPage';
+import ObitoCreatePage from '../features/obito/ObitoCreatePage';
 import DispositivosPage from '../features/dispositivos/DispositivosPage';
 import DispositivoCreatePage from '../features/dispositivos/DispositivoCreatePage';
 import AvcsPage from '../features/avcs/AvcsPage';
@@ -190,6 +192,8 @@ export default function App() {
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId" element={<AttendancePage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias" element={<SorologiasPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias/nova" element={<SorologiaCreatePage />} />
+      <Route path="/pacientes/:pacienteId/obito" element={<ObitoPage />} />
+      <Route path="/pacientes/:pacienteId/obito/nova" element={<ObitoCreatePage />} />
       <Route path="/pacientes/:pacienteId/dispositivos" element={<DispositivosPage />} />
       <Route path="/pacientes/:pacienteId/dispositivos/nova" element={<DispositivoCreatePage />} />
       <Route path="/pacientes/:pacienteId/avcs" element={<AvcsPage />} />
