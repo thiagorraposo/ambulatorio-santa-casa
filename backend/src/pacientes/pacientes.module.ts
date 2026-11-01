@@ -1,3 +1,5 @@
+import { ComplicacoesChagasController } from './complicacoes-chagas.controller';
+import { ComplicacoesChagasService } from './complicacoes-chagas.service';
 import { Module } from '@nestjs/common';
 import { CondicaoChagasController } from './condicao-chagas.controller';
 import { CondicaoChagasService } from './condicao-chagas.service';
@@ -9,6 +11,6 @@ import { RecursosClinicosService } from './recursos-clinicos.service';
 import { SorologiasController } from './sorologias.controller';
 import { SorologiasService } from './sorologias.service';
 
-@Module({ controllers: [PacientesController, RecursosClinicosController, SorologiasController, CondicaoChagasController],
-  providers: [PacientesService, PacientesRepository, RecursosClinicosService, SorologiasService, CondicaoChagasService] })
+@Module({ controllers: [PacientesController, RecursosClinicosController, SorologiasController, CondicaoChagasController, ComplicacoesChagasController],
+  providers: [PacientesService, PacientesRepository, RecursosClinicosService, SorologiasService, CondicaoChagasService, ComplicacoesChagasService] })
 export class PacientesModule {}

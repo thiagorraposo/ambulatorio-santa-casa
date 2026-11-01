@@ -24,6 +24,11 @@ A extensão [7B-E2B.1](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md) publica
 com seis campos independentes, auditoria prospectiva 66 e recuperação; não
 habilita complicações, edição ou regras clínicas novas.
 
+A extensão [7B-E2B.2](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md)
+publica GET/POST de complicações repetíveis por atendimento sobre SQL06, sem
+exigir condição ou diagnóstico. Quatro campos independentes, captura 67,
+autorização e recibo usam a infraestrutura existente; sem edição/revisão temporal.
+
 ## Escopo e fluxo
 
 O backend é um monólito modular NestJS/TypeScript com módulos `health`, `auth` e

@@ -1218,3 +1218,13 @@ auditoria vigente, preservando seus patches39/42, proprietário e ACL.
 Validada em servidor descartável; não aplicada ao persistente. A evidência
 estrutural versionada permanece intacta. [Contrato](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md)
 e [validação](validacoes/VALIDACAO_7B_E2B_1.md).
+
+## Incremento sintético 67 — complicações por atendimento (31/10/2026)
+
+A migration 67 reutiliza `complicacao_chagas` da SQL06 e sua FK para atendimento,
+sem nova tabela ou vínculo obrigatório com condição. Registra captura prospectiva
+de tipo/presença/descrição/gravidade, privilégios mínimos e guard de revisão
+temporal, preservando a captura compartilhada. Não altera legado nem faz backfill.
+[Contrato](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md) e
+[validação](validacoes/VALIDACAO_7B_E2B_2.md) distinguem esses testes descartáveis da
+evidência persistente 00–20, que não foi atualizada.

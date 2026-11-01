@@ -30,7 +30,7 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 | M3 — 7B-E2B.1 | API de condição única por atendimento implementada sobre seis campos; auditoria 66, sem backfill e recibo. | [Contrato](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md)/[evidência](validacoes/VALIDACAO_7B_E2B_1.md); 177 unidades,83 HTTP,37 SQL,upgrade/importador locais aprovados; CI remoto, complicações e aceite humano separados; interface com evidência própria abaixo. |
 | M3 — 7B-E2U.1 | Interface dos seis campos de condição: leitura por consulta, formulário/revisão, confirmação única, rascunho e recibo; ficha/histórico conservam o contexto. | [Evidência](validacoes/VALIDACAO_7B_E2U_1.md); complicações, sintomas específicos sem contrato e aceite humano separados. |
 | M3 — 8A1 | CSV real de ID/nome da página/filtros aplicados, confirmação de escopo e tratamento de respostas tardias; mantém H16 e seus três perfis. | [Evidência](validacoes/VALIDACAO_8A1.md); exportação ampliada, aceite humano e dados reais separados. |
-| M3 — 7B-E2B.2 | [Contrato técnico proposto](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md) para CON-07–10 sobre a SQL06: multiplicidade, quatro campos, autorização, paginação, captura e recuperação. | Preparado para revisão; DTO/semântica não aprovados por esta preparação. Sem nova API, migration ou interface. |
+| M3 — 7B-E2B.2 | API GET/POST de complicações repetíveis por atendimento, quatro campos SQL06, captura prospectiva 67 e recibo por UUID. | [Contrato](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md) e [validação](validacoes/VALIDACAO_7B_E2B_2.md); interface CON-11, edição/revisão temporal e aceite humano separados. |
 
 M2/VU1 está **aprovado por aceite humano em 31/10/2026**, conforme confirmação
 expressa do responsável de que passou em todos os testes de aceite humano.
@@ -39,8 +39,8 @@ registra a origem e os detalhes não informados; não amplia o aceite a M3 ou à
 operação com dados reais. U3/U4.1 foram reexercitadas pela suíte completa local e
 pelo CI do PR #16. Em M3, C2B.1 exige resolver o consumo de sequências antes de
 declarar a garantia ampliada de simulação. A frente de sorologias individuais tem API e interface implementadas, sem
-inferir diagnóstico. Solicitação geral exige contrato próprio; 7B-E2B.1 tem a API de condição e 7B-E2U.1 sua interface de seis campos; o próximo recorte da família é revisar a proposta 7B-E2B.2 de complicações
-repetíveis antes da implementação, preservando pendências de sintomas específicos.
+inferir diagnóstico. Solicitação geral exige contrato próprio; 7B-E2B.1 tem a API de condição e 7B-E2U.1 sua interface de seis campos; 7B-E2B.2 acrescenta a API de complicações repetíveis; a próxima unidade é sua
+interface CON-07–11, preservando pendências de sintomas específicos.
 A sequência detalhada pertence
 ao [roadmap](PROXIMOS_PASSOS.md#próximo-trabalho).
 
@@ -48,7 +48,7 @@ ao [roadmap](PROXIMOS_PASSOS.md#próximo-trabalho).
 
 - **PostgreSQL:** schema `ambulatorio`. A evidência persistente versionada cobre
   migrations 00–20 e 38 tabelas; incrementos posteriores foram validados em bancos
-  descartáveis, incluindo as migrations 65/66 de captura prospectiva de sorologias/condição. O
+  descartáveis, incluindo as migrations 65/66/67 de captura prospectiva de sorologias/condição/complicações. O
   [modelo físico](MODELO_FISICO_ATUAL.md) separa os ambientes; o
   [dump aplicado](evidencias/schema_atual_ambulatorio.sql) é a prova estrutural.
 - **Importador Python:** v1.7.0, manifesto semântico v1.4; reconciliação BZN,

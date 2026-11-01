@@ -615,6 +615,13 @@ interface CON-11 é posterior. Mantidos os commits documentais após `fc51390`,
 o aceite oficial de M2 e a baseline histórica de 252 testes/73 E2E, sem repetição
 por mudança exclusivamente documental.
 
+Continuidade da implementação de 7B-E2B.2 em 31/10: após solicitação de
+continuidade, o contrato técnico foi adotado sem nova regra clínica. GET/POST de
+complicações, quatro campos SQL06, captura prospectiva 67 e recuperação por
+intenção têm [provas próprias](validacoes/VALIDACAO_7B_E2B_2.md). Isso sucede a
+etapa de preparação acima; não é aceite clínico. A próxima unidade desbloqueada
+é 7B-E2U.2 (CON-07–11), com lista/formulário/revisão e recuperação pela interface.
+
 ### Preparação da migração da planilha real
 
 A preparação pode ocorrer em paralelo à construção do frontend, sem exigir a

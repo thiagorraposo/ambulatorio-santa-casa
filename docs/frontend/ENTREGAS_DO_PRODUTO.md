@@ -486,11 +486,11 @@ registra a regressão final após incorporar a correção de isolamento do CI.
 Complicações repetíveis (CON-07–10), interface e sintomas específicos sem
 campos/domínios aprovados continuam separados; não há aceite do pacote agregado.
 
-**Preparação de 31/10 — 7B-E2B.2:** [contrato técnico proposto](../arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md)
-para tipo/presença/descrição/gravidade CON-07–10, reutilizando a SQL06 sem inferir
-condição ou diagnóstico. Rotas, DTO, captura prospectiva e critérios de prova
-especificados para revisão; nenhuma API/migration implementada ou aprovação
-clínica registrada nesta preparação. CON-11/interface têm unidade posterior.
+**Continuidade de 31/10 — 7B-E2B.2:** [contrato técnico](../arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md)
+adotado após solicitação de continuidade; GET/POST de tipo/presença/descrição/
+gravidade, multiplicidade, captura 67 e recuperação implementados. A
+[validação](../validacoes/VALIDACAO_7B_E2B_2.md) separa provas de aceite humano.
+CON-11/interface, sintomas específicos e correção persistida continuam separados.
 
 **Escopo:** Forma clínica/cardíaca/digestiva, classificação e sintomas/regurgitação/constipação/disfagia/dor/dispneia; sem classificação automática.
 
@@ -512,7 +512,7 @@ clínica registrada nesta preparação. CON-11/interface têm unidade posterior.
 implementada sobre o contrato 7B-E2B.1: leitura por atendimento, formulário,
 revisão, confirmação única, rascunho e recibo recuperável. Ficha e histórico
 preservam a seleção ao abrir o recurso. [Evidência e limites](../validacoes/VALIDACAO_7B_E2U_1.md).
-Complicações CON-07–10 e adição CON-11 continuam sem contrato HTTP aprovado;
+CON-07–10 têm API no recorte 7B-E2B.2; a interface CON-07–11 permanece pendente;
 sintomas específicos, edição/remoção e aceite do pacote agregado permanecem
 pendentes. Não se atribui aceite humano à validação técnica.
 

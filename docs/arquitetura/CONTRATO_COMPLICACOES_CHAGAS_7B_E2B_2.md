@@ -1,9 +1,11 @@
-# Complicações por atendimento — proposta 7B-E2B.2
+# Complicações por atendimento — 7B-E2B.2
 
 Preparado em: 2026-10-31, branch `feat/continuidade-m2-condicao`, base `dd82150`.
-**Estado: contrato técnico proposto para revisão; API, migration e interface não
-implementadas por esta entrega.** A preparação não aprova o DTO/semântica nem
-concede aceite clínico. Não altera o contrato publicado 7B-E2B.1.
+**Continuidade de 31/10/2026:** contrato técnico adotado para implementação após
+solicitação de continuidade do responsável. GET/POST, auditoria 67 e recuperação
+implementados no código para ambiente sintético; [evidência](../validacoes/VALIDACAO_7B_E2B_2.md).
+Interface e aceite humano são separados. Não altera o contrato 7B-E2B.1 nem
+registra nova resposta clínica da equipe.
 
 ## Fontes e limites do recorte
 
@@ -19,7 +21,7 @@ D1–D12 não acrescentam uma resposta clínica específica para esses quatro
 campos. A multiplicidade é requisito do [catálogo](../frontend/ENTREGAS_DO_PRODUTO.md#7b-e2b)
 e da [matriz CON](../frontend/MATRIZ_FIGMA_FRONTEND.md#con--condição-clínica-e-complicações).
 As escolhas de nomes HTTP, paginação, limites de texto e protocolo abaixo são
-propostas técnicas, não novas respostas da equipe clínica.
+escolhas técnicas deste recorte, não novas respostas da equipe clínica.
 
 O importador já pode produzir registros `geral`, `cardiaca`, `digestiva` e
 `outra` em `Importer.chagas_condition`. Esses valores são convenções de origem,
@@ -27,12 +29,12 @@ não catálogo fechado para o novo formulário. Não reclassificar nem interpret
 registros existentes, converter descrições em presença ou deduzir condição,
 diagnóstico, descoberta ou sintomas específicos.
 
-## Recurso HTTP proposto
+## Recurso HTTP
 
 Prefixo `/v1`, JWT e política clínica existentes. `:id` identifica paciente;
 `:atendimentoId` identifica o atendimento autorizado desse paciente.
 
-| Método/caminho | Resposta prevista |
+| Método/caminho | Resposta |
 | --- | --- |
 | `GET /pacientes/:id/atendimentos/:atendimentoId/complicacoes-chagas?limit=20&offset=0` | 200, array de registros desta página; `[]` quando vazia. |
 | `POST /pacientes/:id/atendimentos/:atendimentoId/complicacoes-chagas` | 201, `{ complicacaoChagasId: string }`. Um registro por intenção. |
@@ -48,9 +50,9 @@ gravidade clínica. Cada coleção tem paginação própria. Não prometer total
 snapshot estável entre páginas durante inserções concorrentes; página vazia não
 comprova inexistência global nem não aplicação de uma operação.
 
-## DTO proposto e semântica preservada
+## DTO e semântica preservada
 
-| RQ | Propriedade JSON | Persistência e validação proposta |
+| RQ | Propriedade JSON | Persistência e validação |
 | --- | --- | --- |
 | CON-07 | `tipoComplicacao` | `tipo_complicacao`: texto livre até 80 caracteres ou null. Sem enum/sugestão classificatória obrigatória. |
 | CON-08 | `possuiComplicacao` | `possui_complicacao`: booleano ou null. Sem conversão de string/número para booleano. |
@@ -67,7 +69,7 @@ estados distintos. False/null não apagam tipo, descrição ou gravidade. Não
 inferir presença a partir de uma descrição nem exigir gravidade por presença.
 Não interpretar descrição ou tipo livre como diagnóstico/condição confirmados.
 
-Exemplo exclusivamente sintético de corpo válido proposto:
+Exemplo exclusivamente sintético de corpo válido:
 
 ```json
 {
@@ -103,11 +105,11 @@ vigente do serviço. Não expor SQL, nomes internos de constraints, bruto ou
 existência de pacientes não autorizados. Não criar 409 de unicidade clínica,
 pois múltiplos registros são permitidos; conflitos do protocolo são separados.
 
-## Auditoria, permissões e recuperação — trabalho necessário
+## Auditoria, permissões e recuperação
 
-Antes de habilitar o POST, criar nova migration incremental após a 66, com
-numeração conferida na implementação. Não editar migrations aplicadas nem
-atualizar o dump persistente. Escopo mínimo:
+A [migration incremental 67](../../sql/67_captura_complicacao_chagas.sql) foi
+acrescentada sem editar migrations aplicadas ou atualizar o dump persistente.
+Seu escopo segue as garantias abaixo:
 
 - Captura prospectiva dos quatro campos usando a infraestrutura vigente de
   auditoria e a PK `complicacao_chagas_id`; nenhuma alteração/backfill do legado.
@@ -128,15 +130,13 @@ exige consulta autorizada da intenção, nunca busca por conteúdo ou POST
 repetido. Falha comprovada registra não aplicação; estado incerto bloqueia
 reenvio. Não prometer recuperação/idempotência geral entre sessões.
 
-## Critérios de revisão e implementação posterior
+## Critérios técnicos e limites
 
-A revisão deve confirmar explicitamente as escolhas técnicas propostas: nomes
-da rota/propriedades, limite 10000 de descrição, corpo com null explícito,
-ordenação/paginação e unidade de gravação. Não há proposta de novo enum de tipo,
-escala de gravidade ou regra de inferência clínica.
-
-Depois da aprovação de DTO/semântica exigida no catálogo, implementar somente
-GET/POST e captura/recuperação deste recorte. Critérios de conclusão técnica:
+As escolhas técnicas da proposta foram adotadas na continuidade deste recorte:
+rota/propriedades, limite 10000, null explícito, paginação e uma gravação por
+intenção. Nenhum enum de tipo, escala clínica ou regra de inferência foi criado.
+Os critérios abaixo orientam as provas; resultados efetivamente executados e
+limites estão no relatório de validação, sem equivalência a aceite humano.
 
 1. Duas ocorrências de mesmo tipo/conteúdo, duas consultas e dois pacientes:
    IDs distintos, vinculação correta e ausência de mistura no histórico.
@@ -152,9 +152,9 @@ GET/POST e captura/recuperação deste recorte. Critérios de conclusão técnic
 7. Upgrade da migration sem backfill e instalação limpa aprovados em banco
    descartável; legado/importador e guards anteriores preservados.
 
-A validação futura deve combinar SQL/upgrade, backend clínico e importador pelo
+A validação deve combinar SQL/upgrade, backend clínico e importador pelo
 [workflow proporcional](../WORKFLOW_DE_DESENVOLVIMENTO.md#validação-proporcional).
-Isso é plano de prova, não resultado executado nesta entrega documental.
+O relatório identifica comandos/resultados e limitações, sem inferir aprovação clínica.
 
 CON-11 e interface de complicações são incremento 7B-E2U posterior, com lista,
 formulário, revisão, erro, rascunho e recibo; não oferecer campo sem destino HTTP

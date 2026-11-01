@@ -1,5 +1,17 @@
 # Registro de Alterações
 
+## 2026-10-31 — API de complicações repetíveis (7B-E2B.2)
+
+Continuidade técnica do contrato sobre SQL06: quatro campos independentes,
+GET/POST por atendimento, paginação, autorização e recibo por UUID. Migration 67
+ativa captura prospectiva/guard temporal sem backfill e sem alterar a função
+compartilhada de auditoria. Sem nova classificação clínica ou tabela.
+[Validação](validacoes/VALIDACAO_7B_E2B_2.md): 180 unidades, 8 de fundação, 91 HTTP, 38 SQL,
+upgrade/importador/workflow e 2 percursos frontend. Relatório registra falhas de
+configuração/asserção e suas correções, sem apresentar rodadas recusadas como
+sucesso. Runner/CI incluem 67 e upgrade. Interface/aceite humano são separados;
+nenhuma migration persistente, push ou alteração da main.
+
 ## 2026-10-31 — proposta de contrato das complicações (7B-E2B.2)
 
 CON-07–10 especificados em [proposta técnica](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md)

@@ -20,7 +20,7 @@ armazenamento e identidade antes de aplicar o bootstrap. As portas
 `POSTGRES_PORT`, `APP_DB_PORT` e `SYNTHETIC_PG_PORT` são `55457`, exigidas por
 D3/D8; o Compose persistente local continua em `5433`. Backend e frontend
 criam bancos e logins próprios para suas suítes. O job Frontend prepara somente
-a role de origem com SQL00; seu runner aplica 02–66 no banco exclusivo.
+a role de origem com SQL00; seu runner aplica 02–67 no banco exclusivo.
 Nenhuma permissão clínica é concedida manualmente para fazer teste passar.
 
 `db-sorologia-upgrade-test` requer `SYNTHETIC_PG_HOST`, `SYNTHETIC_PG_PORT`,
@@ -524,3 +524,15 @@ as verificações ao servidor descartável com `DB_HOST`/`DB_PORT` explícitos.
 O alvo `db-condicao-upgrade-test` usa o mesmo contrato `SYNTHETIC_PG_*` e
 `PGPASSWORD` do upgrade de sorologia: cria banco próprio, valida65→66 com
 registro legado e remove somente seu banco. Não realiza backfill.
+
+Incremento 7B-E2B.2: `make db-complicacao-upgrade-test COMPACT=1` valida upgrade
+66→67 em banco próprio descartável com `SYNTHETIC_PG_*`. SQL39 e os testes HTTP
+cobrem captura/recuperação de complicações; combinar com backend/project/importer
+quando essas camadas forem alteradas, sem repetir provas aprovadas sem motivo.
+
+Ao direcionar o Make para banco descartável fora do Compose padrão, passe
+`DB_*` e `APP_DB_*` como argumentos (`make ... DB_PORT=... APP_DB_PORT=...`):
+o `.env` incluído pelo Make pode sobrescrever valores exportados no ambiente.
+Confira o destino efetivo antes da execução. Se usar `-o docker-wait`, confirme
+manualmente a prontidão/identidade do servidor sintético; não use isso para
+ignorar a verificação do destino. Alguns testes do importador exigem 55457.
