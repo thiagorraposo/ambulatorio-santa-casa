@@ -13,6 +13,7 @@ fonte temática abaixo; relatórios registram provas e histórico preserva conte
 | Como deve ser o produto completo? | [Visão e especificação](frontend/VISAO_E_ESPECIFICACAO.md) |
 | Qual elemento do protótipo corresponde a qual requisito? | [Matriz Figma → requisito → implementação → lacuna → entrega → aceite](frontend/MATRIZ_FIGMA_FRONTEND.md) |
 | Qual é o escopo e o aceite de cada entrega? | [Catálogo de entregas](frontend/ENTREGAS_DO_PRODUTO.md) |
+| Como executar e retomar as seis janelas de M3 até 03/11? | [Plano operacional e checkpoint único](execucao/PLANO_M3_2026_11_03.md) — preparação; implementação só após início autorizado |
 | Onde estão as comparações de telas? | [Capturas e propostas visuais](frontend/visuais/README.md) |
 
 ## Desenvolver e operar localmente
@@ -71,7 +72,8 @@ São contratos específicos, não duplicatas do modelo físico ou dos relatório
 As fontes principais na raiz de `docs/` mantêm os caminhos exigidos pelo Makefile
 e pelas instruções do repositório. As coleções têm uma função cada:
 `arquitetura/` contratos, `dados/` semântica/layout, `frontend/` produto e entregas,
-`validacoes/` provas, `evidencias/` artefatos estruturais e `historico/` memória.
+`validacoes/` provas, `evidencias/` artefatos estruturais, `execucao/` planos
+operacionais temporários e `historico/` memória.
 Os únicos índices adicionais são os necessários para localizar as numerosas
 validações, os arquivos históricos e as imagens.
 

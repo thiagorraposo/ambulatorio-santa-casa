@@ -68,6 +68,11 @@ PostgreSQL ou actionlint, confira versões oficiais e checksums, teste a altera�
 no PR e confirme novamente o workflow da `main` após merge. Não introduza
 `continue-on-error` nem contorne regras de aprovação humana.
 
+Para o ciclo temporário de seis janelas de M3 até 03/11/2026, usar o
+[plano operacional e checkpoint único](execucao/PLANO_M3_2026_11_03.md).
+Ele organiza a execução; roadmap, contratos e esta matriz de validação permanecem
+as fontes normativas. A preparação não inicia janelas nem autoriza implementação.
+
 ## Preparar o ambiente
 
 Pré-requisitos gerais: GNU Make, Git, Docker Engine com Compose, Python 3,

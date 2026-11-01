@@ -1,5 +1,19 @@
 # Registro de Alterações
 
+## 2026-11-01 — Preparação do ciclo intensivo M3 para 03/11
+
+- Criado [plano operacional](execucao/PLANO_M3_2026_11_03.md) das seis janelas,
+  fila dinâmica, inventário com pacotes/filhos separados, decisões bloqueadoras,
+  validação proporcional, subagentes, checkpoint único e demonstração sintética.
+- Estado inicial verificado em 6fb4cdc, integrado pela PR #23 em e25aafb;
+  evidências posteriores prevalecem sobre rótulos históricos. E3U tecnicamente
+  validada sem aceite humano; E4B é a primeira unidade, ainda não iniciada.
+- Índice e workflow apontam para o plano, sem outro roadmap ou cópia de contratos.
+  Preparação exclusivamente documental: sem implementação, migration, ambiente,
+  commit, push ou merge. Janelas futuras dependem de início autorizado.
+- Validação documental, links/âncoras, cobertura dos 57 IDs e revisão textual
+  dirigida concluídos; CI pós-merge da baseline confirmado como aprovado.
+
 ## 2026-11-01 — Isolamento do upgrade de comorbidades no CI
 
 - Primeira execução da PR #23 (`41306700817`) falhou em Quality porque o upgrade
