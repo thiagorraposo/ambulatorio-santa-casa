@@ -1,5 +1,13 @@
 # Registro de Alterações
 
+## 2026-11-01 — Preparação da integração pela pipeline CI
+
+- Guia de desenvolvimento alinhado ao workflow existente: migrations até 68 e
+  testes de upgrade de complicações/comorbidades. Sem alterar a pipeline.
+- Integração da branch de continuidade deve executar Quality, Database, Backend
+  e Frontend; merge autorizado pelo responsável somente após CI aprovado.
+  Resultados remotos pertencem à PR/run, sem aprovação antecipada nesta entrada.
+
 ## 2026-11-01 — Roadmap integrado de produto, backend e frontend
 
 - Quadro das dez frentes passou a reunir unidades, interface esperada,
