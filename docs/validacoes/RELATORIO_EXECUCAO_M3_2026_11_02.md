@@ -51,6 +51,26 @@ Não foi criada funcionalidade baseada em mocks para contornar esses gates.
 
 ## Aplicação disponível no navegador
 
+**Atualização de02/11,15:56−03 — endereço vigente: http://127.0.0.1:4178**,
+API6063, PostgreSQL55459 exclusivamente sintético em tmpfs. Código servido da
+raiz `/home/raposo/Projetos/ambulatorio-santa-casa`, runtime `ae19c41`; diff de
+backend/src e frontend/src contra esse HEAD vazio. Login real de Administração,
+menu Usuários e GET /usuarios200/tabela confirmados em Chromium; captura
+volátil `/tmp/m3-demo-atual-usuarios.png`. Mesmo acesso sintético abaixo.
+
+Supervisor da raiz `python3 scripts/dev_sintetico.py status`, estado privado
+`/tmp/ambulatorio-dev-1000-209b0b6ca48a`, log `runner.log`. Iniciado com
+`python3 scripts/dev_sintetico.py start --pg-port 55459 --api-port 6063 --web-port 4178`.
+O Vite usa agora a raiz corrente; frontend acompanha suas alterações. Alterações
+posteriores de backend exigem recompilar e atualizar o processo servido antes de
+anunciar o link como atual. Conferir checkout/versão e smoke autenticado, além
+da resposta200 da página de login. Criação/alteração de usuários e novo escopo de
+Edição continuam pendentes; a atualização de endereço não os implementa.
+
+A demonstração anterior em4177 foi preservada e está **desatualizada**. O registro
+abaixo descreve aquele ambiente anterior, não o código vigente.
+
+
 **http://127.0.0.1:4177**; API6062 e PostgreSQL55458, exclusivamente sintéticos.
 Usuário `frontend-administracao@example.invalid`; senha `Etapa6-sintetica!`.
 Sessão de15min; novo login permite continuar. O responsável pediu explicitamente

@@ -1,5 +1,13 @@
 # Registro de Alterações
 
+## 2026-11-02 — Corrigir endereço da demonstração para o código corrente
+
+Identificado que4177 servia checkout antigo em/tmp. Nova demonstração local
+em4178/API6063/PG55459 sintético tmpfs, servindo a raiz/runtimeae19c41; ambiente
+anterior preservado. Smoke em navegador confirmou login/menu/lista administrativa
+pela API real. [Endereço vigente e operação](validacoes/RELATORIO_EXECUCAO_M3_2026_11_02.md#aplicação-disponível-no-navegador).
+Sem mudança de código/runtime, banco persistente ou conclusão de funções pendentes.
+
 ## 2026-11-02 — Integrar leitura mínima administrativa de usuários
 
 GET/rota/menu Usuários somente para Administração, com ID/nome/perfil reais e
