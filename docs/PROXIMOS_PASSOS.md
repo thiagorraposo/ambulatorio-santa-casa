@@ -816,3 +816,9 @@ Continuidade de 02/11/2026: [E6U parâmetros](validacoes/VALIDACAO_7B_E6U_PARAME
 VALIDADA TECNICAMENTE no recorte RQ-EXA-09–13/16, com API/PostgreSQL sintético,
 revisão e recuperação. Datas/status do pai e aceite humano permanecem pendentes.
 Próximas unidades e estado operacional no [checkpoint único](execucao/PLANO_M3_2026_11_03.md#10-checkpoint-único-e-transferência-de-contexto).
+
+
+Estado consolidado da retomada02/11: [entregas, regressão composta, candidato
+a84001a e gates](validacoes/RELATORIO_EXECUCAO_M3_2026_11_02.md). Demonstração
+sintética disponível para revisão; sem aceite humano novo ou conclusão deM3.
+Contagem de janelas/horas não consolidada; não afirmar três janelas completas.

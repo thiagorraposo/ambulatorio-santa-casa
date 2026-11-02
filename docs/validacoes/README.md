@@ -87,3 +87,5 @@ sistema; sua menção preserva rastreabilidade, não garante disponibilidade atu
 - [Isolamento das contagens E2E M3](VALIDACAO_ISOLAMENTO_E2E_M3.md).
 
 - [Regressão composta do frontend M3 — 02/11](VALIDACAO_REGRESSAO_FRONTEND_M3_2026_11_02.md).
+
+- [Registro consolidado da execução M3 — 02/11](RELATORIO_EXECUCAO_M3_2026_11_02.md).

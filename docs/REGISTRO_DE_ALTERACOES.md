@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-02 — Consolidar decisões e disponibilizar demonstração sintética
+
+Triagem de P-04/P-05/P-06/P-09, propostas de fila/revisão e métricas/busca,
+sem escolher clínica, permissões ou concorrência. Gates humanos permanecem
+abertos. Ambiente sintético iniciado em4177/6062/55458, login real de15min,
+três links longitudinais e simulação verificados sem escrita clínica no smoke.
+Candidato funcionala84001a preservado; execução disponível para revisão no
+navegador. [Registro consolidado](validacoes/RELATORIO_EXECUCAO_M3_2026_11_02.md).
+
 ## 2026-11-02 — Restaurar navegação AVC e estabilizar catálogo composto
 
 Restaurado link longitudinal AVC substituído ao acrescentar dispositivos;

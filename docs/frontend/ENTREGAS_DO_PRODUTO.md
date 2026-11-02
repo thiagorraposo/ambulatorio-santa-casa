@@ -908,6 +908,8 @@ Não encerra todos os EVT nem altera o vínculo clínico por paciente.
 
 **Validação/evidência e conclusão:** VD. Decisão/fluxo com exemplos e casos de visibilidade, antes de B/U. Concluir somente pela condição comum acima e pelos critérios desta unidade.
 
+Preparação de02/11: [alternativas e exemplos sintéticos](../arquitetura/PROPOSTA_FILA_REVISAO_8A2D.md) disponíveis; decisão/aprovação VD pendentes. Nenhuma capacidade B/U foi liberada.
+
 <a id="8a2b"></a>
 
 #### 8A2B — Consultar fila global autorizada sem varrer pacientes
@@ -988,6 +990,8 @@ Não encerra todos os EVT nem altera o vínculo clínico por paciente.
 
 **Validação/evidência e conclusão:** VD. Tabela de definições e fixture com resultados esperados, aprovada antes de B/U. Concluir somente pela condição comum acima e pelos critérios desta unidade.
 
+Preparação de02/11: [alternativas e exemplos sintéticos](../arquitetura/PROPOSTA_METRICAS_BUSCA_P05.md) disponíveis; decisão/aprovação VD pendentes. Nenhuma capacidade B/U foi liberada.
+
 <a id="8b1b"></a>
 
 #### 8B1B — Publicar os quatro indicadores operacionais aprovados
@@ -1067,6 +1071,8 @@ Não encerra todos os EVT nem altera o vínculo clínico por paciente.
 **Aceite — cenário principal e falhas:** Cada coluna/filtro tem fonte/regra e exemplo de desconhecido; código do protótipo não é gerado ficticiamente; decisão distingue proveniência de condição clínica.
 
 **Validação/evidência e conclusão:** VD. Dicionário e seleção de primeira expansão, sem exigir todos os filtros de uma vez. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+Preparação de02/11: [alternativas e exemplos sintéticos](../arquitetura/PROPOSTA_METRICAS_BUSCA_P05.md) disponíveis; decisão/aprovação VD pendentes. Nenhuma capacidade B/U foi liberada.
 
 <a id="8b3b"></a>
 
