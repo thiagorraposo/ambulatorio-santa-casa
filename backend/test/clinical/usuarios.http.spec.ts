@@ -1,0 +1,61 @@
+import { INestApplication } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { Test } from '@nestjs/testing';
+import { Pool } from 'pg';
+import request from 'supertest';
+import { AppModule } from '../../src/app.module';
+import { configureApp } from '../../src/bootstrap';
+
+const suite = process.env.TEST_CLINICAL_DB ? describe : describe.skip;
+suite('8D1B.1 leitura mínima de usuários', () => {
+  let app: INestApplication;
+  let owner: Pool;
+  const tokens: Record<string, string> = {};
+  const http = () => request(app.getHttpServer());
+
+  beforeAll(async () => {
+    if (!/^etapa5_clinical_\d+_\d+$/.test(process.env.TEST_CLINICAL_DB!)) throw new Error('Banco descartável obrigatório');
+    owner = new Pool({ host: process.env.TEST_OWNER_HOST, port: Number(process.env.TEST_OWNER_PORT),
+      user: process.env.TEST_OWNER_USER, password: process.env.TEST_OWNER_PASSWORD, database: process.env.TEST_CLINICAL_DB });
+    const module = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    app = module.createNestApplication(); configureApp(app); await app.init();
+    const profiles = ['consulta', 'edicao', 'administracao', 'inativo'];
+    for (const [index, profile] of profiles.entries()) {
+      const id = String(9007199254741881n + BigInt(index));
+      await owner.query(`INSERT INTO ambulatorio.usuario_aplicacao(usuario_id,nome,login,senha_hash,perfil,ativo)
+        OVERRIDING SYSTEM VALUE VALUES($1,$2,$3,$4,$5,$6)`, [id, '000 Usuário Homônimo Sintético 8D', `8d-${profile}@example.invalid`,
+        '$2b$12$AHXFrksRrsnCtxc0yzPeSO3XHF94Quhjtu/5RZVYwRyvU6alPJXSK', profile === 'inativo' ? 'administracao' : profile, profile !== 'inativo']);
+      tokens[profile] = await app.get(JwtService).signAsync({ sub: id, typ: 'access' });
+    }
+  });
+  afterAll(async () => { await app?.close(); await owner?.end(); });
+
+  it('nega anônimo, Consulta, Edição e conta inativa', async () => {
+    await http().get('/v1/usuarios').expect(401);
+    for (const profile of ['consulta', 'edicao']) {
+      const response = await http().get('/v1/usuarios').auth(tokens[profile], { type: 'bearer' }).expect(403);
+      expect(JSON.stringify(response.body)).not.toMatch(/000 Usuário|senha|hash|example.invalid/);
+    }
+    await http().get('/v1/usuarios').auth(tokens.inativo, { type: 'bearer' }).expect(401);
+  });
+  it('projeta apenas ID textual/nome/perfil e pagina homônimos sem duplicação', async () => {
+    const expected = (await owner.query(`SELECT usuario_id::text AS "usuarioId",nome,perfil
+      FROM ambulatorio.usuario_aplicacao ORDER BY nome,usuario_id LIMIT 4`)).rows;
+    const first = await http().get('/v1/usuarios?limit=2&offset=0').auth(tokens.administracao, { type: 'bearer' }).expect(200);
+    const second = await http().get('/v1/usuarios?limit=2&offset=2').auth(tokens.administracao, { type: 'bearer' }).expect(200);
+    expect([...first.body, ...second.body]).toEqual(expected);
+    expect(expected.map(row => row.usuarioId)).toEqual(['9007199254741881', '9007199254741882', '9007199254741883', '9007199254741884']);
+    for (const row of [...first.body, ...second.body]) expect(Object.keys(row).sort()).toEqual(['nome', 'perfil', 'usuarioId']);
+    const empty = await http().get('/v1/usuarios?offset=100000').auth(tokens.administracao, { type: 'bearer' }).expect(200);
+    expect(empty.body).toEqual([]);
+  });
+  it.each(['limit=0', 'limit=101', 'offset=-1', 'offset=100001', 'ativo=true', 'perfil=administracao'])('recusa query fora do contrato: %s', async query => {
+    await http().get(`/v1/usuarios?${query}`).auth(tokens.administracao, { type: 'bearer' }).expect(400);
+  });
+  it('revalida o perfil atual e a ativação com o mesmo token', async () => {
+    await owner.query("UPDATE ambulatorio.usuario_aplicacao SET perfil='consulta' WHERE usuario_id=$1", ['9007199254741883']);
+    await http().get('/v1/usuarios').auth(tokens.administracao, { type: 'bearer' }).expect(403);
+    await owner.query("UPDATE ambulatorio.usuario_aplicacao SET perfil='administracao',ativo=false WHERE usuario_id=$1", ['9007199254741883']);
+    await http().get('/v1/usuarios').auth(tokens.administracao, { type: 'bearer' }).expect(401);
+  });
+});

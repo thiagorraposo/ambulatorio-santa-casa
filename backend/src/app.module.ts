@@ -1,3 +1,4 @@
+import { UsuariosModule } from './usuarios/usuarios.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './common/database/database.module';
@@ -18,6 +19,7 @@ import { OperacoesModule } from './operacoes/operacoes.module';
     DatabaseModule,
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
     AuthModule,
+    UsuariosModule,
     HealthModule,
     PacientesModule,
     CatalogosModule,

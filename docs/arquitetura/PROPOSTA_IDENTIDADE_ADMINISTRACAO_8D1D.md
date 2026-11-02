@@ -112,3 +112,14 @@ específicos satisfeitos; um ponto institucional bloqueado não bloqueia outras
 folhas elegíveis. Não marcar o agregado 8D pronto apenas por backend, rascunho
 visual ou requisitos mínimos escritos. Regras permanentes de conclusão no
 [workflow](../WORKFLOW_DE_DESENVOLVIMENTO.md); escopo/aceites no catálogo.
+
+## Incremento independente — leitura mínima de 02/11
+
+[Contrato da listagem](CONTRATO_LEITURA_USUARIOS_8D1B.md) delimita o recorte
+ID/nome/perfil para Administração, sem publicar login/estado ou comandos.
+[Prova B/U](../validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md) inclui paginação real,
+negação/revalidação de perfis, API/PostgreSQL/navegador e comparação renderizada.
+A ausência de API administrativa completa descrita acima permanece verdadeira;
+essa evidência sucede somente a listagem mínima. Campos adicionais, busca/filtros,
+consulta/histórico, criação, perfil e estado mantêm seus contratos pendentes.
+Não é aprovação integral da política institucional ou das unidades agregadas.

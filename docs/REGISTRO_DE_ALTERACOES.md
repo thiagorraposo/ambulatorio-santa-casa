@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-02 — Integrar leitura mínima administrativa de usuários
+
+GET/rota/menu Usuários somente para Administração, com ID/nome/perfil reais e
+paginação. Nove testes HTTP e três cenários de navegador por perfil comprovam
+projeção, negação, revalidação, erro/recarga e telas menores; comparação técnica
+renderizada preservada. [Evidências e limites](validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md).
+Agregados8D1 parciais; criação/perfil/ativação e P1 Edição preservam decisões
+pendentes. Sem migration, concessão clínica ou alteração de banco persistente.
+
 ## 2026-11-02 — Antecipar limites físicos e preservar foco dos erros P0
 
 DTO/cliente localizam limites numéricos existentes sem definir faixa clínica.
