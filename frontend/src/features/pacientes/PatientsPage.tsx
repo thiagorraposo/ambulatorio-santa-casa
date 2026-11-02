@@ -6,9 +6,13 @@ import { Card, EmptyState, PageHeading, QueryState, TableScroll } from '../../sh
 import { pagePath, Pagination, usePage } from './pagination';
 import PatientCsvExport from './PatientCsvExport';
 import { PatientCreateLink } from '../clinical/PatientCreateGate';
+import { useSession } from '../../app/session';
 
 export default function PatientsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const session = useSession();
+  const canWrite = session.user?.perfil === 'edicao' || session.user?.perfil === 'administracao';
+  const returnSearch = new URLSearchParams({ retorno: `/pacientes?${searchParams}` });
   const page = usePage();
   const currentName = searchParams.get('nome') ?? '';
   const currentSex = searchParams.get('sexo') ?? '';
@@ -72,13 +76,19 @@ export default function PatientsPage() {
             <TableScroll label="Pacientes disponíveis">
               <table className="data-table">
                 <caption className="sr-only">Pacientes desta página</caption>
-                <thead><tr><th scope="col">ID</th><th scope="col">Nome</th><th scope="col">Ficha</th></tr></thead>
+                <thead><tr><th scope="col">ID</th><th scope="col">Nome</th><th scope="col">Ações</th></tr></thead>
                 <tbody>{rows.map(patient => (
                   <tr key={patient.pacienteId}>
                     <td className="mono">{patient.pacienteId}</td>
                     <td>{patient.nome}</td>
                     <td><Link to={`/pacientes/${encodeURIComponent(patient.pacienteId)}`}
-                      aria-label={`Ver ficha de ${patient.nome}`}>Ver ficha</Link></td>
+                      aria-label={`Ver ficha de ${patient.nome}`}>Ver ficha</Link>
+                      {canWrite && <div className="form-actions patient-shortcuts">
+                        <Link to={`/pacientes/${encodeURIComponent(patient.pacienteId)}/editar?${returnSearch}`}
+                          aria-label={`Editar ${patient.nome}, ID ${patient.pacienteId}`}>Editar</Link>
+                        <Link to={`/pacientes/${encodeURIComponent(patient.pacienteId)}/atendimentos/novo?${returnSearch}`}
+                          aria-label={`Novo atendimento para ${patient.nome}, ID ${patient.pacienteId}`}>Novo atendimento</Link>
+                      </div>}</td>
                   </tr>
                 ))}</tbody>
               </table>

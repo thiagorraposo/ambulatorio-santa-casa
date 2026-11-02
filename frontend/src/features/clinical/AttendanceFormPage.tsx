@@ -9,6 +9,7 @@ import { DraftQueryState, EditingGate, MutationForm, useClinicalDraft, type Cata
 import { booleanOptions, FormSection, InputField, SelectField, TextAreaField } from './CoreFields';
 import { attendanceBody, attendanceInitial, clinicalNumbers, dirtyFields, type AttendanceDraft } from './core-contracts';
 import { VersionComparison } from './VersionComparison';
+import { PatientsSearchReturn } from '../pacientes/PatientsSearchReturn';
 
 const attendanceSteps = ['Atendimento', 'Avaliação e Chagas', 'Exames e familiares', 'Pendências', 'Revisão'] as const;
 
@@ -259,6 +260,7 @@ export default function AttendanceFormPage() {
   return <>
     <nav className="breadcrumb" aria-label="Caminho da página"><Link to={`/pacientes/${pacienteId}`}>Ficha do paciente</Link>
       {atendimentoId && <Link to={`/pacientes/${pacienteId}/atendimentos/${atendimentoId}`}>Atendimento</Link>}</nav>
+    <PatientsSearchReturn />
     <PageHeading title={atendimentoId ? 'Editar atendimento' : 'Novo atendimento'} />
     <EditingGate><DraftQueryState query={patientQuery}>{patient => <><p>Paciente: {patient.nome} · ID {patient.pacienteId}</p>
       {atendimentoId ? <ExistingAttendanceForm pacienteId={pacienteId} atendimentoId={atendimentoId} />

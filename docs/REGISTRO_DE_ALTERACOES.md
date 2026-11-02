@@ -1,5 +1,12 @@
 # Registro de Alterações
 
+## 2026-11-02 — Atalhos diretos da busca, 8B3U.4
+
+Atalhos Editar/Novo atendimento por pessoa, nome/ID, perfis e retorno à busca;
+sem N+1 ou escrita nova.22 unidades e2 E2E, build e comparação renderizada320px
+aprovados no recorte; [provas e limites](validacoes/VALIDACAO_8B3U_4.md).
+Novas colunas/filtros e aceite humano permanecem pendentes.
+
 ## 2026-11-02 — E6U parâmetros do exame canônico
 
 - Interface de seis campos, revisão, lista paginada e recuperação no exame

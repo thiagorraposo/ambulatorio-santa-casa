@@ -10,6 +10,7 @@ import { booleanOptions, FormSection, InputField, SelectField } from './CoreFiel
 import { dirtyFields, patientBody, patientInitial } from './core-contracts';
 import { PatientCreateGate } from './PatientCreateGate';
 import { VersionComparison } from './VersionComparison';
+import { PatientsSearchReturn } from '../pacientes/PatientsSearchReturn';
 
 function PriorSearch({ onSearch, onNoMatchConfirmed }: { onSearch: () => void; onNoMatchConfirmed: () => void }) {
   const [name, setName] = useState('');
@@ -103,7 +104,7 @@ function PatientForm({ data }: { data?: PacienteDetalheResponse }) {
 
 function ExistingPatientForm({ id }: { id: string }) {
   const query = useApiQuery<PacienteDetalheResponse>(`/pacientes/${encodeURIComponent(id)}`);
-  return <DraftQueryState query={query}>{data => <PatientForm key={data.pacienteId} data={data} />}</DraftQueryState>;
+  return <DraftQueryState query={query}>{data => <><p>Paciente: {data.nome} · ID {data.pacienteId}</p><PatientForm key={data.pacienteId} data={data} /></>}</DraftQueryState>;
 }
 
 export default function PatientFormPage() {
@@ -112,6 +113,7 @@ export default function PatientFormPage() {
   return <>
     <nav className="breadcrumb" aria-label="Caminho da página"><Link to="/pacientes">Pacientes</Link>
       {pacienteId && <Link to={`/pacientes/${pacienteId}`}>Ficha do paciente</Link>}</nav>
+    <PatientsSearchReturn />
     <PageHeading title={pacienteId ? 'Editar paciente' : 'Cadastrar paciente'} />
     <EditingGate>{pacienteId ? <ExistingPatientForm id={pacienteId} /> : <PatientCreateGate>
       <PriorSearch onSearch={() => setCreateAfterSearch(false)} onNoMatchConfirmed={() => setCreateAfterSearch(true)} />

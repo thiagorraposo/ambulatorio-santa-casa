@@ -1088,7 +1088,7 @@ Não encerra todos os EVT nem altera o vínculo clínico por paciente.
 
 #### 8B3U — Usar tabela ampliada e atalhos por pessoa
 
-**Estado e cobertura:** Planejado; não aceito. RQ-LIS-02–05, 09–10, 13–21; RQ-CAD-03, 09, 20, 25–30; RQ-FIC-02, 05; RQ-RES-02; RQ-ATD-20 (telas/elementos na matriz).
+**Estado e cobertura:** U3.4 VALIDADA TECNICAMENTE ([provas](../validacoes/VALIDACAO_8B3U_4.md)); U3.1–.3 pendentes. Agregado não concluído; sem aceite humano. RQ-LIS-02–05, 09–10, 13–21; RQ-CAD-03, 09, 20, 25–30; RQ-FIC-02, 05; RQ-RES-02; RQ-ATD-20 (telas/elementos na matriz).
 
 **Escopo:** U3.1 tabela/busca código/nascimento; U3.2 origem/proveniência; U3.3 projeto/período/última consulta; U3.4 Editar/Novo atendimento diretos com nome/ID e capacidade. Quatro unidades separadas.
 
