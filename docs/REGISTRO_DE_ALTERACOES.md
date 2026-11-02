@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-02 — Corrigir chaves dos formulários de acompanhamento
+
+`FollowupDraftFields` passa `key` diretamente aos componentes booleano,
+seleção e texto, preservando campos, callbacks e layout. Build e306 unidades
+aprovados;110/110 E2E integrais aprovados sem retries, com limpeza dos recursos
+descartáveis. Comandos e limitações no [registro da retomada](validacoes/VALIDACAO_REGRESSAO_FRONTEND_M3_2026_11_02.md#retomada-do-checkpoint-511d2f2--chaves-dos-formulários).
+Encerramento solicitado após a menor unidade segura; checkpointM3 atualizado
+com resultados e próxima ação, sem concluir achados ou aceites humanos.
+
 ## 2026-11-02 — Conservar filtros no breadcrumb direto do atendimento
 
 Corrigida perda reproduzida de filtros/página ao usar Pacientes no detalhe.

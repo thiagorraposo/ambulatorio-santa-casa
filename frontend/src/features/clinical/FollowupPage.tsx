@@ -104,12 +104,12 @@ function FollowupDraftFields({ fields, draft, onChange }: {
   fields: FieldSpec[]; draft: FollowupDraft; onChange: (name: string, value: string) => void;
 }) {
   return <div className="form-grid">{fields.map(field => {
-    const common = { key: field.name, label: field.label, value: draft[field.name] ?? '',
+    const common = { label: field.label, value: draft[field.name] ?? '',
       onChange: (value: string) => onChange(field.name, value) };
-    if (field.type === 'boolean') return <FollowupBoolean {...common} />;
-    if (field.type === 'select') return <FollowupSelect {...common} options={field.options ?? []} required={field.required}
+    if (field.type === 'boolean') return <FollowupBoolean key={field.name} {...common} />;
+    if (field.type === 'select') return <FollowupSelect key={field.name} {...common} options={field.options ?? []} required={field.required}
       emptyLabel={field.emptyLabel} />;
-    return <FollowupText {...common} type={field.type} maximum={field.maximum} required={field.required}
+    return <FollowupText key={field.name} {...common} type={field.type} maximum={field.maximum} required={field.required}
       multiline={field.multiline} min={field.type === 'number' ? 1 : undefined} max={field.max} />;
   })}</div>;
 }

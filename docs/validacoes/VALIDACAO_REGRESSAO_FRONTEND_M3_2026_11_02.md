@@ -69,3 +69,46 @@ Prontidão técnica do candidato limitada aos recortes implementados e ao
 percurso sintético. Datas/status do exame, escrita de medicamentos, sequências
 do dry-run, recuperação de confirmação da importação e P-03–09 ainda impedem
 M3 integral. Não houve CI remoto, aceite humano, push, merge ou deploy.
+
+
+## Retomada do checkpoint 511d2f2 — chaves dos formulários
+
+Base `511d2f2`, branch `feat/m3-janela-1-eventos`, worktree inicialmente
+limpo. Próxima unidade expressa do checkpoint: `FollowupDraftFields` em
+`FollowupPage.tsx`. A chave estável `field.name` passou a ser atributo direto
+nos componentes booleano, seleção e texto, saindo do objeto compartilhado
+espalhado nas propriedades. Campos, valores e callbacks foram preservados;
+nenhuma alteração de layout, API, autorização ou persistência.
+
+`make frontend-check COMPACT=1` aprovou build frontend, **306/306 unidades em
+36 arquivos** e build backend. Log `/tmp/ambulatorio-check-d91hwmg_/output.log`;
+nenhum aviso de key por spread nesse log. O build mantém o aviso de bundle
+acima de500kB. A etapa E2E inicial falhou antes de criar recursos por usuário
+PostgreSQL incorreto (`postgres`); não é falha de cenário funcional.
+
+Retomada somente da etapa E2E com o administrador sintético documentado
+`m3_sintetico`, sem repetir build/unidades aprovados:
+`SYNTHETIC_PG_HOST=127.0.0.1 SYNTHETIC_PG_PORT=33363 SYNTHETIC_PG_USER=m3_sintetico PGPASSWORD=<segredo local> bash tests/frontend/test_e2e.sh`.
+Servidor PostgreSQL16 em `/dev/shm/m3-estabilizacao-b4b5ss_x`, conferido pelo
+processo e disponibilidade. Runner cria/remove somente banco/logins próprios;
+log `/tmp/m3-retomada-regressao-integral.log`, runner
+`/tmp/etapa6-frontend-VvvGLl`. **110/110 E2E aprovados em24,7min**, uma rodada
+integral, um worker, zero retries/skip e saída0. Inclui os formulários de
+acompanhamento afetados (BZN/retornos/projeto/notificação/encaminhamento/
+contrarreferência/pendências), rascunho, conflito, recuperação sem duplicação,
+P0 sintético, ensaio cadastro→clínica→histórico→CSV, navegação por perfil,
+teclado/Axe/telas menores e listagem administrativa. Banco/login exclusivos
+removidos pelo runner; cluster e demonstrações preexistentes preservados.
+
+Não foi necessário alterar testes ou ampliar timeouts. O runtime validado é
+`511d2f2` mais somente o diff de `FollowupPage.tsx`; alterações posteriores desta
+unidade são documentais. Builds e unidades aprovados não foram repetidos após
+a correção da conexão. SQL/importador/backend completos não foram repetidos:
+nenhum código dessas camadas foi alterado. As comparações visuais anteriores
+continuam no seu recorte; esta alteração não muda apresentação ou layout.
+
+As provas anteriores permanecem válidas em seus recortes; esta rodada atende à
+regressão integral explicitamente pendente no checkpoint. P0 humano
+HUM-M3-03 e aceites M3/8V1/8V2 continuam abertos; sucesso sintético não reproduz
+nem encerra o relato humano. Cadastro por Edição depende do contrato de escopo
+inicial; consulta/histórico e mutações8D dependem dos próprios contratos.
