@@ -10,6 +10,7 @@ import ClinicalActions from '../clinical/ClinicalActions';
 import { AttendanceFamilies } from './PatientResources';
 import { AttendanceChagasDiagnosis, AttendanceClinicalAssessment } from './AttendanceClinicalPanels';
 import { attendanceReturn } from './attendance-navigation';
+import { patientsSearchReturn } from './PatientsSearchReturn';
 
 export default function AttendancePage() {
   const session = useSession();
@@ -19,11 +20,12 @@ export default function AttendancePage() {
   const patientPath = `/pacientes/${encodeURIComponent(pacienteId)}`;
   const [search] = useSearchParams();
   const origin = attendanceReturn(patientPath, search.get('retorno'));
+  const searchOrigin = origin ? patientsSearchReturn(new URL(origin, 'http://app.local').searchParams.get('retorno')) : null;
   const query = useApiQuery<AtendimentoDetalheResponse>(pagePath(`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}`, page.limit, page.offset));
 
   return <>
     <nav className="breadcrumb" aria-label="Caminho da página">
-      <Link to="/pacientes">Pacientes</Link>
+      <Link to={searchOrigin ?? '/pacientes'}>Pacientes</Link>
       <Link to={origin ?? `${patientPath}?aba=atendimentos`}>{origin ? 'Voltar à ficha de origem' : 'Histórico do paciente'}</Link>
       <span>Atendimento</span>
     </nav>

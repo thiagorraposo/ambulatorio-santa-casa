@@ -1,5 +1,13 @@
 # Registro de Alterações
 
+## 2026-11-02 — Conservar filtros no breadcrumb direto do atendimento
+
+Corrigida perda reproduzida de filtros/página ao usar Pacientes no detalhe.
+Destino deriva da origem validada;36 unidades, build e três E2E por perfil
+aprovados, com teclado/Axe e1440/390/320. [Provas e limites](validacoes/VALIDACAO_8B3U_4.md#breadcrumb-direto-do-atendimento--fechamento-solicitado).
+Concluída a menor unidade em andamento a pedido do responsável; checkpoint
+atualizado sem declarar homologação ou conclusão deM3.
+
 ## 2026-11-02 — Melhorar leitura da tabela de pacientes em telas menores
 
 Aplicado padrão existente de rolagem acessível: nomes/IDs inteiros e orientação

@@ -148,3 +148,29 @@ Cobre1440/390/320, Axe, foco/ArrowRight, abertura dos dois formulários reais
 e retorno; Consulta sem atalhos de escrita. Rodada anterior2/2 também passou
 antes da orientação textual (`/tmp/m3-retomada-tabela-e2e.log`).
 Sem alteração lógica que justifique repetir unidades backend/SQL/importador.
+
+## Breadcrumb direto do atendimento — fechamento solicitado
+
+Base `2dfd86f`. Concluída somente a menor unidade em andamento: o link
+Pacientes no detalhe do atendimento usava `/pacientes` e perdia filtros/página,
+embora o retorno pela ficha já funcionasse. Regressão reproduzida antes da
+correção:19 unidades aprovadas/1 falha,
+`/tmp/m3-retomada-breadcrumb-before.log`. Agora deriva a busca do retorno
+validado à ficha do mesmo paciente e reaplica o validador da lista local; sem
+origem válida continua usando `/pacientes`. Nenhuma API/permissão foi alterada.
+
+- **36/36 unidades** de navegação/leitura,
+  `/tmp/m3-fechamento-breadcrumb-unit.log`. Inclui destino padrão para origem
+  ausente/inválida e conservação de filtros/seleção/páginas/hash.
+- `make frontend-build COMPACT=1`: aprovado,
+  `/tmp/ambulatorio-check-n44d6hvq/output.log`.
+- `tests/frontend/test_e2e.sh patient-shortcuts.spec.ts --grep FM-NAV-12`,
+  mesmas variáveis sintéticas33363 anteriores: **3/3 aprovados**,
+  `/tmp/m3-fechamento-breadcrumb-e2e.log`, `/tmp/etapa6-frontend-5hzMSO`.
+  Nos três perfis, o breadcrumb direto é acionado por teclado; voltar no
+  navegador retoma o detalhe e o retorno à ficha/busca conserva o contexto.
+  Mantidas verificações1440/390/320, Axe e recarga/relogin.
+
+Validação dirigida, sem nova execução integral do frontend/backend/SQL.
+P0 humano, demais achados e aceitesM3/8V1/8V2 permanecem abertos. A pedido do
+responsável, a execução contínua termina após commit e checkpoint desta unidade.

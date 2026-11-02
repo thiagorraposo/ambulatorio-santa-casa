@@ -68,6 +68,7 @@ describe('retorno autorizado à ficha de origem', () => {
     await user.click(screen.getByRole('link', { name: `Atendimento ${attendanceId}` }));
     const back = screen.getByRole('link', { name: 'Voltar à ficha de origem' });
     expect(back).toHaveAttribute('href', origin);
+    expect(screen.getByRole('link', { name: /^Pacientes$/ })).toHaveAttribute('href', search);
     await user.click(back);
     expect(screen.getByRole('navigation', { name: 'Caminho da página' })).toContainElement(
       screen.getByRole('link', { name: /^Pacientes$/ }),
@@ -126,6 +127,7 @@ describe('retorno autorizado à ficha de origem', () => {
     'usa histórico padrão quando retorno é ausente ou inválido: %s', raw => {
       show(`${detailPath}${raw === null ? '' : `?${new URLSearchParams({ retorno: raw })}`}`);
       expect(screen.getByRole('link', { name: 'Histórico do paciente' })).toHaveAttribute('href', `${patientPath}?aba=atendimentos`);
+      expect(screen.getByRole('link', { name: /^Pacientes$/ })).toHaveAttribute('href', '/pacientes');
       expect(screen.queryByRole('link', { name: 'Voltar à ficha de origem' })).not.toBeInTheDocument();
     },
   );

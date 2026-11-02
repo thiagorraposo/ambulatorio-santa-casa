@@ -35,6 +35,14 @@ for (const perfil of ['consulta', 'edicao', 'administracao'] as const) {
       await open.focus(); await page.keyboard.press('Enter');
       const back = page.getByRole('link', { name: 'Voltar à ficha de origem', exact: true });
       await expect(back).toHaveAttribute('href', from);
+      const list = page.getByRole('navigation', { name: 'Caminho da página' }).getByRole('link', { name: 'Pacientes', exact: true });
+      await expect(list).toHaveAttribute('href', source);
+      if (via === 'último') {
+        const detail = page.url();
+        await list.focus(); await page.keyboard.press('Enter');
+        await expect(page).toHaveURL(source);
+        await page.goBack(); await expect(page).toHaveURL(detail);
+      }
       await back.click();
       await expect(page).toHaveURL(from);
     }
