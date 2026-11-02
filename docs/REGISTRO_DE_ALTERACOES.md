@@ -1,5 +1,13 @@
 # Registro de Alterações
 
+## 2026-11-02 — Confronto renderizado da leitura de medicamentos
+
+Referência Tratamentos e leitura real comparadas em1440/390/320, preservando
+capturas anteriores. Escopo por atendimento, campos literais e ausência de
+escrita documentados frente à tabela agregada do protótipo.
+[Prova parcial8V1](validacoes/VALIDACAO_7B_E5U_LEITURA.md#comparação-técnica-renderizada--02112026),
+sem homologação visual ou novo aceite humano.
+
 ## 2026-11-02 — Preparar decisões de identidade, documento e isolamento
 
 Propostas8D1D/P-08 e8C3D/P-07 com alternativas, cenários sintéticos e gates;

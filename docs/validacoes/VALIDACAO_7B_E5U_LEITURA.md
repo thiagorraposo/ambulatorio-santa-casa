@@ -29,3 +29,35 @@ Capturas da interface (não constituem comparação nem aceite visual8V1):
 [320](../frontend/visuais/medicamentos-leitura-320.png).
 Rerodar tests/frontend/test_e2e.sh medicamentos.spec.ts apenas em ambiente
 sintético confirmado. Logs /tmp voláteis; resultados resumidos aqui.
+
+
+## Comparação técnica renderizada — 02/11/2026
+
+Durante a regressão M3 em `55f82b5` mais ensaio/isolamento de testes, os dois
+cenários de medicamentos passaram novamente (itens42/43 da rodada integral),
+com capturas reais em `/tmp/etapa6-frontend-0gp2Pn`, API/PostgreSQL sintético e
+migrations02–73. Nenhum código de medicamentos mudou entre as duas provas.
+Referência renderizada em localhost8445: login sintético → Pacientes →
+Paciente Sintético001 → Tratamentos. `PatientRecord.tsx`, SHA256
+`37b7943c03203a382a9a27c0cb9b5ae76a14e67961799f35eb857578bd9a4ac1`.
+O log `/tmp/m3-medicamentos-referencia.log` confirma cabeçalhos reais.
+
+A referência agrega medicamentos das consultas em tabela de sete colunas:
+medicamento/dose/via/frequência/início/uso atual/status, junto do BZN. A aplicação
+mantém o escopo por atendimento e dezoito propriedades identificadas em cartões
+paginados, com nome livre e catálogo separados. Não inventa consolidação,
+status calculado, unidade ou prescrição para copiar a tabela da referência.
+Adicionar medicamento da referência não é oferecido enquanto faltar contrato
+de escrita. Densidade e estrutura diferem; a grade reverte para uma coluna em
+320px, sem overflow de página e com nome/ID/contexto visíveis.
+
+| Viewport | Referência renderizada | Leitura real da aplicação |
+| --- | --- | --- |
+| 1440 | [Original](../frontend/visuais/medicamentos-referencia-m3-1440.png) | [Atual](../frontend/visuais/medicamentos-leitura-m3-1440.png) |
+| 390 | [Original](../frontend/visuais/medicamentos-referencia-m3-390.png) | [Atual](../frontend/visuais/medicamentos-leitura-m3-390.png) |
+| 320 | [Original](../frontend/visuais/medicamentos-referencia-m3-320.png) | [Atual](../frontend/visuais/medicamentos-leitura-m3-320.png) |
+
+As capturas da aplicação mostram o viewport inicial, não todos os cartões ou
+estados em uma imagem. Os dezoito campos, paginação, vazio/erro/perfil e acesso
+continuam comprovados pelos testes. Este confronto acrescenta evidência parcial
+8V1 do recorte de leitura; não homologa escrita, toda a fidelidade visual ou M3.

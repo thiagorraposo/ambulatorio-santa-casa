@@ -135,13 +135,13 @@ recurso já publicado. Caminhos propostos não são criados nesta entrega.
 | H5 | `GET /pacientes/:id/atendimentos` e `/:atendimentoId`: consulta autorizada e coleções paginadas. Diagnóstico/avaliação por consulta. Snapshots e resultados familiares têm endpoints/paginação independentes; R7-01 corrigida no recorte original. |
 | H6 | `GET /pacientes/:id/exames` e `/:exameId`: bloco/identificação/resultado textual/observações; criação em H4; `GET/POST /:exameId/resultados` para parâmetros humanos canônicos; sem datas/status ou correção independente. |
 | H7 | `GET/PUT /pacientes/:id/projetos`: upsert por paciente/projeto, somente campos informados; catálogo ativo. Sem versão/conflito de edição concorrente. |
-| H8 | `GET/POST /pacientes/:id/tratamento-bzn`: um canônico por paciente, reações juntas na criação, transação/lock; conflito de unicidade 409. Sem PATCH/reação isolada. |
+| H8 | `GET/POST /pacientes/:id/tratamento-bzn`: um canônico por paciente, reações juntas na criação, transação/lock; conflito de unicidade 409. `GET/POST /.../reacoes` para reação isolada, com captura/recibo; sem PATCH de correção canônica. |
 | H9 | `GET/POST /pacientes/:id/retornos-bzn`, `/retornos-anuais`, `/ocorrencias-anuais`: episódios ligados ao atendimento, comparecimento não futuro; fato anual separado. BZN confere tratamento canônico. |
 | H10 | `GET/POST /pacientes/:id/encaminhamentos`, `/:encaminhamentoId/contrarreferencias`: catálogos opcionais e atendimento verificado; vários episódios. Sem PATCH/upload. |
 | H11 | `GET/PUT /pacientes/:id/notificacao`: canônica por paciente, campos independentes/parciais; sem versão de concorrência. |
 | H12 | `GET /pacientes/:id/pendencias?status`, `POST`, `PATCH /:pendenciaId`: autorização por pessoa/atendimento. Criação aceita null; PATCH exige string. Resolvida exige data; outros recusam data. Sem nota/responsável/tipo/origem/global. |
 | H13 | `GET /catalogos/exames`, `/projetos`, `/tipos-encaminhamento`: três perfis, ativos/paginados, ID textual; não concede acesso clínico nem escrita. |
-| H14 | `GET /importacoes/lotes[/:id]` e `POST /importacoes` multipart: execução sintética habilitada explicitamente; POST edição/admin. Dry-run resposta mínima; lote efetivo; DTOs sanitizados sem arquivo/hash/versões completas/candidatos/relatório rico. Lotes ordinários: administração; demais com vínculo de todos os pacientes e proveniência íntegra, ADR-023. |
+| H14 | `GET /importacoes/lotes[/:id]` e `POST /importacoes` multipart: execução sintética habilitada explicitamente; POST edição/admin. Dry-run com totais/códigos sanitizados reais e lote efetivo; sem arquivo/hash/versões completas/candidatos; isolamento de sequências e relatório rico restantes pendentes. Lotes ordinários: administração; demais com vínculo de todos os pacientes e proveniência íntegra, ADR-023. |
 | H15 | `/importacoes/revisoes/*`: POST fonte/autorização/recebimento/simulações/publicação/aplicação/encerramento existentes em ambiente sintético. Gestão exige entitlement; fonte exige autorização. Consulta pública/capacidades para retomada ainda necessárias. |
 | H16 | `GET /pacientes/export.csv`: ID/nome da página/filtros, três perfis autorizados ao recurso; fórmulas neutralizadas. UI 8A1 na busca; sem CSV de dashboard. |
 | H17 | `GET/POST /pacientes/:id/atendimentos/:atendimentoId/sorologias`: episódios individuais, métodos repetidos, datas próprias e null, auditoria 65 e recibo `sorologiaId`. Vínculo/perfil/contexto verificados; sem solicitação geral ou edição persistida; interface 7B-E1U em rotas próprias. [Contrato](../arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md). |
@@ -1137,3 +1137,9 @@ alternativas/cenários e checklist de aprovação. Nenhuma capacidade USR/CTA ou
 documental ENC foi implementada, aceita ou desbloqueada por essa preparação.
 [Isolamento do dry-run](../arquitetura/PROPOSTA_ISOLAMENTO_DRY_RUN_8C2B_1.md) tem
 PoC de inviabilidade do overlay simples; gate FM-IMP-36 continua aberto.
+
+
+Confronto renderizado de02/11: [leitura de medicamentos E5U](../validacoes/VALIDACAO_7B_E5U_LEITURA.md#comparação-técnica-renderizada--02112026)
+possui referência/aplicação1440/390/320, com diferença explícita entre tabela
+agregada do protótipo e cartões por atendimento do contrato vigente. Evidência
+parcial de8V1; escrita/prescrição e aceite humano continuam pendentes.
