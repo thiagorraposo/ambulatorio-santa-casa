@@ -1,3 +1,5 @@
+import ResultadosExamePage from '../features/resultados-exame/ResultadosExamePage';
+import ResultadoExameCreatePage from '../features/resultados-exame/ResultadoExameCreatePage';
 import ReacoesBznPage from '../features/reacoes-bzn/ReacoesBznPage';
 import ReacaoBznCreatePage from '../features/reacoes-bzn/ReacaoBznCreatePage';
 import MedicamentosPage from '../features/medicamentos/MedicamentosPage';
@@ -196,6 +198,8 @@ export default function App() {
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/medicamentos" element={<MedicamentosPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias" element={<SorologiasPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias/nova" element={<SorologiaCreatePage />} />
+      <Route path="/pacientes/:pacienteId/exames/:exameId/resultados" element={<ResultadosExamePage />} />
+      <Route path="/pacientes/:pacienteId/exames/:exameId/resultados/nova" element={<ResultadoExameCreatePage />} />
       <Route path="/pacientes/:pacienteId/tratamento-bzn/reacoes" element={<ReacoesBznPage />} />
       <Route path="/pacientes/:pacienteId/tratamento-bzn/reacoes/nova" element={<ReacaoBznCreatePage />} />
       <Route path="/pacientes/:pacienteId/obito" element={<ObitoPage />} />

@@ -343,3 +343,10 @@ export interface ReacaoBznOcorrenciaResponse {
   dataReacao:string|null; consequencia:string|null; observacoes:string|null;
 }
 export interface ReacaoBznCriadaResponse { reacaoId:string }
+
+export interface ResultadoExameResponse {
+  resultadoId:string;exameId:string;nomeParametro:string;valorInformado:string|null;unidadeInformada:string|null;
+  referenciaInformada:string|null;interpretacaoInformada:string|null;observacoes:string|null;
+}
+
+export interface ResultadoExameCriadoResponse {resultadoId:string}

@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-02 — E6U parâmetros do exame canônico
+
+- Interface de seis campos, revisão, lista paginada e recuperação no exame
+  escolhido; ajuste do teste de navegação preserva ausência de atendimento null.
+- Build/266 unidades e3 E2E reais sintéticos aprovados; identificação, rascunho,
+  recibo sem repetir POST, perfis/revogação e pai preservados.
+- [Provas e comparação visual](validacoes/VALIDACAO_7B_E6U_PARAMETROS.md).
+  Datas/status e aceite humano pendentes; sem push, merge ou deploy.
+
 ## 2026-11-01 — E6B parâmetros do exame canônico
 
 - Contrato/destino próprio SQL73 para seis campos humanos, FK canônica, captura

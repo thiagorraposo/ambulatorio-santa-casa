@@ -72,3 +72,5 @@ sistema; sua menção preserva rastreabilidade, não garante disponibilidade atu
 - [Interface marcapasso/CDI — recorte E4U](VALIDACAO_7B_E4U_DISPOSITIVOS.md).
 
 - [Backend óbito inicial — recorte E4B](VALIDACAO_7B_E4B_OBITO.md).
+
+- [Interface de parâmetros do exame — E6U](VALIDACAO_7B_E6U_PARAMETROS.md).

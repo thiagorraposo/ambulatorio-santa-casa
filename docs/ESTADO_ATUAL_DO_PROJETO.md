@@ -156,3 +156,9 @@ SQL73,188 unidades/137 HTTP/44 SQL/upgrade sem backfill. [Contrato e limites](ar
 Vínculo canônico definido tecnicamente sem reinterpretar legado SQL07; valores
 textuais humanos, nenhum cálculo. Próxima: E6U desse recorte; datas/status do pai,
 correções e aceite integral continuam pendentes.
+
+
+Continuidade de 02/11/2026: [E6U parâmetros](validacoes/VALIDACAO_7B_E6U_PARAMETROS.md)
+VALIDADA TECNICAMENTE no recorte RQ-EXA-09–13/16, com API/PostgreSQL sintético,
+revisão e recuperação. Datas/status do pai e aceite humano permanecem pendentes.
+Próximas unidades e estado operacional no [checkpoint único](execucao/PLANO_M3_2026_11_03.md#10-checkpoint-único-e-transferência-de-contexto).

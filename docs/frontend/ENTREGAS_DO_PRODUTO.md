@@ -686,7 +686,7 @@ Não encerra todos os EVT nem altera o vínculo clínico por paciente.
 
 #### 7B-E6U — Registrar e consultar resultados de exames identificados
 
-**Estado e cobertura:** Planejado; não aceito. RQ-EXA-07–13, 16 (telas/elementos na matriz).
+**Estado e cobertura:** Parâmetros canônicos VALIDADOS TECNICAMENTE no recorte RQ-EXA-09–13/16; [provas](../validacoes/VALIDACAO_7B_E6U_PARAMETROS.md). Datas/status do pai pendentes; agregado não concluído nem aceito. RQ-EXA-07–13, 16 (telas/elementos na matriz).
 
 **Escopo:** Status/datas do exame e parâmetros valor/unidade/referência/interpretação textual humana; complementar H6 sem calcular diagnóstico. Uma seção/formulário por módulo; revisão lista todos os campos.
 
