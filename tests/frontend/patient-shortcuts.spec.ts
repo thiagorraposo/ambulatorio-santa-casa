@@ -1,5 +1,46 @@
 import { test, expect } from '@playwright/test';
-import { assertNoPersistentClinicalState, fixture, signIn } from './fixtures';
+import { apiAs, assertNoPersistentClinicalState, fixture, signIn, signInCurrentPage } from './fixtures';
+import { assertAccessible, assertFitsViewport } from './stage7-helpers';
+
+for (const perfil of ['consulta', 'edicao', 'administracao'] as const) {
+  test(`FM-NAV-12: busca, ficha, abas e recarga preservam retorno — ${perfil}`, async ({ page }, info) => {
+    const name = `Retorno busca ${perfil} ${Date.now()} Sintético`;
+    for (let index = 0; index < 2; index++) {
+      const response = await apiAs('administracao', 'POST', '/pacientes', { nome: `${name} ${index}`, sexo: 'feminino' });
+      expect(response.status).toBe(201);
+      const { pacienteId } = await response.json();
+      if (perfil !== 'administracao') {
+        expect((await apiAs('administracao', 'PUT', `/pacientes/${pacienteId}/acesso/${fixture.users[perfil].usuarioId}`,
+          { ativo: true, podeEditar: perfil === 'edicao' })).status).toBe(200);
+      }
+    }
+    const source = `/pacientes?${new URLSearchParams({ nome: name, sexo: 'feminino', limit: '1', offset: '1' })}`;
+    await signIn(page, perfil, source);
+    const record = page.getByRole('link', { name: /^Ver ficha de / }).first();
+    await expect(record).toBeVisible();
+    const target = new URL((await record.getAttribute('href'))!, 'http://app.local');
+    expect(target.searchParams.get('retorno')).toBe(source);
+    await record.focus(); await page.keyboard.press('Enter');
+    await expect(page.getByRole('heading', { name: 'Ficha do paciente', exact: true })).toBeVisible();
+    await page.getByRole('navigation', { name: 'Seções da ficha' }).getByRole('link', { name: 'Projetos', exact: true }).click();
+    await page.reload();
+    // Sessão somente em memória: recarga exige novo login e conserva next/query.
+    await signInCurrentPage(page, perfil);
+    const breadcrumb = page.getByRole('navigation', { name: 'Caminho da página' }).getByRole('link', { name: 'Pacientes', exact: true });
+    await expect(breadcrumb).toHaveAttribute('href', source);
+    for (const width of [1440, 390, 320]) {
+      await page.setViewportSize({ width, height: width === 1440 ? 960 : 844 });
+      await assertFitsViewport(page); await assertAccessible(page);
+      await page.screenshot({ path: info.outputPath(`ficha-retorno-${perfil}-${width}.png`), fullPage: true });
+    }
+    await breadcrumb.focus(); await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(source);
+    await expect(page.getByRole('searchbox', { name: 'Nome', exact: true })).toHaveValue(name);
+    await expect(page.getByRole('combobox', { name: 'Sexo', exact: true })).toHaveValue('feminino');
+    await expect(page.getByRole('link', { name: /^Ver ficha de / }).first()).toHaveAttribute('href', target.pathname + target.search);
+    await assertNoPersistentClinicalState(page);
+  });
+}
 
 test('8B3U.4: atalhos abrem pessoa identificada e preservam busca, teclado e 320px', async ({ page }, testInfo) => {
   const patient = fixture.main;

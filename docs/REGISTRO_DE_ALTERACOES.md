@@ -1,5 +1,12 @@
 # Registro de Alterações
 
+## 2026-11-02 — Conservar filtros ao consultar a ficha de pacientes
+
+Incorporadas alterações locais revisadas: busca→ficha→abas→recarga→busca mantém
+filtros e página, com retorno restrito à lista local. Build,16 unidades e três
+E2E por perfil aprovados, com teclado/Axe e1440/390/320. [Prova e limites](validacoes/VALIDACAO_8B3U_4.md#retorno-da-ficha-à-busca--estabilização-de-0211).
+Sem alteração de permissões, backend ou aceite humano.
+
 ## 2026-11-02 — Incorporar PoC revisada de instância sintética isolada
 
 Harness preexistente revisado e reexecutado em tmpfs: clones próprios,

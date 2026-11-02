@@ -81,7 +81,7 @@ export default function PatientsPage() {
                   <tr key={patient.pacienteId}>
                     <td className="mono">{patient.pacienteId}</td>
                     <td>{patient.nome}</td>
-                    <td><Link to={`/pacientes/${encodeURIComponent(patient.pacienteId)}`}
+                    <td><Link to={`/pacientes/${encodeURIComponent(patient.pacienteId)}?${returnSearch}`}
                       aria-label={`Ver ficha de ${patient.nome}`}>Ver ficha</Link>
                       {canWrite && <div className="form-actions patient-shortcuts">
                         <Link to={`/pacientes/${encodeURIComponent(patient.pacienteId)}/editar?${returnSearch}`}

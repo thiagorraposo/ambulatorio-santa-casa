@@ -73,3 +73,25 @@ Prontidão/DoD do recorte: rotas/camadas existentes suficientes, destinos e reto
 reais, perfis/identificação e interação estreita comprovados. Não há mudança de
 schema ou contrato clínico. RQ-LIS-09/10 mapeados na matriz. EVM sem baseline
 confiável de esforço/custo/valor, não recalculado por contagem de entregas.
+
+## Retorno da ficha à busca — estabilização de 02/11
+
+Base `bd3d58c`; alterações locais preexistentes revisadas e preservadas. O link
+Ver ficha passa a transportar os mesmos filtros/limite/deslocamento dos atalhos;
+o breadcrumb da ficha valida esse destino local e o conserva entre abas e após
+relogin na recarga. URLs externas, de outra ficha e barras invertidas são
+recusadas. Sem alteração de API, RBAC ou persistência clínica.
+
+- Build frontend aprovado: `/tmp/ambulatorio-check-yvemigul/output.log`.
+- Leitura dirigida: **16/16 unidades** (`reading.test.tsx`),
+  `/tmp/m3-retomada-reading.log`.
+- Três E2E por perfil aprovados na rodada dirigida:
+  `/tmp/m3-retomada-percurso.log`, artefatos `/tmp/etapa6-frontend-UP1wFw`.
+  Busca filtrada/paginada, teclado, abas, recarga com novo login, retorno exato,
+  Axe e capturas1440/390/320. A inspeção da captura320 confirma breadcrumb
+  alcançável e menu/abas sem sobreposição.
+
+Mantida a identidade/paleta e a adaptação acessível já comparada acima. As
+capturas deste incremento não constituem nova homologação visual do protótipo.
+FM-NAV-12/RQ-NAV-12 e 7D-R1 recebem prova apenas desse percurso; agregado e
+aceite humano permanecem abertos.

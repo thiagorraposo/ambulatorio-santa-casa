@@ -9,6 +9,7 @@ import { useSession } from '../../app/session';
 import ClinicalActions from '../clinical/ClinicalActions';
 import { LatestAttendance } from './LatestAttendance';
 import { SelectedAttendance } from './SelectedAttendance';
+import { patientsSearchReturn } from './PatientsSearchReturn';
 import {
   AttendanceHistory, PatientAnnualFollowup, PatientBzn, PatientExams, PatientNotification,
   PatientPending, PatientProjects, PatientReferrals,
@@ -81,7 +82,7 @@ export default function PatientPage() {
   const path = `/pacientes/${encodeURIComponent(pacienteId)}`;
   const query = useApiQuery<PacienteDetalheResponse>(pagePath(path, page.limit, page.offset));
   return <>
-    <nav className="breadcrumb" aria-label="Caminho da página"><Link to="/pacientes">Pacientes</Link><span>Ficha do paciente</span></nav>
+    <nav className="breadcrumb" aria-label="Caminho da página"><Link to={patientsSearchReturn(searchParams.get('retorno')) ?? '/pacientes'}>Pacientes</Link><span>Ficha do paciente</span></nav>
     <PageHeading title="Ficha do paciente" />
     <QueryState query={query}>
       {data => <>

@@ -189,3 +189,12 @@ Não houve reprodução da falha original da sessão humana: cenário/perfil/
 ambiente não identificados. **HUM-M3-03 continua ABERTO** e a apresentação
 permanece com ressalvas; sucesso desse ensaio não equivale a homologação,
 comparação visual integral ou conclusão deM3/8V2.
+
+Revalidação seguinte sobre `bd3d58c` e diff de navegação da busca: **13/13 E2E
+aprovados**, `/tmp/m3-retomada-percurso.log`, artefatos
+`/tmp/etapa6-frontend-UP1wFw`. Mesmo servidor sintético tmpfs33363, banco/login
+novos por runner. Seleção anterior de dez casos mais três retornos por perfil
+em `patient-shortcuts.spec.ts`. Comando anterior acrescido desse arquivo e de
+`|FM-NAV-12` ao grep. Build frontend e16 unidades de leitura também passaram;
+nenhuma mudança de backend desde a prova anterior. A causa humana e as ressalvas
+acima permanecem. Não apresentar essa rodada focada como suíte completa.

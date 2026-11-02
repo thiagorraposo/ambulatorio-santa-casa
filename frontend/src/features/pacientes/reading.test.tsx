@@ -84,7 +84,8 @@ describe('busca e paginação de pacientes', () => {
     renderRoute(<PatientsPage />, '/pacientes?nome=Pessoa&sexo=feminino&limit=1&offset=0');
 
     expect(screen.getByText(ID)).toBeVisible();
-    expect(screen.getByRole('link', { name: 'Ver ficha de Pessoa Sintética' })).toHaveAttribute('href', `/pacientes/${ID}`);
+    expect(screen.getByRole('link', { name: 'Ver ficha de Pessoa Sintética' })).toHaveAttribute('href',
+      `/pacientes/${ID}?${new URLSearchParams({ retorno: '/pacientes?nome=Pessoa&sexo=feminino&limit=1&offset=0' })}`);
     expect(screen.queryByText(/cadastrados|de \d+ páginas|total de/i)).not.toBeInTheDocument();
     expect(vi.mocked(useApiQuery).mock.calls.every(([path]) => path.startsWith('/pacientes?'))).toBe(true);
 
@@ -116,6 +117,21 @@ describe('busca e paginação de pacientes', () => {
 });
 
 describe('ficha por recurso', () => {
+  it.each([
+    ['/pacientes?nome=Pessoa&sexo=feminino&limit=1&offset=2', '/pacientes?nome=Pessoa&sexo=feminino&limit=1&offset=2'],
+    ['https://outside.invalid', '/pacientes'],
+    ['/pacientes/2', '/pacientes'],
+    ['/pacientes?nome=a\\b', '/pacientes'],
+  ])('preserva retorno local à busca e recusa destino inválido: %s', async (retorno, expected) => {
+    const user = userEvent.setup();
+    responses.set(`/pacientes/${ID}/projetos?limit=20&offset=0`, []);
+    renderRoute(<PatientPage />, `/pacientes/${ID}?${new URLSearchParams({ retorno })}`, '/pacientes/:pacienteId');
+    const breadcrumb = within(screen.getByRole('navigation', { name: 'Caminho da página' }));
+    expect(breadcrumb.getByRole('link', { name: /^Pacientes$/ })).toHaveAttribute('href', expected);
+    await user.click(screen.getByRole('link', { name: /^Projetos$/ }));
+    expect(breadcrumb.getByRole('link', { name: /^Pacientes$/ })).toHaveAttribute('href', expected);
+  });
+
   it('abre Chagas e avaliação por demanda preservando a consulta selecionada entre abas', async () => {
     const user = userEvent.setup();
     const attendance = { atendimentoId: '9007199254740995', dataAtendimento: '2026-02-21',
