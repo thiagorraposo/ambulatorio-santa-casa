@@ -73,7 +73,8 @@ export default function PatientsPage() {
           {rows => rows.length === 0 ? (
             <EmptyState>Nenhum paciente nesta página para os filtros e o acesso atuais.</EmptyState>
           ) : (
-            <TableScroll label="Pacientes disponíveis">
+            <><p className="muted">Em telas menores, role a tabela horizontalmente para acessar as ações.</p>
+            <TableScroll label="Pacientes disponíveis" wide>
               <table className="data-table">
                 <caption className="sr-only">Pacientes desta página</caption>
                 <thead><tr><th scope="col">ID</th><th scope="col">Nome</th><th scope="col">Ações</th></tr></thead>
@@ -92,7 +93,7 @@ export default function PatientsPage() {
                   </tr>
                 ))}</tbody>
               </table>
-            </TableScroll>
+            </TableScroll></>
           )}
         </QueryState>
         <Pagination label="pacientes" {...page} onChange={page.changePage}

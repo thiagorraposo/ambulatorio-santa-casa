@@ -122,3 +122,29 @@ IDs, seleção, páginas e hash da ficha são preservados.
 
 FM-FIC-11/HIS-12 e7D-R1 recebem essa prova de navegação. Sem alteração de
 contratos clínicos ou permissões e sem homologação do agregado.
+
+## Legibilidade da tabela em telas menores
+
+Sobre `fdc251c`, reutilizado `TableScroll wide`, já aplicado ao histórico.
+Nomes e IDs ficam inteiros; a rolagem ocorre na região da tabela, sem alargar
+a página. Orientação visível informa como alcançar ações. Desktop mantém
+tabela com as mesmas colunas, cores e tipografia. Nenhuma coluna ou capacidade
+backend pendente foi simulada.
+
+Comparadas as capturas oficiais acima com [desktop1440](../frontend/visuais/pacientes-legiveis-1440.png),
+[mobile390](../frontend/visuais/pacientes-legiveis-390.png),
+[mobile320](../frontend/visuais/pacientes-legiveis-320.png) e
+[ações320](../frontend/visuais/pacientes-acoes-320.png). A quebra densa de nomes
+registrada na rodada inicial foi substituída pela rolagem local. Em320, as
+ações exigem rolagem; foco por teclado as revela e ambas abrem a pessoa
+correta, preservando a busca. A referência320 ainda sobrepõe navegação; essa
+limitação não foi reproduzida no produto. Sem novo aceite humano/visual integral.
+
+Build final aprovado, `/tmp/ambulatorio-check-wechiy4p/output.log`.
+`tests/frontend/test_e2e.sh patient-shortcuts.spec.ts --grep 8B3U.4` com as
+mesmas variáveis sintéticas anteriores: **2/2 aprovados**,
+`/tmp/m3-retomada-tabela-final.log`, `/tmp/etapa6-frontend-Ca31aJ`.
+Cobre1440/390/320, Axe, foco/ArrowRight, abertura dos dois formulários reais
+e retorno; Consulta sem atalhos de escrita. Rodada anterior2/2 também passou
+antes da orientação textual (`/tmp/m3-retomada-tabela-e2e.log`).
+Sem alteração lógica que justifique repetir unidades backend/SQL/importador.

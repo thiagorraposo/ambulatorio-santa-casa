@@ -74,7 +74,20 @@ test('8B3U.4: atalhos abrem pessoa identificada e preservam busca, teclado e 320
   const create = page.getByRole('link', { name: `Novo atendimento para ${patient.nome}, ID ${patient.pacienteId}`, exact: true });
   await expect(edit).toBeVisible();
   expect(details).toEqual([]);
-  await page.setViewportSize({ width: 320, height: 844 });
+  const table = page.getByRole('region', { name: /^Pacientes disponíveis; tabela rolável/ });
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: width === 1440 ? 960 : 844 });
+    await assertFitsViewport(page); await assertAccessible(page);
+    await expect(table.locator('tbody td').first()).toHaveCSS('white-space', 'nowrap');
+    await expect(table.locator('tbody td').nth(1)).toHaveCSS('white-space', 'nowrap');
+    await table.evaluate(node => { node.scrollLeft = 0; });
+    await page.screenshot({ path: testInfo.outputPath(`pacientes-legiveis-${width}.png`), fullPage: true });
+    if (width < 600) {
+      expect(await table.evaluate(node => node.scrollWidth > node.clientWidth)).toBe(true);
+      await table.focus(); await page.keyboard.press('ArrowRight');
+      await expect.poll(() => table.evaluate(node => node.scrollLeft)).toBeGreaterThan(0);
+    }
+  }
   await edit.focus();
   await expect(edit).toBeFocused();
   await page.keyboard.press('Enter');

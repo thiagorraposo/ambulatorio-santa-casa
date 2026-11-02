@@ -1,5 +1,12 @@
 # Registro de Alterações
 
+## 2026-11-02 — Melhorar leitura da tabela de pacientes em telas menores
+
+Aplicado padrão existente de rolagem acessível: nomes/IDs inteiros e orientação
+para alcançar ações. Build e dois E2E reais com1440/390/320, teclado e Axe
+aprovados. [Capturas, comparação e limites](validacoes/VALIDACAO_8B3U_4.md#legibilidade-da-tabela-em-telas-menores).
+Sem novas colunas, regras clínicas ou aceite humano.
+
 ## 2026-11-02 — Preservar busca ao abrir e reler atendimentos
 
 Sanitização conserva retorno validado à busca sem cadeias recursivas. Perda

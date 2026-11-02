@@ -1168,6 +1168,10 @@ possui referência/aplicação1440/390/320, com diferença explícita entre tabe
 agregada do protótipo e cartões por atendimento do contrato vigente. Evidência
 parcial de8V1; escrita/prescrição e aceite humano continuam pendentes.
 
+A tabela de pacientes recebeu [ajuste dirigido de legibilidade320/390/1440](../validacoes/VALIDACAO_8B3U_4.md#legibilidade-da-tabela-em-telas-menores):
+nomes/IDs sem fragmentação, região rolável por teclado e ações alcançáveis.
+Adaptação8B3U.4/8V1 parcial; colunas e filtros residuais não implementados.
+
 ## Cobertura funcional dirigida após avaliação humana
 
 Este quadro é a projeção de cobertura do catálogo/FM-RQ existentes, lida contra
