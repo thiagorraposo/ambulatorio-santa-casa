@@ -1,5 +1,15 @@
 # Registro de Alterações
 
+## 2026-11-02 — Ensaio M3 e isolamento dos testes de navegação
+
+Ensaio integrado real de cadastro até episódios/parâmetros, recuperação, segunda
+consulta, perfil consulta e CSV aprovado em banco sintético descartável.
+[Provas e limites](validacoes/VALIDACAO_DEMONSTRACAO_M3_2026_11_02.md).
+Contagens E2E antigas passaram a filtrar sua própria fixture, preservando20/4,
+RBAC e resposta antiga retida na mesma query após troca de identidade;
+[4 cenários dirigidos aprovados](validacoes/VALIDACAO_ISOLAMENTO_E2E_M3.md).
+Regressão frontend integral em andamento; nenhum aceite humano presumido.
+
 ## 2026-11-02 — Totais e códigos reais na interface de simulação
 
 U.1 passa a mostrar relatório H14 sanitizado, com validação defensiva, categorias

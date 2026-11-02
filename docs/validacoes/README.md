@@ -82,3 +82,6 @@ sistema; sua menção preserva rastreabilidade, não garante disponibilidade atu
 - [Rollback de rejeição precoce no dry-run](VALIDACAO_DRY_RUN_REJEICAO_PRECOCE.md).
 
 - [Totais/códigos na simulação — recorte8C2U.1](VALIDACAO_8C2_U1_RELATORIO.md).
+
+- [Ensaio integrado sintético M3](VALIDACAO_DEMONSTRACAO_M3_2026_11_02.md).
+- [Isolamento das contagens E2E M3](VALIDACAO_ISOLAMENTO_E2E_M3.md).

@@ -47,7 +47,13 @@ test('consulta: busca, paginação, leitura e acessibilidade com dados reais da 
   expect(requests.some(path => /^\/v1\/pacientes\/\d+$/.test(path))).toBe(false);
   await expect(page.getByText(fixture.reserved.nome, { exact: true })).toHaveCount(0);
   const headers = await page.getByRole('columnheader').allTextContents();
-  expect(headers).toEqual(['ID', 'Nome', 'Ficha']);
+  expect(headers).toEqual(['ID', 'Nome', 'Ações']);
+  // A fixture deste cenário usa Paciente; seedPatient dos módulos usa Etapa 7.
+  // O filtro real preserva a paginação esperada sem depender de outros specs.
+  await page.getByLabel('Nome', { exact: true }).fill('Paciente');
+  await page.getByRole('button', { name: 'Buscar', exact: true }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get('nome')).toBe('Paciente');
+  await expect(patientRows(page)).toHaveCount(20);
   await page.getByRole('button', { name: 'Próxima', exact: true }).click();
   await expect(page).toHaveURL(/offset=20/);
   await expect(patientRows(page)).toHaveCount(4);
@@ -145,6 +151,10 @@ test('edicao consulta só seus vínculos e mantém a ficha em leitura', async ({
   await expect(page.getByRole('alert')).toContainText(/acesso|permissão|autorizado/i);
   await expect(page.getByText(fixture.reserved.nome, { exact: true })).toHaveCount(0);
   await menu(page).getByRole('link', { name: 'Pacientes', exact: true }).click();
+  // Verifica o conjunto da fixture, sem contar vínculos criados por outros specs.
+  await page.getByLabel('Nome', { exact: true }).fill('Paciente');
+  await page.getByRole('button', { name: 'Buscar', exact: true }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get('nome')).toBe('Paciente');
   await expect(patientRows(page)).toHaveCount(2);
   await expect(page.getByText(fixture.main.nome, { exact: true })).toBeVisible();
   await expect(page.getByText(fixture.large.nome, { exact: true })).toBeVisible();
@@ -201,7 +211,7 @@ test('link direto do atendimento, recarregamento e voltar preservam o destino', 
 });
 
 test('saída e troca de identidade impedem uma resposta real antiga de reaparecer', async ({ page }) => {
-  await signIn(page, 'consulta');
+  const destination = '/pacientes?nome=Paciente&limit=20&offset=0';
   let release!: () => void;
   let ready!: () => void;
   const delayed = new Promise<void>(resolve => { release = resolve; });
@@ -211,16 +221,20 @@ test('saída e troca de identidade impedem uma resposta real antiga de reaparece
     if (!first) { await route.continue(); return; }
     first = false;
     const response = await route.fetch();
+    // A resposta atrasada inclui pessoa sem vínculo de edição.
+    expect((await response.json()).map((item: { pacienteId: string }) => item.pacienteId))
+      .toContain(fixture.patients[1].pacienteId);
     ready();
     await delayed;
     try { await route.fulfill({ response }); } catch { /* cancelamento da sessão encerra a requisição antiga */ }
   });
-  await menu(page).getByRole('link', { name: 'Pacientes', exact: true }).click();
+  // Ambas identidades consultam a mesma chave; somente a geração/sessão muda.
+  await signIn(page, 'consulta', destination);
   await fetched;
   await page.getByRole('button', { name: 'Sair', exact: true }).click();
   await expect(page.getByLabel('Usuário', { exact: true })).toBeVisible();
   await expect(page.getByText(fixture.main.nome, { exact: true })).toHaveCount(0);
-  await signIn(page, 'edicao', '/pacientes');
+  await signIn(page, 'edicao', destination);
   await expect(patientRows(page)).toHaveCount(2);
   release();
   await page.waitForLoadState('networkidle');

@@ -130,3 +130,12 @@ revisão/rascunho, recibo após COMMIT perdido, perfis/IDs trocados e paginaçã
 `importacao-relatorio.spec.ts` confronta totais6/3/2/1 e códigos reais, nascimento
 inválido sem romper rollback e no-op associado ao lote efetivo. Os cenários usam
 somente arquivos gerados sintéticos e o worker/API/PostgreSQL do runner.
+
+
+`m3-demo.spec.ts` ensaia um percurso na mesma pessoa criada pela interface:
+busca/cadastro, consulta com exame identificado, sorologia/condição/duas
+complicações/comorbidades, parâmetro com recibo recuperado, segunda consulta sem
+herança, perfil consulta e CSV. É ensaio técnico sintético; não aceite8V2.
+A fixture clínica de contagens usa o filtro real `nome=Paciente` para não contar
+vínculos `Etapa 7` criados conscientemente pelos outros specs; a prova de troca
+de identidade retém a mesma query/chave entre perfis.
