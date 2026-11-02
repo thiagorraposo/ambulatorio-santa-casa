@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-02 — Preparar decisões de identidade, documento e isolamento
+
+Propostas8D1D/P-08 e8C3D/P-07 com alternativas, cenários sintéticos e gates;
+nenhuma política institucional/ACL/retenção presumida. PoC real demonstrou
+que tabelas temporárias simples não isolam o pipeline de importação; proposta
+C2B.1 separa provisionamento e worker, com equivalência/estado ainda por definir.
+Documentação preparada e validada; unidades D e B/U dependentes seguem
+bloqueadas, sem ativação de runtime ou aceite humano.
+
 ## 2026-11-02 — Ensaio M3 e isolamento dos testes de navegação
 
 Ensaio integrado real de cadastro até episódios/parâmetros, recuperação, segunda

@@ -1181,6 +1181,8 @@ consumo de sequências permanece gate aberto de C2B.1.
 
 **Validação/evidência e conclusão:** VD. Decisão aprovada e fluxo/contrato propostos; sem arquivos reais neste pacote. Concluir somente pela condição comum acima e pelos critérios desta unidade.
 
+Preparação de02/11: [proposta com alternativas e cenários](../arquitetura/PROPOSTA_DOCUMENTO_CONTRARREFERENCIA_8C3D.md) disponível. Sem aprovação VD; B/U permanecem bloqueadas, sem novas permissões ou decisões presumidas.
+
 <a id="8c3b"></a>
 
 #### 8C3B — Anexar e ler documento autorizado de contrarreferência
@@ -1308,6 +1310,8 @@ consumo de sequências permanece gate aberto de C2B.1.
 **Aceite — cenário principal e falhas:** Cada ação tem responsável/capacidade, regra de sessão e caso de bloqueio; não propor exclusão definitiva ou ligação automática a digitador legado.
 
 **Validação/evidência e conclusão:** VD. Decisão com cenários de último admin/autoalteração/revogação, antes dos endpoints novos. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+Preparação de02/11: [proposta com alternativas e cenários](../arquitetura/PROPOSTA_IDENTIDADE_ADMINISTRACAO_8D1D.md) disponível. Sem aprovação VD; B/U permanecem bloqueadas, sem novas permissões ou decisões presumidas.
 
 <a id="8d1b"></a>
 

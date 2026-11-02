@@ -1129,3 +1129,11 @@ metadados/conflitos e garantia sem consumir sequências (FM-IMP-36) não são
 concluídos pelo backend. Confirmação U.2 bloqueada por
 [recuperação autoritativa ausente](../arquitetura/PROPOSTA_CONFIRMACAO_IMPORTACAO_8C2U_2.md),
 sem inventar recibo a partir do código solicitado.
+
+
+Preparação de decisões de02/11: [8D1D/P-08](../arquitetura/PROPOSTA_IDENTIDADE_ADMINISTRACAO_8D1D.md)
+e [8C3D/P-07](../arquitetura/PROPOSTA_DOCUMENTO_CONTRARREFERENCIA_8C3D.md) possuem
+alternativas/cenários e checklist de aprovação. Nenhuma capacidade USR/CTA ou
+documental ENC foi implementada, aceita ou desbloqueada por essa preparação.
+[Isolamento do dry-run](../arquitetura/PROPOSTA_ISOLAMENTO_DRY_RUN_8C2B_1.md) tem
+PoC de inviabilidade do overlay simples; gate FM-IMP-36 continua aberto.

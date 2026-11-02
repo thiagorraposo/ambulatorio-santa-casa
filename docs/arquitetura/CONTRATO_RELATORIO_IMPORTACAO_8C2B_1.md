@@ -54,3 +54,9 @@ Correção posterior de02/11: [rejeição precoce](../validacoes/VALIDACAO_DRY_R
 agora permanece dentro do savepoint da linha. O encerramento externo não pode
 ser disparado como rollback de uma linha sem savepoint. Lote novo e retomada
 preservam todas as tabelas; esta prova não elimina o consumo de sequências.
+
+
+A [PoC de isolamento](PROPOSTA_ISOLAMENTO_DRY_RUN_8C2B_1.md) comprovou que um
+overlay simples de tabelas temporárias perde FKs/triggers e não redireciona
+contexto restrito. A proposta de instância separada exige contrato técnico de
+snapshot/limpeza/equivalência antes de integrar H14; não foi ativada.
