@@ -32,6 +32,26 @@ for (const scenario of ['novo pela interface', 'existente'] as const) {
       { path: 'ambulatorioAnexoProjeto', code: 'attendance_context' },
     ] });
     expect(await (await apiAs('administracao', 'GET', path)).json()).toEqual([]);
+    const catalog = await (await apiAs('administracao', 'GET', '/catalogos/exames?limit=100')).json() as Array<{ id: string; codigo: string }>;
+    const generic = catalog.find(exam => exam.codigo === 'outro')!;
+    expect(generic).toBeDefined();
+    const cases = [
+      { extra: { exames: [{ tipoExameId: '99999999', bloco: 'solicitado' }] }, path: 'exames.0.tipoExameId', code: 'exam_active' },
+      { extra: { exames: [{ tipoExameId: generic.id, bloco: 'solicitado', identificacao: '   ' }] }, path: 'exames.0.identificacao', code: 'exam_identification' },
+      { extra: { pendencias: [{ descricao: 'Sintética', status: 'resolvida' }] }, path: 'pendencias.0.dataResolucao', code: 'pending_date' },
+      { extra: { pendencias: [{ descricao: 'Sintética', status: 'aberta', dataResolucao: '2026-02-01' }] }, path: 'pendencias.0.status', code: 'pending_status' },
+      { extra: { pendencias: [{ descricao: '   ' }] }, path: 'pendencias.0.descricao', code: 'required' },
+    ];
+    for (const rejection of cases) {
+      const response = await apiAs('administracao', 'POST', path, {
+        dataAtendimento: '2026-02-01', dadosClinicos: { pesoKg: 65.25 }, ...rejection.extra,
+      });
+      expect(response.status).toBe(400);
+      const body = await response.json();
+      expect(body).toMatchObject({ errors: [{ path: rejection.path, code: rejection.code }] });
+      expect(JSON.stringify(body)).not.toMatch(/INSERT|SELECT|constraint|stack|65\.25/);
+      expect(await (await apiAs('administracao', 'GET', path)).json()).toEqual([]);
+    }
     await page.getByLabel('Data do atendimento', { exact: true }).fill('2026-02-01');
     await page.getByLabel('Observações do atendimento', { exact: true }).fill('Rascunho exclusivamente sintético preservado');
     await page.getByLabel('Somente ambulatório', { exact: true }).selectOption('sim');

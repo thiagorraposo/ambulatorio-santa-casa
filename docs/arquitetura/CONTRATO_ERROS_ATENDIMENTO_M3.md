@@ -1,6 +1,6 @@
 # Erros por campo do atendimento — M3 / HUM-M3-03
 
-Contrato técnico implementado em 02/11/2026; validação integrada pendente.
+Contrato técnico implementado em 02/11/2026; validação integrada do recorte em ambiente sintético, sem reprodução da entrada humana.
 Escopo: 7D-U1/U2/U4, EST-02/09, ERR-04 e ATD-14. Não determina a causa do
 relato humano e não encerra o P0. [Investigação e aceite](RECORTE_CLINICO_ETAPA_7.md#p0--confirmação-de-atendimento-e-contrato-de-erros).
 
@@ -24,7 +24,8 @@ o rótulo legível começa em um. Listas exatas no
 [mapeamento frontend](../../frontend/src/shared/field-validation.tsx).
 
 Códigos: `date`, `integer`, `number`, `length`, `option`, `invalid` e
-`attendance_context`. Rótulo, motivo e orientação de formato são textos locais
+`attendance_context`, `required`, `exam_active`, `exam_identification`,
+`pending_date` e `pending_status`. Rótulo, motivo e orientação de formato são textos locais
 fixos do frontend, nunca o texto arbitrário recebido do servidor. O cliente
 aceita somente pares reconhecidos em 400, limita a 100 entradas e revalida a
 geração da sessão depois da leitura do corpo. JSON inválido mantém erro genérico.
@@ -52,9 +53,13 @@ Campos ocultos são revelados pelo link antes do foco. Rejeição conserva valor
 válidos e rascunho em memória. Outros formulários não recebem associações de
 campo do atendimento por efeito lateral.
 
-Este recorte não converte todos os erros de domínio em erros de campo. Exames
-inativos, regras de resolução de pendências, erros de faixa física e demais
-constraints ainda podem produzir erro geral. Validações locais anteriores,
-fora da combinação de contexto, conservam suas mensagens e seleção de etapa.
-Integração navegador/API/PostgreSQL, comparação visual em navegador e reprodução
-da entrada humana permanecem obrigatórias; [evidências desta execução](../validacoes/VALIDACAO_P0_ATENDIMENTO_2026_11_02.md).
+Exame sem tipo ativo aponta `exames.i.tipoExameId`; categoria genérica sem
+identificação aponta `exames.i.identificacao`. Pendência sem descrição útil aponta
+`pendencias.i.descricao`; resolvida sem data aponta `dataResolucao`; data em
+outro status aponta `status`. São regras existentes, preservadas na transação.
+Os mesmos pares conhecidos são usados nas validações locais de exames/pendências.
+Não se altera a validação de pendências dos formulários independentes.
+
+Faixas físicas e demais constraints ainda podem produzir erro geral. Comparação
+visual com referência e reprodução da entrada humana permanecem pendentes;
+[evidências desta execução](../validacoes/VALIDACAO_P0_ATENDIMENTO_2026_11_02.md).

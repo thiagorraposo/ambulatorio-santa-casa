@@ -17,6 +17,11 @@ const reasons: Record<string, string> = {
   date: 'Informe uma data válida no formato dia/mês/ano.', integer: 'Informe um número inteiro.',
   number: 'Informe um número com até duas casas decimais.', length: 'Revise o preenchimento e o limite de caracteres do campo.',
   option: 'Selecione uma opção válida.', invalid: 'Revise o preenchimento deste campo.',
+  required: 'Preencha este campo.',
+  exam_active: 'Selecione um tipo de exame ativo.',
+  exam_identification: 'Identifique qual exame foi trazido ou solicitado.',
+  pending_date: 'Informe a data de resolução da pendência resolvida.',
+  pending_status: 'A data de resolução exige status resolvida. Revise os dois campos; nenhum valor será descartado.',
   attendance_context: 'As opções “Somente ambulatório” e “Ambulatório anexo a projeto” não podem ser Sim ao mesmo tempo.',
 };
 export function fieldLabel(path: string): string | undefined {

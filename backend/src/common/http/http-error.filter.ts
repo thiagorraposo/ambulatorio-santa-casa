@@ -32,7 +32,7 @@ export class HttpErrorFilter implements ExceptionFilter {
           message: value.message ?? exception.message,
           ...(status === 400 && Array.isArray(value.errors) ? { errors: value.errors.filter(item => item
             && typeof item.path === 'string' && publicAttendancePath(item.path)
-            && ['date', 'integer', 'number', 'length', 'option', 'invalid', 'attendance_context'].includes(item.code))
+            && ['date', 'integer', 'number', 'length', 'option', 'invalid', 'attendance_context', 'exam_active', 'exam_identification', 'pending_date', 'pending_status', 'required'].includes(item.code))
             .map(({ path, code }) => ({ path, code })) } : {}) };
       }
       return { statusCode: status, error: exception.name, message: String(payload) };

@@ -1,3 +1,4 @@
+import { attendanceFieldException } from '../common/http/field-validation';
 import { BadRequestException, ConflictException, Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { DatabaseService, Transaction } from '../common/database/database.service';
@@ -237,20 +238,21 @@ export class PacientesService {
           VALUES($1,$2,$3,$4,$5,$6,$7,$8)`, [id,d.possuiDiagnosticoChagas ?? null,d.statusDiagnostico ?? null,
           d.resultadoFinal ?? null,d.dataResultadoFinal ?? null,d.dataDescobertaAutorelato ?? null,
           d.criterioConfirmacao ?? null,d.observacoes ?? null]);
-        for (const e of dto.exames ?? []) {
+        for (const [index, e] of (dto.exames ?? []).entries()) {
           const catalog = await tx.query<{ codigo_exame: string }>(
             'SELECT codigo_exame FROM tipo_exame_complementar WHERE tipo_exame_complementar_id=$1 AND ativo FOR SHARE', [e.tipoExameId]);
           const code = catalog.rows[0]?.codigo_exame;
-          if (!code || (['laboratoriais', 'imagem', 'outro', 'nao_informado'].includes(code) && !e.identificacao?.trim())) {
-            throw new BadRequestException('Exame deve possuir identificação inequívoca e tipo ativo');
+          if (!code) throw attendanceFieldException(`exames.${index}.tipoExameId`, 'exam_active');
+          if (['laboratoriais', 'imagem', 'outro', 'nao_informado'].includes(code) && !e.identificacao?.trim()) {
+            throw attendanceFieldException(`exames.${index}.identificacao`, 'exam_identification');
           }
           await tx.query(`INSERT INTO paciente_exame_complementar
           (paciente_id,atendimento_id,tipo_exame_complementar_id,bloco_origem,tipo_exame_original,resultado_texto,observacoes)
           VALUES($1,$2,$3,$4,$5,$6,$7)`, [patientId,e.atendimentoId ?? id,e.tipoExameId,e.bloco,e.identificacao ?? null,e.resultado ?? null,e.observacoes ?? null]);
         }
-        for (const p of dto.pendencias ?? []) {
-          validatePendingResolution(p.status, p.dataResolucao);
-          if (!p.descricao.trim()) throw new BadRequestException('Descrição da pendência é obrigatória');
+        for (const [index, p] of (dto.pendencias ?? []).entries()) {
+          validatePendingResolution(p.status, p.dataResolucao, `pendencias.${index}`);
+          if (!p.descricao.trim()) throw attendanceFieldException(`pendencias.${index}.descricao`, 'required');
           await tx.query(`INSERT INTO pendencia_atendimento
             (atendimento_id,descricao,status_pendencia,data_identificacao,data_resolucao) VALUES($1,$2,$3,$4,$5)`,
           [id,p.descricao,p.status === undefined ? 'aberta' : p.status,dto.dataAtendimento,p.dataResolucao ?? null]);

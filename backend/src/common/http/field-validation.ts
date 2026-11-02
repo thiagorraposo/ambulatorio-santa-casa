@@ -44,3 +44,7 @@ export function attendanceContextException(): BadRequestException {
     { path: 'ambulatorioAnexoProjeto', code: 'attendance_context' },
   ] });
 }
+
+export function attendanceFieldException(path: string, code: string): BadRequestException {
+  return new BadRequestException({ message: 'Revise os campos informados.', errors: [{ path, code }] });
+}

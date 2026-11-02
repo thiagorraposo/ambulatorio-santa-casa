@@ -1,5 +1,15 @@
 # Registro de Alterações
 
+## 2026-11-02 — Validar fluxo P0 integrado e localizar rejeições de filhos
+
+Cadastro novo e existente confirmam/releem atendimento em PostgreSQL descartável;
+falha humana ainda não reproduzida. Exames/pendências passam a indicar caminho,
+código e controle sem descartar valores. Oito E2E focados comprovam rollback,
+403/409, duplo clique e recuperação; unidades 290 frontend/203 backend,
+137 testes clínicos e oito de fundação aprovados, além de project-check.
+[Prova e limites](validacoes/VALIDACAO_P0_ATENDIMENTO_2026_11_02.md#retomada-contínua--integração-liberada).
+P1 Edição/8D seguem gates de decisão; sem alteração de banco persistente ou push.
+
 ## 2026-11-02 — Implementar feedback de campo no atendimento P0
 
 Envelope de erros DTO por caminho/código sanitizado (ADR-027), consumo seguro no

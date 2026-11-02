@@ -1,3 +1,4 @@
+import { FieldValidationError } from '../../shared/field-validation';
 import { describe, expect, it } from 'vitest';
 import type { AtendimentoDetalheResponse, PacienteDetalheResponse } from '../../api/contracts';
 import { attendanceBody, attendanceInitial, patientBody, patientInitial, type AttendanceDraft } from './core-contracts';
@@ -78,7 +79,8 @@ describe('escrita cadastral e atendimento composto', () => {
     value.familyStatus = 'sim';
     value.exams = [{ tipoExameId: '42', bloco: 'trazido', identificacao: '', resultado: '', observacoes: '',
       catalog: { id: '42', codigo: 'laboratoriais', nome: 'Laboratoriais', ativo: true } }];
-    expect(() => attendanceBody(value)).toThrow(/identifique/);
+    expect(() => attendanceBody(value)).toThrow(new FieldValidationError([{ path: 'exames.0.identificacao', code: 'exam_identification' }]));
+    try { attendanceBody(value); } catch (error) { expect(error).toMatchObject({ errors: [{ path: 'exames.0.identificacao', code: 'exam_identification' }] }); }
   });
   it('preserva rastreio explicitamente desconhecido e valida precisão das medidas', () => {
     const value = draft(); value.familyStatus = 'desconhecido';
@@ -91,13 +93,15 @@ describe('escrita cadastral e atendimento composto', () => {
   it('exige resolução datada na criação composta e não descarta uma data incompatível', () => {
     const value = draft();
     value.pending = [{ descricao: 'Pendência sintética', status: 'resolvida' }];
-    expect(() => attendanceBody(value)).toThrow(/data de resolução/);
+    expect(() => attendanceBody(value)).toThrow(new FieldValidationError([{ path: 'pendencias.0.dataResolucao', code: 'pending_date' }]));
+    try { attendanceBody(value); } catch (error) { expect(error).toMatchObject({ errors: [{ path: 'pendencias.0.dataResolucao', code: 'pending_date' }] }); }
     value.pending[0]!.dataResolucao = '2026-02-02';
     expect(attendanceBody(value).pendencias).toEqual([
       { descricao: 'Pendência sintética', status: 'resolvida', dataResolucao: '2026-02-02' },
     ]);
     value.pending[0]!.status = 'aberta';
-    expect(() => attendanceBody(value)).toThrow(/Nenhum campo será descartado/);
+    expect(() => attendanceBody(value)).toThrow(new FieldValidationError([{ path: 'pendencias.0.status', code: 'pending_status' }]));
+    try { attendanceBody(value); } catch (error) { expect(error).toMatchObject({ errors: [{ path: 'pendencias.0.status', code: 'pending_status' }] }); }
   });
   it('preserva desconhecido e não informado como estados distintos da pendência', () => {
     const value = draft();

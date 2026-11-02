@@ -1,4 +1,4 @@
-import { attendanceContextException } from '../common/http/field-validation';
+import { attendanceContextException, attendanceFieldException } from '../common/http/field-validation';
 import { BadRequestException, PipeTransform } from '@nestjs/common';
 
 export class ClinicalIdPipe implements PipeTransform<string, string> {
@@ -15,7 +15,11 @@ export function rejectFuture(date: string | null | undefined, reference: string)
 }
 
 export function validatePendingResolution(status: string | null | undefined,
-  date: string | null | undefined): void {
+  date: string | null | undefined, fieldPrefix?: string): void {
+  if (fieldPrefix) {
+    if (status === 'resolvida' && !date) throw attendanceFieldException(`${fieldPrefix}.dataResolucao`, 'pending_date');
+    if (status !== 'resolvida' && date) throw attendanceFieldException(`${fieldPrefix}.status`, 'pending_status');
+  }
   if (status === 'resolvida' && !date) throw new BadRequestException('Resolução exige data informada');
   if (status !== 'resolvida' && date) throw new BadRequestException('Data de resolução exige status resolvida');
 }

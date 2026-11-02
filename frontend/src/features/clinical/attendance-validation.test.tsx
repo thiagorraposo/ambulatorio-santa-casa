@@ -76,6 +76,25 @@ describe('feedback de campo do atendimento', () => {
     expect(screen.getByLabelText('Observações do atendimento')).toHaveValue('Rascunho sintético');
     expect(write).toHaveBeenCalledTimes(1);
   });
+  it('associa a incompatibilidade de resolução ao status e mantém data e descrição', async () => {
+    const { user, write } = await setup();
+    for (let i = 0; i < 3; i++) await user.click(screen.getByRole('button', { name: 'Próxima etapa' }));
+    await user.click(screen.getByRole('button', { name: 'Adicionar pendência' }));
+    await user.type(screen.getByLabelText('Descrição da pendência 1'), 'Pendência sintética');
+    await user.selectOptions(screen.getByLabelText('Status da pendência 1'), 'aberta');
+    fireEvent.change(screen.getByLabelText('Data de resolução da pendência 1'), { target: { value: '2026-02-01' } });
+    await user.click(screen.getByRole('button', { name: 'Revisar atendimento' }));
+    expect(screen.getByRole('alert')).toHaveFocus();
+    expect(screen.getByLabelText('Status da pendência 1')).toHaveAttribute('aria-invalid', 'true');
+    await user.click(screen.getByRole('link', { name: /^Status da pendência 1:/ }));
+    await waitFor(() => expect(screen.getByLabelText('Status da pendência 1')).toHaveFocus());
+    expect(screen.getByLabelText('Data de resolução da pendência 1')).toHaveValue('2026-02-01');
+    expect(screen.getByLabelText('Descrição da pendência 1')).toHaveValue('Pendência sintética');
+    expect(write).not.toHaveBeenCalled();
+    await user.selectOptions(screen.getByLabelText('Status da pendência 1'), 'resolvida');
+    await user.click(screen.getByRole('button', { name: 'Revisar atendimento' }));
+    expect(screen.getByRole('heading', { name: /^Revisão$/ })).toBeVisible();
+  });
   it('preserva o bloqueio de escrita para Consulta', async () => {
     const { write } = await setup('consulta');
     expect(await screen.findByRole('heading', { name: 'Acesso de consulta' })).toBeVisible();

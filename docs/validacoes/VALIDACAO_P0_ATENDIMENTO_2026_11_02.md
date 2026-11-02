@@ -71,3 +71,52 @@ P1 Edição depende do acesso inicial ao recém-criado sem autovínculo/global.
 P1 8D depende das decisões específicas de campos/capacidades, credenciais,
 autoações/sessão/auditoria/recuperação, conforme proposta vigente. Perguntas
 objetivas apresentadas ao responsável; nenhuma regra foi presumida.
+
+## Retomada contínua — integração liberada
+
+Base `21cb495`, descendente de `e968c40`, mesma branch e árvore inicial limpa.
+Worktrees externos preservados. O ambiente atual abriu socket; cluster novo e
+exclusivamente sintético em diretório registrado no arquivo volátil `/tmp/m3-continuo-pg-path`, host `127.0.0.1`, porta `55483`.
+Nenhum banco persistente foi consultado ou alterado. Uma tentativa inicial de
+initdb falhou por log dentro do diretório alvo; corrigida usando subdiretório
+`data`, sem remover arquivos existentes.
+
+Primeiro executados os dois E2E preparados sobre a base: **2 aprovados**, log
+`/tmp/m3-continuo-p0-e2e.log`. Cadastro UI/Administração e existente/Edição
+confirmaram e releram o atendimento. Portanto a falha humana não foi reproduzida.
+Foi solicitada apenas descrição de cenário fictício/perfil, sem dados clínicos.
+
+Incremento: regras existentes de exames e pendências agora publicam caminhos/
+códigos por filho e feedback navegável local. Nenhuma mudança de schema,
+permissão, recibo, regra clínica ou auditoria. Novos testes exercitam tipo ausente,
+identificação em branco, descrição em branco e ambas as incompatibilidades de
+resolução com 400 sanitizado e lista de atendimentos vazia após cada rejeição,
+inclusive quando dados clínicos foram inseridos antes da falha.
+
+Validação do incremento (não somar provas anteriores às contagens):
+
+- `make backend-build frontend-build COMPACT=1`: aprovado;
+  `/tmp/ambulatorio-check-p38bnck_/output.log`.
+- `make frontend-unit-test backend-unit-test COMPACT=1`: **290 frontend / 203 backend**;
+  `/tmp/ambulatorio-check-qvtg5icj/output.log`. Dois testes antigos que esperavam
+  texto livre foram atualizados para verificar caminho/código estruturado.
+- `SYNTHETIC_PG_HOST=127.0.0.1 SYNTHETIC_PG_PORT=55483 SYNTHETIC_PG_USER=m3_sintetico PGPASSWORD=sintetico bash tests/frontend/test_e2e.sh attendance-validation.spec.ts stage7.spec.ts --grep 'P0:|atendimento composto|409 do atendimento|consulta não escreve|revogação da permissão|cliques repetidos|resposta perdida após commit'`:
+  **8 aprovados**; `/tmp/m3-continuo-p0-regression.log`, artefatos sintéticos
+  `/tmp/etapa6-frontend-hNxxjw`. Comprova novo/existente, rollback, releitura,
+  campos, 320px/axe, 403/409, duplo clique e recuperação após commit sem novo POST.
+- `make backend-clinical-test COMPACT=1`, mesmas variáveis sintéticas:
+  **22 suítes / 137 testes**, `/tmp/ambulatorio-check-jwc4t4u4/output.log`.
+- Fundação executada por `bash tests/backend/test_integration.sh` com destino
+  explícito `m3_validacao_descartavel`, login de aplicação exclusivo e política
+  `todos_sinteticos`: **8 testes**; `/tmp/m3-continuo-foundation.log`.
+  Executada diretamente porque o alvo Make depende de `docker-wait`; servidor
+  desta prova é cluster local descartável. Build/unidades anteriores compõem
+  a validação equivalente a `backend-check`, sem repeti-los.
+- `make project-check DB_ENV=local DB_HOST=127.0.0.1 DB_PORT=55483 DB_USER=m3_sintetico DB_NAME=m3_validacao_descartavel COMPACT=1`:
+  aprovado; `/tmp/ambulatorio-check-_ml2r_f9/output.log`.
+
+DoD: integração técnica dos cenários descritos comprovada; E2E focado não é
+suíte frontend integral nem homologação visual. HUM-M3-03 continua aberto;
+mensagens melhoradas e sucesso sintético não identificam a causa humana.
+P1 Edição permanece dependente do escopo inicial; P1 8D permanece dependente
+dos contratos específicos registrados. Sem recálculo de métricas de M3/8V.
