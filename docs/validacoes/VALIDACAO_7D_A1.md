@@ -145,3 +145,12 @@ foi reproduzida, mas a causa do envio específico da equipe não foi confirmada.
 O patch experimental ficou preservado sem commit ou integração e não participou
 do ambiente aceito. A investigação foi interrompida a pedido do responsável;
 este aceite não apresenta a hipótese como causa resolvida ou correção entregue.
+
+
+## Avaliação humana posterior de M3 — registro separado
+
+A [nova rodada com problemas](AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md) foi
+informada pelo responsável, sem data exata/ambiente/SHA confirmados. M1/M2
+mantêm seus pareceres; HUM-M3-03 é P0 novo aguardando reprodução, sem herdar
+como causa a hipótese histórica de erro400 acima. Provas técnicas deA1 não
+fecham esse novo achado nem significam aceite integral deM3/8V2.

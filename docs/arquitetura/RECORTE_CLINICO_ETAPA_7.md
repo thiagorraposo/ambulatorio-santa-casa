@@ -132,3 +132,91 @@ atuais não prova não aplicação. Recarregar ou encerrar a sessão perde a int
 local; o ledger não oferece enumeração para reconstruí-la. O
 [roadmap](../frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend) e o
 relatório mantêm o aceite individual e as extensões posteriores.
+
+
+## Planejamento após avaliação humana M3
+
+Base inspecionada `44b106a`,02/11/2026. Fonte dos achados e decisões:
+[avaliação humana](../validacoes/AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md).
+Esta seção é planejamento do próximo incremento; não modifica o contrato HTTP
+implementado descrito acima. [DoD/prontidão](../WORKFLOW_DE_DESENVOLVIMENTO.md#entrega-integrada-de-funcionalidades-humanas)
+passam a exigir todas as camadas da experiência humana.
+
+### P0 — confirmação de atendimento e contrato de erros
+
+HUM-M3-03 é P0 do percurso novo paciente→atendimento, com causa/HTTP/campos ainda
+não comprovados. A leitura de `backend/src/bootstrap.ts` e
+[HttpErrorFilter](../../backend/src/common/http/http-error.filter.ts) confirma
+validação DTO e resposta `statusCode/error/message`, sem contrato estável de
+caminho/código por campo. O [cliente](../../frontend/src/api/client.ts) descarta
+esse corpo ao gerar `ApiError` por status. `CoreFields.tsx` e `MutationForm` ainda
+não associam erros estruturados a controles; o formulário de atendimento combina
+validade HTML com mensagens locais/seleção de etapa. Isso confirma lacuna de
+feedback, não a causa do envio humano. A versão atual H4 grava núcleo/filhos em
+transação e possui recuperação; preservar essas garantias.
+
+Próxima execução funcional obrigatória:
+
+1. Isolar ambiente sintético novo, identificar SHA/host/porta/base e perfil;
+   preservar candidato e não aproveitar banco ou dados da reunião.
+2. Buscar/cadastrar paciente pela UI, criar e confirmar atendimento; registrar
+   valores artificiais discriminantes, etapa, intenção e contexto. O P0 pode
+   ser investigado com perfil já autorizado sem esperar a ampliação de Edição.
+3. Inspecionar payload sintético, HTTP, resposta e validações backend/SQL seguras;
+   confrontar o caso com paciente existente. Se não reproduzir, registrar limite
+   e pedir somente os dados de cenário não sensíveis que faltarem; não declarar
+   corrigido nem adotar a hipótese antiga de400 como causa.
+4. Identificar causa/campos reais, corrigir o defeito e integrar mensagens por
+   campo no backend/cliente/controles, etapas e revisão. Não só trocar o texto.
+5. Comprovar criação e releitura dos IDs/filhos, atomicidade e ausência de
+   duplicação; testar validação, permissão/revogação,409 e resposta perdida com
+   recibo, em paciente novo/existente e perfis pertinentes. Registrar evidências
+   navegador/API/PostgreSQL sintético e encaminhar cenários para nova avaliação.
+
+Contrato de erros a especificar antes de implementar: manter distinção entre
+validação conhecida400, autenticação401, autorização403, conflito409 e erro
+inesperado sanitizado (atualmente503), sem atribuir esses status ao relato humano.
+Para rejeições conhecidas, projetar coleção de campos/caminhos permitidos,
+códigos estáveis e descrições sanitizadas; definir representação para erro geral,
+etapas e índices de filhos. Uma possível coleção `errors` é apenas desenho a
+revisar, não DTO já publicado. Não repassar indiscriminadamente mensagens de
+validadores/SQL. Não ecoar valores clínicos ou detalhes de controle de acesso.
+Falhas inesperadas podem permanecer genéricas com correlação quando disponível;
+hoje o envelope não comprova identificador de correlação.
+
+O cliente deverá mapear os caminhos reconhecidos aos rótulos/controles corretos,
+com resumo acessível, links/teclado/foco, destaque e formato esperado quando
+relevante. Caminho desconhecido não pode destacar outro campo. Dados válidos e
+rascunho permanecem na tentativa inválida; 401/troca de identidade mantêm limpeza
+de segurança. Recuperação e incerteza não autorizam repetir POST automaticamente.
+Asserções negativas incluem ausência de SQL/stack/token/dados não autorizados.
+
+### P1 — cadastro e edição cadastral por Edição
+
+A decisão de produto exige cadastro por Edição e alteração cadastral no escopo
+autorizado, ainda não implementados/validados sob a nova política. O fato de a
+edição cadastral já existir não comprova o percurso ampliado. Inspeção atual:
+
+| Camada | Contrato existente e consequência para o incremento |
+| --- | --- |
+| Capacidade | `ClinicalAccessService.canCreate` só permite Edição em todos_sinteticos; `GET /pacientes/capacidades`, POST e operações revalidam. Alterar somente visibilidade da UI ou só esse booleano é insuficiente |
+| Escopo após criar | `PacientesService.create` insere paciente/endereço/contatos sem acesso_paciente. GET/PATCH/atendimento exigem vínculo para Edição em vinculo_explicito. **Falta contrato de autorização inicial para criar→consultar→editar sem autoconcessão de vínculos**; não resolver habilitando acesso global ou criando vínculo silencioso |
+| Alteração existente | `PATCH /pacientes/:id`, Edição/Administração, exige vínculo ativo+pode_editar e versão;409 preserva original/rascunho. Não é edição de registros clínicos históricos |
+| Campos permitidos | `PatientUpdateDto`: nome, dataNascimento, sexo, raca, pertenceComunidadeTradicional, tipoComunidadeTradicional, endereço/cidade e telefonesAdicionar; versão obrigatória. Endereço gera snapshot; telefones são adicionados/deduplicados, sem remoção implícita. Não ampliar whitelist sem contrato |
+| Integridade | Transação/contexto do ator, captura e recibos já existem. Preservar versão original, auditoria, intenção e recuperação. P-03 de projeto/notificação não bloqueia esse PATCH cadastral já contratado |
+| Interface | PatientCreateGate/PatientCreateLink, PatientFormPage, busca prévia, ficha e atalhos; `/capacidades` representa decisão backend. Preservar dados, feedback de campo, revisão/conflito e leitura autorizada; não mostrar paciente recém-criado sem autorização de leitura |
+
+A política desejada está na visão; campo/aceite no catálogo7A-U1 e
+7D-R6B.1/U.1. Gate exato pendente: **como o paciente criado entra no escopo de
+leitura/edição de quem o cadastrou, sem conceder vínculo automaticamente?**
+A autorização de cadastrar está decidida como produto; o mecanismo de escopo
+não foi fornecido. Documentar/resolver o contrato antes do incremento dependente,
+sem bloquear investigação P0 ou outras unidades independentes.
+
+Saída exigida: Edição autorizado vê Novo paciente, busca/cadastra pessoa fictícia,
+consulta o criado e edita somente os campos permitidos; backend valida/audita e
+releitura preserva versão/contatos/endereço. Consulta não cadastra nem altera;
+Edição sem vínculo ativo ou `pode_editar` não altera cadastro alheio e não administra usuários,
+não concede acesso a terceiros nem obtém gestão temporal. Oito comportamentos
+pedidos pelo responsável devem ser exercitados com prova por perfil e cenário;
+novo contrato incompleto continua pendente, não se fabrica operação insegura.

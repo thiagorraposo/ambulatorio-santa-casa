@@ -89,3 +89,5 @@ sistema; sua menção preserva rastreabilidade, não garante disponibilidade atu
 - [Regressão composta do frontend M3 — 02/11](VALIDACAO_REGRESSAO_FRONTEND_M3_2026_11_02.md).
 
 - [Registro consolidado da execução M3 — 02/11](RELATORIO_EXECUCAO_M3_2026_11_02.md).
+
+- [Avaliação humana do protótipo funcional com a equipe Santa Casa — M3](AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md): REALIZADA — COM PROBLEMAS IDENTIFICADOS; ACEITE INTEGRAL NÃO REGISTRADO, achados abertos e data exata não informada.

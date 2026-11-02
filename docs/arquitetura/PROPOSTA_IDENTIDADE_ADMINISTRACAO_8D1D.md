@@ -1,70 +1,114 @@
-# Identidade e administração — proposta 8D1D/P-08
+# Identidade e administração — 8D1D/P-08
 
-2026-11-02, retomada da Janela 1 de M3. **Proposta não aprovada.** A unidade
-8D1D e os B/U dependentes continuam bloqueados pelas decisões institucionais
-abaixo. Este documento não cria capacidades, endpoints ou regras de concorrência.
+Atualização documental após a avaliação humana relatada pelo responsável.
+**Requisitos mínimos parcialmente definidos; política institucional e contratos
+específicos pendentes.** Não é aprovação integral de 8D1D/P-08, implementação,
+aceite humano de M3 ou autorização de uso de dados reais.
 
 Fontes normativas: [catálogo 8D1D](../frontend/ENTREGAS_DO_PRODUTO.md#8d1d),
-[visão USR/CTA](../frontend/VISAO_E_ESPECIFICACAO.md#usuários-minha-conta-e-erros--usr-cta-err)
-e [P-08](../frontend/VISAO_E_ESPECIFICACAO.md#decisões-de-produto-e-limites-ainda-pendentes).
-O catálogo continua sendo a fonte dos critérios de aceite; este texto prepara
-as respostas necessárias, sem substituí-las por uma política presumida.
+[matriz desejada de perfis](../frontend/VISAO_E_ESPECIFICACAO.md#pessoas-problemas-e-percursos),
+[USR/CTA](../frontend/VISAO_E_ESPECIFICACAO.md#usuários-minha-conta-e-erros--usr-cta-err)
+e [avaliação/novas decisões](../validacoes/AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md).
+A data exata da reunião e seu ambiente/commit não foram confirmados. A rodada
+foi realizada com problemas identificados e sem aceite integral registrado.
+Este documento prepara respostas e contratos, preservando o catálogo como fonte
+de escopo e critérios por unidade.
 
-## Limites já estabelecidos e implementação atual
+## Decisões de produto já determinadas
 
-O escopo de produto inclui listagem administrativa de nome/login/perfil/status,
-perfil e ativação/inativação. A visão já exclui autoalteração de perfil,
-exclusão definitiva e vinculação automática ao digitador legado. Gestão de conta
-não concede vínculo clínico ou entitlement de revisão temporal por efeito lateral.
+A Frente 8D é P1, após o P0 de confirmação de atendimento e em conjunto com
+cadastro/edição pelo perfil Edição e cobertura frontend. O produto inclui criar
+contas, listar/consultar usuários, alterar perfis, ativar/inativar e consultar
+histórico auditável. A criação é vinculada a 8D2B.3/8D2U.3 e RQ-USR-20–24; as
+unidades oficiais e USR-01–19 são preservados. Não interpretar a antiga ausência
+de criação no catálogo como exclusão atual desse requisito.
 
-Hoje, [AuthController](../../backend/src/auth/auth.controller.ts) publica login,
+O responsável estabeleceu como requisitos mínimos:
+
+- Proteger o último administrador ativo, inclusive diante de comandos concorrentes.
+- Impedir autoelevação indevida e definir explicitamente autoações; a vedação
+  vigente de autoalteração do próprio perfil não foi revogada por autorização
+  genérica de gestão. A própria inativação ainda exige regra específica.
+- Autorizar ações no backend, auditar ator/instante/resultado e tratar versões
+  obsoletas/conflitos. A UI deve revisar e confirmar as operações sensíveis.
+- Revalidar sessões após mudanças relevantes; conta inativada não pode manter
+  acesso posterior, conforme o contrato de sessão a detalhar.
+- Impedir exclusão física indevida, associação automática ao digitador legado e
+  publicação de hash ou credenciais; não registrar senhas em texto puro ou logs.
+- Não conceder vínculos clínicos, capacidade clínica especial, gestão temporal,
+  reprocessamento ou acesso irrestrito por efeito lateral da gestão de contas.
+
+Esses mínimos delimitam o contrato futuro; não selecionam mecanismo de lock,
+versão, revogação, storage de credenciais ou fluxo de recuperação institucional.
+Nenhuma exceção de emergência para perder o último administrador foi aprovada.
+A prioridade permite preparar e desenvolver recortes sintéticos seguros quando
+seus contratos estiverem suficientes, sem homologação institucional automática.
+
+## Implementação atual e diferença para o requisito
+
+[AuthController](../../backend/src/auth/auth.controller.ts) publica login,
 `me` e verificação mínima de autorização; `me` retorna ID/nome/perfil.
-[AuthService](../../backend/src/auth/auth.service.ts) resolve identidade ativa
-novamente em cada requisição autenticada, por meio do guard. Não há API de
-listagem ou alteração de usuários nesses arquivos. O acesso clínico atual tem
-política explícita em [ClinicalAccessService](../../backend/src/common/security/clinical-access.service.ts);
-o comportamento sintético do administrador não aprova acesso irrestrito a dados
-reais. A política institucional futura não será inferida dos testes.
+[AuthService](../../backend/src/auth/auth.service.ts) revalida a identidade ativa
+nas requisições autenticadas por meio do guard. Não há API administrativa completa
+de criação/listagem/alteração/histórico de usuários nesses arquivos nem frontend
+administrativo integrado. A ausência de gestão de contas foi relatada pela equipe;
+essa avaliação não equivale a reprodução automática ou causa raiz de outro defeito.
 
-## Respostas institucionais necessárias
+O acesso clínico vigente é explícito em
+[ClinicalAccessService](../../backend/src/common/security/clinical-access.service.ts).
+Edição atualmente escreve com vínculo ativo e `pode_editar`; seu cadastro em
+`vinculo_explicito` não foi liberado pelo código. A decisão desejada agora permite
+cadastrar e editar dados cadastrais no escopo autorizado, sem poderes de gestão
+ou concessão automática de vínculos. O acesso inicial para consultar/editar a
+pessoa recém-criada precisa de contrato seguro; não presumir autovínculo ou
+ampliar o acesso a todos os pacientes para cumprir esse percurso.
 
-| Tema | Decisão a registrar | Alternativas e consequência |
+Administração dispensa vínculo individual no comportamento sintético atual;
+isso não aprova política institucional de acesso irrestrito a dados reais.
+Gestão de contas e gestão de vínculo clínico permanecem operações distintas.
+
+## Pontos institucionais e técnicos ainda necessários
+
+| Tema | Mínimo já estabelecido | Decisão/contrato ainda pendente |
 | --- | --- | --- |
-| Responsável pela gestão | Identificar quem autoriza e quem executa cada alteração de perfil/estado; como ocorre substituição/recuperação do responsável | Gestão por administrador designado ou fluxo institucional com aprovação separada; a segunda opção exige representação da aprovação, não apenas outro botão |
-| Último administrador | Definir o conjunto protegido: por exemplo, administradores ativos e aptos a gerir identidade, e a regra de recuperação se nenhum estiver disponível | Impedir a perda do último gestor preserva continuidade; exceção de emergência exige responsável e procedimento externo explícitos, não bypass escondido na API |
-| Autoações | Manter a proibição já descrita de autoalteração de perfil; decidir se a própria inativação também é vedada e como solicitar correção | Proibir a própria inativação reduz perda acidental da sessão; permitir mediante fluxo institucional exige regras de continuidade e recuperação |
-| Sessão afetada | Definir efeito da alteração de perfil e da inativação sobre requisições correntes, próximas requisições e sessões abertas | A identidade já é relida por requisição; exigir novo login ao trocar perfil é requisito adicional e precisa ser aprovado antes de modelar revogação |
-| Conta própria | Aprovar quais campos além de ID/nome/perfil serão publicados por `me` | Login/status próprios são candidatos do catálogo; não publicar nem deduzir estado ativo localmente antes de contrato |
-| Suporte | Nomear canal institucional, responsável, horário e conteúdo da orientação | Não inventar telefone, endereço, promessa de atendimento ou fluxo de redefinição de senha |
-| Auditoria | Definir ator, alvo, estado anterior/novo, motivo exigido ou opcional, consulta autorizada e retenção | Histórico mínimo e motivo institucional têm custos e escopos diferentes; nenhum deles inclui senha/hash/token em resposta ou log |
-| Identidade e vínculo | Confirmar política de concessão/revogação de vínculo clínico e sua relação com mudança de perfil | Manter comandos separados evita permissões por efeito lateral; eventual coordenação requer autorização explícita e não pode herdar entitlement temporal |
+| Responsabilidade | Administração é o perfil de gestão de contas; Consulta/Edição não o exercem | Responsável institucional, delegação/recuperação do gestor e eventual aprovação separada por ação |
+| Último administrador | Nenhuma alteração pode eliminar o último administrador ativo | Mecanismo transacional/concorrência e recuperação institucional; provar dois comandos sobre a mesma baseline sem escolher algoritmo por este documento |
+| Autoações | Sem autoelevação indevida; vedação vigente de alterar o próprio perfil preservada | Regra de auto-inativação e demais autoações, confirmação e encaminhamento institucional |
+| Identidade e duplicidade | Campos aprovados, perfil inicial explícito, prevenção de conta duplicada e confirmação/releitura | Dicionário e validação de campos, identificador único/normalização, filtros autorizados e resposta sanitizada de duplicidade |
+| Credenciais/provisionamento | Mecanismo seguro; sem senha em texto puro, logs/documentos, hashes ou credenciais na resposta | Forma institucional de provisionar/definir credenciais, canal, expiração, ativação inicial e recuperação; não criar conta com credencial insegura para demonstrar UI |
+| Sessão afetada | Revalidação após mudança relevante e recusa de acesso posterior à inativação | Efeito em requisições em andamento, tokens/sessões abertas, rascunhos e necessidade de novo login após mudança de perfil |
+| Consulta e conta própria | Listagem paginada, busca/filtros e detalhes mínimos autorizados; `me` atual preservado | Campos além de ID/nome/perfil, capacidades por leitura e informações que não podem aparecer a terceiros |
+| Auditoria | Ator, instante, alvo e resultado; histórico das operações de contas | Estado anterior/novo, motivo obrigatório ou opcional, consulta autorizada e retenção institucional; nunca senha/hash/token |
+| Suporte | Orientação institucional real quando publicada | Canal, responsável, horário e procedimento; não inventar contato ou promessa de atendimento |
+| Recuperação de escrita | Confirmação explícita, conflito compreensível e consulta de resultado antes de repetir envio incerto | Contrato de versão/recibo por ação; IDs seguros, retenção e tratamento de nova sessão |
+| Identidade e vínculo | Gestão de conta não concede acesso clínico/temporal por efeito lateral | Contrato de acesso inicial ao paciente criado por Edição e política de concessão/revogação por ação autorizada, sem autovínculo presumido |
 
-As opções acima não estão selecionadas. Não se propõe permitir autoalteração de
-perfil como alternativa, pois isso contraria a visão vigente. A proteção de
-último administrador deve valer também quando dois comandos diferentes chegam
-simultaneamente; esta é uma condição a especificar e provar após a decisão,
-não um contrato de lock/versão escolhido neste documento.
+## Cenários sintéticos e critérios posteriores
 
-## Cenários sintéticos para a decisão e validação posterior
-
-| Situação | Pergunta/resultado que a regra aprovada deve resolver |
+| Situação | Resultado a especificar e demonstrar no contrato B/U |
 | --- | --- |
-| Administradores sintéticos A e B ativos; A tenta inativar B | Quem pode autorizar; quais efeitos sobre a sessão de B; qual histórico é visível a A |
-| B já inativo; A é o último gestor e tenta rebaixar/inativar a própria conta | Recusa e recuperação institucional explícitas, sem tornar conta comum um novo gestor automaticamente |
-| A e B tentam rebaixar um ao outro com o mesmo estado inicial | A proteção deve impedir terminar sem gestor; versão obsoleta deve gerar conflito compreensível, conforme contrato posterior |
-| Sessão de edição C continua aberta após sua inativação | Próxima requisição não pode continuar usando identidade inativa; definir comportamento e comunicação sobre trabalho em andamento |
-| Perfil de C muda de edição para consulta enquanto há rascunho clínico | Sessão/rascunho e efeito de uma tentativa posterior de escrita devem obedecer à política aprovada, sem sobrescrever dados |
-| Consulta C solicita listagem de usuários ou conta de terceiro | Não obtém listagem administrativa nem dados de identidade de terceiros; a própria conta usa somente campos publicados |
+| Administrador cria conta sintética C com os campos aprovados e perfil inicial | Confirmação real, consulta da conta criada, histórico e provisionamento seguro; repetição não cria conta duplicada |
+| Consulta/Edição tenta criar, listar administrativamente ou alterar conta de terceiro | Backend recusa; UI não oferece capacidade; sem retorno de credencial ou identidade não autorizada |
+| Administradores A e B ativos; A altera perfil/inativa B | Revisão original→novo, versão, confirmação, auditoria e efeito de sessão reais |
+| A é o último administrador ativo e tenta rebaixar/inativar a própria conta | Proteção preservada e regra explícita de autoação, sem tornar conta comum um novo gestor automaticamente |
+| A e B tentam rebaixar um ao outro com o mesmo estado inicial | Não terminar sem administrador ativo; conflito de versão/concorrência compreensível e recuperação conforme contrato posterior |
+| Sessão de C está aberta durante inativação ou mudança para Consulta | Próximas operações revalidadas; não continuar escrevendo com autorização antiga nem expor rascunho a outra identidade |
+| Resposta se perde após criação ou alteração de conta | Resultado incerto, sem segundo POST/PATCH cego; verificação autorizada distingue confirmado de não determinado |
+| Edição cadastra paciente sob a nova política | Pode consultar e editar o cadastro permitido dentro do contrato inicial aprovado; não ganha vínculo automático, acesso global ou gestão de contas |
 
-## Gate para 8D1B/U e 8D2B/U
+## Gate de prontidão por recorte
 
-- [ ] Responsável institucional, data e respostas a cada tema acima registrados.
-- [ ] Matriz por ação/capacidade, autoações e regra de último gestor aprovadas.
-- [ ] Campos de listagem e conta própria, suporte e auditoria/retenção definidos.
-- [ ] Efeitos de sessão, conflitos e recuperação de resultado incerto especificados.
-- [ ] Cenários sintéticos de dois gestores, revogação, três perfis e paginação
-  convertidos em critérios do contrato B correspondente.
+| Situação | Estado |
+| --- | --- |
+| Prioridade P1, matriz desejada dos perfis e requisitos mínimos de segurança | Determinados pelo responsável; registrados como requisito de produto |
+| Política institucional completa, campos/capacidades, credenciais e suporte | Pendentes; não presumir aprovação |
+| Contratos B de consulta, perfil, estado, criação e histórico | Inspeção/especificação necessárias por recorte; não escolher concorrência/permissão implicitamente |
+| Frontend administrativo completo e integração real | Planejados; listas/formulários/estados/erros/conflitos/recibos/responsividade/acessibilidade exigidos pelo workflow |
+| Testes técnicos e comparação visual | Não executados por esta atualização exclusivamente documental |
+| Aceite VD, homologação institucional, aceite 8V2 ou conclusão de M3 | Não registrados |
 
-Prontidão: preparação documental disponível; **não há aceite VD nem desbloqueio
-de runtime**. Não é política de produção nem liberação da Etapa 9D. Validação
-documental de links não substitui aprovação ou testes dos endpoints futuros.
+Para liberar uma unidade independente, documentar seu contrato e os gates
+específicos satisfeitos; um ponto institucional bloqueado não bloqueia outras
+folhas elegíveis. Não marcar o agregado 8D pronto apenas por backend, rascunho
+visual ou requisitos mínimos escritos. Regras permanentes de conclusão no
+[workflow](../WORKFLOW_DE_DESENVOLVIMENTO.md); escopo/aceites no catálogo.

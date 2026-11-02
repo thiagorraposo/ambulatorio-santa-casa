@@ -264,6 +264,51 @@ padrão em `/tmp/schema_ambulatorio_docker.sql` e não substitui a evidência of
 Enquanto a autorização institucional estiver pendente, `importer-run` deve
 receber exclusivamente fixtures sintéticas.
 
+## Entrega integrada de funcionalidades humanas
+
+Regra permanente determinada pelo responsável após a
+[avaliação humana M3](validacoes/AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md):
+nenhuma funcionalidade destinada ao usuário está concluída apenas por ter backend
+funcional. Ciclo padrão: **CONTRATO → BACKEND → FRONTEND → INTEGRAÇÃO → TESTES →
+VALIDAÇÃO VISUAL → EVIDÊNCIAS**. A ordem pode acompanhar dependências; nenhum
+critério pode ser omitido. Componentes exclusivamente internos podem ter exceção
+justificada no relatório, indicando por que não possuem interação humana.
+Um recorte B pode ser validado tecnicamente sem concluir sua capacidade de produto.
+
+### DoD e prontidão arquitetural
+
+Antes da implementação, explicitar campos/destinos HTTP, escopo por perfil,
+semântica de desconhecido/omissão, transação, auditoria, versões/conflitos e
+recuperação. Indicar contratos suficientes e decisões ainda abertas; prioridade
+não aprova permissões, política institucional ou regra clínica ausente.
+
+| Gate | Evidência exigida para a função humana |
+| --- | --- |
+| Contrato e backend | API real/autorizada, campos completos, validação sanitizada, persistência, auditoria e concorrência/recuperação pertinentes |
+| Frontend e navegação | Rotas e retorno ao contexto correto; formulários completos, dados reais da API e controles por permissão |
+| Estados e feedback | Carga, vazio, sucesso, erro específico, acesso recusado, conflito e resultado incerto distintos; sem zeros/sucesso fictícios |
+| Validação acessível | Campo/label/motivo, destaque e associação acessível, resumo navegável e foco no erro; valores válidos/rascunho preservados na tentativa inválida |
+| Integração e recuperação | Navegador/API/PostgreSQL sintético, persistência/releitura; novo/existente, perfis, revogação, conflito e falha de rede sem duplicação conforme impacto |
+| Interação e visual | Responsividade, teclado/foco e comparação com referência aplicável; diferenças/limites registrados, sem chamar captura isolada de aprovação |
+| Rastreabilidade | IDs oficiais, critérios por recorte, fonte/versionamento/ambiente, testes executados e limitações; matriz de cobertura atualizada e aceite humano separado |
+
+Erro de validação conhecido deve identificar campo/caminho seguro, código estável,
+rótulo legível, motivo e formato esperado quando pertinente. O frontend deve
+associá-lo ao controle, usar `aria-invalid`/descrição e resumo acessível com links
+para o campo/etapa correta, incluindo coleções. A falha não apaga formulário nem
+dados válidos. Autorização, conflito e falha inesperada têm tratamento distinto;
+401/troca de identidade continuam limpando dados conforme a política de segurança.
+Não expor SQL, stack, tokens, hashes, credenciais ou dados não autorizados.
+Erro inesperado usa mensagem genérica segura e correlação somente quando disponível;
+não inventar identificador nem transformar erro desconhecido em erro de um campo.
+
+A [matriz de cobertura frontend](frontend/MATRIZ_FIGMA_FRONTEND.md#cobertura-funcional-dirigida-após-avaliação-humana)
+usa as mesmas unidades FM/RQ do catálogo: funcionalidade→B→U→integração→testes→
+visual→pendências. Não criar catálogo paralelo ou percentual sem denominador.
+Gate ausente significa recorte parcial ou não pronto; auditoria documental não
+significa reprodução técnica. Aplicar os testes proporcionais abaixo; não repetir
+suítes funcionais numa entrega exclusivamente documental.
+
 ## Validação proporcional
 
 | Escopo da mudança | Validação local |

@@ -1,6 +1,6 @@
 # Catálogo de entregas do produto
 
-Atualizado em: 2026-11-01. Fonte dos escopos e critérios por unidade; sequência
+Atualizado em: 2026-11-02. Fonte dos escopos e critérios por unidade; sequência
 e marcos pertencem ao [roadmap](../PROXIMOS_PASSOS.md). Estados históricos não
 equivalem a aceite atual: consultar as continuidades e relatórios citados.
 
@@ -40,6 +40,42 @@ aceite registrado. Falha pertinente não resolvida ou decisão obrigatória aber
 impede conclusão. Build/rota/formulário/suíte geral não substituem esse aceite.
 Para unidades de código, preservar alterações preexistentes e revisar diff/status;
 commit/push apenas quando autorizados em sua própria tarefa.
+
+### Reavaliação M3 após testes humanos
+
+A [avaliação com a equipe](../validacoes/AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md)
+foi REALIZADA — COM PROBLEMAS IDENTIFICADOS; ACEITE INTEGRAL NÃO REGISTRADO.
+Achados permanecem abertos. M1/M2 e provas técnicas anteriores são preservados;
+as novas exigências/defeitos pertencem aos incrementos M3 e não reabrem marcos.
+Prioridade e execução pertencem à [fila vigente](../execucao/PLANO_M3_2026_11_03.md#5-fila-dinâmica-e-regra-de-seleção).
+
+- **P0 · HUM-M3-03:** novo paciente→confirmar atendimento, falha relatada com
+  mensagem genérica, aguardando reprodução e causa. Destinos7D-U1/U2/U4,
+  H4/7D-R6B.2/U.2 e revalidação7D-A1. Seguir a
+  [investigação obrigatória e contrato de erros](../arquitetura/RECORTE_CLINICO_ETAPA_7.md#p0--confirmação-de-atendimento-e-contrato-de-erros).
+  Saída: causa reproduzida/corrigida, campos reais identificados, resumo/controles
+  acessíveis, dados preservados, persistência/releitura novo/existente e perfis,
+  conflito/revogação/recuperação sem duplicar. Só melhorar mensagem não conclui.
+- **P1 · HUM-M3-01/02:** nova exigência cadastro/edição cadastral por Edição,
+  ainda não validada no contrato ampliado;7A-U1 e7D-R6B.1/U.1. Não confundir
+  PATCH cadastral existente com correção de fatos clínicos históricos.
+- **P1 · HUM-M3-05:** gestão administrativa8D1D/B/U e8D2B/U. Criação não estava
+  suficientemente especificada; passa explicitamente a8D2B.3/U.3, RQ-USR-20–24,
+  preservandoUSR-01–19 e todos os IDs anteriores. Políticas específicas pendentes
+  não bloqueiam recortes independentes cujo contrato já seja suficiente.
+- **P1 · HUM-M3-04:** frontend completo por capacidade humana, com dados reais,
+  integração/validação visual e reavaliação dirigida da cobertura.
+  [DoD/prontidão permanentes](../WORKFLOW_DE_DESENVOLVIMENTO.md#entrega-integrada-de-funcionalidades-humanas).
+  Backend validado isoladamente não conclui a função de produto nem sua unidade U.
+
+Erros conhecidos devem ter campo/caminho seguro, código estável e descrição
+sanitizada, mapeados a rótulo/motivo/formato, destaque e resumo navegável por
+teclado; manter dados válidos e foco no erro. Erros de autorização, conflito e
+falha inesperada não viram erro de campo arbitrário nem expõem SQL/stack/token.
+A coleção HTTP ainda será especificada; não é implementação já disponível.
+P2 conserva todo o restante deM3 obrigatório, sem exclusão de requisito.
+A reprodução/correção do P0 preserva versões/recibos já existentes; a P-03 de
+projetos/notificação não deve ser usada para postergar a investigação do percurso.
 
 ### Validação proporcional dos pacotes futuros
 
@@ -102,6 +138,18 @@ M3 ou fidelidade integral 8V1/8V2.
 **Validação/evidência e conclusão:** VF. Roteiro com os dois caminhos, contagem de POST e releitura do cadastro com contatos/endereço. Concluir somente pela condição comum acima e pelos critérios desta unidade.
 
 **Evidência técnica:** [VALIDACAO_7A_U1](../validacoes/VALIDACAO_7A_U1.md). Busca concluída com confirmação explícita, sem formulário antes da escolha; cadastro autorizado e abertura de correspondência sem POST; homônimos mantidos; busca vazia/403 e cancelamento sem escrita.
+
+**Extensão M3/P1 após avaliação humana:** Edição autorizado vê Novo paciente,
+busca antes de criar pessoa fictícia, consulta o registro criado e altera os
+dados cadastrais permitidos, com validação/auditoria/backend revalidando acesso.
+Consulta não recebe criação/alteração; Edição não ganha administração, acesso
+global ou concessão automática de vínculo. O contrato atual e os campos PATCH
+estão no [recorte clínico](../arquitetura/RECORTE_CLINICO_ETAPA_7.md#p1--cadastro-e-edição-cadastral-por-edição).
+PATCH versionado já existe e não depende da P-03 de projeto/notificação.
+**Dependência:** contratar acesso inicial ao recém-criado sem autovínculo; liberar
+apenas `podeCadastrar` não entrega criar→consultar→editar. Revalidar7D-R6B.1/U.1,
+versão, contatos/endereço, recusas e recibo. Requisito ampliado ainda não validado;
+o aceite anterior deM2 não é transferido a essa extensão.
 
 <a id="7b-r1b"></a>
 
@@ -343,6 +391,11 @@ M3 ou fidelidade integral 8V1/8V2.
 
 **Validação/evidência e conclusão:** VF. Roteiro com filhos repetidos, vazio/desconhecido, navegação e teclado/390 px, sem perda. Concluir somente pela condição comum acima e pelos critérios desta unidade.
 
+**Continuidade M3:** HUM-M3-03/HUM-M3-04 mantêm P0 confirmação e P1 feedback/
+frontend abertos, sem revogar aceiteM2 ou atribuir causa à hipótese histórica.
+Aplicar os critérios da reavaliação acima, a prova integrada e nova avaliação
+humana dos cenários afetados; não concluir só por mensagem ou teste antigo.
+
 <a id="7d-u2"></a>
 
 #### 7D-U2 — Revisar atendimento e reconhecer cada confirmação separada
@@ -358,6 +411,11 @@ M3 ou fidelidade integral 8V1/8V2.
 **Aceite — cenário principal e falhas:** Alterar um campo na revisão atualiza só ele; confirmar grava uma vez; falha de acompanhamento não desfaz/oculta consulta salva. Duplo clique e Enter não duplicam; resposta incerta segue R6.
 
 **Validação/evidência e conclusão:** VF. Comparação resumo/payload/releitura com valores discriminantes; captura do recibo e falha posterior. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+**Continuidade M3:** HUM-M3-03/HUM-M3-04 mantêm P0 confirmação e P1 feedback/
+frontend abertos, sem revogar aceiteM2 ou atribuir causa à hipótese histórica.
+Aplicar os critérios da reavaliação acima, a prova integrada e nova avaliação
+humana dos cenários afetados; não concluir só por mensagem ou teste antigo.
 
 <a id="7d-u3"></a>
 
@@ -410,6 +468,11 @@ agregado não declara U4 integral, VU1 ou aceite clínico concluídos.
 
 **Validação/evidência e conclusão:** VF. Capturas comparáveis, Axe e revisão humana de teclado/foco nas duas unidades; Axe não substitui revisão. Concluir somente pela condição comum acima e pelos critérios desta unidade.
 
+**Continuidade M3:** HUM-M3-03/HUM-M3-04 mantêm P0 confirmação e P1 feedback/
+frontend abertos, sem revogar aceiteM2 ou atribuir causa à hipótese histórica.
+Aplicar os critérios da reavaliação acima, a prova integrada e nova avaliação
+humana dos cenários afetados; não concluir só por mensagem ou teste antigo.
+
 <a id="7d-a1"></a>
 
 #### 7D-A1 — Comprovar cadastro → atendimento → acompanhamento → histórico pela interface
@@ -425,6 +488,11 @@ agregado não declara U4 integral, VU1 ou aceite clínico concluídos.
 **Aceite — cenário principal e falhas:** Todo recurso tem ID e consulta de origem corretos; usuário completa sem SQL. Falhas 403, 409 de versão/BZN e resposta perdida recuperam só intenção afetada; confirmação anterior permanece. Duas intenções iguais são distinguíveis; zero reenvio automático/duplicação.
 
 **Validação/evidência e conclusão:** VF. IDs por passo, contagem/releitura em API/SQL, capturas dos pontos de decisão e revisão com equipe; cobrir falhas por casos focados, sem repetir toda a suíte após o mesmo estado aprovado. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+**Continuidade M3:** HUM-M3-03/HUM-M3-04 mantêm P0 confirmação e P1 feedback/
+frontend abertos, sem revogar aceiteM2 ou atribuir causa à hipótese histórica.
+Aplicar os critérios da reavaliação acima, a prova integrada e nova avaliação
+humana dos cenários afetados; não concluir só por mensagem ou teste antigo.
 
 ### Extensões clínicas vinculadas a 7B e 7C
 
@@ -1305,9 +1373,9 @@ Preparação de02/11: [proposta com alternativas e cenários](../arquitetura/PRO
 
 #### 8D1D — Decidir gestão de identidade e limites de administração
 
-**Estado e cobertura:** Planejado; não aceito. RQ-NAV-07; RQ-USR-01–10 (telas/elementos na matriz).
+**Estado e cobertura:** P1; mínimos de produto determinados, política institucional/contratos específicos ainda pendentes, sem aprovação integral de8D1D. RQ-NAV-07; RQ-USR-01–10,20–24 (telas/elementos na matriz).
 
-**Escopo:** Usuários e Minha conta, perfis, ativação/inativação, último administrador, autoalteração, suporte, auditabilidade e política institucional de vínculo.
+**Escopo:** Usuários e Minha conta, perfis, ativação/inativação, último administrador, autoalteração, suporte, auditabilidade, criação/provisionamento e política institucional de vínculo.
 
 **Dependências/decisões:** P-08; H1 e política sintética não equivalem a liberação real 9D.
 
@@ -1317,15 +1385,21 @@ Preparação de02/11: [proposta com alternativas e cenários](../arquitetura/PRO
 
 **Validação/evidência e conclusão:** VD. Decisão com cenários de último admin/autoalteração/revogação, antes dos endpoints novos. Concluir somente pela condição comum acima e pelos critérios desta unidade.
 
-Preparação de02/11: [proposta com alternativas e cenários](../arquitetura/PROPOSTA_IDENTIDADE_ADMINISTRACAO_8D1D.md) disponível. Sem aprovação VD; B/U permanecem bloqueadas, sem novas permissões ou decisões presumidas.
+Atualização após relato humano: [mínimos determinados versus decisões pendentes](../arquitetura/PROPOSTA_IDENTIDADE_ADMINISTRACAO_8D1D.md).
+Proteger último administrador ativo, impedir autoelevação, explicitar autoações,
+autorizar/auditar no backend, tratar concorrência/versões e revalidar sessões;
+sem exclusão física indevida, vínculo legado/clínico ou gestão temporal automática.
+Dicionário de identidade, provisionamento/credenciais seguras, auto-inativação,
+suporte e detalhes institucionais permanecem gate por recorte. Esta execução é
+somente documental; prioridade não constitui homologação institucional.
 
 <a id="8d1b"></a>
 
 #### 8D1B — Consultar usuários e identidade ampliada com escopo explícito
 
-**Estado e cobertura:** Planejado; não aceito. RQ-NAV-07; RQ-USR-01–10; RQ-CTA-03–04 (telas/elementos na matriz).
+**Estado e cobertura:** P1; implementação administrativa pendente, sem aceite. RQ-NAV-07; RQ-USR-01–10,24; RQ-CTA-03–04 (telas/elementos na matriz).
 
-**Escopo:** D1B.1 listagem paginada admin de nome/login/perfil/status; D1B.2 me com campos aprovados. Duas unidades separadas, sem senha/hash.
+**Escopo:** D1B.1 listagem paginada, consulta de conta e histórico administrativo autorizado de criação, alteração de perfil e ativação/inativação; D1B.2 me com campos aprovados. Duas unidades separadas, sem senha/hash.
 
 **Dependências/decisões:** 8D1D/P-08; H1.
 
@@ -1335,13 +1409,28 @@ Preparação de02/11: [proposta com alternativas e cenários](../arquitetura/PRO
 
 **Validação/evidência e conclusão:** VB. Aceites separados de listagem/me com três perfis e paginação/negação. Concluir somente pela condição comum acima e pelos critérios desta unidade.
 
+**Planejamento por recorte:** listagem administrativa paginada e autorizada,
+busca/filtros aprovados, nome/login/perfil/status e detalhes mínimos reais; sem
+hash/credencial.8D1B.1/U.1 podem ter contrato delimitado sem aguardar a forma de
+provisionar credenciais de8D2.3; não pular aprovação de seus próprios campos/
+capacidades. Dados ampliados de Minha conta e suporte conservam gates próprios.
+Interface deve incluir carga/vazio/erro, responsividade/teclado e permissão,
+sem arrays locais; consulta da conta criada e histórico apoiamUSR-24.
+
+**Releitura e histórico (USR-24):** administração consulta a conta e o histórico
+auditável dos três comandos, não apenas da criação: ator, instante e resultado,
+estado anterior/novo quando contratado e campos estritamente necessários.
+Autorização e paginação/filtros do histórico precisam de contrato verificável;
+sem credenciais/hash ou informações clínicas por efeito lateral. Testar três
+perfis, recusas, vazio/erro e releitura real na interface correspondente.
+
 <a id="8d1u"></a>
 
 #### 8D1U — Ler usuários e Minha conta sem afirmar estado fictício
 
-**Estado e cobertura:** Planejado; não aceito. RQ-NAV-07; RQ-USR-01–10; RQ-CTA-03–04 (telas/elementos na matriz).
+**Estado e cobertura:** P1; implementação administrativa pendente, sem aceite. RQ-NAV-07; RQ-USR-01–10,24; RQ-CTA-03–04 (telas/elementos na matriz).
 
-**Escopo:** D1U.1 tabela/admin e autoações indisponíveis conforme regra; D1U.2 dados de conta/suporte/sair. Duas unidades; ações de alteração em D2U.
+**Escopo:** D1U.1 tabela/consulta/histórico administrativo e autoações indisponíveis conforme regra; D1U.2 dados de conta/suporte/sair. Duas unidades; ações de alteração em D2U.
 
 **Dependências/decisões:** 8D1B unidade correspondente; P-08; 7D-U4.
 
@@ -1351,13 +1440,28 @@ Preparação de02/11: [proposta com alternativas e cenários](../arquitetura/PRO
 
 **Validação/evidência e conclusão:** VF. Capturas/roteiros por unidade, três perfis e erro de identidade. Concluir somente pela condição comum acima e pelos critérios desta unidade.
 
+**Planejamento por recorte:** listagem administrativa paginada e autorizada,
+busca/filtros aprovados, nome/login/perfil/status e detalhes mínimos reais; sem
+hash/credencial.8D1B.1/U.1 podem ter contrato delimitado sem aguardar a forma de
+provisionar credenciais de8D2.3; não pular aprovação de seus próprios campos/
+capacidades. Dados ampliados de Minha conta e suporte conservam gates próprios.
+Interface deve incluir carga/vazio/erro, responsividade/teclado e permissão,
+sem arrays locais; consulta da conta criada e histórico apoiamUSR-24.
+
+**Releitura e histórico (USR-24):** administração consulta a conta e o histórico
+auditável dos três comandos, não apenas da criação: ator, instante e resultado,
+estado anterior/novo quando contratado e campos estritamente necessários.
+Autorização e paginação/filtros do histórico precisam de contrato verificável;
+sem credenciais/hash ou informações clínicas por efeito lateral. Testar três
+perfis, recusas, vazio/erro e releitura real na interface correspondente.
+
 <a id="8d2b"></a>
 
 #### 8D2B — Alterar perfil e estado do usuário com concorrência e auditoria
 
-**Estado e cobertura:** Planejado; não aceito. RQ-USR-11–18 (telas/elementos na matriz).
+**Estado e cobertura:** P1; implementação pendente, sem aceite. RQ-USR-11–18,20–24 (telas/elementos na matriz).
 
-**Escopo:** D2B.1 perfil; D2B.2 ativação/inativação. Duas unidades versionadas, sem excluir usuário ou conceder gestão temporal automaticamente.
+**Escopo:** D2B.1 perfil; D2B.2 ativação/inativação; **D2B.3 criação de conta**. Três comandos/recortes com auditoria, concorrência/recuperação pertinentes, sem excluir usuário ou conceder capacidades clínicas/temporais automaticamente.
 
 **Dependências/decisões:** 8D1D/P-08; 8D1B.
 
@@ -1365,15 +1469,28 @@ Preparação de02/11: [proposta com alternativas e cenários](../arquitetura/PRO
 
 **Aceite — cenário principal e falhas:** Cada unidade: operação válida relida; autoalteração/último admin/versão obsoleta recusados conforme política aprovada; sessão afetada revalidada; sem edição por consulta/edição.
 
-**Validação/evidência e conclusão:** VB. Dois administradores/versões, log de decisão, sessão afetada e três perfis; aceite separado por comando. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+**Validação/evidência e conclusão:** VB e integração VI/VF com U correspondente. Dois administradores/versões, histórico auditável, sessão afetada e três perfis; aceite separado por comando. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+**Aceite específico8D2B.3 (USR-20–24):** administrador informa campos de
+identidade aprovados e perfil inicial, provisiona/define credencial por mecanismo
+seguro contratado, confirma uma vez e relê a conta. Rejeitar duplicidade conforme
+unicidade/normalização aprovadas, erro de campo, perfil indevido e falta de
+permissão; sem senha em texto puro, logs/documentação, hash/credencial em resposta.
+Auditar ator, instante e resultado, com consulta autorizada da operação/histórico;
+falha/rollback e resposta perdida não duplicam conta. Sem conferir vínculos,
+gestão temporal, reprocessamento ou acesso global como efeito da criação.
+Contrato de credenciais/identidade/recuperação ainda necessário; não usar senha
+padrão insegura ou cadastrar somente no frontend para demonstrar funcionalidade.
+Criação deve ser acompanhada de8D2U.3 e releitura8D1B/U; B isolado não conclui
+esta capacidade humana. Não é criação de paciente.
 
 <a id="8d2u"></a>
 
 #### 8D2U — Confirmar alteração de perfil ou ativação com efeitos compreensíveis
 
-**Estado e cobertura:** Planejado; não aceito. RQ-USR-11–18; RQ-EST-17 (telas/elementos na matriz).
+**Estado e cobertura:** P1; interface administrativa pendente, sem aceite. RQ-USR-11–18,20–24; RQ-EST-17 (telas/elementos na matriz).
 
-**Escopo:** D2U.1 modal/página perfil com anterior→novo; D2U.2 ativar/inativar com consequência. Duas unidades separadas, foco/fechar/cancelar acessíveis.
+**Escopo:** D2U.1 modal/página perfil com anterior→novo; D2U.2 ativar/inativar com consequência; **D2U.3 formulário/revisão/confirmação de criação de conta**. Três recortes separados, acessíveis, integrados à API real.
 
 **Dependências/decisões:** 8D2B unidade correspondente; P-08; padrão de recuperação de operação definido.
 
@@ -1382,6 +1499,16 @@ Preparação de02/11: [proposta com alternativas e cenários](../arquitetura/PRO
 **Aceite — cenário principal e falhas:** Cancelar/X/Escape não escreve; confirmar um comando real; 409 preserva escolha e compara estado; 403/resposta perdida verificam sem repetir; conta/sessão afetadas refletem revalidação.
 
 **Validação/evidência e conclusão:** VF. Roteiro por comando com payload/estado relido, foco do diálogo e caso de conflito. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+**Aceite específico8D2U.3:** criação com campos/perfil aprovados, provisionamento
+seguro conforme B, revisão e confirmação explícita, sucesso/recibo e releitura
+da conta criada; erros específicos por campo, duplicidade,403/409 e resposta
+perdida sem reenvio cego. Preservar preenchimento válido, teclado/foco, resumo de
+erros, responsividade, estados de carga/conflito e retorno à listagem. Não
+reexibir senha ou simular confirmação por timer. Cancelar não escreve. Consulta/
+Edição não administram contas, inclusive por rota direta; nova conta só recebe
+capacidades contratadas. Comparar referência aplicável; criação ausente no
+protótipo deve ser documentada como extensão real, não excluída do produto.
 
 ### Fidelidade visual e aceite do produto completo
 

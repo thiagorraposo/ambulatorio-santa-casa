@@ -15,6 +15,16 @@ diagnóstico/avaliação por consulta selecionada (U3.2) receberam implementaç�
 validação técnica, registradas no [roadmap](ENTREGAS_DO_PRODUTO.md#7d-u3).
 Os demais recortes continuam sujeitos aos próprios critérios e decisões.
 
+**Atualização após avaliação humana com a equipe:** rodada REALIZADA — COM
+PROBLEMAS IDENTIFICADOS; ACEITE INTEGRAL NÃO REGISTRADO. O
+[relatório específico](../validacoes/AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md)
+separa os relatos, as decisões novas e as provas técnicas anteriores. Data exata
+da sessão não informada; ambiente/commit não confirmados para a reunião.
+As menções históricas a revisão futura abaixo não anulam esse registro; M1/M2
+permanecem aceitos nos seus recortes, sem reabertura. A ordem atual de M3 é P0 de
+atendimento, P1 de cadastro/edição,8D e frontend, e P2 restante conforme a
+[fila operacional](../execucao/PLANO_M3_2026_11_03.md#5-fila-dinâmica-e-regra-de-seleção).
+
 Este documento é a fonte da experiência pretendida. A
 [matriz ponto a ponto](MATRIZ_FIGMA_FRONTEND.md) define os requisitos de cada
 elemento, sua implementação, lacuna e destino. O
@@ -102,15 +112,39 @@ não consulta banco persistente nem altera a evidência estrutural.
 
 ## Pessoas, problemas e percursos
 
-| Pessoa/perfil | Trabalho e percurso pretendido | Autorização atual e limite |
-| --- | --- | --- |
-| Consulta | Entrar → buscar → ficha → atendimento/módulo → histórico → sair. Conferir informação sem abrir edição. | `consulta` lê os recursos autorizados; sob `vinculo_explicito`, precisa de vínculo ativo. URL de escrita não concede permissão. |
-| Profissional com edição | Buscar antes de cadastrar → identificar paciente → atendimento composto → confirmação → acompanhamento com confirmações próprias → releitura do histórico. Corrigir informações onde houver contrato. | `edicao` escreve no paciente com vínculo ativo e `pode_editar`; cadastro exige `podeCadastrar`, verdadeiro para edição somente em `todos_sinteticos`. |
-| Administração | Trabalho clínico permitido e operação de lotes; posteriormente gerir identidades e acessos. Investigar falhas sem expor bruto. | Hoje administração dispensa vínculo clínico individual quando a política sintética está habilitada. Isso não define acesso institucional futuro. Não existe CRUD HTTP de usuários. |
-| Responsável pela revisão de arquivos | Fonte/autorização → simulação → comparação → decisão seletiva → aplicação → encerramento. | Gestão temporal exige entitlement nominal externo, separado do perfil e do acesso à fonte. Administração não o recebe automaticamente. |
+A matriz abaixo é a **política de produto desejada**, determinada pelo
+responsável após a [avaliação humana com a equipe](../validacoes/AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md).
+Ela não declara essas capacidades implementadas ou validadas. A rodada foi
+realizada com problemas; data exata, ambiente usado e commit da sessão não foram
+confirmados, e aceite integral não foi registrado.
 
-Os papéis de profissional, operador e gestor acima descrevem tarefas; não criam
-novos perfis técnicos. A instituição ainda deve designar pessoas e política de
+| Perfil | Responsabilidade desejada | Limites obrigatórios |
+| --- | --- | --- |
+| Consulta | Consultar pacientes e registros autorizados; utilizar CSV quando autorizado. | Não cadastrar pacientes, alterar dados cadastrais/clínicos ou administrar usuários. Exportar não amplia o escopo de leitura. |
+| Edição | Consultar pacientes autorizados, cadastrar novos pacientes, editar os dados cadastrais permitidos no escopo autorizado, criar atendimentos e registrar/consultar clínica conforme vínculo e permissões. | Não administrar usuários, conceder vínculos automaticamente ou adquirir acesso global. Cadastro civil não autoriza corrigir registros clínicos históricos. |
+| Administração | Cadastrar pacientes, consultar/editar conforme a política vigente, gerir vínculos pelas capacidades existentes; criar/consultar contas, alterar perfis, ativar/inativar e consultar histórico auditável dessas operações. | Gestão de contas não concede acesso clínico irrestrito, capacidade clínica especial, gestão temporal ou reprocessamento automaticamente. A política institucional específica permanece sujeita aos gates P-08. |
+
+**Implementação atual, distinta da decisão acima:** `consulta` somente lê no
+escopo autorizado. Sob `vinculo_explicito`, `edicao` precisa de vínculo ativo e
+`pode_editar` para escrever; `podeCadastrar` hoje é verdadeiro para edição
+somente em `todos_sinteticos`, conforme
+[ClinicalAccessService](../../backend/src/common/security/clinical-access.service.ts).
+A nova capacidade de cadastro por edição ainda não foi implementada nem validada
+nessa política. Administração dispensa vínculo individual no comportamento
+sintético atual; isso não aprova acesso institucional irrestrito a dados reais.
+Não existe gestão HTTP completa de contas ou frontend administrativo integrado.
+
+Permitir ao criador consultar/editar o paciente recém-criado exige contrato de
+acesso inicial compatível com a proibição de conceder vínculos automaticamente.
+Não resolver a lacuna trocando para acesso global ou tornando edição um perfil
+administrativo. Cadastro e edição cadastral têm prioridade P1 e critérios
+próprios no [catálogo 7A](ENTREGAS_DO_PRODUTO.md#7a-u1).
+
+O responsável pela revisão de arquivos percorre fonte/autorização → simulação →
+comparação → decisão seletiva → aplicação → encerramento. Essa capacidade exige
+entitlement nominal externo, separado do perfil e do acesso à fonte. Administração
+não o recebe automaticamente. Os papéis profissionais descrevem tarefas, sem
+criar novos perfis técnicos; a instituição deve designar pessoas e política de
 produção. O digitador legado não vira usuário autenticado automaticamente.
 
 ## Versões e destino do inventário
@@ -235,6 +269,18 @@ não é rádio para inventar diagnóstico. Salvar confirma ID canônico e abre f
 Cancelar/voltar passa pela decisão de rascunho, sem descartar silenciosamente.
 PATCH envia versão original e somente alterações, com comparação em 409.
 
+Após o feedback humano, cadastro por Edição e edição cadastral nesse perfil são
+requisitos explícitos P1, ainda não validados na política desejada. Já existe
+contrato de PATCH cadastral versionado; sua existência não comprova autorização
+do novo percurso. Preservar campos permitidos, validação, auditoria e recuperação
+do contrato vigente, sem confundir o PATCH do paciente com correção de filhos
+clínicos históricos. O backend deve revalidar capacidade e escopo em cada ação.
+
+A confirmação de atendimento após cadastrar paciente é P0 relatado, ainda sem
+causa técnica comprovada. Sua reprodução e aceites de ponta a ponta precedem
+outras ampliações na [fila vigente](../execucao/PLANO_M3_2026_11_03.md#5-fila-dinâmica-e-regra-de-seleção).
+Melhorar a mensagem sem demonstrar persistência não encerra esse P0.
+
 ### Ficha longitudinal — FIC, RES, HIS, CHA, PRO, EXA, TRA, AVL, ENC, NOT
 
 Cabeçalho: nome, nascimento, idade/referência, identificador secundário e ações
@@ -255,7 +301,8 @@ de atendimentos, nomeada assim.
 Histórico: data/contexto, procedência quando houver contrato, observação e link
 para detalhe. Nunca apresentar status “Completo” sem definição aprovada. Exames
 agrupados por trazido/solicitado preservam identificação, resultado e observações;
-status/data de exame e parâmetros detalhados aguardam evolução HTTP. Expansão
+Parâmetros humanos canônicos têm [GET/POST e interface próprios](../validacoes/VALIDACAO_7B_E6U_PARAMETROS.md), com origem/ID e recibo preservados;
+status/data e correções do exame pai aguardam contrato/evolução próprios. Expansão
 mostra detalhe sem perder aba ou página. Vazio não significa resultado negativo.
 
 Cada aba deve ter carregamento, vazio específico, erro e recuperação de leitura.
@@ -369,21 +416,58 @@ dashboard. Exportação ampliada de métricas/colunas é P-05 e contrato futuro.
 
 ### Usuários, minha conta e erros — USR, CTA, ERR
 
-PC de usuários: listagem paginada nome/login/perfil/status, seleção de perfil e
-confirmação de ativação/inativação. Sem autoalterar perfil, exclusão definitiva
-ou vincular digitador antigo. Exige API, concorrência, auditoria e política para
-evitar perda do último administrador; não substituir por gestão de vínculo
-clínico já existente. Proposta P-08, sem implementação administrativa atual.
+Gestão de contas é P1 da Frente 8D, após o P0 de atendimento e em conjunto com
+cadastro/edição e integração frontend. O produto exige listagem paginada,
+busca/filtros autorizados, identificação/perfil/status, criação segura de conta,
+consulta da conta criada, alteração de perfil, ativação/inativação e histórico
+auditável. As operações sensíveis têm revisão e confirmação explícitas; resultado
+real e releitura não podem ser simulados por arrays ou temporizadores.
+
+A criação é o recorte **8D2B.3/8D2U.3**, com RQ-USR-20–24; preserva USR-01–19 e
+as unidades existentes de consulta, perfil e estado. Nome/login e demais campos
+de identidade precisam de contrato aprovado, perfil inicial explícito, prevenção
+de duplicidade e provisionamento/definição de credenciais seguros. Não registrar
+senhas em texto puro, logs ou documentação, nem publicar hash ou credenciais.
+Detalhes e aceites ficam no [catálogo 8D](ENTREGAS_DO_PRODUTO.md#8d1d).
+
+Os requisitos mínimos determinados pelo responsável incluem proteção do último
+administrador ativo, impedimento de autoelevação indevida, regras explícitas para
+autoações, autorização no backend, auditoria, versões/conflitos e revalidação de
+sessões após mudanças relevantes. Permanecem vedadas exclusão física indevida,
+associação automática ao digitador legado e concessão implícita de vínculos
+clínicos, gestão temporal ou reprocessamento. A vedação vigente de autoalterar o
+próprio perfil não foi revogada por uma autorização genérica de gestão.
+
+P-08 está **parcialmente definido em requisitos mínimos**, sem homologação
+institucional integral ou implementação administrativa atual. O responsável
+institucional, campos/capacidades, provisionamento de credenciais, detalhes de
+autoações/concorrência/sessão, suporte e auditoria/retenção ainda precisam das
+respostas registradas na [proposta 8D1D](../arquitetura/PROPOSTA_IDENTIDADE_ADMINISTRACAO_8D1D.md).
+Não substituir gestão de contas por gestão de vínculo clínico já existente.
 
 Minha conta VU1: nome/perfil e identificação secundária de `/auth/me`, sair e
 orientação institucional de suporte. Login/status entram apenas após extensão
-de identidade, sem derivar “ativo” de dados locais.
+de identidade, sem derivar “ativo” de dados locais ou inventar contato de suporte.
+
+Erros de validação conhecidos devem identificar campo/caminho seguro, rótulo
+legível, motivo e formato esperado quando relevante; preservar os valores
+válidos, destacar o controle, apresentar resumo acessível e permitir chegar por
+teclado ao primeiro erro. O formulário não é apagado após tentativa inválida.
+API e frontend precisam de contrato de erro estável e sanitizado para associar
+a resposta ao controle; a investigação do P0 deve verificar esse contrato antes
+de escolher sua representação. Exemplos de campos não constituem diagnóstico
+da falha humana relatada.
 
 401 encerra sessão e reautentica; 403 mostra recusa e opção de verificar acesso;
-404 oferece destino útil sem afirmar que o paciente foi removido; 429 informa
-aguardar; 503/rede permitem nova **leitura**; erro de escrita usa recuperação
-abaixo. Página desconhecida permite início/busca. Não mostrar SQL, stack, tokens
-ou texto arbitrário de processamento.
+404 oferece destino útil sem afirmar que o paciente foi removido; 409 distingue
+conflito de validação; 429 informa aguardar; 503/rede permitem nova **leitura**;
+erro de escrita usa recuperação abaixo. Falha inesperada pode ter mensagem
+segura genérica e correlação quando disponível. Não mostrar SQL, stack, tokens,
+identificadores sensíveis ou texto clínico/processamento não autorizado.
+
+Toda funcionalidade de interação humana exige frontend integrado e validado,
+conforme o [workflow e DoD permanentes](../WORKFLOW_DE_DESENVOLVIMENTO.md).
+Backend funcional isolado comprova uma camada, não a conclusão da funcionalidade.
 
 ## Estados, salvamento e recuperação — EST
 
@@ -391,7 +475,7 @@ ou texto arbitrário de processamento.
 | --- | --- |
 | Carregamento/reconsulta | Informação anterior oculta; leitura cancelável; ação de escrita desabilitada enquanto identidade/recurso não for revalidado. |
 | Vazio | Mensagem específica do recurso e da página/escopo; não concluir ausência global, resultado negativo ou contagem zero indiscriminadamente. |
-| Erro de entrada/400 | Rascunho visível, erro associado ao campo e resumo com foco; corrigir e confirmar uma intenção. Não repetir a escrita por timer. |
+| Erro de validação conhecido | Rascunho e dados válidos preservados; motivo sanitizado e código estável associados ao campo/caminho seguro, rótulo legível e formato quando relevante. Controle destacado, resumo acessível e foco/navegação por teclado ao primeiro erro. Corrigir e confirmar uma intenção; não repetir por timer. |
 | Pronto/rascunho | Valores, baseline e identidade/contexto em memória; mudança de etapa não perde dados. Navegar pede continuar ou sair mantendo rascunho. Descarte é explícito por rascunho. |
 | Enviando | Um envio; duplo clique/Enter/navegação não duplicam. Mostrar aguardar confirmação. Não tornar POST idempotente apenas por desabilitar botão. |
 | Confirmado | Recibo com recurso/ID, paciente, atendimento quando aplicável e valores confirmados; releitura por ação. Permanece após falha temporária de `/auth/me` da mesma identidade. |
@@ -617,7 +701,7 @@ contrato. Pacotes dependentes permanecem planejados até a escolha necessária.
 | P-05 | Filtros/colunas/código, procedência, indicadores e exportação inventariados incluídos; definir semântica e aprovar KPIs, população/período e contrato da exportação ampliada. Proposta inicial: nome/sexo, ID secundário e CSV da página. | 8A1, 8B1D/B/U, 8B2B/U, 8B3D/B/U. API sintética atual de CSV permite três perfis, Figma restringe a admin. |
 | P-06 | Confirmar destino de D9: planejamento de retorno futuro/desfecho e eventual retirada do campo legado. Proposta: separado de comparecimento efetivo. | 7C-E5D/B/U. Não fabricar retorno, excluir texto ou consolidar silenciosamente. |
 | P-07 | Upload incluído; decidir documento/estado/armazenamento/retenção e acesso. | 8C3D/B/U; obrigatório no produto completo; detalhes pendentes. |
-| P-08 | Gestão de usuários incluída; aprovar política institucional de identidade/acesso; definir proteção do último administrador, suporte e dados de Minha conta. | 8D1D/B/U, 8D2B/U, Etapas 9B/9D. Não presumir acesso irrestrito real por perfil. |
+| P-08 | Gestão de contas P1 inclui criação, consulta, perfil, estado e auditoria. Mínimos de proteção do último administrador ativo, não autoelevação, autoações explícitas, backend, auditoria, concorrência/versão, revalidação de sessão e ausência de privilégios implícitos foram determinados pelo responsável. Detalhes institucionais de identidade/capacidades, provisionamento, sessão, suporte e retenção continuam pendentes na proposta 8D1D. | 8D1D/B/U e 8D2B/U, incluindo criação 8D2B.3/U.3. Não é aprovação integral P-08, implementação ou autorização real da Etapa 9. |
 | P-09 | Reprocessamento e revisão incluídos; definir autorização, leitura, retomada e ordem de implementação desses processos. | 8C4D/B/U e 8C5B/U; reenvio ordinário é outra ação. |
 
 ## Conclusão documental e condição de aceite do produto

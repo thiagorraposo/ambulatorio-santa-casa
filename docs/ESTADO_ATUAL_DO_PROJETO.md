@@ -1,7 +1,29 @@
 # Estado atual do projeto
 
-Atualizado em: 2026-10-31. Síntese de implementação e evidências existentes;
+Atualizado em: 2026-11-02. Síntese de implementação e evidências existentes;
 esta atualização documental não reexecuta as suítes da aplicação.
+
+## Atualização após avaliação humana M3
+
+A avaliação com a equipe do Centro de Pesquisa em Saúde da Santa Casa foi
+**REALIZADA — COM PROBLEMAS IDENTIFICADOS**. **ACEITE INTEGRAL NÃO REGISTRADO**;
+data exata da sessão, ambiente efetivamente usado e commit não foram confirmados.
+Fonte: [relato formal do responsável e decisões de produto](validacoes/AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md).
+M1/M2 não são reabertos; as evidências abaixo permanecem válidas nos seus recortes.
+
+| Prioridade | Estado atual versus requisito novo | Próxima validação |
+| --- | --- | --- |
+| P0 · confirmação de atendimento | Falha humana relatada após novo cadastro; mensagem genérica, sem causa/HTTP/campo comprovados. Lacuna de feedback confirmada por inspeção, não reprodução | Reproduzir UI/API/PostgreSQL sintético; corrigir causa real e validar persistência novo/existente, erros por campo, permissão/conflito e recibo sem duplicação |
+| P1 · cadastro/edição por Edição | Nova política desejada ainda não validada. Cadastro atualmente restringe Edição em vinculo_explicito; PATCH cadastral versionado/auditado já existe | Contratar acesso inicial ao criado sem vínculo automático/global; capacidade/backend/UI, whitelist cadastral, perfis e releitura |
+| P1 · gestão8D | Ampliação administrativa ainda sem API/UI completas; criar conta agora explicitamente8D2B.3/U.3, USR20–24, preservando19EX | Mínimos determinados e P-08 específico; leitura, comandos, auditoria, sessão e provisão segura por recorte |
+| P1 · cobertura frontend | Recortes B/U tecnicamente comprovados não constituem frontend completo; insuficiência relatada pela equipe permanece aberta | [Matriz dirigida de cobertura](frontend/MATRIZ_FIGMA_FRONTEND.md#cobertura-funcional-dirigida-após-avaliação-humana), DoD/prontidão integrada e nova avaliação dos cenários afetados |
+
+Candidato funcional anterior `a84001a` preservado. A existência de um percurso
+sintético positivo não fecha a falha humana com entradas não conhecidas.
+Nesta entrega foram feitas somente inspeções de código e documentação; nenhum
+reteste clínico, migration, dado real ou alteração da aplicação. Não declarar
+M3 tecnicamente concluída, formalmente aceita, percentual de cobertura ou EVM.
+Retomada funcional: [checkpoint/fila P0→P1→P2](execucao/PLANO_M3_2026_11_03.md#5-fila-dinâmica-e-regra-de-seleção).
 
 ## Escopo e estágio
 

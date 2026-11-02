@@ -1,5 +1,24 @@
 # Registro de Alterações
 
+## 2026-11-02 — Registrar avaliação humana e repriorizar M3
+
+Registrada a avaliação do protótipo funcional com a equipe do Centro de Pesquisa
+em Saúde e responsável técnico: REALIZADA — COM PROBLEMAS IDENTIFICADOS; ACEITE
+INTEGRAL NÃO REGISTRADO. Data exata, ambiente e SHA da sessão não confirmados.
+Cinco achados abertos: cadastro/edição por Edição, confirmação de atendimentoP0,
+cobertura frontend e gestão de contas. [Fonte humana](validacoes/AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md).
+
+Novos requisitos desejados de perfis e mínimos8D/P-08 separados do código atual;
+criação de contas acrescentada8D2B.3/U.3 eFM/RQ-USR20–24, preservando19EX/IDs.
+Fila passa aP0 atendimento→P1 cadastro/edição,8D efrontend→P2 restante. Workflow
+exige frontend/integração/visual em toda função humana; cobertura/prontidão/DoD
+reavaliados sem EVM ou percentual inventado. Contrato de erros/campos e acesso
+inicial ao paciente criado permanecem planejamento, sem autovínculo/global.
+
+Entrega exclusivamente documental, com candidatoa84001a e aceitesM1/M2
+preservados. Nenhuma implementação, migração, teste clínico, dado persistente,
+credencial, push, merge ou deploy; validações documentais registradas no checkpoint.
+
 ## 2026-11-02 — Consolidar decisões e disponibilizar demonstração sintética
 
 Triagem de P-04/P-05/P-06/P-09, propostas de fila/revisão e métricas/busca,
