@@ -9,6 +9,7 @@ import { DatabaseService } from '../common/database/database.service';
 import { ClinicalAccessService } from '../common/security/clinical-access.service';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { AppConfig } from '../config/app.config';
+import { importacaoRelatorio } from './importacao-relatorio';
 import { ImportacaoFinalidade, ImportacaoLoteDetalheResponse, ImportacaoLoteResponse,
   ImportacaoLinhaResponse, ImportacaoLinhaRow, ImportacaoSubmitResponse } from './dto/importacao.response';
 
@@ -45,28 +46,35 @@ export class ImportacoesService {
         '--db-role', importer.role, '--db-name', importer.name!];
       if (dryRun) args.push('--dry-run');
       let executedLotId: string | null = null;
+      let output: { stdout: string; stderr: string };
       try {
-        const { stderr } = await execFileAsync('python3', args, { env: {
+        output = await execFileAsync('python3', args, { env: {
           PATH: process.env.PATH, LANG: process.env.LANG, LC_ALL: process.env.LC_ALL,
           PGPASSWORD: importer.password,
         }, maxBuffer: 1024 * 1024 });
-        // Only the worker's technical completion events identify the effective lot.
-        // The requested code can differ on an idempotent no-op of the same content.
-        for (const line of stderr.split('\n')) {
-          try {
-            const event: { event?: string; lot_id?: unknown } = JSON.parse(line);
-            const id = String(event.lot_id ?? '');
-            if (['import_finished', 'import_idempotent_noop'].includes(event.event ?? '') && /^[1-9]\d{0,18}$/.test(id)) executedLotId = id;
-          } catch { /* Ignore non-event diagnostics; never expose worker output. */ }
-        }
       } catch {
         throw new BadRequestException('Importação recusada; consulte o lote e os erros sanitizados');
+      }
+      let relatorio: ImportacaoSubmitResponse['relatorio'];
+      try {
+        relatorio = importacaoRelatorio(output.stdout, dryRun);
+      } catch {
+        throw new ServiceUnavailableException('Resultado da importação indisponível; consulte o lote antes de reenviar');
+      }
+      // Only the worker's technical completion events identify the effective lot.
+      // The requested code can differ on an idempotent no-op of the same content.
+      for (const line of output.stderr.split('\n')) {
+        try {
+          const event: { event?: string; lot_id?: unknown } = JSON.parse(line);
+          const id = String(event.lot_id ?? '');
+          if (['import_finished', 'import_idempotent_noop'].includes(event.event ?? '') && /^[1-9]\d{0,18}$/.test(id)) executedLotId = id;
+        } catch { /* Ignore non-event diagnostics; never expose worker output. */ }
       }
       const lot = await this.database.query<{ importacao_lote_id: string; codigo_lote: string; status_lote: string }>(
         'SELECT importacao_lote_id::text,codigo_lote,status_lote FROM importacao_lote_consulta WHERE importacao_lote_id=$1::bigint', [executedLotId]);
       if (!dryRun && !lot.rows[0]) throw new ServiceUnavailableException('Resultado da importação indisponível');
       return { codigoLote: lot.rows[0]?.codigo_lote ?? lotCode, codigoLoteSolicitado: lotCode, dryRun,
-        loteId: lot.rows[0]?.importacao_lote_id ?? null, status: lot.rows[0]?.status_lote ?? 'dry_run_concluido' };
+        loteId: lot.rows[0]?.importacao_lote_id ?? null, status: lot.rows[0]?.status_lote ?? 'dry_run_concluido', relatorio };
     } finally {
       await fs.rm(temporary, { recursive: true, force: true });
     }

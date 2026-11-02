@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
-from importar_planilha import bzn_duration, bool_value, date_value, normalized, number_value, HANDLED_TABLES, Importer, NONCRITICAL_POLICY, PROMOTION_REGISTRY, RowConflict, main
+from importar_planilha import bzn_duration, bool_value, date_value, normalized, number_value, HANDLED_TABLES, Importer, import_issue_code, NONCRITICAL_POLICY, PROMOTION_REGISTRY, RowConflict, main
 
 
 class FinalidadeImportacaoTest(unittest.TestCase):
@@ -420,6 +420,24 @@ class ReconciliacaoBznTest(unittest.TestCase):
                                  f"tratamento_benzonidazol.{field}: divergência consolidada")
                 self.importer.insert_returning.assert_not_called()
                 self.importer.provenance.assert_not_called()
+
+
+
+
+class ImportIssueCodeTest(unittest.TestCase):
+    def test_vocabulary_and_priority_never_echo_source(self):
+        cases = [
+            ("importada", "SEGREDO", None),
+            ("importada_com_pendencia", "SEGREDO", "pendencia_nao_promovida"),
+            ("pendente", "SEGREDO", "falha_operacional"),
+            ("rejeitada", "SEGREDO data inválida", "data_invalida"),
+            ("rejeitada", "SEGREDO catálogo sintético inexistente", "catalogo_indisponivel"),
+            ("rejeitada", "SEGREDO conflito com data inválida", "data_invalida"),
+            ("rejeitada", "SEGREDO sem causa conhecida", "linha_rejeitada"),
+        ]
+        for status, message, expected in cases:
+            with self.subTest(status=status, expected=expected):
+                self.assertEqual(import_issue_code(status, message), expected)
 
 
 if __name__ == "__main__": unittest.main()

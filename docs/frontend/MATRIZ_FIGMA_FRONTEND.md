@@ -1119,3 +1119,13 @@ navegador. **EST** cobre todos os demais. Nenhum campo sem API foi marcado como
 excluído por essa ausência. A manutenção deve acrescentar evidência por ID,
 ambiente, cenário/assertiva e resultado, sem substituir o inventário por
 declaração genérica de tela concluída.
+
+
+Continuidade de02/11 — Capability Mapping da importação: backend de
+FM-IMP-32/42 possui agora [relatório H14 sanitizado](../arquitetura/CONTRATO_RELATORIO_IMPORTACAO_8C2B_1.md)
+com totais/códigos reais; [provas de pipeline/HTTP](../validacoes/VALIDACAO_8C2B_1_RELATORIO.md).
+As linhas acima que descrevem dry-run mínimo são a fotografia anterior; interface,
+metadados/conflitos e garantia sem consumir sequências (FM-IMP-36) não são
+concluídos pelo backend. Confirmação U.2 bloqueada por
+[recuperação autoritativa ausente](../arquitetura/PROPOSTA_CONFIRMACAO_IMPORTACAO_8C2U_2.md),
+sem inventar recibo a partir do código solicitado.

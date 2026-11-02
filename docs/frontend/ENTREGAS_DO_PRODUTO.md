@@ -1120,7 +1120,7 @@ Não encerra todos os EVT nem altera o vínculo clínico por paciente.
 
 #### 8C2B — Evoluir relatório de simulação e metadados por unidades
 
-**Estado e cobertura:** Planejado; não aceito. RQ-IMP-01–24, 32, 36, 39, 42–51 (telas/elementos na matriz).
+**Estado e cobertura:** Relatório/totais/códigos de C2B.1 VALIDADOS TECNICAMENTE ([provas](../validacoes/VALIDACAO_8C2B_1_RELATORIO.md)); ausência de consumo de sequências pendente. C2B.1 inteira IMPLEMENTADA SEM VALIDAÇÃO COMPLETA; metadados/conflitos e aceite humano pendentes. RQ-IMP-01–24, 32, 36, 39, 42–51 (telas/elementos na matriz).
 
 **Escopo:** C2B.1 contagens/códigos do dry-run e totais reais; C2B.2 arquivo/hash/versões sanitizados; C2B.3 candidatos de conflito com autorização. Três unidades; C2B.3 incluída no produto completo; decidir exposição mínima antes de implementar.
 
@@ -1154,6 +1154,11 @@ aceite humano registrado.
 **Aceite — cenário principal e falhas:** U.1 arquivo inválido/recusa não grava e troca/cancelar preserva escolha consciente; U.2 simular zero escrita, confirmar/reenvio mostra lote efetivo e recusa de arquivo alterado explica revisão; U.3 contagens/metadados reais; U.4 links sem exposição indevida. Resposta perdida mantém incerto e verifica lote/operação autorizados.
 
 **Validação/evidência e conclusão:** VI. Roteiro separado por unidade com XLSX sintético/POST contados, lote relido e falhas; período/etapa não avançam por timer. Concluir somente pela condição comum acima e pelos critérios desta unidade.
+
+Bloqueio confirmado em02/11: U.2 não dispõe de recuperação autoritativa após
+worker concluir e resposta se perder; código solicitado pode diferir do lote
+efetivo. [Requisito e alternativas ainda não aprovadas](../arquitetura/PROPOSTA_CONFIRMACAO_IMPORTACAO_8C2U_2.md).
+Não liberar confirmação ou repetir POST com base em consulta inconclusiva.
 
 <a id="8c3d"></a>
 

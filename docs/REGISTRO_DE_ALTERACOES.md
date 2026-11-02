@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-02 — Relatório H14 sanitizado, recorte8C2B.1
+
+Totais disjuntos e códigos fechados na simulação/aplicação/no-op, com lote
+efetivo, allowlist e validação de protocolo; sem bruto/metadados/candidatos.
+197 unidades backend,35 Python,26 HTTP e pipeline integral aprovados.
+[Provas e limites](validacoes/VALIDACAO_8C2B_1_RELATORIO.md): sequências ainda
+consumidas, folha inteira pendente. U.2 bloqueada por recuperação autoritativa
+sem contrato suficiente; proposta registrada sem liberar confirmação/reenvio.
+
 ## 2026-11-02 — Atalhos diretos da busca, 8B3U.4
 
 Atalhos Editar/Novo atendimento por pessoa, nome/ID, perfis e retorno à busca;

@@ -282,16 +282,29 @@ suite('Fluxos clínicos HTTP em banco descartável', () => {
     const dry = await http().post('/importacoes').auth(tokens.edicao, { type: 'bearer' })
       .field('finalidade', 'carga_inicial').field('codigoLote', 'http-dry-run').field('dryRun', 'true').attach('arquivo', file).expect(201);
     expect(dry.body).toMatchObject({ dryRun: true, loteId: null, status: 'dry_run_concluido' });
+    expect(dry.body.relatorio).toEqual({ totalLinhas: 2, linhasImportadas: 2,
+      linhasComPendencia: 0, linhasRejeitadas: 0, codigosErro: [] });
     expect(await count()).toBe(before);
     const imported = await http().post('/importacoes').auth(tokens.edicao, { type: 'bearer' })
       .field('finalidade', 'carga_inicial').field('codigoLote', 'http-sintetico').attach('arquivo', file).expect(201);
     expect(imported.body.loteId).toMatch(/^[1-9]\d*$/);
+    expect(imported.body.relatorio).toEqual(dry.body.relatorio);
     expect(await count()).toBe(before + 2);
     const repeated = await http().post('/importacoes').auth(tokens.administracao, { type: 'bearer' })
       .field('finalidade', 'mesmo_conteudo').field('codigoLote', 'http-outro-codigo').attach('arquivo', file).expect(201);
     expect(repeated.body.loteId).toBe(imported.body.loteId);
     expect(repeated.body.codigoLote).toBe('http-sintetico');
     expect(repeated.body.codigoLoteSolicitado).toBe('http-outro-codigo');
+    expect(repeated.body.relatorio).toEqual(imported.body.relatorio);
+    const snapshot = await owner.query(`SELECT total_linhas::int,linhas_importadas::int,
+      linhas_com_pendencia::int,linhas_rejeitadas::int FROM ambulatorio.importacao_lote_consulta
+      WHERE importacao_lote_id=$1`, [imported.body.loteId]);
+    expect(repeated.body.relatorio).toMatchObject({ totalLinhas: snapshot.rows[0].total_linhas,
+      linhasImportadas: snapshot.rows[0].linhas_importadas,
+      linhasComPendencia: snapshot.rows[0].linhas_com_pendencia,
+      linhasRejeitadas: snapshot.rows[0].linhas_rejeitadas });
+    expect(JSON.stringify([dry.body, imported.body, repeated.body])).not.toMatch(
+      /dados_brutos|mensagem_processamento|file_sha256|manifest_sha256|git_revision|Paciente importado HTTP/);
     expect(await count()).toBe(before + 2);
     const importedPatients = await owner.query(`SELECT DISTINCT registro_id::text AS paciente_id FROM ambulatorio.importacao_registro r
       JOIN ambulatorio.importacao_linha i USING(importacao_linha_id)

@@ -76,3 +76,5 @@ sistema; sua menção preserva rastreabilidade, não garante disponibilidade atu
 - [Interface de parâmetros do exame — E6U](VALIDACAO_7B_E6U_PARAMETROS.md).
 
 - [Atalhos diretos por pessoa — 8B3U.4](VALIDACAO_8B3U_4.md).
+
+- [Relatório H14 sanitizado — recorte8C2B.1](VALIDACAO_8C2B_1_RELATORIO.md).

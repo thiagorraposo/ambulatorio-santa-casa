@@ -62,6 +62,41 @@ def safe_log(event: str, **fields) -> None:
                      ensure_ascii=True, sort_keys=True), file=sys.stderr)
 
 
+def import_issue_code(status: str, message: str) -> str | None:
+    """Mesmo vocabulário fechado de SQL53, sem retornar conteúdo da mensagem."""
+    if status == "importada_com_pendencia":
+        return "pendencia_nao_promovida"
+    if status == "pendente" and message:
+        return "falha_operacional"
+    if status != "rejeitada":
+        return None
+    rules = (
+        (("valor obrigatório ausente",), "campo_obrigatorio_ausente"),
+        (("data inválida",), "data_invalida"),
+        (("booleano inválido",), "booleano_invalido"),
+        (("número inválido",), "numero_invalido"),
+        (("ano inválido",), "ano_invalido"),
+        (("duração ambígua",), "duracao_ambigua"),
+        (("domínio inválido",), "dominio_invalido"),
+        (("múltiplos pacientes candidatos",), "identidade_ambigua"),
+        (("conflitante", "conflito"), "dados_conflitantes"),
+    )
+    for fragments, code in rules:
+        if any(fragment in message for fragment in fragments):
+            return code
+    if ("catálogo" in message and "inexistente" in message[message.index("catálogo"):]
+            or "catálogo não resolvido" in message):
+        return "catalogo_indisponivel"
+    for fragments, code in (
+        (("proveniência ambígua",), "proveniencia_ambigua"),
+        (("divergência", "divergente"), "dados_divergentes"),
+        (("ciclo na cadeia",), "cadeia_reprocessamento_invalida"),
+    ):
+        if any(fragment in message for fragment in fragments):
+            return code
+    return "linha_rejeitada"
+
+
 def normalized(value: str) -> str:
     value = unicodedata.normalize("NFKD", value.strip().lower())
     return " ".join("".join(c for c in value if not unicodedata.combining(c)).split())
@@ -1195,6 +1230,11 @@ class Importer:
             "manifest_sha256": self.manifest_hash,
             "importer_version": IMPORTER_VERSION,
             "git_revision": self.revision,
+            "issue_counts": {
+                code: sum(import_issue_code(status, message) == code for status, message in statuses)
+                for code in sorted({import_issue_code(status, message) for status, message in statuses}
+                                   - {None})
+            },
             "metrics": {
                 "total_rows": len(statuses), "valid_rows": imported,
                 "importable_rows": imported, "pending_rows": pending,
@@ -1206,7 +1246,7 @@ class Importer:
 
     def run(self):
         self.validate_layout()
-        if not self.prepare_lot(): return
+        if not self.prepare_lot(): return self.quality_report()
         self.stage()
         self.db.run(f"UPDATE importacao_lote SET status_lote='processando', atualizado_em=CURRENT_TIMESTAMP WHERE importacao_lote_id={self.lot_id}")
         portador = self.manifest["sheets"][0]
