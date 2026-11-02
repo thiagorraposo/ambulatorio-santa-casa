@@ -118,3 +118,10 @@ Só então integrar o supervisor autorizado ao H14, preservando o contrato de
 relatório sanitizado e o limite de capacidades. Não concluir C2B.1 com uma
 simulação sobre base vazia, um overlay sem triggers ou apenas restauração de
 contadores. Aceite humano e liberação de dados reais permanecem separados.
+
+PoC parcial de instância separada revisada/reexecutada em tmpfs em02/11:
+[evidência e limites](../validacoes/VALIDACAO_POC_ISOLAMENTO_INSTANCIA_8C2B_1.md).
+Origem sintética imutável, clone com schema/ACLs/credencial restrita, worker real,
+no-op/reprocessamento/indisponibilidade/cancelamento comprovados no estado
+descrito. Equivalência transacional geral, supervisor operacional e integração
+H14 continuam pendentes; C2B.1 não concluída.

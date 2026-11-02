@@ -1,5 +1,12 @@
 # Registro de Alterações
 
+## 2026-11-02 — Incorporar PoC revisada de instância sintética isolada
+
+Harness preexistente revisado e reexecutado em tmpfs: clones próprios,
+schema/ACLs/credencial restrita, worker real, no-op, reprocessamento e
+cancelamento;61 tabelas/54 sequências da origem preservadas. [Provas e limites](validacoes/VALIDACAO_POC_ISOLAMENTO_INSTANCIA_8C2B_1.md).
+Sem integração H14, supervisor operacional ou conclusão de8C2B.1.
+
 ## 2026-11-02 — Revalidar P0 na retomada de estabilização
 
 Dez cenários de navegador/API/PostgreSQL sintético tmpfs aprovados, incluindo
