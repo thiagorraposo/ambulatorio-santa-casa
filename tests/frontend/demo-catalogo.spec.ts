@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test';
-import { apiJson, seedPatient, seedAttendance, signIn } from './stage7-helpers';
+import { apiJson, seedPatient, seedAttendance, signIn, checkComorbidityCatalogItem } from './stage7-helpers';
 test('fixture de demonstração disponibiliza catálogo canônico sem depender de outro teste', async ({ page }) => {
   const catalog = await apiJson<Array<{ id: string; nome: string }>>('GET', '/catalogos/comorbidades?limit=100');
   expect(catalog.map(r => r.nome)).toEqual(expect.arrayContaining(['hipertensao_arterial', 'diabetes']));
   const p = await seedPatient('Catálogo demo sintético'); const a = await seedAttendance(p.path);
   const path = `${a.path}/comorbidades`;
   await signIn(page, 'edicao', `${path}/nova`);
-  await page.getByLabel('Avaliar hipertensao_arterial', { exact: true }).check();
+  await checkComorbidityCatalogItem(page, 'hipertensao_arterial');
   await page.getByLabel('Presença de hipertensao_arterial', { exact: true }).selectOption('nao');
   await page.getByRole('button', { name: 'Revisar comorbidades', exact: true }).click();
   const saved = page.waitForResponse(r => r.request().method() === 'POST' && new URL(r.url()).pathname === `/v1${path}`);

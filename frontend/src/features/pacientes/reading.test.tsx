@@ -298,7 +298,18 @@ describe('atendimento e coleções aninhadas', () => {
     responses.set(`/pacientes/${ID}/atendimentos/71/rastreios-familiares?limit=20&offset=0`, attendance.rastreiosFamiliares);
     for (const snapshot of attendance.rastreiosFamiliares) responses.set(
       `/pacientes/${ID}/atendimentos/71/rastreios-familiares/${snapshot.rastreioFamiliarId}/familiares?limit=20&offset=0`, snapshot);
-    renderRoute(<AttendancePage />, `/pacientes/${ID}/atendimentos/71?limit=2&offset=0`, '/pacientes/:pacienteId/atendimentos/:atendimentoId');
+    const source = `/pacientes/${ID}/atendimentos/71?limit=2&offset=0#dados`;
+    renderRoute(<AttendancePage />, source, '/pacientes/:pacienteId/atendimentos/:atendimentoId');
+    // Os recursos longitudinais coexistem e retornam à consulta exata de origem.
+    for (const [name, resource] of [
+      ['AVC do paciente (longitudinal)', 'avcs'],
+      ['Marcapasso e CDI do paciente', 'dispositivos'],
+      ['Estado de óbito do paciente', 'obito'],
+    ]) {
+      const target = new URL(screen.getByRole('link', { name }).getAttribute('href')!, 'http://app.local');
+      expect(target.pathname).toBe(`/pacientes/${ID}/${resource}`);
+      expect(target.searchParams.get('retorno')).toBe(source);
+    }
     expect(screen.getByText('9007199254740993,123456789000 cm')).toBeVisible();
     expect(screen.getByText('0 bpm')).toBeVisible();
     expect(screen.getByText('nyha_legado')).toBeVisible();

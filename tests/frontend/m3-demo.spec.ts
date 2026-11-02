@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import type { AtendimentoDetalheResponse, ResultadoExameResponse, SorologiaResponse } from '../../frontend/src/api/contracts';
 import { fixture, apiAs, assertNoPersistentClinicalState } from './fixtures';
 import { apiJson, nextAttendanceStep, reviewAttendance, signIn, submitWrite,
-  assertAccessible, assertFitsViewport, loseResponseAfterCommit } from './stage7-helpers';
+  assertAccessible, assertFitsViewport, loseResponseAfterCommit, checkComorbidityCatalogItem } from './stage7-helpers';
 
 test('M3 demonstração sintética: cadastro buscado, consulta, episódios, parâmetros, histórico e CSV', async ({page}, info) => {
   test.setTimeout(180_000);
@@ -82,7 +82,7 @@ test('M3 demonstração sintética: cadastro buscado, consulta, episódios, par�
 
   await page.getByRole('link',{name:'Comorbidades deste atendimento',exact:true}).click();
   await page.getByRole('link',{name:'Registrar comorbidades',exact:true}).click();
-  await page.getByLabel('Avaliar hipertensao_arterial',{exact:true}).check();
+  await checkComorbidityCatalogItem(page, 'hipertensao_arterial');
   await page.getByLabel('Presença de hipertensao_arterial',{exact:true}).selectOption('nao');
   await page.getByLabel('Histórico de doença familiar',{exact:true}).selectOption('desconhecido');
   await page.getByLabel('Relato familiar',{exact:true}).fill('Relato familiar sintético M3');

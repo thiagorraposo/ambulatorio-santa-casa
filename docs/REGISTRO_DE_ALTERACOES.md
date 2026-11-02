@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-02 — Restaurar navegação AVC e estabilizar catálogo composto
+
+Restaurado link longitudinal AVC substituído ao acrescentar dispositivos;
+consulta agora mantém AVC/dispositivos/óbito com retorno exato. Roteiros de
+catálogo percorrem páginas reais após inserção de25categorias sintéticas.
+Rodada integral97 aprovados/4 falhas; correções em checkout isolado passaram
+build,12 unidades e5 E2E (quatro casos falhos mais pré-requisito de catálogo).
+[Prova composta e limites](validacoes/VALIDACAO_REGRESSAO_FRONTEND_M3_2026_11_02.md).
+
 ## 2026-11-02 — Confronto renderizado da leitura de medicamentos
 
 Referência Tratamentos e leitura real comparadas em1440/390/320, preservando

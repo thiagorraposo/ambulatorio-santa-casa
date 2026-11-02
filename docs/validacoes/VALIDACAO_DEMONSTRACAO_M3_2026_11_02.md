@@ -60,3 +60,11 @@ não foram todos exercitados nesta mesma pessoa ou como apresentação humana.
 Não há parecer clínico/visual registrado por este ensaio. A regressão frontend
 integral está em andamento e não é declarada aprovada aqui. Candidato anterior
 continua preservado até fechar essa validação e identificar SHA final.
+
+
+Continuidade: os dois roteiros de catálogo foram corrigidos para percorrer a
+segunda página quando outras categorias precedem a canônica. O ensaio passou
+novamente em8,4s no checkout corrigido com o catálogo composto.
+[Regressão e validação proporcional das correções](VALIDACAO_REGRESSAO_FRONTEND_M3_2026_11_02.md).
+A expressão “regressão em andamento” acima descreve a prova inicial; a rodada
+terminou97/101 e os quatro casos falhos passaram após correção dirigida.
