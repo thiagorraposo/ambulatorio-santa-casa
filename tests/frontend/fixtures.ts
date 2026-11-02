@@ -34,9 +34,17 @@ async function waitForLoginWindow(milliseconds: number) {
 }
 
 export async function signIn(page: Page, perfil: Perfil, destination = '/') {
+  return submitLogin(page, perfil, destination);
+}
+
+export async function signInCurrentPage(page: Page, perfil: Perfil) {
+  return submitLogin(page, perfil);
+}
+
+async function submitLogin(page: Page, perfil: Perfil, destination?: string) {
   const pause = loginWindowUntil - Date.now();
   if (pause > 0) await waitForLoginWindow(pause);
-  await page.goto(destination);
+  if (destination !== undefined) await page.goto(destination);
   await expect(page.getByLabel('Usuário', { exact: true })).toBeVisible();
   await page.getByLabel('Usuário', { exact: true }).fill(fixture.users[perfil].login);
   await page.keyboard.press('Tab');

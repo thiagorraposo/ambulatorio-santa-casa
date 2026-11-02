@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-02 — Antecipar limites físicos e preservar foco dos erros P0
+
+DTO/cliente localizam limites numéricos existentes sem definir faixa clínica.
+Familiares incompatíveis apontam controles; corrigido foco do resumo ao revelar
+outra etapa. Testes reproduziram ambas as lacunas antes da correção;211 unidades
+backend,137 clínicos,24 focados frontend e E2E novo passaram. Rodada ampla parcial
+exposta com limites; relogin do roteiro respeita429 pelo helper compartilhado.
+[Detalhes e rastreabilidade](validacoes/VALIDACAO_P0_ATENDIMENTO_2026_11_02.md#limites-físicos-familiares-e-foco-entre-etapas).
+
 ## 2026-11-02 — Validar fluxo P0 integrado e localizar rejeições de filhos
 
 Cadastro novo e existente confirmam/releem atendimento em PostgreSQL descartável;

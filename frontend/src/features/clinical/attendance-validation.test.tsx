@@ -95,6 +95,20 @@ describe('feedback de campo do atendimento', () => {
     await user.click(screen.getByRole('button', { name: 'Revisar atendimento' }));
     expect(screen.getByRole('heading', { name: /^Revisão$/ })).toBeVisible();
   });
+  it('mantém o foco no resumo quando a rejeição local revela outra etapa', async () => {
+    const { user, write } = await setup();
+    await user.click(screen.getByRole('button', { name: 'Próxima etapa' }));
+    fireEvent.change(screen.getByLabelText('Altura (cm)'), { target: { value: '1000' } });
+    await user.click(screen.getByRole('button', { name: 'Próxima etapa' }));
+    await user.click(screen.getByRole('button', { name: 'Próxima etapa' }));
+    await user.click(screen.getByRole('button', { name: 'Revisar atendimento' }));
+    expect(screen.getByRole('alert')).toHaveFocus();
+    expect(screen.getByRole('alert')).toHaveTextContent('entre -999,99 e 999,99');
+    expect(screen.getByLabelText('Altura (cm)')).toHaveValue(1000);
+    await user.click(screen.getByRole('link', { name: /^Altura \(cm\):/ }));
+    await waitFor(() => expect(screen.getByLabelText('Altura (cm)')).toHaveFocus());
+    expect(write).not.toHaveBeenCalled();
+  });
   it('preserva o bloqueio de escrita para Consulta', async () => {
     const { write } = await setup('consulta');
     expect(await screen.findByRole('heading', { name: 'Acesso de consulta' })).toBeVisible();

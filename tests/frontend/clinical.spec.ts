@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { fixture, signIn, apiAs, setUserActive, resumePage, assertNoPersistentClinicalState, delayOneApiResponse } from './fixtures';
+import { fixture, signIn, signInCurrentPage, apiAs, setUserActive, resumePage, assertNoPersistentClinicalState, delayOneApiResponse } from './fixtures';
 
 const mainPath = `/pacientes/${fixture.main.pacienteId}`;
 const patientRows = (page: import('@playwright/test').Page) => page.getByRole('table').locator('tbody tr');
@@ -197,11 +197,7 @@ test('link direto do atendimento, recarregamento e voltar preservam o destino', 
   await page.reload();
   await expect(page.getByLabel('Usuário', { exact: true })).toBeVisible();
   await expect(page.getByText('Observação sintética 1', { exact: true })).toHaveCount(0);
-  const response = page.waitForResponse(r => new URL(r.url()).pathname === '/v1/auth/login' && r.status() === 201);
-  await page.getByLabel('Usuário', { exact: true }).fill(fixture.users.consulta.login);
-  await page.getByLabel('Senha', { exact: true }).fill(fixture.password);
-  await page.getByRole('button', { name: 'Entrar', exact: true }).click();
-  await response;
+  await signInCurrentPage(page, 'consulta');
   await expect(page).toHaveURL(destinationWithExam);
   await expect(page.getByText('Observação sintética 1', { exact: true })).toBeVisible();
   await menu(page).getByRole('link', { name: 'Pacientes', exact: true }).click();

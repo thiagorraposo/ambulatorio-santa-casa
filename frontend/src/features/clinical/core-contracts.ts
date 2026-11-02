@@ -99,7 +99,14 @@ export function attendanceBody(draft: AttendanceDraft): Record<string, unknown> 
     const clinical: Record<string, unknown> = {};
     for (const [key, label, integer] of clinicalNumbers) {
       if (draft.clinical[key] !== undefined && draft.clinical[key] !== '') {
-        clinical[key] = optionalNumber(draft.clinical[key]!, label, integer);
+        const path = `dadosClinicos.${key}`;
+        let value: number | null;
+        try { value = optionalNumber(draft.clinical[key]!, label, integer); }
+        catch { throw new FieldValidationError([{ path, code: integer ? 'integer' : 'number' }]); }
+        if (value !== null && (integer ? value < -2147483648 || value > 2147483647 : value < -999.99 || value > 999.99)) {
+          throw new FieldValidationError([{ path, code: integer ? 'integer_range' : 'decimal_range' }]);
+        }
+        clinical[key] = value;
       }
     }
     for (const key of ['nyha', 'observacoes']) if (draft.clinical[key]) clinical[key] = draft.clinical[key];
@@ -136,8 +143,12 @@ export function attendanceBody(draft: AttendanceDraft): Record<string, unknown> 
   if (draft.familyStatus !== '' || draft.families.length) {
     const flag = triValue(draft.familyStatus);
     if (flag === true && !draft.families.length) throw new Error('Identifique ao menos um familiar examinado e seu resultado.');
-    if (flag !== true && draft.families.length) throw new Error('Os familiares preenchidos exigem a indicação de familiares examinados. Nenhum resultado será descartado.');
-    if (draft.families.some(item => !item.familiar.trim() || !item.resultado.trim())) throw new Error('Informe a identificação e o resultado de cada familiar.');
+    if (flag !== true && draft.families.length) throw new FieldValidationError([{ path: 'rastreioFamiliar.familiaresExaminados', code: 'family_status' }]);
+    const incomplete = draft.families.flatMap((item, index) => [
+      ...(!item.familiar.trim() ? [{ path: `rastreioFamiliar.familiares.${index}.familiar`, code: 'required' }] : []),
+      ...(!item.resultado.trim() ? [{ path: `rastreioFamiliar.familiares.${index}.resultado`, code: 'required' }] : []),
+    ]);
+    if (incomplete.length) throw new FieldValidationError(incomplete);
     body.rastreioFamiliar = { familiaresExaminados: flag, familiares: draft.families };
   }
   return body;

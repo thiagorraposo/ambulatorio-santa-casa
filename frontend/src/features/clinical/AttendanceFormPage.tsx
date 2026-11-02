@@ -73,8 +73,8 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
   const stepErrorRef = useRef<HTMLDivElement>(null);
   const navigatedStep = useRef(false);
   useEffect(() => {
-    if (navigatedStep.current) stepHeading.current?.focus();
-  }, [step]);
+    if (navigatedStep.current && !validationErrors.length) stepHeading.current?.focus();
+  }, [step, validationErrors.length]);
   useEffect(() => { if (stepError) stepErrorRef.current?.focus(); }, [stepError]);
   const initial = attendanceInitial(data);
   const [draft, setDraft, clearDraft] = useClinicalDraft<AttendanceDraft>(`attendance:${pacienteId}:${data?.atendimentoId ?? 'new'}`, {

@@ -120,3 +120,45 @@ suíte frontend integral nem homologação visual. HUM-M3-03 continua aberto;
 mensagens melhoradas e sucesso sintético não identificam a causa humana.
 P1 Edição permanece dependente do escopo inicial; P1 8D permanece dependente
 dos contratos específicos registrados. Sem recálculo de métricas de M3/8V.
+
+## Limites físicos, familiares e foco entre etapas
+
+Incremento seguinte sobre `258c472`. Sete casos reproduziram aceitação indevida
+no DTO de números que não cabem nas colunas físicas: teste inicial **7 falhas /
+6 aprovados**, `/tmp/m3-continuo-limits-before.log`. Schema aplicado define
+numeric(5,2) para altura/peso/circunferência/saturação e integer para frequência/
+pressões. DTO e cliente passam a recusar esses mesmos limites com caminho/código;
+null, zero, negativos e extremos físicos continuam permitidos. Não se definem
+faixas fisiológicas, não há migration, arredondamento ou correção automática.
+Familiares incompatíveis/sem texto útil passam a apontar controles existentes;
+a exigência de incluir ao menos um familiar continua geral quando ainda não
+existe um controle de detalhe a focar.
+
+O novo E2E revelou foco perdido ao sair da revisão para a etapa inválida: efeito
+do título da etapa sobrepunha o foco do resumo. Reproduzido também em componente
+(`/tmp/m3-continuo-focus-before.log`), corrigido condicionando esse efeito à
+navegação sem erros. `24` testes focados aprovados após correção, incluindo
+regressão de foco/rascunho/links (`/tmp/m3-continuo-focus-after.log`).
+
+- Build backend/frontend aprovado: `/tmp/ambulatorio-check-bz4b42s0/output.log`;
+  build frontend após ajuste de foco: `/tmp/ambulatorio-check-zmll4lne/output.log`.
+- Unidades backend: **211 aprovadas**, `/tmp/ambulatorio-check-1ze357v6/output.log`.
+- Unidades frontend: rodada de297 casos teve296 aprovados e uma falha de timing
+  no teste de interrupção do hash; arquivo afetado passou isolado9/9 sem mudança
+  de produto (`/tmp/m3-continuo-operation-retry.log`). Após novo teste/fix de foco,
+  os24 focados passaram. Não afirmar execução integral298/298 nem somar repetidos.
+- Clínicos: **137 aprovados**, `/tmp/ambulatorio-check-5xmrxv7l/output.log`.
+- E2E novo limites/familiares/API/320px/axe/releitura: **1 aprovado**,
+  `/tmp/m3-continuo-limits-e2e.log`, runner `/tmp/etapa6-frontend-MRycmj`.
+- Rodada ampla104: **55 aprovados, 2 falhos, 1 interrompido, 46 não executados**,
+  `/tmp/ambulatorio-check-czw1w6as/output.log`, `/tmp/etapa6-frontend-pKcqnq`.
+  Interrompida pelo agente após reproduzir o defeito para corrigir e selecionar
+  os casos restantes. Primeiro falho era foco descrito acima, já validado.
+  Segundo era roteiro de relogin que ignorava429 real (alerta de excesso de
+  tentativas registrado): passou a reutilizar o mesmo helper de login com
+  espera de Retry-After, sem mudar/burlar limiter. Login na página atual preserva
+  next/query; teste focado passou1/1 (`/tmp/m3-continuo-login-reload.log`).
+
+Próxima rodada seleciona casos restantes/falhos e recortes impactados; preserva
+provas dos casos aprovados sem alteração. SQL/fundação do incremento anterior
+permanecem aplicáveis aos seus componentes inalterados. P0 humano ainda aberto.

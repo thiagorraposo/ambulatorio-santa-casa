@@ -25,7 +25,8 @@ o rótulo legível começa em um. Listas exatas no
 
 Códigos: `date`, `integer`, `number`, `length`, `option`, `invalid` e
 `attendance_context`, `required`, `exam_active`, `exam_identification`,
-`pending_date` e `pending_status`. Rótulo, motivo e orientação de formato são textos locais
+`pending_date`, `pending_status`, `decimal_range` e `integer_range`.
+`family_status` é validação local para a opção incompatível com familiares preenchidos. Rótulo, motivo e orientação de formato são textos locais
 fixos do frontend, nunca o texto arbitrário recebido do servidor. O cliente
 aceita somente pares reconhecidos em 400, limita a 100 entradas e revalida a
 geração da sessão depois da leitura do corpo. JSON inválido mantém erro genérico.
@@ -60,6 +61,11 @@ outro status aponta `status`. São regras existentes, preservadas na transação
 Os mesmos pares conhecidos são usados nas validações locais de exames/pendências.
 Não se altera a validação de pendências dos formulários independentes.
 
-Faixas físicas e demais constraints ainda podem produzir erro geral. Comparação
+Limites físicos do schema (numeric(5,2) e integer) são antecipados pelo DTO e
+pelo formulário para cada medida; não representam faixas clínicas. Caminhos de
+familiares com texto em branco usam `required` localmente; indicação familiar
+incompatível usa `family_status`. Sem familiares adicionados, a exigência de
+incluir um permanece mensagem geral, pois não existe controle de detalhe.
+Demais constraints sem mapeamento conhecido mantêm erro geral. Comparação
 visual com referência e reprodução da entrada humana permanecem pendentes;
 [evidências desta execução](../validacoes/VALIDACAO_P0_ATENDIMENTO_2026_11_02.md).

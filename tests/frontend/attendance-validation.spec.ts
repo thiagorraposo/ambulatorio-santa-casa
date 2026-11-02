@@ -79,3 +79,53 @@ for (const scenario of ['novo pela interface', 'existente'] as const) {
     expect(await (await apiAs('administracao', 'GET', path)).json()).toHaveLength(1);
   });
 }
+
+test('P0: limites de registro e familiares apontam campo e etapa antes de confirmar', async ({ page }) => {
+  const patient = await seedPatient('Limites e familiares');
+  await signIn(page, 'edicao', `${patient.path}/atendimentos/novo`);
+  const path = `${patient.path}/atendimentos`;
+  for (const [field, value, code] of [
+    ['alturaCm', 1000, 'decimal_range'], ['pesoKg', -1000, 'decimal_range'],
+    ['frequenciaCardiacaBpm', 2147483648, 'integer_range'], ['paDiastolicaMmhg', -2147483649, 'integer_range'],
+  ] as const) {
+    const refused = await apiAs('edicao', 'POST', path, { dataAtendimento: '2026-02-01', dadosClinicos: { [field]: value } });
+    expect(refused.status).toBe(400);
+    expect(await refused.json()).toMatchObject({ errors: [{ path: `dadosClinicos.${field}`, code }] });
+    expect(await (await apiAs('edicao', 'GET', path)).json()).toEqual([]);
+  }
+  let writes = 0;
+  page.on('request', request => { if (request.method() === 'POST' && new URL(request.url()).pathname === `/v1${path}`) writes++; });
+  await page.getByLabel('Data do atendimento', { exact: true }).fill('2026-02-01');
+  await nextAttendanceStep(page);
+  await page.getByLabel('Altura (cm)', { exact: true }).fill('1000');
+  await nextAttendanceStep(page); await nextAttendanceStep(page);
+  await page.getByRole('button', { name: 'Revisar atendimento', exact: true }).click();
+  await expect(page.getByRole('alert')).toBeFocused();
+  await page.getByRole('link', { name: /^Altura \(cm\):/ }).click();
+  await expect(page.getByLabel('Altura (cm)', { exact: true })).toBeFocused();
+  await expect(page.getByLabel('Altura (cm)', { exact: true })).toHaveValue('1000');
+  expect(writes).toBe(0);
+  await page.getByLabel('Altura (cm)', { exact: true }).fill('170.25');
+  await nextAttendanceStep(page);
+  await page.getByLabel('Familiares examinados', { exact: true }).selectOption('nao');
+  await page.getByRole('button', { name: 'Adicionar familiar examinado', exact: true }).click();
+  await page.getByLabel('Identificação do familiar 1', { exact: true }).fill('Familiar sintético');
+  await page.getByLabel('Resultado do familiar 1', { exact: true }).fill('Resultado exclusivamente sintético');
+  await nextAttendanceStep(page);
+  await page.getByRole('button', { name: 'Revisar atendimento', exact: true }).click();
+  await expect(page.getByRole('alert')).toBeFocused();
+  await page.getByRole('link', { name: /^Familiares examinados:/ }).click();
+  const familyStatus = page.getByLabel('Familiares examinados', { exact: true });
+  await expect(familyStatus).toBeFocused(); await expect(familyStatus).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.getByLabel('Resultado do familiar 1', { exact: true })).toHaveValue('Resultado exclusivamente sintético');
+  expect(writes).toBe(0);
+  await page.setViewportSize({ width: 320, height: 844 });
+  await assertFitsViewport(page); await assertAccessible(page);
+  await familyStatus.selectOption('sim'); await nextAttendanceStep(page);
+  await page.getByRole('button', { name: 'Revisar atendimento', exact: true }).click();
+  const saved = await submitWrite(page, 'POST', path, 'Confirmar atendimento');
+  const { atendimentoId } = await saved.response.json() as { atendimentoId: string };
+  expect(await readAttendance(`${path}/${atendimentoId}`)).toMatchObject({ dadosClinicos: { alturaCm: '170.25' },
+    rastreioFamiliar: { familiaresExaminados: true, familiares: [{ identificacaoFamiliar: 'Familiar sintético', resultadoSorologia: 'Resultado exclusivamente sintético' }] } });
+  expect(writes).toBe(1);
+});

@@ -18,6 +18,8 @@ export function publicAttendancePath(path: string): boolean {
   return parts.length === 4 && parts[0] === 'rastreioFamiliar' && parts[1] === 'familiares'
     && /^(?:[0-9]|[1-4][0-9])$/.test(parts[2]) && ['familiar', 'resultado'].includes(parts[3]);
 }
+const isClinicalNumberPath = (path: string): boolean => path.startsWith('dadosClinicos.')
+  && clinical.has(path.split('.')[1]) && !['nyha', 'observacoes'].includes(path.split('.')[1]);
 export interface FieldViolation { path: string; code: string }
 export function fieldValidationException(errors: ValidationError[]): BadRequestException {
   const violations: FieldViolation[] = [];
@@ -27,6 +29,8 @@ export function fieldValidationException(errors: ValidationError[]): BadRequestE
       if (error.constraints && publicAttendancePath(path)) {
         const keys = Object.keys(error.constraints);
         const code = keys.some(key => ['isDateString', 'matches'].includes(key)) && /[Dd]ata/.test(path) ? 'date'
+          : (keys.includes('min') || keys.includes('max')) && isClinicalNumberPath(path) ?
+            (['frequenciaCardiacaBpm', 'paSistolicaMmhg', 'paDiastolicaMmhg'].includes(path.split('.')[1]) ? 'integer_range' : 'decimal_range')
           : keys.includes('isInt') ? 'integer' : keys.includes('isNumber') ? 'number'
           : keys.includes('maxLength') || keys.includes('isLength') ? 'length'
           : keys.includes('isBoolean') || keys.includes('isIn') ? 'option' : 'invalid';

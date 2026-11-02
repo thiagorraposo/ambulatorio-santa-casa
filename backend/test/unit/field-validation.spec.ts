@@ -50,6 +50,22 @@ describe('contrato sanitizado de validação do atendimento', () => {
     const internal = new Error('SQL privado');
     expect(() => databaseConflict(internal)).toThrow(internal);
   });
+  it.each([
+    ['alturaCm', 1000, 'decimal_range'], ['pesoKg', -1000, 'decimal_range'],
+    ['circunferenciaAbdominalCm', 1000, 'decimal_range'], ['saturacaoPercentual', 1000, 'decimal_range'],
+    ['frequenciaCardiacaBpm', 2147483648, 'integer_range'], ['paSistolicaMmhg', -2147483649, 'integer_range'],
+    ['paDiastolicaMmhg', 2147483648, 'integer_range'],
+  ])('localiza o limite físico de %s sem inventar faixa clínica', async (field, value, code) => {
+    await expect(parse({ dataAtendimento: '2026-02-01', dadosClinicos: { [field]: value } })).rejects.toMatchObject({
+      response: { errors: [{ path: `dadosClinicos.${field}`, code }] },
+    });
+  });
+  it('preserva limites físicos, zero, negativos e null sem interpretar normalidade clínica', async () => {
+    const body = { dataAtendimento: '2026-02-01', dadosClinicos: { alturaCm: -999.99, pesoKg: 999.99,
+      circunferenciaAbdominalCm: 0, saturacaoPercentual: null, frequenciaCardiacaBpm: -2147483648,
+      paSistolicaMmhg: 2147483647, paDiastolicaMmhg: 0 } };
+    await expect(parse(body)).resolves.toMatchObject(body);
+  });
   it('mantém a validação da versão no PATCH', async () => {
     await expect(pipe.transform({ versao: 'incorreta', observacoes: 'Sintético' },
       { type: 'body', metatype: AttendanceUpdateDto })).rejects.toBeInstanceOf(BadRequestException);
