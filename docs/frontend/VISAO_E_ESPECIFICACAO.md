@@ -226,7 +226,7 @@ decorativa que anuncie um fluxo funcional inexistente.
 
 Navegação é URL real, links diretos, voltar/avançar, aba e paginação recuperáveis.
 O retorno à busca deve preservar filtros/página; os breadcrumbs atuais para
-`/pacientes` ainda não guardam esse retorno. Em tela menor, menu compacto
+`/pacientes` conservam o retorno validado à busca no percurso ficha/atendimento, conforme [prova dirigida](../validacoes/VALIDACAO_8B3U_4.md#retorno-pelo-atendimento). Em tela menor, menu compacto
 expansível e conteúdo em uma coluna; a sidebar não pode consumir a área da ficha.
 Menu de conta acessível e saída explícita. Logout/401/expiração/troca de perfil ou
 identidade encerram dados e rascunhos da sessão conforme ADR-024.

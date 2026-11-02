@@ -95,3 +95,30 @@ Mantida a identidade/paleta e a adaptação acessível já comparada acima. As
 capturas deste incremento não constituem nova homologação visual do protótipo.
 FM-NAV-12/RQ-NAV-12 e 7D-R1 recebem prova apenas desse percurso; agregado e
 aceite humano permanecem abertos.
+
+### Retorno pelo atendimento
+
+Sobre `acfc9ae`, reproduzida em componente a perda da busca ao percorrer
+ficha→detalhe→ficha: o sanitizador removia qualquer `retorno`, incluindo o
+destino válido da lista. Dois casos novos falharam antes da correção
+(`/tmp/m3-retomada-navigation-before.log`,18 aprovados/2 falhos). Agora mantém
+somente retorno validado à lista e remove encadeamentos dentro da própria
+lista. Destinos externos, outra ficha/detalhe e controles continuam recusados;
+IDs, seleção, páginas e hash da ficha são preservados.
+
+- Três arquivos dirigidos:46 unidades aprovadas; build aprovado.
+- Suíte frontend em série: **36 arquivos/306 testes aprovados**,
+  `/tmp/m3-retomada-unit-final.log`.
+- Nove E2E: seis aprovados; três novos identificaram reordenação desnecessária
+  de query ao sanitizar retorno. Ajustado para conservar a posição original do
+  parâmetro; teste de componente agora cobre essa ordem. Após ajuste, **20/20
+  unidades** e build passaram (`/tmp/m3-retomada-navigation-order.log`).
+- Três afetados repetidos: **3/3 aprovados**,
+  `/tmp/m3-retomada-navigation-final.log`, `/tmp/etapa6-frontend-I8f6L3`;
+  último atendimento e histórico→detalhe→ficha→abas→recarga→busca, três perfis,
+  teclado e1440/390/320 com Axe. Os seis anteriores em
+  `/tmp/m3-retomada-navigation-e2e.log` cobrem últimos registros, atalhos,
+  histórico/exames e revogação; não somar como uma única execução9/9.
+
+FM-FIC-11/HIS-12 e7D-R1 recebem essa prova de navegação. Sem alteração de
+contratos clínicos ou permissões e sem homologação do agregado.

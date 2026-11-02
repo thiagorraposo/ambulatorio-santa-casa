@@ -1,5 +1,12 @@
 # Registro de Alterações
 
+## 2026-11-02 — Preservar busca ao abrir e reler atendimentos
+
+Sanitização conserva retorno validado à busca sem cadeias recursivas. Perda
+reproduzida em teste;306 unidades frontend passaram,20 afetadas revalidadas
+após preservar ordem da query e três E2E por perfil aprovados. [Evidência](validacoes/VALIDACAO_8B3U_4.md#retorno-pelo-atendimento).
+Permissões e cinco achados humanos preservados.
+
 ## 2026-11-02 — Conservar filtros ao consultar a ficha de pacientes
 
 Incorporadas alterações locais revisadas: busca→ficha→abas→recarga→busca mantém

@@ -9,6 +9,8 @@ for (const perfil of ['consulta', 'edicao', 'administracao'] as const) {
       const response = await apiAs('administracao', 'POST', '/pacientes', { nome: `${name} ${index}`, sexo: 'feminino' });
       expect(response.status).toBe(201);
       const { pacienteId } = await response.json();
+      expect((await apiAs('administracao', 'POST', `/pacientes/${pacienteId}/atendimentos`,
+        { dataAtendimento: '2026-11-01', observacoes: 'Retorno de navegação exclusivamente sintético' })).status).toBe(201);
       if (perfil !== 'administracao') {
         expect((await apiAs('administracao', 'PUT', `/pacientes/${pacienteId}/acesso/${fixture.users[perfil].usuarioId}`,
           { ativo: true, podeEditar: perfil === 'edicao' })).status).toBe(200);
@@ -22,6 +24,21 @@ for (const perfil of ['consulta', 'edicao', 'administracao'] as const) {
     expect(target.searchParams.get('retorno')).toBe(source);
     await record.focus(); await page.keyboard.press('Enter');
     await expect(page.getByRole('heading', { name: 'Ficha do paciente', exact: true })).toBeVisible();
+    const origin = new URL(page.url()).pathname + new URL(page.url()).search;
+    for (const via of ['último', 'histórico'] as const) {
+      if (via === 'histórico') {
+        await page.getByRole('navigation', { name: 'Seções da ficha' }).getByRole('link', { name: 'Atendimentos', exact: true }).click();
+      }
+      const from = new URL(page.url()).pathname + new URL(page.url()).search;
+      const open = via === 'último' ? page.getByRole('link', { name: /^Abrir último atendimento / })
+        : page.getByRole('table').getByRole('link', { name: /^Atendimento / }).first();
+      await open.focus(); await page.keyboard.press('Enter');
+      const back = page.getByRole('link', { name: 'Voltar à ficha de origem', exact: true });
+      await expect(back).toHaveAttribute('href', from);
+      await back.click();
+      await expect(page).toHaveURL(from);
+    }
+    expect(new URL(page.url()).searchParams.get('retorno')).toBe(new URL(origin, 'http://app.local').searchParams.get('retorno'));
     await page.getByRole('navigation', { name: 'Seções da ficha' }).getByRole('link', { name: 'Projetos', exact: true }).click();
     await page.reload();
     // Sessão somente em memória: recarga exige novo login e conserva next/query.
