@@ -162,3 +162,30 @@ regressão de foco/rascunho/links (`/tmp/m3-continuo-focus-after.log`).
 Próxima rodada seleciona casos restantes/falhos e recortes impactados; preserva
 provas dos casos aprovados sem alteração. SQL/fundação do incremento anterior
 permanecem aplicáveis aos seus componentes inalterados. P0 humano ainda aberto.
+
+## Revalidação da retomada de estabilização
+
+Base `cafc153`, mesma branch, com três alterações preexistentes preservadas.
+Revisado o ajuste pendente de `stage7.spec.ts`: limite de peso é recusado
+localmente, erro leva ao campo sem perder rascunho; uma rejeição tardia real
+de segundo exame comprova rollback do pai, avaliação e primeiro exame válido.
+Esse ajuste passa a fazer parte da regressão versionada.
+
+Cluster novo, exclusivamente sintético em tmpfs
+`/dev/shm/m3-estabilizacao-b4b5ss_x`, PostgreSQL16.15 em127.0.0.1:33363,
+usuário `m3_sintetico`. Runner cria e remove sua base/login exclusivos.
+Comando: `SYNTHETIC_PG_HOST=127.0.0.1 SYNTHETIC_PG_PORT=33363 SYNTHETIC_PG_USER=m3_sintetico PGPASSWORD=sintetico bash tests/frontend/test_e2e.sh attendance-validation.spec.ts stage7.spec.ts m3-demo.spec.ts --grep 'P0:|atendimento composto|409 do atendimento|consulta não escreve|revogação da permissão|cliques repetidos|resposta perdida após commit|M3 demonstração sintética'`.
+
+**10/10 aprovados**; `/tmp/m3-estabilizacao-p0.log`, artefatos sintéticos em
+`/tmp/etapa6-frontend-LwK2RI`. Confirma cadastro UI/Administração e paciente
+existente/Edição, erros por campo, rollback, rascunho,403/409, clique repetido,
+recuperação após commit sem novo POST. Ensaio completo inclui sorologia,
+condição, complicações, comorbidades, parâmetros literais, histórico de duas
+consultas, permissões de Consulta e CSV real.320px/axe no P0 e capturas1440/390
+no ensaio. A alteração posterior do retorno da busca não muda contratos ou
+persistência desses fluxos; tem validação própria.
+
+Não houve reprodução da falha original da sessão humana: cenário/perfil/
+ambiente não identificados. **HUM-M3-03 continua ABERTO** e a apresentação
+permanece com ressalvas; sucesso desse ensaio não equivale a homologação,
+comparação visual integral ou conclusão deM3/8V2.

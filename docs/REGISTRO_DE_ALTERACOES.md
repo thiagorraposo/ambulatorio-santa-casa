@@ -1,5 +1,13 @@
 # Registro de Alterações
 
+## 2026-11-02 — Revalidar P0 na retomada de estabilização
+
+Dez cenários de navegador/API/PostgreSQL sintético tmpfs aprovados, incluindo
+cadastro→atendimento→registro clínico→histórico→CSV,403/409, rollback e
+recuperação sem duplicação. Incorporado roteiro composto pendente, revisado
+contra validação local de limites e rollback tardio real. [Evidência P0](validacoes/VALIDACAO_P0_ATENDIMENTO_2026_11_02.md#revalidação-da-retomada-de-estabilização).
+Falha humana não reproduzida; achados/aceites e restrições permanecem vigentes.
+
 ## 2026-11-02 — Corrigir endereço da demonstração para o código corrente
 
 Identificado que4177 servia checkout antigo em/tmp. Nova demonstração local

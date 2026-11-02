@@ -421,14 +421,21 @@ test('7B: atendimento composto valida ambiguidades, faz rollback e salva todos o
   await page.getByLabel('Peso (kg)', { exact: true }).fill('9999999');
   await nextAttendanceStep(page);
   await nextAttendanceStep(page);
-  await reviewAttendance(page);
-  await submitWrite(page, 'POST', `${patient.path}/atendimentos`, 'Confirmar atendimento', 400);
-  await expect(page.getByRole('alert')).toContainText(/incompatíveis|revise/i);
+  await page.getByRole('button', { name: 'Revisar atendimento', exact: true }).click();
+  await expect(page.getByRole('alert')).toBeFocused();
+  await expect(page.getByRole('alert')).toContainText('entre -999,99 e 999,99');
+  expect(writes).toBe(0);
+  // A late domain failure still rolls back the parent, clinical data and a valid first child.
+  const rejected = await apiAs('edicao', 'POST', `${patient.path}/atendimentos`, {
+    dataAtendimento: '2026-04-04', dadosClinicos: { pesoKg: 70.25 },
+    exames: [{ tipoExameId: holter.id, bloco: 'solicitado' }, { tipoExameId: '99999999', bloco: 'solicitado' }],
+  });
+  expect(rejected.status).toBe(400);
+  expect(await rejected.json()).toMatchObject({ errors: [{ path: 'exames.1.tipoExameId', code: 'exam_active' }] });
   expect(await apiJson<unknown[]>('GET', `${patient.path}/atendimentos`)).toHaveLength(0);
   expect(await apiJson<unknown[]>('GET', `${patient.path}/exames`)).toHaveLength(0);
-  await page.getByRole('button', { name: 'Etapa anterior', exact: true }).click();
-  await page.getByRole('button', { name: 'Etapa anterior', exact: true }).click();
-  await page.getByRole('button', { name: 'Etapa anterior', exact: true }).click();
+  await page.getByRole('link', { name: /^Peso \(kg\):/ }).click();
+  await expect(page.getByLabel('Peso (kg)', { exact: true })).toBeFocused();
   await expect(page.getByLabel('Observações clínicas', { exact: true })).toHaveValue('Avaliação completa sintética');
   await page.getByLabel('Peso (kg)', { exact: true }).fill('70.25');
   await nextAttendanceStep(page);
@@ -462,7 +469,7 @@ test('7B: atendimento composto valida ambiguidades, faz rollback e salva todos o
     expect.objectContaining({ descricao: 'Pendência composta sintética 3', status: 'resolvida', dataIdentificacao: '2026-04-04', dataResolucao: '2026-04-04' }),
   ]));
   expect(await apiJson<unknown[]>('GET', `${patient.path}/atendimentos`)).toHaveLength(1);
-  expect(writes).toBe(2);
+  expect(writes).toBe(1);
 });
 
 test('7C: BZN único com reação, retornos repetidos e ano informado separado de visitas', async ({ page }, testInfo) => {
