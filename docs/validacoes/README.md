@@ -78,3 +78,5 @@ sistema; sua menção preserva rastreabilidade, não garante disponibilidade atu
 - [Atalhos diretos por pessoa — 8B3U.4](VALIDACAO_8B3U_4.md).
 
 - [Relatório H14 sanitizado — recorte8C2B.1](VALIDACAO_8C2B_1_RELATORIO.md).
+
+- [Rollback de rejeição precoce no dry-run](VALIDACAO_DRY_RUN_REJEICAO_PRECOCE.md).

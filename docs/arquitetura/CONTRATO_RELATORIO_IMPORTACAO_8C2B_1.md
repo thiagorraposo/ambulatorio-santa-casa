@@ -48,3 +48,9 @@ escritores operam, nem conceder propriedade de tabelas ao worker para alterar
 defaults. O isolamento da execução simulada precisa de incremento próprio que
 preserve o mesmo pipeline, catálogo/estado de origem, constraints e regras de
 captura. Não há nova decisão clínica neste recorte.
+
+
+Correção posterior de02/11: [rejeição precoce](../validacoes/VALIDACAO_DRY_RUN_REJEICAO_PRECOCE.md)
+agora permanece dentro do savepoint da linha. O encerramento externo não pode
+ser disparado como rollback de uma linha sem savepoint. Lote novo e retomada
+preservam todas as tabelas; esta prova não elimina o consumo de sequências.

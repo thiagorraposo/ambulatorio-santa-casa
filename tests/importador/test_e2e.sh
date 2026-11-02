@@ -532,4 +532,7 @@ D2_DB_NAME="$test_db" D2_IMPORT_USER="$import_user" D2_IMPORT_PASSWORD="$import_
 D8_DB_NAME="$test_db" D8_IMPORT_USER="$import_user" D8_IMPORT_PASSWORD="$import_password" \
   python3 tests/importador/test_ultimo_comparecimento_ano.py
 
+EARLY_DB_NAME="$test_db" EARLY_IMPORT_USER="$import_user" EARLY_IMPORT_PASSWORD="$import_password" \
+  python3 tests/importador/test_dry_run_rejeicao_precoce.py
+
 echo "OK: finalidade explícita, recusas sem efeitos, 126 destinos, criticidade, promoção, proveniência, rollback, reprocessamento e captura ativa"

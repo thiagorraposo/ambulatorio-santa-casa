@@ -8,6 +8,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from importador.psql import Database
 from importar_planilha import bzn_duration, bool_value, date_value, normalized, number_value, HANDLED_TABLES, Importer, import_issue_code, NONCRITICAL_POLICY, PROMOTION_REGISTRY, RowConflict, main
 
 
@@ -438,6 +439,44 @@ class ImportIssueCodeTest(unittest.TestCase):
         for status, message, expected in cases:
             with self.subTest(status=status, expected=expected):
                 self.assertEqual(import_issue_code(status, message), expected)
+
+
+class DryRunTransactionBoundaryTest(unittest.TestCase):
+    def database(self):
+        db = Database.__new__(Database)
+        db.rollback_only = True
+        db.savepoint_active = False
+        db.run = Mock()
+        return db
+
+    def test_rejects_boundary_without_savepoint_without_sql_or_outer_rollback(self):
+        db = self.database()
+        for command in ("ROLLBACK", "COMMIT"):
+            with self.subTest(command=command), self.assertRaises(RuntimeError):
+                db.transaction(command)
+        with self.assertRaises(ValueError):
+            db.transaction("ROLLBACK; BEGIN")
+        db.run.assert_not_called()
+
+    def test_rejected_row_rolls_back_only_its_savepoint_and_can_continue(self):
+        db = self.database()
+        db.transaction("BEGIN")
+        db.transaction("ROLLBACK")
+        db.transaction("BEGIN")
+        db.transaction("COMMIT")
+        self.assertEqual([call.args[0] for call in db.run.call_args_list], [
+            "SAVEPOINT importador_linha", "ROLLBACK TO SAVEPOINT importador_linha",
+            "RELEASE SAVEPOINT importador_linha", "SAVEPOINT importador_linha",
+            "RELEASE SAVEPOINT importador_linha"])
+        self.assertFalse(db.savepoint_active)
+
+    def test_nested_line_begin_is_refused_without_replacing_existing_savepoint(self):
+        db = self.database()
+        db.transaction("BEGIN")
+        with self.assertRaises(RuntimeError):
+            db.transaction("BEGIN")
+        db.run.assert_called_once_with("SAVEPOINT importador_linha")
+        self.assertTrue(db.savepoint_active)
 
 
 if __name__ == "__main__": unittest.main()

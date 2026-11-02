@@ -1,5 +1,15 @@
 # Registro de Alterações
 
+## 2026-11-02 — Preservar rollback do dry-run após rejeição precoce
+
+Nascimento inválido podia tentar rollback antes do savepoint e encerrar a
+transação externa, permitindo persistência posterior de metadados em lote
+retomado. Savepoint agora antecede transformações; adaptador recusa encerramento
+sem savepoint.38 unidades Python e pipeline integral, com comparação de todas
+as tabelas em lote novo/retomado, aprovados; prova alvo em porta alternativa.
+[Reprodução e validação](validacoes/VALIDACAO_DRY_RUN_REJEICAO_PRECOCE.md).
+Consumo de sequências continua pendente em8C2B.1.
+
 ## 2026-11-02 — Relatório H14 sanitizado, recorte8C2B.1
 
 Totais disjuntos e códigos fechados na simulação/aplicação/no-op, com lote

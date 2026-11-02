@@ -1125,10 +1125,12 @@ class Importer:
         row=self.row_map(sheet["columns"], values)
         self.db.run(f"UPDATE importacao_linha SET status_linha='processando', atualizado_em=CURRENT_TIMESTAMP WHERE importacao_linha_id={line_id}")
         try:
+            # Todas as validações da linha pertencem ao mesmo limite transacional.
+            # No dry-run, uma rejeição precoce deve reverter apenas este savepoint.
+            self.db.transaction("BEGIN")
             name=(row.get("nome") or "").strip()
             birth=date_value(row.get("data_de_nascimento"),"data_de_nascimento",True)
             identity=(normalized(name),birth)
-            self.db.transaction("BEGIN")
             self.db.run(f"SELECT auditoria_iniciar_importacao({line_id})")
             if self.reuse_predecessor(line_id,sheet,line_no,row):
                 self.db.transaction("COMMIT"); self.imported += 1
