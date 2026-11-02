@@ -821,3 +821,23 @@ Consequências: gravação atômica e única por atendimento, auditoria prospect
 recibo por intenção e conflito 409 em repetição. Correções/versionamento precisam
 unidade própria; captura não habilita revisão temporal. Contrato e limites em
 [comorbidades E3B](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md).
+
+## ADR-027
+
+Título: Erros de validação por caminhos e códigos públicos, sem valores
+
+Data: 2026-11-02. Status: implementação técnica parcial; validação integrada e
+aceite humano pendentes.
+
+Decisão: acrescentar coleção opcional `errors` ao envelope 400, com whitelist
+explícita de caminhos e códigos. Backend não publica objetos/valores/mensagens
+de validadores; frontend resolve rótulo/motivo localmente e só associa controles
+nos formulários integrados ao contrato. Autorização, conflito e resultado
+incerto preservam seus tratamentos e recibos.
+
+Justificativa: o feedback por status não permite localizar a rejeição; exibir
+texto arbitrário do servidor exporia detalhes internos. Contexto incompatível
+já proibido pela SQL03 ganha tradução específica sem alterar regra ou migration.
+
+Consequências e limites no [contrato de erros do atendimento](arquitetura/CONTRATO_ERROS_ATENDIMENTO_M3.md).
+O recorte não encerra a investigação HUM-M3-03 nem valida todos os formulários.

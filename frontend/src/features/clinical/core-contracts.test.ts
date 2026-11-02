@@ -109,3 +109,16 @@ describe('escrita cadastral e atendimento composto', () => {
     ]);
   });
 });
+
+it('recusa contexto simultâneo em criação e edição sem descartar valores', () => {
+  for (const original of [undefined, attendance]) {
+    const value = { ...draft(), original, values: { ...attendanceInitial(original), dataAtendimento: '2026-02-01',
+      ambulatorioUnicamente: 'sim', ambulatorioAnexoProjeto: 'sim' } };
+    try { attendanceBody(value); throw new Error('Deveria rejeitar'); }
+    catch (error) { expect(error).toMatchObject({ errors: [
+      { path: 'ambulatorioUnicamente', code: 'attendance_context' },
+      { path: 'ambulatorioAnexoProjeto', code: 'attendance_context' },
+    ] }); }
+    expect(value.values.ambulatorioAnexoProjeto).toBe('sim');
+  }
+});

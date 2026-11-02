@@ -168,3 +168,7 @@ details[open] > summary { padding-bottom: 1rem; }
   .data-table th, .data-table td { padding: .7rem .6rem; }
 }
 @media (max-width: 420px) { .sidebar nav a span { display: none; } .filters .form-field { flex-basis: 100%; } }
+
+/* Field feedback shares the existing form/error palette. */
+.form-field [aria-invalid="true"] { border: 2px solid #8f2525; }
+.field-error { color: #8f2525; margin: .25rem 0; }

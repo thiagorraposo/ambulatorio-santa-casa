@@ -1,3 +1,4 @@
+import { FieldValidationError, type FieldViolation } from '../../shared/field-validation';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import type { AtendimentoDetalheResponse, PacienteDetalheResponse } from '../../api/contracts';
@@ -7,7 +8,7 @@ import { useCollectionRemovalFocus } from '../../shared/useCollectionRemovalFocu
 import { clinicalLabel } from '../../shared/formatters';
 import { DraftQueryState, EditingGate, MutationForm, useClinicalDraft, type CatalogItem } from '../../shared/writing';
 import { booleanOptions, FormSection, InputField, SelectField, TextAreaField } from './CoreFields';
-import { attendanceBody, attendanceInitial, clinicalNumbers, dirtyFields, type AttendanceDraft } from './core-contracts';
+import { attendanceBody, attendanceCore, attendanceInitial, clinicalNumbers, dirtyFields, type AttendanceDraft } from './core-contracts';
 import { VersionComparison } from './VersionComparison';
 import { PatientsSearchReturn } from '../pacientes/PatientsSearchReturn';
 
@@ -60,6 +61,13 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
   const pendingFocus = useCollectionRemovalFocus();
   const [step, setStep] = useState(0);
   const [stepError, setStepError] = useState('');
+  const [validationErrors, setValidationErrors] = useState<FieldViolation[]>([]);
+  function revealField(path: string) {
+    const next = path.startsWith('pendencias.') ? 3
+      : path.startsWith('exames.') || path.startsWith('rastreioFamiliar.') ? 2
+      : path.startsWith('dadosClinicos.') || path.startsWith('diagnosticoChagas.') ? 1 : 0;
+    setStep(next);
+  }
   const panelRefs = useRef<Array<HTMLFieldSetElement | null>>([]);
   const stepHeading = useRef<HTMLHeadingElement>(null);
   const stepErrorRef = useRef<HTMLDivElement>(null);
@@ -86,10 +94,14 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
   }));
   function moveTo(next: number) {
     setStepError('');
+    setValidationErrors([]);
     if (next > step && panelRefs.current[step]?.closest('form')?.reportValidity() === false) return;
-    if (next === 4) {
-      try { attendanceBody(draft); }
+    if (next === 4 || (next > step && step === 0)) {
+      try { if (next === 4) attendanceBody(draft); else attendanceCore(draft.values, draft.original); }
       catch (error) {
+        if (error instanceof FieldValidationError) {
+          setValidationErrors(error.errors); revealField(error.errors[0]!.path); return;
+        }
         const message = error instanceof Error ? error.message : 'Revise os dados antes de continuar.';
         setStepError(message);
         if (/^Pendência|descrição de cada pendência/i.test(message)) setStep(3);
@@ -108,6 +120,7 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
     <MutationForm title={data ? 'Editar atendimento' : 'Novo atendimento'} path={path} method={data ? 'PATCH' : 'POST'}
       dirty={dirty} submitLabel={data ? 'Salvar atendimento' : 'Confirmar atendimento'}
       submitVisible={Boolean(data) || step === 4} disabled={!data && step !== 4} buildBody={() => attendanceBody(draft)}
+      validationErrors={validationErrors} onValidationField={revealField}
       operationKey={draft.operationKey}
       responseId="atendimentoId" expectedId={data?.atendimentoId}
       conflictReview={data ? abandon => <VersionComparison<AtendimentoDetalheResponse> path={path}
@@ -132,13 +145,14 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
         panelRef={!data ? node => { panelRefs.current[0] = node; } : undefined}>
       {!data && <h2 ref={step === 0 ? stepHeading : undefined} tabIndex={-1}>Atendimento</h2>}
       <FormSection title="Dados básicos do atendimento">
-        <InputField label="Data do atendimento" type="date" value={draft.values.dataAtendimento!} required={!draft.original || draft.original.dataAtendimento !== null} onChange={value => field('dataAtendimento', value)} />
+        <InputField fieldPath="dataAtendimento" label="Data do atendimento" type="date" value={draft.values.dataAtendimento!} required={!draft.original || draft.original.dataAtendimento !== null} onChange={value => field('dataAtendimento', value)} />
         {draft.original?.dataAtendimento === null && <p className="muted">A data deste atendimento legado é desconhecida.
           Você pode corrigir os outros dados mantendo a data em branco, sem estimar uma data.</p>}
-        <InputField label="Localização do prontuário" value={draft.values.localizacaoProntuario!} maxLength={120} onChange={value => field('localizacaoProntuario', value)} />
-        <SelectField label="Somente ambulatório" value={draft.values.ambulatorioUnicamente!} options={booleanOptions} onChange={value => field('ambulatorioUnicamente', value)} />
-        <SelectField label="Ambulatório anexo a projeto" value={draft.values.ambulatorioAnexoProjeto!} options={booleanOptions} onChange={value => field('ambulatorioAnexoProjeto', value)} />
-        <TextAreaField label="Observações do atendimento" value={draft.values.observacoes!} onChange={value => field('observacoes', value)} />
+        <InputField fieldPath="localizacaoProntuario" label="Localização do prontuário" value={draft.values.localizacaoProntuario!} maxLength={120} onChange={value => field('localizacaoProntuario', value)} />
+        <p>As duas opções de contexto não podem ser Sim ao mesmo tempo. Mantenha em branco a informação desconhecida.</p>
+        <SelectField fieldPath="ambulatorioUnicamente" label="Somente ambulatório" value={draft.values.ambulatorioUnicamente!} options={booleanOptions} onChange={value => field('ambulatorioUnicamente', value)} />
+        <SelectField fieldPath="ambulatorioAnexoProjeto" label="Ambulatório anexo a projeto" value={draft.values.ambulatorioAnexoProjeto!} options={booleanOptions} onChange={value => field('ambulatorioAnexoProjeto', value)} />
+        <TextAreaField fieldPath="observacoes" label="Observações do atendimento" value={draft.values.observacoes!} onChange={value => field('observacoes', value)} />
       </FormSection>
       </StepPanel>
       {!data && <>
@@ -146,24 +160,24 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
           panelRef={node => { panelRefs.current[1] = node; }}>
         <h2 ref={step === 1 ? stepHeading : undefined} tabIndex={-1}>Avaliação e Chagas</h2>
         <FormSection title="Avaliação clínica">
-          {clinicalNumbers.map(([key, label, integer]) => <InputField key={key} label={label} type="number"
+          {clinicalNumbers.map(([key, label, integer]) => <InputField fieldPath={`dadosClinicos.${key}`} key={key} label={label} type="number"
             step={integer ? '1' : '0.01'} value={draft.clinical[key] ?? ''} onChange={value => sectionField('clinical', key, value)} />)}
-          <InputField label="NYHA" value={draft.clinical.nyha ?? ''} maxLength={20} onChange={value => sectionField('clinical', 'nyha', value)} />
-          <TextAreaField label="Observações clínicas" value={draft.clinical.observacoes ?? ''} onChange={value => sectionField('clinical', 'observacoes', value)} />
+          <InputField fieldPath="dadosClinicos.nyha" label="NYHA" value={draft.clinical.nyha ?? ''} maxLength={20} onChange={value => sectionField('clinical', 'nyha', value)} />
+          <TextAreaField fieldPath="dadosClinicos.observacoes" label="Observações clínicas" value={draft.clinical.observacoes ?? ''} onChange={value => sectionField('clinical', 'observacoes', value)} />
         </FormSection>
         <FormSection title="Diagnóstico e descoberta de Chagas">
-          <SelectField label="Possui diagnóstico de Chagas" value={draft.diagnosis.possuiDiagnosticoChagas ?? ''} options={booleanOptions}
+          <SelectField fieldPath="diagnosticoChagas.possuiDiagnosticoChagas" label="Possui diagnóstico de Chagas" value={draft.diagnosis.possuiDiagnosticoChagas ?? ''} options={booleanOptions}
             onChange={value => sectionField('diagnosis', 'possuiDiagnosticoChagas', value)} />
-          <SelectField label="Status do diagnóstico" value={draft.diagnosis.statusDiagnostico ?? ''}
+          <SelectField fieldPath="diagnosticoChagas.statusDiagnostico" label="Status do diagnóstico" value={draft.diagnosis.statusDiagnostico ?? ''}
             options={[["confirmado", "Confirmado"], ["descartado", "Descartado"], ["inconclusivo", "Inconclusivo"], ["suspeito", "Suspeito"], ["nao_informado", "Não informado (registrado)"]]}
             onChange={value => sectionField('diagnosis', 'statusDiagnostico', value)} />
-          <SelectField label="Resultado final" value={draft.diagnosis.resultadoFinal ?? ''}
+          <SelectField fieldPath="diagnosticoChagas.resultadoFinal" label="Resultado final" value={draft.diagnosis.resultadoFinal ?? ''}
             options={[["positivo", "Positivo"], ["negativo", "Negativo"], ["inconclusivo", "Inconclusivo"], ["indeterminado", "Indeterminado"], ["nao_informado", "Não informado (registrado)"]]}
             onChange={value => sectionField('diagnosis', 'resultadoFinal', value)} />
-          <InputField label="Data do resultado final" type="date" value={draft.diagnosis.dataResultadoFinal ?? ''} onChange={value => sectionField('diagnosis', 'dataResultadoFinal', value)} />
-          <InputField label="Data de descoberta por autorrelato" type="date" value={draft.diagnosis.dataDescobertaAutorelato ?? ''} onChange={value => sectionField('diagnosis', 'dataDescobertaAutorelato', value)} />
-          <InputField label="Critério de confirmação" value={draft.diagnosis.criterioConfirmacao ?? ''} maxLength={80} onChange={value => sectionField('diagnosis', 'criterioConfirmacao', value)} />
-          <TextAreaField label="Observações do diagnóstico" value={draft.diagnosis.observacoes ?? ''} onChange={value => sectionField('diagnosis', 'observacoes', value)} />
+          <InputField fieldPath="diagnosticoChagas.dataResultadoFinal" label="Data do resultado final" type="date" value={draft.diagnosis.dataResultadoFinal ?? ''} onChange={value => sectionField('diagnosis', 'dataResultadoFinal', value)} />
+          <InputField fieldPath="diagnosticoChagas.dataDescobertaAutorelato" label="Data de descoberta por autorrelato" type="date" value={draft.diagnosis.dataDescobertaAutorelato ?? ''} onChange={value => sectionField('diagnosis', 'dataDescobertaAutorelato', value)} />
+          <InputField fieldPath="diagnosticoChagas.criterioConfirmacao" label="Critério de confirmação" value={draft.diagnosis.criterioConfirmacao ?? ''} maxLength={80} onChange={value => sectionField('diagnosis', 'criterioConfirmacao', value)} />
+          <TextAreaField fieldPath="diagnosticoChagas.observacoes" label="Observações do diagnóstico" value={draft.diagnosis.observacoes ?? ''} onChange={value => sectionField('diagnosis', 'observacoes', value)} />
         </FormSection>
         <p className="muted">Descoberta por autorrelato e resultado final são informações distintas. Sorologias detalhadas, comorbidades, medicamentos e eventos clínicos ainda não estão disponíveis para registro aqui.</p>
         </StepPanel>
@@ -182,16 +196,16 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
           </>}
           {draft.exams.map((exam, index) => <fieldset key={index} className="form-section"><legend>Exame {index + 1}</legend>
             <div className="form-grid">
-              <SelectField label={`Tipo de exame ${index + 1}`} required blank="Selecione um tipo ativo" value={exam.tipoExameId}
+              <SelectField fieldPath={`exames.${index}.tipoExameId`} label={`Tipo de exame ${index + 1}`} required blank="Selecione um tipo ativo" value={exam.tipoExameId}
                 options={(catalog.isSuccess ? catalog.data : []).map(item => [item.id, item.nome])}
                 onChange={value => updateExam(index, { tipoExameId: value, catalog: catalog.data?.find(item => item.id === value) })} />
               {exam.catalog && <p className="muted">Selecionado: {exam.catalog.nome} ({exam.catalog.codigo})</p>}
-              <SelectField label={`Origem do exame ${index + 1}`} required value={exam.bloco} options={[["trazido", "Trazido"], ["solicitado", "Solicitado"]]}
+              <SelectField fieldPath={`exames.${index}.bloco`} label={`Origem do exame ${index + 1}`} required value={exam.bloco} options={[["trazido", "Trazido"], ["solicitado", "Solicitado"]]}
                 onChange={value => updateExam(index, { bloco: value })} />
-              <InputField label={`Identificação do exame ${index + 1}`} value={exam.identificacao} maxLength={1000}
+              <InputField fieldPath={`exames.${index}.identificacao`} label={`Identificação do exame ${index + 1}`} value={exam.identificacao} maxLength={1000}
                 required={['laboratoriais', 'imagem', 'outro', 'nao_informado'].includes(exam.catalog?.codigo ?? '')} onChange={value => updateExam(index, { identificacao: value })} />
-              <TextAreaField label={`Resultado do exame ${index + 1}`} value={exam.resultado} onChange={value => updateExam(index, { resultado: value })} />
-              <TextAreaField label={`Observações do exame ${index + 1}`} value={exam.observacoes} onChange={value => updateExam(index, { observacoes: value })} />
+              <TextAreaField fieldPath={`exames.${index}.resultado`} label={`Resultado do exame ${index + 1}`} value={exam.resultado} onChange={value => updateExam(index, { resultado: value })} />
+              <TextAreaField fieldPath={`exames.${index}.observacoes`} label={`Observações do exame ${index + 1}`} value={exam.observacoes} onChange={value => updateExam(index, { observacoes: value })} />
             </div>
             <button type="button" className="button button-secondary" onClick={() => examFocus.remove(() => setDraft(previous => ({ ...previous, exams: previous.exams.filter((_, i) => i !== index) })))}>Remover exame {index + 1}</button>
           </fieldset>)}
@@ -200,13 +214,13 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
         </fieldset>
         <fieldset className="form-section"><legend>Rastreio familiar</legend>
           <p>Identificação do familiar e resultado do exame; este registro não representa histórico de doença familiar.</p>
-          <SelectField label="Familiares examinados" value={draft.familyStatus} blank="Sem registro de rastreio"
+          <SelectField fieldPath="rastreioFamiliar.familiaresExaminados" label="Familiares examinados" value={draft.familyStatus} blank="Sem registro de rastreio"
             options={[["sim", "Sim"], ["nao", "Não"], ["desconhecido", "Desconhecido (registrar)"]]}
             onChange={value => setDraft(previous => ({ ...previous, familyStatus: value }))} />
           {draft.families.map((family, index) => <fieldset key={index} className="form-section"><legend>Familiar {index + 1}</legend>
-            <div className="form-grid"><InputField label={`Identificação do familiar ${index + 1}`} value={family.familiar} required maxLength={1000}
+            <div className="form-grid"><InputField fieldPath={`rastreioFamiliar.familiares.${index}.familiar`} label={`Identificação do familiar ${index + 1}`} value={family.familiar} required maxLength={1000}
               onChange={value => setDraft(previous => ({ ...previous, families: previous.families.map((item, i) => i === index ? { ...item, familiar: value } : item) }))} />
-              <TextAreaField label={`Resultado do familiar ${index + 1}`} required={draft.familyStatus === 'sim'} value={family.resultado}
+              <TextAreaField fieldPath={`rastreioFamiliar.familiares.${index}.resultado`} label={`Resultado do familiar ${index + 1}`} required={draft.familyStatus === 'sim'} value={family.resultado}
                 onChange={value => setDraft(previous => ({ ...previous, families: previous.families.map((item, i) => i === index ? { ...item, resultado: value } : item) }))} /></div>
             <button type="button" className="button button-secondary" onClick={() => familyFocus.remove(() => setDraft(previous => ({ ...previous, families: previous.families.filter((_, i) => i !== index) })))}>Remover familiar {index + 1}</button>
           </fieldset>)}
@@ -220,12 +234,12 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
         <fieldset className="form-section"><legend>Pendências na criação</legend>
           <p>Pendência resolvida exige a data de resolução informada. A criação de cada pendência faz parte da mesma gravação do atendimento.</p>
           {draft.pending.map((pending, index) => <fieldset key={index} className="form-section"><legend>Pendência {index + 1}</legend>
-            <TextAreaField label={`Descrição da pendência ${index + 1}`} required value={pending.descricao}
+            <TextAreaField fieldPath={`pendencias.${index}.descricao`} label={`Descrição da pendência ${index + 1}`} required value={pending.descricao}
               onChange={value => setDraft(previous => ({ ...previous, pending: previous.pending.map((item, i) => i === index ? { ...item, descricao: value } : item) }))} />
-            <SelectField label={`Status da pendência ${index + 1}`} value={pending.status} blank="Desconhecido"
+            <SelectField fieldPath={`pendencias.${index}.status`} label={`Status da pendência ${index + 1}`} value={pending.status} blank="Desconhecido"
               options={[["aberta", "Aberta"], ["em_andamento", "Em andamento"], ["resolvida", "Resolvida"], ["cancelada", "Cancelada"], ["nao_informado", "Não informado"]]}
               onChange={value => setDraft(previous => ({ ...previous, pending: previous.pending.map((item, i) => i === index ? { ...item, status: value } : item) }))} />
-            <InputField label={`Data de resolução da pendência ${index + 1}`} type="date" value={pending.dataResolucao ?? ''}
+            <InputField fieldPath={`pendencias.${index}.dataResolucao`} label={`Data de resolução da pendência ${index + 1}`} type="date" value={pending.dataResolucao ?? ''}
               required={pending.status === 'resolvida'} onChange={value => setDraft(previous => ({ ...previous,
                 pending: previous.pending.map((item, i) => i === index ? { ...item, dataResolucao: value } : item) }))} />
             <button type="button" className="button button-secondary" onClick={() => pendingFocus.remove(() => setDraft(previous => ({ ...previous, pending: previous.pending.filter((_, i) => i !== index) })))}>Remover pendência {index + 1}</button>

@@ -1,3 +1,4 @@
+import { FieldValidationError } from '../../shared/field-validation';
 import type { AtendimentoDetalheResponse, PacienteDetalheResponse } from '../../api/contracts';
 import type { CatalogItem } from '../../shared/writing';
 
@@ -56,6 +57,10 @@ export function attendanceInitial(data?: AtendimentoDetalheResponse): Fields {
 }
 
 export function attendanceCore(values: Fields, original?: AtendimentoDetalheResponse): Record<string, unknown> {
+  if (values.ambulatorioUnicamente === 'sim' && values.ambulatorioAnexoProjeto === 'sim') {
+    throw new FieldValidationError([{ path: 'ambulatorioUnicamente', code: 'attendance_context' },
+      { path: 'ambulatorioAnexoProjeto', code: 'attendance_context' }]);
+  }
   const initial = attendanceInitial(original);
   const body: Record<string, unknown> = original ? { versao: original.versao } : {};
   for (const key of Object.keys(initial)) {

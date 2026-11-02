@@ -40,6 +40,7 @@ fonte temática abaixo; relatórios registram provas e histórico preserva conte
 | Regras normativas de importação | [Especificação do importador](ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md) |
 | API e autorização | [Arquitetura do backend](ARQUITETURA_BACKEND.md) e [contratos clínicos](arquitetura/CONTRATOS_CLINICOS_ETAPA_5.md) |
 | Formulários e limites HTTP | [Recorte clínico](arquitetura/RECORTE_CLINICO_ETAPA_7.md) e [catálogos](arquitetura/CONTRATOS_CATALOGOS_ETAPA_7.md) |
+| Erros por campo do atendimento | [Contrato e limites](arquitetura/CONTRATO_ERROS_ATENDIMENTO_M3.md) |
 | Recuperação de escrita e paginação de familiares | [Operações](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) e [familiares](arquitetura/CONTRATO_FAMILIARES_ETAPA_7.md) |
 | Episódios individuais de sorologia | [Contrato 7B-E1B](arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md) |
 | Condição de Chagas por atendimento | [Contrato 7B-E2B.1](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md) |

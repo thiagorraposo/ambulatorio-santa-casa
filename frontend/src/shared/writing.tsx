@@ -1,5 +1,6 @@
+import { FieldValidationError, FieldValidationProvider, FieldValidationSummary, type FieldViolation } from './field-validation';
 import { createContext, useCallback, useContext, useEffect, useRef, useState,
-  useSyncExternalStore, type Dispatch, type FormEvent, type ReactNode, type SetStateAction } from 'react';
+  useId, useSyncExternalStore, type Dispatch, type FormEvent, type ReactNode, type SetStateAction } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useBeforeUnload, useBlocker } from 'react-router';
 import { useQueryClient, type UseQueryResult } from '@tanstack/react-query';
@@ -70,7 +71,7 @@ export function DraftQueryState<T>({ query, children }: { query: UseQueryResult<
 }
 
 type WriteState = { status: 'idle' | 'pending' | 'saved' | 'error' | 'uncertain' | 'conflict' | 'denied' | 'not_applied';
-  message?: string; intention?: ClinicalIntention };
+  message?: string; intention?: ClinicalIntention; errors?: FieldViolation[] };
 export interface MutationFormProps<T = Record<string, unknown>> {
   title: string;
   path: string;
@@ -90,12 +91,15 @@ export interface MutationFormProps<T = Record<string, unknown>> {
   conflictReview?: (abandonIntention: () => void) => ReactNode;
   intentionReview?: (abandonIntention: () => void) => ReactNode;
   onConflict?: () => void;
+  validationErrors?: FieldViolation[];
+  onValidationField?: (path: string) => void;
 }
 
 export function MutationForm<T = Record<string, unknown>>({ title, path, method, buildBody, onSaved, children, dirty,
   submitLabel = 'Salvar registro', verificationPath, verificationLabel = 'Verificar registro salvo', disabled = false,
   submitVisible = true,
-  operationKey = '', responseId, expectedId, conflictReview, intentionReview, onConflict }: MutationFormProps<T>) {
+  operationKey = '', responseId, expectedId, conflictReview, intentionReview, onConflict, validationErrors = [], onValidationField }: MutationFormProps<T>) {
+  const fieldPrefix = useId();
   const session = useSession();
   const queries = useQueryClient();
   const drafts = useContext(Drafts)!;
@@ -106,6 +110,8 @@ export function MutationForm<T = Record<string, unknown>>({ title, path, method,
   const allowNavigation = useRef(false);
   const alert = useRef<HTMLDivElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
+  const validationAlert = useRef<HTMLDivElement>(null);
+  useEffect(() => { if (validationErrors.length) validationAlert.current?.focus(); }, [validationErrors]);
   const blocked = useBlocker(({ currentLocation, nextLocation }) => !allowNavigation.current
     && (dirty || sending.current || state.status === 'pending') && state.status !== 'saved'
     && `${currentLocation.pathname}${currentLocation.search}` !== `${nextLocation.pathname}${nextLocation.search}`);
@@ -197,7 +203,8 @@ export function MutationForm<T = Record<string, unknown>>({ title, path, method,
     let body: unknown;
     try { body = buildBody(); }
     catch (error) {
-      setState({ status: 'error', message: error instanceof Error ? error.message : 'Revise os campos antes de salvar.' });
+      setState({ status: 'error', message: error instanceof Error ? error.message : 'Revise os campos antes de salvar.',
+        errors: onValidationField && error instanceof FieldValidationError ? error.errors : [] });
       return;
     }
     sending.current = true;
@@ -234,18 +241,20 @@ export function MutationForm<T = Record<string, unknown>>({ title, path, method,
       } else if (safe.status === 0 || safe.status >= 500) {
         setState({ status: 'uncertain', intention, message: 'Não foi possível confirmar se a operação foi salva. Consulte o registro antes de qualquer nova operação. Este envio não será repetido automaticamente.' });
       } else {
-        setState({ status: safe.status === 409 ? 'conflict' : safe.status === 403 ? 'denied' : 'error', intention, message: safe.message });
+        setState({ status: safe.status === 409 ? 'conflict' : safe.status === 403 ? 'denied' : 'error', intention, message: safe.message, errors: onValidationField ? safe.errors : [] });
         if (safe.status === 409) onConflict?.();
         if (safe.status === 403) void queries.invalidateQueries({ queryKey: ['clinical'], refetchType: 'active' });
       }
     } finally { sending.current = false; }
   }
 
+  const errors = state.errors?.length ? state.errors : validationErrors;
   return <>
     <form onSubmit={event => { void submit(event); }} aria-label={title} aria-busy={busy}>
       {state.message && <div className={state.status === 'saved' ? 'notice' : 'error-state'}
         role={state.status === 'saved' ? 'status' : 'alert'} ref={alert} tabIndex={-1}>
         <p>{state.message}</p>
+        <FieldValidationSummary errors={state.errors ?? []} prefix={fieldPrefix} reveal={onValidationField} />
         {verificationPath && ['saved', 'uncertain', 'conflict'].includes(state.status)
           && <Link to={verificationPath}>{verificationLabel}</Link>}
       </div>}
@@ -266,7 +275,11 @@ export function MutationForm<T = Record<string, unknown>>({ title, path, method,
         drafts.unsaved.delete(writeKey);
         setState({ status: 'idle' });
       })}
-      <fieldset disabled={locked} className="form-body"><legend className="sr-only">{title}</legend>{children}</fieldset>
+      <FieldValidationProvider errors={errors} prefix={fieldPrefix}>
+        {validationErrors.length > 0 && <div ref={validationAlert} tabIndex={-1} role="alert" className="error-state"><p>Revise os campos indicados.</p>
+          <FieldValidationSummary errors={validationErrors} prefix={fieldPrefix} reveal={onValidationField} /></div>}
+        <fieldset disabled={locked} className="form-body"><legend className="sr-only">{title}</legend>{children}</fieldset>
+      </FieldValidationProvider>
       {submitVisible && <div className="form-actions"><button type="submit" className="button" disabled={locked || disabled || !dirty}>
         {busy ? 'Salvando…' : submitLabel}</button>
         {dirty && state.status !== 'saved' && <span className="muted">Alterações em rascunho; ainda não confirmadas.</span>}

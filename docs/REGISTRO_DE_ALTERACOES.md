@@ -1,5 +1,18 @@
 # Registro de Alterações
 
+## 2026-11-02 — Implementar feedback de campo no atendimento P0
+
+Envelope de erros DTO por caminho/código sanitizado (ADR-027), consumo seguro no
+cliente, resumo navegável entre etapas e controles com erro acessível. Contexto
+simultâneo já proibido pela SQL03 é recusado antes da revisão e traduzido pelo
+backend sem alterar regra, schema, autorização, auditoria ou recibos.
+
+[Provas e limites](validacoes/VALIDACAO_P0_ATENDIMENTO_2026_11_02.md): 289 unidades
+frontend, 12 testes backend focados; 54 regressões focadas após ajuste final.
+Builds aprovados. Socket EPERM impediu reprodução/persistência/E2E/visual; dois
+cenários E2E preparados, sem alegar execução. P0 humano permanece aberto.
+P1 acesso inicial e decisões 8D preservados como gates; sem dados persistentes.
+
 ## 2026-11-02 — Registrar avaliação humana e repriorizar M3
 
 Registrada a avaliação do protótipo funcional com a equipe do Centro de Pesquisa

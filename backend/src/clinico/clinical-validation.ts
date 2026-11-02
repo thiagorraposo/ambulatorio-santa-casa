@@ -1,3 +1,4 @@
+import { attendanceContextException } from '../common/http/field-validation';
 import { BadRequestException, PipeTransform } from '@nestjs/common';
 
 export class ClinicalIdPipe implements PipeTransform<string, string> {
@@ -21,6 +22,10 @@ export function validatePendingResolution(status: string | null | undefined,
 
 export function databaseConflict(error: unknown): never {
   const code = typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : '';
+  if (code === '23514' && 'constraint' in (error as object)
+    && (error as { constraint: unknown }).constraint === 'chk_atendimento_contexto_ambulatorio') {
+    throw attendanceContextException();
+  }
   if (['23502', '23503', '23514', '22003', '22007', '22008'].includes(code)) {
     throw new BadRequestException('Dados incompatíveis com o recurso ou seu contrato');
   }

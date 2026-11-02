@@ -1,8 +1,9 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { FieldViolation, publicAttendancePath } from './field-validation';
 import { AuthenticatedUser } from '../../auth/auth.types';
 
-interface ErrorBody { statusCode: number; error: string; message: string | string[] }
+interface ErrorBody { statusCode: number; error: string; message: string | string[]; errors?: FieldViolation[] }
 
 @Catch()
 export class HttpErrorFilter implements ExceptionFilter {
@@ -28,7 +29,11 @@ export class HttpErrorFilter implements ExceptionFilter {
       if (typeof payload === 'object' && payload !== null) {
         const value = payload as Partial<ErrorBody>;
         return { statusCode: status, error: String(value.error ?? exception.name),
-          message: value.message ?? exception.message };
+          message: value.message ?? exception.message,
+          ...(status === 400 && Array.isArray(value.errors) ? { errors: value.errors.filter(item => item
+            && typeof item.path === 'string' && publicAttendancePath(item.path)
+            && ['date', 'integer', 'number', 'length', 'option', 'invalid', 'attendance_context'].includes(item.code))
+            .map(({ path, code }) => ({ path, code })) } : {}) };
       }
       return { statusCode: status, error: exception.name, message: String(payload) };
     }
