@@ -61,7 +61,7 @@ O runner [`tests/frontend/test_e2e.sh`](../tests/frontend/test_e2e.sh) recebe
 `SYNTHETIC_PG_HOST`, `SYNTHETIC_PG_PORT`, `SYNTHETIC_PG_USER` e `PGPASSWORD` pelo
 ambiente, todos obrigatórios. O usuário deve poder criar banco e login de teste.
 Ele cria seu banco e roles de teste, aplica as
-migrations 02–66 apenas nesse banco, inicia API/Vite e encerra os recursos que
+migrations 02–73 apenas nesse banco, inicia API/Vite e encerra os recursos que
 criou.
 Não lê `.env` para selecionar o banco de teste. Não exige build do frontend para
 servir Vite; o build de produção é verificado separadamente por `frontend-check`.
@@ -404,3 +404,18 @@ revisão. [Contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) e
 
 O seed sintético do runner/--serve inclui os nomes canônicos hipertensao_arterial
 e diabetes, sem associação clínica pré-preenchida. [Prova de fixture e limites](validacoes/VALIDACAO_FIXTURE_DEMO_M3.md).
+
+
+## Continuidade M3 — parâmetros, atalhos e simulação
+
+Parâmetros humanos são acessados no exame expandido da ficha/consulta e mantêm
+ID/identificação do exame, retorno de origem, revisão dos seis campos, rascunho
+e recibo recuperável. [Provas E6U](validacoes/VALIDACAO_7B_E6U_PARAMETROS.md).
+A busca oferece [atalhos Editar/Novo atendimento](validacoes/VALIDACAO_8B3U_4.md)
+por pessoa aos perfis de escrita, preservando filtros/página ao voltar.
+
+A simulação XLSX exibe [totais disjuntos e códigos reais](validacoes/VALIDACAO_8C2_U1_RELATORIO.md),
+inclusive lote efetivo no no-op. Não habilita confirmação; a recuperação de uma
+importação confirmada ainda exige contrato próprio. A rejeição precoce preserva
+o rollback de todas as tabelas; sequências podem avançar. Não apresentar o
+resultado mínimo como ausência de todo efeito ou aceite de8C2B.1 integral.

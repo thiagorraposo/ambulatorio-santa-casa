@@ -23,7 +23,7 @@ os testes automáticos continuam fixados em 60 segundos. O
 [roteiro clínico](../../docs/validacoes/ROTEIRO_REVISAO_CLINICA_ETAPA_7.md)
 orienta a execução e o registro do parecer da equipe.
 
-Migrations 02–67 são aplicadas explicitamente no banco `etapa6_frontend_*`;
+Migrations 02–73 são aplicadas explicitamente no banco `etapa6_frontend_*`;
 00/01 são substituídas pela criação do banco/schema exclusivos. O login técnico
 dedicado usa `scripts/configurar_login_aplicacao.sql` e `vinculo_explicito`.
 Importação HTTP sintética usa worker real com outro login, limitado à role
@@ -122,3 +122,11 @@ Logs, screenshots, resultados e traces ficam apenas em um
 diretório `/tmp/etapa6-frontend-*`; o arquivo de fixture é removido ao finalizar.
 O cleanup encerra somente os dois processos e remove somente o banco/login
 criados pelo runner, inclusive quando um teste falha.
+
+
+`resultados-exame.spec.ts` verifica parâmetros literais ligados ao exame canônico,
+revisão/rascunho, recibo após COMMIT perdido, perfis/IDs trocados e paginação.
+`patient-shortcuts.spec.ts` confere atalhos por pessoa e retorno à busca sem N+1.
+`importacao-relatorio.spec.ts` confronta totais6/3/2/1 e códigos reais, nascimento
+inválido sem romper rollback e no-op associado ao lote efetivo. Os cenários usam
+somente arquivos gerados sintéticos e o worker/API/PostgreSQL do runner.

@@ -80,3 +80,5 @@ sistema; sua menção preserva rastreabilidade, não garante disponibilidade atu
 - [Relatório H14 sanitizado — recorte8C2B.1](VALIDACAO_8C2B_1_RELATORIO.md).
 
 - [Rollback de rejeição precoce no dry-run](VALIDACAO_DRY_RUN_REJEICAO_PRECOCE.md).
+
+- [Totais/códigos na simulação — recorte8C2U.1](VALIDACAO_8C2_U1_RELATORIO.md).

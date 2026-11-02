@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -8,7 +8,9 @@ import ImportacaoSimulacaoPage from './ImportacaoSimulacaoPage';
 
 vi.mock('../../app/session', () => ({ useSession: vi.fn() }));
 const request = vi.fn();
-const response = { codigoLote: 'sintetico-1', codigoLoteSolicitado: 'sintetico-1', dryRun: true, loteId: null, status: 'dry_run_concluido' };
+const response = { codigoLote: 'sintetico-1', codigoLoteSolicitado: 'sintetico-1', dryRun: true, loteId: null, status: 'dry_run_concluido',
+  relatorio: { totalLinhas: 6, linhasImportadas: 3, linhasComPendencia: 2, linhasRejeitadas: 1,
+    codigosErro: [{ codigo: 'data_invalida', total: 2 }, { codigo: 'linha_rejeitada', total: 1 }] } };
 function session(perfil: 'consulta' | 'edicao' | 'administracao' = 'edicao', generation = 0) {
   return { client: { request }, user: { usuarioId: '1', nome: 'Sintético', perfil }, generation, draftScope: generation } as unknown as ReturnType<typeof useSession>;
 }
@@ -45,6 +47,13 @@ describe('simulação mínima de XLSX', () => {
     expect(body.get('dryRun')).toBe('true');
     expect(request).toHaveBeenCalledTimes(1);
     expect(screen.getByText('Nenhum lote foi criado por esta simulação.')).toBeVisible();
+    const report = within(screen.getByRole('region', { name: 'Relatório da simulação' }));
+    expect(report.getByText('6', { selector: 'dd' })).toBeVisible();
+    expect(report.getByText('3', { selector: 'dd' })).toBeVisible();
+    expect(report.getByText('2', { selector: 'dd' })).toBeVisible();
+    expect(report.getByText('1', { selector: 'dd' })).toBeVisible();
+    expect(report.getByRole('list', { name: 'Ocorrências por código' })).toHaveTextContent('Data inválida (data_invalida): 2');
+    expect(screen.getByText(/pode avançar a numeração interna/)).toBeVisible();
   });
 
   it('valida seleção, extensão, limite e código antes de enviar', async () => {
@@ -154,4 +163,35 @@ describe('simulação mínima de XLSX', () => {
       .toHaveAttribute('href', '/importacoes/lotes/9007199254740993');
     expect((request.mock.calls[0]![1].body as FormData).get('dryRun')).toBe('true');
   });
+  it.each([
+    undefined,
+    { ...response.relatorio, totalLinhas: 99 },
+    { ...response.relatorio, linhasImportadas: -1 },
+    { ...response.relatorio, linhasRejeitadas: 1.5 },
+    { ...response.relatorio, codigosErro: [{ codigo: 'SQL-segredo', total: 3 }] },
+    { ...response.relatorio, codigosErro: [{ codigo: 'data_invalida', total: 2 }] },
+    { ...response.relatorio, codigosErro: [{ codigo: 'data_invalida', total: 1 }, { codigo: 'data_invalida', total: 2 }] },
+  ])('recusa relatório ausente/inconsistente sem inventar zero ou vazar código: %j', async relatorio => {
+    request.mockResolvedValue({ ...response, relatorio });
+    setup(); const user = await fill();
+    await user.click(screen.getByRole('button', { name: 'Simular planilha' }));
+    await screen.findByRole('alert');
+    expect(screen.queryByRole('heading', { name: 'Simulação concluída' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Relatório da simulação' })).not.toBeInTheDocument();
+    expect(screen.getByRole('alert')).not.toHaveTextContent('SQL-segredo');
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+
+  it('distingue zero informado de relatório ausente e descreve no-op como lote existente', async () => {
+    request.mockResolvedValue({ ...response, codigoLote: 'lote-original', loteId: '9007199254740993', status: 'concluido',
+      relatorio: { totalLinhas: 0, linhasImportadas: 0, linhasComPendencia: 0, linhasRejeitadas: 0, codigosErro: [] } });
+    setup(); const user = await fill();
+    await user.click(screen.getByRole('button', { name: 'Simular planilha' }));
+    await screen.findByRole('heading', { name: 'Simulação concluída' });
+    const report = within(screen.getByRole('region', { name: 'Relatório da simulação' }));
+    expect(report.getAllByText('0', { selector: 'dd' })).toHaveLength(4);
+    expect(report.getByText('Nenhuma ocorrência informada no relatório.')).toBeVisible();
+    expect(report.getByText('Os números descrevem o lote existente; não representam novas gravações.')).toBeVisible();
+  });
+
 });

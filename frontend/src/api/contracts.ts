@@ -224,12 +224,21 @@ export type ImportacaoCodigoErro = 'falha_operacional' | 'campo_obrigatorio_ause
 
 export type ImportacaoFinalidade = 'carga_inicial' | 'mesmo_conteudo' | 'revisao';
 
+export interface ImportacaoRelatorioResponse {
+  totalLinhas: number;
+  linhasImportadas: number;
+  linhasComPendencia: number;
+  linhasRejeitadas: number;
+  codigosErro: { codigo: ImportacaoCodigoErro; total: number }[];
+}
+
 export interface ImportacaoSubmitResponse {
   codigoLote: string;
   codigoLoteSolicitado: string;
   dryRun: boolean;
   loteId: string | null;
   status: string;
+  relatorio: ImportacaoRelatorioResponse;
 }
 
 export interface ImportacaoLoteResponse {

@@ -1,5 +1,13 @@
 # Registro de Alterações
 
+## 2026-11-02 — Totais e códigos reais na interface de simulação
+
+U.1 passa a mostrar relatório H14 sanitizado, com validação defensiva, categorias
+disjuntas e lote efetivo no no-op; confirmação continua bloqueada.18 unidades,
+build,4 E2E de regressão e3 cenários novos aprovados, com comparação renderizada.
+[Provas e limites](validacoes/VALIDACAO_8C2_U1_RELATORIO.md). Sem metadados ampliados
+ou promessa de ausência de consumo de sequências.
+
 ## 2026-11-02 — Preservar rollback do dry-run após rejeição precoce
 
 Nascimento inválido podia tentar rollback antes do savepoint e encerrar a

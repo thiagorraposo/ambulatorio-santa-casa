@@ -1160,6 +1160,11 @@ worker concluir e resposta se perder; código solicitado pode diferir do lote
 efetivo. [Requisito e alternativas ainda não aprovadas](../arquitetura/PROPOSTA_CONFIRMACAO_IMPORTACAO_8C2U_2.md).
 Não liberar confirmação ou repetir POST com base em consulta inconclusiva.
 
+Continuidade de02/11: U.1 exibe também os [totais/códigos sanitizados reais](../validacoes/VALIDACAO_8C2_U1_RELATORIO.md),
+com no-op do lote efetivo e aviso do avanço de numeração. Não conclui U.3 rica
+ou libera confirmação. O defeito de rollback precoce foi [corrigido e testado](../validacoes/VALIDACAO_DRY_RUN_REJEICAO_PRECOCE.md);
+consumo de sequências permanece gate aberto de C2B.1.
+
 <a id="8c3d"></a>
 
 #### 8C3D — Decidir upload de contrarreferência

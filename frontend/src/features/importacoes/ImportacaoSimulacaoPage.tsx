@@ -4,6 +4,7 @@ import { ApiClient, ApiError, isAbort } from '../../api/client';
 import type { ImportacaoFinalidade, ImportacaoSubmitResponse } from '../../api/contracts';
 import { useSession } from '../../app/session';
 import { ApiErrorState, Card, PageHeading } from '../../shared/ui';
+import { ImportacaoRelatorio, readImportacaoRelatorio } from './ImportacaoRelatorio';
 
 export default function ImportacaoSimulacaoPage() {
   const session = useSession();
@@ -76,7 +77,7 @@ function SimulationForm({ client }: { client: ApiClient }) {
       if (response.dryRun !== true || !validLot || typeof response.codigoLote !== 'string'
         || !/^[a-z0-9][a-z0-9_-]{0,98}$/i.test(response.codigoLote)
         || response.codigoLoteSolicitado !== code) throw new ApiError(502);
-      setResult(response);
+      setResult({ ...response, relatorio: readImportacaoRelatorio(response.relatorio) });
     } catch (failure) {
       if (current !== revision.current || isAbort(failure)) return;
       setError({ message: failure instanceof ApiError ? failure.message : new ApiError(0).message });
@@ -88,6 +89,7 @@ function SimulationForm({ client }: { client: ApiClient }) {
     <PageHeading title="Simular planilha" description="Confira uma planilha sintética antes de importar. Esta simulação não grava os dados da planilha." />
     <Link to="/importacoes">Voltar aos lotes</Link>
     <Card>
+      <p className="notice">A simulação não salva os registros da planilha, mas pode avançar a numeração interna dos registros.</p>
       <p>A revisão temporal entre arquivos é um processo separado. Use aqui a carga inicial ou a verificação de conteúdo já enviado.</p>
       <form noValidate onSubmit={event => { void submit(event); }} aria-busy={busy}>
         <div className="form-field"><label htmlFor="simulation-file">Arquivo XLSX sintético</label>
@@ -111,6 +113,7 @@ function SimulationForm({ client }: { client: ApiClient }) {
         <p>Nenhum lote foi criado por esta simulação.</p><p>Código solicitado: {result.codigoLoteSolicitado}</p>
         {result.loteId !== null && <><p>Código do lote existente: {result.codigoLote}</p>
           <Link to={`/importacoes/lotes/${encodeURIComponent(result.loteId)}`}>Consultar lote existente {result.loteId}</Link></>}
+        <ImportacaoRelatorio report={result.relatorio} existing={result.loteId !== null} />
         <p>A confirmação da importação é uma operação separada.</p></div>}
     </Card>
   </>;
