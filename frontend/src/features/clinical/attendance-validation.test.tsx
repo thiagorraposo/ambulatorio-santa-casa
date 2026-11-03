@@ -36,7 +36,6 @@ async function setup(perfil = 'edicao') {
   return { user, write };
 }
 async function review(user: ReturnType<typeof userEvent.setup>) {
-  for (let i = 0; i < 3; i++) await user.click(screen.getByRole('button', { name: 'Próxima etapa' }));
   await user.click(screen.getByRole('button', { name: 'Revisar atendimento' }));
 }
 describe('feedback de campo do atendimento', () => {
@@ -44,7 +43,7 @@ describe('feedback de campo do atendimento', () => {
     const { user, write } = await setup();
     await user.selectOptions(screen.getByLabelText('Somente ambulatório'), 'sim');
     await user.selectOptions(screen.getByLabelText('Ambulatório anexo a projeto'), 'sim');
-    await user.click(screen.getByRole('button', { name: 'Próxima etapa' }));
+    await user.click(screen.getByRole('button', { name: 'Próxima seção' }));
     const alert = screen.getByRole('alert');
     expect(alert).toHaveFocus();
     expect(alert).toHaveTextContent('não podem ser Sim ao mesmo tempo');
@@ -78,7 +77,7 @@ describe('feedback de campo do atendimento', () => {
   });
   it('associa a incompatibilidade de resolução ao status e mantém data e descrição', async () => {
     const { user, write } = await setup();
-    for (let i = 0; i < 3; i++) await user.click(screen.getByRole('button', { name: 'Próxima etapa' }));
+    await user.click(screen.getByRole('button', { name: /^Observações$/ }));
     await user.click(screen.getByRole('button', { name: 'Adicionar pendência' }));
     await user.type(screen.getByLabelText('Descrição da pendência 1'), 'Pendência sintética');
     await user.selectOptions(screen.getByLabelText('Status da pendência 1'), 'aberta');
@@ -97,10 +96,9 @@ describe('feedback de campo do atendimento', () => {
   });
   it('mantém o foco no resumo quando a rejeição local revela outra etapa', async () => {
     const { user, write } = await setup();
-    await user.click(screen.getByRole('button', { name: 'Próxima etapa' }));
+    await user.click(screen.getByRole('button', { name: /^Avaliação Clínica$/ }));
     fireEvent.change(screen.getByLabelText('Altura (cm)'), { target: { value: '1000' } });
-    await user.click(screen.getByRole('button', { name: 'Próxima etapa' }));
-    await user.click(screen.getByRole('button', { name: 'Próxima etapa' }));
+    await user.click(screen.getByRole('button', { name: /^Observações$/ }));
     await user.click(screen.getByRole('button', { name: 'Revisar atendimento' }));
     expect(screen.getByRole('alert')).toHaveFocus();
     expect(screen.getByRole('alert')).toHaveTextContent('entre -999,99 e 999,99');

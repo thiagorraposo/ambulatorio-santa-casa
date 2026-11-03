@@ -5,7 +5,12 @@ import { apiAs, fixture, type Perfil } from './fixtures';
 export { signIn } from './fixtures';
 
 export async function nextAttendanceStep(page: Page) {
-  await page.getByRole('button', { name: 'Próxima etapa', exact: true }).click();
+  await page.getByRole('button', { name: 'Próxima seção', exact: true }).click();
+}
+
+export async function attendanceSection(page: Page, title: string) {
+  await page.getByRole('navigation', { name: 'Seções do atendimento', exact: true })
+    .getByRole('button', { name: title, exact: true }).click();
 }
 
 export async function reviewAttendance(page: Page) {
@@ -14,9 +19,6 @@ export async function reviewAttendance(page: Page) {
 }
 
 export async function moveAttendanceToReview(page: Page) {
-  await nextAttendanceStep(page);
-  await nextAttendanceStep(page);
-  await nextAttendanceStep(page);
   await reviewAttendance(page);
 }
 

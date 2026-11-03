@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import type { AtendimentoDetalheResponse, ResultadoExameResponse, SorologiaResponse } from '../../frontend/src/api/contracts';
 import { fixture, apiAs, assertNoPersistentClinicalState } from './fixtures';
-import { apiJson, nextAttendanceStep, reviewAttendance, signIn, submitWrite,
+import { apiJson, attendanceSection, reviewAttendance, signIn, submitWrite,
   assertAccessible, assertFitsViewport, loseResponseAfterCommit, checkComorbidityCatalogItem } from './stage7-helpers';
 
 test('M3 demonstração sintética: cadastro buscado, consulta, episódios, parâmetros, histórico e CSV', async ({page}, info) => {
@@ -26,15 +26,14 @@ test('M3 demonstração sintética: cadastro buscado, consulta, episódios, par�
   await page.getByRole('link', {name:'Novo atendimento',exact:true}).click();
   await page.getByLabel('Data do atendimento', {exact:true}).fill('2026-10-30');
   await page.getByLabel('Observações do atendimento', {exact:true}).fill('Ensaio M3 exclusivamente sintético');
-  await nextAttendanceStep(page);
-  await nextAttendanceStep(page);
+  await attendanceSection(page, 'Exames');
   await page.getByRole('button', {name:'Adicionar exame',exact:true}).click();
   const exams = await apiJson<Array<{id:string;codigo:string}>>('GET','/catalogos/exames?limit=100');
   await page.getByLabel('Tipo de exame 1', {exact:true}).selectOption(exams.find(exam => exam.codigo==='outro')!.id);
   await page.getByLabel('Identificação do exame 1', {exact:true}).fill('Exame da demonstração sintética M3');
-  await nextAttendanceStep(page);
+  await attendanceSection(page, 'Observações');
   await reviewAttendance(page);
-  await expect(page.getByRole('group',{name:'Etapa 5 — Revisão'})).toContainText('Exame da demonstração sintética M3');
+  await expect(page.getByRole('group',{name:'Revisão do atendimento'})).toContainText('Exame da demonstração sintética M3');
   const consultation = await submitWrite(page,'POST',`${patientPath}/atendimentos`,'Confirmar atendimento');
   const {atendimentoId} = await consultation.response.json() as {atendimentoId:string};
   const attendancePath = `${patientPath}/atendimentos/${atendimentoId}`;
@@ -127,7 +126,7 @@ test('M3 demonstração sintética: cadastro buscado, consulta, episódios, par�
   await page.getByRole('link',{name:'Histórico do paciente',exact:true}).click();
   await page.getByRole('link',{name:'Novo atendimento',exact:true}).click();
   await page.getByLabel('Data do atendimento',{exact:true}).fill('2026-10-31');
-  await nextAttendanceStep(page); await nextAttendanceStep(page); await nextAttendanceStep(page); await reviewAttendance(page);
+  await reviewAttendance(page);
   const next = await submitWrite(page,'POST',`${patientPath}/atendimentos`,'Confirmar atendimento');
   const secondId = (await next.response.json()).atendimentoId as string;
   expect(await apiJson('GET',`${patientPath}/atendimentos/${secondId}/sorologias`)).toEqual([]);

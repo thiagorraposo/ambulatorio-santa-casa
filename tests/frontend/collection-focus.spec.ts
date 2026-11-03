@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { assertAccessible, assertFitsViewport, nextAttendanceStep, seedPatient, signIn, visitByLink } from './stage7-helpers';
+import { assertAccessible, assertFitsViewport, attendanceSection, seedPatient, signIn, visitByLink } from './stage7-helpers';
 
 async function removePair(page: Page, addName: string, removePrefix: string, firstLabel: string, secondLabel: string) {
   const add = page.getByRole('button', { name: addName, exact: true });
@@ -52,15 +52,14 @@ test('7D-U4.2: remoção de itens devolve foco à coleção sem apagar o próxim
   await visitByLink(page, patient.path);
   await visitByLink(page, `${patient.path}/atendimentos/novo`);
   await page.getByLabel('Data do atendimento', { exact: true }).fill('2026-04-14');
-  await nextAttendanceStep(page);
-  await nextAttendanceStep(page);
+  await attendanceSection(page, 'Exames');
   await removePair(page, 'Adicionar exame', 'Remover exame', 'Identificação do exame 1', 'Identificação do exame 2');
   await removePair(page, 'Adicionar familiar examinado', 'Remover familiar', 'Identificação do familiar 1', 'Identificação do familiar 2');
   await assertFitsViewport(page);
   await assertAccessible(page);
-  await nextAttendanceStep(page);
+  await attendanceSection(page, 'Observações');
   await removePair(page, 'Adicionar pendência', 'Remover pendência', 'Descrição da pendência 1', 'Descrição da pendência 2');
-  for (let step = 0; step < 3; step++) await page.getByRole('button', { name: 'Etapa anterior', exact: true }).click();
+  await attendanceSection(page, 'Atendimento');
   await page.getByLabel('Data do atendimento', { exact: true }).fill('');
   await visitByLink(page, patient.path);
   await visitByLink(page, `${patient.path}?aba=bzn`);

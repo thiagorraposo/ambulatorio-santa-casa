@@ -10,9 +10,27 @@ import { DraftQueryState, EditingGate, MutationForm, useClinicalDraft, type Cata
 import { booleanOptions, FormSection, InputField, SelectField, TextAreaField } from './CoreFields';
 import { attendanceBody, attendanceCore, attendanceInitial, clinicalNumbers, dirtyFields, type AttendanceDraft } from './core-contracts';
 import { VersionComparison } from './VersionComparison';
+import './attendance.css';
 import { PatientsSearchReturn } from '../pacientes/PatientsSearchReturn';
 
-const attendanceSteps = ['Atendimento', 'Avaliação e Chagas', 'Exames e familiares', 'Pendências', 'Revisão'] as const;
+const attendanceSections = [
+  'Atendimento', 'Chagas e Sorologia', 'Condição Clínica', 'Comorbidades',
+  'Avaliação Clínica', 'Eventos e Dispositivos', 'Projetos', 'Exames',
+  'Medicamentos e BZN', 'Encaminhamentos', 'Notificação', 'Observações',
+] as const;
+const editableSections = [0, 1, 4, 7, 11, 12];
+const sectionForField = (path: string) => path.startsWith('pendencias.') ? 11
+  : path.startsWith('exames.') || path.startsWith('rastreioFamiliar.') ? 7
+  : path.startsWith('dadosClinicos.') ? 4 : path.startsWith('diagnosticoChagas.') ? 1 : 0;
+const complementarySections: Record<number, { description: string; links?: Array<[string, string]> }> = {
+  2: { description: 'Condição de Chagas, sintomas e complicações têm registros próprios, vinculados ao atendimento salvo.' },
+  3: { description: 'A avaliação de comorbidades tem confirmação própria após salvar o atendimento.' },
+  5: { description: 'AVC, marcapasso/CDI e óbito são registros longitudinais do paciente, com confirmação própria.', links: [['avcs', 'Consultar AVC'], ['dispositivos', 'Consultar dispositivos'], ['obito', 'Consultar óbito']] },
+  6: { description: 'Os projetos são registrados na ficha do paciente, com confirmação própria.', links: [['?aba=projetos', 'Consultar projetos']] },
+  8: { description: 'O tratamento BZN e suas reações têm confirmação própria na ficha. Os medicamentos são consultados por atendimento salvo; a prescrição ainda não está disponível.', links: [['?aba=bzn', 'Consultar tratamento BZN']] },
+  9: { description: 'Encaminhamentos e contrarreferências têm confirmação própria após salvar o atendimento.' },
+  10: { description: 'A notificação é um registro do paciente, com confirmação própria na ficha.', links: [['?aba=notificacao', 'Consultar notificação']] },
+};
 
 function StepPanel({ active, title, panelRef, children }: { active: boolean; title: string;
   panelRef?: (node: HTMLFieldSetElement | null) => void; children: ReactNode }) {
@@ -63,17 +81,25 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
   const [stepError, setStepError] = useState('');
   const [validationErrors, setValidationErrors] = useState<FieldViolation[]>([]);
   function revealField(path: string) {
-    const next = path.startsWith('pendencias.') ? 3
-      : path.startsWith('exames.') || path.startsWith('rastreioFamiliar.') ? 2
-      : path.startsWith('dadosClinicos.') || path.startsWith('diagnosticoChagas.') ? 1 : 0;
+    const next = sectionForField(path);
     setStep(next);
   }
   const panelRefs = useRef<Array<HTMLFieldSetElement | null>>([]);
   const stepHeading = useRef<HTMLHeadingElement>(null);
+  const sectionNav = useRef<HTMLElement>(null);
   const stepErrorRef = useRef<HTMLDivElement>(null);
   const navigatedStep = useRef(false);
   useEffect(() => {
     if (navigatedStep.current && !validationErrors.length) stepHeading.current?.focus();
+    const revealSelected = () => {
+      const selected = sectionNav.current?.querySelector<HTMLElement>('[aria-current]');
+      if (selected && window.matchMedia?.('(max-width: 800px)').matches) {
+        sectionNav.current?.scrollTo({ left: selected.offsetLeft - sectionNav.current.offsetLeft - 8 });
+      }
+    };
+    revealSelected();
+    window.addEventListener('resize', revealSelected);
+    return () => window.removeEventListener('resize', revealSelected);
   }, [step, validationErrors.length]);
   useEffect(() => { if (stepError) stepErrorRef.current?.focus(); }, [stepError]);
   const initial = attendanceInitial(data);
@@ -95,19 +121,19 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
   function moveTo(next: number) {
     setStepError('');
     setValidationErrors([]);
-    if (next > step && panelRefs.current[step]?.closest('form')?.reportValidity() === false) return;
-    if (next === 4 || (next > step && step === 0)) {
-      try { if (next === 4) attendanceBody(draft); else attendanceCore(draft.values, draft.original); }
+    if (next === 12 && panelRefs.current[step]?.closest('form')?.reportValidity() === false) return;
+    if (next === 12) {
+      try { attendanceBody(draft); }
       catch (error) {
         if (error instanceof FieldValidationError) {
           setValidationErrors(error.errors); revealField(error.errors[0]!.path); return;
         }
         const message = error instanceof Error ? error.message : 'Revise os dados antes de continuar.';
         setStepError(message);
-        if (/^Pendência|descrição de cada pendência/i.test(message)) setStep(3);
-        else if (/^Exame|familiar/i.test(message)) setStep(2);
+        if (/^Pendência|descrição de cada pendência/i.test(message)) setStep(11);
+        else if (/^Exame|familiar/i.test(message)) setStep(7);
         else if (/^Data do atendimento/i.test(message)) setStep(0);
-        else setStep(1);
+        else setStep(4);
         navigatedStep.current = true;
         return;
       }
@@ -115,11 +141,11 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
     navigatedStep.current = true;
     setStep(next);
   }
-  return <Card>
+  return <Card className="attendance-workflow">
     {data && <p className="notice">Esta edição altera os dados básicos do atendimento. Medidas, diagnóstico, exames, familiares e pendências já salvos são preservados; sua edição não está disponível neste formulário.</p>}
     <MutationForm title={data ? 'Editar atendimento' : 'Novo atendimento'} path={path} method={data ? 'PATCH' : 'POST'}
       dirty={dirty} submitLabel={data ? 'Salvar atendimento' : 'Confirmar atendimento'}
-      submitVisible={Boolean(data) || step === 4} disabled={!data && step !== 4} buildBody={() => attendanceBody(draft)}
+      submitVisible={Boolean(data) || step === 12} disabled={!data && step !== 12} buildBody={() => attendanceBody(draft)}
       validationErrors={validationErrors} onValidationField={revealField}
       operationKey={draft.operationKey}
       responseId="atendimentoId" expectedId={data?.atendimentoId}
@@ -139,9 +165,41 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
       onSaved={(response: { atendimentoId: string }) => { clearDraft(); navigate(`${patientPath}/atendimentos/${response.atendimentoId}`, {
         state: { saved: 'Atendimento salvo. Tratamento, retornos e encaminhamentos têm confirmação própria.' },
       }); }}>
-      {!data && <p className="notice" role="status">Etapa {step + 1} de 5: {attendanceSteps[step]}</p>}
+      <div className={data ? '' : 'attendance-layout'}>
+      {!data && <aside className="attendance-sidebar">
+        <h2>Seções</h2>
+        <nav ref={sectionNav} aria-label="Seções do atendimento">
+          {attendanceSections.map((title, index) => {
+            const errors = validationErrors.some(error => sectionForField(error.path) === index);
+            const filled = index === 0 ? Object.values(draft.values).some(Boolean)
+              : index === 1 ? Object.values(draft.diagnosis).some(Boolean)
+              : index === 4 ? Object.values(draft.clinical).some(Boolean)
+              : index === 7 ? draft.exams.length > 0 || draft.families.length > 0 || Boolean(draft.familyStatus)
+              : index === 11 ? draft.pending.length > 0 : false;
+            const state = errors ? 'Revisar campos' : complementarySections[index] ? 'Registro separado' : filled ? 'Com dados' : 'Sem preenchimento';
+            return <button type="button" key={title} aria-label={title} aria-describedby={`attendance-section-state-${index}`} aria-current={step === index ? 'true' : undefined}
+              className={errors ? 'section-has-error' : ''} onClick={() => moveTo(index)}>
+              <span className="section-number" aria-hidden="true">{errors ? '!' : index + 1}</span>
+              <span>{title}<small id={`attendance-section-state-${index}`}>{state}</small></span>
+            </button>;
+          })}
+        </nav>
+        <p>Preencha as seções necessárias e revise antes de confirmar.</p>
+      </aside>}
+      <div className="attendance-content">
+      {!data && <p className="section-progress" role="status">{step === 12 ? 'Pronto para conferir' : <><span className="sr-only">Seção </span>{step + 1} de 12<span className="sr-only">: {attendanceSections[step]}</span></>}</p>}
+      {!data && complementarySections[step] && <section className="complementary-section">
+        <h2 ref={stepHeading} tabIndex={-1}>{attendanceSections[step]}</h2>
+        <span className="badge">Registro separado</span>
+        <p>{complementarySections[step].description}</p>
+        {[2, 3, 9].includes(step) && <p>Salve este atendimento e acesse os complementos no detalhe. Os dados já preenchidos permanecem no rascunho ao trocar de seção.</p>}
+        {complementarySections[step].links && <div className="form-actions">
+          {complementarySections[step].links.map(([suffix, label]) => <Link key={suffix} className="button button-secondary"
+            to={`${patientPath}${suffix.startsWith('?') ? '' : '/'}${suffix}`}>{label}</Link>)}
+        </div>}
+      </section>}
       {!data && stepError && <div ref={stepErrorRef} role="alert" className="error-state" tabIndex={-1}>{stepError}</div>}
-      <StepPanel active={Boolean(data) || step === 0} title={data ? 'Dados básicos do atendimento' : 'Etapa 1 — Atendimento'}
+      <StepPanel active={Boolean(data) || step === 0} title={data ? 'Dados básicos do atendimento' : 'Atendimento'}
         panelRef={!data ? node => { panelRefs.current[0] = node; } : undefined}>
       {!data && <h2 ref={step === 0 ? stepHeading : undefined} tabIndex={-1}>Atendimento</h2>}
       <FormSection title="Dados básicos do atendimento">
@@ -149,22 +207,20 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
         {draft.original?.dataAtendimento === null && <p className="muted">A data deste atendimento legado é desconhecida.
           Você pode corrigir os outros dados mantendo a data em branco, sem estimar uma data.</p>}
         <InputField fieldPath="localizacaoProntuario" label="Localização do prontuário" value={draft.values.localizacaoProntuario!} maxLength={120} onChange={value => field('localizacaoProntuario', value)} />
-        <p>As duas opções de contexto não podem ser Sim ao mesmo tempo. Mantenha em branco a informação desconhecida.</p>
+        </FormSection>
+        <FormSection title="Contexto do atendimento">
         <SelectField fieldPath="ambulatorioUnicamente" label="Somente ambulatório" value={draft.values.ambulatorioUnicamente!} options={booleanOptions} onChange={value => field('ambulatorioUnicamente', value)} />
         <SelectField fieldPath="ambulatorioAnexoProjeto" label="Ambulatório anexo a projeto" value={draft.values.ambulatorioAnexoProjeto!} options={booleanOptions} onChange={value => field('ambulatorioAnexoProjeto', value)} />
+        <p className="muted">As duas opções de contexto não podem ser Sim ao mesmo tempo. Mantenha em branco a informação desconhecida.</p>
+        </FormSection>
+        <FormSection title="Observações gerais">
         <TextAreaField fieldPath="observacoes" label="Observações do atendimento" value={draft.values.observacoes!} onChange={value => field('observacoes', value)} />
       </FormSection>
       </StepPanel>
       {!data && <>
-        <StepPanel active={step === 1} title="Etapa 2 — Avaliação e Chagas"
+        <StepPanel active={step === 1} title="Chagas e Sorologia"
           panelRef={node => { panelRefs.current[1] = node; }}>
-        <h2 ref={step === 1 ? stepHeading : undefined} tabIndex={-1}>Avaliação e Chagas</h2>
-        <FormSection title="Avaliação clínica">
-          {clinicalNumbers.map(([key, label, integer]) => <InputField fieldPath={`dadosClinicos.${key}`} key={key} label={label} type="number"
-            step={integer ? '1' : '0.01'} value={draft.clinical[key] ?? ''} onChange={value => sectionField('clinical', key, value)} />)}
-          <InputField fieldPath="dadosClinicos.nyha" label="NYHA" value={draft.clinical.nyha ?? ''} maxLength={20} onChange={value => sectionField('clinical', 'nyha', value)} />
-          <TextAreaField fieldPath="dadosClinicos.observacoes" label="Observações clínicas" value={draft.clinical.observacoes ?? ''} onChange={value => sectionField('clinical', 'observacoes', value)} />
-        </FormSection>
+        <h2 ref={step === 1 ? stepHeading : undefined} tabIndex={-1}>Chagas e Sorologia</h2>
         <FormSection title="Diagnóstico e descoberta de Chagas">
           <SelectField fieldPath="diagnosticoChagas.possuiDiagnosticoChagas" label="Possui diagnóstico de Chagas" value={draft.diagnosis.possuiDiagnosticoChagas ?? ''} options={booleanOptions}
             onChange={value => sectionField('diagnosis', 'possuiDiagnosticoChagas', value)} />
@@ -179,11 +235,20 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
           <InputField fieldPath="diagnosticoChagas.criterioConfirmacao" label="Critério de confirmação" value={draft.diagnosis.criterioConfirmacao ?? ''} maxLength={80} onChange={value => sectionField('diagnosis', 'criterioConfirmacao', value)} />
           <TextAreaField fieldPath="diagnosticoChagas.observacoes" label="Observações do diagnóstico" value={draft.diagnosis.observacoes ?? ''} onChange={value => sectionField('diagnosis', 'observacoes', value)} />
         </FormSection>
-        <p className="muted">Descoberta por autorrelato e resultado final são informações distintas. Sorologias detalhadas, comorbidades, medicamentos e eventos clínicos ainda não estão disponíveis para registro aqui.</p>
+        <p className="notice">Sorologias detalhadas têm registro próprio no detalhe, após salvar o atendimento. Descoberta por autorrelato e resultado final são informações distintas.</p>
         </StepPanel>
-        <StepPanel active={step === 2} title="Etapa 3 — Exames e familiares"
-          panelRef={node => { panelRefs.current[2] = node; }}>
-        <h2 ref={step === 2 ? stepHeading : undefined} tabIndex={-1}>Exames e familiares</h2>
+        <StepPanel active={step === 4} title="Avaliação Clínica" panelRef={node => { panelRefs.current[4] = node; }}>
+        <h2 ref={step === 4 ? stepHeading : undefined} tabIndex={-1}>Avaliação Clínica</h2>
+        <FormSection title="Avaliação clínica">
+          {clinicalNumbers.map(([key, label, integer]) => <InputField fieldPath={`dadosClinicos.${key}`} key={key} label={label} type="number"
+            step={integer ? '1' : '0.01'} value={draft.clinical[key] ?? ''} onChange={value => sectionField('clinical', key, value)} />)}
+          <InputField fieldPath="dadosClinicos.nyha" label="NYHA" value={draft.clinical.nyha ?? ''} maxLength={20} onChange={value => sectionField('clinical', 'nyha', value)} />
+          <TextAreaField fieldPath="dadosClinicos.observacoes" label="Observações clínicas" value={draft.clinical.observacoes ?? ''} onChange={value => sectionField('clinical', 'observacoes', value)} />
+        </FormSection>
+        </StepPanel>
+        <StepPanel active={step === 7} title="Exames e familiares"
+          panelRef={node => { panelRefs.current[7] = node; }}>
+        <h2 ref={step === 7 ? stepHeading : undefined} tabIndex={-1}>Exames</h2>
         <fieldset className="form-section"><legend>Exames trazidos e solicitados</legend>
           <p>Um exame solicitado pode ser registrado sem resultado. Identifique os exames de categorias genéricas.</p>
           {draft.exams.length > 0 && <>
@@ -228,9 +293,9 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
             onClick={() => setDraft(previous => ({ ...previous, families: [...previous.families, { familiar: '', resultado: '' }] }))}>Adicionar familiar examinado</button>
         </fieldset>
         </StepPanel>
-        <StepPanel active={step === 3} title="Etapa 4 — Pendências"
-          panelRef={node => { panelRefs.current[3] = node; }}>
-        <h2 ref={step === 3 ? stepHeading : undefined} tabIndex={-1}>Pendências</h2>
+        <StepPanel active={step === 11} title="Observações e pendências"
+          panelRef={node => { panelRefs.current[11] = node; }}>
+        <h2 ref={step === 11 ? stepHeading : undefined} tabIndex={-1}>Observações e pendências</h2>
         <fieldset className="form-section"><legend>Pendências na criação</legend>
           <p>Pendência resolvida exige a data de resolução informada. A criação de cada pendência faz parte da mesma gravação do atendimento.</p>
           {draft.pending.map((pending, index) => <fieldset key={index} className="form-section"><legend>Pendência {index + 1}</legend>
@@ -248,17 +313,25 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
             onClick={() => setDraft(previous => ({ ...previous, pending: [...previous.pending, { descricao: '', status: 'aberta' }] }))}>Adicionar pendência</button>
         </fieldset>
         </StepPanel>
-        <StepPanel active={step === 4} title="Etapa 5 — Revisão">
-          <h2 ref={step === 4 ? stepHeading : undefined} tabIndex={-1}>Revisão</h2>
+        <StepPanel active={step === 12} title="Revisão do atendimento">
+          <h2 ref={step === 12 ? stepHeading : undefined} tabIndex={-1}>Revisão</h2>
           <AttendanceReview draft={draft} />
         </StepPanel>
-        <div className="form-actions" aria-label="Navegação entre etapas">
-          {step > 0 && <button type="button" className="button button-secondary" onClick={() => moveTo(step - 1)}>Etapa anterior</button>}
-          {step < 3 && <button type="button" className="button button-secondary" onClick={() => moveTo(step + 1)}>Próxima etapa</button>}
-          {step === 3 && <button type="button" className="button button-secondary" onClick={() => moveTo(4)}>Revisar atendimento</button>}
+        <div className="form-actions attendance-actions" aria-label="Navegação entre seções">
+          {step > 0 && <button type="button" className="button button-secondary" onClick={() => moveTo([...editableSections].reverse().find(index => index < step) ?? 0)}>Seção anterior</button>}
+          {step < 11 && <button type="button" className="button button-secondary" onClick={() => {
+            if (step === 0) {
+              if (panelRefs.current[0]?.closest('form')?.reportValidity() === false) return;
+              try { attendanceCore(draft.values, draft.original); }
+              catch (error) { if (error instanceof FieldValidationError) setValidationErrors(error.errors); return; }
+            }
+            moveTo(editableSections.find(index => index > step) ?? 11);
+          }}>Próxima seção</button>}
+          {step !== 12 && <button type="button" className="button" onClick={() => moveTo(12)}>Revisar atendimento</button>}
           <button type="button" className="button button-secondary" onClick={() => navigate(patientPath)}>Cancelar atendimento</button>
         </div>
       </>}
+      </div></div>
     </MutationForm>
   </Card>;
 }
@@ -271,13 +344,13 @@ function ExistingAttendanceForm({ pacienteId, atendimentoId }: { pacienteId: str
 export default function AttendanceFormPage() {
   const { pacienteId = '', atendimentoId } = useParams<{ pacienteId: string; atendimentoId: string }>();
   const patientQuery = useApiQuery<PacienteDetalheResponse>(`/pacientes/${encodeURIComponent(pacienteId)}`);
-  return <>
+  return <div className="attendance-form-page">
     <nav className="breadcrumb" aria-label="Caminho da página"><Link to={`/pacientes/${pacienteId}`}>Ficha do paciente</Link>
       {atendimentoId && <Link to={`/pacientes/${pacienteId}/atendimentos/${atendimentoId}`}>Atendimento</Link>}</nav>
     <PatientsSearchReturn />
     <PageHeading title={atendimentoId ? 'Editar atendimento' : 'Novo atendimento'} />
-    <EditingGate><DraftQueryState query={patientQuery}>{patient => <><p>Paciente: {patient.nome} · ID {patient.pacienteId}</p>
+    <EditingGate><DraftQueryState query={patientQuery}>{patient => <><div className="attendance-patient"><span className="patient-avatar" aria-hidden="true">{patient.nome[0]}</span><div><strong>{patient.nome}</strong><p className="muted">ID {patient.pacienteId}</p></div></div>
       {atendimentoId ? <ExistingAttendanceForm pacienteId={pacienteId} atendimentoId={atendimentoId} />
         : <AttendanceForm key={pacienteId} pacienteId={pacienteId} />}</>}</DraftQueryState></EditingGate>
-  </>;
+  </div>;
 }

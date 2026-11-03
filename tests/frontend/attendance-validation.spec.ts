@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { apiAs } from './fixtures';
-import { assertAccessible, assertFitsViewport, moveAttendanceToReview, nextAttendanceStep,
+import { assertAccessible, assertFitsViewport, moveAttendanceToReview, nextAttendanceStep, attendanceSection,
   readAttendance, seedPatient, signIn, submitWrite } from './stage7-helpers';
 
 for (const scenario of ['novo pela interface', 'existente'] as const) {
@@ -96,9 +96,9 @@ test('P0: limites de registro e familiares apontam campo e etapa antes de confir
   let writes = 0;
   page.on('request', request => { if (request.method() === 'POST' && new URL(request.url()).pathname === `/v1${path}`) writes++; });
   await page.getByLabel('Data do atendimento', { exact: true }).fill('2026-02-01');
-  await nextAttendanceStep(page);
+  await attendanceSection(page, 'Avaliação Clínica');
   await page.getByLabel('Altura (cm)', { exact: true }).fill('1000');
-  await nextAttendanceStep(page); await nextAttendanceStep(page);
+  await attendanceSection(page, 'Observações');
   await page.getByRole('button', { name: 'Revisar atendimento', exact: true }).click();
   await expect(page.getByRole('alert')).toBeFocused();
   await page.getByRole('link', { name: /^Altura \(cm\):/ }).click();
@@ -106,7 +106,7 @@ test('P0: limites de registro e familiares apontam campo e etapa antes de confir
   await expect(page.getByLabel('Altura (cm)', { exact: true })).toHaveValue('1000');
   expect(writes).toBe(0);
   await page.getByLabel('Altura (cm)', { exact: true }).fill('170.25');
-  await nextAttendanceStep(page);
+  await attendanceSection(page, 'Exames');
   await page.getByLabel('Familiares examinados', { exact: true }).selectOption('nao');
   await page.getByRole('button', { name: 'Adicionar familiar examinado', exact: true }).click();
   await page.getByLabel('Identificação do familiar 1', { exact: true }).fill('Familiar sintético');
