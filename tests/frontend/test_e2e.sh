@@ -157,7 +157,7 @@ export AUTH_JWT_SECRET="$(node -e "process.stdout.write(require('node:crypto').r
 # A inspeção humana precisa de tempo para preencher os formulários. O prazo
 # curto permanece fixo nos testes automáticos de expiração.
 export AUTH_JWT_EXPIRES_IN_SECONDS=60
-if [[ "${1:-}" == --serve ]]; then
+if [[ "${1:-}" == --serve || "${1:-}" == --demo-test ]]; then
   export AUTH_JWT_EXPIRES_IN_SECONDS=900
 fi
 export CLINICAL_IMPORT_ENABLED=true IMPORT_DB_HOST="$PGHOST" IMPORT_DB_PORT="$PGPORT" IMPORT_DB_NAME="$task_db"
@@ -185,6 +185,12 @@ while (Date.now() < deadline) {
 }
 throw new Error('API descartável não ficou pronta; consulte backend.log');
 JS
+# O modo demo só é selecionado neste banco recém-criado pelo runner.
+# --demo-test exercita a mesma carga do --serve sem iniciar as fixtures de stress.
+unset FRONTEND_SEED_MODE
+if [[ "${1:-}" == --serve || "${1:-}" == --demo-test ]]; then
+  export FRONTEND_SEED_MODE=demo
+fi
 node "$task_root/tests/frontend/seed.mjs"
 (cd "$task_root/frontend" && exec node node_modules/vite/bin/vite.js --host 127.0.0.1 --port "$task_web_port" --strictPort) >"$task_dir/frontend.log" 2>&1 &
 task_frontend_pid=$!
@@ -208,5 +214,10 @@ if [[ "${1:-}" == --serve ]]; then
   wait "$task_frontend_pid"
 else
   cd "$task_root/frontend"
-  node node_modules/@playwright/test/cli.js test --config playwright.config.ts "$@"
+  if [[ "${1:-}" == --demo-test ]]; then
+    shift
+    node node_modules/@playwright/test/cli.js test --config playwright.config.ts demo-base.spec.ts "$@"
+  else
+    node node_modules/@playwright/test/cli.js test --config playwright.config.ts "$@"
+  fi
 fi

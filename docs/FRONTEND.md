@@ -131,7 +131,8 @@ fixa SHA, evidências do percurso real, roteiro, ressalvas e contingência.
 Não equivale a homologação clínica ou conclusão de M3.
 
 `make dev-sintetico-start` cria um PostgreSQL 16.15 exclusivo e inicia o runner
-`test_e2e.sh --serve`, com migrations e fixture sintéticas. Requer Python 3.9+
+`test_e2e.sh --serve`, com migrations e a base `chagas-demo-v1`: 10 pacientes
+fictícios e 27 atendimentos, sem dados pessoais reais. Requer Python 3.9+
 em Linux com suporte a pidfd, Docker, Node.js 24, clientes PostgreSQL e build preparados
 por `make backend-install frontend-install backend-build`. O Chromium só é
 necessário para testes automatizados, não para servir a aplicação.
@@ -142,6 +143,19 @@ Os usuários são `frontend-consulta@example.invalid`,
 `frontend-edicao@example.invalid` e `frontend-administracao@example.invalid`,
 todos com a senha exclusivamente sintética `Etapa6-sintetica!`.
 Cada sessão de login dura 15 minutos; novo login permite continuar a revisão.
+O período padrão contém oito atendimentos; ampliar a data inicial em cinco meses
+mostra toda a série e mais de uma página de resultados. A data âncora é o dia
+UTC de criação; reproduzir a carga no mesmo dia produz os mesmos cenários.
+[Casos, contagens por perfil e provas](validacoes/VALIDACAO_BASE_DEMO_CHAGAS_M3.md).
+
+O runner mantém as fixtures de stress no E2E comum e seleciona a demonstração
+apenas em `--serve`/`--demo-test`. `make frontend-demo-test COMPACT=1` valida a
+mesma carga em outro banco novo; requer as variáveis `SYNTHETIC_PG_*` e
+`PGPASSWORD` do servidor exclusivamente sintético, conforme o setup E2E acima.
+O seed repetido no mesmo banco concluído não escreve nem duplica registros.
+Banco parcial/alterado ou fixture ausente é recusado; use stop/start para recriar
+somente a demonstração descartável. `start` com ambiente já pronto conserva a
+sessão existente: substituir uma base anterior requer primeiro `stop`.
 
 `make dev-sintetico-status` verifica o supervisor e a disponibilidade HTTP;
 `make dev-sintetico-stop` encerra o runner e o container que pertencem à

@@ -16,6 +16,10 @@ const owner = new Pool({ host: process.env.PGHOST, port: Number(process.env.PGPO
   user: process.env.PGUSER, password: process.env.PGPASSWORD, database: db });
 const fixture = { password: 'Etapa6-sintetica!', users: {}, patients: [], main: null, reserved: null, large: null };
 try {
+  if (process.env.FRONTEND_SEED_MODE === 'demo') {
+    const { seedDemo } = await import('./seed-demo.mjs');
+    await seedDemo(owner, { hash, sign });
+  } else {
   // Nomes canônicos já consumidos por Importer.comorbidities, sem paciente associado.
   await owner.query(`INSERT INTO ambulatorio.comorbidade(nome_comorbidade)
     VALUES ('hipertensao_arterial'),('diabetes') ON CONFLICT (nome_comorbidade) DO NOTHING`);
@@ -135,6 +139,7 @@ try {
   });
   await writeFile(process.env.FRONTEND_E2E_FIXTURE, JSON.stringify(fixture, null, 2), { mode: 0o600 });
   console.log('Fixture exclusivamente sintética criada pela API; três perfis e recursos de leitura disponíveis.');
+  }
 } finally {
   await owner.end();
 }

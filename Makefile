@@ -42,7 +42,7 @@ COMPACT_TARGETS := git-status docs-check manifest-check manifest-source-check re
 	docker-project-check docker-restore-check docker-restore-test importer-test \
 	backend-build backend-unit-test backend-integration-test backend-foundation-e2e \
 	backend-check backend-container-check backend-clinical-test workflow-test \
-	frontend-build frontend-unit-test frontend-e2e frontend-check
+	frontend-build frontend-unit-test frontend-e2e frontend-demo-test frontend-check
 ifneq ($(filter-out $(COMPACT_TARGETS),$(COMPACT_GOALS)),)
 $(error COMPACT=1 aceita somente alvos de validação ou git-status; consulte make help)
 endif
@@ -64,11 +64,12 @@ else
 	manifest-check manifest-source-check importer-fixture importer-run importer-dry-run importer-test \
 	backend-install backend-build backend-unit-test backend-db-setup backend-integration-test \
 	backend-foundation-e2e backend-clinical-test backend-check backend-up backend-container-check backend-logs backend-stop workflow-test \
-	frontend-install frontend-dev frontend-build frontend-unit-test frontend-e2e frontend-check \
+	frontend-install frontend-dev frontend-build frontend-unit-test frontend-e2e frontend-demo-test frontend-check \
 	dev-sintetico-start dev-sintetico-status dev-sintetico-stop
 
 help:
 	@echo "Comandos disponíveis:"
+	@echo "  make frontend-demo-test Validar a base demo no navegador/API/PostgreSQL descartáveis"
 	@echo "  make dev-sintetico-start Inicia PostgreSQL/API/frontend exclusivos com dados sintéticos"
 	@echo "  make dev-sintetico-status Exibe prontidão, endereços e login sintético"
 	@echo "  make dev-sintetico-stop Encerra somente os recursos sintéticos deste ambiente"
@@ -361,6 +362,9 @@ frontend-unit-test:
 
 frontend-e2e: backend-build
 	@bash tests/frontend/test_e2e.sh
+
+frontend-demo-test: backend-build
+	@bash tests/frontend/test_e2e.sh --demo-test
 
 frontend-check: frontend-build frontend-unit-test frontend-e2e
 	@echo "OK: frontend compilado e testado com navegador/API sintéticos"

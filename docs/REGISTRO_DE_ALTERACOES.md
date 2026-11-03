@@ -1,5 +1,16 @@
 # Registro de Alterações
 
+## 2026-11-03 — Substituir a base de demonstração por dez pacientes fictícios
+
+Seed existente ganha perfil demonstrativo exclusivo de --serve/--demo-test, com
+10 pacientes, 27 atendimentos, evolução clínica e registros relacionados via API.
+Reexecução sem duplicação, recusa de base parcial e recriação pelo runner isolado;
+fixtures de stress preservadas apenas nos testes. Dashboard validado contra SQL
+nos três perfis, incluindo capacidade nominal, filtros, série, páginas e ambos
+os CSVs. Gráfico rolável recebe foco de teclado ao revelar série de seis meses.
+[Provas, contagens e limites](validacoes/VALIDACAO_BASE_DEMO_CHAGAS_M3.md).
+Sem migrations, banco persistente, push ou deploy; aceite humano pendente.
+
 ## 2026-11-03 — Estabilizar experiência operacional e analítica dos três perfis
 
 Início por perfil separado de Dashboard; busca e tarefas reais, navegação com
