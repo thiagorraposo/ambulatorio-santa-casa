@@ -311,3 +311,9 @@ Fechamento documental: `make docs-check repository-check COMPACT=1` aprovado
 (`/tmp/ambulatorio-check-jazvhcsp/output.log`), diff sem whitespace,1.708 destinos
 locais e26 hashes de capturas conferidos;138 aprovações distintas verificadas
 no mapa JSON. Nenhum dado real, credencial, push, merge ou deploy acrescentado.
+
+HEAD do código/testes validados no fechamento:
+`2c82b500c4630d6164a2bf3dfbec69351a52e4fe`
+(`test: validar fluxo único com serviços sintéticos`); status limpo após commit.
+O checkpoint posterior é exclusivamente documental e identificável pelo histórico
+Git; a revisão humana e a próxima unidade8D permanecem pendentes.
