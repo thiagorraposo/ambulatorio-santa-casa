@@ -86,14 +86,14 @@ test('8B3U.4: atalhos abrem pessoa identificada e preservam busca, teclado e 320
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: width === 1440 ? 960 : 844 });
     await assertFitsViewport(page); await assertAccessible(page);
-    await expect(table.locator('tbody td').first()).toHaveCSS('white-space', 'nowrap');
-    await expect(table.locator('tbody td').nth(1)).toHaveCSS('white-space', 'nowrap');
+    await expect(table.locator('tbody td').first()).toContainText(patient.nome);
+    await expect(table.locator('tbody td').nth(1)).toHaveText(patient.pacienteId);
     await table.evaluate(node => { node.scrollLeft = 0; });
     await page.screenshot({ path: testInfo.outputPath(`pacientes-legiveis-${width}.png`), fullPage: true });
     if (width < 600) {
-      expect(await table.evaluate(node => node.scrollWidth > node.clientWidth)).toBe(true);
-      await table.focus(); await page.keyboard.press('ArrowRight');
-      await expect.poll(() => table.evaluate(node => node.scrollLeft)).toBeGreaterThan(0);
+      expect(await table.evaluate(node => node.scrollWidth <= node.clientWidth + 1)).toBe(true);
+      await expect(table.locator('tbody td').first()).toHaveCSS('display', 'block');
+      await expect(edit).toBeVisible(); await expect(create).toBeVisible();
     }
   }
   await edit.focus();
@@ -111,7 +111,8 @@ test('8B3U.4: atalhos abrem pessoa identificada e preservam busca, teclado e 320
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Novo atendimento', exact: true })).toBeVisible();
-  await expect(page.getByText(`Paciente: ${patient.nome} · ID ${patient.pacienteId}`, { exact: true })).toBeVisible();
+  await expect(page.locator('.attendance-patient')).toContainText(patient.nome);
+  await expect(page.locator('.attendance-patient')).toContainText(`ID ${patient.pacienteId}`);
   await page.getByRole('link', { name: 'Voltar aos resultados da busca' }).click();
   await expect(page).toHaveURL(source);
   expect(writes).toEqual([]);

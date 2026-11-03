@@ -37,14 +37,19 @@ export default function AttendancePage() {
           <Card>
             <h2>Atendimento de {formatClinicalDate(data.dataAtendimento)}</h2>
             <p className="muted">Avaliação, diagnóstico, exames e pendências abaixo pertencem a este atendimento.</p>
-            <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/medicamentos?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Medicamentos deste atendimento</Link></p>
-            <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/sorologias?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Sorologias deste atendimento</Link></p>
-            <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/condicao-chagas?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Condição de Chagas deste atendimento</Link></p>
-            <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/comorbidades?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Comorbidades deste atendimento</Link></p>
-            <p><Link to={`${patientPath}/avcs?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>AVC do paciente (longitudinal)</Link></p>
-            <p><Link to={`${patientPath}/dispositivos?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Marcapasso e CDI do paciente</Link></p>
-            <p><Link to={`${patientPath}/obito?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Estado de óbito do paciente</Link></p>
-            <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/complicacoes-chagas?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Complicações deste atendimento</Link></p>
+            <nav className="clinical-resource-nav" aria-label="Registros complementares">
+              <div><h3>Deste atendimento</h3>
+            <Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/medicamentos?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Medicamentos deste atendimento</Link>
+            <Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/sorologias?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Sorologias deste atendimento</Link>
+            <Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/condicao-chagas?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Condição de Chagas deste atendimento</Link>
+            <Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/comorbidades?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Comorbidades deste atendimento</Link>
+            <Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/complicacoes-chagas?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Complicações deste atendimento</Link>
+              </div><div><h3>Histórico do paciente</h3>
+            <Link to={`${patientPath}/avcs?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>AVC do paciente (longitudinal)</Link>
+            <Link to={`${patientPath}/dispositivos?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Marcapasso e CDI do paciente</Link>
+            <Link to={`${patientPath}/obito?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Estado de óbito do paciente</Link>
+              </div>
+            </nav>
             {location.state?.saved && <p className="notice" role="status">{String(location.state.saved)}</p>}
             {session.user?.perfil !== 'consulta' && <div className="form-actions">
               <Link to={`${patientPath}/atendimentos/${atendimentoId}/editar`} className="button button-secondary">Editar atendimento</Link>

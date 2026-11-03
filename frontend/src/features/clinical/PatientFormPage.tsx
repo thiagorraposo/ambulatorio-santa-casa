@@ -17,8 +17,8 @@ function PriorSearch({ onSearch, onNoMatchConfirmed }: { onSearch: () => void; o
   const [search, setSearch] = useState('');
   const query = useApiQuery<PacienteResponse[]>(`/pacientes?nome=${encodeURIComponent(search)}&limit=20&offset=0`, !!search);
   const showingCurrentSearch = search !== '' && name.trim() === search;
-  return <Card><h2>Busque antes de cadastrar</h2>
-    <p>Confira possíveis cadastros pelo nome. Os resultados dependem do seu acesso e da página consultada.</p>
+  return <Card><h2>Verificar se o paciente já existe</h2>
+    <p className="notice">Antes de criar um cadastro, confira possíveis correspondências pelo nome. Os resultados dependem do seu acesso e da página consultada.</p>
     <form className="filters" aria-label="Busca prévia de pacientes" onSubmit={event => {
       event.preventDefault();
       const normalized = name.trim();
@@ -110,7 +110,7 @@ function ExistingPatientForm({ id }: { id: string }) {
 export default function PatientFormPage() {
   const { pacienteId } = useParams<{ pacienteId: string }>();
   const [createAfterSearch, setCreateAfterSearch] = useState(false);
-  return <>
+  return <div className="patient-form-page">
     <nav className="breadcrumb" aria-label="Caminho da página"><Link to="/pacientes">Pacientes</Link>
       {pacienteId && <Link to={`/pacientes/${pacienteId}`}>Ficha do paciente</Link>}</nav>
     <PatientsSearchReturn />
@@ -123,5 +123,5 @@ export default function PatientFormPage() {
         <PatientForm key="new" />
       </>}
     </PatientCreateGate>}</EditingGate>
-  </>;
+  </div>;
 }

@@ -11,9 +11,11 @@ export function TableScroll({ label, children, wide = false }: { label: string; 
     aria-label={`${label}; tabela rolável horizontalmente quando necessário`}>{children}</div>;
 }
 
-export function PageHeading({ title, description }: { title: string; description?: string }) {
-  return <div className="page-heading"><h1 tabIndex={-1}>{title}</h1>
-    {description && <p className="muted">{description}</p>}</div>;
+export function PageHeading({ title, description, actions }: { title: string; description?: string; actions?: ReactNode }) {
+  const copy = <><h1 tabIndex={-1}>{title}</h1>{description && <p className="muted">{description}</p>}</>;
+  return <div className="page-heading">
+    {actions ? <div className="page-heading-copy">{copy}</div> : copy}
+    {actions && <div className="page-heading-actions">{actions}</div>}</div>;
 }
 
 export function EmptyState({ children }: { children: ReactNode }) {

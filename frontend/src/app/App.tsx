@@ -83,7 +83,7 @@ function LoginPage() {
   };
   return <main className="login-page" id="conteudo" tabIndex={-1}>
     <div className="login-brand"><span className="brand-mark" aria-hidden="true">+</span>
-      <p>Ambulatório <strong>Santa Casa</strong></p></div>
+      <p><strong>Centro de Pesquisa em Saúde</strong>Ambulatório Santa Casa<small>Sistema de Gestão Ambulatorial</small></p></div>
     <Card className="login-card">
       <PageHeading title="Entre na sua conta" description="Consulte os registros do ambulatório com seu acesso institucional." />
       {session.reason && session.reason !== 'signed_out' && <p className="notice" role="status">
@@ -113,7 +113,7 @@ function Layout({ children }: { children: ReactNode }) {
     <a className="skip-link" href="#conteudo">Ir para o conteúdo</a>
     <AppNavigation user={user} logout={session.logout} />
     <div className="workspace">
-      <header className="topbar"><span className="topbar-service">Ambulatório Santa Casa</span>
+      <header className="topbar"><span className="topbar-service">Centro de Pesquisa em Saúde — Hospital Santa Casa</span>
         <div className="topbar-identity"><span>{user.nome}</span>
           <span className="badge">{profiles[user.perfil]}</span></div></header>
       <main id="conteudo" className="page-content" tabIndex={-1}>{children}</main>

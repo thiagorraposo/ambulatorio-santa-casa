@@ -47,7 +47,7 @@ test('consulta: busca, paginação, leitura e acessibilidade com dados reais da 
   expect(requests.some(path => /^\/v1\/pacientes\/\d+$/.test(path))).toBe(false);
   await expect(page.getByText(fixture.reserved.nome, { exact: true })).toHaveCount(0);
   const headers = await page.getByRole('columnheader').allTextContents();
-  expect(headers).toEqual(['ID', 'Nome', 'Ações']);
+  expect(headers).toEqual(['Paciente', 'ID do sistema', 'Ações']);
   // A fixture deste cenário usa Paciente; seedPatient dos módulos usa Etapa 7.
   // O filtro real preserva a paginação esperada sem depender de outros specs.
   await page.getByLabel('Nome', { exact: true }).fill('Paciente');
