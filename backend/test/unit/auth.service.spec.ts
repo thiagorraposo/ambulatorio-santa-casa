@@ -54,3 +54,28 @@ describe('AuthService', () => {
     warn.mockRestore();
   });
 });
+
+
+describe('AuthService revogação por geração', () => {
+  const repository = { findByLogin: jest.fn(), findActiveById: jest.fn() };
+  const jwt = { signAsync: jest.fn().mockResolvedValue('token') };
+  const config = { get: jest.fn().mockReturnValue(900) };
+  const service = new AuthService(repository as unknown as AuthRepository, jwt as unknown as JwtService,
+    config as unknown as ConfigService<AppConfig, true>);
+  it('aceita legado somente na geração zero e rejeita JWT anterior mesmo após restauração de perfil', async () => {
+    const user = { usuario_id: '9', nome: 'Sintético', perfil: 'administracao', login: 'sintetico', ativo: true };
+    repository.findActiveById.mockResolvedValue({ ...user, geracao_sessao: '0' });
+    expect(await service.resolveIdentity({ sub: '9', typ: 'access' })).toMatchObject({ usuarioId: '9' });
+    repository.findActiveById.mockResolvedValue({ ...user, geracao_sessao: '2' });
+    expect(await service.resolveIdentity({ sub: '9', typ: 'access' })).toBeUndefined();
+    expect(await service.resolveIdentity({ sub: '9', typ: 'access', ver: '1' })).toBeUndefined();
+    const identity = await service.resolveIdentity({ sub: '9', typ: 'access', ver: '2' });
+    expect(JSON.parse(JSON.stringify(identity))).toEqual({ usuarioId: '9', nome: 'Sintético', perfil: 'administracao', login: 'sintetico', ativo: true });
+  });
+  it('login inclui geração atual sem expor hash ou perfil no payload', async () => {
+    repository.findByLogin.mockResolvedValue({ usuario_id: '9', ativo: true, geracao_sessao: '4',
+      senha_hash: await hash('Sintetica123!', 4) });
+    await service.login('sintetico', 'Sintetica123!');
+    expect(jwt.signAsync).toHaveBeenLastCalledWith({ sub: '9', typ: 'access', ver: '4' });
+  });
+});

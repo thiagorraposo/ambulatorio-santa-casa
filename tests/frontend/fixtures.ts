@@ -81,7 +81,12 @@ async function submitLogin(page: Page, perfil: Perfil, destination?: string) {
 export async function apiAs(perfil: Perfil, method: string, path: string, body?: unknown) {
   // Tokens de setup são usados só pelas verificações/alterações autorizadas do
   // teste. Login, identidade e sessão da interface usam as chamadas HTTP reais.
-  const token = sign({ sub: fixture.users[perfil].usuarioId, typ: 'access' }, process.env.AUTH_JWT_SECRET, { expiresIn: 120 });
+  const owner = new Pool({ host: process.env.PGHOST, port: Number(process.env.PGPORT),
+    user: process.env.PGUSER, password: process.env.PGPASSWORD, database: process.env.FRONTEND_E2E_DB });
+  let ver: string;
+  try { ver = (await owner.query('SELECT geracao_sessao::text FROM ambulatorio.usuario_aplicacao WHERE usuario_id=$1',
+    [fixture.users[perfil].usuarioId])).rows[0].geracao_sessao; } finally { await owner.end(); }
+  const token = sign({ sub: fixture.users[perfil].usuarioId, typ: 'access', ver }, process.env.AUTH_JWT_SECRET, { expiresIn: 120 });
   return fetch(`${process.env.FRONTEND_API_TARGET}/v1${path}`, {
     method, headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -104,6 +109,12 @@ export async function setUserActive(perfil: Perfil, active: boolean) {
     user: process.env.PGUSER, password: process.env.PGPASSWORD, database: process.env.FRONTEND_E2E_DB });
   try {
     await owner.query('BEGIN');
+    if (perfil === 'administracao' && !active) {
+      // O cenário de revogação precisa de outro administrador: a regra do último permanece ativa.
+      await owner.query(`INSERT INTO ambulatorio.usuario_aplicacao(nome,login,senha_hash,perfil)
+        SELECT 'Reserva administrativa sintética','frontend-reserva@example.invalid',senha_hash,'administracao'
+        FROM ambulatorio.usuario_aplicacao WHERE usuario_id=$1 ON CONFLICT DO NOTHING`, [fixture.users[perfil].usuarioId]);
+    }
     if (!active) grantsBeforeInactivation.set(perfil, (await owner.query(
       'SELECT paciente_id::text,pode_editar FROM ambulatorio.acesso_paciente WHERE usuario_id=$1 AND ativo',
       [fixture.users[perfil].usuarioId])).rows);

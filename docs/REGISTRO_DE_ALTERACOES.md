@@ -1,5 +1,15 @@
 # Registro de Alterações
 
+## 2026-11-03 — Integrar alteração administrativa de perfil8D2B.1/U.1
+
+Migration75 versiona conta/sessão e guarda recibos; API e detalhe de usuário
+integram justificativa/revisão/confirmação, conflito e recuperação após login.
+Autoação vedada, último administrador protegido sob concorrência, JWT antigo
+não revive. Privilégio de hash da role de captura continua proibido; contratos
+clínicos preservados. SQL/HTTP/frontend/E2E e comparação visual técnica na
+[prova delimitada](validacoes/VALIDACAO_8D2_PERFIL.md). Sem banco persistente,
+push ou aceite humano; família8D continua parcial.
+
 ## 2026-11-03 — Integrar identificação própria e suporte em Minha conta
 
 /auth/me amplia login/situação reais, sem hash ou leitura de terceiros; interface

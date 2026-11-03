@@ -6,6 +6,10 @@ DO $$
 DECLARE gestor bigint; revisor bigint; inativo bigint; p bigint; atid bigint;
   lote bigint; linha bigint; fonte bigint; autorizacao bigint; outra bigint; instante timestamptz; papel text;
 BEGIN
+  -- Reserva sintética: este teste inativa/despromove outra conta administrativa.
+  INSERT INTO usuario_aplicacao(nome,login,senha_hash,perfil) VALUES
+    ('Reserva administrativa sintética','reserva-18@example.invalid',
+     '$2b$12$AHXFrksRrsnCtxc0yzPeSO3XHF94Quhjtu/5RZVYwRyvU6alPJXSK','administracao');
   INSERT INTO usuario_aplicacao(nome,login,senha_hash,perfil) VALUES
     ('Gestor temporal sintetico','gestor.temporal@example.invalid',
      '$2b$12$AHXFrksRrsnCtxc0yzPeSO3XHF94Quhjtu/5RZVYwRyvU6alPJXSK','administracao') RETURNING usuario_id INTO gestor;

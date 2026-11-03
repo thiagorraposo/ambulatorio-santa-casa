@@ -13,8 +13,9 @@ nova execução integral no último SHA. Novas evidências serão registradas po
 conforme [provas e limites](validacoes/VALIDACAO_CADASTRO_EDICAO_M3.md). Seguir a
 mesma fila M3; [leitura administrativa8D de login/estado validada](validacoes/VALIDACAO_8D1_LOGIN_ESTADO.md).
 [Minha conta integrada](validacoes/VALIDACAO_8D1_MINHA_CONTA.md).
-Próxima: contrato/implementação de alteração administrativa de perfil8D2B.1/U.1,
-com concorrência, proteção do último administrador e revogação de sessões. Não concluir a família
+[Perfil8D2B.1/U.1 integrado e validado tecnicamente](validacoes/VALIDACAO_8D2_PERFIL.md),
+com concorrência, proteção do último administrador e revogação de sessões.
+Próxima unidade: ativação/inativação8D2B.2/U.2. Não concluir a família
 8D ou os achados humanos por associação. Sem reinício das seis janelas.
 
 

@@ -860,3 +860,22 @@ Justificativa: liberar somente podeCadastrar produziria criação sem acesso ao
 próprio registro. O gatilho garante atomicidade também em falhas posteriores e
 serializa criação/inativação com bloqueio da identidade em função restrita.
 [Contrato, efeitos, compatibilidade e validação](arquitetura/CONTRATO_CADASTRO_EDICAO_M3.md).
+
+## ADR-029
+
+Título: Versão de conta, geração de sessão e recibo administrativo de perfil
+
+Data: 2026-11-03. Status: decisão técnica sintética; aceite humano pendente.
+
+Aplicar as decisões 3–10 de produto com concorrência otimista por conta e uma
+exclusão transacional comum aos comandos/UPDATEs de identidade. Proibir autoação,
+proteger o último administrador ativo e revalidar geração no JWT em cada pedido.
+Tokens legados sem geração só valem na geração zero; restaurar perfil/ativação
+não ressuscita sessão revogada. Operações já admitidas não são desfeitas.
+
+Recibo imutável por UUID registra sucesso/recusa funcional sem credencial;
+consulta autorizada permite verificar resposta perdida após novo login. Ausência
+de recibo não prova rollback. A role de captura conserva a proibição de ler hash.
+O comando usa READ COMMITTED e FOR NO KEY UPDATE, compatível com as referências
+à identidade na auditoria, evitando deadlock nas despromoções cruzadas.
+[Contrato e limites](arquitetura/CONTRATO_PERFIL_USUARIO_8D2.md).

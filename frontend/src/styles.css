@@ -152,6 +152,9 @@ details[open] > summary { padding-bottom: 1rem; }
 .repeat-row { display: flex; align-items: end; flex-wrap: wrap; gap: .8rem; margin-bottom: 1rem; }
 .repeat-row .form-field { flex: 1 1 15rem; }
 .draft-dialog { border: 1px solid var(--border); border-radius: .65rem; padding: 1.5rem; color: #111827; max-width: min(36rem, calc(100vw - 2rem)); }
+.dialog-heading { display: flex; align-items: start; gap: 1rem; margin-bottom: 1.25rem; }
+.dialog-heading h2 { flex: 1; min-width: 0; margin: 0; }
+.dialog-heading > button { flex: none; }
 .draft-dialog::backdrop { background: #11182766; }
 @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
 @media (max-width: 800px) {

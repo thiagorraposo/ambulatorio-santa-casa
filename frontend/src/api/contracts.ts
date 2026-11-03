@@ -363,5 +363,5 @@ export interface ResultadoExameResponse {
 export interface ResultadoExameCriadoResponse {resultadoId:string}
 
 export interface UsuarioResumo {
-  usuarioId: string; nome: string; perfil: 'consulta' | 'edicao' | 'administracao'; login: string; ativo: boolean;
+  usuarioId: string; nome: string; perfil: 'consulta' | 'edicao' | 'administracao'; login: string; ativo: boolean; versao?: string;
 }

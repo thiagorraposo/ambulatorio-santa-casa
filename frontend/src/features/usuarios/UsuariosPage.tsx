@@ -5,7 +5,7 @@ import { Card, EmptyState, PageHeading, QueryState, TableScroll } from '../../sh
 import { pagePath, Pagination, usePage } from '../pacientes/pagination';
 
 import type { UsuarioResumo } from '../../api/contracts';
-const profiles = { consulta: 'Consulta', edicao: 'Edição', administracao: 'Administração' };
+import { AlterarPerfil, profiles } from './AlterarPerfil';
 
 function UsersList() {
   const session = useSession();
@@ -36,13 +36,13 @@ function UserDetail({ usuarioId }: { usuarioId: string }) {
     <Link to={pagePath('/usuarios', page.limit, page.offset)}>Voltar aos usuários</Link>
     <PageHeading title="Dados do usuário" />
     <Card>
-      <QueryState query={query}>{user => <dl className="details-list">
+      <QueryState query={query}>{user => <><dl className="details-list">
         <div><dt>ID</dt><dd className="mono">{user.usuarioId}</dd></div>
         <div><dt>Nome</dt><dd>{user.nome}</dd></div>
         <div><dt>Login</dt><dd>{user.login}</dd></div>
         <div><dt>Situação da conta</dt><dd>{user.ativo ? 'Ativa' : 'Inativa'}</dd></div>
         <div><dt>Perfil</dt><dd><span className="badge">{profiles[user.perfil]}</span></dd></div>
-      </dl>}</QueryState>
+      </dl><AlterarPerfil key={user.usuarioId} user={user} /></>}</QueryState>
     </Card>
   </>;
 }
@@ -50,7 +50,7 @@ function UserDetail({ usuarioId }: { usuarioId: string }) {
 export default function UsuariosPage() {
   const session = useSession();
   const { usuarioId } = useParams();
-  return session.user?.perfil === 'administracao' ? (usuarioId ? <UserDetail usuarioId={usuarioId} /> : <UsersList />) : <Card>
+  return session.user?.perfil === 'administracao' ? (usuarioId ? <UserDetail key={usuarioId} usuarioId={usuarioId} /> : <UsersList />) : <Card>
     <PageHeading title="Acesso administrativo necessário" description="A consulta de usuários exige perfil de Administração." />
     <Link to="/">Voltar ao início</Link>
   </Card>;

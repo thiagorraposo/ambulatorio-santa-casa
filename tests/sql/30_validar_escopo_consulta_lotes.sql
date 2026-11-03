@@ -7,6 +7,10 @@ DECLARE ator bigint; paciente_a bigint; paciente_b bigint; endereco bigint; linh
   lote_sem_proveniencia bigint; lote_completo bigint; lote_misto bigint; lote_base bigint;
   lote_revisado bigint; fonte bigint; revisao bigint; resultado boolean; contexto xid8;
 BEGIN
+  -- Reserva sintética: este teste inativa/despromove outra conta administrativa.
+  INSERT INTO usuario_aplicacao(nome,login,senha_hash,perfil) VALUES
+    ('Reserva administrativa sintética','reserva-30@example.invalid',
+     '$2b$12$AHXFrksRrsnCtxc0yzPeSO3XHF94Quhjtu/5RZVYwRyvU6alPJXSK','administracao');
   INSERT INTO usuario_aplicacao(nome,login,senha_hash,perfil) VALUES
     ('Auditoria escopo síntética','escopo-lotes@example.invalid',
       '$2b$12$AHXFrksRrsnCtxc0yzPeSO3XHF94Quhjtu/5RZVYwRyvU6alPJXSK','consulta')

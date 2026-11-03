@@ -14,7 +14,9 @@ validado tecnicamente, com vínculo específico atômico, atendimento e revogaç
 Migration74 somente descartável; aceitações humanas pendentes. Próxima unidade:
 [8D leitura administrativa de login/estado validada](validacoes/VALIDACAO_8D1_LOGIN_ESTADO.md);
 [identificação própria de Minha conta também validada](validacoes/VALIDACAO_8D1_MINHA_CONTA.md).
-Seguir8D2 por recortes com contrato de versão/sessão/auditoria; sem concluir a família8D.
+[Perfil8D2B.1/U.1 integrado](validacoes/VALIDACAO_8D2_PERFIL.md): versão, justificativa,
+recibo, último administrador e revogação JWT. Migration75 somente descartável.
+Seguir ativação/inativação8D2B.2/U.2; sem concluir a família8D.
 
 
 **Histórico da retomada visual de 03/11:** atendimento organizado nas 12 seções

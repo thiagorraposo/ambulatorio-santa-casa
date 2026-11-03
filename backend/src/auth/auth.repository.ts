@@ -9,6 +9,7 @@ export interface UsuarioAuthRow {
   senha_hash: string;
   perfil: Perfil;
   ativo: boolean;
+  geracao_sessao: string;
 }
 
 @Injectable()
@@ -17,14 +18,14 @@ export class AuthRepository {
 
   async findByLogin(login: string): Promise<UsuarioAuthRow | undefined> {
     const result = await this.database.query<UsuarioAuthRow>(
-      `SELECT usuario_id::text, nome, login, senha_hash, perfil, ativo
+      `SELECT usuario_id::text, nome, login, senha_hash, perfil, ativo, geracao_sessao::text
          FROM usuario_aplicacao WHERE login = $1 LIMIT 1`, [login]);
     return result.rows[0];
   }
 
   async findActiveById(usuarioId: string): Promise<Omit<UsuarioAuthRow, 'senha_hash'> | undefined> {
     const result = await this.database.query<Omit<UsuarioAuthRow, 'senha_hash'>>(
-      `SELECT usuario_id::text, nome, perfil, login, ativo
+      `SELECT usuario_id::text, nome, perfil, login, ativo, geracao_sessao::text
          FROM usuario_aplicacao WHERE usuario_id = $1 AND ativo = TRUE LIMIT 1`, [usuarioId]);
     return result.rows[0];
   }

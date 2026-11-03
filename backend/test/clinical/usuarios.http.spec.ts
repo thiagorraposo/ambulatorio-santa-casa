@@ -50,7 +50,7 @@ suite('8D1B.1 leitura mínima de usuários', () => {
     }
   });
   it('projeta ID textual/nome/login/perfil/estado e pagina homônimos sem duplicação', async () => {
-    const expected = (await owner.query(`SELECT usuario_id::text AS "usuarioId",nome,perfil,login,ativo
+    const expected = (await owner.query(`SELECT usuario_id::text AS "usuarioId",nome,perfil,login,ativo,versao_conta::text AS "versao"
       FROM ambulatorio.usuario_aplicacao ORDER BY nome,usuario_id LIMIT 4`)).rows;
     const first = await http().get('/v1/usuarios?limit=2&offset=0').auth(tokens.administracao, { type: 'bearer' }).expect(200);
     const second = await http().get('/v1/usuarios?limit=2&offset=2').auth(tokens.administracao, { type: 'bearer' }).expect(200);
@@ -58,7 +58,7 @@ suite('8D1B.1 leitura mínima de usuários', () => {
     expect(expected.map(row => row.ativo)).toEqual([true, true, true, false]);
     expect(expected.map(row => row.login)).toEqual(['8d-consulta@example.invalid', '8d-edicao@example.invalid', '8d-administracao@example.invalid', '8d-inativo@example.invalid']);
     expect(expected.map(row => row.usuarioId)).toEqual(['9007199254741881', '9007199254741882', '9007199254741883', '9007199254741884']);
-    for (const row of [...first.body, ...second.body]) expect(Object.keys(row).sort()).toEqual(['ativo', 'login', 'nome', 'perfil', 'usuarioId']);
+    for (const row of [...first.body, ...second.body]) expect(Object.keys(row).sort()).toEqual(['ativo', 'login', 'nome', 'perfil', 'usuarioId', 'versao']);
     const empty = await http().get('/v1/usuarios?offset=100000').auth(tokens.administracao, { type: 'bearer' }).expect(200);
     expect(empty.body).toEqual([]);
   });
@@ -66,13 +66,13 @@ suite('8D1B.1 leitura mínima de usuários', () => {
     await http().get(`/v1/usuarios?${query}`).auth(tokens.administracao, { type: 'bearer' }).expect(400);
   });
   it('consulta conta própria, terceiro e alvo inativo com projeção exata e ID grande', async () => {
-    const rows = (await owner.query(`SELECT usuario_id::text AS "usuarioId",nome,perfil,login,ativo
+    const rows = (await owner.query(`SELECT usuario_id::text AS "usuarioId",nome,perfil,login,ativo,versao_conta::text AS "versao"
       FROM ambulatorio.usuario_aplicacao WHERE login LIKE '8d-%@example.invalid' ORDER BY usuario_id`)).rows;
     expect(rows).toHaveLength(4);
     for (const row of rows) {
       const response = await http().get(`/v1/usuarios/${row.usuarioId}`).auth(tokens.administracao, { type: 'bearer' }).expect(200);
       expect(response.body).toEqual(row);
-      expect(Object.keys(response.body).sort()).toEqual(['ativo', 'login', 'nome', 'perfil', 'usuarioId']);
+      expect(Object.keys(response.body).sort()).toEqual(['ativo', 'login', 'nome', 'perfil', 'usuarioId', 'versao']);
     }
   });
   it('autoriza antes de revelar existência ou validar ID do detalhe', async () => {
@@ -95,9 +95,11 @@ suite('8D1B.1 leitura mínima de usuários', () => {
     }
   });
   it('revalida o perfil atual e a ativação com o mesmo token', async () => {
+    await owner.query(`INSERT INTO ambulatorio.usuario_aplicacao(nome,login,senha_hash,perfil)
+      VALUES('Administrador reserva sintético','8d-reserva@example.invalid','$2b$12$AHXFrksRrsnCtxc0yzPeSO3XHF94Quhjtu/5RZVYwRyvU6alPJXSK','administracao')`);
     await owner.query("UPDATE ambulatorio.usuario_aplicacao SET perfil='consulta' WHERE usuario_id=$1", ['9007199254741883']);
-    await http().get('/v1/usuarios').auth(tokens.administracao, { type: 'bearer' }).expect(403);
-    await http().get('/v1/usuarios/9007199254741881').auth(tokens.administracao, { type: 'bearer' }).expect(403);
+    await http().get('/v1/usuarios').auth(tokens.administracao, { type: 'bearer' }).expect(401);
+    await http().get('/v1/usuarios/9007199254741881').auth(tokens.administracao, { type: 'bearer' }).expect(401);
     await owner.query("UPDATE ambulatorio.usuario_aplicacao SET perfil='administracao',ativo=false WHERE usuario_id=$1", ['9007199254741883']);
     await http().get('/v1/usuarios').auth(tokens.administracao, { type: 'bearer' }).expect(401);
     await http().get('/v1/usuarios/9007199254741881').auth(tokens.administracao, { type: 'bearer' }).expect(401);

@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcryptjs';
 import { AppConfig } from '../config/app.config';
 import { AuthRepository } from './auth.repository';
-import { AuthenticatedUser, TokenPayload } from './auth.types';
+import { AuthenticatedUser, SESSION_VERSION, TokenPayload } from './auth.types';
 import { LoginResponse } from './dto/login.response';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class AuthService {
       throw new UnauthorizedException('Credenciais inválidas');
     }
     const expiresIn = this.config.get('auth.jwtExpiresInSeconds', { infer: true });
-    const accessToken = await this.jwt.signAsync({ sub: user.usuario_id, typ: 'access' } satisfies TokenPayload);
+    const accessToken = await this.jwt.signAsync({ sub: user.usuario_id, typ: 'access', ver: user.geracao_sessao ?? '0' } satisfies TokenPayload);
     this.logger.log(JSON.stringify({ event: 'authentication', outcome: 'success', userId: user.usuario_id }));
     return { accessToken, tokenType: 'Bearer', expiresIn };
   }
@@ -32,6 +32,7 @@ export class AuthService {
   async resolveIdentity(payload: TokenPayload): Promise<AuthenticatedUser | undefined> {
     if (payload.typ !== 'access' || !/^\d+$/.test(payload.sub)) return undefined;
     const user = await this.repository.findActiveById(payload.sub);
-    return user ? { usuarioId: user.usuario_id, nome: user.nome, perfil: user.perfil, login: user.login, ativo: user.ativo } : undefined;
+    if (!user || (payload.ver ?? '0') !== (user.geracao_sessao ?? '0')) return undefined;
+    return { [SESSION_VERSION]: user.geracao_sessao ?? '0', usuarioId: user.usuario_id, nome: user.nome, perfil: user.perfil, login: user.login, ativo: user.ativo };
   }
 }

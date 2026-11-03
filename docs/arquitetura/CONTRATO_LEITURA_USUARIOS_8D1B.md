@@ -1,5 +1,9 @@
 # Leitura mínima de usuários — 8D1B.1 / 8D1U.1
 
+**Evolução posterior em03/11:** [perfil8D2.1](CONTRATO_PERFIL_USUARIO_8D2.md)
+acrescenta versão textual aos GETs administrativos; projeções históricas abaixo
+conservam o escopo efetivamente validado.
+
 **Vigente em03/11:** a [ampliação integrada de login/estado](#ampliação-integrada-de0311--login-e-estado)
 sucede a projeção mínima histórica abaixo. Preserva os endpoints e os campos
 anteriores; [identificação própria de Minha conta](#identificação-própria-integrada--8d1b2u2)

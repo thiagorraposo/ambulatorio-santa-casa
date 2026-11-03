@@ -42,6 +42,7 @@ fonte temática abaixo; relatórios registram provas e histórico preserva conte
 | Regras normativas de importação | [Especificação do importador](ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md) |
 | API e autorização | [Arquitetura do backend](ARQUITETURA_BACKEND.md) e [contratos clínicos](arquitetura/CONTRATOS_CLINICOS_ETAPA_5.md) |
 | Formulários e limites HTTP | [Recorte clínico](arquitetura/RECORTE_CLINICO_ETAPA_7.md) e [catálogos](arquitetura/CONTRATOS_CATALOGOS_ETAPA_7.md) |
+| Alteração administrativa de perfil (8D2.1) | [Contrato](arquitetura/CONTRATO_PERFIL_USUARIO_8D2.md) · [validação integrada](validacoes/VALIDACAO_8D2_PERFIL.md) |
 | Leitura mínima de usuários (8D1) | [Contrato](arquitetura/CONTRATO_LEITURA_USUARIOS_8D1B.md) · [validação](validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md) |
 | Erros por campo do atendimento | [Contrato e limites](arquitetura/CONTRATO_ERROS_ATENDIMENTO_M3.md) |
 | Recuperação de escrita e paginação de familiares | [Operações](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) e [familiares](arquitetura/CONTRATO_FAMILIARES_ETAPA_7.md) |

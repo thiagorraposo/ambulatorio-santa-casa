@@ -96,7 +96,10 @@ suite('Invariantes dos fluxos /v1 da Etapa 7', () => {
     await owner.query('UPDATE ambulatorio.usuario_aplicacao SET ativo=false WHERE usuario_id=$1', [creator]);
     await http().get(target).auth(token, { type: 'bearer' }).expect(401);
     await owner.query('UPDATE ambulatorio.usuario_aplicacao SET ativo=true WHERE usuario_id=$1', [creator]);
-    await http().get(target).auth(token, { type: 'bearer' }).expect(403);
+    await http().get(target).auth(token, { type: 'bearer' }).expect(401);
+    const generation = (await owner.query('SELECT geracao_sessao::text FROM ambulatorio.usuario_aplicacao WHERE usuario_id=$1', [creator])).rows[0].geracao_sessao;
+    const renewed = await app.get(JwtService).signAsync({ sub: creator, typ: 'access', ver: generation });
+    await http().get(target).auth(renewed, { type: 'bearer' }).expect(403);
     expect((await owner.query(`SELECT ativo FROM ambulatorio.acesso_paciente WHERE paciente_id=$1 AND usuario_id=$2`,
       [created.pacienteId, creator])).rows).toEqual([{ ativo: false }]);
     expect((await owner.query(`SELECT ator_usuario_id,principal_db FROM ambulatorio.acesso_paciente_evento

@@ -1473,7 +1473,7 @@ perfis, recusas, vazio/erro e releitura real na interface correspondente.
 
 #### 8D2B — Alterar perfil e estado do usuário com concorrência e auditoria
 
-**Estado e cobertura:** P1; implementação pendente, sem aceite. RQ-USR-11–18,20–24 (telas/elementos na matriz).
+**Estado e cobertura:** IMPLEMENTADA SEM VALIDAÇÃO COMPLETA no agregado; perfil8D2B.1/U.1 [validado tecnicamente](../validacoes/VALIDACAO_8D2_PERFIL.md). Estado/criação próprios pendentes, sem aceite humano. RQ-USR-11–18,20–24 (telas/elementos na matriz).
 
 **Escopo:** D2B.1 perfil; D2B.2 ativação/inativação; **D2B.3 criação de conta**. Três comandos/recortes com auditoria, concorrência/recuperação pertinentes, sem excluir usuário ou conceder capacidades clínicas/temporais automaticamente.
 
@@ -1502,7 +1502,7 @@ esta capacidade humana. Não é criação de paciente.
 
 #### 8D2U — Confirmar alteração de perfil ou ativação com efeitos compreensíveis
 
-**Estado e cobertura:** P1; interface administrativa pendente, sem aceite. RQ-USR-11–18,20–24; RQ-EST-17 (telas/elementos na matriz).
+**Estado e cobertura:** IMPLEMENTADA SEM VALIDAÇÃO COMPLETA no agregado; perfil8D2B.1/U.1 [validado tecnicamente](../validacoes/VALIDACAO_8D2_PERFIL.md). Estado/criação próprios pendentes, sem aceite humano. RQ-USR-11–18,20–24; RQ-EST-17 (telas/elementos na matriz).
 
 **Escopo:** D2U.1 modal/página perfil com anterior→novo; D2U.2 ativar/inativar com consequência; **D2U.3 formulário/revisão/confirmação de criação de conta**. Três recortes separados, acessíveis, integrados à API real.
 
