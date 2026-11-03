@@ -52,10 +52,41 @@ suite('8D1B.1 leitura mínima de usuários', () => {
   it.each(['limit=0', 'limit=101', 'offset=-1', 'offset=100001', 'ativo=true', 'perfil=administracao'])('recusa query fora do contrato: %s', async query => {
     await http().get(`/v1/usuarios?${query}`).auth(tokens.administracao, { type: 'bearer' }).expect(400);
   });
+  it('consulta conta própria, terceiro e alvo inativo com projeção exata e ID grande', async () => {
+    const rows = (await owner.query(`SELECT usuario_id::text AS "usuarioId",nome,perfil
+      FROM ambulatorio.usuario_aplicacao WHERE login LIKE '8d-%@example.invalid' ORDER BY usuario_id`)).rows;
+    expect(rows).toHaveLength(4);
+    for (const row of rows) {
+      const response = await http().get(`/v1/usuarios/${row.usuarioId}`).auth(tokens.administracao, { type: 'bearer' }).expect(200);
+      expect(response.body).toEqual(row);
+      expect(Object.keys(response.body).sort()).toEqual(['nome', 'perfil', 'usuarioId']);
+    }
+  });
+  it('autoriza antes de revelar existência ou validar ID do detalhe', async () => {
+    for (const id of ['9007199254741881', '9223372036854775807', 'invalido']) {
+      await http().get(`/v1/usuarios/${id}`).expect(401);
+      await http().get(`/v1/usuarios/${id}`).auth(tokens.inativo, { type: 'bearer' }).expect(401);
+      for (const profile of ['consulta', 'edicao']) {
+        const response = await http().get(`/v1/usuarios/${id}`).auth(tokens[profile], { type: 'bearer' }).expect(403);
+        expect(JSON.stringify(response.body)).not.toMatch(/000 Usuário|senha|hash|example.invalid/);
+      }
+    }
+  });
+  it.each(['0', '-1', '01', '1.5', 'abc', '9223372036854775808', '99999999999999999999'])('recusa ID inválido no detalhe: %s', async id => {
+    await http().get(`/v1/usuarios/${id}`).auth(tokens.administracao, { type: 'bearer' }).expect(400);
+  });
+  it('distingue inexistente de inválido e recusa query não contratada', async () => {
+    await http().get('/v1/usuarios/9223372036854775807').auth(tokens.administracao, { type: 'bearer' }).expect(404);
+    for (const query of ['limit=20', 'offset=0', 'ativo=true', 'perfil=consulta']) {
+      await http().get(`/v1/usuarios/9007199254741881?${query}`).auth(tokens.administracao, { type: 'bearer' }).expect(400);
+    }
+  });
   it('revalida o perfil atual e a ativação com o mesmo token', async () => {
     await owner.query("UPDATE ambulatorio.usuario_aplicacao SET perfil='consulta' WHERE usuario_id=$1", ['9007199254741883']);
     await http().get('/v1/usuarios').auth(tokens.administracao, { type: 'bearer' }).expect(403);
+    await http().get('/v1/usuarios/9007199254741881').auth(tokens.administracao, { type: 'bearer' }).expect(403);
     await owner.query("UPDATE ambulatorio.usuario_aplicacao SET perfil='administracao',ativo=false WHERE usuario_id=$1", ['9007199254741883']);
     await http().get('/v1/usuarios').auth(tokens.administracao, { type: 'bearer' }).expect(401);
+    await http().get('/v1/usuarios/9007199254741881').auth(tokens.administracao, { type: 'bearer' }).expect(401);
   });
 });

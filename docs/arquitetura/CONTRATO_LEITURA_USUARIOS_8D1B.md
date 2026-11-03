@@ -5,7 +5,7 @@ Recorte técnico de listagem, conforme os mínimos de
 gestão determinado; Consulta/Edição não listam terceiros. O gate de campos
 adicionais não impede a projeção mínima de ID/nome/perfil já delimitada na
 proposta. Este contrato não aprova provisionamento, autoações ou política
-institucional completa. O agregado D1B.1 inclui consulta/histórico ainda pendentes.
+institucional completa. O agregado D1B.1 inclui histórico e capacidades ampliadas ainda pendentes.
 
 `GET /v1/usuarios?limit=20&offset=0` exige identidade ativa e perfil Administração,
 revalidados pelos guards H1 existentes em cada requisição. Retorna apenas
@@ -33,10 +33,13 @@ ausência de campos adicionais; navegador/API/PostgreSQL com retorno/recarga,
 teclado, 320/390, axe e erro de leitura. Aceite humano e confronto visual com a
 referência permanecem próprios de 8V1/8V2, sem declarar a família 8D concluída.
 
-## Proposta de próximo incremento — consulta individual mínima
+<a id="proposta-de-próximo-incremento--consulta-individual-mínima"></a>
 
-Preparada em 02/11/2026 na retomada do checkpoint `1abe410`. **Proposta
-delimitada, sem implementação ou validação funcional deste incremento.** A
+## Consulta individual mínima
+
+Proposta preparada em 02/11/2026 no checkpoint `1abe410` e implementada na
+retomada de `6764cb8`. **Recorte técnico validado**, conforme a
+[prova do detalhe](../validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md#consulta-individual-mínima--retomada-de-6764cb8). A
 listagem acima conserva seu contrato e suas provas. Esta consulta é um recorte
 de D1B.1/U.1, não uma nova unidade nominal nem conclusão do histórico USR-24.
 
@@ -44,12 +47,12 @@ Objetivo: abrir uma conta da página administrativa e reler ID/nome/perfil
 diretamente da API. Os três campos e o perfil de gestão já estão delimitados
 no contrato mínimo; implementar a leitura não depende de escolher credenciais,
 autoações ou campos adicionais. Nenhuma decisão institucional nova é necessária
-para essa projeção. O contrato técnico e as provas abaixo ainda precisam ser
-materializados antes de afirmar disponibilidade.
+para essa projeção. As provas cobrem esta projeção mínima; os gates abaixo continuam próprios
+dos recortes restantes.
 
-### HTTP e capacidades propostas
+### HTTP e capacidades
 
-`GET /v1/usuarios/:usuarioId` retornará um único
+`GET /v1/usuarios/:usuarioId` retorna um único
 `{ usuarioId: string; nome: string; perfil: Perfil }`, com projeção SQL explícita
 dos mesmos campos da listagem. ID decimal positivo dentro do intervalo bigint
 PostgreSQL, preservado como string da URL à resposta, inclusive acima de 2^53.
@@ -57,44 +60,44 @@ Reutilizar a validação de identificadores existente; parâmetros de consulta
 não previstos serão recusados com 400. Não aceitar filtros ou paginação nesta
 rota individual.
 
-| Identidade requisitante | Leitura individual proposta |
+| Identidade requisitante | Leitura individual |
 | --- | --- |
 | Administração ativa | Consulta qualquer conta existente, inclusive a própria, com os mesmos três campos |
 | Consulta ou Edição ativa | 403, inclusive para o próprio ID nesta rota administrativa; a conta própria continua em `me` |
 | Anônima, sessão inválida ou conta requisitante inativa | 401 pelo mecanismo H1 existente |
 
-Guards existentes revalidarão identidade ativa/perfil em cada GET, antes de
+Guards existentes revalidam identidade ativa/perfil em cada GET, antes de
 consultar a conta alvo. Depois da autorização: ID inválido → 400; ID válido
 inexistente → 404 sanitizado; conta existente → 200. Conta alvo inativa também
 é existente, como na coleção; a resposta não informa nem infere seu estado.
 Erro interno usa o tratamento sanitizado atual. A consulta não cria evento
 administrativo de mutação ou registros históricos fictícios.
 
-### Interface proposta
+### Interface
 
-O nome na tabela levará a `/usuarios/:usuarioId`, conservando `limit`/`offset`
-validados no retorno à coleção. A página fará GET próprio: não usar a linha
+O nome na tabela leva a `/usuarios/:usuarioId`, conservando `limit`/`offset`
+validados no retorno à coleção. A página faz GET próprio: não usar a linha
 em memória como resposta persistida. Acesso direto e recarga devem funcionar;
 o link de retorno deve manter a página mesmo após recarga. Identificação textual
 e perfil usarão os componentes existentes, sem oferecer comandos de mutação.
 
 Carga, 404, erro de rede/servidor com repetição explícita de GET e perda de
-sessão/perfil terão estados distintos. Dados de outra conta não devem permanecer
+sessão/perfil têm estados distintos. Dados de outra conta não devem permanecer
 visíveis durante troca de ID, erro ou perda de autorização. Consulta/Edição
-receberão orientação de acesso administrativo sem requisitar o detalhe, como
+recebem orientação de acesso administrativo sem requisitar o detalhe, como
 ocorre na coleção. Repetir uma leitura não exige recibo de escrita.
 
 ### Gates e critérios de validação
 
 | Recorte | Situação e condição para avançar |
 | --- | --- |
-| Consulta individual ID/nome/perfil | Campos/capacidade suficientes pelo contrato mínimo; próxima implementação B/U deve comprovar HTTP, persistência de origem e navegação reais |
+| Consulta individual ID/nome/perfil | Implementada com os campos/capacidade do contrato mínimo; provas HTTP/PostgreSQL/navegador no relatório do detalhe |
 | Login, estado, campos adicionais e busca/filtros | Dependem de contrato próprio de campos/normalização/capacidades; não incluir neste incremento |
 | Histórico de criação/perfil/ativação | Depende de contrato de eventos/origem, ator/instante/resultado, anterior/novo quando aplicável, autorização, paginação/filtros e retenção; ausência de eventos não comprova ausência de operações |
 | Criação, alteração de perfil ou estado | Conservam contratos próprios de provisionamento, concorrência, auditoria, sessão, recuperação e autoações/último administrador em 8D2/P-08 |
 | Agregados D1B.1/U.1, 8D e aceites 8V1/8V2 | Permanecem incompletos; consulta mínima não substitui histórico, capacidades ampliadas ou aceite humano |
 
-Aceite técnico do próximo incremento: API/PostgreSQL sintéticos com projeção
+Critérios técnicos deste incremento: API/PostgreSQL sintéticos com projeção
 exata e ausência de campos adicionais; três perfis, anônimo/inativo, revalidação
 do mesmo token após mudança de perfil/estado da identidade requisitante, alvo
 inativo, ID grande, inválido e inexistente. Confirmar a ordenação das recusas
@@ -104,6 +107,6 @@ No navegador, provar coleção paginada→detalhe→recarga→retorno à mesma p
 acesso direto, troca de ID, 404, erro/repetição e perda de autorização. Revisar
 teclado/foco, Axe, 1440/390/320 e referência visual disponível, registrando
 lacunas. Aplicar a matriz de validação para mudança backend/frontend; aproveitar
-as provas anteriores apenas nas camadas inalteradas. Esta preparação textual
-exige `docs-check`, revisão de links/conteúdo e diff, sem repetir testes da
-aplicação ou iniciar banco.
+as provas anteriores apenas nas camadas inalteradas. A preparação textual anterior conserva sua validação documental;
+comandos, falhas de ambiente e composição funcional deste incremento estão no
+relatório do detalhe, sem alegar nova rodada integral do frontend.

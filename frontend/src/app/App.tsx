@@ -48,7 +48,7 @@ function RouteEffects() {
   useEffect(() => {
     const name = location.pathname === '/login' ? 'Entrar' : location.pathname.startsWith('/pacientes')
       ? 'Pacientes' : location.pathname.startsWith('/importacoes') ? 'Importações'
-      : location.pathname === '/minha-conta' ? 'Minha conta' : location.pathname === '/usuarios' ? 'Usuários' : 'Início';
+      : location.pathname === '/minha-conta' ? 'Minha conta' : location.pathname === '/usuarios' || location.pathname.startsWith('/usuarios/') ? 'Usuários' : 'Início';
     document.title = `${name} | Ambulatório Santa Casa`;
     if (location.pathname !== '/login') document.querySelector<HTMLElement>('#conteudo')?.focus();
   }, [location.key, location.pathname]);
@@ -189,6 +189,7 @@ export default function App() {
     <Route element={<ProtectedLayout />}>
       <Route index element={<HomePage />} />
       <Route path="/usuarios" element={<UsuariosPage />} />
+      <Route path="/usuarios/:usuarioId" element={<UsuariosPage />} />
       <Route path="/pacientes" element={<PatientsPage />} />
       <Route path="/pacientes/novo" element={<PatientFormPage />} />
       <Route path="/pacientes/:pacienteId/editar" element={<PatientFormPage />} />

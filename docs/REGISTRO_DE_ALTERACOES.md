@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-02 — Integrar consulta individual mínima de usuários
+
+API e interface administrativas de detalhe com ID/nome/perfil reais, retorno
+paginado, recarga, erro/404 e recusas por perfil/sessão. Builds, unidades,
+19 HTTP e nove cenários de navegador aprovados; SQL/fundação concluídos por
+composição após corrigir configuração local, preservando resultados aprovados.
+[Provas, capturas e limites](validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md#consulta-individual-mínima--retomada-de-6764cb8).
+Histórico/campos ampliados/mutações e aceites humanos seguem pendentes.
+
 ## 2026-11-02 — Delimitar consulta individual mínima de usuários
 
 Retomado checkpoint `1abe410` com Git limpo. Preparada a

@@ -115,11 +115,11 @@ visual ou requisitos mínimos escritos. Regras permanentes de conclusão no
 
 ## Incremento independente — leitura mínima de 02/11
 
-[Contrato da listagem](CONTRATO_LEITURA_USUARIOS_8D1B.md) delimita o recorte
+[Contrato de leitura](CONTRATO_LEITURA_USUARIOS_8D1B.md) delimita listagem e consulta individual no recorte
 ID/nome/perfil para Administração, sem publicar login/estado ou comandos.
 [Prova B/U](../validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md) inclui paginação real,
 negação/revalidação de perfis, API/PostgreSQL/navegador e comparação renderizada.
 A ausência de API administrativa completa descrita acima permanece verdadeira;
-essa evidência sucede somente a listagem mínima. Campos adicionais, busca/filtros,
-consulta/histórico, criação, perfil e estado mantêm seus contratos pendentes.
+essa evidência sucede listagem e consulta individual mínimas. Campos adicionais,
+busca/filtros, histórico, criação, perfil e estado mantêm seus contratos pendentes.
 Não é aprovação integral da política institucional ou das unidades agregadas.

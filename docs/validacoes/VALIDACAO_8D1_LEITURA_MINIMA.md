@@ -108,3 +108,102 @@ alterada; nenhuma suíte funcional repetida, ambiente iniciado ou conexão ao
 banco. As provas de listagem acima e a regressão b95df82 (306 unidades/110 E2E)
 permanecem no seu escopo; não provam o detalhe proposto. Próxima unidade concreta:
 implementar B/U mínimo e executar a composição de validações pertinente ao diff.
+
+
+## Consulta individual mínima — retomada de 6764cb8
+
+Base `6764cb8`, branch `feat/m3-janela-1-eventos`, worktree inicialmente limpo,
+sem upstream configurado. Diff de aplicação restrito a controller/service de
+usuários, `UsuariosPage.tsx` e registro/título da rota em `App.tsx`; testes HTTP
+e navegador correspondentes ampliados. Commit local desta entrega identifica
+esse diff; documentação/capturas posteriores não alteram runtime.
+
+GET `/v1/usuarios/:usuarioId` e página `/usuarios/:usuarioId` integrados com
+projeção explícita ID textual/nome/perfil. Reutilizados H1, validação bigint,
+QueryState, sessão/cache e componentes existentes. Nome da lista abre detalhe;
+GET independente, recarga, retorno `limit`/`offset`, 404 e recuperação de leitura
+reais. Conta requisitante precisa estar ativa e ser Administração; conta alvo
+inativa continua consultável sem informar estado. Consulta/Edição não fazem GET
+do detalhe nem para a própria conta nessa rota administrativa.
+
+### Ambiente e validação proporcional
+
+PostgreSQL16 identificado antes de escrita: `127.0.0.1:33363`, administrador
+`m3_sintetico`, data directory `/dev/shm/m3-estabilizacao-b4b5ss_x/data`, filesystem
+tmpfs confirmado. Credencial lida de arquivo privado local, não versionada.
+Bases/logins exclusivos dos runners removidos ao terminar, inclusive nas falhas.
+Criada somente no cluster sintético a role de bootstrap `ambulatorio_user NOLOGIN`
+exigida pelo runner; nenhuma alteração no schema ou nas permissões da aplicação.
+Demonstrações e processos preexistentes preservados, disponibilidade não revalidada.
+
+- `make backend-build frontend-build backend-unit-test frontend-unit-test COMPACT=1`:
+  builds aprovados; **211/211 unidades backend**. Frontend **25 arquivos aprovados,
+  11 com falhas de timeout** (288 testes passaram na primeira rodada), log
+  `/tmp/ambulatorio-check-mv8pnyx_/output.log`. Reexecutados somente os11 arquivos
+  falhos com `npm run test:unit -- --maxWorkers=1 <arquivos falhos>`:
+  **126/126 aprovados**, `/tmp/m3-usuario-detalhe-unit-serial.log`.
+  Cobertura composta dos306 testes; não uma nova rodada306/306 única. Sem mudar
+  timeouts ou produto para acomodar a falha.
+- `SYNTHETIC_PG_HOST=127.0.0.1 SYNTHETIC_PG_PORT=33363 SYNTHETIC_PG_USER=m3_sintetico PGPASSWORD=<segredo local> bash tests/backend/test_clinical_integration.sh test/clinical/usuarios.http.spec.ts`:
+  **19/19 HTTP aprovados**, `/tmp/m3-usuario-detalhe-http.log`.
+  Primeira tentativa parou no bootstrap por ausência da role mencionada, antes
+  dos testes; corrigida no cluster e runner retomado. Prova projeção exata de
+  conta própria/terceiros/inativo, ID acima de2^53, ID inválido/inexistente, query
+  desconhecida, autorização antes de validar/revelar existência e mesmo token
+  após alteração de perfil/ativação do requisitante.
+- Mesmas variáveis sintéticas, `bash tests/frontend/test_e2e.sh usuarios.spec.ts`:
+  **8/8 E2E**,1,1min, `/tmp/m3-usuario-detalhe-e2e.log`, runner
+  `/tmp/etapa6-frontend-DQe7MM`. Lista e detalhe, paginação, acesso direto/recarga,
+  erro/repetição/404, três perfis e401 real após inativação do requisitante.
+  Teclado, Axe e1440/390/320 aprovados. Acrescentado cenário de troca de conta
+  com resposta HTTP real atrasada: `usuarios.spec.ts --grep 'troca de conta por navegação'`,
+  **1/1 aprovado**, `/tmp/m3-usuario-detalhe-troca.log`, runner
+  `/tmp/etapa6-frontend-acTvih`. Nenhuma conta anterior visível durante a carga.
+  Total composto9 cenários, sem repetir os oito já aprovados após adicionar o nono.
+- `make project-check DB_ENV=local DB_HOST=127.0.0.1 DB_PORT=33363 DB_USER=m3_sintetico DB_NAME=<base exclusiva descartável> COMPACT=1`:
+  cobertura composta dos**44 arquivos SQL**. Primeira base tinha nome sem marcador
+  descartável:31 arquivos aprovados e SQL33 recusou corretamente a execução;
+  `/tmp/ambulatorio-check-jbt8boze/output.log`. Base removida; recriada com prefixo
+  `m3_usuario_descartavel_`, mesmas migrations02–73, e retomados só SQL33 em diante
+  via `SQL_TESTS`:13 arquivos aprovados; `/tmp/ambulatorio-check-ywwllmee/output.log`.
+  Não foi enfraquecida a proteção do SQL33. Diff/status/documentação aprovados.
+- Fundação por `bash tests/backend/test_integration.sh` com DB/APP_DB explícitos,
+  login restrito exclusivo e `CLINICAL_ACCESS_POLICY=todos_sinteticos` no cluster
+  descartável. Usado runner direto porque Make depende de `docker-wait`.
+  Primeira rodada:6/8 passaram; dois503 por omissão da política sintética no
+  comando local, `/tmp/m3-usuario-detalhe-base-retomada.log`. Seleções parciais
+  seguintes evidenciaram dependência entre testes que inicializam tokens;
+  `/tmp/m3-usuario-detalhe-foundation-retomada.log` e `foundation-final.log`
+  (mesmo prefixo). Corrigidos comando e seleção, sem mudar produto ou testes:
+  percurso inicial + autorização + limites de role **3/3 aprovados**;
+  `/tmp/m3-usuario-detalhe-foundation-prerequisitos.log`. Casos não selecionados
+  nessa última chamada já tinham passado; corpus8 coberto por composição,
+  sem afirmar rodada8/8 única. Builds/unidades/fundação compõem backend-check.
+
+Não foram repetidos os110 E2E integrais de b95df82 nem suítes clínicas/importador
+inalteradas. A composição frontend desta unidade usa builds/unidades atuais,
+nove cenários administrativos e baseline integral anterior nos percursos não
+alterados; **não é nova execução integral de `frontend-check`**. Falhas de
+configuração/seleção acima não foram ocultadas. Aviso de bundle acima de500kB
+permanece. Dados exclusivamente sintéticos; sem push/merge/deploy ou banco
+persistente.
+
+### Comparação visual e limites
+
+Inspecionados [referência disponível](../frontend/visuais/figma-usuarios.png) e
+capturas atuais [1440](../frontend/visuais/8d1u-usuario-detalhe-1440.png),
+[390](../frontend/visuais/8d1u-usuario-detalhe-390.png) e
+[320](../frontend/visuais/8d1u-usuario-detalhe-320.png).
+Shell branco/azul, cartão, tipografia e badge conservam a linguagem da listagem;
+Usuários permanece ativo. Detalhe usa lista semântica de definições e link de
+retorno; em320/390 os três campos permanecem legíveis sem rolagem horizontal.
+A referência disponível não contém tela individual ou mobile; não foi provada
+fidelidade integral do detalhe. Zoom de navegador não foi ensaiado nesta unidade.
+Comparação técnica parcial, sem homologação8V1/8V2 ou novo aceite humano.
+
+DoD do recorte mínimo: integrado e tecnicamente provado nos limites descritos.
+Histórico USR-24, campos ampliados, comandos de contas e me ampliado continuam
+pendentes com seus próprios contratos; D1B.1/U.1 e8D não estão concluídos. P0
+humano e demais achados preservados. Próxima ação: delimitar contrato de histórico
+administrativo a partir das fontes de auditoria existentes, sem apresentar
+coleção vazia fictícia ou implementar novos campos antes dos respectivos gates.
