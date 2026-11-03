@@ -101,7 +101,9 @@ confirmação coordenada sucedem a separação acima no recorte de novos registr
 FM/RQ-ATD, DIA/SOR, condição/COM, EVT/DSP, PRJ, BZN, ENC e NTF conservam seus IDs,
 entidades e limites clínicos. Existentes são consultados sem cópia; alterações
 longitudinais continuam próprias. [Mapa por seção, contrato e provas](../validacoes/FLUXO_UNICO_ATENDIMENTO_M3_2026_11_03.md).
-Estado: implementado, testes sem sockets; validação integrada/visual pendente.
+Estado: VALIDADO TECNICAMENTE no recorte do fluxo único, com frontend/API/
+PostgreSQL sintético, autorização, recibos, histórico e comparação1440/390.
+Regressão composta e limites no relatório; sem homologação/aceite humano8V.
 Linhas históricas abaixo não constituem prova do endpoint novo nem aceite8V.
 
 ## Como ler e manter a rastreabilidade

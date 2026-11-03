@@ -6,13 +6,16 @@ P0 funcional M3 assume prioridade máxima. Campos dos serviços clínicos existe
 agora compartilham preenchimento/revisão; histórico longitudinal consultável sem
 cópia, novos registros explícitos e confirmação PostgreSQL coordenada com recibos
 por operação. Recuperação mantém reenvio bloqueado até prova autoritativa; novos
-atendimentos começam vazios. Sem migration ou banco persistente. Builds/testes
-sem sockets e limitações reais em [relatório da unidade](validacoes/FLUXO_UNICO_ATENDIMENTO_M3_2026_11_03.md).
+atendimentos começam vazios. Sem migration ou banco persistente. Contrato, provas e limites em [relatório da unidade](validacoes/FLUXO_UNICO_ATENDIMENTO_M3_2026_11_03.md).
 Retomada: bloqueios anteriores de Git e sockets não reproduzidos, sem alterar
 permissões/configurações. Provas focadas reais HTTP/PostgreSQL/Chromium,
 concorrência, histórico, auditoria e visual1440/390 aprovadas; corrigidos SQL do
-teste e alinhamento da grade. Regressão ampla ainda em curso, com evidências no
-mesmo relatório; sem aceite humano8V.
+teste e alinhamento da grade. Fechamento técnico:225 unidades backend,8 fundação,
+173 clínicos HTTP/PostgreSQL,47SQL;138 E2E distintos aprovados por composição,
+com falhas/reexecuções discriminadas no relatório. Corrigida higiene sintética
+de vínculos para respeitar o limitador real;337 unidades frontend reutilizadas.
+Commit de implementação30ae955 preservado; revisão humana pendente, sem iniciar8D
+por solicitação de finalizar esta menor unidade.
 
 ## 2026-11-03 — Integrar ativação e inativação administrativas8D2B.2/U.2
 

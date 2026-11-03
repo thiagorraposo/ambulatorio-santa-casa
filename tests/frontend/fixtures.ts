@@ -25,8 +25,8 @@ const { sign } = requireBackend('jsonwebtoken');
 const { Pool } = requireBackend('pg');
 let loginWindowUntil = 0;
 
-async function waitForLoginWindow(milliseconds: number) {
-  // The real rate limiter can add a full minute between logins. Account for
+export async function waitForRateLimitWindow(milliseconds: number) {
+  // The real rate limiter can add a full minute between setup requests or logins. Account for
   // that wait separately from the scenario's action/assertion budget.
   const info = test.info();
   info.setTimeout(info.timeout + milliseconds);
@@ -43,7 +43,7 @@ export async function signInCurrentPage(page: Page, perfil: Perfil) {
 
 async function submitLogin(page: Page, perfil: Perfil, destination?: string) {
   const pause = loginWindowUntil - Date.now();
-  if (pause > 0) await waitForLoginWindow(pause);
+  if (pause > 0) await waitForRateLimitWindow(pause);
   if (destination !== undefined) await page.goto(destination);
   await expect(page.getByLabel('Usuário', { exact: true })).toBeVisible();
   await page.getByLabel('Usuário', { exact: true }).fill(fixture.users[perfil].login);
@@ -62,7 +62,7 @@ async function submitLogin(page: Page, perfil: Perfil, destination?: string) {
     const seconds = Number(response.headers()['retry-after'] ?? response.headers()['x-ratelimit-reset']);
     expect(Number.isFinite(seconds) && seconds > 0 && seconds <= 60).toBe(true);
     await expect(page.getByRole('alert')).toContainText(/tentativas|aguarde|limite/i);
-    await waitForLoginWindow(seconds * 1000 + 200);
+    await waitForRateLimitWindow(seconds * 1000 + 200);
     const resumed = page.waitForResponse(item => new URL(item.url()).pathname === '/v1/auth/login'
       && item.request().method() === 'POST');
     await page.getByRole('button', { name: 'Entrar', exact: true }).click();
@@ -107,9 +107,28 @@ export async function captureUserGrants(perfil: Perfil) {
 
 export async function restoreUserGrants(perfil: Perfil) {
   // Higiene da fixture: reativação sozinha não restaura vínculos de produção.
+  const owner = new Pool({ host: process.env.PGHOST, port: Number(process.env.PGPORT),
+    user: process.env.PGUSER, password: process.env.PGPASSWORD, database: process.env.FRONTEND_E2E_DB });
+  let current: Map<string, boolean>;
+  try {
+    const rows = (await owner.query('SELECT paciente_id::text,pode_editar FROM ambulatorio.acesso_paciente WHERE usuario_id=$1 AND ativo',
+      [fixture.users[perfil].usuarioId])).rows as Array<{ paciente_id: string; pode_editar: boolean }>;
+    current = new Map(rows.map(row => [row.paciente_id, row.pode_editar]));
+  } finally { await owner.end(); }
   for (const grant of grantsBeforeInactivation.get(perfil) ?? []) {
-    expect((await apiAs('administracao', 'PUT', `/pacientes/${grant.paciente_id}/acesso/${fixture.users[perfil].usuarioId}`,
-      { ativo: true, podeEditar: grant.pode_editar })).status).toBe(200);
+    if (current.get(grant.paciente_id) === grant.pode_editar) continue;
+    const restore = () => apiAs('administracao', 'PUT', `/pacientes/${grant.paciente_id}/acesso/${fixture.users[perfil].usuarioId}`,
+      { ativo: true, podeEditar: grant.pode_editar });
+    let response = await restore();
+    // Apenas higiene sintética: 429 é recusa anterior à escrita, não resultado incerto.
+    // Erros de rede ou outros status nunca repetem a concessão automaticamente.
+    if (response.status === 429) {
+      const seconds = Number(response.headers.get('retry-after') ?? response.headers.get('x-ratelimit-reset'));
+      expect(Number.isFinite(seconds) && seconds > 0 && seconds <= 60).toBe(true);
+      await waitForRateLimitWindow(seconds * 1000 + 200);
+      response = await restore();
+    }
+    expect(response.status).toBe(200);
   }
   grantsBeforeInactivation.delete(perfil);
 }

@@ -36,3 +36,6 @@ acompanhar a paginação ([antes](antes-projetos-1440.png), [depois](secao-07-14
 `align-items: start` na grade do atendimento mantém altura normal dos campos;
 assert de navegador verifica seletores visíveis menores que 60 px em 1440/390/320.
 Sem redesign, alteração de referência ou homologação visual integral.
+
+[Composição dos138 cenários E2E e falhas intermediárias](RESULTADOS_E2E.json),
+conferida por arquivo/título; não representa uma rodada integral aprovada.

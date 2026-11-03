@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { expect, test } from '@playwright/test';
-import { apiAs, captureUserGrants, fixture, resumePage, restoreUserGrants, signIn, signInCurrentPage } from './fixtures';
+import { apiAs, captureUserGrants, fixture, resumePage, restoreUserGrants, signIn, signInCurrentPage, waitForRateLimitWindow } from './fixtures';
 import { assertAccessible, assertFitsViewport } from './stage7-helpers';
 const target = () => `/usuarios/${fixture.users.edicao.usuarioId}`;
 test.beforeEach(async () => { await captureUserGrants('edicao'); });
@@ -88,4 +88,40 @@ test('8D2U.2 conflito perfil×estado preserva escolha, cancelamento e preparaç�
     const current = await (await apiAs('administracao', 'GET', target())).json() as { versao: string };
     expect((await apiAs('administracao', 'POST', `${target()}/perfil`, { ...dto, operacaoId: randomUUID(), versao: current.versao, perfil: row.perfil })).status).toBe(201);
   }
+});
+
+test('fixture sintética restaura mais de cem vínculos respeitando o limitador real', async () => {
+  for (let index = 0; index < 101; index++) {
+    const create = () => apiAs('edicao', 'POST', '/pacientes', { nome: `Restauração ${index} exclusivamente sintética` });
+    let response = await create();
+    // Preparação sintética volumosa também respeita a recusa explícita anterior à escrita.
+    if (response.status === 429) {
+      const seconds = Number(response.headers.get('retry-after') ?? response.headers.get('x-ratelimit-reset'));
+      expect(Number.isFinite(seconds) && seconds > 0 && seconds <= 60).toBe(true);
+      await waitForRateLimitWindow(seconds * 1000 + 200);
+      response = await create();
+    }
+    expect(response.status).toBe(201);
+  }
+  await captureUserGrants('edicao');
+  const patients = async () => {
+    const result = [];
+    for (const offset of [0, 100]) {
+      const response = await apiAs('edicao', 'GET', `/pacientes?limit=100&offset=${offset}`);
+      expect(response.status).toBe(200);
+      result.push(...await response.json() as Array<{ pacienteId: string }>);
+    }
+    return result;
+  };
+  const before = await patients();
+  expect(before.length).toBeGreaterThan(100);
+  let row = await (await apiAs('administracao', 'GET', target())).json() as { versao: string };
+  expect((await apiAs('administracao', 'POST', `${target()}/estado`, { operacaoId: randomUUID(), versao: row.versao,
+    ativo: false, justificativa: 'Inativação exclusivamente sintética para validar restauração da fixture' })).status).toBe(201);
+  row = await (await apiAs('administracao', 'GET', target())).json() as { versao: string };
+  expect((await apiAs('administracao', 'POST', `${target()}/estado`, { operacaoId: randomUUID(), versao: row.versao,
+    ativo: true, justificativa: 'Reativação exclusivamente sintética para validar restauração da fixture' })).status).toBe(201);
+  expect(await patients()).toEqual([]);
+  await restoreUserGrants('edicao');
+  expect(await patients()).toEqual(before);
 });

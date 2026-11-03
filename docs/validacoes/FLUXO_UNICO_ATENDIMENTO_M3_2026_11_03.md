@@ -4,8 +4,10 @@
 
 Base de entrada: `082d174bffba7ce953a75294fa8e7be0d6045e7a`, branch
 `feat/m3-janela-1-eventos`, árvore inicialmente limpa. Implementação desta unidade
-na árvore e no index, ainda sem commit novo; não confundir a base com um SHA que
-já contenha a mudança. **Implementado com validação integrada pendente.**
+preservada e consolidada no commit local
+`30ae9557ad55a27af2597c8328e134e97bbc3508`, com as correções e evidências da
+retomada. **VALIDADO TECNICAMENTE no recorte do fluxo único, com integração real e
+regressão composta. Aceite humano pendente.**
 Na execução anterior, o responsável solicitou finalizar a menor unidade segura,
 testar e registrar commit/checkpoint. A retomada atual autoriza continuar8D
 após o fechamento técnico do P0; revisão humana permanece adiada.
@@ -241,4 +243,71 @@ pixel nem aceite visual humano; revisão/homologação8V continuam pendentes.
   igual ao estado aprovado; única correção posterior de produto é CSS verificado
   no build e navegador. As unidades não são apresentadas como integração.
 
-Regressão ampla de navegador e fechamento do checkpoint/commit em andamento.
+Commit local realizado: `30ae9557ad55a27af2597c8328e134e97bbc3508`, mensagem
+`feat: integrar rascunho e confirmação coordenada do atendimento`. Os60 arquivos
+incluem todas as alterações de entrada, correções dos testes/CSS e26 capturas.
+`git status --short` limpo após commit. `make docs-check repository-check COMPACT=1`
+aprovado em `/tmp/ambulatorio-check-yy1ptwb2/output.log`; TypeScript standalone dos
+dois arquivos E2E alterados aprovado em `/tmp/m3-p0-e2e-types.log`.
+Revisão estática independente do coordenador/recibos não encontrou defeito
+bloqueante comprovado; não substitui as provas executadas.
+
+### Fechamento técnico da retomada
+
+A rodada ampla `make frontend-e2e COMPACT=1` terminou com **132/137 aprovados,
+5 falhas**, zero skips/retries. Log `/tmp/ambulatorio-check-fve0wcj0/output.log`,
+resultados `/tmp/etapa6-frontend-TJSTzj/results.json`. Não é uma integral aprovada.
+Além da expectativa antiga de `/auth/me`, quatro falhas foram429 na higiene ou
+preparação de vínculos, não falhas de confirmação do atendimento. O afterEach
+restaurava inclusive vínculos já ativos e excedia100 chamadas ao mesmo endpoint
+por minuto durante a composição ampla.
+
+Corrigido somente o suporte sintético: `restoreUserGrants` consulta os vínculos
+atuais, evita concessões redundantes e, somente após429 explícito anterior à
+escrita, aguarda `Retry-After` antes de uma nova tentativa. Erros de rede e outros
+status não repetem a concessão. Limitador, backend e autorização permanecem
+inalterados. O helper só opera no banco aleatório exigido pelo runner.
+
+- Reexecução de estado/perfil em `/tmp/etapa6-frontend-8bxizy`:7/8 aprovados,
+  incluindo os dois cenários de estado antes reprovados e os quatro de perfil.
+  O novo teste de volume falhou durante a preparação por429 no cadastro, antes
+  de conferir restauração. Log `/tmp/m3-p0-fixture-final.log`.
+- Em `/tmp/etapa6-frontend-dz7WYm`, conta inativa e percurso visual amplo
+  reaprovados;2/3. O teste de volume ainda preparou só82 vínculos, menos que os
+  mais de100 exigidos. Preparação corrigida para criar101 explicitamente e
+  também aguardar o limitador real de cadastro; não se relaxou o assert.
+  Log `/tmp/m3-p0-volume-visual-final.log`.
+- **1/1** final em `/tmp/etapa6-frontend-1h5ebd`: mais de100 vínculos revogados
+  pela inativação, reativação sem restauração automática e recomposição integral
+  autorizada da fixture via HTTP, respeitando o limitador. Log
+  `/tmp/m3-p0-volume-corrected.log`. TypeScript dos E2E alterados reaprovado em
+  `/tmp/m3-p0-e2e-types-final.log`.
+
+Composição conferida por arquivo/título e resultado JSON: **138/138 cenários
+distintos com prova aprovada, nenhum pendente** (137 originais + novo caso de
+volume). [Mapa durável de resultados por execução](../evidencias/fluxo_unico_m3_2026_11_03/RESULTADOS_E2E.json)
+preserva também as falhas intermediárias. Não houve nova integral única no
+último estado; as reexecuções cobrem o CSS, os asserts finais e a higiene
+alterados após o início da ampla.337 unidades frontend reutilizadas como
+unidades, não integração. Nenhuma nova alteração de produto após o CSS.
+
+**P0 funcional concluído tecnicamente neste recorte.** Percurso positivo e
+negativos, recibos, autorização, persistência/releitura, concorrência, histórico,
+auditoria/proveniência e comparação visual estão comprovados com frontend,
+API e PostgreSQL sintético. HUM-M3-03 permanece sem causa original reproduzida;
+não há aceite humano, homologação8V1/8V2 ou conclusão de M3 inteiro.
+
+Por solicitação posterior do responsável, finalizar esta menor unidade e
+encerrar a execução; não iniciar8D nesta sessão. Próxima ação: ler o checkpoint,
+confirmar HEAD/status e selecionar8D2B.3/U.3 pelos contratos aprovados de
+identidade/provisionamento/troca obrigatória. Se faltar dependência indispensável,
+registrar o gate exato e selecionar outra8D independente, sem conta demonstrativa.
+
+Serviço PostgreSQL próprio encerrado após as validações com `pg_ctl` no diretório
+temporário confirmado. Runners encerraram suas APIs/frontends e limparam seus
+bancos/logins exclusivos. Artefatos temporários de evidência foram preservados.
+
+Fechamento documental: `make docs-check repository-check COMPACT=1` aprovado
+(`/tmp/ambulatorio-check-jazvhcsp/output.log`), diff sem whitespace,1.708 destinos
+locais e26 hashes de capturas conferidos;138 aprovações distintas verificadas
+no mapa JSON. Nenhum dado real, credencial, push, merge ou deploy acrescentado.

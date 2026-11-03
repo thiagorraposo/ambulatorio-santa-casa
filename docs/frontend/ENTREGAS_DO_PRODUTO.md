@@ -397,8 +397,9 @@ o aceite anterior deM2 não é transferido a essa extensão.
 implementado para preenchimento/revisão/novos registros com confirmação
 transacional e recuperação por recibo. Sucede a divisão inicial em cinco etapas
 e amplia7D-U2 no contrato novo; endpoints e aceites históricos preservados.
-Provas navegador/API/PostgreSQL/visual ainda pendentes pelo sandbox; não concluir
-U1/U2 de M3 ou8V por testes unitários. Edição de históricos/retornos e demais
+Recorte do fluxo único VALIDADO TECNICAMENTE com navegador/API/PostgreSQL
+sintético, recibos, negativos e comparação visual1440/390; regressão composta
+no relatório. Não implica aceite humano, fechamento integral de U1/U2 de M3 ou8V. Edição de históricos/retornos e demais
 lacunas continuam obrigatórias nas unidades próprias.
 
 
