@@ -1,5 +1,10 @@
 # Identidade e administração — 8D1D/P-08
 
+**Atualização vigente de02/11:** as [decisões de produto1–31](../dados/DECISOES_PRODUTO_M3_2026_11_02.md)
+aprovam as regras sintéticas correspondentes. Perguntas e estados de aprovação
+abaixo descrevem a preparação anterior e são sucedidos por essa fonte; contratos
+técnicos, implementação, validação e homologação continuam separados.
+
 Atualização documental após a avaliação humana relatada pelo responsável.
 **Requisitos mínimos parcialmente definidos; política institucional e contratos
 específicos pendentes.** Não é aprovação integral de 8D1D/P-08, implementação,

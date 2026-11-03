@@ -689,20 +689,22 @@ P-02 abaixo preserva a proposta de origem; verificar separadamente o limite de
 recuperação após nova sessão, sem tratar todo o mecanismo como não implementado.
 
 
-São propostas abertas, não decisões clínicas novas ou mudanças aprovadas de
-contrato. Pacotes dependentes permanecem planejados até a escolha necessária.
+As decisões de produto para o protótipo sintético foram aprovadas em02/11,
+conforme [respostas1–31](../dados/DECISOES_PRODUTO_M3_2026_11_02.md).
+A tabela distingue regras aprovadas de contratos técnicos e implementações
+ainda pendentes. Não é homologação clínica/institucional ou liberação real.
 
 | ID | Proposta e decisão solicitada | Impacto no roadmap |
 | --- | --- | --- |
 | P-01 | Inclusão de todos os módulos não EX aprovada em 23/10. Em 26/10 o responsável delimitou a sequência de trabalho M2: 7A-U1, 7D-U1/U2/U4.2, verificar U3/U4.1 e 7D-A1. Em 27/10 solicitou continuidade da frente preparada de sorologias individuais (7B-E1B). A ordem das demais famílias, seu primeiro uso e detalhes ainda abertos continuam pendentes; isso não concede aceite clínico. | 7B-E/7C-E obrigatórios no produto completo; decidir dependências e primeiro uso, sem exclusão por ausência de API. |
 | P-02 | Aprovar desenho de recuperação por correlação de operação consultável, inclusive após nova sessão. Alternativa de reenvio cego não atende o produto. | 7D-R6D escolhe solução técnica e eventual idempotência/registro, sem alterar nada nesta análise. |
-| P-03 | Para o recorte M2, instrução do responsável em 26/10 adota cinco etapas, revisão antes da confirmação e acompanhamento separado. Permanecem pendentes contrato aprovado para versão/concorrência nos PUT de projeto/notificação e revisão de pendência. | 7D-U1/U2; mudanças sem contrato seguem bloqueadas, incluindo 7C-E4B/U. |
-| P-04 | Definir se fila global agrupa pendências assistenciais e inconsistências de importação ou as apresenta em grupos relacionados; definir responsabilidade e registro de decisão. | 8A2D/B/U, 8A3B/U. Não classificar texto automaticamente. |
-| P-05 | Filtros/colunas/código, procedência, indicadores e exportação inventariados incluídos; definir semântica e aprovar KPIs, população/período e contrato da exportação ampliada. Proposta inicial: nome/sexo, ID secundário e CSV da página. | 8A1, 8B1D/B/U, 8B2B/U, 8B3D/B/U. API sintética atual de CSV permite três perfis, Figma restringe a admin. |
-| P-06 | Confirmar destino de D9: planejamento de retorno futuro/desfecho e eventual retirada do campo legado. Proposta: separado de comparecimento efetivo. | 7C-E5D/B/U. Não fabricar retorno, excluir texto ou consolidar silenciosamente. |
-| P-07 | Upload incluído; decidir documento/estado/armazenamento/retenção e acesso. | 8C3D/B/U; obrigatório no produto completo; detalhes pendentes. |
-| P-08 | Gestão de contas P1 inclui criação, consulta, perfil, estado e auditoria. Mínimos de proteção do último administrador ativo, não autoelevação, autoações explícitas, backend, auditoria, concorrência/versão, revalidação de sessão e ausência de privilégios implícitos foram determinados pelo responsável. Detalhes institucionais de identidade/capacidades, provisionamento, sessão, suporte e retenção continuam pendentes na proposta 8D1D. | 8D1D/B/U e 8D2B/U, incluindo criação 8D2B.3/U.3. Não é aprovação integral P-08, implementação ou autorização real da Etapa 9. |
-| P-09 | Reprocessamento e revisão incluídos; definir autorização, leitura, retomada e ordem de implementação desses processos. | 8C4D/B/U e 8C5B/U; reenvio ordinário é outra ação. |
+| P-03 | Decisões11–12 aprovam autoria/histórico, justificativa obrigatória, concorrência otimista e retorno explícito a desconhecido quando o campo o admite. Omissão preserva; vazio não vira desconhecido. Contratos por recurso ainda necessários. | 7D-U1/U2; mudanças sem contrato seguem bloqueadas, incluindo 7C-E4B/U. |
+| P-04 | Decisões13–16 aprovam dois grupos independentes, estados aberta/em andamento/resolvida, atribuição, revisão com autoria/instante/justificativa e capacidades clínicas/importação específicas. Sem classificação textual ou alteração clínica automática. | 8A2D/B/U, 8A3B/U. Não classificar texto automaticamente. |
+| P-05 | Decisões17–21 aprovam definições dos quatro indicadores, colunas prioritárias, identificador interno, procedências distintas, projetos conforme evidência e CSV ampliado autorizado/auditado limitado inicialmente a5.000 linhas. CSV atual preservado; contratos técnicos por recorte pendentes. | 8A1, 8B1D/B/U, 8B2B/U, 8B3D/B/U. API sintética atual de CSV permite três perfis, Figma restringe a admin. |
+| P-06 | Decisão22 aprova separação de planejamento/orientação/comparecimento, precisão conhecida e preservação do desfecho legado. Retirada dos novos formulários só após substituição validada. | 7C-E5D/B/U. Não fabricar retorno, excluir texto ou consolidar silenciosamente. |
+| P-07 | Decisões23–25 aprovam anexos privados sintéticos PDF/JPG/PNG,10MB/arquivo e5/episódio, versões e capacidades documentais explícitas. Retenção institucional e eliminação real não autorizadas; contratos de integração pendentes. | 8C3D/B/U; obrigatório no produto completo; detalhes pendentes. |
+| P-08 | Decisões3–10 aprovam login por nome de usuário, credencial temporária de24h configurável/troca obrigatória/exibição única, recuperação restrita, autoações vedadas, último administrador protegido, revogação efetiva de sessões, auditoria e suporte genérico. Implementação/contratos próprios ainda pendentes; decisões1–2 autorizam vínculo automático específico ao cadastro por Edição. | 8D1D/B/U e 8D2B/U, incluindo criação 8D2B.3/U.3. Não é aprovação integral P-08, implementação ou autorização real da Etapa 9. |
+| P-09 | Decisões26–27 aprovam capacidades independentes dos perfis, separação proponente/aprovador e recibo/consulta autoritativa após novo login, inclusive verificação por outro operador autorizado com auditoria. Reenvio/reprocessamento/revisão distintos; implementação técnica pendente. | 8C4D/B/U e 8C5B/U; reenvio ordinário é outra ação. |
 
 ## Conclusão documental e condição de aceite do produto
 

@@ -1,5 +1,10 @@
 # Matriz Figma Make × frontend × produto
 
+**Política vigente de02/11:** [decisões de produto1–31](../dados/DECISOES_PRODUTO_M3_2026_11_02.md).
+As referências a escolhas P-03–P-09 pendentes devem ser lidas com essa atualização;
+a implementação/cobertura comprovada de cada FM/RQ permanece a registrada, sem
+atribuir funcionalidades às novas regras apenas por aprovação documental.
+
 Data: 2026-10-05. Código reavaliado em `29b3186`; status inicial limpo.
 Fonte ponto a ponto da [visão de produto](VISAO_E_ESPECIFICACAO.md) e dos
 [pacotes do roadmap](ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend).

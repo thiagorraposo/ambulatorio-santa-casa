@@ -1,5 +1,10 @@
 # Estado atual do projeto
 
+**Decisões posteriores aprovadas:** [produto M3 de02/11](dados/DECISOES_PRODUTO_M3_2026_11_02.md).
+Esta atualização registra política, sem mudar o runtime comprovado. A restrição
+atual de cadastro por Edição passa a ser lacuna de implementação, com vínculo
+automático específico autorizado; demais novas regras têm entrega própria.
+
 Atualizado em: 2026-11-02. Síntese de implementação e evidências existentes;
 esta atualização documental não reexecuta as suítes da aplicação.
 

@@ -1,5 +1,10 @@
 # Confirmação e recuperação da importação — proposta para 8C2U.2
 
+**Atualização vigente de02/11:** as [decisões de produto1–31](../dados/DECISOES_PRODUTO_M3_2026_11_02.md)
+aprovam as regras sintéticas correspondentes. Perguntas e estados de aprovação
+abaixo descrevem a preparação anterior e são sucedidos por essa fonte; contratos
+técnicos, implementação, validação e homologação continuam separados.
+
 2026-11-02, retomada da Janela1. **Proposta não aprovada; unidade BLOQUEADA
 pela recuperação autoritativa ausente.** Nenhum endpoint, concorrência,
 permissão ou regra clínica nova foi implementado por este documento.

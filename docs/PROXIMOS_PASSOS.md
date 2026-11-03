@@ -1,5 +1,10 @@
 # Roadmap do Projeto
 
+**Atualização de produto:** [decisões M3 de02/11](dados/DECISOES_PRODUTO_M3_2026_11_02.md)
+autorizam regras e implementação sintética, incluindo vínculo automático
+específico para o paciente cadastrado por Edição. Contratos técnicos/entregas
+continuam pela fila e pelo checkpoint; não há novo aceite humano ou dados reais.
+
 Atualizado em: 2026-11-01
 
 **Continuidade de 2026-10-15:** as sete lacunas da reauditoria de 05/10 receberam

@@ -1,5 +1,10 @@
 # Fila e responsabilidade de revisão — proposta 8A2D/P-04
 
+**Atualização vigente de02/11:** as [decisões de produto1–31](../dados/DECISOES_PRODUTO_M3_2026_11_02.md)
+aprovam as regras sintéticas correspondentes. Perguntas e estados de aprovação
+abaixo descrevem a preparação anterior e são sucedidos por essa fonte; contratos
+técnicos, implementação, validação e homologação continuam separados.
+
 2026-11-02, Janela 1 de M3. **Proposta não aprovada; B/U dependentes bloqueados.**
 Fontes: [catálogo 8A2D](../frontend/ENTREGAS_DO_PRODUTO.md#8a2d),
 [visão PEN](../frontend/VISAO_E_ESPECIFICACAO.md#pendências-por-paciente-e-fila-global--pen)

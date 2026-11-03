@@ -1,5 +1,10 @@
 # Catálogo de entregas do produto
 
+**Decisões vigentes:** [respostas de produto1–31/P-03–P-09](../dados/DECISOES_PRODUTO_M3_2026_11_02.md)
+aprovadas para o protótipo sintético. Sucedem os gates de escolha de produto
+abaixo no seu recorte, inclusive o vínculo automático específico por Edição;
+não concluem entregas, contratos técnicos ou aceites humanos. IDs preservados.
+
 Atualizado em: 2026-11-02. Fonte dos escopos e critérios por unidade; sequência
 e marcos pertencem ao [roadmap](../PROXIMOS_PASSOS.md). Estados históricos não
 equivalem a aceite atual: consultar as continuidades e relatórios citados.

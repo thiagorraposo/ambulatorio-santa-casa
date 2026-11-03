@@ -1,5 +1,10 @@
 # Métricas e projeção de busca — proposta P-05
 
+**Atualização vigente de02/11:** as [decisões de produto1–31](../dados/DECISOES_PRODUTO_M3_2026_11_02.md)
+aprovam as regras sintéticas correspondentes. Perguntas e estados de aprovação
+abaixo descrevem a preparação anterior e são sucedidos por essa fonte; contratos
+técnicos, implementação, validação e homologação continuam separados.
+
 2026-11-02, Janela 1 de M3. **Proposta não aprovada.** Prepara 8B1D/8B3D sem
 definir política clínica, score, acesso ampliado ou contrato de exportação.
 Fontes: [8B1D](../frontend/ENTREGAS_DO_PRODUTO.md#8b1d),

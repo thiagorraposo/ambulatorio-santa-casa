@@ -1,5 +1,16 @@
 # Registro de Alterações
 
+## 2026-11-02 — Registrar decisões de produto M3 para implementação sintética
+
+Consolidadas as [respostas1–31](dados/DECISOES_PRODUTO_M3_2026_11_02.md)
+com rastreabilidade P-03–P-09, parâmetros provisórios e limites institucionais.
+Registrada antes de mudança de código a substituição da vedação de autovínculo
+pela autorização específica/auditável/revogável ao cadastro por Edição.
+Fontes temáticas apontam para o registro único; contratos e provas anteriores
+preservados. Menor unidade documental encerrada a pedido do responsável, sem
+alteração de aplicação, migration ou banco. Validação e próxima unidade no
+[checkpoint M3](execucao/PLANO_M3_2026_11_03.md#10-checkpoint-único-e-transferência-de-contexto).
+
 ## 2026-11-02 — Integrar consulta individual mínima de usuários
 
 API e interface administrativas de detalhe com ID/nome/perfil reais, retorno

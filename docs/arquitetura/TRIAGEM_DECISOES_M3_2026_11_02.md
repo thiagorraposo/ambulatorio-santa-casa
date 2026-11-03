@@ -1,5 +1,10 @@
 # Triagem dirigida de decisões restantes de M3
 
+**Atualização vigente de02/11:** as [decisões de produto1–31](../dados/DECISOES_PRODUTO_M3_2026_11_02.md)
+aprovam as regras sintéticas correspondentes. Perguntas e estados de aprovação
+abaixo descrevem a preparação anterior e são sucedidos por essa fonte; contratos
+técnicos, implementação, validação e homologação continuam separados.
+
 2026-11-02, Janela 1. Leitura de catálogo/visão e trechos das fontes abaixo,
 sem auditoria exaustiva ou releitura de histórico. Não é novo índice, roadmap,
 aprovação clínica ou mudança de estado de B/U. As propostas permanecem não

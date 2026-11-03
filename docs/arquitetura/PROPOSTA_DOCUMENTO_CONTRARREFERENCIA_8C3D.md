@@ -1,5 +1,10 @@
 # Documento de contrarreferência — proposta 8C3D/P-07
 
+**Atualização vigente de02/11:** as [decisões de produto1–31](../dados/DECISOES_PRODUTO_M3_2026_11_02.md)
+aprovam as regras sintéticas correspondentes. Perguntas e estados de aprovação
+abaixo descrevem a preparação anterior e são sucedidos por essa fonte; contratos
+técnicos, implementação, validação e homologação continuam separados.
+
 2026-11-02, retomada da Janela 1 de M3. **Proposta não aprovada.** Upload está
 incluído no produto; representação, estados e política de arquivo continuam
 pendentes. Nenhum storage, endpoint, migration ou permissão nova é criado aqui.
