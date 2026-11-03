@@ -281,3 +281,33 @@ input[type="checkbox"], input[type="radio"] { width: 1.1rem; height: 1.1rem; min
 .comorbidity-choices .form-field { margin-block: .75rem; }
 .comorbidity-choices > .loading-state, .comorbidity-choices > .error-state { grid-column: 1 / -1; }
 @media (max-width: 800px) { .comorbidity-choices { grid-template-columns: minmax(0, 1fr); } }
+
+/* 8B1: indicadores operacionais, adaptados da grade de quatro cards oficial. */
+.dashboard-page { min-width: 0; }
+.dashboard-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.dashboard-heading h2 { margin: 0; font-size: 1.05rem; }
+.dashboard-filters form { display: flex; flex-wrap: wrap; align-items: end; gap: 1rem; }
+.dashboard-filters .form-field { flex: 1 1 12rem; }
+.dashboard-filters form > .button { flex: 0 0 auto; }
+.dashboard-filters > p { font-size: .85rem; margin-bottom: 0; }
+.dashboard-period { font-size: .85rem; color: var(--muted); margin-block: 1rem; }
+.dashboard-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+.dashboard-indicator { min-width: 0; padding: 1.25rem; }
+.dashboard-indicator h3 { font-size: .75rem; font-weight: 500; color: #576477; text-transform: uppercase; letter-spacing: .04em; margin: 0 0 .65rem; min-height: 2.25rem; }
+.dashboard-value { font-size: 2rem; font-weight: 650; line-height: 1.2; margin: 0 0 .65rem; color: #1a4fa0; }
+.dashboard-indicator-atendimentos .dashboard-value { color: #166534; }
+.dashboard-indicator-pendencias .dashboard-value { color: #92400e; }
+.dashboard-indicator-lotes .dashboard-value { color: #075985; }
+.dashboard-context, .dashboard-indicator .muted, .dashboard-indicator details { font-size: .8rem; }
+.dashboard-context { color: #576477; }
+.dashboard-no-access { font-size: 1.1rem; font-weight: 600; margin-block: .65rem; }
+.dashboard-indicator details { margin-top: 1rem; }
+.dashboard-indicator summary { cursor: pointer; color: #1a4fa0; }
+.dashboard-indicator details p { overflow-wrap: anywhere; }
+.dashboard-shortcuts { margin-top: 1.5rem; }
+@media (max-width: 1100px) { .dashboard-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 540px) {
+  .dashboard-cards { grid-template-columns: minmax(0, 1fr); }
+  .dashboard-indicator h3 { min-height: 0; }
+  .dashboard-filters form > .button, .dashboard-heading > .button { width: 100%; }
+}

@@ -42,6 +42,8 @@ fonte temática abaixo; relatórios registram provas e histórico preserva conte
 | Regras normativas de importação | [Especificação do importador](ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md) |
 | API e autorização | [Arquitetura do backend](ARQUITETURA_BACKEND.md) e [contratos clínicos](arquitetura/CONTRATOS_CLINICOS_ETAPA_5.md) |
 | Formulários e limites HTTP | [Recorte clínico](arquitetura/RECORTE_CLINICO_ETAPA_7.md) e [catálogos](arquitetura/CONTRATOS_CATALOGOS_ETAPA_7.md) |
+| Dashboard básico (8B1) | [Contrato](arquitetura/CONTRATO_DASHBOARD_8B1.md) · [validação](validacoes/VALIDACAO_8B1_DASHBOARD.md) |
+| Criação e primeiro acesso (8D2.3) | [Contrato](arquitetura/CONTRATO_CRIACAO_USUARIO_8D2.md) · [validação](validacoes/VALIDACAO_8D2_CRIACAO.md) |
 | Ativação/inativação administrativas (8D2.2) | [Contrato](arquitetura/CONTRATO_PERFIL_USUARIO_8D2.md#extensão-integrada--estado-8d2b2u2) · [validação integrada](validacoes/VALIDACAO_8D2_ESTADO.md) |
 | Alteração administrativa de perfil (8D2.1) | [Contrato](arquitetura/CONTRATO_PERFIL_USUARIO_8D2.md) · [validação integrada](validacoes/VALIDACAO_8D2_PERFIL.md) |
 | Leitura mínima de usuários (8D1) | [Contrato](arquitetura/CONTRATO_LEITURA_USUARIOS_8D1B.md) · [validação](validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md) |

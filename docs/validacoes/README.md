@@ -9,6 +9,7 @@ de testes não é uma contagem atual e aceite sintético não autoriza dados rea
 
 | Escopo | Evidência | Leitura correta |
 | --- | --- | --- |
+| Dashboard básico8B1 | [Validação integrada](VALIDACAO_8B1_DASHBOARD.md) | Quatro indicadores PostgreSQL, capacidade explícita, filtros e estados;2 E2E e comparação técnica. |
 | 8D criação e primeiro acesso | [Validação integrada](VALIDACAO_8D2_CRIACAO.md) | Criação, uso único, troca obrigatória, recibos e recuperação; sem aceite humano. |
 | 8D estado administrativo | [Validação integrada](VALIDACAO_8D2_ESTADO.md) | Ativação/inativação, concorrência e revogação sem restauração;325 unidades frontend integrais e7 E2E focados; sem aceite humano. |
 | 8D perfil administrativo | [Validação integrada](VALIDACAO_8D2_PERFIL.md) | API/UI/PostgreSQL, versão/justificativa/recibo, concorrência e revogação JWT; sem aceite humano. |

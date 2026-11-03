@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-03 — Entregar dashboard básico com quatro indicadores reais
+
+API e interface de Início/Dashboard agregam pacientes autorizados, consultas
+realizadas, pendências atuais e lotes concluídos, com período e definições.
+Migration78 exige capacidade nominal para indicador de importações, além do
+escopo de lote; sem permissão não vira zero. Fixtures conhecidas,7 HTTP,8 unidades
+backend,25 frontend focadas e2 E2E aprovados; [provas e comparação visual](validacoes/VALIDACAO_8B1_DASHBOARD.md).
+8D commitado em `e40fdeb`; revisão humana adiada, sem concluir M3/8V.
+
 ## 2026-11-03 — Integrar criação de usuários e primeiro acesso obrigatório
 
 Migration77, API e interface administrativas criam conta com credencial temporária

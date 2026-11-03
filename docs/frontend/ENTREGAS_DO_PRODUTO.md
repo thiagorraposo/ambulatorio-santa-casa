@@ -1070,7 +1070,7 @@ Preparação de02/11: [alternativas e exemplos sintéticos](../arquitetura/PROPO
 
 #### 8B1D — Aprovar métricas e semântica de período
 
-**Estado e cobertura:** Planejado; não aceito. RQ-NAV-06; RQ-HOM-01–05, 13–20; RQ-RES-29; RQ-DAS-01–11 (telas/elementos na matriz).
+**Estado e cobertura:** VALIDADA TECNICAMENTE no protótipo sintético, sem aceite humano. [Contrato/provas](../validacoes/VALIDACAO_8B1_DASHBOARD.md). RQ-NAV-06; RQ-HOM-01–05, 13–20; RQ-RES-29; RQ-DAS-01–11 (telas/elementos na matriz).
 
 **Escopo:** Definir pacientes cadastrados, atendimentos, pendências abertas e lotes, população/perfil/período; definir origem/projeto/completude ou manter sem exibição.
 
@@ -1082,13 +1082,13 @@ Preparação de02/11: [alternativas e exemplos sintéticos](../arquitetura/PROPO
 
 **Validação/evidência e conclusão:** VD. Tabela de definições e fixture com resultados esperados, aprovada antes de B/U. Concluir somente pela condição comum acima e pelos critérios desta unidade.
 
-Preparação de02/11: [alternativas e exemplos sintéticos](../arquitetura/PROPOSTA_METRICAS_BUSCA_P05.md) disponíveis; decisão/aprovação VD pendentes. Nenhuma capacidade B/U foi liberada.
+Preparação histórica de02/11 sucedida pelas decisões17/26 e pelo [contrato implementado](../arquitetura/CONTRATO_DASHBOARD_8B1.md). Definições e fixture reais verificadas; sem aprovação institucional.
 
 <a id="8b1b"></a>
 
 #### 8B1B — Publicar os quatro indicadores operacionais aprovados
 
-**Estado e cobertura:** Planejado; não aceito. RQ-NAV-06; RQ-HOM-02–05; RQ-DAS-01–11 (telas/elementos na matriz).
+**Estado e cobertura:** VALIDADA TECNICAMENTE no protótipo sintético, sem aceite humano. [Contrato/provas](../validacoes/VALIDACAO_8B1_DASHBOARD.md). RQ-NAV-06; RQ-HOM-02–05; RQ-DAS-01–11 (telas/elementos na matriz).
 
 **Escopo:** Agregado de quatro KPIs, definição/período e população autorizada; série/gráficos e atividade recente em 8B2.
 
@@ -1104,7 +1104,7 @@ Preparação de02/11: [alternativas e exemplos sintéticos](../arquitetura/PROPO
 
 #### 8B1U — Exibir KPIs com período, definição e estados honestos
 
-**Estado e cobertura:** Planejado; não aceito. RQ-NAV-06; RQ-HOM-01–05; RQ-DAS-01–11 (telas/elementos na matriz).
+**Estado e cobertura:** VALIDADA TECNICAMENTE no protótipo sintético, sem aceite humano. [Contrato/provas](../validacoes/VALIDACAO_8B1_DASHBOARD.md). RQ-NAV-06; RQ-HOM-01–05; RQ-DAS-01–11 (telas/elementos na matriz).
 
 **Escopo:** Quatro cards e filtro aprovado no Início/dashboard, legenda de definição; nenhum gráfico ainda.
 

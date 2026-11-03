@@ -26,6 +26,7 @@ describe('7D-U4.1 — navegação por disclosure sem diálogo modal', () => {
     const nav = within(screen.getByRole('navigation', { name: 'Menu principal' }));
     expect(nav.getByRole('link', { name: 'Início' })).toHaveAttribute('href', '/');
     expect(nav.getByRole('link', { name: 'Início' })).toHaveAttribute('aria-current', 'page');
+    expect(nav.getByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', '/dashboard');
     expect(nav.getByRole('link', { name: 'Pacientes' })).toHaveAttribute('href', '/pacientes');
     expect(nav.getByRole('link', { name: 'Minha conta' })).toHaveAttribute('href', '/minha-conta');
     expect(content).toHaveTextContent(user.nome);

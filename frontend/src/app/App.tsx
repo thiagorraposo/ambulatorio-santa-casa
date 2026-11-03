@@ -1,3 +1,4 @@
+import DashboardPage from '../features/dashboard/DashboardPage';
 import AlterarSenha from '../features/usuarios/AlterarSenha';
 import UsuariosPage from '../features/usuarios/UsuariosPage';
 import ResultadosExamePage from '../features/resultados-exame/ResultadosExamePage';
@@ -47,7 +48,7 @@ export function returnDestination(value: string | null): string {
 function RouteEffects() {
   const location = useLocation();
   useEffect(() => {
-    const name = location.pathname === '/login' ? 'Entrar' : location.pathname.startsWith('/pacientes')
+    const name = location.pathname === '/login' ? 'Entrar' : location.pathname === '/dashboard' ? 'Dashboard' : location.pathname.startsWith('/pacientes')
       ? 'Pacientes' : location.pathname.startsWith('/importacoes') ? 'Importações'
       : location.pathname === '/minha-conta' ? 'Minha conta' : location.pathname === '/usuarios' || location.pathname.startsWith('/usuarios/') ? 'Usuários' : 'Início';
     document.title = `${name} | Ambulatório Santa Casa`;
@@ -150,22 +151,6 @@ function IdentityUnavailable() {
   </div>;
 }
 
-function HomePage() {
-  return <>
-    <PageHeading title="Início" description="Encontre um paciente e consulte os registros disponíveis para seu acesso." />
-    <div className="home-grid">
-      <Card><span className="section-label">REGISTROS DO AMBULATÓRIO</span>
-        <h2>Consulte a ficha do paciente</h2>
-        <p>Busque por nome ou sexo para abrir dados pessoais, atendimentos e acompanhamento.</p>
-        <Link to="/pacientes" className="button">Consultar pacientes <span aria-hidden="true">→</span></Link>
-      </Card>
-      <Card><span className="section-label">SEU ACESSO</span><h2>Minha conta</h2>
-        <p>Confira sua identificação e o perfil de acesso informado pelo serviço.</p>
-        <Link to="/minha-conta" className="button button-secondary">Ver minha conta</Link>
-      </Card>
-    </div>
-  </>;
-}
 
 function AccountPage() {
   const session = useSession();
@@ -191,7 +176,8 @@ export default function App() {
   return <><RouteEffects /><Routes>
     <Route path="/login" element={<LoginPage />} />
     <Route element={<ProtectedLayout />}>
-      <Route index element={<HomePage />} />
+      <Route index element={<DashboardPage />} />
+      <Route path="/dashboard" element={<DashboardPage title="Dashboard" />} />
       <Route path="/usuarios" element={<UsuariosPage />} />
       <Route path="/usuarios/:usuarioId" element={<UsuariosPage />} />
       <Route path="/pacientes" element={<PatientsPage />} />
