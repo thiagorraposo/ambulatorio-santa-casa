@@ -115,4 +115,47 @@ describe('DatabaseService', () => {
     expect(query.mock.calls.map(([sql]) => sql)).not.toContain('COMMIT');
     expect(query).toHaveBeenLastCalledWith('ROLLBACK');
   });
+  it('coordena serviços com um único BEGIN, ator e recibo e reverte qualquer falha dependente', async () => {
+    const query = jest.fn().mockResolvedValue({ rows: [] });
+    const { service } = serviceWith(query);
+    const scope: ClinicalOperationContext = { actorId: '4', transactionStarted: false,
+      before: async tx => { await tx.query('LOCK recibo'); },
+      after: async (tx, result) => { await tx.query('RECIBO coordenado', [result]); } };
+    await clinicalOperationContext.run(scope, () => service.coordinate('4', async () => {
+      await service.transaction(tx => tx.query('ESCRITA atendimento'), '4');
+      await service.transaction(tx => tx.query('ESCRITA dependente'), '4');
+      await service.query('LEITURA no mesmo snapshot');
+      return { atendimentoId: '50', sorologia0Id: '51' };
+    }));
+    const sql = query.mock.calls.map(([value]) => value);
+    expect(sql.filter(value => value === 'BEGIN')).toHaveLength(1);
+    expect(sql.filter(value => value === 'COMMIT')).toHaveLength(1);
+    expect(sql.slice(sql.indexOf('LOCK recibo'))).toEqual(['LOCK recibo', 'ESCRITA atendimento',
+      'ESCRITA dependente', 'LEITURA no mesmo snapshot', 'RECIBO coordenado', 'COMMIT']);
+    expect(query).toHaveBeenCalledWith('RECIBO coordenado', [{ atendimentoId: '50', sorologia0Id: '51' }]);
+    query.mockClear();
+    await expect(service.coordinate('4', async () => {
+      await service.transaction(tx => tx.query('PRIMEIRA escrita'), '4');
+      await service.transaction(async () => { throw new Error('falha dependente'); }, '4');
+    })).rejects.toThrow('falha dependente');
+    expect(query.mock.calls.map(([value]) => value)).not.toContain('COMMIT');
+    expect(query).toHaveBeenLastCalledWith('ROLLBACK');
+  });
+
+  it('não permite commit depois de falha capturada nem troca de ator na composição', async () => {
+    const query = jest.fn().mockResolvedValue({ rows: [] });
+    const { service } = serviceWith(query);
+    await expect(service.coordinate('4', async () => {
+      await service.transaction(async () => { throw new Error('falha'); }, '4').catch(() => undefined);
+      return 'não deve confirmar';
+    })).rejects.toThrow('confirmação integral cancelada');
+    expect(query.mock.calls.map(([value]) => value)).not.toContain('COMMIT');
+    query.mockClear();
+    await expect(service.coordinate('4', async () => {
+      await service.transaction(tx => tx.query('OUTRO ator'), '5');
+    })).rejects.toThrow('ator divergente');
+    expect(query.mock.calls.map(([value]) => value)).not.toContain('OUTRO ator');
+    expect(query).toHaveBeenLastCalledWith('ROLLBACK');
+  });
+
 });

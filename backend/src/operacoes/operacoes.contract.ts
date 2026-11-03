@@ -20,6 +20,7 @@ export interface ClinicalRoute {
   receiptId: string;
   version?: boolean;
   pendingStatus?: boolean;
+  attendanceConfirmation?: boolean;
 }
 
 const id = '([1-9]\\d{0,18})';
@@ -27,6 +28,7 @@ const routes: Array<[ClinicalMethod, RegExp, Omit<ClinicalRoute, 'patientId'>]> 
   ['POST', /^\/v1\/pacientes$/, { receiptId: 'pacienteId' }],
   ['PATCH', new RegExp(`^/v1/pacientes/${id}$`), { receiptId: 'pacienteId', version: true }],
   ['POST', new RegExp(`^/v1/pacientes/${id}/atendimentos$`), { receiptId: 'atendimentoId' }],
+  ['POST', new RegExp(`^/v1/pacientes/${id}/atendimentos/confirmacao$`), { receiptId: 'atendimentoId', attendanceConfirmation: true }],
   ['PATCH', new RegExp(`^/v1/pacientes/${id}/atendimentos/${id}$`), { receiptId: 'atendimentoId', version: true }],
   ['POST', new RegExp(`^/v1/pacientes/${id}/atendimentos/${id}/sorologias$`), { receiptId: 'sorologiaId' }],
   ['POST', new RegExp(`^/v1/pacientes/${id}/atendimentos/${id}/condicao-chagas$`), { receiptId: 'condicaoChagasId' }],
@@ -84,6 +86,15 @@ export function operationReceipt(route: ClinicalRoute, value: unknown): Operatio
   for (const key of [route.receiptId, ...(route.version ? ['versao'] : [])]) {
     if (typeof source[key] !== 'string' || !/^[1-9]\d{0,18}$/.test(source[key])) throw new Error('ID/versão ausente no recibo clínico');
     receipt[key] = source[key];
+  }
+  if (route.attendanceConfirmation) {
+    const singles = new Set(['condicaoChagasId', 'avaliacaoComorbidadesId', 'obitoId', 'tratamentoId', 'notificacaoId']);
+    for (const [key, id] of Object.entries(source)) {
+      if (!singles.has(key) && !/^(?:sorologia|complicacao|avc|dispositivo|projeto|encaminhamento)(?:[0-9]|[12][0-9])Id$/.test(key)) continue;
+      if (typeof id !== 'string') throw new Error('ID inválido no recibo da confirmação');
+      new ClinicalIdPipe().transform(id);
+      receipt[key] = id;
+    }
   }
   if (route.pendingStatus) {
     if (source.status !== null && !['aberta','em_andamento','resolvida','cancelada','nao_informado'].includes(String(source.status))) {

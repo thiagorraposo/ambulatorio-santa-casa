@@ -1,5 +1,19 @@
 # Registro de Alterações
 
+## 2026-11-03 — Integrar rascunho das12 seções e confirmação coordenada do atendimento
+
+P0 funcional M3 assume prioridade máxima. Campos dos serviços clínicos existentes
+agora compartilham preenchimento/revisão; histórico longitudinal consultável sem
+cópia, novos registros explícitos e confirmação PostgreSQL coordenada com recibos
+por operação. Recuperação mantém reenvio bloqueado até prova autoritativa; novos
+atendimentos começam vazios. Sem migration ou banco persistente. Builds/testes
+sem sockets e limitações reais em [relatório da unidade](validacoes/FLUXO_UNICO_ATENDIMENTO_M3_2026_11_03.md).
+Retomada: bloqueios anteriores de Git e sockets não reproduzidos, sem alterar
+permissões/configurações. Provas focadas reais HTTP/PostgreSQL/Chromium,
+concorrência, histórico, auditoria e visual1440/390 aprovadas; corrigidos SQL do
+teste e alinhamento da grade. Regressão ampla ainda em curso, com evidências no
+mesmo relatório; sem aceite humano8V.
+
 ## 2026-11-03 — Integrar ativação e inativação administrativas8D2B.2/U.2
 
 Migration76 compartilha recibos/versão entre perfil e estado, conserva wrapper/view

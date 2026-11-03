@@ -5,6 +5,7 @@ import { useApiQuery } from '../../api/useApiQuery';
 import { useSession } from '../../app/session';
 import { ApiErrorState, EmptyState } from '../../shared/ui';
 import { FollowupField } from './FollowupFields';
+import { fieldReason, useFieldValidation } from '../../shared/field-validation';
 
 export function FollowupRead<T>({ query, children }: {
   query: UseQueryResult<T, ApiError>; children: (data: T) => ReactNode;
@@ -39,12 +40,13 @@ export function useFollowupAll<T>(path: string): UseQueryResult<T[], ApiError> {
 
 /** Page selectors keep the selected string ID while the available choices change pages. */
 export function FollowupChoice<T>({ label, path, value, onChange, idOf, labelOf,
-  required = false, filter, emptyLabel, onRecord }: {
+  required = false, filter, emptyLabel, onRecord, fieldPath }: {
   label: string; path: string; value: string; onChange: (value: string) => void;
   idOf: (row: T) => string; labelOf: (row: T) => string;
   required?: boolean; filter?: (row: T) => boolean; emptyLabel?: string;
-  onRecord?: (row: T) => void;
+  onRecord?: (row: T) => void; fieldPath?: string;
 }) {
+  const validation = useFieldValidation(fieldPath);
   const [offset, setOffset] = useState(0);
   const query = useApiQuery<T[]>(`${path}${path.includes('?') ? '&' : '?'}limit=20&offset=${offset}`);
   const [selected, setSelected] = useState<{ id: string; label: string } | null>(null);
@@ -52,7 +54,8 @@ export function FollowupChoice<T>({ label, path, value, onChange, idOf, labelOf,
   const count = query.isSuccess && !query.isFetching ? query.data.length : undefined;
   const selectedLabel = selected?.id === value ? selected.label : `ID ${value} (seleção mantida)`;
   return <div className="choice-field">
-    <FollowupField label={label}>{id => <select id={id} required={required} value={value}
+    {validation.error && <p id={validation.errorId} className="field-error">{fieldReason(validation.error.code)}</p>}
+    <FollowupField label={label} fieldId={validation.id}>{id => <select id={validation.id ?? id} aria-invalid={validation.error ? true : undefined} aria-describedby={validation.errorId} required={required} value={value}
       disabled={query.isPending || query.isFetching || query.isError}
       onChange={event => {
         const next = event.target.value;

@@ -96,6 +96,14 @@ FM/RQ-LOG, NAV, CAD, FIC/HIS e EST: componentes compartilhados e recortes visuai
 exercitados no relatório; não significa cobertura de todos os IDs dessas famílias.
 Sem novos contratos, permissões ou aceite integral 8V1/8V2.
 
+**P0 funcional vigente — fluxo único:** a implementação das12 seções e a
+confirmação coordenada sucedem a separação acima no recorte de novos registros.
+FM/RQ-ATD, DIA/SOR, condição/COM, EVT/DSP, PRJ, BZN, ENC e NTF conservam seus IDs,
+entidades e limites clínicos. Existentes são consultados sem cópia; alterações
+longitudinais continuam próprias. [Mapa por seção, contrato e provas](../validacoes/FLUXO_UNICO_ATENDIMENTO_M3_2026_11_03.md).
+Estado: implementado, testes sem sockets; validação integrada/visual pendente.
+Linhas históricas abaixo não constituem prova do endpoint novo nem aceite8V.
+
 ## Como ler e manter a rastreabilidade
 
 Cada linha tem ID estável `FM-FAMÍLIA-NN`. Seu requisito individual é

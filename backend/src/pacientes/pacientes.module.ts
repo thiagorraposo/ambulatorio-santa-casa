@@ -1,3 +1,5 @@
+import { AttendanceConfirmationController } from './attendance-confirmation.controller';
+import { AttendanceConfirmationService } from './attendance-confirmation.service';
 import { ResultadosExameController } from './resultados-exame.controller';
 import { ResultadosExameService } from './resultados-exame.service';
 import { ReacoesBznController } from './reacoes-bzn.controller';
@@ -25,6 +27,6 @@ import { RecursosClinicosService } from './recursos-clinicos.service';
 import { SorologiasController } from './sorologias.controller';
 import { SorologiasService } from './sorologias.service';
 
-@Module({ controllers: [ResultadosExameController, ReacoesBznController, MedicamentosController, ObitoController, DispositivosController, AvcsController, ComorbidadesController, PacientesController, RecursosClinicosController, SorologiasController, CondicaoChagasController, ComplicacoesChagasController],
-  providers: [ResultadosExameService, ReacoesBznService, MedicamentosService, ObitoService, DispositivosService, AvcsService, ComorbidadesService, PacientesService, PacientesRepository, RecursosClinicosService, SorologiasService, CondicaoChagasService, ComplicacoesChagasService] })
+@Module({ controllers: [AttendanceConfirmationController, ResultadosExameController, ReacoesBznController, MedicamentosController, ObitoController, DispositivosController, AvcsController, ComorbidadesController, PacientesController, RecursosClinicosController, SorologiasController, CondicaoChagasController, ComplicacoesChagasController],
+  providers: [AttendanceConfirmationService, ResultadosExameService, ReacoesBznService, MedicamentosService, ObitoService, DispositivosService, AvcsService, ComorbidadesService, PacientesService, PacientesRepository, RecursosClinicosService, SorologiasService, CondicaoChagasService, ComplicacoesChagasService] })
 export class PacientesModule {}

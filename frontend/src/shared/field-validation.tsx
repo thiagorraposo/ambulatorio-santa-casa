@@ -1,3 +1,4 @@
+import { integratedFieldLabel } from '../features/clinical/attendance-integration';
 import { createContext, useContext, type ReactNode } from 'react';
 
 export interface FieldViolation { path: string; code: string }
@@ -38,7 +39,7 @@ export function fieldLabel(path: string): string | undefined {
   }
   const family = /^rastreioFamiliar\.familiares\.([0-9]|[1-4][0-9])\.(familiar|resultado)$/.exec(path);
   if (family) return `${family[2] === 'familiar' ? 'Identificação' : 'Resultado'} do familiar ${Number(family[1]) + 1}`;
-  return undefined;
+  return integratedFieldLabel(path);
 }
 export const fieldReason = (code: string): string => Object.hasOwn(reasons, code) ? reasons[code]! : reasons.invalid!;
 export function readFieldViolations(body: unknown): FieldViolation[] {

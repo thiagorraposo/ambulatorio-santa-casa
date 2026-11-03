@@ -17,7 +17,8 @@ test('consulta: busca, paginação, leitura e acessibilidade com dados reais da 
   await assertAccessible(page);
   const authentication = await signIn(page, 'consulta');
   const me = await page.request.get('/v1/auth/me', { headers: { authorization: `Bearer ${authentication.accessToken}` } });
-  expect(await me.json()).toEqual({ usuarioId: fixture.users.consulta.usuarioId, nome: fixture.users.consulta.nome, perfil: 'consulta' });
+  expect(await me.json()).toEqual({ usuarioId: fixture.users.consulta.usuarioId, nome: fixture.users.consulta.nome,
+    perfil: 'consulta', login: fixture.users.consulta.login, ativo: true });
   await expect(page.getByRole('heading', { name: 'Início', exact: true })).toBeVisible();
   await menu(page).getByRole('link', { name: 'Minha conta', exact: true }).click();
   await expect(page.getByRole('main')).toBeFocused();

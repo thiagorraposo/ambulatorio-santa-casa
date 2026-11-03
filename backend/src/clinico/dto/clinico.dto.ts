@@ -121,8 +121,7 @@ export class BznReactionDto {
   @IsOptional() @IsString() @MaxLength(10000) consequencia?: string | null;
   @IsOptional() @IsString() @MaxLength(10000) observacoes?: string | null;
 }
-export class BznTreatmentCreateDto {
-  @IsOptional() @Matches(/^[1-9]\d{0,18}$/) atendimentoId?: string;
+export class BznTreatmentDataDto {
   @IsOptional() @IsBoolean() temIndicacao?: boolean | null;
   @IsOptional() @IsBoolean() iniciado?: boolean | null;
   @IsOptional() @IsBoolean() tratamentoPeloAmbulatorio?: boolean | null;
@@ -134,6 +133,9 @@ export class BznTreatmentCreateDto {
   @IsOptional() @IsBoolean() teveReacaoAdversa?: boolean | null;
   @IsOptional() @IsString() @MaxLength(10000) observacoes?: string | null;
   @IsOptional() @IsArray() @ArrayMaxSize(30) @IsObject({ each: true }) @ValidateNested({ each: true }) @Type(() => BznReactionDto) reacoes?: BznReactionDto[];
+}
+export class BznTreatmentCreateDto extends BznTreatmentDataDto {
+  @IsOptional() @Matches(/^[1-9]\d{0,18}$/) atendimentoId?: string;
 }
 export class AnnualFactDto {
   @IsInt() @Min(1) @Max(9999) ano!: number;

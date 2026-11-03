@@ -393,6 +393,15 @@ o aceite anterior deM2 não é transferido a essa extensão.
 
 #### 7D-U1 — Preencher atendimento em cinco etapas sem perder dados
 
+**Atualização P0 funcional M3 de03/11:** [fluxo único das12 seções](../validacoes/FLUXO_UNICO_ATENDIMENTO_M3_2026_11_03.md)
+implementado para preenchimento/revisão/novos registros com confirmação
+transacional e recuperação por recibo. Sucede a divisão inicial em cinco etapas
+e amplia7D-U2 no contrato novo; endpoints e aceites históricos preservados.
+Provas navegador/API/PostgreSQL/visual ainda pendentes pelo sandbox; não concluir
+U1/U2 de M3 ou8V por testes unitários. Edição de históricos/retornos e demais
+lacunas continuam obrigatórias nas unidades próprias.
+
+
 **Estado e cobertura:** Implementado e validado tecnicamente em 26/10/2026; aceito no recorte M2 em 31/10/2026, conforme parecer oficial 7D-A1. Evidências e limites em [7D-U1/U2](../validacoes/VALIDACAO_7D_U1_U2.md). RQ-ATD-01–10, 12–19; RQ-DIA-01–07, 22; RQ-MED-01–09; RQ-EXN-01–09; RQ-OBS-01–03; RQ-EST-10 (telas/elementos na matriz).
 
 **Escopo:** Atendimento, Avaliação/Chagas, Exames/familiares, Pendências e Revisão; somente campos hoje aceitos. Prévia de resumo não confirma ainda; etapa de revisão completa pertence a U2.

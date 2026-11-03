@@ -1,4 +1,4 @@
-/* Organização informacional das 12 seções oficiais; confirmações separadas conservam seus contratos. */
+/* Fluxo contínuo das 12 seções oficiais; contratos e entidades clínicas preservados. */
 .attendance-workflow { background: transparent; border: 0; padding: 0; box-shadow: none; max-width: 64rem; margin-inline: auto; }
 .attendance-layout { display: grid; grid-template-columns: 14rem minmax(0, 1fr); gap: 1.25rem; align-items: start; }
 .attendance-sidebar { background: #fff; border: 1px solid var(--border); border-radius: .5rem; overflow: hidden; }
@@ -17,7 +17,7 @@
 .attendance-content > .form-section > h2, .complementary-section > h2 { margin: -1.25rem -1.25rem 1.25rem; padding: 1rem 6.5rem 1rem 1.25rem; border-bottom: 1px solid var(--border); font-size: .95rem; }
 .attendance-content > .form-section > .form-section { border: 0; padding: 0; }
 .attendance-content > .form-section > .form-section > legend { font-size: .8rem; color: var(--muted); padding: 0; margin-bottom: .75rem; }
-.attendance-content .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.attendance-content .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
 .attendance-content > .form-section:first-of-type .form-section:first-of-type .form-grid { grid-template-columns: minmax(0, 1fr); }
 .attendance-content > .form-section:first-of-type .form-section:first-of-type > legend,
 .attendance-content > .form-section:first-of-type .form-section:last-of-type > legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
@@ -43,3 +43,5 @@
 .attendance-workflow.card { background: transparent; border: 0; padding: 0; box-shadow: none; }
 .attendance-layout { grid-template-columns: 12.5rem minmax(0, 1fr); }
 @media (max-width: 800px) { .attendance-layout { grid-template-columns: minmax(0, 1fr); } }
+
+.attendance-content details, .attendance-content dd { overflow-wrap: anywhere; }

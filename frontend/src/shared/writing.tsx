@@ -75,9 +75,12 @@ type WriteState = { status: 'idle' | 'pending' | 'saved' | 'error' | 'uncertain'
 export interface MutationFormProps<T = Record<string, unknown>> {
   title: string;
   path: string;
+  draftPath?: string;
+  verifyConflict?: boolean;
   method: 'POST' | 'PATCH' | 'PUT';
   buildBody: () => unknown;
   onSaved?: (data: T) => void;
+  validateResponse?: (data: T) => boolean;
   children: ReactNode;
   dirty: boolean;
   submitLabel?: string;
@@ -95,7 +98,7 @@ export interface MutationFormProps<T = Record<string, unknown>> {
   onValidationField?: (path: string) => void;
 }
 
-export function MutationForm<T = Record<string, unknown>>({ title, path, method, buildBody, onSaved, children, dirty,
+export function MutationForm<T = Record<string, unknown>>({ title, path, draftPath = path, verifyConflict = false, method, buildBody, onSaved, validateResponse, children, dirty,
   submitLabel = 'Salvar registro', verificationPath, verificationLabel = 'Verificar registro salvo', disabled = false,
   submitVisible = true,
   operationKey = '', responseId, expectedId, conflictReview, intentionReview, onConflict, validationErrors = [], onValidationField }: MutationFormProps<T>) {
@@ -103,7 +106,7 @@ export function MutationForm<T = Record<string, unknown>>({ title, path, method,
   const session = useSession();
   const queries = useQueryClient();
   const drafts = useContext(Drafts)!;
-  const writeKey = `write:${method}:${path}:${operationKey}`;
+  const writeKey = `write:${method}:${draftPath}:${operationKey}`;
   const [state, setState] = useClinicalDraft<WriteState>(writeKey, { status: 'idle' });
   const [verifying, setVerifying] = useState(false);
   const sending = useRef(false);
@@ -143,6 +146,7 @@ export function MutationForm<T = Record<string, unknown>>({ title, path, method,
   }, [blocked.state]);
 
   function confirm(data: T, intention?: ClinicalIntention) {
+    if (validateResponse && !validateResponse(data)) throw new ApiError(502);
     const ids = data && typeof data === 'object' ? Object.entries(data).filter(([key, value]) =>
       (responseId ? key === responseId : key.endsWith('Id')) && typeof value === 'string' && /^[1-9]\d{0,18}$/.test(value)) : [];
     if (!ids.length || (expectedId !== undefined && ids[0]![1] !== expectedId)) throw new ApiError(502);
@@ -258,7 +262,7 @@ export function MutationForm<T = Record<string, unknown>>({ title, path, method,
         {verificationPath && ['saved', 'uncertain', 'conflict'].includes(state.status)
           && <Link to={verificationPath}>{verificationLabel}</Link>}
       </div>}
-      {state.status === 'uncertain' && state.intention && <div className="form-actions" aria-live="polite">
+      {(state.status === 'uncertain' || (verifyConflict && state.status === 'conflict')) && state.intention && <div className="form-actions" aria-live="polite">
         <button type="button" className="button button-secondary" disabled={verifying} onClick={() => { void recover(); }}>Verificar resultado do envio</button>
         <button type="button" className="button button-secondary" disabled={verifying} onClick={() => { void recover(true); }}>Encerrar tentativa e verificar</button>
         {verifying && <span role="status">Verificando o resultado…</span>}

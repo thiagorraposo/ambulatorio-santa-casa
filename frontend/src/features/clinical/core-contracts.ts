@@ -1,3 +1,4 @@
+import { integratedBody, type IntegratedDraft } from './attendance-integration';
 import { FieldValidationError } from '../../shared/field-validation';
 import type { AtendimentoDetalheResponse, PacienteDetalheResponse } from '../../api/contracts';
 import type { CatalogItem } from '../../shared/writing';
@@ -89,7 +90,7 @@ export interface AttendanceDraft {
   values: Fields; initial: Fields; original?: AtendimentoDetalheResponse;
   clinical: Fields; diagnosis: Fields; exams: ExamDraft[]; families: FamilyDraft[];
   familyStatus: string; pending: PendingDraft[];
-  operationKey?: string;
+  operationKey?: string; integrated?: IntegratedDraft;
 }
 
 export function attendanceBody(draft: AttendanceDraft): Record<string, unknown> {
@@ -151,5 +152,5 @@ export function attendanceBody(draft: AttendanceDraft): Record<string, unknown> 
     if (incomplete.length) throw new FieldValidationError(incomplete);
     body.rastreioFamiliar = { familiaresExaminados: flag, familiares: draft.families };
   }
-  return body;
+  return { ...body, ...integratedBody(draft.integrated) };
 }

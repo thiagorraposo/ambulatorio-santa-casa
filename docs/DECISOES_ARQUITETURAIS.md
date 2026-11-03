@@ -884,3 +884,29 @@ Extensão8D2.2: migration76 compartilha a versão/recibo entre perfil e estado,
 conserva wrapper e view de perfil para compatibilidade e usa a revogação de
 vínculos da74 na mesma transação. Nova intenção após recibo confirmado exige
 releitura explícita. [Prova integrada de estado](validacoes/VALIDACAO_8D2_ESTADO.md).
+
+## ADR-030
+
+ID: ADR-030
+
+Título: Coordenar novos registros do fluxo único na transação clínica existente
+
+Data: 2026-11-03
+
+Status: Implementada; validação integrada pendente
+
+Contexto: As12 seções do atendimento precisam compartilhar preenchimento e
+revisão sem reduzir o histórico do paciente à entidade atendimento.
+
+Decisão: Acrescentar confirmação coordenada por DTOs e serviços existentes,
+com escopo transacional explícito, mesmo ator e recibo na mesma transação.
+Manter os endpoints individuais. Só criar novos recursos longitudinais por
+intenção explícita; conflitos não sobrescrevem históricos. Recuperação consulta
+o recibo autoritativo e não reexecuta operações clínicas.
+
+Consequências: Há atomicidade entre os registros do endpoint coordenado, sem
+compensações destrutivas. Edição e acompanhamentos fora deste recorte preservam
+seus contratos próprios. [Contrato, limites e provas pendentes](validacoes/FLUXO_UNICO_ATENDIMENTO_M3_2026_11_03.md).
+
+Alternativas rejeitadas: Gravações independentes apresentadas como transação;
+tabela única para todo o histórico; cópia automática de registros longitudinais.
