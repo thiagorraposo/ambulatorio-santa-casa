@@ -19,7 +19,7 @@ for (const profile of ['consulta', 'edicao'] as const) {
     await signIn(page, profile, '/importacoes');
     await expect(page.getByText(/frontend-lote-sanitizado-/)).toBeVisible();
     await expect(page.getByText(/frontend-lote-sem-vinculo-/)).toHaveCount(0);
-    await page.getByRole('link', { name: 'Consultar' }).click();
+    await page.getByRole('row').filter({ hasText: /frontend-lote-sanitizado-/ }).getByRole('link', { name: 'Consultar', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Detalhe da importação' })).toBeVisible();
     await expect(page.getByRole('cell', { name: 'SEGREDO_CLINICO_SINTETICO' })).toHaveCount(0);
     const pagination = page.getByRole('navigation', { name: 'Paginação de linhas' });

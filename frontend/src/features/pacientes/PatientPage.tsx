@@ -9,7 +9,7 @@ import { useSession } from '../../app/session';
 import ClinicalActions from '../clinical/ClinicalActions';
 import { LatestAttendance } from './LatestAttendance';
 import { SelectedAttendance } from './SelectedAttendance';
-import { patientsSearchReturn } from './PatientsSearchReturn';
+import { patientsSearchReturn, searchReturnPath } from './PatientsSearchReturn';
 import {
   AttendanceHistory, PatientAnnualFollowup, PatientBzn, PatientExams, PatientNotification,
   PatientPending, PatientProjects, PatientReferrals,
@@ -80,9 +80,10 @@ export default function PatientPage() {
   const section = searchParams.get('aba') ?? 'dados';
   const page = usePage('dados');
   const path = `/pacientes/${encodeURIComponent(pacienteId)}`;
+  const searchOrigin = patientsSearchReturn(searchParams.get('retorno'));
   const query = useApiQuery<PacienteDetalheResponse>(pagePath(path, page.limit, page.offset));
   return <>
-    <nav className="breadcrumb" aria-label="Caminho da página"><Link to={patientsSearchReturn(searchParams.get('retorno')) ?? '/pacientes'}>Pacientes</Link><span>Ficha do paciente</span></nav>
+    <nav className="breadcrumb" aria-label="Caminho da página"><Link to={searchOrigin ?? '/pacientes'}>{searchOrigin?.startsWith('/dashboard') ? 'Dashboard' : 'Pacientes'}</Link><span>Ficha do paciente</span></nav>
     <PageHeading title="Ficha do paciente" />
     <QueryState query={query}>
       {data => <>
@@ -94,8 +95,8 @@ export default function PatientPage() {
           <p>{formatAge(data.idade, data.dataReferenciaIdade)}</p>
           </div>
           {session.user?.perfil !== 'consulta' && <div className="form-actions">
-            <Link to={`${path}/editar`} className="button button-secondary">Editar paciente</Link>
-            <Link to={`${path}/atendimentos/novo`} className="button">Novo atendimento</Link>
+            <Link to={searchReturnPath(`${path}/editar`, searchOrigin)} className="button button-secondary">Editar paciente</Link>
+            <Link to={searchReturnPath(`${path}/atendimentos/novo`, searchOrigin)} className="button">Novo atendimento</Link>
             <Link to={`${path}/registrar?tipo=bzn`} className="button button-secondary">Registrar acompanhamento</Link>
           </div>}
           </div>

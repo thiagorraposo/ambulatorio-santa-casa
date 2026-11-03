@@ -13,7 +13,7 @@ const managers: SessionManager[] = [];
 const routers: ReturnType<typeof createMemoryRouter>[] = [];
 afterEach(() => { routers.splice(0).forEach(router => router.dispose()); managers.splice(0).forEach(manager => manager.dispose()); });
 interface Write { path: string; operationId: string | null; body: Record<string, unknown> }
-async function setup({ loseCommit = false, existing = false, rejectFirst = 0 }: { loseCommit?: boolean; existing?: boolean; rejectFirst?: 0 | 400 | 409 } = {}) {
+async function setup({ loseCommit = false, existing = false, rejectFirst = 0, origin }: { loseCommit?: boolean; existing?: boolean; rejectFirst?: 0 | 400 | 409; origin?: string } = {}) {
   const writes: Write[] = [];
   const intentions: ClinicalIntention[] = [];
   const receipt = { atendimentoId: '501', condicaoChagasId: '502', sorologia0Id: '503', avc0Id: '504', avaliacaoComorbidadesId: '505' };
@@ -50,7 +50,7 @@ async function setup({ loseCommit = false, existing = false, rejectFirst = 0 }: 
   managers.push(manager); await manager.login('sintetico@example.invalid', 'senha-sintetica');
   const router = createMemoryRouter([{ path: '/pacientes/:pacienteId/atendimentos/novo',
     element: <SessionProvider manager={manager}><DraftProvider><AttendanceFormPage /></DraftProvider></SessionProvider> }],
-  { initialEntries: ['/pacientes/42/atendimentos/novo'] });
+  { initialEntries: [`/pacientes/42/atendimentos/novo${origin ? `?${new URLSearchParams({ retorno: origin })}` : ''}`] });
   routers.push(router); render(<RouterProvider router={router} />);
   const user = userEvent.setup();
   const date = await screen.findByLabelText('Data do atendimento');
@@ -64,6 +64,19 @@ const add = (user: ReturnType<typeof userEvent.setup>, title: string) => user.cl
 const review = (user: ReturnType<typeof userEvent.setup>) => user.click(screen.getByRole('button', { name: 'Revisar atendimento' }));
 
 describe('rascunho e confirmação do atendimento integrado', () => {
+  it.each(['/pacientes?nome=Ana&limit=1&offset=2', '/dashboard?nome=Ana&offset=20&inicio=2026-10-01&fim=2026-10-31'])('mantém a origem filtrada após confirmar uma única vez: %s', async origin => {
+    const { user, writes } = await setup({ origin });
+    const record = `/pacientes/42?${new URLSearchParams({ retorno: origin })}`;
+    expect(screen.getByRole('link', { name: 'Ficha do paciente' })).toHaveAttribute('href', record);
+    await section(user, 'Condição Clínica');
+    await add(user, 'condição de Chagas');
+    await user.selectOptions(screen.getByLabelText('Possui sintomas 1'), 'nao');
+    await review(user);
+    await user.click(screen.getByRole('button', { name: 'Confirmar atendimento' }));
+    const detail = await screen.findByRole('link', { name: 'Consultar atendimento confirmado' });
+    expect(new URL(detail.getAttribute('href')!, 'http://app.local').searchParams.get('retorno')).toBe(record);
+    expect(writes).toHaveLength(1);
+  });
   it('preserva campos entre seções e revisa negativo, desconhecido e omitido sem escrever na navegação', async () => {
     const { user, writes } = await setup();
     await section(user, 'Condição Clínica'); await add(user, 'condição de Chagas');

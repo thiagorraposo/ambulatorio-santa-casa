@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useApiQuery } from '../../api/useApiQuery';
 import PatientsPage from './PatientsPage';
-import { PatientsSearchReturn } from './PatientsSearchReturn';
+import { PatientsSearchReturn, patientsSearchReturn, searchReturnPath } from './PatientsSearchReturn';
 
 vi.mock('../../api/useApiQuery', () => ({ useApiQuery: vi.fn() }));
 vi.mock('../clinical/PatientCreateGate', () => ({ PatientCreateLink: () => null }));
@@ -57,5 +57,15 @@ describe('8B3U.4 atalhos por pessoa', () => {
   it.each(['https://outside.invalid', '//outside.invalid', '/pacientes/2', '/pacientes#fora', '/pacientes?nome=a\\b'])('recusa retorno alheio à busca: %s', retorno => {
     render(<MemoryRouter initialEntries={[`/formulario?${new URLSearchParams({ retorno })}`]}><PatientsSearchReturn /></MemoryRouter>);
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+  it('retorna ao Dashboard com filtros, ordenação e página preservados', () => {
+    const retorno = '/dashboard?inicio=2026-10-01&fim=2026-10-31&nome=Ana&offset=20&ordem=data_desc';
+    render(<MemoryRouter initialEntries={[`/formulario?${new URLSearchParams({ retorno })}`]}><PatientsSearchReturn /></MemoryRouter>);
+    expect(screen.getByRole('link', { name: 'Voltar ao dashboard' })).toHaveAttribute('href', retorno);
+    expect(searchReturnPath(`/pacientes/${ID}/editar`, retorno)).toBe(`/pacientes/${ID}/editar?${new URLSearchParams({ retorno })}`);
+  });
+  it.each(['/dashboard/externo', '/dashboard#fora', '/dashboard?nome=a\\b', '/dashboard\n', '/dashboard?nome=a\t', '/dashboardevil', 'https://outside.invalid/dashboard', '//outside.invalid/dashboard'])('rejeita retorno de análise inválido: %s', retorno => {
+    expect(patientsSearchReturn(retorno)).toBeNull();
+    expect(searchReturnPath(`/pacientes/${ID}/editar`, retorno)).toBe(`/pacientes/${ID}/editar`);
   });
 });

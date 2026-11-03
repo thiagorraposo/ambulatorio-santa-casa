@@ -62,7 +62,7 @@ test('8B1 quatro indicadores reais com fixture conhecida, filtros URL e visual r
     }
     await page.getByLabel('Data inicial', { exact: true }).fill('2003-03-14');
     await page.getByLabel('Data final', { exact: true }).fill('2003-03-14');
-    await page.getByRole('button', { name: 'Aplicar período', exact: true }).click();
+    await page.getByRole('button', { name: 'Aplicar filtros', exact: true }).click();
     await expect(page).toHaveURL(/inicio=2003-03-14&fim=2003-03-14/);
     const changed = await read('edicao', 'inicio=2003-03-14&fim=2003-03-14');
     await displayed(page, changed);
@@ -71,8 +71,8 @@ test('8B1 quatro indicadores reais com fixture conhecida, filtros URL e visual r
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.getByRole('navigation', { name: 'Menu principal', exact: true }).getByRole('link', { name: 'Início', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Início', exact: true })).toBeVisible();
-    await expect(page.getByRole('group', { name: 'Pacientes autorizados', exact: true })).toBeVisible();
-    await page.getByRole('link', { name: /Consultar pacientes/ }).click();
+    await expect(page.getByRole('group', { name: 'Pacientes autorizados', exact: true })).toHaveCount(0);
+    await page.getByRole('navigation', { name: 'Menu principal', exact: true }).getByRole('link', { name: 'Pacientes', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Pacientes', exact: true })).toBeVisible();
   } finally {
     if (granted) await owner.query('UPDATE ambulatorio.dashboard_importacao_leitor SET revogado_em=clock_timestamp(),revogado_por_principal=session_user WHERE dashboard_importacao_leitor_id=$1', [granted]);
@@ -81,13 +81,13 @@ test('8B1 quatro indicadores reais com fixture conhecida, filtros URL e visual r
 });
 
 test('8B1 falta de capacidade, zero autorizado, carga e erro não exibem contagem anterior', async ({ page }, info) => {
-  await signIn(page, 'consulta', `/?${period}`);
+  await signIn(page, 'consulta', `/dashboard?${period}`);
   const current = await read('consulta'); await displayed(page, current);
   const lots = page.getByRole('group', { name: 'Lotes de importação concluídos', exact: true });
   await expect(lots).toContainText('Sem permissão'); await expect(lots.locator('.dashboard-value')).toHaveCount(0);
   await page.getByLabel('Data inicial', { exact: true }).fill('1001-01-01');
   await page.getByLabel('Data final', { exact: true }).fill('1001-01-01');
-  await page.getByRole('button', { name: 'Aplicar período', exact: true }).click();
+  await page.getByRole('button', { name: 'Aplicar filtros', exact: true }).click();
   await expect(page.getByLabel('Atendimentos realizados: 0', { exact: true })).toBeVisible();
   await expect(page.getByRole('group', { name: 'Atendimentos realizados', exact: true })).toContainText('Nenhum registro no recorte autorizado');
   await page.setViewportSize({ width: 390, height: 900 });

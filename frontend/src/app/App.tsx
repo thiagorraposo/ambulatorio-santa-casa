@@ -1,4 +1,5 @@
 import DashboardPage from '../features/dashboard/DashboardPage';
+import HomePage from '../features/home/HomePage';
 import AlterarSenha from '../features/usuarios/AlterarSenha';
 import UsuariosPage from '../features/usuarios/UsuariosPage';
 import ResultadosExamePage from '../features/resultados-exame/ResultadosExamePage';
@@ -176,7 +177,7 @@ export default function App() {
   return <><RouteEffects /><Routes>
     <Route path="/login" element={<LoginPage />} />
     <Route element={<ProtectedLayout />}>
-      <Route index element={<DashboardPage />} />
+      <Route index element={<HomePage />} />
       <Route path="/dashboard" element={<DashboardPage title="Dashboard" />} />
       <Route path="/usuarios" element={<UsuariosPage />} />
       <Route path="/usuarios/:usuarioId" element={<UsuariosPage />} />

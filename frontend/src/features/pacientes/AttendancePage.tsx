@@ -25,7 +25,7 @@ export default function AttendancePage() {
 
   return <>
     <nav className="breadcrumb" aria-label="Caminho da página">
-      <Link to={searchOrigin ?? '/pacientes'}>Pacientes</Link>
+      <Link to={searchOrigin ?? '/pacientes'}>{searchOrigin?.startsWith('/dashboard') ? 'Dashboard' : 'Pacientes'}</Link>
       <Link to={origin ?? `${patientPath}?aba=atendimentos`}>{origin ? 'Voltar à ficha de origem' : 'Histórico do paciente'}</Link>
       <span>Atendimento</span>
     </nav>
@@ -52,7 +52,7 @@ export default function AttendancePage() {
             </nav>
             {location.state?.saved && <p className="notice" role="status">{String(location.state.saved)}</p>}
             {session.user?.perfil !== 'consulta' && <div className="form-actions">
-              <Link to={`${patientPath}/atendimentos/${atendimentoId}/editar`} className="button button-secondary">Editar atendimento</Link>
+              <Link to={`${patientPath}/atendimentos/${atendimentoId}/editar${origin ? `?${new URLSearchParams({ retorno: origin })}` : ''}`} className="button button-secondary">Editar atendimento</Link>
               <Link to={`${patientPath}/registrar?tipo=bzn&atendimentoId=${encodeURIComponent(atendimentoId)}&retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`} className="button button-secondary">Registrar acompanhamento</Link>
             </div>}
             <Fields items={[

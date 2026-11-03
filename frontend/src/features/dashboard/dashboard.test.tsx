@@ -10,7 +10,7 @@ const managers: SessionManager[] = [];
 afterEach(() => managers.splice(0).forEach(manager => manager.dispose()));
 function data(inicio = '2026-10-30', fim = '2026-10-31'): DashboardResponse {
   const metric = (valor: number, periodoAplicado: boolean) => ({ valor, periodoAplicado, estado: 'disponivel' as const, definicao: 'Definição sintética autorizada' });
-  return { periodo: { inicio, fim, limites: 'inclusivos', tempoLotes: 'timestamp_sem_fuso' }, atualizadoEm: '2026-11-03T10:00:00Z', indicadores: {
+  return { resultados: [], paginacao: { limit: 20, offset: 0, total: 0 }, serieAtendimentos: [], projetos: [], periodo: { inicio, fim, limites: 'inclusivos', tempoLotes: 'timestamp_sem_fuso' }, atualizadoEm: '2026-11-03T10:00:00Z', indicadores: {
     pacientes: metric(3, false), atendimentos: metric(inicio === '2026-10-30' ? 3 : 1, true), pendencias: metric(2, false),
     lotes: { estado: 'sem_permissao', valor: null, periodoAplicado: true, definicao: 'Capacidade explícita necessária' },
   } };
@@ -48,15 +48,15 @@ describe('8B1 dashboard integrado', () => {
     const { user, reads } = await setup(); await screen.findByRole('group', { name: 'Pacientes autorizados' });
     fireEvent.change(screen.getByLabelText('Data inicial'), { target: { value: '2026-11-01' } });
     fireEvent.change(screen.getByLabelText('Data final'), { target: { value: '2026-11-01' } });
-    await user.click(screen.getByRole('button', { name: 'Aplicar período' }));
+    await user.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
     expect(await screen.findByLabelText('Atendimentos realizados: 1')).toBeVisible();
     expect(screen.getByLabelText('Pacientes autorizados: 3')).toBeVisible();
-    expect(reads.mock.calls.at(-1)?.[0]).toBe('/v1/dashboard?inicio=2026-11-01&fim=2026-11-01');
+    expect(reads.mock.calls.at(-1)?.[0]).toBe('/v1/dashboard?inicio=2026-11-01&fim=2026-11-01&ordenacao=data_desc&limit=20&offset=0');
   });
   it('recusa período inválido sem nova consulta', async () => {
     const { user, reads } = await setup(); await screen.findByRole('group', { name: 'Pacientes autorizados' });
     fireEvent.change(screen.getByLabelText('Data inicial'), { target: { value: '2026-11-01' } });
-    await user.click(screen.getByRole('button', { name: 'Aplicar período' }));
+    await user.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
     expect(screen.getByRole('alert')).toHaveTextContent('ordem crescente'); expect(reads).toHaveBeenCalledTimes(1);
   });
   it('atualização oculta valores durante carga e falha sem conservar contagens anteriores', async () => {

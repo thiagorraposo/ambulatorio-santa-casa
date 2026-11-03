@@ -2,7 +2,7 @@ import { AttendanceIntegratedFields, AttendanceIntegratedReview, AttendanceRecei
 import { completeAttendanceReceipt, integratedResources, integratedSectionForField } from './attendance-integration';
 import { FieldValidationError, type FieldViolation } from '../../shared/field-validation';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import type { AtendimentoDetalheResponse, PacienteDetalheResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
 import { ApiErrorState, Card, PageHeading } from '../../shared/ui';
@@ -13,7 +13,8 @@ import { booleanOptions, FormSection, InputField, SelectField, TextAreaField } f
 import { attendanceBody, attendanceCore, attendanceInitial, clinicalNumbers, dirtyFields, type AttendanceDraft } from './core-contracts';
 import { VersionComparison } from './VersionComparison';
 import './attendance.css';
-import { PatientsSearchReturn } from '../pacientes/PatientsSearchReturn';
+import { PatientsSearchReturn, searchReturnPath } from '../pacientes/PatientsSearchReturn';
+import { attendanceDetailPath, attendanceReturn } from '../pacientes/attendance-navigation';
 
 const attendanceSections = [
   'Atendimento', 'Chagas e Sorologia', 'Condição Clínica', 'Comorbidades',
@@ -68,6 +69,7 @@ function AttendanceReview({ draft }: { draft: AttendanceDraft }) {
 
 function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: AtendimentoDetalheResponse }) {
   const navigate = useNavigate();
+  const [search] = useSearchParams();
   const examFocus = useCollectionRemovalFocus();
   const familyFocus = useCollectionRemovalFocus();
   const pendingFocus = useCollectionRemovalFocus();
@@ -137,8 +139,9 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
     navigatedStep.current = true;
     setStep(next);
   }
+  const recordOrigin = attendanceReturn(patientPath, search.get('retorno')) ?? searchReturnPath(patientPath, search.get('retorno'));
   if (receipt) return <Card><AttendanceReceipt receipt={receipt} />
-    <Link className="button" to={`${patientPath}/atendimentos/${receipt.atendimentoId}`}>Consultar atendimento confirmado</Link>
+    <Link className="button" to={attendanceDetailPath(patientPath, String(receipt.atendimentoId), recordOrigin === patientPath ? '' : recordOrigin)}>Consultar atendimento confirmado</Link>
     <button type="button" className="button button-secondary" onClick={() => { setReceipt(null); setDraft({ values: initial, initial, clinical: {}, diagnosis: {}, exams: [], families: [], familyStatus: '', pending: [], operationKey: crypto.randomUUID() }); setStep(0); }}>Iniciar novo atendimento</button>
   </Card>;
   return <Card className="attendance-workflow">
@@ -163,7 +166,7 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
         }} /> : undefined}
       verificationPath={data ? path : `${patientPath}?aba=atendimentos`}
       validateResponse={response => !coordinated || completeAttendanceReceipt(response, draft.integrated)}
-      onSaved={(response: { atendimentoId: string }) => { clearDraft(); if (coordinated) { setReceipt(response); return; } navigate(`${patientPath}/atendimentos/${response.atendimentoId}`, {
+      onSaved={(response: { atendimentoId: string }) => { clearDraft(); if (coordinated) { setReceipt(response); return; } navigate(attendanceDetailPath(patientPath, response.atendimentoId, recordOrigin === patientPath ? '' : recordOrigin), {
         state: { saved: 'Atendimento salvo. Tratamento, retornos e encaminhamentos têm confirmação própria.' },
       }); }}>
       <div className={data ? '' : 'attendance-layout'}>
@@ -327,7 +330,7 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
             moveTo(editableSections.find(index => index > step) ?? 11);
           }}>Próxima seção</button>}
           {step !== 12 && <button type="button" className="button" onClick={() => moveTo(12)}>Revisar atendimento</button>}
-          <button type="button" className="button button-secondary" onClick={() => navigate(patientPath)}>Cancelar atendimento</button>
+          <button type="button" className="button button-secondary" onClick={() => navigate(recordOrigin)}>Cancelar atendimento</button>
         </div>
       </>}
       </div></div>
@@ -342,10 +345,13 @@ function ExistingAttendanceForm({ pacienteId, atendimentoId }: { pacienteId: str
 
 export default function AttendanceFormPage() {
   const { pacienteId = '', atendimentoId } = useParams<{ pacienteId: string; atendimentoId: string }>();
+  const [search] = useSearchParams();
+  const patientPath = `/pacientes/${encodeURIComponent(pacienteId)}`;
+  const recordOrigin = attendanceReturn(patientPath, search.get('retorno')) ?? searchReturnPath(patientPath, search.get('retorno'));
   const patientQuery = useApiQuery<PacienteDetalheResponse>(`/pacientes/${encodeURIComponent(pacienteId)}`);
   return <div className="attendance-form-page">
-    <nav className="breadcrumb" aria-label="Caminho da página"><Link to={`/pacientes/${pacienteId}`}>Ficha do paciente</Link>
-      {atendimentoId && <Link to={`/pacientes/${pacienteId}/atendimentos/${atendimentoId}`}>Atendimento</Link>}</nav>
+    <nav className="breadcrumb" aria-label="Caminho da página"><Link to={recordOrigin}>Ficha do paciente</Link>
+      {atendimentoId && <Link to={attendanceDetailPath(patientPath, atendimentoId, recordOrigin === patientPath ? '' : recordOrigin)}>Atendimento</Link>}</nav>
     <PatientsSearchReturn />
     <PageHeading title={atendimentoId ? 'Editar atendimento' : 'Novo atendimento'} />
     <EditingGate><DraftQueryState query={patientQuery}>{patient => <><div className="attendance-patient"><span className="patient-avatar" aria-hidden="true">{patient.nome[0]}</span><div><strong>{patient.nome}</strong><p className="muted">ID {patient.pacienteId}</p></div></div>

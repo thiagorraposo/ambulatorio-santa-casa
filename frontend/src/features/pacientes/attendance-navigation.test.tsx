@@ -149,4 +149,13 @@ describe('retorno autorizado à ficha de origem', () => {
     expect(attendanceDetailPath(patientPath, attendanceId, clean)).toBe(target);
     expect(attendanceDetailPath(patientPath, attendanceId, detailPath)).toBe(detailPath);
   });
+  it('preserva retorno analítico dentro da ficha e identifica Dashboard no breadcrumb', () => {
+    const dashboard = '/dashboard?inicio=2026-10-01&fim=2026-10-31&offset=20&nome=Ana';
+    const record = `${patientPath}?aba=atendimentos&${new URLSearchParams({ retorno: dashboard })}`;
+    const detail = attendanceDetailPath(patientPath, attendanceId, record);
+    expect(attendanceReturn(patientPath, new URL(detail, 'http://app.local').searchParams.get('retorno'))).toBe(record);
+    show(detail);
+    expect(screen.getByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', dashboard);
+    expect(screen.getByRole('link', { name: 'Voltar à ficha de origem' })).toHaveAttribute('href', record);
+  });
 });

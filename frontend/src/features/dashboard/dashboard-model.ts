@@ -2,8 +2,15 @@ export type DashboardKey = 'pacientes' | 'atendimentos' | 'pendencias' | 'lotes'
 export interface DashboardIndicator {
   estado: 'disponivel' | 'sem_permissao'; valor: number | null; definicao: string; periodoAplicado: boolean;
 }
+export interface DashboardResult {
+  pacienteId: string; nome: string; atendimentoId: string; dataAtendimento: string; pendenciasAbertas: number;
+}
 export interface DashboardResponse {
   periodo: { inicio: string; fim: string; limites: 'inclusivos'; tempoLotes: 'timestamp_sem_fuso' };
+  resultados: DashboardResult[];
+  paginacao: { limit: number; offset: number; total: number };
+  serieAtendimentos: Array<{ mes: string; total: number }>;
+  projetos: Array<{ projetoId: string; nome: string }>;
   atualizadoEm: string; indicadores: Record<DashboardKey, DashboardIndicator>;
 }
 export const dashboardCards: Array<{ key: DashboardKey; title: string }> = [
@@ -24,7 +31,15 @@ export function validDashboardPeriod(inicio: string, fim: string): boolean {
 export const displayDashboardDate = (value: string) => value.split('-').reverse().join('/');
 export function validDashboardResponse(value: DashboardResponse): boolean {
   return !!value && validDashboardPeriod(value.periodo?.inicio ?? '', value.periodo?.fim ?? '')
-    && Number.isFinite(Date.parse(value.atualizadoEm)) && dashboardCards.every(({ key }) => {
+    && Number.isFinite(Date.parse(value.atualizadoEm))
+    && Array.isArray(value.resultados) && value.resultados.every(row => /^\d+$/.test(row.pacienteId)
+      && /^\d+$/.test(row.atendimentoId) && typeof row.nome === 'string' && validDashboardPeriod(row.dataAtendimento, row.dataAtendimento)
+      && Number.isSafeInteger(row.pendenciasAbertas) && row.pendenciasAbertas >= 0)
+    && !!value.paginacao && Number.isSafeInteger(value.paginacao.total) && value.paginacao.total >= 0
+    && Array.isArray(value.serieAtendimentos) && value.serieAtendimentos.every(row => /^\d{4}-\d{2}$/.test(row.mes)
+      && Number.isSafeInteger(row.total) && row.total >= 0)
+    && Array.isArray(value.projetos) && value.projetos.every(row => /^\d+$/.test(row.projetoId) && typeof row.nome === 'string')
+    && dashboardCards.every(({ key }) => {
       const indicator = value.indicadores?.[key];
       return indicator && typeof indicator.definicao === 'string' && typeof indicator.periodoAplicado === 'boolean'
         && (indicator.estado === 'sem_permissao' ? indicator.valor === null
