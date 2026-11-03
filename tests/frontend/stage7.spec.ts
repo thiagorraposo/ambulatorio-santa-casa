@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import type { AnnualReturnResponse, ClinicalEventResponse, CounterReferralResponse, NotificationResponse,
   ProjectResponse, ReferralResponse, RetornoBznResponse, TratamentoBznResponse } from '../../frontend/src/api/contracts';
-import { apiAs, fixture, resumePage, setUserActive, assertNoPersistentClinicalState, delayOneApiResponse } from './fixtures';
+import { apiAs, fixture, resumePage, setUserActive, restoreUserGrants, assertNoPersistentClinicalState, delayOneApiResponse } from './fixtures';
 import { apiJson, assertAccessible, assertFitsViewport, loseResponseAfterCommit, moveAttendanceToReview, nextAttendanceStep, attendanceSection,
   readAttendance, reviewAttendance,
   readPatient, seedAttendance, seedPatient, signIn, submitWrite, visitByLink } from './stage7-helpers';
@@ -236,7 +236,7 @@ test('7D: consulta não escreve, vínculo delimita edição e administração se
   expect((await apiAs('edicao', 'PATCH', `/pacientes/${fixture.reserved.pacienteId}`, {
     versao: reserved.versao, nome: 'Etapa 7 mudança recusada Sintético',
   })).status).toBe(403);
-  expect((await apiAs('edicao', 'POST', '/pacientes', { nome: 'Etapa 7 cadastro sem política Sintético' })).status).toBe(403);
+  expect((await apiAs('consulta', 'POST', '/pacientes', { nome: 'Etapa 7 cadastro recusado Sintético' })).status).toBe(403);
   await page.getByRole('button', { name: 'Sair', exact: true }).click();
   await signIn(page, 'administracao', `/pacientes/${fixture.reserved.pacienteId}/editar`);
   await expect(page.getByLabel('Nome completo', { exact: true })).toHaveValue(fixture.reserved.nome);
@@ -856,7 +856,7 @@ test('7D: 401 real em escrita encerra sessão e remove rascunho clínico', async
     await expect(page.getByLabel('Usuário', { exact: true })).toBeVisible();
     await expect(page.getByLabel('Nome completo', { exact: true })).toHaveCount(0);
     await assertNoPersistentClinicalState(page);
-  } finally { await setUserActive('edicao', true); }
+  } finally { await setUserActive('edicao', true); await restoreUserGrants('edicao'); }
   expect((await readPatient(patient.path)).nome).toBe(original.nome);
   await signIn(page, 'edicao', `${patient.path}/editar`);
   await expect(page.getByLabel('Nome completo', { exact: true })).toHaveValue(original.nome);
@@ -890,23 +890,16 @@ test('7D: resposta antiga de escrita não navega nem mostra sucesso após trocar
   await assertNoPersistentClinicalState(page);
 });
 
-test('7A/7D: política clínica impede formulário de cadastro mesmo com perfil de edição', async ({ page }) => {
-  expect(await apiJson('GET', '/pacientes/capacidades', undefined, 'edicao')).toEqual({ podeCadastrar: false });
-  const capability = page.waitForResponse(response => response.request().method() === 'GET'
-    && new URL(response.url()).pathname === '/v1/pacientes/capacidades', { timeout: 0 });
-  let writes = 0;
-  page.on('request', request => {
-    if (request.method() === 'POST' && new URL(request.url()).pathname === '/v1/pacientes') writes++;
-  });
-  await signIn(page, 'edicao', '/pacientes/novo');
-  expect(await (await capability).json()).toEqual({ podeCadastrar: false });
+test('7A/7D: Edição recebe capacidade e formulário após busca prévia', async ({ page }) => {
+  expect(await apiJson('GET', '/pacientes/capacidades', undefined, 'edicao')).toEqual({ podeCadastrar: true });
+  await signIn(page, 'edicao', '/pacientes');
+  await page.getByRole('link', { name: 'Cadastrar paciente', exact: true }).click();
+  await expect(page.getByText(/Ao cadastrar, você receberá acesso/)).toBeVisible();
   await expect(page.getByLabel('Nome completo', { exact: true })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Cadastrar paciente', exact: true })).toHaveCount(0);
-  await page.getByRole('navigation', { name: 'Menu principal' }).getByRole('link', { name: 'Pacientes', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Pacientes', exact: true })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Cadastrar paciente', exact: true })).toHaveCount(0);
-  await page.waitForLoadState('networkidle');
-  expect(writes).toBe(0);
+  await page.getByLabel('Nome para busca prévia').fill('Etapa 7 busca Edição Sintético');
+  await page.getByRole('button', { name: 'Consultar possíveis cadastros', exact: true }).click();
+  await page.getByRole('button', { name: 'Nenhuma correspondência serve — continuar para cadastro' }).click();
+  await expect(page.getByLabel('Nome completo', { exact: true })).toBeVisible();
 });
 
 test('7D: perda da resposta do PATCH confirma pela ficha sem repetir alteração versionada', async ({ page }) => {

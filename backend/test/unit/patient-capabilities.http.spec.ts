@@ -44,7 +44,7 @@ describe('Capacidade de cadastro HTTP', () => {
   });
 
   it.each([
-    ['vinculo_explicito', 'consulta', false], ['vinculo_explicito', 'edicao', false],
+    ['vinculo_explicito', 'consulta', false], ['vinculo_explicito', 'edicao', true],
     ['vinculo_explicito', 'administracao', true], ['todos_sinteticos', 'consulta', false],
     ['todos_sinteticos', 'edicao', true], ['todos_sinteticos', 'administracao', true],
   ] as const)('reflete a política %s para %s sem consultar pacientes', async (configured, perfil, podeCadastrar) => {

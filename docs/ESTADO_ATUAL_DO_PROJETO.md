@@ -9,6 +9,12 @@ As 306 unidades e 118 E2E anteriores foram aprovados por composição; não houv
 nova execução integral no último SHA. Novas evidências serão registradas por unidade.
 
 
+**Entrega funcional de03/11:** [cadastro/edição por Edição integrado](validacoes/VALIDACAO_CADASTRO_EDICAO_M3.md)
+validado tecnicamente, com vínculo específico atômico, atendimento e revogação.
+Migration74 somente descartável; aceitações humanas pendentes. Próxima unidade:
+8D leitura administrativa de login/estado, preservando rotas e autorização.
+
+
 **Histórico da retomada visual de 03/11:** atendimento organizado nas 12 seções
 informacionais, pacientes/formulários/ficha e componentes compartilhados
 aproximados da referência. Contratos, perfis e confirmações próprias preservados.
@@ -16,21 +22,20 @@ aproximados da referência. Contratos, perfis e confirmações próprias preserv
 O congelamento abaixo descreve o candidato anterior; esta retomada não o substitui
 nem conclui M3/8V1/8V2.
 
-**Congelamento temporário para apresentação:** candidato `c4a3c99`, runtime
+**Congelamento histórico para apresentação:** candidato `c4a3c99`, runtime
 preservado, builds e40 E2E aprovados e ensaio separado no navegador/API/PostgreSQL
 sintéticos. [SHA completo, roteiro, evidências, ressalvas e contingência](validacoes/CONGELAMENTO_DEMONSTRACAO_2026_11_02.md).
-HUM-M3-03 permanece aberto; M3 não concluído nem homologado. Não retomar
-expansão automaticamente após esse marco; cadastro por Edição e8D preservados.
+HUM-M3-03 permanece aberto; M3 não concluído nem homologado. A restrição de
+expansão foi sucedida pela continuidade autorizada em03/11.
 
-**Decisões posteriores aprovadas:** [produto M3 de02/11](dados/DECISOES_PRODUTO_M3_2026_11_02.md).
-Esta atualização registra política, sem mudar o runtime comprovado. A restrição
-atual de cadastro por Edição passa a ser lacuna de implementação, com vínculo
-automático específico autorizado; demais novas regras têm entrega própria.
+**Decisões de produto aprovadas:** [produto M3 de02/11](dados/DECISOES_PRODUTO_M3_2026_11_02.md).
+A política autoriza vínculo automático específico ao cadastro por Edição;
+implementação e validação seguem o contrato da unidade, sem aceite automático.
 
 Atualizado em: 2026-11-02. Síntese de implementação e evidências existentes;
 esta atualização documental não reexecuta as suítes da aplicação.
 
-## Atualização após avaliação humana M3
+## Fotografia de02/11 após avaliação humana M3
 
 A avaliação com a equipe do Centro de Pesquisa em Saúde da Santa Casa foi
 **REALIZADA — COM PROBLEMAS IDENTIFICADOS**. **ACEITE INTEGRAL NÃO REGISTRADO**;

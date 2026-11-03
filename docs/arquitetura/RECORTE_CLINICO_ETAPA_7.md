@@ -193,25 +193,15 @@ Asserções negativas incluem ausência de SQL/stack/token/dados não autorizado
 
 ### P1 — cadastro e edição cadastral por Edição
 
-A decisão de produto exige cadastro por Edição e alteração cadastral no escopo
-autorizado, ainda não implementados/validados sob a nova política. O fato de a
-edição cadastral já existir não comprova o percurso ampliado. Inspeção atual:
-
-| Camada | Contrato existente e consequência para o incremento |
-| --- | --- |
-| Capacidade | `ClinicalAccessService.canCreate` só permite Edição em todos_sinteticos; `GET /pacientes/capacidades`, POST e operações revalidam. Alterar somente visibilidade da UI ou só esse booleano é insuficiente |
-| Escopo após criar | `PacientesService.create` insere paciente/endereço/contatos sem acesso_paciente. GET/PATCH/atendimento exigem vínculo para Edição em vinculo_explicito. **Falta contrato de autorização inicial para criar→consultar→editar sem autoconcessão de vínculos**; não resolver habilitando acesso global ou criando vínculo silencioso |
-| Alteração existente | `PATCH /pacientes/:id`, Edição/Administração, exige vínculo ativo+pode_editar e versão;409 preserva original/rascunho. Não é edição de registros clínicos históricos |
-| Campos permitidos | `PatientUpdateDto`: nome, dataNascimento, sexo, raca, pertenceComunidadeTradicional, tipoComunidadeTradicional, endereço/cidade e telefonesAdicionar; versão obrigatória. Endereço gera snapshot; telefones são adicionados/deduplicados, sem remoção implícita. Não ampliar whitelist sem contrato |
-| Integridade | Transação/contexto do ator, captura e recibos já existem. Preservar versão original, auditoria, intenção e recuperação. P-03 de projeto/notificação não bloqueia esse PATCH cadastral já contratado |
-| Interface | PatientCreateGate/PatientCreateLink, PatientFormPage, busca prévia, ficha e atalhos; `/capacidades` representa decisão backend. Preservar dados, feedback de campo, revisão/conflito e leitura autorizada; não mostrar paciente recém-criado sem autorização de leitura |
-
-A política desejada está na visão; campo/aceite no catálogo7A-U1 e
-7D-R6B.1/U.1. Gate exato pendente: **como o paciente criado entra no escopo de
-leitura/edição de quem o cadastrou, sem conceder vínculo automaticamente?**
-A autorização de cadastrar está decidida como produto; o mecanismo de escopo
-não foi fornecido. Documentar/resolver o contrato antes do incremento dependente,
-sem bloquear investigação P0 ou outras unidades independentes.
+As [decisões1–2](../dados/DECISOES_PRODUTO_M3_2026_11_02.md#cadastro-e-acesso-por-edição--decisões-1–2)
+aprovaram vínculo automático específico, auditável e revogável ao recém-criado.
+O [contrato técnico integrado](CONTRATO_CADASTRO_EDICAO_M3.md) substitui o antigo
+gate de acesso inicial, sem acesso global ou concessão a terceiros por Edição.
+Reutiliza POST/GET/PATCH/capacidades, formulário, versão e recibo existentes;
+campos de cadastro continuam os de PatientCreateDto/PatientUpdateDto. Endereço
+gera snapshot e telefones são adicionados, sem remoção implícita.
+Migration74 realiza vínculo/evento na transação de criação e revoga vínculos
+na inativação, sem restauração na reativação. Gestão8D mantém escopo próprio.
 
 Saída exigida: Edição autorizado vê Novo paciente, busca/cadastra pessoa fictícia,
 consulta o criado e edita somente os campos permitidos; backend valida/audita e

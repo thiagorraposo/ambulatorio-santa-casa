@@ -63,7 +63,7 @@ suite('Fluxos clínicos HTTP em banco descartável', () => {
   afterAll(async () => { await app?.close(); await owner?.end(); });
 
   it('cadastra paciente completo e limita cadastro conforme perfil', async () => {
-    for (const perfil of ['consulta', 'edicao']) await http().post('/pacientes')
+    for (const perfil of ['consulta']) await http().post('/pacientes')
       .auth(tokens[perfil], { type: 'bearer' }).send({ nome: 'Cadastro negado sintético' }).expect(403);
     const r = await http().post('/pacientes').auth(tokens.administracao, { type: 'bearer' })
       .send({ nome: 'Paciente HTTP Sintético', dataNascimento: '1980-02-10', sexo: 'feminino',

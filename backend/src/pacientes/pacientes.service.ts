@@ -1,5 +1,5 @@
 import { attendanceFieldException } from '../common/http/field-validation';
-import { BadRequestException, ConflictException, Injectable, NotFoundException, Optional } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, Optional, UnauthorizedException } from '@nestjs/common';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { DatabaseService, Transaction } from '../common/database/database.service';
 import { ClinicalAccessService } from '../common/security/clinical-access.service';
@@ -146,7 +146,13 @@ export class PacientesService {
         if (dto.endereco) await tx.query('INSERT INTO paciente_endereco(paciente_id,endereco,cidade) VALUES($1,$2,$3)', [id,dto.endereco.endereco ?? null,dto.endereco.cidade ?? null]);
         for (const telefone of dto.telefones ?? []) await tx.query('INSERT INTO paciente_contato(paciente_id,telefone) VALUES($1,$2)', [id,telefone]);
         return { pacienteId: id };
-      } catch (error) { return databaseConflict(error); }
+      } catch (error) {
+        if (error && typeof error === 'object' && 'code' in error && error.code === '42501'
+          && 'message' in error && error.message === 'cadastro_identidade_inativa') {
+          throw new UnauthorizedException('Sessão inválida');
+        }
+        return databaseConflict(error);
+      }
     }, user.usuarioId);
   }
 

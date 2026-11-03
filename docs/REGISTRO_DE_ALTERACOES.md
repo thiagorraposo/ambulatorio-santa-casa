@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-03 — Integrar cadastro e edição por Edição com vínculo específico
+
+Capacidade real habilita busca/formulário existente; migration74 cria vínculo e
+auditoria na transação do cadastro. PATCH e atendimento reutilizados; inativação
+revoga vínculos sem restauração, concessão concorrente serializada e perda de
+identidade traduzida para401. Contratos/endpoints preservados. SQL/HTTP/navegador,
+visual e limitações no [relatório da unidade](validacoes/VALIDACAO_CADASTRO_EDICAO_M3.md).
+Sem aplicação em banco persistente ou aceite humano.
+
 ## 2026-11-03 — Retomar execução contínua de M3 com DoD integrado
 
 Revisão humana comparativa temporariamente adiada, sem aprovação/homologação.

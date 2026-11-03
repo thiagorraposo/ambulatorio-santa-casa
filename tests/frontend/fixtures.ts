@@ -88,11 +88,25 @@ export async function apiAs(perfil: Perfil, method: string, path: string, body?:
   });
 }
 
+const grantsBeforeInactivation = new Map<Perfil, Array<{ paciente_id: string; pode_editar: boolean }>>();
+
+export async function restoreUserGrants(perfil: Perfil) {
+  // Higiene da fixture: reativação sozinha não restaura vínculos de produção.
+  for (const grant of grantsBeforeInactivation.get(perfil) ?? []) {
+    expect((await apiAs('administracao', 'PUT', `/pacientes/${grant.paciente_id}/acesso/${fixture.users[perfil].usuarioId}`,
+      { ativo: true, podeEditar: grant.pode_editar })).status).toBe(200);
+  }
+  grantsBeforeInactivation.delete(perfil);
+}
+
 export async function setUserActive(perfil: Perfil, active: boolean) {
   const owner = new Pool({ host: process.env.PGHOST, port: Number(process.env.PGPORT),
     user: process.env.PGUSER, password: process.env.PGPASSWORD, database: process.env.FRONTEND_E2E_DB });
   try {
     await owner.query('BEGIN');
+    if (!active) grantsBeforeInactivation.set(perfil, (await owner.query(
+      'SELECT paciente_id::text,pode_editar FROM ambulatorio.acesso_paciente WHERE usuario_id=$1 AND ativo',
+      [fixture.users[perfil].usuarioId])).rows);
     await owner.query('UPDATE ambulatorio.usuario_aplicacao SET ativo=$1 WHERE usuario_id=$2', [active, fixture.users[perfil].usuarioId]);
     await owner.query('COMMIT');
   } finally { await owner.end(); }

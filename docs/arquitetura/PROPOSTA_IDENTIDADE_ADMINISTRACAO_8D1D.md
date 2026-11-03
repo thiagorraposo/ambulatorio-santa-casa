@@ -61,12 +61,10 @@ essa avaliação não equivale a reprodução automática ou causa raiz de outro
 
 O acesso clínico vigente é explícito em
 [ClinicalAccessService](../../backend/src/common/security/clinical-access.service.ts).
-Edição atualmente escreve com vínculo ativo e `pode_editar`; seu cadastro em
-`vinculo_explicito` não foi liberado pelo código. A decisão desejada agora permite
-cadastrar e editar dados cadastrais no escopo autorizado, sem poderes de gestão
-ou concessão automática de vínculos. O acesso inicial para consultar/editar a
-pessoa recém-criada precisa de contrato seguro; não presumir autovínculo ou
-ampliar o acesso a todos os pacientes para cumprir esse percurso.
+Edição escreve com vínculo ativo e `pode_editar`. As decisões1–2 autorizaram
+vínculo específico no cadastro; o [contrato integrado](CONTRATO_CADASTRO_EDICAO_M3.md)
+substitui o gate anterior de acesso inicial, sem poderes administrativos ou acesso
+global. A gestão8D conserva seus próprios contratos de comandos/sessão/auditoria.
 
 Administração dispensa vínculo individual no comportamento sintético atual;
 isso não aprova política institucional de acesso irrestrito a dados reais.

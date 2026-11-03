@@ -1,5 +1,12 @@
 # Modelo Físico Atual
 
+**Evolução incremental de03/11:** migration74 acrescenta vínculo automático
+específico ao cadastro por Edição e revogação na inativação; eventos podem
+registrar principal_db sem ator funcional para operações de infraestrutura.
+Validada somente em bancos descartáveis, sem backfill ou atualização do dump
+aplicado persistente. [Contrato e efeitos](arquitetura/CONTRATO_CADASTRO_EDICAO_M3.md).
+
+
 Atualizado em: 2026-10-01
 
 As seções iniciais descrevem a estrutura física aplicada no schema `ambulatorio`,

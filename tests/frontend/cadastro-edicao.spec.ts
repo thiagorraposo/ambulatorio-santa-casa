@@ -1,0 +1,50 @@
+import { expect, test } from '@playwright/test';
+import { apiAs, fixture, signInCurrentPage } from './fixtures';
+import { apiJson, assertAccessible, assertFitsViewport, reviewAttendance, signIn, submitWrite } from './stage7-helpers';
+import type { PacienteDetalheResponse } from '../../frontend/src/api/contracts';
+
+test('M3 Edição cadastra, relê, edita e confirma atendimento sem concessão administrativa', async ({ page }, info) => {
+  test.setTimeout(150_000);
+  const name = `Cadastro Edição integrado ${Date.now()} Sintético`;
+  await signIn(page, 'edicao', '/pacientes');
+  await page.getByRole('link', { name: 'Cadastrar paciente', exact: true }).click();
+  await expect(page.getByText(/Ao cadastrar, você receberá acesso/)).toBeVisible();
+  await page.getByLabel('Nome para busca prévia', { exact: true }).fill(name);
+  await page.getByRole('button', { name: 'Consultar possíveis cadastros', exact: true }).click();
+  await expect(page.getByText(/Nenhum paciente nesta página/)).toBeVisible();
+  await page.getByRole('button', { name: 'Nenhuma correspondência serve — continuar para cadastro' }).click();
+  await page.getByLabel('Nome completo', { exact: true }).fill(name);
+  await page.getByLabel('Cidade', { exact: true }).fill('Cidade exclusivamente sintética');
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 960 });
+    await assertFitsViewport(page); await assertAccessible(page);
+    await page.screenshot({ path: info.outputPath(`cadastro-edicao-${width}.png`), fullPage: true });
+  }
+  const registered = await submitWrite(page, 'POST', '/pacientes', 'Cadastrar paciente');
+  const { pacienteId } = await registered.response.json() as { pacienteId: string };
+  const path = `/pacientes/${pacienteId}`;
+  await expect(page.getByText('Paciente salvo.', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
+  const original = await apiJson<PacienteDetalheResponse>('GET', path, undefined, 'edicao');
+  expect(original.endereco?.cidade).toBe('Cidade exclusivamente sintética');
+  expect((await apiAs('consulta', 'GET', path)).status).toBe(403);
+  expect((await apiAs('edicao', 'GET', `/pacientes/${fixture.reserved.pacienteId}`)).status).toBe(403);
+  await page.getByRole('link', { name: 'Editar paciente', exact: true }).click();
+  await page.getByLabel('Raça', { exact: true }).fill('Informação sintética');
+  const edited = await submitWrite(page, 'PATCH', path, 'Salvar paciente');
+  expect(edited.body).toEqual({ versao: original.versao, raca: 'Informação sintética' });
+  await expect(page.getByText('Paciente salvo.', { exact: true })).toBeVisible();
+  await page.reload(); await signInCurrentPage(page, 'edicao');
+  await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
+  expect(await apiJson('GET', path, undefined, 'edicao')).toMatchObject({ raca: 'Informação sintética' });
+  await page.getByRole('link', { name: 'Novo atendimento', exact: true }).click();
+  await page.getByLabel('Data do atendimento', { exact: true }).fill('2026-10-30');
+  await reviewAttendance(page);
+  await submitWrite(page, 'POST', `${path}/atendimentos`, 'Confirmar atendimento');
+  await expect(page.getByText(/Atendimento salvo.*confirmação própria/)).toBeVisible();
+  expect(await apiJson<unknown[]>('GET', `${path}/atendimentos`, undefined, 'edicao')).toHaveLength(1);
+  await apiJson('PUT', `${path}/acesso/${fixture.users.edicao.usuarioId}`, { ativo: false, podeEditar: false });
+  await page.goto(`${path}/editar`); await signInCurrentPage(page, 'edicao');
+  await expect(page.getByRole('alert')).toContainText(/acesso|permissão|autoriza/i);
+  await expect(page.getByLabel('Nome completo', { exact: true })).toHaveCount(0);
+});

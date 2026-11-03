@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { apiAs, delayOneApiResponse, fixture, resumePage, setUserActive, signInCurrentPage } from './fixtures';
+import { apiAs, delayOneApiResponse, fixture, resumePage, setUserActive, restoreUserGrants, signInCurrentPage } from './fixtures';
 import { assertAccessible, assertFitsViewport, signIn } from './stage7-helpers';
 
 test('8D1U.1: Administração consulta usuários reais, pagina, recupera leitura e mantém URL', async ({ page }, testInfo) => {
@@ -123,7 +123,7 @@ test('8D1U.1: inativação real do requisitante oculta detalhe e encerra sessão
     await expect(page).toHaveURL(/\/login/);
     await expect(page.locator('dl')).toHaveCount(0);
     await expect(page.getByText(user.nome, { exact: true })).toHaveCount(0);
-  } finally { await setUserActive('administracao', true); }
+  } finally { await setUserActive('administracao', true); await restoreUserGrants('administracao'); }
 });
 
 

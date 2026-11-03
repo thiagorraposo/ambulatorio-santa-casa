@@ -841,3 +841,22 @@ já proibido pela SQL03 ganha tradução específica sem alterar regra ou migrat
 
 Consequências e limites no [contrato de erros do atendimento](arquitetura/CONTRATO_ERROS_ATENDIMENTO_M3.md).
 O recorte não encerra a investigação HUM-M3-03 nem valida todos os formulários.
+
+## ADR-028
+
+Título: Vínculo atômico e específico no cadastro por Edição
+
+Data: 2026-11-03. Status: decisão técnica para implementação sintética das
+[decisões de produto1–2](dados/DECISOES_PRODUTO_M3_2026_11_02.md#cadastro-e-acesso-por-edição--decisões-1–2), sem aceite humano.
+
+Gatilho restrito de INSERT vincula somente o paciente recém-criado ao ator
+Edição ativo do contexto confiável, na mesma transação da auditoria e do recibo.
+Não ampliar acesso global, conceder INSERT direto em acesso_paciente ou reutilizar
+a função administrativa para autoconcessão. Inativação revoga vínculos ativos;
+reativação exige nova concessão administrativa. Eventos de infraestrutura guardam
+principal_db sem inventar ator funcional. Contratos HTTP existentes preservados.
+
+Justificativa: liberar somente podeCadastrar produziria criação sem acesso ao
+próprio registro. O gatilho garante atomicidade também em falhas posteriores e
+serializa criação/inativação com bloqueio da identidade em função restrita.
+[Contrato, efeitos, compatibilidade e validação](arquitetura/CONTRATO_CADASTRO_EDICAO_M3.md).

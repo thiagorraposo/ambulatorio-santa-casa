@@ -9,6 +9,12 @@ As 306 unidades e 118 E2E anteriores foram aprovados por composição; não houv
 nova execução integral no último SHA. Novas evidências serão registradas por unidade.
 
 
+**Incremento integrado de03/11:** cadastro/edição por Edição validado tecnicamente,
+conforme [provas e limites](validacoes/VALIDACAO_CADASTRO_EDICAO_M3.md). Seguir a
+mesma fila M3 para leitura administrativa8D de login/estado; não concluir a família
+8D ou os achados humanos por associação. Sem reinício das seis janelas.
+
+
 **Atualização de produto:** [decisões M3 de02/11](dados/DECISOES_PRODUTO_M3_2026_11_02.md)
 autorizam regras e implementação sintética, incluindo vínculo automático
 específico para o paciente cadastrado por Edição. Contratos técnicos/entregas

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { fixture, signIn, signInCurrentPage, apiAs, setUserActive, resumePage, assertNoPersistentClinicalState, delayOneApiResponse } from './fixtures';
+import { fixture, signIn, signInCurrentPage, apiAs, setUserActive, restoreUserGrants, resumePage, assertNoPersistentClinicalState, delayOneApiResponse } from './fixtures';
 
 const mainPath = `/pacientes/${fixture.main.pacienteId}`;
 const patientRows = (page: import('@playwright/test').Page) => page.getByRole('table').locator('tbody tr');
@@ -276,7 +276,7 @@ test('401 real por identidade inativada limpa sessão e cache ao retomar foco', 
     await assertNoPersistentClinicalState(page);
   } finally {
     delayed.release();
-    await setUserActive('consulta', true);
+    await setUserActive('consulta', true); await restoreUserGrants('consulta');
   }
 });
 

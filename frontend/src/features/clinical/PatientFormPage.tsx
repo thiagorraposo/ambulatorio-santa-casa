@@ -11,6 +11,7 @@ import { dirtyFields, patientBody, patientInitial } from './core-contracts';
 import { PatientCreateGate } from './PatientCreateGate';
 import { VersionComparison } from './VersionComparison';
 import { PatientsSearchReturn } from '../pacientes/PatientsSearchReturn';
+import { useSession } from '../../app/session';
 
 function PriorSearch({ onSearch, onNoMatchConfirmed }: { onSearch: () => void; onNoMatchConfirmed: () => void }) {
   const [name, setName] = useState('');
@@ -108,6 +109,7 @@ function ExistingPatientForm({ id }: { id: string }) {
 }
 
 export default function PatientFormPage() {
+  const session = useSession();
   const { pacienteId } = useParams<{ pacienteId: string }>();
   const [createAfterSearch, setCreateAfterSearch] = useState(false);
   return <div className="patient-form-page">
@@ -116,6 +118,7 @@ export default function PatientFormPage() {
     <PatientsSearchReturn />
     <PageHeading title={pacienteId ? 'Editar paciente' : 'Cadastrar paciente'} />
     <EditingGate>{pacienteId ? <ExistingPatientForm id={pacienteId} /> : <PatientCreateGate>
+      {session.user?.perfil === 'edicao' && <p className="notice">Ao cadastrar, você receberá acesso a este paciente para consultar, editar o cadastro e registrar atendimentos. Esse vínculo pode ser revogado pela Administração e será revogado se sua conta for inativada.</p>}
       <PriorSearch onSearch={() => setCreateAfterSearch(false)} onNoMatchConfirmed={() => setCreateAfterSearch(true)} />
       {createAfterSearch && <>
         <p role="status">Cadastro autorizado após sua revisão. Prosseguir não funde registros; nomes iguais podem pertencer a pessoas diferentes.</p>

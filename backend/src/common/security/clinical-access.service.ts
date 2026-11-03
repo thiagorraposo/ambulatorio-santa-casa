@@ -40,8 +40,7 @@ export class ClinicalAccessService {
   }
 
   canCreate(user: AuthenticatedUser): boolean {
-    return this.policy !== 'desabilitada' && (user.perfil === 'administracao'
-      || (user.perfil === 'edicao' && this.policy === 'todos_sinteticos'));
+    return this.policy !== 'desabilitada' && (user.perfil === 'administracao' || user.perfil === 'edicao');
   }
 
   requireCreate(user: AuthenticatedUser): void {

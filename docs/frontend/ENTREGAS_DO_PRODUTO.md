@@ -156,12 +156,13 @@ M3 ou fidelidade integral 8V1/8V2.
 busca antes de criar pessoa fictícia, consulta o registro criado e altera os
 dados cadastrais permitidos, com validação/auditoria/backend revalidando acesso.
 Consulta não recebe criação/alteração; Edição não ganha administração, acesso
-global ou concessão automática de vínculo. O contrato atual e os campos PATCH
+global ou concessão de vínculos a terceiros. O contrato atual e os campos PATCH
 estão no [recorte clínico](../arquitetura/RECORTE_CLINICO_ETAPA_7.md#p1--cadastro-e-edição-cadastral-por-edição).
 PATCH versionado já existe e não depende da P-03 de projeto/notificação.
-**Dependência:** contratar acesso inicial ao recém-criado sem autovínculo; liberar
+**Contrato vigente:** [cadastro integrado e vínculo específico](../arquitetura/CONTRATO_CADASTRO_EDICAO_M3.md),
+conforme decisões1–2; liberar
 apenas `podeCadastrar` não entrega criar→consultar→editar. Revalidar7D-R6B.1/U.1,
-versão, contatos/endereço, recusas e recibo. Requisito ampliado ainda não validado;
+versão, contatos/endereço, recusas e recibo. [Recorte ampliado validado tecnicamente](../validacoes/VALIDACAO_CADASTRO_EDICAO_M3.md);
 o aceite anterior deM2 não é transferido a essa extensão.
 
 <a id="7b-r1b"></a>
