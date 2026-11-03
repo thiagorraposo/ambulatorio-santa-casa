@@ -1,7 +1,7 @@
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { AuthenticatedUser, Perfil, SESSION_VERSION } from '../auth/auth.types';
 import { PageQuery } from '../clinico/dto/clinico.dto';
-import { AlterarPerfilDto } from './usuarios.dto';
+import { AlterarEstadoDto, AlterarPerfilDto } from './usuarios.dto';
 import { DatabaseService } from '../common/database/database.service';
 
 export interface UsuarioResumo { usuarioId: string; nome: string; perfil: Perfil; login: string; ativo: boolean; versao: string }
@@ -18,20 +18,28 @@ export class UsuariosService {
     return { usuarioId: row.usuarioId, nome: row.nome, perfil: row.perfil, login: row.login, ativo: row.ativo, versao: row.versao };
   }
 
-  async operation(usuarioId: string, operacaoId: string): Promise<PerfilRecibo> {
-    const result = await this.database.query<{ recibo: PerfilRecibo }>(`SELECT recibo FROM ambulatorio.usuario_perfil_operacao
+  async operation(usuarioId: string, operacaoId: string): Promise<ContaRecibo> {
+    const result = await this.database.query<{ recibo: ContaRecibo }>(`SELECT recibo FROM ambulatorio.usuario_conta_operacao
       WHERE usuario_id=$1 AND operacao_id=$2`, [usuarioId, operacaoId]);
     if (!result.rows[0]) throw new NotFoundException('Recibo não disponível; resultado ainda indeterminado');
     return result.rows[0].recibo;
   }
 
   async changeProfile(user: AuthenticatedUser, usuarioId: string, dto: AlterarPerfilDto): Promise<PerfilRecibo> {
-    let receipt: PerfilRecibo;
+    return this.change(user, usuarioId, dto, 'perfil') as Promise<PerfilRecibo>;
+  }
+
+  async changeState(user: AuthenticatedUser, usuarioId: string, dto: AlterarEstadoDto): Promise<EstadoRecibo> {
+    return this.change(user, usuarioId, dto, 'estado') as Promise<EstadoRecibo>;
+  }
+
+  private async change(user: AuthenticatedUser, usuarioId: string, dto: AlterarPerfilDto | AlterarEstadoDto, kind: 'perfil' | 'estado'): Promise<ContaRecibo> {
+    let receipt: ContaRecibo;
     try {
       receipt = await this.database.transaction(async tx => {
-        const result = await tx.query<{ recibo: PerfilRecibo }>(
-          'SELECT ambulatorio.alterar_perfil_usuario($1,$2,$3,$4,$5,$6) AS recibo',
-          [usuarioId, dto.versao, dto.perfil, dto.justificativa, dto.operacaoId, user[SESSION_VERSION] ?? '0']);
+        const result = await tx.query<{ recibo: ContaRecibo }>(
+          `SELECT ambulatorio.${kind === 'perfil' ? 'alterar_perfil_usuario' : 'alterar_estado_usuario'}($1,$2,$3,$4,$5,$6) AS recibo`,
+          [usuarioId, dto.versao, 'perfil' in dto ? dto.perfil : dto.ativo, dto.justificativa, dto.operacaoId, user[SESSION_VERSION] ?? '0']);
         return result.rows[0].recibo;
       }, user.usuarioId);
     } catch (error) {
@@ -54,8 +62,12 @@ export class UsuariosService {
   }
 }
 
-export interface PerfilRecibo {
-  operacaoId: string; usuarioId: string; atorUsuarioId: string; operacao: 'perfil'; instante: string;
-  resultado: 'aplicada' | 'autoacao_proibida' | 'alvo_inexistente' | 'versao_obsoleta' | 'ultimo_administrador' | 'perfil_inalterado';
-  anterior: Perfil | null; novo: Perfil; versaoAnterior: string | null; versaoNova: string | null; justificativa: string;
+interface ReciboBase {
+  operacaoId: string; usuarioId: string; atorUsuarioId: string; instante: string;
+  resultado: 'aplicada' | 'autoacao_proibida' | 'alvo_inexistente' | 'versao_obsoleta' | 'ultimo_administrador' | 'perfil_inalterado' | 'estado_inalterado';
+  versaoAnterior: string | null; versaoNova: string | null; justificativa: string;
 }
+
+export type PerfilRecibo = ReciboBase & { operacao: 'perfil'; anterior: Perfil | null; novo: Perfil };
+export type EstadoRecibo = ReciboBase & { operacao: 'estado'; anterior: boolean | null; novo: boolean };
+export type ContaRecibo = PerfilRecibo | EstadoRecibo;

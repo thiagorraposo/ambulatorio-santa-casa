@@ -95,6 +95,16 @@ export async function apiAs(perfil: Perfil, method: string, path: string, body?:
 
 const grantsBeforeInactivation = new Map<Perfil, Array<{ paciente_id: string; pode_editar: boolean }>>();
 
+export async function captureUserGrants(perfil: Perfil) {
+  const owner = new Pool({ host: process.env.PGHOST, port: Number(process.env.PGPORT),
+    user: process.env.PGUSER, password: process.env.PGPASSWORD, database: process.env.FRONTEND_E2E_DB });
+  try {
+    grantsBeforeInactivation.set(perfil, (await owner.query(
+      'SELECT paciente_id::text,pode_editar FROM ambulatorio.acesso_paciente WHERE usuario_id=$1 AND ativo',
+      [fixture.users[perfil].usuarioId])).rows);
+  } finally { await owner.end(); }
+}
+
 export async function restoreUserGrants(perfil: Perfil) {
   // Higiene da fixture: reativação sozinha não restaura vínculos de produção.
   for (const grant of grantsBeforeInactivation.get(perfil) ?? []) {

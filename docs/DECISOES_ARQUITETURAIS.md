@@ -879,3 +879,8 @@ de recibo não prova rollback. A role de captura conserva a proibição de ler h
 O comando usa READ COMMITTED e FOR NO KEY UPDATE, compatível com as referências
 à identidade na auditoria, evitando deadlock nas despromoções cruzadas.
 [Contrato e limites](arquitetura/CONTRATO_PERFIL_USUARIO_8D2.md).
+
+Extensão8D2.2: migration76 compartilha a versão/recibo entre perfil e estado,
+conserva wrapper e view de perfil para compatibilidade e usa a revogação de
+vínculos da74 na mesma transação. Nova intenção após recibo confirmado exige
+releitura explícita. [Prova integrada de estado](validacoes/VALIDACAO_8D2_ESTADO.md).

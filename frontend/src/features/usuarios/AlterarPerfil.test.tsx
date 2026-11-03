@@ -13,16 +13,18 @@ beforeAll(() => {
 });
 const resources: Array<{ manager: SessionManager; router: ReturnType<typeof createMemoryRouter> }> = [];
 afterEach(() => resources.splice(0).forEach(({ manager, router }) => { router.dispose(); manager.dispose(); }));
-async function setup(code = 201, operation = '', profile = 'administracao', self = false) {
+async function setup(code = 201, operation = '', profile = 'administracao', self = false, kind: 'perfil' | 'estado' = 'perfil') {
   let current = { usuarioId: '9007199254740993', nome: 'Alvo sintético', login: 'alvo-sintetico', perfil: 'consulta', ativo: true, versao: '1' };
   let receipt: Record<string, unknown> | undefined;
   let receiptFails = false; let readFails = false;
   const writes = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
     const dto = JSON.parse(String(init?.body));
-    receipt = { ...dto, usuarioId: current.usuarioId, atorUsuarioId: '42', operacao: 'perfil', instante: '2026-11-03T10:00:00Z',
-      anterior: current.perfil, novo: dto.perfil, versaoAnterior: current.versao, versaoNova: code === 201 ? '2' : '1',
+    const nextVersion = String(BigInt(current.versao) + 1n);
+    receipt = { ...dto, usuarioId: current.usuarioId, atorUsuarioId: '42', operacao: kind, instante: '2026-11-03T10:00:00Z',
+      anterior: kind === 'perfil' ? current.perfil : current.ativo, novo: kind === 'perfil' ? dto.perfil : dto.ativo,
+      versaoAnterior: current.versao, versaoNova: code === 201 ? nextVersion : current.versao,
       resultado: code === 409 ? 'versao_obsoleta' : code === 403 ? 'autoacao_proibida' : 'aplicada' };
-    if (code === 201 || code === 0) current = { ...current, perfil: dto.perfil, versao: '2' };
+    if (code === 201 || code === 0) current = { ...current, ...(kind === 'perfil' ? { perfil: dto.perfil } : { ativo: dto.ativo }), versao: nextVersion };
     if (code === 0) throw new TypeError('Resposta perdida');
     return Response.json(receipt, { status: code });
   });
@@ -36,7 +38,7 @@ async function setup(code = 201, operation = '', profile = 'administracao', self
   };
   const manager = new SessionManager(fetcher); await manager.login('sintetico', 'senha-sintetica');
   const router = createMemoryRouter([{ path: '/usuarios/:usuarioId', element: <SessionProvider manager={manager}><DraftProvider><UsuariosPage /></DraftProvider></SessionProvider> }],
-    { initialEntries: [`/usuarios/${current.usuarioId}${operation ? `?operacao=${operation}` : ''}`] });
+    { initialEntries: [`/usuarios/${current.usuarioId}?comando=${kind}${operation ? `&operacao=${operation}` : ''}`] });
   resources.push({ manager, router }); render(<RouterProvider router={router} />);
   await screen.findByRole('heading', { name: profile === 'administracao' ? 'Dados do usuário' : 'Acesso administrativo necessário' });
   const user = userEvent.setup();
@@ -123,4 +125,52 @@ describe('8D2U.1 perfil administrativo integrado', () => {
     const { writes } = await setup(201, '', profile);
     expect(screen.queryByLabelText('Novo perfil')).not.toBeInTheDocument(); expect(writes).not.toHaveBeenCalled();
   });
+});
+
+
+async function reviewState(user: ReturnType<typeof userEvent.setup>, choice = 'inativa') {
+  await user.selectOptions(await screen.findByLabelText('Nova situação'), choice);
+  await user.type(screen.getByLabelText('Justificativa'), 'Situação sintética justificada');
+  await user.click(screen.getByRole('button', { name: 'Revisar alteração' }));
+}
+it('estado: revisa consequências, confirma e prepara nova intenção com versão atual', async () => {
+  const { user, writes } = await setup(201, '', 'administracao', false, 'estado');
+  await reviewState(user);
+  expect(screen.getByRole('dialog')).toHaveTextContent('Ativa → Inativa');
+  expect(screen.getByRole('dialog')).toHaveTextContent('vínculos com pacientes serão revogados');
+  await user.click(screen.getByRole('button', { name: 'Confirmar alteração' }));
+  expect(await screen.findByText('Alteração de situação da conta confirmada.')).toBeVisible();
+  expect(screen.getByText(/Recibo de/)).toHaveTextContent('Ativa → Inativa');
+  await user.click(screen.getByRole('button', { name: 'Preparar nova alteração' }));
+  await user.selectOptions(await screen.findByLabelText('Nova situação'), 'ativa');
+  await user.click(screen.getByRole('button', { name: 'Revisar alteração' }));
+  expect(screen.getByRole('dialog')).toHaveTextContent('Vínculos revogados não serão restaurados');
+  await user.click(screen.getByRole('button', { name: 'Confirmar alteração' }));
+  await waitFor(() => expect(writes).toHaveBeenCalledTimes(2));
+  const bodies = writes.mock.calls.map(call => JSON.parse(String(call[1]?.body)));
+  expect(bodies[0]).toMatchObject({ ativo: false, versao: '1' }); expect(bodies[1]).toMatchObject({ ativo: true, versao: '2' });
+  expect(bodies[0].operacaoId).not.toBe(bodies[1].operacaoId);
+});
+it('estado: resposta perdida recupera booleano falso pelo recibo sem reenvio', async () => {
+  const { user, writes } = await setup(0, '', 'administracao', false, 'estado'); await reviewState(user);
+  await user.click(screen.getByRole('button', { name: 'Confirmar alteração' }));
+  expect(await screen.findByText(/Resposta não confirmada/)).toBeVisible();
+  await user.click(screen.getByRole('button', { name: 'Consultar resultado' }));
+  expect(await screen.findByText('Alteração de situação da conta confirmada.')).toBeVisible(); expect(writes).toHaveBeenCalledTimes(1);
+});
+it('estado: conflito preserva situação e justificativa até nova revisão explícita', async () => {
+  const { user, writes } = await setup(409, '', 'administracao', false, 'estado'); await reviewState(user);
+  await user.click(screen.getByRole('button', { name: 'Confirmar alteração' }));
+  await screen.findByText(/Conflito: sua escolha/);
+  await user.click(screen.getByRole('button', { name: 'Consultar resultado' }));
+  await screen.findByText(/A conta mudou desde a leitura/);
+  expect(screen.getByLabelText('Nova situação')).toHaveValue('inativa');
+  await user.click(screen.getByRole('button', { name: 'Preparar nova revisão' }));
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Revisar alteração' })).toBeEnabled()); expect(writes).toHaveBeenCalledTimes(1);
+});
+it('estado: cancelar e fechar não escrevem; link de perfil conserva o caminho do usuário', async () => {
+  const { user, writes } = await setup(201, '', 'administracao', false, 'estado'); await reviewState(user);
+  await user.click(screen.getByRole('button', { name: 'Fechar revisão' })); expect(writes).not.toHaveBeenCalled();
+  await user.click(screen.getByRole('link', { name: 'Alterar perfil da conta' }));
+  expect(await screen.findByLabelText('Novo perfil')).toBeVisible(); expect(writes).not.toHaveBeenCalled();
 });

@@ -1,11 +1,11 @@
-import { Link, useParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router';
 import { useSession } from '../../app/session';
 import { useApiQuery } from '../../api/useApiQuery';
 import { Card, EmptyState, PageHeading, QueryState, TableScroll } from '../../shared/ui';
 import { pagePath, Pagination, usePage } from '../pacientes/pagination';
 
 import type { UsuarioResumo } from '../../api/contracts';
-import { AlterarPerfil, profiles } from './AlterarPerfil';
+import { AlterarConta, profiles } from './AlterarConta';
 
 function UsersList() {
   const session = useSession();
@@ -31,6 +31,8 @@ function UsersList() {
 
 function UserDetail({ usuarioId }: { usuarioId: string }) {
   const page = usePage();
+  const [params] = useSearchParams();
+  const kind = params.get('comando') === 'estado' ? 'estado' : 'perfil';
   const query = useApiQuery<UsuarioResumo>(`/usuarios/${encodeURIComponent(usuarioId)}`);
   return <>
     <Link to={pagePath('/usuarios', page.limit, page.offset)}>Voltar aos usuários</Link>
@@ -42,7 +44,7 @@ function UserDetail({ usuarioId }: { usuarioId: string }) {
         <div><dt>Login</dt><dd>{user.login}</dd></div>
         <div><dt>Situação da conta</dt><dd>{user.ativo ? 'Ativa' : 'Inativa'}</dd></div>
         <div><dt>Perfil</dt><dd><span className="badge">{profiles[user.perfil]}</span></dd></div>
-      </dl><AlterarPerfil key={user.usuarioId} user={user} /></>}</QueryState>
+      </dl><AlterarConta key={`${user.usuarioId}:${kind}`} user={user} kind={kind} /></>}</QueryState>
     </Card>
   </>;
 }

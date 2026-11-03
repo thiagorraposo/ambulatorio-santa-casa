@@ -15,7 +15,8 @@ mesma fila M3; [leitura administrativa8D de login/estado validada](validacoes/VA
 [Minha conta integrada](validacoes/VALIDACAO_8D1_MINHA_CONTA.md).
 [Perfil8D2B.1/U.1 integrado e validado tecnicamente](validacoes/VALIDACAO_8D2_PERFIL.md),
 com concorrência, proteção do último administrador e revogação de sessões.
-Próxima unidade: ativação/inativação8D2B.2/U.2. Não concluir a família
+[Ativação/inativação8D2B.2/U.2 integrada](validacoes/VALIDACAO_8D2_ESTADO.md).
+Próxima unidade: criação/provisionamento8D2B.3/U.3. Não concluir a família
 8D ou os achados humanos por associação. Sem reinício das seis janelas.
 
 

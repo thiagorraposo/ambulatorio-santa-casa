@@ -72,3 +72,31 @@ explícita para outra intenção. Recibo aplicado mostra resultado histórico e 
 o estado atual separadamente; falha de releitura permanece erro, sem inventar
 persistência. Autoação tem orientação de procurar outro administrador. Carga,
 vazio/404, 400/401/403/409/503 e falha de rede têm tratamento seguro.
+
+## Extensão integrada — estado 8D2B.2/U.2
+
+Unidade posterior ao commit18e209b; [validação própria](../validacoes/VALIDACAO_8D2_ESTADO.md).
+POST `/v1/usuarios/:usuarioId/estado` recebe `{operacaoId, versao, ativo: boolean,
+justificativa}` com as mesmas restrições de UUID/versão/justificativa do perfil.
+Autoativação/autoinativação proibidas; último administrador ativo protegido;
+409 se estado igual ou versão obsoleta. Recibo `operacao: 'estado'`, anterior/novo
+booleanos, demais campos iguais; resultado `estado_inalterado` acrescentado.
+Consulta de recibo mantém endpoint/autorização; códigos globais entre os comandos.
+
+Migration76 generaliza o armazenamento de recibos em usuario_conta_operacao,
+preservando recibos existentes e wrapper SQL/API de perfil. A view de leitura
+usuario_perfil_operacao conserva os consumidores antigos, filtrada por perfil. Nenhuma migration
+aplicada será editada. Alteração de estado incrementa versão/geração; inativação
+usa a revogação de vínculos da74 na mesma transação e reativação não os restaura.
+Identidade inativa não autentica; sessão anterior permanece inválida após reativar.
+
+UI reutiliza AlterarConta, editor administrativo/revisão/recuperação, com aviso de perda de
+acesso e vínculos na inativação, e de não restauração na reativação. Justificativa
+obrigatória em ambos os comandos para manter uma trilha explícita. Falhas e
+recuperação seguem o perfil. Aceite: API/UI/SQL, duas versões, JWT antigo,
+concorrência cruzada/perfil×estado, vínculo revogado e cancelamento sem escrita.
+
+Recibo confirmado permite preparar explicitamente outra intenção, relendo a conta,
+sem repetir a anterior. A URL inclui comando=estado para recuperar o recibo no
+editor correto após login; URLs antigas de perfil sem comando permanecem válidas.
+A troca entre os comandos conserva a paginação e separa rascunhos por conta/ação.

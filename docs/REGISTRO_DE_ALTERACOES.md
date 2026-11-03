@@ -1,5 +1,15 @@
 # Registro de Alterações
 
+## 2026-11-03 — Integrar ativação e inativação administrativas8D2B.2/U.2
+
+Migration76 compartilha recibos/versão entre perfil e estado, conserva wrapper/view
+anteriores e revoga vínculos/sessões atomicamente na inativação. Reativação não
+restaura acesso prévio. API e editor de revisão/recuperação reais reutilizados;
+nova intenção após recibo confirmado exige releitura.47 SQL,213 unidades backend,
+325 frontend integrais,8 fundação,14 HTTP e7 E2E focados aprovados, além do
+upgrade75→76 e31 workflow. [Prova e comparação visual](validacoes/VALIDACAO_8D2_ESTADO.md).
+Sem banco persistente/aceite humano; próxima criação/provisionamento8D2.3.
+
 ## 2026-11-03 — Integrar alteração administrativa de perfil8D2B.1/U.1
 
 Migration75 versiona conta/sessão e guarda recibos; API e detalhe de usuário

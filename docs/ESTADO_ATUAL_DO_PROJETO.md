@@ -16,7 +16,9 @@ Migration74 somente descartável; aceitações humanas pendentes. Próxima unida
 [identificação própria de Minha conta também validada](validacoes/VALIDACAO_8D1_MINHA_CONTA.md).
 [Perfil8D2B.1/U.1 integrado](validacoes/VALIDACAO_8D2_PERFIL.md): versão, justificativa,
 recibo, último administrador e revogação JWT. Migration75 somente descartável.
-Seguir ativação/inativação8D2B.2/U.2; sem concluir a família8D.
+[Estado8D2B.2/U.2 também integrado](validacoes/VALIDACAO_8D2_ESTADO.md), com
+47 SQL,213 unidades backend,325 frontend integrais e7 E2E focados. Migration76
+somente descartável. Seguir criação/provisionamento8D2B.3/U.3; família8D parcial.
 
 
 **Histórico da retomada visual de 03/11:** atendimento organizado nas 12 seções
