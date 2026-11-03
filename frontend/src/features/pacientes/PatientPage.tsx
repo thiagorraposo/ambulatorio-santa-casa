@@ -9,6 +9,7 @@ import { useSession } from '../../app/session';
 import ClinicalActions from '../clinical/ClinicalActions';
 import { LatestAttendance } from './LatestAttendance';
 import { SelectedAttendance } from './SelectedAttendance';
+import { patientsSearchReturn, searchReturnPath } from './PatientsSearchReturn';
 import {
   AttendanceHistory, PatientAnnualFollowup, PatientBzn, PatientExams, PatientNotification,
   PatientPending, PatientProjects, PatientReferrals,
@@ -36,7 +37,7 @@ function PatientData({ data, changePage }: { data: PacienteDetalheResponse; chan
     )}
     <h3>Atendimentos desta página</h3>
     {data.atendimentos.length === 0 ? <EmptyState>Nenhum atendimento nesta página.</EmptyState> : (
-      <div className="resource-list">{data.atendimentos.map(item => <article className="resource-item" key={item.atendimentoId}>
+      <div className="resource-list patient-attendance-list">{data.atendimentos.map(item => <article className="resource-item" key={item.atendimentoId}>
         <AttendanceLink pacienteId={data.pacienteId} atendimentoId={item.atendimentoId} />
         <p>{formatClinicalDate(item.dataAtendimento)}</p>
         <p>{displayText(item.observacoes)}</p>
@@ -79,23 +80,27 @@ export default function PatientPage() {
   const section = searchParams.get('aba') ?? 'dados';
   const page = usePage('dados');
   const path = `/pacientes/${encodeURIComponent(pacienteId)}`;
+  const searchOrigin = patientsSearchReturn(searchParams.get('retorno'));
   const query = useApiQuery<PacienteDetalheResponse>(pagePath(path, page.limit, page.offset));
   return <>
-    <nav className="breadcrumb" aria-label="Caminho da página"><Link to="/pacientes">Pacientes</Link><span>Ficha do paciente</span></nav>
+    <nav className="breadcrumb" aria-label="Caminho da página"><Link to={searchOrigin ?? '/pacientes'}>{searchOrigin?.startsWith('/dashboard') ? 'Dashboard' : 'Pacientes'}</Link><span>Ficha do paciente</span></nav>
     <PageHeading title="Ficha do paciente" />
     <QueryState query={query}>
       {data => <>
         <Card className="patient-summary">
+          <div className="patient-summary-header"><span className="patient-avatar" aria-hidden="true">{data.nome[0]}</span><div className="patient-summary-identity">
           <h2>{data.nome}</h2>
           <p>ID <span className="mono">{data.pacienteId}</span></p>
           <p>Nascimento: <span>{formatClinicalDate(data.dataNascimento)}</span></p>
           <p>{formatAge(data.idade, data.dataReferenciaIdade)}</p>
-          {location.state?.saved && <p className="notice" role="status">{String(location.state.saved)}</p>}
+          </div>
           {session.user?.perfil !== 'consulta' && <div className="form-actions">
-            <Link to={`${path}/editar`} className="button button-secondary">Editar paciente</Link>
-            <Link to={`${path}/atendimentos/novo`} className="button">Novo atendimento</Link>
+            <Link to={searchReturnPath(`${path}/editar`, searchOrigin)} className="button button-secondary">Editar paciente</Link>
+            <Link to={searchReturnPath(`${path}/atendimentos/novo`, searchOrigin)} className="button">Novo atendimento</Link>
             <Link to={`${path}/registrar?tipo=bzn`} className="button button-secondary">Registrar acompanhamento</Link>
           </div>}
+          </div>
+          {location.state?.saved && <p className="notice" role="status">{String(location.state.saved)}</p>}
         </Card>
         <LatestAttendance key={pacienteId} pacienteId={pacienteId} />
         <nav className="record-nav" aria-label="Seções da ficha">

@@ -1,5 +1,519 @@
 # Registro de Alterações
 
+## 2026-11-03 — Organizar publicação integrada de M3 pelo GitHub Flow
+
+Entrega reunida na branch existente `feat/m3-janela-1-eventos`, preservando os
+68 commits de implementação/evidências e incorporando `origin/main` por merge
+sem conflitos (`0f67429`). Nenhuma migration anterior foi alterada; as migrations
+69–79 são incrementais. Validação e publicação seguem o workflow oficial, com
+PostgreSQL exclusivo em tmpfs na porta 55457, sem operar os ambientes persistentes.
+Resultados locais, CI e limites ficam na descrição da PR e nas execuções do GitHub
+Actions vinculadas, evitando duplicar seu estado transitório neste registro.
+Publicação técnica não equivale a homologação humana de M3/8V1/8V2.
+O job Frontend passa de 25 para 45 minutos: a rodada local integral ultrapassou
+25 minutos (149 cenários em 35,4 minutos) com esperas do limiter real, sem falhas
+ou redução de cobertura; margem adicional inclui a preparação do runner.
+
+## 2026-11-03 — Substituir a base de demonstração por dez pacientes fictícios
+
+Seed existente ganha perfil demonstrativo exclusivo de --serve/--demo-test, com
+10 pacientes, 27 atendimentos, evolução clínica e registros relacionados via API.
+Reexecução sem duplicação, recusa de base parcial e recriação pelo runner isolado;
+fixtures de stress preservadas apenas nos testes. Dashboard validado contra SQL
+nos três perfis, incluindo capacidade nominal, filtros, série, páginas e ambos
+os CSVs. Gráfico rolável recebe foco de teclado ao revelar série de seis meses.
+[Provas, contagens e limites](validacoes/VALIDACAO_BASE_DEMO_CHAGAS_M3.md).
+Sem migrations, banco persistente, push ou deploy; aceite humano pendente.
+
+## 2026-11-03 — Estabilizar experiência operacional e analítica dos três perfis
+
+Início por perfil separado de Dashboard; busca e tarefas reais, navegação com
+retorno preservado entre análise/busca, ficha e escrita/confirmação. Dashboard
+combina filtros autorizados, série mensal/tabela, resultados paginados e CSV de
+todas as páginas, até5.000, neutralizado e auditado pela nova migration79.
+Importações e fluxo único preservados; sem ampliar RBAC ou usar banco persistente.
+[Ensaio, validações, contingência e limites](validacoes/ESTABILIZACAO_FINAL_M3_2026_11_03.md).
+Novos achados humanos registrados sem homologação de M3/8V1/8V2.
+
+## 2026-11-03 — Entregar dashboard básico com quatro indicadores reais
+
+API e interface de Início/Dashboard agregam pacientes autorizados, consultas
+realizadas, pendências atuais e lotes concluídos, com período e definições.
+Migration78 exige capacidade nominal para indicador de importações, além do
+escopo de lote; sem permissão não vira zero. Fixtures conhecidas,7 HTTP,8 unidades
+backend,25 frontend focadas e2 E2E aprovados; [provas e comparação visual](validacoes/VALIDACAO_8B1_DASHBOARD.md).
+8D commitado em `e40fdeb`; revisão humana adiada, sem concluir M3/8V.
+
+## 2026-11-03 — Integrar criação de usuários e primeiro acesso obrigatório
+
+Migration77, API e interface administrativas criam conta com credencial temporária
+forte de exibição única, prazo configurável e consumo transacional. Sessão inicial
+restrita à troca de senha; novo hash revoga sessões. Recuperação não administrativa
+com versão/justificativa e recibo sem segredo. Proteções de perfil/estado preservadas;
+dono de credenciais separado do dono da auditoria. [Contrato](arquitetura/CONTRATO_CRIACAO_USUARIO_8D2.md)
+e [provas técnicas](validacoes/VALIDACAO_8D2_CRIACAO.md). Somente PostgreSQL sintético
+descartável; sem aceite institucional ou conclusão integral de M3.
+
+## 2026-11-03 — Integrar rascunho das12 seções e confirmação coordenada do atendimento
+
+P0 funcional M3 assume prioridade máxima. Campos dos serviços clínicos existentes
+agora compartilham preenchimento/revisão; histórico longitudinal consultável sem
+cópia, novos registros explícitos e confirmação PostgreSQL coordenada com recibos
+por operação. Recuperação mantém reenvio bloqueado até prova autoritativa; novos
+atendimentos começam vazios. Sem migration ou banco persistente. Contrato, provas e limites em [relatório da unidade](validacoes/FLUXO_UNICO_ATENDIMENTO_M3_2026_11_03.md).
+Retomada: bloqueios anteriores de Git e sockets não reproduzidos, sem alterar
+permissões/configurações. Provas focadas reais HTTP/PostgreSQL/Chromium,
+concorrência, histórico, auditoria e visual1440/390 aprovadas; corrigidos SQL do
+teste e alinhamento da grade. Fechamento técnico:225 unidades backend,8 fundação,
+173 clínicos HTTP/PostgreSQL,47SQL;138 E2E distintos aprovados por composição,
+com falhas/reexecuções discriminadas no relatório. Corrigida higiene sintética
+de vínculos para respeitar o limitador real;337 unidades frontend reutilizadas.
+Commit de implementação30ae955 preservado; revisão humana pendente, sem iniciar8D
+por solicitação de finalizar esta menor unidade.
+
+## 2026-11-03 — Integrar ativação e inativação administrativas8D2B.2/U.2
+
+Migration76 compartilha recibos/versão entre perfil e estado, conserva wrapper/view
+anteriores e revoga vínculos/sessões atomicamente na inativação. Reativação não
+restaura acesso prévio. API e editor de revisão/recuperação reais reutilizados;
+nova intenção após recibo confirmado exige releitura.47 SQL,213 unidades backend,
+325 frontend integrais,8 fundação,14 HTTP e7 E2E focados aprovados, além do
+upgrade75→76 e31 workflow. [Prova e comparação visual](validacoes/VALIDACAO_8D2_ESTADO.md).
+Sem banco persistente/aceite humano; próxima criação/provisionamento8D2.3.
+
+## 2026-11-03 — Integrar alteração administrativa de perfil8D2B.1/U.1
+
+Migration75 versiona conta/sessão e guarda recibos; API e detalhe de usuário
+integram justificativa/revisão/confirmação, conflito e recuperação após login.
+Autoação vedada, último administrador protegido sob concorrência, JWT antigo
+não revive. Privilégio de hash da role de captura continua proibido; contratos
+clínicos preservados. SQL/HTTP/frontend/E2E e comparação visual técnica na
+[prova delimitada](validacoes/VALIDACAO_8D2_PERFIL.md). Sem banco persistente,
+push ou aceite humano; família8D continua parcial.
+
+## 2026-11-03 — Integrar identificação própria e suporte em Minha conta
+
+/auth/me amplia login/situação reais, sem hash ou leitura de terceiros; interface
+reaproveita identidade em memória e publica suporte da decisão10. Contratos e
+sessão preservados, projeção antiga aceita sem inventar dados. Builds,211 unidades
+backend,311 frontend integrais,8 fundação,22 HTTP e4+2 E2E focados aprovados.
+[Provas e comparação visual](validacoes/VALIDACAO_8D1_MINHA_CONTA.md), sem aceite humano.
+
+## 2026-11-03 — Integrar login e situação na leitura administrativa8D
+
+GETs administrativos existentes e lista/detalhe passam a publicar login e estado
+real ativo/inativo, conforme decisão8. Campos anteriores/RBAC/paginação preservados;
+sem rota nova, migration ou comandos fictícios. Testes/projeção exata, perfis,
+conta inativa e comparação visual na [prova integrada](validacoes/VALIDACAO_8D1_LOGIN_ESTADO.md).
+Histórico, Minha conta ampliada e comandos8D2 continuam escopos próprios.
+
+## 2026-11-03 — Integrar cadastro e edição por Edição com vínculo específico
+
+Capacidade real habilita busca/formulário existente; migration74 cria vínculo e
+auditoria na transação do cadastro. PATCH e atendimento reutilizados; inativação
+revoga vínculos sem restauração, concessão concorrente serializada e perda de
+identidade traduzida para401. Contratos/endpoints preservados. SQL/HTTP/navegador,
+visual e limitações no [relatório da unidade](validacoes/VALIDACAO_CADASTRO_EDICAO_M3.md).
+Sem aplicação em banco persistente ou aceite humano.
+
+## 2026-11-03 — Retomar execução contínua de M3 com DoD integrado
+
+Revisão humana comparativa temporariamente adiada, sem aprovação/homologação.
+Validações técnicas obrigatórias e aceites pendentes. Workflow permanente completa
+contrato→backend→frontend→integração→testes→validação visual→evidências→commit,
+com preservação de contratos e backend isolado identificado como parcial.
+Fila vigente retomada, seis janelas e marcos preservados; HEAD inicial c2129b3,
+árvore limpa. Continuidade funcional autorizada após validação documental.
+
+
+## 2026-11-03 — Aproximar o frontend da referência oficial
+
+Preservadas e completadas alterações preexistentes: atendimento nas 12 seções
+informacionais, navegação livre e revisão, listagem com nome/ID/ações e reflow,
+cabeçalhos e agrupamentos de cadastro, ficha e recursos clínicos consistentes.
+Contratos, perfis, rascunhos, recibos e confirmações próprias mantidos.
+[Comparação visual, mapa de suporte e validações](validacoes/ADEQUACAO_VISUAL_FRONTEND_2026_11_03.md).
+Sem backend novo, migrations, dados reais, push/deploy ou aceite8V1/8V2.
+
+## 2026-11-02 — Congelar candidato sintético para apresentação Santa Casa
+
+Candidato `c4a3c998f1b25addac65e1c79fb2b6a00f3fac73` fixado em branch local,
+sem mudança de runtime. Builds backend/frontend e40 E2E integrados aprovados;
+ensaio separado no Chromium com API/PostgreSQL descartáveis comprovou cadastro,
+atendimento/medidas, recuperação sem duplicação, histórico, isolamento, leitura,
+403 e CSV real. Capturas1440/390/320, SQL, recibos e hashes preservados.
+HUM-M3-03 continua aberto; sem causa humana inventada, melhoria visual nova ou
+aceite8V1/8V2. Ambiente encerrado; contingência b95df82 em checkout isolado.
+[Roteiro, resultados, limitações e contingência](validacoes/CONGELAMENTO_DEMONSTRACAO_2026_11_02.md).
+Checkpoint impede expansão automática de M3 após o congelamento.
+
+## 2026-11-02 — Registrar decisões de produto M3 para implementação sintética
+
+Consolidadas as [respostas1–31](dados/DECISOES_PRODUTO_M3_2026_11_02.md)
+com rastreabilidade P-03–P-09, parâmetros provisórios e limites institucionais.
+Registrada antes de mudança de código a substituição da vedação de autovínculo
+pela autorização específica/auditável/revogável ao cadastro por Edição.
+Fontes temáticas apontam para o registro único; contratos e provas anteriores
+preservados. Menor unidade documental encerrada a pedido do responsável, sem
+alteração de aplicação, migration ou banco. Validação e próxima unidade no
+[checkpoint M3](execucao/PLANO_M3_2026_11_03.md#10-checkpoint-único-e-transferência-de-contexto).
+
+## 2026-11-02 — Integrar consulta individual mínima de usuários
+
+API e interface administrativas de detalhe com ID/nome/perfil reais, retorno
+paginado, recarga, erro/404 e recusas por perfil/sessão. Builds, unidades,
+19 HTTP e nove cenários de navegador aprovados; SQL/fundação concluídos por
+composição após corrigir configuração local, preservando resultados aprovados.
+[Provas, capturas e limites](validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md#consulta-individual-mínima--retomada-de-6764cb8).
+Histórico/campos ampliados/mutações e aceites humanos seguem pendentes.
+
+## 2026-11-02 — Delimitar consulta individual mínima de usuários
+
+Retomado checkpoint `1abe410` com Git limpo. Preparada a
+[proposta de leitura individual](arquitetura/CONTRATO_LEITURA_USUARIOS_8D1B.md#proposta-de-próximo-incremento--consulta-individual-mínima)
+com ID/nome/perfil, capacidades por perfil, HTTP, retorno paginado, critérios
+e gates de histórico/campos adicionais. Apenas documentação; listagem validada
+e regressão anterior preservadas, sem repetir suítes ou alterar ambiente.
+[Inspeção e limites](validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md#retomada-de-1abe410--proposta-de-consulta-individual).
+Checkpoint indica implementação mínima B/U como próxima ação elegível.
+
+## 2026-11-02 — Corrigir chaves dos formulários de acompanhamento
+
+`FollowupDraftFields` passa `key` diretamente aos componentes booleano,
+seleção e texto, preservando campos, callbacks e layout. Build e306 unidades
+aprovados;110/110 E2E integrais aprovados sem retries, com limpeza dos recursos
+descartáveis. Comandos e limitações no [registro da retomada](validacoes/VALIDACAO_REGRESSAO_FRONTEND_M3_2026_11_02.md#retomada-do-checkpoint-511d2f2--chaves-dos-formulários).
+Encerramento solicitado após a menor unidade segura; checkpointM3 atualizado
+com resultados e próxima ação, sem concluir achados ou aceites humanos.
+
+## 2026-11-02 — Conservar filtros no breadcrumb direto do atendimento
+
+Corrigida perda reproduzida de filtros/página ao usar Pacientes no detalhe.
+Destino deriva da origem validada;36 unidades, build e três E2E por perfil
+aprovados, com teclado/Axe e1440/390/320. [Provas e limites](validacoes/VALIDACAO_8B3U_4.md#breadcrumb-direto-do-atendimento--fechamento-solicitado).
+Concluída a menor unidade em andamento a pedido do responsável; checkpoint
+atualizado sem declarar homologação ou conclusão deM3.
+
+## 2026-11-02 — Melhorar leitura da tabela de pacientes em telas menores
+
+Aplicado padrão existente de rolagem acessível: nomes/IDs inteiros e orientação
+para alcançar ações. Build e dois E2E reais com1440/390/320, teclado e Axe
+aprovados. [Capturas, comparação e limites](validacoes/VALIDACAO_8B3U_4.md#legibilidade-da-tabela-em-telas-menores).
+Sem novas colunas, regras clínicas ou aceite humano.
+
+## 2026-11-02 — Preservar busca ao abrir e reler atendimentos
+
+Sanitização conserva retorno validado à busca sem cadeias recursivas. Perda
+reproduzida em teste;306 unidades frontend passaram,20 afetadas revalidadas
+após preservar ordem da query e três E2E por perfil aprovados. [Evidência](validacoes/VALIDACAO_8B3U_4.md#retorno-pelo-atendimento).
+Permissões e cinco achados humanos preservados.
+
+## 2026-11-02 — Conservar filtros ao consultar a ficha de pacientes
+
+Incorporadas alterações locais revisadas: busca→ficha→abas→recarga→busca mantém
+filtros e página, com retorno restrito à lista local. Build,16 unidades e três
+E2E por perfil aprovados, com teclado/Axe e1440/390/320. [Prova e limites](validacoes/VALIDACAO_8B3U_4.md#retorno-da-ficha-à-busca--estabilização-de-0211).
+Sem alteração de permissões, backend ou aceite humano.
+
+## 2026-11-02 — Incorporar PoC revisada de instância sintética isolada
+
+Harness preexistente revisado e reexecutado em tmpfs: clones próprios,
+schema/ACLs/credencial restrita, worker real, no-op, reprocessamento e
+cancelamento;61 tabelas/54 sequências da origem preservadas. [Provas e limites](validacoes/VALIDACAO_POC_ISOLAMENTO_INSTANCIA_8C2B_1.md).
+Sem integração H14, supervisor operacional ou conclusão de8C2B.1.
+
+## 2026-11-02 — Revalidar P0 na retomada de estabilização
+
+Dez cenários de navegador/API/PostgreSQL sintético tmpfs aprovados, incluindo
+cadastro→atendimento→registro clínico→histórico→CSV,403/409, rollback e
+recuperação sem duplicação. Incorporado roteiro composto pendente, revisado
+contra validação local de limites e rollback tardio real. [Evidência P0](validacoes/VALIDACAO_P0_ATENDIMENTO_2026_11_02.md#revalidação-da-retomada-de-estabilização).
+Falha humana não reproduzida; achados/aceites e restrições permanecem vigentes.
+
+## 2026-11-02 — Corrigir endereço da demonstração para o código corrente
+
+Identificado que4177 servia checkout antigo em/tmp. Nova demonstração local
+em4178/API6063/PG55459 sintético tmpfs, servindo a raiz/runtimeae19c41; ambiente
+anterior preservado. Smoke em navegador confirmou login/menu/lista administrativa
+pela API real. [Endereço vigente e operação](validacoes/RELATORIO_EXECUCAO_M3_2026_11_02.md#aplicação-disponível-no-navegador).
+Sem mudança de código/runtime, banco persistente ou conclusão de funções pendentes.
+
+## 2026-11-02 — Integrar leitura mínima administrativa de usuários
+
+GET/rota/menu Usuários somente para Administração, com ID/nome/perfil reais e
+paginação. Nove testes HTTP e três cenários de navegador por perfil comprovam
+projeção, negação, revalidação, erro/recarga e telas menores; comparação técnica
+renderizada preservada. [Evidências e limites](validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md).
+Agregados8D1 parciais; criação/perfil/ativação e P1 Edição preservam decisões
+pendentes. Sem migration, concessão clínica ou alteração de banco persistente.
+
+## 2026-11-02 — Antecipar limites físicos e preservar foco dos erros P0
+
+DTO/cliente localizam limites numéricos existentes sem definir faixa clínica.
+Familiares incompatíveis apontam controles; corrigido foco do resumo ao revelar
+outra etapa. Testes reproduziram ambas as lacunas antes da correção;211 unidades
+backend,137 clínicos,24 focados frontend e E2E novo passaram. Rodada ampla parcial
+exposta com limites; relogin do roteiro respeita429 pelo helper compartilhado.
+[Detalhes e rastreabilidade](validacoes/VALIDACAO_P0_ATENDIMENTO_2026_11_02.md#limites-físicos-familiares-e-foco-entre-etapas).
+
+## 2026-11-02 — Validar fluxo P0 integrado e localizar rejeições de filhos
+
+Cadastro novo e existente confirmam/releem atendimento em PostgreSQL descartável;
+falha humana ainda não reproduzida. Exames/pendências passam a indicar caminho,
+código e controle sem descartar valores. Oito E2E focados comprovam rollback,
+403/409, duplo clique e recuperação; unidades 290 frontend/203 backend,
+137 testes clínicos e oito de fundação aprovados, além de project-check.
+[Prova e limites](validacoes/VALIDACAO_P0_ATENDIMENTO_2026_11_02.md#retomada-contínua--integração-liberada).
+P1 Edição/8D seguem gates de decisão; sem alteração de banco persistente ou push.
+
+## 2026-11-02 — Implementar feedback de campo no atendimento P0
+
+Envelope de erros DTO por caminho/código sanitizado (ADR-027), consumo seguro no
+cliente, resumo navegável entre etapas e controles com erro acessível. Contexto
+simultâneo já proibido pela SQL03 é recusado antes da revisão e traduzido pelo
+backend sem alterar regra, schema, autorização, auditoria ou recibos.
+
+[Provas e limites](validacoes/VALIDACAO_P0_ATENDIMENTO_2026_11_02.md): 289 unidades
+frontend, 12 testes backend focados; 54 regressões focadas após ajuste final.
+Builds aprovados. Socket EPERM impediu reprodução/persistência/E2E/visual; dois
+cenários E2E preparados, sem alegar execução. P0 humano permanece aberto.
+P1 acesso inicial e decisões 8D preservados como gates; sem dados persistentes.
+
+## 2026-11-02 — Registrar avaliação humana e repriorizar M3
+
+Registrada a avaliação do protótipo funcional com a equipe do Centro de Pesquisa
+em Saúde e responsável técnico: REALIZADA — COM PROBLEMAS IDENTIFICADOS; ACEITE
+INTEGRAL NÃO REGISTRADO. Data exata, ambiente e SHA da sessão não confirmados.
+Cinco achados abertos: cadastro/edição por Edição, confirmação de atendimentoP0,
+cobertura frontend e gestão de contas. [Fonte humana](validacoes/AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md).
+
+Novos requisitos desejados de perfis e mínimos8D/P-08 separados do código atual;
+criação de contas acrescentada8D2B.3/U.3 eFM/RQ-USR20–24, preservando19EX/IDs.
+Fila passa aP0 atendimento→P1 cadastro/edição,8D efrontend→P2 restante. Workflow
+exige frontend/integração/visual em toda função humana; cobertura/prontidão/DoD
+reavaliados sem EVM ou percentual inventado. Contrato de erros/campos e acesso
+inicial ao paciente criado permanecem planejamento, sem autovínculo/global.
+
+Entrega exclusivamente documental, com candidatoa84001a e aceitesM1/M2
+preservados. Nenhuma implementação, migração, teste clínico, dado persistente,
+credencial, push, merge ou deploy; validações documentais registradas no checkpoint.
+
+## 2026-11-02 — Consolidar decisões e disponibilizar demonstração sintética
+
+Triagem de P-04/P-05/P-06/P-09, propostas de fila/revisão e métricas/busca,
+sem escolher clínica, permissões ou concorrência. Gates humanos permanecem
+abertos. Ambiente sintético iniciado em4177/6062/55458, login real de15min,
+três links longitudinais e simulação verificados sem escrita clínica no smoke.
+Candidato funcionala84001a preservado; execução disponível para revisão no
+navegador. [Registro consolidado](validacoes/RELATORIO_EXECUCAO_M3_2026_11_02.md).
+
+## 2026-11-02 — Restaurar navegação AVC e estabilizar catálogo composto
+
+Restaurado link longitudinal AVC substituído ao acrescentar dispositivos;
+consulta agora mantém AVC/dispositivos/óbito com retorno exato. Roteiros de
+catálogo percorrem páginas reais após inserção de25categorias sintéticas.
+Rodada integral97 aprovados/4 falhas; correções em checkout isolado passaram
+build,12 unidades e5 E2E (quatro casos falhos mais pré-requisito de catálogo).
+[Prova composta e limites](validacoes/VALIDACAO_REGRESSAO_FRONTEND_M3_2026_11_02.md).
+
+## 2026-11-02 — Confronto renderizado da leitura de medicamentos
+
+Referência Tratamentos e leitura real comparadas em1440/390/320, preservando
+capturas anteriores. Escopo por atendimento, campos literais e ausência de
+escrita documentados frente à tabela agregada do protótipo.
+[Prova parcial8V1](validacoes/VALIDACAO_7B_E5U_LEITURA.md#comparação-técnica-renderizada--02112026),
+sem homologação visual ou novo aceite humano.
+
+## 2026-11-02 — Preparar decisões de identidade, documento e isolamento
+
+Propostas8D1D/P-08 e8C3D/P-07 com alternativas, cenários sintéticos e gates;
+nenhuma política institucional/ACL/retenção presumida. PoC real demonstrou
+que tabelas temporárias simples não isolam o pipeline de importação; proposta
+C2B.1 separa provisionamento e worker, com equivalência/estado ainda por definir.
+Documentação preparada e validada; unidades D e B/U dependentes seguem
+bloqueadas, sem ativação de runtime ou aceite humano.
+
+## 2026-11-02 — Ensaio M3 e isolamento dos testes de navegação
+
+Ensaio integrado real de cadastro até episódios/parâmetros, recuperação, segunda
+consulta, perfil consulta e CSV aprovado em banco sintético descartável.
+[Provas e limites](validacoes/VALIDACAO_DEMONSTRACAO_M3_2026_11_02.md).
+Contagens E2E antigas passaram a filtrar sua própria fixture, preservando20/4,
+RBAC e resposta antiga retida na mesma query após troca de identidade;
+[4 cenários dirigidos aprovados](validacoes/VALIDACAO_ISOLAMENTO_E2E_M3.md).
+Regressão frontend integral em andamento; nenhum aceite humano presumido.
+
+## 2026-11-02 — Totais e códigos reais na interface de simulação
+
+U.1 passa a mostrar relatório H14 sanitizado, com validação defensiva, categorias
+disjuntas e lote efetivo no no-op; confirmação continua bloqueada.18 unidades,
+build,4 E2E de regressão e3 cenários novos aprovados, com comparação renderizada.
+[Provas e limites](validacoes/VALIDACAO_8C2_U1_RELATORIO.md). Sem metadados ampliados
+ou promessa de ausência de consumo de sequências.
+
+## 2026-11-02 — Preservar rollback do dry-run após rejeição precoce
+
+Nascimento inválido podia tentar rollback antes do savepoint e encerrar a
+transação externa, permitindo persistência posterior de metadados em lote
+retomado. Savepoint agora antecede transformações; adaptador recusa encerramento
+sem savepoint.38 unidades Python e pipeline integral, com comparação de todas
+as tabelas em lote novo/retomado, aprovados; prova alvo em porta alternativa.
+[Reprodução e validação](validacoes/VALIDACAO_DRY_RUN_REJEICAO_PRECOCE.md).
+Consumo de sequências continua pendente em8C2B.1.
+
+## 2026-11-02 — Relatório H14 sanitizado, recorte8C2B.1
+
+Totais disjuntos e códigos fechados na simulação/aplicação/no-op, com lote
+efetivo, allowlist e validação de protocolo; sem bruto/metadados/candidatos.
+197 unidades backend,35 Python,26 HTTP e pipeline integral aprovados.
+[Provas e limites](validacoes/VALIDACAO_8C2B_1_RELATORIO.md): sequências ainda
+consumidas, folha inteira pendente. U.2 bloqueada por recuperação autoritativa
+sem contrato suficiente; proposta registrada sem liberar confirmação/reenvio.
+
+## 2026-11-02 — Atalhos diretos da busca, 8B3U.4
+
+Atalhos Editar/Novo atendimento por pessoa, nome/ID, perfis e retorno à busca;
+sem N+1 ou escrita nova.22 unidades e2 E2E, build e comparação renderizada320px
+aprovados no recorte; [provas e limites](validacoes/VALIDACAO_8B3U_4.md).
+Novas colunas/filtros e aceite humano permanecem pendentes.
+
+## 2026-11-02 — E6U parâmetros do exame canônico
+
+- Interface de seis campos, revisão, lista paginada e recuperação no exame
+  escolhido; ajuste do teste de navegação preserva ausência de atendimento null.
+- Build/266 unidades e3 E2E reais sintéticos aprovados; identificação, rascunho,
+  recibo sem repetir POST, perfis/revogação e pai preservados.
+- [Provas e comparação visual](validacoes/VALIDACAO_7B_E6U_PARAMETROS.md).
+  Datas/status e aceite humano pendentes; sem push, merge ou deploy.
+
+## 2026-11-01 — E6B parâmetros do exame canônico
+
+- Contrato/destino próprio SQL73 para seis campos humanos, FK canônica, captura
+  e guard; GET/POST com vínculo/recibo, sem interpretação automática ou backfill.
+- Build188, HTTP137, SQL44, upgrade72→73 com legado coexistente e31 workflow
+  aprovados. [Evidência](validacoes/VALIDACAO_7B_E6B_PARAMETROS.md).
+- Continuar E6U do recorte; datas/status/correções do pai não incluídos.
+
+
+## 2026-11-01 — 7C-E1U E1.2 interface de reação isolada
+
+- Cinco campos literais, revisão, rascunho, lista paginada e recuperação sem
+  repetir envio; retorno exato da ficha e tratamento canônico preservado.
+- Build, cobertura unitária composta265 e2 E2E reais aprovados; teste de timeout
+  isolado revalidado. [Evidência e limites](validacoes/VALIDACAO_7C_E1U_REACOES.md).
+- Referência BZN renderizada; não existe nela formulário de reação equivalente.
+  Sem aceite humano; continuar contrato E6B de resultados canônicos.
+
+
+## 2026-11-01 — 7C-E1B E1.2 reação isolada no BZN
+
+- Leitura/criação no tratamento existente, sem alterar indicadores; captura72
+  prospectiva/guard, recibo, autorização e rollback. Legado intocado.
+- Build187, HTTP132, SQL43, upgrade71→72, importador e31 workflow aprovados;
+  [evidência/falhas corrigidas/limites](validacoes/VALIDACAO_7C_E1B_REACOES.md).
+- SQL07 testes16/22 passam a exigir proteção histórica de reação auditada;
+  nenhuma FK/migration antiga reescrita. Continuar na interface E1.2.
+
+
+## 2026-11-01 — E5U leitura de medicamentos
+
+- Lista paginada por atendimento, campos literais, origem preservada e somente
+  leitura; nenhum formulário de prescrição ou efeito em SQL/importador.
+- Build/264 unidades e dois E2E reais aprovados; [provas/limites](validacoes/VALIDACAO_7B_E5U_LEITURA.md).
+- Continuar na fila, contrato7B-E6B antes da implementação.
+
+
+## 2026-11-01 — E5B consulta de medicamentos
+
+- Catálogo ativo e medicamentos por atendimento com autorização/paginação e
+  campos literais; nenhuma escrita, regra de dose ou migration adicionada.
+- Build/186 unidades e15 HTTP reais aprovados. [Provas](validacoes/VALIDACAO_7B_E5B_LEITURA.md).
+- Escrita depende de decisões explícitas; continuar com a interface de leitura.
+
+
+## 2026-11-01 — E4U óbito inicial
+
+- Interface longitudinal de leitura/criação, quatro campos independentes,
+  revisão, rascunho, recibo e retorno seguro. Sem novas regras clínicas.
+- Build/263 unidades e dois E2E reais aprovados; comparação original renderizada
+  em três viewports. [Provas e limites](validacoes/VALIDACAO_7B_E4U_OBITO.md).
+- Sem aceite humano; próxima investigação dirigida: contrato7B-E5B medicamentos.
+
+
+## 2026-11-01 — E4B óbito consolidado inicial
+
+- GET JSON null/estado e POST inicial único com recibo, quatro campos independentes,
+  sem data parcial fabricada, upsert ou regra causal nova. Captura71 sem backfill.
+- Build/185 unidades, seis novos HTTP,42 SQL/upgrade70→71/importador/31 workflow
+  aprovados; [evidência completa e limites](validacoes/VALIDACAO_7B_E4B_OBITO.md).
+- Interface/visual/aceite e decisões de precisão parcial seguem separados.
+
+## 2026-11-01 — E4U marcapasso/CDI, revisão e recibos
+
+- Interface de leitura/criação inicial por paciente/tipo, rascunho, revisão,
+  recibos e consulta só lê. Build/262 unidades e dois E2E reais passaram.
+- Comparação renderizada em1440/390/320 registrada com capturas e adaptações;
+  [provas e diferenças remanescentes](validacoes/VALIDACAO_7B_E4U_DISPOSITIVOS.md).
+- Continuar na mesma Janela1 para recorte inicial de óbito conforme contrato,
+  sem resolver precisão parcial ou resincronizador por suposição.
+
+## 2026-11-01 — E4B marcapasso/CDI, estados iniciais
+
+- GET/POST sobre SQL10, estado consolidado com409 em existente, sem upsert ou
+  resincronizador presumido. SQL70 captura três campos sem alterar ACL/legado.
+- Build/184 unidades, cinco HTTP focados,41 SQL, upgrade69→70/importador/31 workflow
+  aprovados; composição HTTP/fundação registrada no [relatório](validacoes/VALIDACAO_7B_E4B_DISPOSITIVOS.md).
+- Interface E4U correspondente e aceite humano separados; nenhum push/merge/deploy.
+
+## 2026-11-01 — Comparação AVC renderizada e interações restantes
+
+- Referência original executada e capturas comparáveis em1440/390/320;
+  diferenças e adaptações por contrato/acessibilidade documentadas, sem aceite
+  visual fictício. Diferenças de densidade/estilo permanecem para8V1.
+- Novo E2E de teclado/rascunho/foco/zoom200%/duas intenções passou com API/PG reais.
+  [Provas e limites](validacoes/VALIDACAO_7B_E4U_AVC.md). Próxima frente técnica:
+  recorte E4B marcapasso/CDI conforme contrato vigente, sem resincronizador presumido.
+
+## 2026-11-01 — Fixture mínima de comorbidades para demonstração M3
+
+- Seed do runner/--serve inclui dois nomes canônicos do importador, sem vínculos
+  clínicos fabricados. Novo E2E e sete regressões de comorbidades/importações
+  aprovados; [evidência e limites](validacoes/VALIDACAO_FIXTURE_DEMO_M3.md).
+- Não equivale a ensaio integral nem conclusão/aceite de 8V2.
+
+## 2026-11-01 — Interface longitudinal de AVC (E4U parcial)
+
+- Lista, formulário/revisão, recibos e retorno seguro à origem; sem snapshot de consulta.
+- Build/261 unidades e dois E2E reais focados aprovados; comparação renderizada,
+  revisão integral de interação/zoom e aceite humano pendentes conforme
+  [relatório](validacoes/VALIDACAO_7B_E4U_AVC.md). Backend/SQL inalterados reutilizados.
+
+## 2026-11-01 — Janela 1: backend AVC longitudinal (recorte E4B)
+
+- API GET/POST por paciente sobre SQL10/contrato vigente, sem FK de atendimento,
+  inferência de data/diagnóstico ou consolidação após negativa; recibo por intenção.
+- SQL69 captura quatro campos prospectivamente, preservando ano_evento/D8,
+  ACLs/funções/gatilhos; guard somente dos campos novos. Sem backfill/persistente.
+- Build, 183 unidades, 8 fundação, 110 HTTP e composição de 40 scripts SQL,
+  upgrade68→69, importador e 31 workflow aprovados. [Falhas e correções](validacoes/VALIDACAO_7B_E4B_AVC.md).
+- Próxima entrega E4U AVC; demais EVT/aceite separados. Subagente de SQL atingiu
+  limite de uso durante a correção; principal assumiu os arquivos e validou.
+  Sem push/merge/deploy; checkpoint registra retomada da mesma Janela 1.
+
+## 2026-11-01 — Preparação do ciclo intensivo M3 para 03/11
+
+- Criado [plano operacional](execucao/PLANO_M3_2026_11_03.md) das seis janelas,
+  fila dinâmica, inventário com pacotes/filhos separados, decisões bloqueadoras,
+  validação proporcional, subagentes, checkpoint único e demonstração sintética.
+- Estado inicial verificado em 6fb4cdc, integrado pela PR #23 em e25aafb;
+  evidências posteriores prevalecem sobre rótulos históricos. E3U tecnicamente
+  validada sem aceite humano; E4B é a primeira unidade, ainda não iniciada.
+- Índice e workflow apontam para o plano, sem outro roadmap ou cópia de contratos.
+  Preparação exclusivamente documental: sem implementação, migration, ambiente,
+  commit, push ou merge. Janelas futuras dependem de início autorizado.
+- Validação documental, links/âncoras, cobertura dos 57 IDs e revisão textual
+  dirigida concluídos; CI pós-merge da baseline confirmado como aprovado.
+
 ## 2026-11-01 — Isolamento do upgrade de comorbidades no CI
 
 - Primeira execução da PR #23 (`41306700817`) falhou em Quality porque o upgrade

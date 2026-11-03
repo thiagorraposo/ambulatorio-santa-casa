@@ -1,0 +1,50 @@
+{
+  "origem": "make frontend-demo-test COMPACT=1; PostgreSQL 16.15 tmpfs, API e Chromium reais; somente dados fictícios",
+  "base": "921a91b + diff desta entrega",
+  "data": "2026-11-03",
+  "stats": {
+    "startTime": "2026-11-03T19:38:38.137Z",
+    "duration": 24194.042,
+    "expected": 4,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cenarios": [
+    {
+      "titulo": "demo: reexecução idempotente, limites, recursos clínicos e rejeição de destinos/estados inseguros",
+      "status": "expected",
+      "anotacoes": []
+    },
+    {
+      "titulo": "demo consulta: SQL = API = dashboard, filtros, gráfico, páginas, CSV e percursos",
+      "status": "expected",
+      "anotacoes": [
+        {
+          "type": "SQL/API/UI",
+          "description": "{\"pacientes\":8,\"atendimentos\":24,\"atuais\":8,\"pendencias\":4,\"lotes\":null}"
+        }
+      ]
+    },
+    {
+      "titulo": "demo edicao: SQL = API = dashboard, filtros, gráfico, páginas, CSV e percursos",
+      "status": "expected",
+      "anotacoes": [
+        {
+          "type": "SQL/API/UI",
+          "description": "{\"pacientes\":9,\"atendimentos\":24,\"atuais\":8,\"pendencias\":4,\"lotes\":2}"
+        }
+      ]
+    },
+    {
+      "titulo": "demo administracao: SQL = API = dashboard, filtros, gráfico, páginas, CSV e percursos",
+      "status": "expected",
+      "anotacoes": [
+        {
+          "type": "SQL/API/UI",
+          "description": "{\"pacientes\":10,\"atendimentos\":27,\"atuais\":8,\"pendencias\":5,\"lotes\":3}"
+        }
+      ]
+    }
+  ]
+}

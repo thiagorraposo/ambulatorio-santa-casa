@@ -57,10 +57,106 @@ suite('Invariantes dos fluxos /v1 da Etapa 7', () => {
     await http().get('/v1/pacientes/capacidades').expect(401);
     for (const perfil of ['consulta', 'edicao', 'administracao']) {
       await http().get('/v1/pacientes/capacidades').auth(tokens[perfil], { type: 'bearer' })
-        .expect(200).expect({ podeCadastrar: perfil === 'administracao' });
+        .expect(200).expect({ podeCadastrar: perfil !== 'consulta' });
     }
     await http().post('/v1/pacientes').auth(tokens.edicao, { type: 'bearer' })
-      .send({ nome: 'Cadastro recusado sintético' }).expect(403);
+      .send({ nome: 'Cadastro vinculado sintético' }).expect(201);
+  });
+
+  it('integra cadastro por Edição, vínculo específico, PATCH, atendimento, revogação e inativação', async () => {
+    const creator = (await owner.query(`INSERT INTO ambulatorio.usuario_aplicacao(nome,login,senha_hash,perfil)
+      VALUES('Criador sintético','criador-integrado@example.invalid',
+      '$2b$12$AHXFrksRrsnCtxc0yzPeSO3XHF94Quhjtu/5RZVYwRyvU6alPJXSK','edicao') RETURNING usuario_id::text`)).rows[0].usuario_id;
+    const token = await app.get(JwtService).signAsync({ sub: creator, typ: 'access' });
+    const created = (await http().post('/v1/pacientes').auth(token, { type: 'bearer' })
+      .send({ nome: 'Cadastro integrado Edição sintético', telefones: ['000000001'],
+        endereco: { cidade: 'Cidade sintética' } }).expect(201)).body;
+    const target = `/v1/pacientes/${created.pacienteId}`;
+    const current = (await http().get(target).auth(token, { type: 'bearer' }).expect(200)).body;
+    expect(current).toMatchObject({ nome: 'Cadastro integrado Edição sintético', telefones: ['000000001'], endereco: { cidade: 'Cidade sintética' } });
+    await http().get(target).auth(tokens.edicao, { type: 'bearer' }).expect(403);
+    await http().get(target).auth(tokens.consulta, { type: 'bearer' }).expect(403);
+    await http().get(path()).auth(token, { type: 'bearer' }).expect(403);
+    await http().put(`${path()}/acesso/${creator}`).auth(token, { type: 'bearer' })
+      .send({ ativo: true, podeEditar: true }).expect(403);
+    await http().patch(target).auth(token, { type: 'bearer' })
+      .send({ versao: current.versao, raca: 'Informação sintética' }).expect(200);
+    await http().patch(target).auth(token, { type: 'bearer' })
+      .send({ versao: current.versao, nome: 'Sobrescrita recusada sintética' }).expect(409);
+    await http().post(`${target}/atendimentos`).auth(token, { type: 'bearer' })
+      .send({ dataAtendimento: '2026-04-03' }).expect(201);
+    const audit = (await owner.query(`SELECT ator_usuario_id::text,ativo,pode_editar,principal_db
+      FROM ambulatorio.acesso_paciente_evento WHERE paciente_id=$1`, [created.pacienteId])).rows;
+    expect(audit).toEqual([{ ator_usuario_id: creator, ativo: true, pode_editar: true, principal_db: process.env.APP_DB_USER }]);
+    await http().put(`${target}/acesso/${creator}`).auth(tokens.administracao, { type: 'bearer' })
+      .send({ ativo: false, podeEditar: false }).expect(200);
+    await http().get(target).auth(token, { type: 'bearer' }).expect(403);
+    await http().put(`${target}/acesso/${creator}`).auth(tokens.administracao, { type: 'bearer' })
+      .send({ ativo: true, podeEditar: true }).expect(200);
+    await owner.query('UPDATE ambulatorio.usuario_aplicacao SET ativo=false WHERE usuario_id=$1', [creator]);
+    await http().get(target).auth(token, { type: 'bearer' }).expect(401);
+    await owner.query('UPDATE ambulatorio.usuario_aplicacao SET ativo=true WHERE usuario_id=$1', [creator]);
+    await http().get(target).auth(token, { type: 'bearer' }).expect(401);
+    const generation = (await owner.query('SELECT geracao_sessao::text FROM ambulatorio.usuario_aplicacao WHERE usuario_id=$1', [creator])).rows[0].geracao_sessao;
+    const renewed = await app.get(JwtService).signAsync({ sub: creator, typ: 'access', ver: generation });
+    await http().get(target).auth(renewed, { type: 'bearer' }).expect(403);
+    expect((await owner.query(`SELECT ativo FROM ambulatorio.acesso_paciente WHERE paciente_id=$1 AND usuario_id=$2`,
+      [created.pacienteId, creator])).rows).toEqual([{ ativo: false }]);
+    expect((await owner.query(`SELECT ator_usuario_id,principal_db FROM ambulatorio.acesso_paciente_evento
+      WHERE paciente_id=$1 ORDER BY acesso_paciente_evento_id DESC LIMIT 1`, [created.pacienteId])).rows)
+      .toEqual([{ ator_usuario_id: null, principal_db: process.env.TEST_OWNER_USER }]);
+  });
+
+  it('serializa cadastro e concessão concorrentes com inativação sem restaurar acesso', async () => {
+    const target = (await owner.query(`INSERT INTO ambulatorio.usuario_aplicacao(nome,login,senha_hash,perfil)
+      VALUES('Corrida sintética','corrida-cadastro@example.invalid',
+      '$2b$12$AHXFrksRrsnCtxc0yzPeSO3XHF94Quhjtu/5RZVYwRyvU6alPJXSK','edicao') RETURNING usuario_id::text`)).rows[0].usuario_id;
+    const token = await app.get(JwtService).signAsync({ sub: target, typ: 'access' });
+    const first = await owner.connect();
+    const second = await owner.connect();
+    let pendingGrant: Promise<unknown> | undefined;
+    let pendingCreate: Promise<request.Response> | undefined;
+    const waitForLock = async (fragment: string) => {
+      const deadline = Date.now() + 5000;
+      while (Date.now() < deadline) {
+        const locked = await owner.query(`SELECT 1 FROM pg_stat_activity
+          WHERE datname=current_database() AND wait_event_type='Lock' AND cardinality(pg_blocking_pids(pid))>0
+          AND query LIKE $1`, [`%${fragment}%`]);
+        if (locked.rowCount) return;
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+      throw new Error('Operação não aguardou a identidade bloqueada');
+    };
+    try {
+      await first.query('BEGIN');
+      await first.query('UPDATE ambulatorio.usuario_aplicacao SET ativo=false WHERE usuario_id=$1', [target]);
+      pendingCreate = http().post('/v1/pacientes').auth(token, { type: 'bearer' })
+        .send({ nome: 'Cadastro concorrente recusado sintético' }).then(response => response);
+      await waitForLock('INSERT INTO paciente');
+      await first.query('COMMIT');
+      expect((await pendingCreate).status).toBe(401);
+      expect((await owner.query(`SELECT 1 FROM ambulatorio.paciente WHERE nome='Cadastro concorrente recusado sintético'`)).rowCount).toBe(0);
+      await first.query('UPDATE ambulatorio.usuario_aplicacao SET ativo=true WHERE usuario_id=$1', [target]);
+      await first.query('BEGIN');
+      await first.query('UPDATE ambulatorio.usuario_aplicacao SET ativo=false WHERE usuario_id=$1', [target]);
+      await second.query('BEGIN');
+      await second.query('SET LOCAL ROLE ambulatorio_servico_autenticado');
+      await second.query('SELECT ambulatorio.auditoria_iniciar_aplicacao($1)', [ids.administracao]);
+      pendingGrant = second.query('SELECT ambulatorio.definir_acesso_paciente($1,$2,true,true)', [patientId, target])
+        .then(() => ({ code: 'concessao_indevida' }), error => ({ code: error.code }));
+      await waitForLock('SELECT ambulatorio.definir_acesso_paciente');
+      await first.query('COMMIT');
+      expect(await pendingGrant).toEqual({ code: '42501' });
+      await second.query('ROLLBACK');
+      await first.query('UPDATE ambulatorio.usuario_aplicacao SET ativo=true WHERE usuario_id=$1', [target]);
+      expect((await owner.query('SELECT 1 FROM ambulatorio.acesso_paciente WHERE usuario_id=$1 AND ativo', [target])).rowCount).toBe(0);
+    } finally {
+      await first.query('ROLLBACK');
+      if (pendingCreate) await pendingCreate;
+      if (pendingGrant) await pendingGrant;
+      await second.query('ROLLBACK');
+      first.release(); second.release();
+    }
   });
 
   it('preserva todos os filhos aceitos, estados desconhecidos e datas clínicas na mesma criação', async () => {

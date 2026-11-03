@@ -11,3 +11,8 @@ export interface ComorbidadeCatalogoResponse {
   nome: string;
   ativo: boolean;
 }
+
+export interface MedicamentoCatalogoResponse extends CatalogoResponse {
+  principioAtivo: string | null;
+  classeMedicamento: string | null;
+}

@@ -1,3 +1,5 @@
+import { integratedBody, type IntegratedDraft } from './attendance-integration';
+import { FieldValidationError } from '../../shared/field-validation';
 import type { AtendimentoDetalheResponse, PacienteDetalheResponse } from '../../api/contracts';
 import type { CatalogItem } from '../../shared/writing';
 
@@ -56,6 +58,10 @@ export function attendanceInitial(data?: AtendimentoDetalheResponse): Fields {
 }
 
 export function attendanceCore(values: Fields, original?: AtendimentoDetalheResponse): Record<string, unknown> {
+  if (values.ambulatorioUnicamente === 'sim' && values.ambulatorioAnexoProjeto === 'sim') {
+    throw new FieldValidationError([{ path: 'ambulatorioUnicamente', code: 'attendance_context' },
+      { path: 'ambulatorioAnexoProjeto', code: 'attendance_context' }]);
+  }
   const initial = attendanceInitial(original);
   const body: Record<string, unknown> = original ? { versao: original.versao } : {};
   for (const key of Object.keys(initial)) {
@@ -84,7 +90,7 @@ export interface AttendanceDraft {
   values: Fields; initial: Fields; original?: AtendimentoDetalheResponse;
   clinical: Fields; diagnosis: Fields; exams: ExamDraft[]; families: FamilyDraft[];
   familyStatus: string; pending: PendingDraft[];
-  operationKey?: string;
+  operationKey?: string; integrated?: IntegratedDraft;
 }
 
 export function attendanceBody(draft: AttendanceDraft): Record<string, unknown> {
@@ -94,7 +100,14 @@ export function attendanceBody(draft: AttendanceDraft): Record<string, unknown> 
     const clinical: Record<string, unknown> = {};
     for (const [key, label, integer] of clinicalNumbers) {
       if (draft.clinical[key] !== undefined && draft.clinical[key] !== '') {
-        clinical[key] = optionalNumber(draft.clinical[key]!, label, integer);
+        const path = `dadosClinicos.${key}`;
+        let value: number | null;
+        try { value = optionalNumber(draft.clinical[key]!, label, integer); }
+        catch { throw new FieldValidationError([{ path, code: integer ? 'integer' : 'number' }]); }
+        if (value !== null && (integer ? value < -2147483648 || value > 2147483647 : value < -999.99 || value > 999.99)) {
+          throw new FieldValidationError([{ path, code: integer ? 'integer_range' : 'decimal_range' }]);
+        }
+        clinical[key] = value;
       }
     }
     for (const key of ['nyha', 'observacoes']) if (draft.clinical[key]) clinical[key] = draft.clinical[key];
@@ -109,9 +122,9 @@ export function attendanceBody(draft: AttendanceDraft): Record<string, unknown> 
   }
   if (draft.exams.length) {
     body.exames = draft.exams.map((exam, index) => {
-      if (!exam.tipoExameId) throw new Error(`Exame ${index + 1}: selecione um tipo de exame ativo.`);
+      if (!exam.tipoExameId) throw new FieldValidationError([{ path: `exames.${index}.tipoExameId`, code: 'exam_active' }]);
       if (['laboratoriais', 'imagem', 'outro', 'nao_informado'].includes(exam.catalog?.codigo ?? '') && !exam.identificacao.trim()) {
-        throw new Error(`Exame ${index + 1}: identifique qual exame foi trazido ou solicitado.`);
+        throw new FieldValidationError([{ path: `exames.${index}.identificacao`, code: 'exam_identification' }]);
       }
       return { tipoExameId: exam.tipoExameId, bloco: exam.bloco,
         ...(exam.identificacao ? { identificacao: exam.identificacao } : {}),
@@ -120,10 +133,10 @@ export function attendanceBody(draft: AttendanceDraft): Record<string, unknown> 
     });
   }
   if (draft.pending.length) {
-    if (draft.pending.some(item => !item.descricao.trim())) throw new Error('Preencha a descrição de cada pendência.');
     body.pendencias = draft.pending.map((item, index) => {
-      if (item.status === 'resolvida' && !item.dataResolucao) throw new Error(`Pendência ${index + 1}: informe a data de resolução.`);
-      if (item.status !== 'resolvida' && item.dataResolucao) throw new Error(`Pendência ${index + 1}: data de resolução exige status resolvida. Nenhum campo será descartado.`);
+      if (!item.descricao.trim()) throw new FieldValidationError([{ path: `pendencias.${index}.descricao`, code: 'required' }]);
+      if (item.status === 'resolvida' && !item.dataResolucao) throw new FieldValidationError([{ path: `pendencias.${index}.dataResolucao`, code: 'pending_date' }]);
+      if (item.status !== 'resolvida' && item.dataResolucao) throw new FieldValidationError([{ path: `pendencias.${index}.status`, code: 'pending_status' }]);
       return { descricao: item.descricao, status: item.status || null,
         ...(item.dataResolucao ? { dataResolucao: item.dataResolucao } : {}) };
     });
@@ -131,9 +144,13 @@ export function attendanceBody(draft: AttendanceDraft): Record<string, unknown> 
   if (draft.familyStatus !== '' || draft.families.length) {
     const flag = triValue(draft.familyStatus);
     if (flag === true && !draft.families.length) throw new Error('Identifique ao menos um familiar examinado e seu resultado.');
-    if (flag !== true && draft.families.length) throw new Error('Os familiares preenchidos exigem a indicação de familiares examinados. Nenhum resultado será descartado.');
-    if (draft.families.some(item => !item.familiar.trim() || !item.resultado.trim())) throw new Error('Informe a identificação e o resultado de cada familiar.');
+    if (flag !== true && draft.families.length) throw new FieldValidationError([{ path: 'rastreioFamiliar.familiaresExaminados', code: 'family_status' }]);
+    const incomplete = draft.families.flatMap((item, index) => [
+      ...(!item.familiar.trim() ? [{ path: `rastreioFamiliar.familiares.${index}.familiar`, code: 'required' }] : []),
+      ...(!item.resultado.trim() ? [{ path: `rastreioFamiliar.familiares.${index}.resultado`, code: 'required' }] : []),
+    ]);
+    if (incomplete.length) throw new FieldValidationError(incomplete);
     body.rastreioFamiliar = { familiaresExaminados: flag, familiares: draft.families };
   }
-  return body;
+  return { ...body, ...integratedBody(draft.integrated) };
 }

@@ -1,3 +1,4 @@
+import { readFieldViolations, type FieldViolation } from '../shared/field-validation';
 const messages: Record<number, string> = {
   0: 'Não foi possível conectar ao serviço. Verifique sua conexão e tente novamente.',
   400: 'A solicitação não é válida. Revise os campos e filtros e tente novamente.',
@@ -11,7 +12,7 @@ const messages: Record<number, string> = {
 
 export class ApiError extends Error {
   readonly status: number;
-  constructor(status: number) {
+  constructor(status: number, readonly errors: FieldViolation[] = []) {
     super(messages[status] ?? 'Não foi possível concluir a solicitação. Tente novamente mais tarde.');
     this.name = 'ApiError';
     this.status = status;
@@ -97,7 +98,12 @@ export class ApiClient {
       if (!response.ok) {
         if (response.status === 401 && !options.public) this.unauthorized('unauthorized');
         // Arbitrary server text, SQL errors and clinical processing details are not displayed.
-        throw new ApiError(response.status);
+        let errors: FieldViolation[] = [];
+        if (response.status === 400) {
+          try { errors = readFieldViolations(await response.json()); } catch { /* Unknown bodies remain generic. */ }
+          current();
+        }
+        throw new ApiError(response.status, errors);
       }
       if (options.responseType === 'csv' && !/^text\/csv(?:\s*;|$)/i.test(response.headers.get('content-type') ?? '')) {
         throw new ApiError(502);

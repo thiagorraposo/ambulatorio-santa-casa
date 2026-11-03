@@ -176,3 +176,15 @@ describe('CSV autenticado pelo mesmo cliente', () => {
     expect(unauthorized).toHaveBeenCalledExactlyOnceWith('unauthorized');
   });
 });
+
+it('consome apenas erros 400 conhecidos e descarta texto/caminhos/códigos arbitrários', async () => {
+  const client = new ApiClient(async () => Response.json({ message: 'SELECT segredo', errors: [
+    { path: 'exames.1.bloco', code: 'option', message: 'senha privada' },
+    { path: 'segredo', code: 'invalid' }, { path: 'observacoes', code: '__proto__' },
+    { path: '__proto__', code: 'invalid' }, { path: 'exames.30.bloco', code: 'option' },
+    { path: 'observacoes', code: 'SQL' },
+  ] }, { status: 400 }));
+  client.authenticate('sintetico', 60);
+  await expect(client.get('/pacientes/1')).rejects.toMatchObject({ status: 400,
+    errors: [{ path: 'exames.1.bloco', code: 'option' }] });
+});

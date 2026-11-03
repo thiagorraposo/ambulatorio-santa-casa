@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { fixture, signIn, apiAs, setUserActive, resumePage, assertNoPersistentClinicalState, delayOneApiResponse } from './fixtures';
+import { fixture, signIn, signInCurrentPage, apiAs, setUserActive, restoreUserGrants, resumePage, assertNoPersistentClinicalState, delayOneApiResponse } from './fixtures';
 
 const mainPath = `/pacientes/${fixture.main.pacienteId}`;
 const patientRows = (page: import('@playwright/test').Page) => page.getByRole('table').locator('tbody tr');
@@ -17,7 +17,8 @@ test('consulta: busca, paginação, leitura e acessibilidade com dados reais da 
   await assertAccessible(page);
   const authentication = await signIn(page, 'consulta');
   const me = await page.request.get('/v1/auth/me', { headers: { authorization: `Bearer ${authentication.accessToken}` } });
-  expect(await me.json()).toEqual({ usuarioId: fixture.users.consulta.usuarioId, nome: fixture.users.consulta.nome, perfil: 'consulta' });
+  expect(await me.json()).toEqual({ usuarioId: fixture.users.consulta.usuarioId, nome: fixture.users.consulta.nome,
+    perfil: 'consulta', login: fixture.users.consulta.login, ativo: true });
   await expect(page.getByRole('heading', { name: 'Início', exact: true })).toBeVisible();
   await menu(page).getByRole('link', { name: 'Minha conta', exact: true }).click();
   await expect(page.getByRole('main')).toBeFocused();
@@ -47,7 +48,13 @@ test('consulta: busca, paginação, leitura e acessibilidade com dados reais da 
   expect(requests.some(path => /^\/v1\/pacientes\/\d+$/.test(path))).toBe(false);
   await expect(page.getByText(fixture.reserved.nome, { exact: true })).toHaveCount(0);
   const headers = await page.getByRole('columnheader').allTextContents();
-  expect(headers).toEqual(['ID', 'Nome', 'Ficha']);
+  expect(headers).toEqual(['Paciente', 'ID do sistema', 'Ações']);
+  // A fixture deste cenário usa Paciente; seedPatient dos módulos usa Etapa 7.
+  // O filtro real preserva a paginação esperada sem depender de outros specs.
+  await page.getByLabel('Nome', { exact: true }).fill('Paciente');
+  await page.getByRole('button', { name: 'Buscar', exact: true }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get('nome')).toBe('Paciente');
+  await expect(patientRows(page)).toHaveCount(20);
   await page.getByRole('button', { name: 'Próxima', exact: true }).click();
   await expect(page).toHaveURL(/offset=20/);
   await expect(patientRows(page)).toHaveCount(4);
@@ -145,6 +152,10 @@ test('edicao consulta só seus vínculos e mantém a ficha em leitura', async ({
   await expect(page.getByRole('alert')).toContainText(/acesso|permissão|autorizado/i);
   await expect(page.getByText(fixture.reserved.nome, { exact: true })).toHaveCount(0);
   await menu(page).getByRole('link', { name: 'Pacientes', exact: true }).click();
+  // Verifica o conjunto da fixture, sem contar vínculos criados por outros specs.
+  await page.getByLabel('Nome', { exact: true }).fill('Paciente');
+  await page.getByRole('button', { name: 'Buscar', exact: true }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get('nome')).toBe('Paciente');
   await expect(patientRows(page)).toHaveCount(2);
   await expect(page.getByText(fixture.main.nome, { exact: true })).toBeVisible();
   await expect(page.getByText(fixture.large.nome, { exact: true })).toBeVisible();
@@ -187,11 +198,7 @@ test('link direto do atendimento, recarregamento e voltar preservam o destino', 
   await page.reload();
   await expect(page.getByLabel('Usuário', { exact: true })).toBeVisible();
   await expect(page.getByText('Observação sintética 1', { exact: true })).toHaveCount(0);
-  const response = page.waitForResponse(r => new URL(r.url()).pathname === '/v1/auth/login' && r.status() === 201);
-  await page.getByLabel('Usuário', { exact: true }).fill(fixture.users.consulta.login);
-  await page.getByLabel('Senha', { exact: true }).fill(fixture.password);
-  await page.getByRole('button', { name: 'Entrar', exact: true }).click();
-  await response;
+  await signInCurrentPage(page, 'consulta');
   await expect(page).toHaveURL(destinationWithExam);
   await expect(page.getByText('Observação sintética 1', { exact: true })).toBeVisible();
   await menu(page).getByRole('link', { name: 'Pacientes', exact: true }).click();
@@ -201,7 +208,7 @@ test('link direto do atendimento, recarregamento e voltar preservam o destino', 
 });
 
 test('saída e troca de identidade impedem uma resposta real antiga de reaparecer', async ({ page }) => {
-  await signIn(page, 'consulta');
+  const destination = '/pacientes?nome=Paciente&limit=20&offset=0';
   let release!: () => void;
   let ready!: () => void;
   const delayed = new Promise<void>(resolve => { release = resolve; });
@@ -211,16 +218,20 @@ test('saída e troca de identidade impedem uma resposta real antiga de reaparece
     if (!first) { await route.continue(); return; }
     first = false;
     const response = await route.fetch();
+    // A resposta atrasada inclui pessoa sem vínculo de edição.
+    expect((await response.json()).map((item: { pacienteId: string }) => item.pacienteId))
+      .toContain(fixture.patients[1].pacienteId);
     ready();
     await delayed;
     try { await route.fulfill({ response }); } catch { /* cancelamento da sessão encerra a requisição antiga */ }
   });
-  await menu(page).getByRole('link', { name: 'Pacientes', exact: true }).click();
+  // Ambas identidades consultam a mesma chave; somente a geração/sessão muda.
+  await signIn(page, 'consulta', destination);
   await fetched;
   await page.getByRole('button', { name: 'Sair', exact: true }).click();
   await expect(page.getByLabel('Usuário', { exact: true })).toBeVisible();
   await expect(page.getByText(fixture.main.nome, { exact: true })).toHaveCount(0);
-  await signIn(page, 'edicao', '/pacientes');
+  await signIn(page, 'edicao', destination);
   await expect(patientRows(page)).toHaveCount(2);
   release();
   await page.waitForLoadState('networkidle');
@@ -266,7 +277,7 @@ test('401 real por identidade inativada limpa sessão e cache ao retomar foco', 
     await assertNoPersistentClinicalState(page);
   } finally {
     delayed.release();
-    await setUserActive('consulta', true);
+    await setUserActive('consulta', true); await restoreUserGrants('consulta');
   }
 });
 

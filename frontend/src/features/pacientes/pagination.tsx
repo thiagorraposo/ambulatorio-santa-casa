@@ -50,12 +50,13 @@ export function pagePath(path: string, limit: number, offset: number): string {
   return `${path}${path.includes('?') ? '&' : '?'}limit=${limit}&offset=${offset}`;
 }
 
-export function Pagination({ label, limit, offset, count, showCount = true, onChange }: {
+export function Pagination({ label, limit, offset, count, showCount = true, hasNext, onChange }: {
   label: string;
   limit: number;
   offset: number;
   count?: number;
   showCount?: boolean;
+  hasNext?: boolean;
   onChange: (offset: number, limit?: number) => void;
 }) {
   return (
@@ -67,7 +68,7 @@ export function Pagination({ label, limit, offset, count, showCount = true, onCh
       <div className="pagination-actions">
         <button className="button button-secondary" disabled={offset === 0}
           onClick={() => onChange(Math.max(0, offset - limit))}>Anterior</button>
-        <button className="button button-secondary" disabled={count === undefined || count < limit || offset + limit > MAX_OFFSET}
+        <button className="button button-secondary" disabled={hasNext === false || count === undefined || count < limit || offset + limit > MAX_OFFSET}
           onClick={() => onChange(offset + limit)}>Próxima</button>
         <label>
           Itens por página

@@ -1,0 +1,44 @@
+import { expect,test } from '@playwright/test';
+import { apiJson,seedPatient,seedAttendance,signIn,assertAccessible,assertFitsViewport,loseResponseAfterCommit } from './stage7-helpers';
+test('E4U dispositivos: revisão, rascunho e dois tipos sem substituir estado',async({page},info)=>{
+ const p=await seedPatient('Dispositivos UI sintético');const a=await seedAttendance(p.path);const path=`${p.path}/dispositivos`;
+ await signIn(page,'edicao',a.path);await page.getByRole('link',{name:'Marcapasso e CDI do paciente',exact:true}).click();
+ await expect(page.getByRole('link',{name:/Voltar à origem/})).toHaveAttribute('href',a.path);
+ await page.getByRole('link',{name:'Registrar dispositivo',exact:true}).click();
+ await page.getByRole('button',{name:'Revisar dispositivo',exact:true}).click();
+ await expect(page.getByLabel('Tipo de dispositivo',{exact:true})).toBeFocused();
+ await page.getByLabel('Tipo de dispositivo',{exact:true}).selectOption('marcapasso');
+ await page.getByLabel('Presença do dispositivo',{exact:true}).selectOption('nao');
+ await page.getByLabel('Observações do dispositivo',{exact:true}).fill('  Estado sintético literal  ');
+ await page.getByRole('link',{name:'← Voltar aos episódios',exact:true}).click();
+ await page.getByRole('dialog',{name:'Alterações não salvas',exact:true}).getByRole('button',{name:'Sair e manter rascunho',exact:true}).click();
+ await page.getByRole('link',{name:'Registrar dispositivo',exact:true}).click();
+ await expect(page.getByLabel('Tipo de dispositivo',{exact:true})).toHaveValue('marcapasso');
+ await expect(page.getByLabel('Observações do dispositivo',{exact:true})).toHaveValue('  Estado sintético literal  ');
+ for(const width of [320,390,1440]){await page.setViewportSize({width,height:width===1440?960:844});await assertFitsViewport(page);await assertAccessible(page);await page.screenshot({path:info.outputPath(`dispositivo-${width}.png`),fullPage:true});}
+ await page.getByRole('button',{name:'Revisar dispositivo',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Revisão do dispositivo',exact:true})).toBeFocused();
+ await expect(page.getByRole('region',{name:'Resumo do dispositivo',exact:true}).locator('dt')).toHaveCount(3);
+ const save=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===`/v1${path}`);
+ await page.getByRole('button',{name:'Confirmar dispositivo',exact:true}).click();expect((await save).status()).toBe(201);
+ await page.getByRole('button',{name:'Registrar outro tipo',exact:true}).click();
+ await page.getByLabel('Tipo de dispositivo',{exact:true}).selectOption('cdi');
+ await page.getByRole('button',{name:'Revisar dispositivo',exact:true}).click();
+ const save2=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===`/v1${path}`);
+ await page.getByRole('button',{name:'Confirmar dispositivo',exact:true}).click();expect((await save2).status()).toBe(201);
+ await expect(page.getByRole('heading',{name:/Estado confirmado/})).toHaveCount(2);
+ expect(await apiJson('GET',path)).toEqual([expect.objectContaining({tipoDispositivo:'cdi',possuiDispositivo:null,observacoes:null}),expect.objectContaining({tipoDispositivo:'marcapasso',possuiDispositivo:false,observacoes:'  Estado sintético literal  '})]);
+ await page.getByRole('link',{name:'Conferir estados do paciente',exact:true}).click();
+ await expect(page.getByRole('link',{name:'Registrar dispositivo',exact:true})).toHaveCount(0);
+});
+test('E4U dispositivos: COMMIT perdido recupera recibo sem repetir e consulta só lê',async({page})=>{
+ const p=await seedPatient('Dispositivo recibo sintético');const path=`${p.path}/dispositivos`;
+ await signIn(page,'edicao',`${path}/nova`);
+ await page.getByLabel('Tipo de dispositivo',{exact:true}).selectOption('cdi');await page.getByRole('button',{name:'Revisar dispositivo',exact:true}).click();
+ const lost=await loseResponseAfterCommit(page,'POST',path);await page.getByRole('button',{name:'Confirmar dispositivo',exact:true}).click();
+ const saved=await lost.committed;expect(saved.status()).toBe(201);const id=(await saved.json()).dispositivoId;
+ await page.getByRole('button',{name:'Verificar resultado do envio',exact:true}).click();
+ await expect(page.getByRole('heading',{name:`Estado confirmado ${id}`,exact:true})).toBeVisible();expect(lost.writes()).toBe(1);
+ await signIn(page,'consulta',path);await expect(page.getByRole('link',{name:'Registrar dispositivo',exact:true})).toHaveCount(0);
+ await signIn(page,'consulta',`${path}/nova`);await expect(page.getByRole('heading',{name:'Acesso de consulta',exact:true})).toBeVisible();
+});

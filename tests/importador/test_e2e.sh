@@ -147,6 +147,9 @@ assert r['metrics']=={'between_sheet_conflicts': 1, 'identity_conflicts': 1,
  'pending_rows': 3, 'rejected_rows': 5, 'total_rows': 13,
  'unknown_catalogs': 1, 'valid_rows': 8}
 assert r['importer_version']=='1.7.0'
+assert r['issue_counts']=={'dados_conflitantes': 1, 'dados_divergentes': 1,
+ 'data_invalida': 1, 'identidade_ambigua': 1, 'linha_rejeitada': 1,
+ 'pendencia_nao_promovida': 3}
 PY
 if rg -i 'Ana Sintética|Identidade Duplicada|telefone|texto parcial preservado|pendência sintética conflitante' /tmp/ambulatorio-importador.log; then
   echo "Erro: log estruturado contém dado sensível ou valor clínico" >&2
@@ -155,6 +158,15 @@ fi
 
 PGPASSWORD="$import_password" python3 scripts/importar_planilha.py "$fixture" --codigo-lote sint-v1-e2e --finalidade carga_inicial \
   --db-host "$DB_HOST" --db-port "$DB_PORT" --db-user "$import_user" --db-role ambulatorio_importador --db-name "$test_db"
+
+# O relatório simulado usa exatamente os mesmos códigos fechados da projeção SQL53.
+psql -X -qAt -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$test_db" -v ON_ERROR_STOP=1 \
+  -c "SELECT COALESCE(jsonb_object_agg(codigo_erro,n),'{}'::jsonb) FROM (SELECT codigo_erro,count(*) AS n FROM ambulatorio.importacao_linha_consulta i JOIN ambulatorio.importacao_lote l USING(importacao_lote_id) WHERE l.codigo_lote='sint-v1-e2e' AND codigo_erro IS NOT NULL GROUP BY codigo_erro) q" \
+  >/tmp/ambulatorio-quality-codes.json
+python3 - <<'PYREPORT'
+import json
+assert json.load(open('/tmp/ambulatorio-quality-codes.json')) == json.load(open('/tmp/ambulatorio-quality-1.json'))['issue_counts']
+PYREPORT
 
 # Mesmo hash conhecido continua exigindo finalidade; revisão não contorna o no-op.
 assert_refused finalidade_ausente "$fixture"
@@ -259,6 +271,9 @@ r=json.load(open('/tmp/ambulatorio-quality-promocao.json'))
 assert r['metrics']['unknown_catalogs']==0
 assert r['metrics']['pending_rows']==3
 assert r['importer_version']=='1.7.0'
+assert r['issue_counts']=={'dados_conflitantes': 1, 'dados_divergentes': 1,
+ 'data_invalida': 1, 'identidade_ambigua': 1, 'linha_rejeitada': 1,
+ 'pendencia_nao_promovida': 3}
 assert r['purpose']=='mesmo_conteudo'
 PY
 if rg -i 'Ana Sintética|Identidade Duplicada|telefone|texto parcial preservado|pendência sintética conflitante' /tmp/ambulatorio-importador.log; then
@@ -516,5 +531,8 @@ D2_DB_NAME="$test_db" D2_IMPORT_USER="$import_user" D2_IMPORT_PASSWORD="$import_
 
 D8_DB_NAME="$test_db" D8_IMPORT_USER="$import_user" D8_IMPORT_PASSWORD="$import_password" \
   python3 tests/importador/test_ultimo_comparecimento_ano.py
+
+EARLY_DB_NAME="$test_db" EARLY_IMPORT_USER="$import_user" EARLY_IMPORT_PASSWORD="$import_password" \
+  python3 tests/importador/test_dry_run_rejeicao_precoce.py
 
 echo "OK: finalidade explícita, recusas sem efeitos, 126 destinos, criticidade, promoção, proveniência, rollback, reprocessamento e captura ativa"

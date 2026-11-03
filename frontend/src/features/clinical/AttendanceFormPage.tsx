@@ -1,5 +1,8 @@
+import { AttendanceIntegratedFields, AttendanceIntegratedReview, AttendanceReceipt } from './AttendanceIntegratedFields';
+import { completeAttendanceReceipt, integratedResources, integratedSectionForField } from './attendance-integration';
+import { FieldValidationError, type FieldViolation } from '../../shared/field-validation';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import type { AtendimentoDetalheResponse, PacienteDetalheResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
 import { ApiErrorState, Card, PageHeading } from '../../shared/ui';
@@ -7,10 +10,21 @@ import { useCollectionRemovalFocus } from '../../shared/useCollectionRemovalFocu
 import { clinicalLabel } from '../../shared/formatters';
 import { DraftQueryState, EditingGate, MutationForm, useClinicalDraft, type CatalogItem } from '../../shared/writing';
 import { booleanOptions, FormSection, InputField, SelectField, TextAreaField } from './CoreFields';
-import { attendanceBody, attendanceInitial, clinicalNumbers, dirtyFields, type AttendanceDraft } from './core-contracts';
+import { attendanceBody, attendanceCore, attendanceInitial, clinicalNumbers, dirtyFields, type AttendanceDraft } from './core-contracts';
 import { VersionComparison } from './VersionComparison';
+import './attendance.css';
+import { PatientsSearchReturn, searchReturnPath } from '../pacientes/PatientsSearchReturn';
+import { attendanceDetailPath, attendanceReturn } from '../pacientes/attendance-navigation';
 
-const attendanceSteps = ['Atendimento', 'Avaliação e Chagas', 'Exames e familiares', 'Pendências', 'Revisão'] as const;
+const attendanceSections = [
+  'Atendimento', 'Chagas e Sorologia', 'Condição Clínica', 'Comorbidades',
+  'Avaliação Clínica', 'Eventos e Dispositivos', 'Projetos', 'Exames',
+  'Medicamentos e BZN', 'Encaminhamentos', 'Notificação', 'Observações',
+] as const;
+const editableSections = Array.from({ length: 13 }, (_, index) => index);
+const sectionForField = (path: string) => integratedSectionForField(path) ?? (path.startsWith('pendencias.') ? 11
+  : path.startsWith('exames.') || path.startsWith('rastreioFamiliar.') ? 7
+  : path.startsWith('dadosClinicos.') ? 4 : path.startsWith('diagnosticoChagas.') ? 1 : 0);
 
 function StepPanel({ active, title, panelRef, children }: { active: boolean; title: string;
   panelRef?: (node: HTMLFieldSetElement | null) => void; children: ReactNode }) {
@@ -26,7 +40,8 @@ function ReviewSection({ title, values }: { title: string; values: Array<[string
 
 function AttendanceReview({ draft }: { draft: AttendanceDraft }) {
   return <>
-    <p>Confira os dados e registros vinculados. A confirmação grava somente o atendimento e os filhos mostrados aqui; acompanhamento é uma ação separada.</p>
+    <p>Confira os dados e registros vinculados. A confirmação grava o atendimento e as informações novas mostradas aqui. Registros longitudinais existentes não serão copiados. Todos os registros deste envio serão confirmados juntos; se houver falha, consulte o recibo antes de preparar outro envio.</p>
+    <AttendanceIntegratedReview draft={draft.integrated} />
     <ReviewSection title="Atendimento" values={[
       ['Data', draft.values.dataAtendimento], ['Localização do prontuário', draft.values.localizacaoProntuario],
       ['Somente ambulatório', draft.values.ambulatorioUnicamente], ['Anexo a projeto', draft.values.ambulatorioAnexoProjeto],
@@ -54,18 +69,35 @@ function AttendanceReview({ draft }: { draft: AttendanceDraft }) {
 
 function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: AtendimentoDetalheResponse }) {
   const navigate = useNavigate();
+  const [search] = useSearchParams();
   const examFocus = useCollectionRemovalFocus();
   const familyFocus = useCollectionRemovalFocus();
   const pendingFocus = useCollectionRemovalFocus();
   const [step, setStep] = useState(0);
+  const [receipt, setReceipt] = useClinicalDraft<Record<string, unknown> | null>(`attendance-receipt:${pacienteId}:${data?.atendimentoId ?? 'new'}`, null);
   const [stepError, setStepError] = useState('');
+  const [validationErrors, setValidationErrors] = useState<FieldViolation[]>([]);
+  function revealField(path: string) {
+    const next = sectionForField(path);
+    setStep(next);
+  }
   const panelRefs = useRef<Array<HTMLFieldSetElement | null>>([]);
   const stepHeading = useRef<HTMLHeadingElement>(null);
+  const sectionNav = useRef<HTMLElement>(null);
   const stepErrorRef = useRef<HTMLDivElement>(null);
   const navigatedStep = useRef(false);
   useEffect(() => {
-    if (navigatedStep.current) stepHeading.current?.focus();
-  }, [step]);
+    if (navigatedStep.current && !validationErrors.length) stepHeading.current?.focus();
+    const revealSelected = () => {
+      const selected = sectionNav.current?.querySelector<HTMLElement>('[aria-current]');
+      if (selected && window.matchMedia?.('(max-width: 800px)').matches) {
+        sectionNav.current?.scrollTo({ left: selected.offsetLeft - sectionNav.current.offsetLeft - 8 });
+      }
+    };
+    revealSelected();
+    window.addEventListener('resize', revealSelected);
+    return () => window.removeEventListener('resize', revealSelected);
+  }, [step, validationErrors.length]);
   useEffect(() => { if (stepError) stepErrorRef.current?.focus(); }, [stepError]);
   const initial = attendanceInitial(data);
   const [draft, setDraft, clearDraft] = useClinicalDraft<AttendanceDraft>(`attendance:${pacienteId}:${data?.atendimentoId ?? 'new'}`, {
@@ -77,24 +109,29 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
   const sectionField = (section: 'clinical' | 'diagnosis', key: string, value: string) => setDraft(previous => ({ ...previous, [section]: { ...previous[section], [key]: value } }));
   const dirty = dirtyFields(draft.values, draft.initial) || Object.values(draft.clinical).some(Boolean)
     || Object.values(draft.diagnosis).some(Boolean) || draft.exams.length > 0 || draft.families.length > 0
-    || draft.familyStatus !== '' || draft.pending.length > 0;
+    || draft.familyStatus !== '' || draft.pending.length > 0 || Object.values(draft.integrated ?? {}).some(rows => rows.length > 0);
   const patientPath = `/pacientes/${encodeURIComponent(pacienteId)}`;
-  const path = data ? `${patientPath}/atendimentos/${data.atendimentoId}` : `${patientPath}/atendimentos`;
+  const coordinated = !data && Object.values(draft.integrated ?? {}).some(rows => rows.length > 0);
+  const path = data ? `${patientPath}/atendimentos/${data.atendimentoId}` : `${patientPath}/atendimentos${coordinated ? '/confirmacao' : ''}`;
   const updateExam = (index: number, next: Partial<AttendanceDraft['exams'][number]>) => setDraft(previous => ({
     ...previous, exams: previous.exams.map((exam, i) => i === index ? { ...exam, ...next } : exam),
   }));
   function moveTo(next: number) {
     setStepError('');
-    if (next > step && panelRefs.current[step]?.closest('form')?.reportValidity() === false) return;
-    if (next === 4) {
+    setValidationErrors([]);
+    if (next === 12 && panelRefs.current[step]?.closest('form')?.reportValidity() === false) return;
+    if (next === 12) {
       try { attendanceBody(draft); }
       catch (error) {
+        if (error instanceof FieldValidationError) {
+          setValidationErrors(error.errors); revealField(error.errors[0]!.path); return;
+        }
         const message = error instanceof Error ? error.message : 'Revise os dados antes de continuar.';
         setStepError(message);
-        if (/^Pendência|descrição de cada pendência/i.test(message)) setStep(3);
-        else if (/^Exame|familiar/i.test(message)) setStep(2);
+        if (/^Pendência|descrição de cada pendência/i.test(message)) setStep(11);
+        else if (/^Exame|familiar/i.test(message)) setStep(7);
         else if (/^Data do atendimento/i.test(message)) setStep(0);
-        else setStep(1);
+        else setStep(4);
         navigatedStep.current = true;
         return;
       }
@@ -102,11 +139,17 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
     navigatedStep.current = true;
     setStep(next);
   }
-  return <Card>
+  const recordOrigin = attendanceReturn(patientPath, search.get('retorno')) ?? searchReturnPath(patientPath, search.get('retorno'));
+  if (receipt) return <Card><AttendanceReceipt receipt={receipt} />
+    <Link className="button" to={attendanceDetailPath(patientPath, String(receipt.atendimentoId), recordOrigin === patientPath ? '' : recordOrigin)}>Consultar atendimento confirmado</Link>
+    <button type="button" className="button button-secondary" onClick={() => { setReceipt(null); setDraft({ values: initial, initial, clinical: {}, diagnosis: {}, exams: [], families: [], familyStatus: '', pending: [], operationKey: crypto.randomUUID() }); setStep(0); }}>Iniciar novo atendimento</button>
+  </Card>;
+  return <Card className="attendance-workflow">
     {data && <p className="notice">Esta edição altera os dados básicos do atendimento. Medidas, diagnóstico, exames, familiares e pendências já salvos são preservados; sua edição não está disponível neste formulário.</p>}
-    <MutationForm title={data ? 'Editar atendimento' : 'Novo atendimento'} path={path} method={data ? 'PATCH' : 'POST'}
+    <MutationForm title={data ? 'Editar atendimento' : 'Novo atendimento'} path={path} draftPath={data ? path : `${patientPath}/atendimentos`} verifyConflict={!data} method={data ? 'PATCH' : 'POST'}
       dirty={dirty} submitLabel={data ? 'Salvar atendimento' : 'Confirmar atendimento'}
-      submitVisible={Boolean(data) || step === 4} disabled={!data && step !== 4} buildBody={() => attendanceBody(draft)}
+      submitVisible={Boolean(data) || step === 12} disabled={!data && step !== 12} buildBody={() => attendanceBody(draft)}
+      validationErrors={validationErrors} onValidationField={revealField}
       operationKey={draft.operationKey}
       responseId="atendimentoId" expectedId={data?.atendimentoId}
       conflictReview={data ? abandon => <VersionComparison<AtendimentoDetalheResponse> path={path}
@@ -122,53 +165,92 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
             familyStatus: '', pending: [], operationKey: crypto.randomUUID() });
         }} /> : undefined}
       verificationPath={data ? path : `${patientPath}?aba=atendimentos`}
-      onSaved={(response: { atendimentoId: string }) => { clearDraft(); navigate(`${patientPath}/atendimentos/${response.atendimentoId}`, {
+      validateResponse={response => !coordinated || completeAttendanceReceipt(response, draft.integrated)}
+      onSaved={(response: { atendimentoId: string }) => { clearDraft(); if (coordinated) { setReceipt(response); return; } navigate(attendanceDetailPath(patientPath, response.atendimentoId, recordOrigin === patientPath ? '' : recordOrigin), {
         state: { saved: 'Atendimento salvo. Tratamento, retornos e encaminhamentos têm confirmação própria.' },
       }); }}>
-      {!data && <p className="notice" role="status">Etapa {step + 1} de 5: {attendanceSteps[step]}</p>}
+      <div className={data ? '' : 'attendance-layout'}>
+      {!data && <aside className="attendance-sidebar">
+        <h2>Seções</h2>
+        <nav ref={sectionNav} aria-label="Seções do atendimento">
+          {attendanceSections.map((title, index) => {
+            const errors = validationErrors.some(error => sectionForField(error.path) === index);
+            const filled = index === 0 ? Object.values(draft.values).some(Boolean)
+              : index === 1 ? Object.values(draft.diagnosis).some(Boolean)
+              : index === 4 ? Object.values(draft.clinical).some(Boolean)
+              : index === 7 ? draft.exams.length > 0 || draft.families.length > 0 || Boolean(draft.familyStatus)
+              : index === 11 ? draft.pending.length > 0 : false;
+            const extraFilled = integratedResources.some(resource => resource.section === index && draft.integrated?.[resource.key]?.length);
+            const state = errors ? 'Revisar campos' : filled || extraFilled ? 'Com dados' : 'Sem preenchimento';
+            return <button type="button" key={title} aria-label={title} aria-describedby={`attendance-section-state-${index}`} aria-current={step === index ? 'true' : undefined}
+              className={errors ? 'section-has-error' : ''} onClick={() => moveTo(index)}>
+              <span className="section-number" aria-hidden="true">{errors ? '!' : index + 1}</span>
+              <span>{title}<small id={`attendance-section-state-${index}`}>{state}</small></span>
+            </button>;
+          })}
+        </nav>
+        <p>Preencha as seções necessárias e revise antes de confirmar.</p>
+      </aside>}
+      <div className="attendance-content">
+      {!data && <p className="section-progress" role="status">{step === 12 ? 'Pronto para conferir' : <><span className="sr-only">Seção </span>{step + 1} de 12<span className="sr-only">: {attendanceSections[step]}</span></>}</p>}
+      {!data && [2, 3, 5, 6, 8, 9, 10].includes(step) && <section className="complementary-section">
+        <h2 ref={stepHeading} tabIndex={-1}>{attendanceSections[step]}</h2>
+        <AttendanceIntegratedFields section={step} patientPath={patientPath} draft={draft.integrated}
+          onChange={integrated => setDraft(previous => ({ ...previous, integrated }))} />
+      </section>}
       {!data && stepError && <div ref={stepErrorRef} role="alert" className="error-state" tabIndex={-1}>{stepError}</div>}
-      <StepPanel active={Boolean(data) || step === 0} title={data ? 'Dados básicos do atendimento' : 'Etapa 1 — Atendimento'}
+      <StepPanel active={Boolean(data) || step === 0} title={data ? 'Dados básicos do atendimento' : 'Atendimento'}
         panelRef={!data ? node => { panelRefs.current[0] = node; } : undefined}>
       {!data && <h2 ref={step === 0 ? stepHeading : undefined} tabIndex={-1}>Atendimento</h2>}
       <FormSection title="Dados básicos do atendimento">
-        <InputField label="Data do atendimento" type="date" value={draft.values.dataAtendimento!} required={!draft.original || draft.original.dataAtendimento !== null} onChange={value => field('dataAtendimento', value)} />
+        <InputField fieldPath="dataAtendimento" label="Data do atendimento" type="date" value={draft.values.dataAtendimento!} required={!draft.original || draft.original.dataAtendimento !== null} onChange={value => field('dataAtendimento', value)} />
         {draft.original?.dataAtendimento === null && <p className="muted">A data deste atendimento legado é desconhecida.
           Você pode corrigir os outros dados mantendo a data em branco, sem estimar uma data.</p>}
-        <InputField label="Localização do prontuário" value={draft.values.localizacaoProntuario!} maxLength={120} onChange={value => field('localizacaoProntuario', value)} />
-        <SelectField label="Somente ambulatório" value={draft.values.ambulatorioUnicamente!} options={booleanOptions} onChange={value => field('ambulatorioUnicamente', value)} />
-        <SelectField label="Ambulatório anexo a projeto" value={draft.values.ambulatorioAnexoProjeto!} options={booleanOptions} onChange={value => field('ambulatorioAnexoProjeto', value)} />
-        <TextAreaField label="Observações do atendimento" value={draft.values.observacoes!} onChange={value => field('observacoes', value)} />
+        <InputField fieldPath="localizacaoProntuario" label="Localização do prontuário" value={draft.values.localizacaoProntuario!} maxLength={120} onChange={value => field('localizacaoProntuario', value)} />
+        </FormSection>
+        <FormSection title="Contexto do atendimento">
+        <SelectField fieldPath="ambulatorioUnicamente" label="Somente ambulatório" value={draft.values.ambulatorioUnicamente!} options={booleanOptions} onChange={value => field('ambulatorioUnicamente', value)} />
+        <SelectField fieldPath="ambulatorioAnexoProjeto" label="Ambulatório anexo a projeto" value={draft.values.ambulatorioAnexoProjeto!} options={booleanOptions} onChange={value => field('ambulatorioAnexoProjeto', value)} />
+        <p className="muted">As duas opções de contexto não podem ser Sim ao mesmo tempo. Mantenha em branco a informação desconhecida.</p>
+        </FormSection>
+        <FormSection title="Observações gerais">
+        <TextAreaField fieldPath="observacoes" label="Observações do atendimento" value={draft.values.observacoes!} onChange={value => field('observacoes', value)} />
       </FormSection>
       </StepPanel>
       {!data && <>
-        <StepPanel active={step === 1} title="Etapa 2 — Avaliação e Chagas"
+        <StepPanel active={step === 1} title="Chagas e Sorologia"
           panelRef={node => { panelRefs.current[1] = node; }}>
-        <h2 ref={step === 1 ? stepHeading : undefined} tabIndex={-1}>Avaliação e Chagas</h2>
-        <FormSection title="Avaliação clínica">
-          {clinicalNumbers.map(([key, label, integer]) => <InputField key={key} label={label} type="number"
-            step={integer ? '1' : '0.01'} value={draft.clinical[key] ?? ''} onChange={value => sectionField('clinical', key, value)} />)}
-          <InputField label="NYHA" value={draft.clinical.nyha ?? ''} maxLength={20} onChange={value => sectionField('clinical', 'nyha', value)} />
-          <TextAreaField label="Observações clínicas" value={draft.clinical.observacoes ?? ''} onChange={value => sectionField('clinical', 'observacoes', value)} />
-        </FormSection>
+        <h2 ref={step === 1 ? stepHeading : undefined} tabIndex={-1}>Chagas e Sorologia</h2>
         <FormSection title="Diagnóstico e descoberta de Chagas">
-          <SelectField label="Possui diagnóstico de Chagas" value={draft.diagnosis.possuiDiagnosticoChagas ?? ''} options={booleanOptions}
+          <SelectField fieldPath="diagnosticoChagas.possuiDiagnosticoChagas" label="Possui diagnóstico de Chagas" value={draft.diagnosis.possuiDiagnosticoChagas ?? ''} options={booleanOptions}
             onChange={value => sectionField('diagnosis', 'possuiDiagnosticoChagas', value)} />
-          <SelectField label="Status do diagnóstico" value={draft.diagnosis.statusDiagnostico ?? ''}
+          <SelectField fieldPath="diagnosticoChagas.statusDiagnostico" label="Status do diagnóstico" value={draft.diagnosis.statusDiagnostico ?? ''}
             options={[["confirmado", "Confirmado"], ["descartado", "Descartado"], ["inconclusivo", "Inconclusivo"], ["suspeito", "Suspeito"], ["nao_informado", "Não informado (registrado)"]]}
             onChange={value => sectionField('diagnosis', 'statusDiagnostico', value)} />
-          <SelectField label="Resultado final" value={draft.diagnosis.resultadoFinal ?? ''}
+          <SelectField fieldPath="diagnosticoChagas.resultadoFinal" label="Resultado final" value={draft.diagnosis.resultadoFinal ?? ''}
             options={[["positivo", "Positivo"], ["negativo", "Negativo"], ["inconclusivo", "Inconclusivo"], ["indeterminado", "Indeterminado"], ["nao_informado", "Não informado (registrado)"]]}
             onChange={value => sectionField('diagnosis', 'resultadoFinal', value)} />
-          <InputField label="Data do resultado final" type="date" value={draft.diagnosis.dataResultadoFinal ?? ''} onChange={value => sectionField('diagnosis', 'dataResultadoFinal', value)} />
-          <InputField label="Data de descoberta por autorrelato" type="date" value={draft.diagnosis.dataDescobertaAutorelato ?? ''} onChange={value => sectionField('diagnosis', 'dataDescobertaAutorelato', value)} />
-          <InputField label="Critério de confirmação" value={draft.diagnosis.criterioConfirmacao ?? ''} maxLength={80} onChange={value => sectionField('diagnosis', 'criterioConfirmacao', value)} />
-          <TextAreaField label="Observações do diagnóstico" value={draft.diagnosis.observacoes ?? ''} onChange={value => sectionField('diagnosis', 'observacoes', value)} />
+          <InputField fieldPath="diagnosticoChagas.dataResultadoFinal" label="Data do resultado final" type="date" value={draft.diagnosis.dataResultadoFinal ?? ''} onChange={value => sectionField('diagnosis', 'dataResultadoFinal', value)} />
+          <InputField fieldPath="diagnosticoChagas.dataDescobertaAutorelato" label="Data de descoberta por autorrelato" type="date" value={draft.diagnosis.dataDescobertaAutorelato ?? ''} onChange={value => sectionField('diagnosis', 'dataDescobertaAutorelato', value)} />
+          <InputField fieldPath="diagnosticoChagas.criterioConfirmacao" label="Critério de confirmação" value={draft.diagnosis.criterioConfirmacao ?? ''} maxLength={80} onChange={value => sectionField('diagnosis', 'criterioConfirmacao', value)} />
+          <TextAreaField fieldPath="diagnosticoChagas.observacoes" label="Observações do diagnóstico" value={draft.diagnosis.observacoes ?? ''} onChange={value => sectionField('diagnosis', 'observacoes', value)} />
         </FormSection>
-        <p className="muted">Descoberta por autorrelato e resultado final são informações distintas. Sorologias detalhadas, comorbidades, medicamentos e eventos clínicos ainda não estão disponíveis para registro aqui.</p>
+        {step === 1 && <AttendanceIntegratedFields section={1} patientPath={patientPath} draft={draft.integrated}
+          onChange={integrated => setDraft(previous => ({ ...previous, integrated }))} />}
+        <p className="notice">Descoberta por autorrelato e resultado final são informações distintas.</p>
         </StepPanel>
-        <StepPanel active={step === 2} title="Etapa 3 — Exames e familiares"
-          panelRef={node => { panelRefs.current[2] = node; }}>
-        <h2 ref={step === 2 ? stepHeading : undefined} tabIndex={-1}>Exames e familiares</h2>
+        <StepPanel active={step === 4} title="Avaliação Clínica" panelRef={node => { panelRefs.current[4] = node; }}>
+        <h2 ref={step === 4 ? stepHeading : undefined} tabIndex={-1}>Avaliação Clínica</h2>
+        <FormSection title="Avaliação clínica">
+          {clinicalNumbers.map(([key, label, integer]) => <InputField fieldPath={`dadosClinicos.${key}`} key={key} label={label} type="number"
+            step={integer ? '1' : '0.01'} value={draft.clinical[key] ?? ''} onChange={value => sectionField('clinical', key, value)} />)}
+          <InputField fieldPath="dadosClinicos.nyha" label="NYHA" value={draft.clinical.nyha ?? ''} maxLength={20} onChange={value => sectionField('clinical', 'nyha', value)} />
+          <TextAreaField fieldPath="dadosClinicos.observacoes" label="Observações clínicas" value={draft.clinical.observacoes ?? ''} onChange={value => sectionField('clinical', 'observacoes', value)} />
+        </FormSection>
+        </StepPanel>
+        <StepPanel active={step === 7} title="Exames e familiares"
+          panelRef={node => { panelRefs.current[7] = node; }}>
+        <h2 ref={step === 7 ? stepHeading : undefined} tabIndex={-1}>Exames</h2>
         <fieldset className="form-section"><legend>Exames trazidos e solicitados</legend>
           <p>Um exame solicitado pode ser registrado sem resultado. Identifique os exames de categorias genéricas.</p>
           {draft.exams.length > 0 && <>
@@ -181,16 +263,16 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
           </>}
           {draft.exams.map((exam, index) => <fieldset key={index} className="form-section"><legend>Exame {index + 1}</legend>
             <div className="form-grid">
-              <SelectField label={`Tipo de exame ${index + 1}`} required blank="Selecione um tipo ativo" value={exam.tipoExameId}
+              <SelectField fieldPath={`exames.${index}.tipoExameId`} label={`Tipo de exame ${index + 1}`} required blank="Selecione um tipo ativo" value={exam.tipoExameId}
                 options={(catalog.isSuccess ? catalog.data : []).map(item => [item.id, item.nome])}
                 onChange={value => updateExam(index, { tipoExameId: value, catalog: catalog.data?.find(item => item.id === value) })} />
               {exam.catalog && <p className="muted">Selecionado: {exam.catalog.nome} ({exam.catalog.codigo})</p>}
-              <SelectField label={`Origem do exame ${index + 1}`} required value={exam.bloco} options={[["trazido", "Trazido"], ["solicitado", "Solicitado"]]}
+              <SelectField fieldPath={`exames.${index}.bloco`} label={`Origem do exame ${index + 1}`} required value={exam.bloco} options={[["trazido", "Trazido"], ["solicitado", "Solicitado"]]}
                 onChange={value => updateExam(index, { bloco: value })} />
-              <InputField label={`Identificação do exame ${index + 1}`} value={exam.identificacao} maxLength={1000}
+              <InputField fieldPath={`exames.${index}.identificacao`} label={`Identificação do exame ${index + 1}`} value={exam.identificacao} maxLength={1000}
                 required={['laboratoriais', 'imagem', 'outro', 'nao_informado'].includes(exam.catalog?.codigo ?? '')} onChange={value => updateExam(index, { identificacao: value })} />
-              <TextAreaField label={`Resultado do exame ${index + 1}`} value={exam.resultado} onChange={value => updateExam(index, { resultado: value })} />
-              <TextAreaField label={`Observações do exame ${index + 1}`} value={exam.observacoes} onChange={value => updateExam(index, { observacoes: value })} />
+              <TextAreaField fieldPath={`exames.${index}.resultado`} label={`Resultado do exame ${index + 1}`} value={exam.resultado} onChange={value => updateExam(index, { resultado: value })} />
+              <TextAreaField fieldPath={`exames.${index}.observacoes`} label={`Observações do exame ${index + 1}`} value={exam.observacoes} onChange={value => updateExam(index, { observacoes: value })} />
             </div>
             <button type="button" className="button button-secondary" onClick={() => examFocus.remove(() => setDraft(previous => ({ ...previous, exams: previous.exams.filter((_, i) => i !== index) })))}>Remover exame {index + 1}</button>
           </fieldset>)}
@@ -199,13 +281,13 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
         </fieldset>
         <fieldset className="form-section"><legend>Rastreio familiar</legend>
           <p>Identificação do familiar e resultado do exame; este registro não representa histórico de doença familiar.</p>
-          <SelectField label="Familiares examinados" value={draft.familyStatus} blank="Sem registro de rastreio"
+          <SelectField fieldPath="rastreioFamiliar.familiaresExaminados" label="Familiares examinados" value={draft.familyStatus} blank="Sem registro de rastreio"
             options={[["sim", "Sim"], ["nao", "Não"], ["desconhecido", "Desconhecido (registrar)"]]}
             onChange={value => setDraft(previous => ({ ...previous, familyStatus: value }))} />
           {draft.families.map((family, index) => <fieldset key={index} className="form-section"><legend>Familiar {index + 1}</legend>
-            <div className="form-grid"><InputField label={`Identificação do familiar ${index + 1}`} value={family.familiar} required maxLength={1000}
+            <div className="form-grid"><InputField fieldPath={`rastreioFamiliar.familiares.${index}.familiar`} label={`Identificação do familiar ${index + 1}`} value={family.familiar} required maxLength={1000}
               onChange={value => setDraft(previous => ({ ...previous, families: previous.families.map((item, i) => i === index ? { ...item, familiar: value } : item) }))} />
-              <TextAreaField label={`Resultado do familiar ${index + 1}`} required={draft.familyStatus === 'sim'} value={family.resultado}
+              <TextAreaField fieldPath={`rastreioFamiliar.familiares.${index}.resultado`} label={`Resultado do familiar ${index + 1}`} required={draft.familyStatus === 'sim'} value={family.resultado}
                 onChange={value => setDraft(previous => ({ ...previous, families: previous.families.map((item, i) => i === index ? { ...item, resultado: value } : item) }))} /></div>
             <button type="button" className="button button-secondary" onClick={() => familyFocus.remove(() => setDraft(previous => ({ ...previous, families: previous.families.filter((_, i) => i !== index) })))}>Remover familiar {index + 1}</button>
           </fieldset>)}
@@ -213,18 +295,18 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
             onClick={() => setDraft(previous => ({ ...previous, families: [...previous.families, { familiar: '', resultado: '' }] }))}>Adicionar familiar examinado</button>
         </fieldset>
         </StepPanel>
-        <StepPanel active={step === 3} title="Etapa 4 — Pendências"
-          panelRef={node => { panelRefs.current[3] = node; }}>
-        <h2 ref={step === 3 ? stepHeading : undefined} tabIndex={-1}>Pendências</h2>
+        <StepPanel active={step === 11} title="Observações e pendências"
+          panelRef={node => { panelRefs.current[11] = node; }}>
+        <h2 ref={step === 11 ? stepHeading : undefined} tabIndex={-1}>Observações e pendências</h2>
         <fieldset className="form-section"><legend>Pendências na criação</legend>
           <p>Pendência resolvida exige a data de resolução informada. A criação de cada pendência faz parte da mesma gravação do atendimento.</p>
           {draft.pending.map((pending, index) => <fieldset key={index} className="form-section"><legend>Pendência {index + 1}</legend>
-            <TextAreaField label={`Descrição da pendência ${index + 1}`} required value={pending.descricao}
+            <TextAreaField fieldPath={`pendencias.${index}.descricao`} label={`Descrição da pendência ${index + 1}`} required value={pending.descricao}
               onChange={value => setDraft(previous => ({ ...previous, pending: previous.pending.map((item, i) => i === index ? { ...item, descricao: value } : item) }))} />
-            <SelectField label={`Status da pendência ${index + 1}`} value={pending.status} blank="Desconhecido"
+            <SelectField fieldPath={`pendencias.${index}.status`} label={`Status da pendência ${index + 1}`} value={pending.status} blank="Desconhecido"
               options={[["aberta", "Aberta"], ["em_andamento", "Em andamento"], ["resolvida", "Resolvida"], ["cancelada", "Cancelada"], ["nao_informado", "Não informado"]]}
               onChange={value => setDraft(previous => ({ ...previous, pending: previous.pending.map((item, i) => i === index ? { ...item, status: value } : item) }))} />
-            <InputField label={`Data de resolução da pendência ${index + 1}`} type="date" value={pending.dataResolucao ?? ''}
+            <InputField fieldPath={`pendencias.${index}.dataResolucao`} label={`Data de resolução da pendência ${index + 1}`} type="date" value={pending.dataResolucao ?? ''}
               required={pending.status === 'resolvida'} onChange={value => setDraft(previous => ({ ...previous,
                 pending: previous.pending.map((item, i) => i === index ? { ...item, dataResolucao: value } : item) }))} />
             <button type="button" className="button button-secondary" onClick={() => pendingFocus.remove(() => setDraft(previous => ({ ...previous, pending: previous.pending.filter((_, i) => i !== index) })))}>Remover pendência {index + 1}</button>
@@ -233,17 +315,25 @@ function AttendanceForm({ pacienteId, data }: { pacienteId: string; data?: Atend
             onClick={() => setDraft(previous => ({ ...previous, pending: [...previous.pending, { descricao: '', status: 'aberta' }] }))}>Adicionar pendência</button>
         </fieldset>
         </StepPanel>
-        <StepPanel active={step === 4} title="Etapa 5 — Revisão">
-          <h2 ref={step === 4 ? stepHeading : undefined} tabIndex={-1}>Revisão</h2>
+        <StepPanel active={step === 12} title="Revisão do atendimento">
+          <h2 ref={step === 12 ? stepHeading : undefined} tabIndex={-1}>Revisão</h2>
           <AttendanceReview draft={draft} />
         </StepPanel>
-        <div className="form-actions" aria-label="Navegação entre etapas">
-          {step > 0 && <button type="button" className="button button-secondary" onClick={() => moveTo(step - 1)}>Etapa anterior</button>}
-          {step < 3 && <button type="button" className="button button-secondary" onClick={() => moveTo(step + 1)}>Próxima etapa</button>}
-          {step === 3 && <button type="button" className="button button-secondary" onClick={() => moveTo(4)}>Revisar atendimento</button>}
-          <button type="button" className="button button-secondary" onClick={() => navigate(patientPath)}>Cancelar atendimento</button>
+        <div className="form-actions attendance-actions" aria-label="Navegação entre seções">
+          {step > 0 && <button type="button" className="button button-secondary" onClick={() => moveTo([...editableSections].reverse().find(index => index < step) ?? 0)}>Seção anterior</button>}
+          {step < 11 && <button type="button" className="button button-secondary" onClick={() => {
+            if (step === 0) {
+              if (panelRefs.current[0]?.closest('form')?.reportValidity() === false) return;
+              try { attendanceCore(draft.values, draft.original); }
+              catch (error) { if (error instanceof FieldValidationError) setValidationErrors(error.errors); return; }
+            }
+            moveTo(editableSections.find(index => index > step) ?? 11);
+          }}>Próxima seção</button>}
+          {step !== 12 && <button type="button" className="button" onClick={() => moveTo(12)}>Revisar atendimento</button>}
+          <button type="button" className="button button-secondary" onClick={() => navigate(recordOrigin)}>Cancelar atendimento</button>
         </div>
       </>}
+      </div></div>
     </MutationForm>
   </Card>;
 }
@@ -255,13 +345,17 @@ function ExistingAttendanceForm({ pacienteId, atendimentoId }: { pacienteId: str
 
 export default function AttendanceFormPage() {
   const { pacienteId = '', atendimentoId } = useParams<{ pacienteId: string; atendimentoId: string }>();
+  const [search] = useSearchParams();
+  const patientPath = `/pacientes/${encodeURIComponent(pacienteId)}`;
+  const recordOrigin = attendanceReturn(patientPath, search.get('retorno')) ?? searchReturnPath(patientPath, search.get('retorno'));
   const patientQuery = useApiQuery<PacienteDetalheResponse>(`/pacientes/${encodeURIComponent(pacienteId)}`);
-  return <>
-    <nav className="breadcrumb" aria-label="Caminho da página"><Link to={`/pacientes/${pacienteId}`}>Ficha do paciente</Link>
-      {atendimentoId && <Link to={`/pacientes/${pacienteId}/atendimentos/${atendimentoId}`}>Atendimento</Link>}</nav>
+  return <div className="attendance-form-page">
+    <nav className="breadcrumb" aria-label="Caminho da página"><Link to={recordOrigin}>Ficha do paciente</Link>
+      {atendimentoId && <Link to={attendanceDetailPath(patientPath, atendimentoId, recordOrigin === patientPath ? '' : recordOrigin)}>Atendimento</Link>}</nav>
+    <PatientsSearchReturn />
     <PageHeading title={atendimentoId ? 'Editar atendimento' : 'Novo atendimento'} />
-    <EditingGate><DraftQueryState query={patientQuery}>{patient => <><p>Paciente: {patient.nome} · ID {patient.pacienteId}</p>
+    <EditingGate><DraftQueryState query={patientQuery}>{patient => <><div className="attendance-patient"><span className="patient-avatar" aria-hidden="true">{patient.nome[0]}</span><div><strong>{patient.nome}</strong><p className="muted">ID {patient.pacienteId}</p></div></div>
       {atendimentoId ? <ExistingAttendanceForm pacienteId={pacienteId} atendimentoId={atendimentoId} />
         : <AttendanceForm key={pacienteId} pacienteId={pacienteId} />}</>}</DraftQueryState></EditingGate>
-  </>;
+  </div>;
 }

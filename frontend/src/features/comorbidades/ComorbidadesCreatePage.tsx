@@ -67,7 +67,7 @@ function Form({ path, back }: { path: string; back: string }) {
         <legend>Avaliação desta consulta</legend><h2 ref={!draft.reviewing ? heading : undefined} tabIndex={-1}>Selecionar comorbidades</h2>
         <p>Selecione somente o que foi avaliado. A seleção inicia como desconhecida; marque Sim ou Não quando informado. Itens não selecionados não serão registrados.</p>
         {error && <p role="alert">{error}</p>}
-        <QueryState query={catalog}>{rows => <>{!rows.length && <p>Nenhuma comorbidade nesta página.</p>}{rows.map(row => {
+        <div className="comorbidity-choices"><QueryState query={catalog}>{rows => <>{!rows.length && <p>Nenhuma comorbidade nesta página.</p>}{rows.map(row => {
           const item = draft.values.items[row.id];
           return <section key={row.id} className="form-section" aria-label={row.nome}>
             <label style={{ overflowWrap: 'anywhere' }}><input type="checkbox" checked={item?.selected ?? false}
@@ -76,7 +76,7 @@ function Form({ path, back }: { path: string; back: string }) {
               options={booleanOptions} onChange={value => changeItem(row, { presence: value })} />
               <TextAreaField label={`Observações de ${item.nome}`} value={item.observacoes} onChange={value => changeItem(row, { observacoes: value })} /></>}
           </section>;
-        })}</>}</QueryState>
+        })}</>}</QueryState></div>
         <p>Catálogo: itens {offset + 1}–{offset + (catalog.isSuccess && !catalog.isFetching ? catalog.data.length : 0)}. Seleções de outras páginas são preservadas.</p>
         <button type="button" className="button button-secondary" disabled={offset === 0 || catalog.isFetching} onClick={() => setOffset(value => Math.max(0, value - 20))}>Página anterior do catálogo</button>
         <button type="button" className="button button-secondary" disabled={!catalog.isSuccess || catalog.isFetching || catalog.data.length < 20 || offset >= 100000} onClick={() => setOffset(value => value + 20)}>Próxima página do catálogo</button>

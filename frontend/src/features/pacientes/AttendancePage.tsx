@@ -10,6 +10,7 @@ import ClinicalActions from '../clinical/ClinicalActions';
 import { AttendanceFamilies } from './PatientResources';
 import { AttendanceChagasDiagnosis, AttendanceClinicalAssessment } from './AttendanceClinicalPanels';
 import { attendanceReturn } from './attendance-navigation';
+import { patientsSearchReturn } from './PatientsSearchReturn';
 
 export default function AttendancePage() {
   const session = useSession();
@@ -19,11 +20,12 @@ export default function AttendancePage() {
   const patientPath = `/pacientes/${encodeURIComponent(pacienteId)}`;
   const [search] = useSearchParams();
   const origin = attendanceReturn(patientPath, search.get('retorno'));
+  const searchOrigin = origin ? patientsSearchReturn(new URL(origin, 'http://app.local').searchParams.get('retorno')) : null;
   const query = useApiQuery<AtendimentoDetalheResponse>(pagePath(`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}`, page.limit, page.offset));
 
   return <>
     <nav className="breadcrumb" aria-label="Caminho da página">
-      <Link to="/pacientes">Pacientes</Link>
+      <Link to={searchOrigin ?? '/pacientes'}>{searchOrigin?.startsWith('/dashboard') ? 'Dashboard' : 'Pacientes'}</Link>
       <Link to={origin ?? `${patientPath}?aba=atendimentos`}>{origin ? 'Voltar à ficha de origem' : 'Histórico do paciente'}</Link>
       <span>Atendimento</span>
     </nav>
@@ -35,13 +37,22 @@ export default function AttendancePage() {
           <Card>
             <h2>Atendimento de {formatClinicalDate(data.dataAtendimento)}</h2>
             <p className="muted">Avaliação, diagnóstico, exames e pendências abaixo pertencem a este atendimento.</p>
-            <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/sorologias?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Sorologias deste atendimento</Link></p>
-            <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/condicao-chagas?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Condição de Chagas deste atendimento</Link></p>
-            <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/comorbidades?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Comorbidades deste atendimento</Link></p>
-            <p><Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/complicacoes-chagas?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Complicações deste atendimento</Link></p>
+            <nav className="clinical-resource-nav" aria-label="Registros complementares">
+              <div><h3>Deste atendimento</h3>
+            <Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/medicamentos?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Medicamentos deste atendimento</Link>
+            <Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/sorologias?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Sorologias deste atendimento</Link>
+            <Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/condicao-chagas?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Condição de Chagas deste atendimento</Link>
+            <Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/comorbidades?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Comorbidades deste atendimento</Link>
+            <Link to={`${patientPath}/atendimentos/${encodeURIComponent(atendimentoId)}/complicacoes-chagas?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Complicações deste atendimento</Link>
+              </div><div><h3>Histórico do paciente</h3>
+            <Link to={`${patientPath}/avcs?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>AVC do paciente (longitudinal)</Link>
+            <Link to={`${patientPath}/dispositivos?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Marcapasso e CDI do paciente</Link>
+            <Link to={`${patientPath}/obito?retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`}>Estado de óbito do paciente</Link>
+              </div>
+            </nav>
             {location.state?.saved && <p className="notice" role="status">{String(location.state.saved)}</p>}
             {session.user?.perfil !== 'consulta' && <div className="form-actions">
-              <Link to={`${patientPath}/atendimentos/${atendimentoId}/editar`} className="button button-secondary">Editar atendimento</Link>
+              <Link to={`${patientPath}/atendimentos/${atendimentoId}/editar${origin ? `?${new URLSearchParams({ retorno: origin })}` : ''}`} className="button button-secondary">Editar atendimento</Link>
               <Link to={`${patientPath}/registrar?tipo=bzn&atendimentoId=${encodeURIComponent(atendimentoId)}&retorno=${encodeURIComponent(location.pathname + location.search + location.hash)}`} className="button button-secondary">Registrar acompanhamento</Link>
             </div>}
             <Fields items={[

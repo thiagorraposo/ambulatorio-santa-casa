@@ -9,6 +9,13 @@ de testes não é uma contagem atual e aceite sintético não autoriza dados rea
 
 | Escopo | Evidência | Leitura correta |
 | --- | --- | --- |
+| Dashboard básico8B1 | [Validação integrada](VALIDACAO_8B1_DASHBOARD.md) | Quatro indicadores PostgreSQL, capacidade explícita, filtros e estados;2 E2E e comparação técnica. |
+| 8D criação e primeiro acesso | [Validação integrada](VALIDACAO_8D2_CRIACAO.md) | Criação, uso único, troca obrigatória, recibos e recuperação; sem aceite humano. |
+| 8D estado administrativo | [Validação integrada](VALIDACAO_8D2_ESTADO.md) | Ativação/inativação, concorrência e revogação sem restauração;325 unidades frontend integrais e7 E2E focados; sem aceite humano. |
+| 8D perfil administrativo | [Validação integrada](VALIDACAO_8D2_PERFIL.md) | API/UI/PostgreSQL, versão/justificativa/recibo, concorrência e revogação JWT; sem aceite humano. |
+| 8D Minha conta | [Identificação própria integrada](VALIDACAO_8D1_MINHA_CONTA.md) | Cinco campos reais/suporte/saída;311 unidades frontend integrais,22 HTTP e4+2 E2E focados;8D agregado pendente. |
+| 8D login/estado administrativo | [Validação integrada](VALIDACAO_8D1_LOGIN_ESTADO.md) | Lista/detalhe reais com cinco campos,19 HTTP/10 E2E; comandos e aceite próprios pendentes. |
+| M3 cadastro/edição por Edição | [Validação integrada](VALIDACAO_CADASTRO_EDICAO_M3.md) | Vínculo atômico/específico, PATCH, atendimento, revogação e concorrência; sem aceite humano. |
 | CI — diagnóstico e estabilização por componente | [Validação de 26/10](VALIDACAO_CI_2026_10_26.md) | Causas originais reproduzidas; arquitetura, verificações locais e procedimento para conferir o aceite remoto no PR/main. |
 | Etapa 5 — backend/importação | [Aceite integrado](ACEITE_INTEGRADO_ETAPA_5.md) | Matriz F01–F16/T01–T18 e limites sintéticos. |
 | Execução incremental da Etapa 5 | [Continuidade](CONTINUIDADE_ETAPA_5.md) | Diário de tentativas e resultados; o fechamento de 03/10 prevalece sobre pendências de entradas anteriores. |
@@ -60,3 +67,34 @@ sistema; sua menção preserva rastreabilidade, não garante disponibilidade atu
 - [Avaliação de comorbidades por atendimento — E3B.2](VALIDACAO_7B_E3B_2.md).
 
 - [Interface de comorbidades — E3U](VALIDACAO_7B_E3U.md).
+
+- [Backend AVC longitudinal — recorte E4B](VALIDACAO_7B_E4B_AVC.md).
+
+- [Interface AVC — E4U, provas e pendência visual](VALIDACAO_7B_E4U_AVC.md).
+
+- [Catálogo mínimo da demonstração M3](VALIDACAO_FIXTURE_DEMO_M3.md).
+
+- [Backend marcapasso/CDI — criação inicial](VALIDACAO_7B_E4B_DISPOSITIVOS.md).
+
+- [Interface marcapasso/CDI — recorte E4U](VALIDACAO_7B_E4U_DISPOSITIVOS.md).
+
+- [Backend óbito inicial — recorte E4B](VALIDACAO_7B_E4B_OBITO.md).
+
+- [Interface de parâmetros do exame — E6U](VALIDACAO_7B_E6U_PARAMETROS.md).
+
+- [Atalhos diretos por pessoa — 8B3U.4](VALIDACAO_8B3U_4.md).
+
+- [Relatório H14 sanitizado — recorte8C2B.1](VALIDACAO_8C2B_1_RELATORIO.md).
+
+- [Rollback de rejeição precoce no dry-run](VALIDACAO_DRY_RUN_REJEICAO_PRECOCE.md).
+
+- [Totais/códigos na simulação — recorte8C2U.1](VALIDACAO_8C2_U1_RELATORIO.md).
+
+- [Ensaio integrado sintético M3](VALIDACAO_DEMONSTRACAO_M3_2026_11_02.md).
+- [Isolamento das contagens E2E M3](VALIDACAO_ISOLAMENTO_E2E_M3.md).
+
+- [Regressão composta do frontend M3 — 02/11](VALIDACAO_REGRESSAO_FRONTEND_M3_2026_11_02.md).
+
+- [Registro consolidado da execução M3 — 02/11](RELATORIO_EXECUCAO_M3_2026_11_02.md).
+
+- [Avaliação humana do protótipo funcional com a equipe Santa Casa — M3](AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md): REALIZADA — COM PROBLEMAS IDENTIFICADOS; ACEITE INTEGRAL NÃO REGISTRADO, achados abertos e data exata não informada.

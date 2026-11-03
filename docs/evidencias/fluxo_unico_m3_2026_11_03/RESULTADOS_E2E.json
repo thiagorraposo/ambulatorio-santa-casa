@@ -1,0 +1,1189 @@
+{
+  "implementacao": "30ae9557ad55a27af2597c8328e134e97bbc3508",
+  "tipo": "composição de rodada ampla e reexecuções focadas; não uma rodada integral aprovada",
+  "cenarios_distintos": 138,
+  "aprovados_distintos": 138,
+  "pendentes": 0,
+  "execucoes": [
+    {
+      "execucao": "etapa6-frontend-TJSTzj",
+      "estatisticas": {
+        "startTime": "2026-11-03T14:28:43.077Z",
+        "duration": 1796537.562,
+        "expected": 132,
+        "skipped": 0,
+        "unexpected": 5,
+        "flaky": 0
+      }
+    },
+    {
+      "execucao": "etapa6-frontend-QV6mJZ",
+      "estatisticas": {
+        "startTime": "2026-11-03T14:32:23.891Z",
+        "duration": 32543.358999999997,
+        "expected": 2,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "execucao": "etapa6-frontend-8bxizy",
+      "estatisticas": {
+        "startTime": "2026-11-03T14:58:14.497Z",
+        "duration": 125065.898,
+        "expected": 7,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      }
+    },
+    {
+      "execucao": "etapa6-frontend-dz7WYm",
+      "estatisticas": {
+        "startTime": "2026-11-03T14:59:57.885Z",
+        "duration": 96955.618,
+        "expected": 2,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      }
+    },
+    {
+      "execucao": "etapa6-frontend-1h5ebd",
+      "estatisticas": {
+        "startTime": "2026-11-03T15:02:06.456Z",
+        "duration": 125468.936,
+        "expected": 1,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    }
+  ],
+  "cenarios": [
+    {
+      "arquivo": "attendance-sections.spec.ts",
+      "cenario": "M3: doze seções informacionais, navegação livre, rascunho, validação e confirmação real",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "attendance-unified.spec.ts",
+      "cenario": "P0 fluxo único: confirmações concorrentes do mesmo AVC preservam uma unidade e seus recibos",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "attendance-unified.spec.ts",
+      "cenario": "P0 fluxo único: consulta e falta de vínculo impedem escrita; inválidos retornam campos específicos",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "attendance-unified.spec.ts",
+      "cenario": "P0 fluxo único: doze seções, revisão, uma confirmação, releitura HTTP e SQL, novo atendimento vazio",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj",
+        "etapa6-frontend-QV6mJZ"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "attendance-unified.spec.ts",
+      "cenario": "P0 fluxo único: falha tardia reverte a unidade inteira e recibo impede replay",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "attendance-unified.spec.ts",
+      "cenario": "P0 fluxo único: histórico longitudinal existente é consultado sem duplicação ou sobrescrita",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "attendance-unified.spec.ts",
+      "cenario": "P0 fluxo único: resposta perdida e repetição de clique recuperam todos os recibos sem duplicar",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "attendance-validation.spec.ts",
+      "cenario": "P0: contexto inválido, correção e releitura de atendimento — paciente existente",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "attendance-validation.spec.ts",
+      "cenario": "P0: contexto inválido, correção e releitura de atendimento — paciente novo pela interface",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "attendance-validation.spec.ts",
+      "cenario": "P0: limites de registro e familiares apontam campo e etapa antes de confirmar",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "avcs-interacoes.spec.ts",
+      "cenario": "E4U AVC: teclado, rascunho, revisão, zoom e duas intenções preservadas",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "avcs.spec.ts",
+      "cenario": "E4U AVC: consulta pagina 20/1, erro oculta dados e escrita permanece recusada",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "avcs.spec.ts",
+      "cenario": "E4U AVC: revisão, negativa/ano, recibo perdido e leitura longitudinal real",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "cadastro-edicao.spec.ts",
+      "cenario": "M3 Edição cadastra, relê, edita e confirma atendimento sem concessão administrativa",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "clinical.spec.ts",
+      "cenario": "401 real por identidade inativada limpa sessão e cache ao retomar foco",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "clinical.spec.ts",
+      "cenario": "administracao lê inclusive o paciente fora dos vínculos de consulta/edicao",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "clinical.spec.ts",
+      "cenario": "consulta: busca, paginação, leitura e acessibilidade com dados reais da API",
+      "aprovado_em": [
+        "etapa6-frontend-QV6mJZ"
+      ],
+      "falhou_em": [
+        "etapa6-frontend-TJSTzj"
+      ]
+    },
+    {
+      "arquivo": "clinical.spec.ts",
+      "cenario": "edicao consulta só seus vínculos e mantém a ficha em leitura",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "clinical.spec.ts",
+      "cenario": "expiração local do token limpa ficha e exige nova autenticação",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "clinical.spec.ts",
+      "cenario": "link direto do atendimento, recarregamento e voltar preservam o destino",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "clinical.spec.ts",
+      "cenario": "revogação real de vínculo oculta a ficha quando o navegador retoma foco",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "clinical.spec.ts",
+      "cenario": "saída e troca de identidade impedem uma resposta real antiga de reaparecer",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "collection-focus.spec.ts",
+      "cenario": "7D-U4.2: remoção de itens devolve foco à coleção sem apagar o próximo rascunho",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "comorbidades.spec.ts",
+      "cenario": "7B-E3U: catálogo paginado preserva seleções de páginas distintas e não registra itens ausentes",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "comorbidades.spec.ts",
+      "cenario": "7B-E3U: confirma somente histórico familiar e recupera COMMIT sem repetir envio",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "comorbidades.spec.ts",
+      "cenario": "7B-E3U: leitura de consulta e falha não expõem conteúdo antigo ou habilitam escrita",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "comorbidades.spec.ts",
+      "cenario": "7B-E3U: seleciona e revisa triestado, mantém rascunho e origem sem copiar entre consultas",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "complicacoes-chagas.spec.ts",
+      "cenario": "7B-E2U.2: pagina 20/1, consulta só lê e falha de leitura oculta registros anteriores",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "complicacoes-chagas.spec.ts",
+      "cenario": "7B-E2U.2: resposta perdida após COMMIT recupera recibo sem repetir ocorrência",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "complicacoes-chagas.spec.ts",
+      "cenario": "7B-E2U.2: revisa quatro campos, preserva rascunho e registra ocorrências repetidas sem inferência",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "condicao-chagas.spec.ts",
+      "cenario": "7B-E2U.1: 403 conserva revisão, revalida acesso e exige nova confirmação explícita",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "condicao-chagas.spec.ts",
+      "cenario": "7B-E2U.1: ausência e null permanecem distintos de negativo; consulta só lê e falha não mostra dado antigo",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "condicao-chagas.spec.ts",
+      "cenario": "7B-E2U.1: criação concorrente recebe 409 sem sobrescrever condição nem perder revisão",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "condicao-chagas.spec.ts",
+      "cenario": "7B-E2U.1: resposta perdida recupera recibo por UUID sem repetir criação",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "condicao-chagas.spec.ts",
+      "cenario": "7B-E2U.1: revisa seis campos, preserva rascunho e confirma condição única sem inferir diagnóstico",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "demo-catalogo.spec.ts",
+      "cenario": "fixture de demonstração disponibiliza catálogo canônico sem depender de outro teste",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "dispositivos.spec.ts",
+      "cenario": "E4U dispositivos: COMMIT perdido recupera recibo sem repetir e consulta só lê",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "dispositivos.spec.ts",
+      "cenario": "E4U dispositivos: revisão, rascunho e dois tipos sem substituir estado",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "familiares.spec.ts",
+      "cenario": "R7-01: 30/50 familiares por snapshot, erro da segunda página, voltar e recarregar",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "importacao-relatorio.spec.ts",
+      "cenario": "H14: nascimento inválido anterior ao savepoint mantém rejeição no relatório dry-run",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "importacao-relatorio.spec.ts",
+      "cenario": "H14: relatório simulado real apresenta categorias distintas, códigos e nenhum POST efetivo",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "importacao-relatorio.spec.ts",
+      "cenario": "H14: simulação de mesmo conteúdo relata lote efetivo e contagens já existentes",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "importacao-simulacao.spec.ts",
+      "cenario": "8C2U.1: arquivo adulterado é recusado pelo worker sem persistir registros",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "importacao-simulacao.spec.ts",
+      "cenario": "8C2U.1: consulta não tem formulário de simulação",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "importacao-simulacao.spec.ts",
+      "cenario": "8C2U.1: resposta perdida de simulação não gera reenvio automático ou falso sucesso",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "importacao-simulacao.spec.ts",
+      "cenario": "8C2U.1: seleciona e simula XLSX sintético uma vez sem persistir registros",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "importacoes.spec.ts",
+      "cenario": "importações: administração consulta lote sanitizado",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "importacoes.spec.ts",
+      "cenario": "importações: consulta pagina apenas lote integralmente vinculado",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "importacoes.spec.ts",
+      "cenario": "importações: edicao pagina apenas lote integralmente vinculado",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "latest-attendance.spec.ts",
+      "cenario": "7D-U3.1: última consulta independe da página dos dados e abre o atendimento correto",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "m2-visual.spec.ts",
+      "cenario": "7D-U4.2: evidências de formulário, tabela, diálogo, carga e erro em 320/390 px e zoom",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "m3-demo.spec.ts",
+      "cenario": "M3 demonstração sintética: cadastro buscado, consulta, episódios, parâmetros, histórico e CSV",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "medicamentos.spec.ts",
+      "cenario": "E5U leitura: campos literais, paginação, responsividade e nenhuma escrita",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "medicamentos.spec.ts",
+      "cenario": "E5U leitura: consulta só lê, troca de origem, vazio, erro e acesso negado",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "minha-conta.spec.ts",
+      "cenario": "8D1B.2/U.2: administracao consulta identificação própria real e suporte aprovado",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "minha-conta.spec.ts",
+      "cenario": "8D1B.2/U.2: consulta consulta identificação própria real e suporte aprovado",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "minha-conta.spec.ts",
+      "cenario": "8D1B.2/U.2: edicao consulta identificação própria real e suporte aprovado",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "minha-conta.spec.ts",
+      "cenario": "8D1B.2/U.2: falha de identidade oculta login e inativação real encerra a conta",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "obito.spec.ts",
+      "cenario": "E4U óbito: negativa preserva data/causa e rascunho, consulta não escreve",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "obito.spec.ts",
+      "cenario": "E4U óbito: positivo sem data/causa, revisão e recibo de COMMIT perdido",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "pacientes-csv.spec.ts",
+      "cenario": "8A1: administracao baixa CSV UTF-8 da página/filtros aplicados e respeita o escopo",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "pacientes-csv.spec.ts",
+      "cenario": "8A1: consulta baixa CSV UTF-8 da página/filtros aplicados e respeita o escopo",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "pacientes-csv.spec.ts",
+      "cenario": "8A1: edicao baixa CSV UTF-8 da página/filtros aplicados e respeita o escopo",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "pacientes-csv.spec.ts",
+      "cenario": "8A1: falha de rede e resposta 403 entregue não geram arquivo nem sucesso fictício",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "patient-shortcuts.spec.ts",
+      "cenario": "8B3U.4: atalhos abrem pessoa identificada e preservam busca, teclado e 320px",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "patient-shortcuts.spec.ts",
+      "cenario": "8B3U.4: consulta só recebe o atalho de ficha",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "patient-shortcuts.spec.ts",
+      "cenario": "FM-NAV-12: busca, ficha, abas e recarga preservam retorno — administracao",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "patient-shortcuts.spec.ts",
+      "cenario": "FM-NAV-12: busca, ficha, abas e recarga preservam retorno — consulta",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "patient-shortcuts.spec.ts",
+      "cenario": "FM-NAV-12: busca, ficha, abas e recarga preservam retorno — edicao",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "reacoes-bzn.spec.ts",
+      "cenario": "E1.2 BZN: consulta só lê, paginação real, vazio e ausência do tratamento",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "reacoes-bzn.spec.ts",
+      "cenario": "E1.2 BZN: revisão, rascunho, duas intenções e confirmação perdida sem alterar canônico",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "resultados-exame.spec.ts",
+      "cenario": "E6U parâmetros: exame escolhido, seis campos, revisão e duas intenções com recuperação",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "resultados-exame.spec.ts",
+      "cenario": "E6U parâmetros: identificação genérica, descarte protegido e exame de outro paciente recusado",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "resultados-exame.spec.ts",
+      "cenario": "E6U parâmetros: paginação persistente, perfil consulta, erro recuperável e revogação",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "selected-attendance.spec.ts",
+      "cenario": "7D-U3.2: escolher consulta, alternar avaliação/Chagas e reler ausência sem último não nulo",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "selected-attendance.spec.ts",
+      "cenario": "7D-U3.2: revogar vínculo ao paginar opções oculta a avaliação previamente consultada",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "shell-navigation.spec.ts",
+      "cenario": "7D-U4.1: endereço desconhecido oferece destinos reais em 320 px e foco após navegação",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "shell-navigation.spec.ts",
+      "cenario": "7D-U4.1: falha transitória de identidade oculta a conta e devolve foco após recuperação por leitura",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "shell-navigation.spec.ts",
+      "cenario": "7D-U4.1: menu compacto opera por teclado, conserva destino e responde ao breakpoint",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "sorologias.spec.ts",
+      "cenario": "7B-E1U: 403 de escrita mantém revisão e exige nova confirmação após restaurar a permissão",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "sorologias.spec.ts",
+      "cenario": "7B-E1U: consulta pagina episódios, recupera erro de leitura e não oferece escrita",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "sorologias.spec.ts",
+      "cenario": "7B-E1U: resposta perdida recupera o recibo por UUID e não duplica a sorologia",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "sorologias.spec.ts",
+      "cenario": "7B-E1U: revisa sete campos, preserva rascunho e confirma episódios de mesmo método sem inferência",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7-acceptance.spec.ts",
+      "cenario": "7D: cadastro → atendimento composto → acompanhamentos → resolução → histórico pela interface",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7-access-recovery.spec.ts",
+      "cenario": "7D-R2: 403 de escrita permite revisar o mesmo rascunho e confirmar após restaurar o vínculo",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7-followup-recovery.spec.ts",
+      "cenario": "7B-R2: POST de pendências distingue desconhecido de não informado e aberta ao reler",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7-followup-recovery.spec.ts",
+      "cenario": "7D-R1: atalhos mantêm atendimento e origem e a troca de consulta é explícita",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7-followup-recovery.spec.ts",
+      "cenario": "7D-R1: contexto de outro paciente é recusado antes de apresentar formulário ou escrever",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7-followup-recovery.spec.ts",
+      "cenario": "7D-R4: recibo e valores sobrevivem a auth/me temporário e a navegação sem novo POST",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7-followup-recovery.spec.ts",
+      "cenario": "7D-R5: BZN concorrente mantém campos e reações do perdedor para cópia e descarte explícito",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7A/7B: PATCH do núcleo usa a versão carregada e preserva filhos do atendimento",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7A/7D: 409 do atendimento mantém a versão e as alterações locais",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7A/7D: 409 mantém o rascunho e a versão original do paciente sem sobrescrita",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7A/7D: Edição recebe capacidade e formulário após busca prévia",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7A: cadastro exige nome, usa busca prévia e mantém homônimos separados",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7A: edição preserva contatos, endereço, estados desconhecidos e IDs textuais",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7A: resultado vazio exige confirmação e falha de busca não libera cadastro",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7B: atendimento composto valida ambiguidades, faz rollback e salva todos os campos preenchidos",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7C: BZN único com reação, retornos repetidos e ano informado separado de visitas",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7C: projeto, notificação, encaminhamento, contrarreferências e resolução de pendência",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7D-U1: cancelar pede decisão e preserva o rascunho sem escrever",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7D-U2: cliques repetidos na confirmação gravam um atendimento apenas",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7D-U4.2: etapas do atendimento e diálogo funcionam por teclado em telas estreitas e zoom",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7D: 401 real em escrita encerra sessão e remove rascunho clínico",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7D: conflito no acompanhamento conserva o atendimento confirmado e o rascunho posterior",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7D: consulta não escreve, vínculo delimita edição e administração segue a API",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7D: draft protege navegação, voltar, teclado, mobile e zoom; saída apaga o draft",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7D: expiração limpa alterações clínicas em memória antes da nova sessão",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7D: falha de rede na revalidação durante escrita oculta e recupera a intenção incerta sem duplicar",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7D: perda da resposta do PATCH confirma pela ficha sem repetir alteração versionada",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7D: reconsulta com vínculo revogado oculta formulário antes da resposta e conserva o rascunho",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7D: resposta antiga de escrita não navega nem mostra sucesso após trocar identidade",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7D: resposta perdida após commit exige verificação e não repete atendimento",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7D: resposta perdida de contrarreferencia preserva episódio único e sua intenção ao voltar",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7D: resposta perdida de retorno-anual preserva episódio único e sua intenção ao voltar",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "stage7.spec.ts",
+      "cenario": "7D: revogação da permissão recusa a preparação com 403 e conserva rascunho sem sucesso",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "u33-navigation.spec.ts",
+      "cenario": "7D-U3.3: consulta percorre histórico, detalhe e exames com retorno exato",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "u33-navigation.spec.ts",
+      "cenario": "7D-U3.3: edicao percorre histórico, detalhe e exames com retorno exato",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "u33-navigation.spec.ts",
+      "cenario": "7D-U3.3: reconsulta e revogação na página de exames ocultam o resultado anterior",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "usuario-estado.spec.ts",
+      "cenario": "8D2U.2 conflito perfil×estado preserva escolha, cancelamento e preparação explícita",
+      "aprovado_em": [
+        "etapa6-frontend-8bxizy"
+      ],
+      "falhou_em": [
+        "etapa6-frontend-TJSTzj"
+      ]
+    },
+    {
+      "arquivo": "usuario-estado.spec.ts",
+      "cenario": "8D2U.2 inativa/reativa de verdade, revoga JWT/vínculo e não restaura acesso",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj",
+        "etapa6-frontend-8bxizy"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "usuario-estado.spec.ts",
+      "cenario": "8D2U.2 resposta perdida recupera estado após novo login sem repetir POST",
+      "aprovado_em": [
+        "etapa6-frontend-8bxizy"
+      ],
+      "falhou_em": [
+        "etapa6-frontend-TJSTzj"
+      ]
+    },
+    {
+      "arquivo": "usuario-estado.spec.ts",
+      "cenario": "fixture sintética restaura mais de cem vínculos respeitando o limitador real",
+      "aprovado_em": [
+        "etapa6-frontend-1h5ebd"
+      ],
+      "falhou_em": [
+        "etapa6-frontend-8bxizy",
+        "etapa6-frontend-dz7WYm"
+      ]
+    },
+    {
+      "arquivo": "usuario-perfil.spec.ts",
+      "cenario": "8D2U.1 conflito preserva rascunho, compara estado e exige nova revisão",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj",
+        "etapa6-frontend-8bxizy"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "usuario-perfil.spec.ts",
+      "cenario": "8D2U.1 código sem recibo e falha de consulta mantêm reenvio bloqueado; autoação não oferece escrita",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj",
+        "etapa6-frontend-8bxizy"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "usuario-perfil.spec.ts",
+      "cenario": "8D2U.1 resposta perdida é recuperada por código após novo login sem novo POST",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj",
+        "etapa6-frontend-8bxizy"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "usuario-perfil.spec.ts",
+      "cenario": "8D2U.1 revisão acessível, cancelar/Escape, confirmação/releitura e JWT revogado",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj",
+        "etapa6-frontend-8bxizy"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "usuarios.spec.ts",
+      "cenario": "8D1: Administração consulta login e situação real de conta inativa sem comandos de alteração",
+      "aprovado_em": [
+        "etapa6-frontend-dz7WYm"
+      ],
+      "falhou_em": [
+        "etapa6-frontend-TJSTzj"
+      ]
+    },
+    {
+      "arquivo": "usuarios.spec.ts",
+      "cenario": "8D1U.1: Administração consulta usuários reais, pagina, recupera leitura e mantém URL",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "usuarios.spec.ts",
+      "cenario": "8D1U.1: consulta não consulta detalhe por URL nem a própria conta administrativa",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "usuarios.spec.ts",
+      "cenario": "8D1U.1: consulta não lista terceiros por menu ou URL",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "usuarios.spec.ts",
+      "cenario": "8D1U.1: detalhe distingue 404, erro e repetição sem mostrar conta anterior",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "usuarios.spec.ts",
+      "cenario": "8D1U.1: detalhe real conserva página, recarga, teclado e leitura em telas menores",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "usuarios.spec.ts",
+      "cenario": "8D1U.1: edicao não consulta detalhe por URL nem a própria conta administrativa",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "usuarios.spec.ts",
+      "cenario": "8D1U.1: edicao não lista terceiros por menu ou URL",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "usuarios.spec.ts",
+      "cenario": "8D1U.1: inativação real do requisitante oculta detalhe e encerra sessão",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "usuarios.spec.ts",
+      "cenario": "8D1U.1: troca de conta por navegação mantém dados antigos ocultos durante carga",
+      "aprovado_em": [
+        "etapa6-frontend-TJSTzj"
+      ],
+      "falhou_em": []
+    },
+    {
+      "arquivo": "visual-reference.spec.ts",
+      "cenario": "M3 visual: ficha, formulários e recursos existentes em 1440 e 390 px com API real",
+      "aprovado_em": [
+        "etapa6-frontend-dz7WYm"
+      ],
+      "falhou_em": [
+        "etapa6-frontend-TJSTzj"
+      ]
+    }
+  ]
+}

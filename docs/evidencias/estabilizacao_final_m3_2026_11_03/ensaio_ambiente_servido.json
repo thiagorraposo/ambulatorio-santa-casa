@@ -1,0 +1,26 @@
+[
+  {
+    "perfil": "administracao",
+    "login": "aprovado",
+    "inicio": "operacional",
+    "dashboard": "aprovado",
+    "csvAtendimentos": 21,
+    "url": "http://127.0.0.1:4177"
+  },
+  {
+    "perfil": "edicao",
+    "login": "aprovado",
+    "inicio": "operacional",
+    "dashboard": "aprovado",
+    "csvAtendimentos": 21,
+    "url": "http://127.0.0.1:4177"
+  },
+  {
+    "perfil": "consulta",
+    "login": "aprovado",
+    "inicio": "operacional",
+    "dashboard": "aprovado",
+    "csvAtendimentos": 21,
+    "url": "http://127.0.0.1:4177"
+  }
+]

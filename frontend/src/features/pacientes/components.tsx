@@ -89,6 +89,8 @@ export function ExamList({ rows, pacienteId }: { rows: ExameResponse[]; paciente
               ['Identificação', displayText(exam.identificacao)],
               ['Resultado', displayText(exam.resultado)], ['Observações', displayText(exam.observacoes)],
             ]} />
+            <p><Link to={`/pacientes/${encodeURIComponent(pacienteId)}/exames/${encodeURIComponent(exam.exameId)}/resultados?retorno=${encodeURIComponent(location.pathname+location.search+location.hash)}`}
+              aria-label={`Parâmetros do exame ${exam.nomeExame}, ID ${exam.exameId}`}>Parâmetros deste exame</Link></p>
           </details>)}</div>}
       </section>
     ))}

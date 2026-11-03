@@ -50,6 +50,22 @@ repositories contêm SQL parametrizado; DTOs separam entrada/saída do modelo
 físico. `common` contém somente banco e infraestrutura HTTP compartilhados. Não
 há dependências circulares nem abstrações antecipatórias.
 
+## Replanejamento após avaliação humana M3
+
+A [nova matriz desejada dos perfis](frontend/VISAO_E_ESPECIFICACAO.md#pessoas-problemas-e-percursos)
+não altera por documentação os guards ou HTTP existentes abaixo. P0 confirmação
+após cadastro e P1 cadastro/edição por Edição exigem o
+[plano de investigação e evolução do contrato](arquitetura/RECORTE_CLINICO_ETAPA_7.md#planejamento-após-avaliação-humana-m3).
+PATCH cadastral já é versionado/auditado; escopo inicial do recém-criado sem
+vínculo automático continua uma lacuna explícita. O cliente descarta detalhes
+do erro hoje; novo envelope por campo/código ainda será contratado e integrado.
+
+Gestão8D foi elevada aP1, incluindo criação8D2B.3/U.3 e histórico auditável;
+[mínimos determinados e detalhes P-08 pendentes](arquitetura/PROPOSTA_IDENTIDADE_ADMINISTRACAO_8D1D.md).
+Nenhum endpoint de usuários, provisão de credencial ou nova autorização foi
+implementado nesta entrega. [Rodada humana](validacoes/AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md)
+realizada com problemas não aprova integralmenteM3 ou política institucional.
+
 ## Autenticação e autorização
 
 `usuario_aplicacao` é independente de roles PostgreSQL e do responsável legado.

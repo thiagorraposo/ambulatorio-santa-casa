@@ -821,3 +821,92 @@ Consequências: gravação atômica e única por atendimento, auditoria prospect
 recibo por intenção e conflito 409 em repetição. Correções/versionamento precisam
 unidade própria; captura não habilita revisão temporal. Contrato e limites em
 [comorbidades E3B](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md).
+
+## ADR-027
+
+Título: Erros de validação por caminhos e códigos públicos, sem valores
+
+Data: 2026-11-02. Status: implementação técnica parcial; validação integrada e
+aceite humano pendentes.
+
+Decisão: acrescentar coleção opcional `errors` ao envelope 400, com whitelist
+explícita de caminhos e códigos. Backend não publica objetos/valores/mensagens
+de validadores; frontend resolve rótulo/motivo localmente e só associa controles
+nos formulários integrados ao contrato. Autorização, conflito e resultado
+incerto preservam seus tratamentos e recibos.
+
+Justificativa: o feedback por status não permite localizar a rejeição; exibir
+texto arbitrário do servidor exporia detalhes internos. Contexto incompatível
+já proibido pela SQL03 ganha tradução específica sem alterar regra ou migration.
+
+Consequências e limites no [contrato de erros do atendimento](arquitetura/CONTRATO_ERROS_ATENDIMENTO_M3.md).
+O recorte não encerra a investigação HUM-M3-03 nem valida todos os formulários.
+
+## ADR-028
+
+Título: Vínculo atômico e específico no cadastro por Edição
+
+Data: 2026-11-03. Status: decisão técnica para implementação sintética das
+[decisões de produto1–2](dados/DECISOES_PRODUTO_M3_2026_11_02.md#cadastro-e-acesso-por-edição--decisões-1–2), sem aceite humano.
+
+Gatilho restrito de INSERT vincula somente o paciente recém-criado ao ator
+Edição ativo do contexto confiável, na mesma transação da auditoria e do recibo.
+Não ampliar acesso global, conceder INSERT direto em acesso_paciente ou reutilizar
+a função administrativa para autoconcessão. Inativação revoga vínculos ativos;
+reativação exige nova concessão administrativa. Eventos de infraestrutura guardam
+principal_db sem inventar ator funcional. Contratos HTTP existentes preservados.
+
+Justificativa: liberar somente podeCadastrar produziria criação sem acesso ao
+próprio registro. O gatilho garante atomicidade também em falhas posteriores e
+serializa criação/inativação com bloqueio da identidade em função restrita.
+[Contrato, efeitos, compatibilidade e validação](arquitetura/CONTRATO_CADASTRO_EDICAO_M3.md).
+
+## ADR-029
+
+Título: Versão de conta, geração de sessão e recibo administrativo de perfil
+
+Data: 2026-11-03. Status: decisão técnica sintética; aceite humano pendente.
+
+Aplicar as decisões 3–10 de produto com concorrência otimista por conta e uma
+exclusão transacional comum aos comandos/UPDATEs de identidade. Proibir autoação,
+proteger o último administrador ativo e revalidar geração no JWT em cada pedido.
+Tokens legados sem geração só valem na geração zero; restaurar perfil/ativação
+não ressuscita sessão revogada. Operações já admitidas não são desfeitas.
+
+Recibo imutável por UUID registra sucesso/recusa funcional sem credencial;
+consulta autorizada permite verificar resposta perdida após novo login. Ausência
+de recibo não prova rollback. A role de captura conserva a proibição de ler hash.
+O comando usa READ COMMITTED e FOR NO KEY UPDATE, compatível com as referências
+à identidade na auditoria, evitando deadlock nas despromoções cruzadas.
+[Contrato e limites](arquitetura/CONTRATO_PERFIL_USUARIO_8D2.md).
+
+Extensão8D2.2: migration76 compartilha a versão/recibo entre perfil e estado,
+conserva wrapper e view de perfil para compatibilidade e usa a revogação de
+vínculos da74 na mesma transação. Nova intenção após recibo confirmado exige
+releitura explícita. [Prova integrada de estado](validacoes/VALIDACAO_8D2_ESTADO.md).
+
+## ADR-030
+
+ID: ADR-030
+
+Título: Coordenar novos registros do fluxo único na transação clínica existente
+
+Data: 2026-11-03
+
+Status: Implementada; validação integrada pendente
+
+Contexto: As12 seções do atendimento precisam compartilhar preenchimento e
+revisão sem reduzir o histórico do paciente à entidade atendimento.
+
+Decisão: Acrescentar confirmação coordenada por DTOs e serviços existentes,
+com escopo transacional explícito, mesmo ator e recibo na mesma transação.
+Manter os endpoints individuais. Só criar novos recursos longitudinais por
+intenção explícita; conflitos não sobrescrevem históricos. Recuperação consulta
+o recibo autoritativo e não reexecuta operações clínicas.
+
+Consequências: Há atomicidade entre os registros do endpoint coordenado, sem
+compensações destrutivas. Edição e acompanhamentos fora deste recorte preservam
+seus contratos próprios. [Contrato, limites e provas pendentes](validacoes/FLUXO_UNICO_ATENDIMENTO_M3_2026_11_03.md).
+
+Alternativas rejeitadas: Gravações independentes apresentadas como transação;
+tabela única para todo o histórico; cópia automática de registros longitudinais.

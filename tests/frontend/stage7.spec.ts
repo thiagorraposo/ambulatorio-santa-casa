@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 import type { AnnualReturnResponse, ClinicalEventResponse, CounterReferralResponse, NotificationResponse,
   ProjectResponse, ReferralResponse, RetornoBznResponse, TratamentoBznResponse } from '../../frontend/src/api/contracts';
-import { apiAs, fixture, resumePage, setUserActive, assertNoPersistentClinicalState, delayOneApiResponse } from './fixtures';
-import { apiJson, assertAccessible, assertFitsViewport, loseResponseAfterCommit, moveAttendanceToReview, nextAttendanceStep,
+import { apiAs, fixture, resumePage, setUserActive, restoreUserGrants, assertNoPersistentClinicalState, delayOneApiResponse } from './fixtures';
+import { apiJson, assertAccessible, assertFitsViewport, loseResponseAfterCommit, moveAttendanceToReview, nextAttendanceStep, attendanceSection,
   readAttendance, reviewAttendance,
   readPatient, seedAttendance, seedPatient, signIn, submitWrite, visitByLink } from './stage7-helpers';
 
@@ -236,7 +236,7 @@ test('7D: consulta não escreve, vínculo delimita edição e administração se
   expect((await apiAs('edicao', 'PATCH', `/pacientes/${fixture.reserved.pacienteId}`, {
     versao: reserved.versao, nome: 'Etapa 7 mudança recusada Sintético',
   })).status).toBe(403);
-  expect((await apiAs('edicao', 'POST', '/pacientes', { nome: 'Etapa 7 cadastro sem política Sintético' })).status).toBe(403);
+  expect((await apiAs('consulta', 'POST', '/pacientes', { nome: 'Etapa 7 cadastro recusado Sintético' })).status).toBe(403);
   await page.getByRole('button', { name: 'Sair', exact: true }).click();
   await signIn(page, 'administracao', `/pacientes/${fixture.reserved.pacienteId}/editar`);
   await expect(page.getByLabel('Nome completo', { exact: true })).toHaveValue(fixture.reserved.nome);
@@ -344,16 +344,16 @@ test('7B: atendimento composto valida ambiguidades, faz rollback e salva todos o
   expect(catalog.every(exam => exam.ativo && typeof exam.id === 'string')).toBe(true);
   await signIn(page, 'edicao', `${patient.path}/atendimentos/novo`);
   await expect(page.getByRole('heading', { name: 'Novo atendimento', exact: true })).toBeVisible();
-  await expect(page.getByRole('status')).toHaveText('Etapa 1 de 5: Atendimento');
+  await expect(page.getByRole('status')).toHaveText('Seção 1 de 12: Atendimento');
   await expect(page.getByRole('button', { name: 'Confirmar atendimento', exact: true })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Próxima etapa', exact: true }).click();
-  await expect(page.getByRole('status')).toHaveText('Etapa 1 de 5: Atendimento');
+  await page.getByRole('button', { name: 'Próxima seção', exact: true }).click();
+  await expect(page.getByRole('status')).toHaveText('Seção 1 de 12: Atendimento');
   expect(await page.getByLabel('Data do atendimento', { exact: true }).evaluate(element => !(element as HTMLInputElement).checkValidity())).toBe(true);
   await page.getByLabel('Data do atendimento', { exact: true }).fill('2026-04-04');
   await page.getByLabel('Localização do prontuário', { exact: true }).fill('Arquivo composto sintético');
   await page.getByLabel('Somente ambulatório', { exact: true }).selectOption('nao');
   await page.getByLabel('Observações do atendimento', { exact: true }).fill('Atendimento composto sintético');
-  await nextAttendanceStep(page);
+  await attendanceSection(page, 'Avaliação Clínica');
   for (const [label, value] of [['Altura (cm)', '170'], ['Peso (kg)', '70.25'],
     ['Circunferência abdominal (cm)', '90.5'], ['Frequência cardíaca (bpm)', '70'],
     ['Saturação (%)', '97.5'], ['PA sistólica (mmHg)', '120'], ['PA diastólica (mmHg)', '80']] as const) {
@@ -361,13 +361,14 @@ test('7B: atendimento composto valida ambiguidades, faz rollback e salva todos o
   }
   await page.getByLabel('NYHA', { exact: true }).fill('II');
   await page.getByLabel('Observações clínicas', { exact: true }).fill('Avaliação completa sintética');
+  await attendanceSection(page, 'Chagas e Sorologia');
   await page.getByLabel('Status do diagnóstico', { exact: true }).selectOption('inconclusivo');
   await page.getByLabel('Resultado final', { exact: true }).selectOption('indeterminado');
   await page.getByLabel('Data do resultado final', { exact: true }).fill('2025-12-01');
   await page.getByLabel('Data de descoberta por autorrelato', { exact: true }).fill('2010-05-03');
   await page.getByLabel('Critério de confirmação', { exact: true }).fill('Critério sintético');
   await page.getByLabel('Observações do diagnóstico', { exact: true }).fill('Diagnóstico sintético independente da descoberta');
-  await nextAttendanceStep(page);
+  await attendanceSection(page, 'Exames');
   const loadedCatalog = page.waitForResponse(response => response.request().method() === 'GET'
     && new URL(response.url()).pathname === '/v1/catalogos/exames');
   await page.getByRole('button', { name: 'Adicionar exame', exact: true }).click();
@@ -386,7 +387,7 @@ test('7B: atendimento composto valida ambiguidades, faz rollback e salva todos o
   await page.getByRole('button', { name: 'Adicionar familiar examinado', exact: true }).click();
   await page.getByLabel('Identificação do familiar 1', { exact: true }).fill('Familiar identificado sintético');
   await page.getByLabel('Resultado do familiar 1', { exact: true }).fill('Resultado familiar inconclusivo sintético');
-  await nextAttendanceStep(page);
+  await attendanceSection(page, 'Observações');
   for (const [index, status] of [[1, 'em_andamento'], [2, 'nao_informado'], [3, 'resolvida']] as const) {
     await page.getByRole('button', { name: 'Adicionar pendência', exact: true }).click();
     await page.getByLabel(`Descrição da pendência ${index}`, { exact: true }).fill(`Pendência composta sintética ${index}`);
@@ -405,7 +406,7 @@ test('7B: atendimento composto valida ambiguidades, faz rollback e salva todos o
   await page.getByLabel('Familiares examinados', { exact: true }).selectOption('sim');
   await nextAttendanceStep(page);
   await reviewAttendance(page);
-  const review = page.getByRole('group', { name: 'Etapa 5 — Revisão' });
+  const review = page.getByRole('group', { name: 'Revisão do atendimento' });
   await expect(review.getByText('Avaliação completa sintética', { exact: true })).toBeVisible();
   await expect(review.getByText('Diagnóstico sintético independente da descoberta', { exact: true })).toBeVisible();
   expect(writes).toBe(0);
@@ -415,24 +416,27 @@ test('7B: atendimento composto valida ambiguidades, faz rollback e salva todos o
   await assertAccessible(page);
   await page.screenshot({ path: testInfo.outputPath('atendimento-composto-mobile.png'), fullPage: true });
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.getByRole('button', { name: 'Etapa anterior', exact: true }).click();
-  await page.getByRole('button', { name: 'Etapa anterior', exact: true }).click();
-  await page.getByRole('button', { name: 'Etapa anterior', exact: true }).click();
+  await attendanceSection(page, 'Avaliação Clínica');
   await page.getByLabel('Peso (kg)', { exact: true }).fill('9999999');
-  await nextAttendanceStep(page);
-  await nextAttendanceStep(page);
-  await reviewAttendance(page);
-  await submitWrite(page, 'POST', `${patient.path}/atendimentos`, 'Confirmar atendimento', 400);
-  await expect(page.getByRole('alert')).toContainText(/incompatíveis|revise/i);
+  await attendanceSection(page, 'Observações');
+  await page.getByRole('button', { name: 'Revisar atendimento', exact: true }).click();
+  await expect(page.getByRole('alert')).toBeFocused();
+  await expect(page.getByRole('alert')).toContainText('entre -999,99 e 999,99');
+  expect(writes).toBe(0);
+  // A late domain failure still rolls back the parent, clinical data and a valid first child.
+  const rejected = await apiAs('edicao', 'POST', `${patient.path}/atendimentos`, {
+    dataAtendimento: '2026-04-04', dadosClinicos: { pesoKg: 70.25 },
+    exames: [{ tipoExameId: holter.id, bloco: 'solicitado' }, { tipoExameId: '99999999', bloco: 'solicitado' }],
+  });
+  expect(rejected.status).toBe(400);
+  expect(await rejected.json()).toMatchObject({ errors: [{ path: 'exames.1.tipoExameId', code: 'exam_active' }] });
   expect(await apiJson<unknown[]>('GET', `${patient.path}/atendimentos`)).toHaveLength(0);
   expect(await apiJson<unknown[]>('GET', `${patient.path}/exames`)).toHaveLength(0);
-  await page.getByRole('button', { name: 'Etapa anterior', exact: true }).click();
-  await page.getByRole('button', { name: 'Etapa anterior', exact: true }).click();
-  await page.getByRole('button', { name: 'Etapa anterior', exact: true }).click();
+  await page.getByRole('link', { name: /^Peso \(kg\):/ }).click();
+  await expect(page.getByLabel('Peso (kg)', { exact: true })).toBeFocused();
   await expect(page.getByLabel('Observações clínicas', { exact: true })).toHaveValue('Avaliação completa sintética');
   await page.getByLabel('Peso (kg)', { exact: true }).fill('70.25');
-  await nextAttendanceStep(page);
-  await nextAttendanceStep(page);
+  await attendanceSection(page, 'Observações');
   await reviewAttendance(page);
   const written = await submitWrite(page, 'POST', `${patient.path}/atendimentos`, 'Confirmar atendimento');
   const created = await written.response.json() as { atendimentoId: string };
@@ -462,7 +466,7 @@ test('7B: atendimento composto valida ambiguidades, faz rollback e salva todos o
     expect.objectContaining({ descricao: 'Pendência composta sintética 3', status: 'resolvida', dataIdentificacao: '2026-04-04', dataResolucao: '2026-04-04' }),
   ]));
   expect(await apiJson<unknown[]>('GET', `${patient.path}/atendimentos`)).toHaveLength(1);
-  expect(writes).toBe(2);
+  expect(writes).toBe(1);
 });
 
 test('7C: BZN único com reação, retornos repetidos e ano informado separado de visitas', async ({ page }, testInfo) => {
@@ -752,11 +756,11 @@ test('7D-U4.2: etapas do atendimento e diálogo funcionam por teclado em telas e
     await page.setViewportSize({ width, height: 844 });
     await assertFitsViewport(page);
     await assertAccessible(page);
-    await page.getByRole('button', { name: 'Próxima etapa', exact: true }).click();
-    await expect(page.getByRole('heading', { level: 2, name: 'Avaliação e Chagas' })).toBeFocused();
+    await page.getByRole('button', { name: 'Próxima seção', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 2, name: 'Chagas e Sorologia' })).toBeFocused();
     await assertFitsViewport(page);
     await assertAccessible(page);
-    await page.getByRole('button', { name: 'Etapa anterior', exact: true }).click();
+    await page.getByRole('button', { name: 'Seção anterior', exact: true }).click();
     await expect(page.getByRole('heading', { level: 2, name: 'Atendimento' })).toBeFocused();
   }
 
@@ -789,7 +793,7 @@ test('7D: resposta perdida após commit exige verificação e não repete atendi
   const created = await committed.json() as { atendimentoId: string };
   await expect(page.getByRole('alert')).toContainText(/não foi possível confirmar.*salva/i);
   await expect(page.getByRole('button', { name: 'Confirmar atendimento', exact: true })).toBeDisabled();
-  await expect(page.getByRole('group', { name: 'Etapa 5 — Revisão' })
+  await expect(page.getByRole('group', { name: 'Revisão do atendimento' })
     .getByText('Atendimento com resposta perdida sintético', { exact: true })).toBeVisible();
   await expect(page.getByText(/Atendimento salvo\./)).toHaveCount(0);
   await page.getByRole('link', { name: 'Verificar registro salvo', exact: true }).click();
@@ -852,7 +856,7 @@ test('7D: 401 real em escrita encerra sessão e remove rascunho clínico', async
     await expect(page.getByLabel('Usuário', { exact: true })).toBeVisible();
     await expect(page.getByLabel('Nome completo', { exact: true })).toHaveCount(0);
     await assertNoPersistentClinicalState(page);
-  } finally { await setUserActive('edicao', true); }
+  } finally { await setUserActive('edicao', true); await restoreUserGrants('edicao'); }
   expect((await readPatient(patient.path)).nome).toBe(original.nome);
   await signIn(page, 'edicao', `${patient.path}/editar`);
   await expect(page.getByLabel('Nome completo', { exact: true })).toHaveValue(original.nome);
@@ -886,23 +890,16 @@ test('7D: resposta antiga de escrita não navega nem mostra sucesso após trocar
   await assertNoPersistentClinicalState(page);
 });
 
-test('7A/7D: política clínica impede formulário de cadastro mesmo com perfil de edição', async ({ page }) => {
-  expect(await apiJson('GET', '/pacientes/capacidades', undefined, 'edicao')).toEqual({ podeCadastrar: false });
-  const capability = page.waitForResponse(response => response.request().method() === 'GET'
-    && new URL(response.url()).pathname === '/v1/pacientes/capacidades', { timeout: 0 });
-  let writes = 0;
-  page.on('request', request => {
-    if (request.method() === 'POST' && new URL(request.url()).pathname === '/v1/pacientes') writes++;
-  });
-  await signIn(page, 'edicao', '/pacientes/novo');
-  expect(await (await capability).json()).toEqual({ podeCadastrar: false });
+test('7A/7D: Edição recebe capacidade e formulário após busca prévia', async ({ page }) => {
+  expect(await apiJson('GET', '/pacientes/capacidades', undefined, 'edicao')).toEqual({ podeCadastrar: true });
+  await signIn(page, 'edicao', '/pacientes');
+  await page.getByRole('link', { name: 'Cadastrar paciente', exact: true }).click();
+  await expect(page.getByText(/Ao cadastrar, você receberá acesso/)).toBeVisible();
   await expect(page.getByLabel('Nome completo', { exact: true })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Cadastrar paciente', exact: true })).toHaveCount(0);
-  await page.getByRole('navigation', { name: 'Menu principal' }).getByRole('link', { name: 'Pacientes', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Pacientes', exact: true })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Cadastrar paciente', exact: true })).toHaveCount(0);
-  await page.waitForLoadState('networkidle');
-  expect(writes).toBe(0);
+  await page.getByLabel('Nome para busca prévia').fill('Etapa 7 busca Edição Sintético');
+  await page.getByRole('button', { name: 'Consultar possíveis cadastros', exact: true }).click();
+  await page.getByRole('button', { name: 'Nenhuma correspondência serve — continuar para cadastro' }).click();
+  await expect(page.getByLabel('Nome completo', { exact: true })).toBeVisible();
 });
 
 test('7D: perda da resposta do PATCH confirma pela ficha sem repetir alteração versionada', async ({ page }) => {

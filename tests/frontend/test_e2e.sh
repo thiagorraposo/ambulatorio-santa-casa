@@ -117,11 +117,11 @@ fi
 createdb "$task_db"
 task_db_created=true
 psql -X -q -d "$task_db" -v ON_ERROR_STOP=1 -c "CREATE SCHEMA ambulatorio AUTHORIZATION $PGUSER; ALTER DATABASE $task_db SET search_path TO ambulatorio,public" >"$task_dir/migrations.log" 2>&1
-printf 'Aplicando migrations 02–68 no banco descartável %s\n' "$task_db"
+printf 'Aplicando migrations 02–79 no banco descartável %s\n' "$task_db"
 for task_migration in "$task_root"/sql/[0-9][0-9]_*.sql; do
   task_name="$(basename "$task_migration")"
   [[ "$task_name" == 00_* || "$task_name" == 01_* ]] && continue
-  if [[ "${task_name:0:2}" > 68 ]]; then
+  if [[ "${task_name:0:2}" > 79 ]]; then
     printf 'Migration fora da base esperada da Etapa 6: %s\n' "$task_name" >&2
     exit 1
   fi
@@ -157,7 +157,7 @@ export AUTH_JWT_SECRET="$(node -e "process.stdout.write(require('node:crypto').r
 # A inspeção humana precisa de tempo para preencher os formulários. O prazo
 # curto permanece fixo nos testes automáticos de expiração.
 export AUTH_JWT_EXPIRES_IN_SECONDS=60
-if [[ "${1:-}" == --serve ]]; then
+if [[ "${1:-}" == --serve || "${1:-}" == --demo-test ]]; then
   export AUTH_JWT_EXPIRES_IN_SECONDS=900
 fi
 export CLINICAL_IMPORT_ENABLED=true IMPORT_DB_HOST="$PGHOST" IMPORT_DB_PORT="$PGPORT" IMPORT_DB_NAME="$task_db"
@@ -185,6 +185,12 @@ while (Date.now() < deadline) {
 }
 throw new Error('API descartável não ficou pronta; consulte backend.log');
 JS
+# O modo demo só é selecionado neste banco recém-criado pelo runner.
+# --demo-test exercita a mesma carga do --serve sem iniciar as fixtures de stress.
+unset FRONTEND_SEED_MODE
+if [[ "${1:-}" == --serve || "${1:-}" == --demo-test ]]; then
+  export FRONTEND_SEED_MODE=demo
+fi
 node "$task_root/tests/frontend/seed.mjs"
 (cd "$task_root/frontend" && exec node node_modules/vite/bin/vite.js --host 127.0.0.1 --port "$task_web_port" --strictPort) >"$task_dir/frontend.log" 2>&1 &
 task_frontend_pid=$!
@@ -208,5 +214,10 @@ if [[ "${1:-}" == --serve ]]; then
   wait "$task_frontend_pid"
 else
   cd "$task_root/frontend"
-  node node_modules/@playwright/test/cli.js test --config playwright.config.ts "$@"
+  if [[ "${1:-}" == --demo-test ]]; then
+    shift
+    node node_modules/@playwright/test/cli.js test --config playwright.config.ts demo-base.spec.ts "$@"
+  else
+    node node_modules/@playwright/test/cli.js test --config playwright.config.ts "$@"
+  fi
 fi

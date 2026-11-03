@@ -25,8 +25,8 @@ const { sign } = requireBackend('jsonwebtoken');
 const { Pool } = requireBackend('pg');
 let loginWindowUntil = 0;
 
-async function waitForLoginWindow(milliseconds: number) {
-  // The real rate limiter can add a full minute between logins. Account for
+export async function waitForRateLimitWindow(milliseconds: number) {
+  // The real rate limiter can add a full minute between setup requests or logins. Account for
   // that wait separately from the scenario's action/assertion budget.
   const info = test.info();
   info.setTimeout(info.timeout + milliseconds);
@@ -34,9 +34,17 @@ async function waitForLoginWindow(milliseconds: number) {
 }
 
 export async function signIn(page: Page, perfil: Perfil, destination = '/') {
+  return submitLogin(page, perfil, destination);
+}
+
+export async function signInCurrentPage(page: Page, perfil: Perfil) {
+  return submitLogin(page, perfil);
+}
+
+async function submitLogin(page: Page, perfil: Perfil, destination?: string) {
   const pause = loginWindowUntil - Date.now();
-  if (pause > 0) await waitForLoginWindow(pause);
-  await page.goto(destination);
+  if (pause > 0) await waitForRateLimitWindow(pause);
+  if (destination !== undefined) await page.goto(destination);
   await expect(page.getByLabel('Usuário', { exact: true })).toBeVisible();
   await page.getByLabel('Usuário', { exact: true }).fill(fixture.users[perfil].login);
   await page.keyboard.press('Tab');
@@ -54,7 +62,7 @@ export async function signIn(page: Page, perfil: Perfil, destination = '/') {
     const seconds = Number(response.headers()['retry-after'] ?? response.headers()['x-ratelimit-reset']);
     expect(Number.isFinite(seconds) && seconds > 0 && seconds <= 60).toBe(true);
     await expect(page.getByRole('alert')).toContainText(/tentativas|aguarde|limite/i);
-    await waitForLoginWindow(seconds * 1000 + 200);
+    await waitForRateLimitWindow(seconds * 1000 + 200);
     const resumed = page.waitForResponse(item => new URL(item.url()).pathname === '/v1/auth/login'
       && item.request().method() === 'POST');
     await page.getByRole('button', { name: 'Entrar', exact: true }).click();
@@ -73,11 +81,56 @@ export async function signIn(page: Page, perfil: Perfil, destination = '/') {
 export async function apiAs(perfil: Perfil, method: string, path: string, body?: unknown) {
   // Tokens de setup são usados só pelas verificações/alterações autorizadas do
   // teste. Login, identidade e sessão da interface usam as chamadas HTTP reais.
-  const token = sign({ sub: fixture.users[perfil].usuarioId, typ: 'access' }, process.env.AUTH_JWT_SECRET, { expiresIn: 120 });
+  const owner = new Pool({ host: process.env.PGHOST, port: Number(process.env.PGPORT),
+    user: process.env.PGUSER, password: process.env.PGPASSWORD, database: process.env.FRONTEND_E2E_DB });
+  let ver: string;
+  try { ver = (await owner.query('SELECT geracao_sessao::text FROM ambulatorio.usuario_aplicacao WHERE usuario_id=$1',
+    [fixture.users[perfil].usuarioId])).rows[0].geracao_sessao; } finally { await owner.end(); }
+  const token = sign({ sub: fixture.users[perfil].usuarioId, typ: 'access', ver }, process.env.AUTH_JWT_SECRET, { expiresIn: 120 });
   return fetch(`${process.env.FRONTEND_API_TARGET}/v1${path}`, {
     method, headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
+}
+
+const grantsBeforeInactivation = new Map<Perfil, Array<{ paciente_id: string; pode_editar: boolean }>>();
+
+export async function captureUserGrants(perfil: Perfil) {
+  const owner = new Pool({ host: process.env.PGHOST, port: Number(process.env.PGPORT),
+    user: process.env.PGUSER, password: process.env.PGPASSWORD, database: process.env.FRONTEND_E2E_DB });
+  try {
+    grantsBeforeInactivation.set(perfil, (await owner.query(
+      'SELECT paciente_id::text,pode_editar FROM ambulatorio.acesso_paciente WHERE usuario_id=$1 AND ativo',
+      [fixture.users[perfil].usuarioId])).rows);
+  } finally { await owner.end(); }
+}
+
+export async function restoreUserGrants(perfil: Perfil) {
+  // Higiene da fixture: reativação sozinha não restaura vínculos de produção.
+  const owner = new Pool({ host: process.env.PGHOST, port: Number(process.env.PGPORT),
+    user: process.env.PGUSER, password: process.env.PGPASSWORD, database: process.env.FRONTEND_E2E_DB });
+  let current: Map<string, boolean>;
+  try {
+    const rows = (await owner.query('SELECT paciente_id::text,pode_editar FROM ambulatorio.acesso_paciente WHERE usuario_id=$1 AND ativo',
+      [fixture.users[perfil].usuarioId])).rows as Array<{ paciente_id: string; pode_editar: boolean }>;
+    current = new Map(rows.map(row => [row.paciente_id, row.pode_editar]));
+  } finally { await owner.end(); }
+  for (const grant of grantsBeforeInactivation.get(perfil) ?? []) {
+    if (current.get(grant.paciente_id) === grant.pode_editar) continue;
+    const restore = () => apiAs('administracao', 'PUT', `/pacientes/${grant.paciente_id}/acesso/${fixture.users[perfil].usuarioId}`,
+      { ativo: true, podeEditar: grant.pode_editar });
+    let response = await restore();
+    // Apenas higiene sintética: 429 é recusa anterior à escrita, não resultado incerto.
+    // Erros de rede ou outros status nunca repetem a concessão automaticamente.
+    if (response.status === 429) {
+      const seconds = Number(response.headers.get('retry-after') ?? response.headers.get('x-ratelimit-reset'));
+      expect(Number.isFinite(seconds) && seconds > 0 && seconds <= 60).toBe(true);
+      await waitForRateLimitWindow(seconds * 1000 + 200);
+      response = await restore();
+    }
+    expect(response.status).toBe(200);
+  }
+  grantsBeforeInactivation.delete(perfil);
 }
 
 export async function setUserActive(perfil: Perfil, active: boolean) {
@@ -85,6 +138,15 @@ export async function setUserActive(perfil: Perfil, active: boolean) {
     user: process.env.PGUSER, password: process.env.PGPASSWORD, database: process.env.FRONTEND_E2E_DB });
   try {
     await owner.query('BEGIN');
+    if (perfil === 'administracao' && !active) {
+      // O cenário de revogação precisa de outro administrador: a regra do último permanece ativa.
+      await owner.query(`INSERT INTO ambulatorio.usuario_aplicacao(nome,login,senha_hash,perfil)
+        SELECT 'Reserva administrativa sintética','frontend-reserva@example.invalid',senha_hash,'administracao'
+        FROM ambulatorio.usuario_aplicacao WHERE usuario_id=$1 ON CONFLICT DO NOTHING`, [fixture.users[perfil].usuarioId]);
+    }
+    if (!active) grantsBeforeInactivation.set(perfil, (await owner.query(
+      'SELECT paciente_id::text,pode_editar FROM ambulatorio.acesso_paciente WHERE usuario_id=$1 AND ativo',
+      [fixture.users[perfil].usuarioId])).rows);
     await owner.query('UPDATE ambulatorio.usuario_aplicacao SET ativo=$1 WHERE usuario_id=$2', [active, fixture.users[perfil].usuarioId]);
     await owner.query('COMMIT');
   } finally { await owner.end(); }

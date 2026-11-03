@@ -1,6 +1,6 @@
 # Frontend — leitura e fluxos clínicos
 
-Atualizado em: 2026-10-31. Fundação 6A–6B e recorte clínico original
+Atualizado em: 2026-11-03. Fundação 6A–6B e recorte clínico original
 implementados e validados com dados sintéticos. M1 e M2/VU1 possuem aceite
 humano registrado; o [parecer de M2](validacoes/VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026)
 não aceita as extensões de M3 ou o produto completo. Contagens e limites de cada
@@ -21,6 +21,39 @@ pretendida está na [visão de produto](frontend/VISAO_E_ESPECIFICACAO.md);
 a [matriz Figma/frontend](frontend/MATRIZ_FIGMA_FRONTEND.md) inventaria campos,
 ações e destinos, e os [pacotes do roadmap](frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend)
 definem dependências e aceite. Proposta não é contrato publicado.
+
+## Apresentação vigente — adequação à referência em03/11
+
+Atendimento organizado nas 12 seções informacionais oficiais, com seleção livre,
+estados de preenchimento/validação e revisão final. O POST inicial conserva seus
+campos; complementos e registros longitudinais usam as interfaces e confirmações
+próprias existentes. O [mapa de suporte por seção](validacoes/ADEQUACAO_VISUAL_FRONTEND_2026_11_03.md)
+registra contratos, comparação renderizada, testes e limites.
+
+Pacientes prioriza nome, ID secundário e ações autorizadas; em telas pequenas as
+linhas se reorganizam em cartões. Filtros e CSV conservam escopo/página reais.
+Cabeçalhos, cartões, formulários, tabelas e mensagens compartilham paleta e
+espaçamentos da referência. Cadastro mantém busca prévia e capacidade efetiva;
+formulários clínicos usam largura limitada, duas colunas/uma no mobile e controles
+nativos. Não há novas funcionalidades clínicas, permissões ou biblioteca de UI.
+As [evidências1440/390](evidencias/frontend_referencia_2026_11_03/README.md) incluem
+antes/depois e protótipo; não representam aprovação integral de8V1/8V2.
+
+## Estabilização final — Início e análise separados
+
+Início orienta o trabalho por perfil, com busca real de pacientes, instruções do
+percurso, cadastro condicionado à capacidade e atalhos para Dashboard, Importações,
+Minha conta e gestão administrativa. Não repete os indicadores analíticos.
+Dashboard combina período, nome, ID, sexo, participação em projeto e status de
+pendência; mantém filtros, ordenação e página na URL, permite limpeza individual
+ou geral e abre ficha/atendimento com retorno à análise. Ficha, edição, cancelamento
+e confirmação conservam a origem validada de Pacientes ou Dashboard.
+
+Dashboard inclui quatro indicadores reais, série mensal com tabela equivalente,
+resultados navegáveis e CSV de **todas** as páginas filtradas/ordenadas, até5.000
+atendimentos, com auditoria e proteção contra fórmulas. O CSV antigo da busca
+continua exportando apenas sua página. [Semântica e limites da API](arquitetura/CONTRATO_DASHBOARD_8B1.md#extensão-de-estabilização--filtros-série-e-csv-em-03112026).
+[Ensaio, versão demonstrável e contingência](validacoes/ESTABILIZACAO_FINAL_M3_2026_11_03.md).
 
 ## Preparação e comandos
 
@@ -61,7 +94,7 @@ O runner [`tests/frontend/test_e2e.sh`](../tests/frontend/test_e2e.sh) recebe
 `SYNTHETIC_PG_HOST`, `SYNTHETIC_PG_PORT`, `SYNTHETIC_PG_USER` e `PGPASSWORD` pelo
 ambiente, todos obrigatórios. O usuário deve poder criar banco e login de teste.
 Ele cria seu banco e roles de teste, aplica as
-migrations 02–66 apenas nesse banco, inicia API/Vite e encerra os recursos que
+migrations 02–79 apenas nesse banco, inicia API/Vite e encerra os recursos que
 criou.
 Não lê `.env` para selecionar o banco de teste. Não exige build do frontend para
 servir Vite; o build de produção é verificado separadamente por `frontend-check`.
@@ -93,8 +126,13 @@ frontend.
 
 ## Demonstração sintética isolada
 
+O [registro do candidato da apresentação](validacoes/CONGELAMENTO_DEMONSTRACAO_2026_11_02.md)
+fixa SHA, evidências do percurso real, roteiro, ressalvas e contingência.
+Não equivale a homologação clínica ou conclusão de M3.
+
 `make dev-sintetico-start` cria um PostgreSQL 16.15 exclusivo e inicia o runner
-`test_e2e.sh --serve`, com migrations e fixture sintéticas. Requer Python 3.9+
+`test_e2e.sh --serve`, com migrations e a base `chagas-demo-v1`: 10 pacientes
+fictícios e 27 atendimentos, sem dados pessoais reais. Requer Python 3.9+
 em Linux com suporte a pidfd, Docker, Node.js 24, clientes PostgreSQL e build preparados
 por `make backend-install frontend-install backend-build`. O Chromium só é
 necessário para testes automatizados, não para servir a aplicação.
@@ -105,6 +143,19 @@ Os usuários são `frontend-consulta@example.invalid`,
 `frontend-edicao@example.invalid` e `frontend-administracao@example.invalid`,
 todos com a senha exclusivamente sintética `Etapa6-sintetica!`.
 Cada sessão de login dura 15 minutos; novo login permite continuar a revisão.
+O período padrão contém oito atendimentos; ampliar a data inicial em cinco meses
+mostra toda a série e mais de uma página de resultados. A data âncora é o dia
+UTC de criação; reproduzir a carga no mesmo dia produz os mesmos cenários.
+[Casos, contagens por perfil e provas](validacoes/VALIDACAO_BASE_DEMO_CHAGAS_M3.md).
+
+O runner mantém as fixtures de stress no E2E comum e seleciona a demonstração
+apenas em `--serve`/`--demo-test`. `make frontend-demo-test COMPACT=1` valida a
+mesma carga em outro banco novo; requer as variáveis `SYNTHETIC_PG_*` e
+`PGPASSWORD` do servidor exclusivamente sintético, conforme o setup E2E acima.
+O seed repetido no mesmo banco concluído não escreve nem duplica registros.
+Banco parcial/alterado ou fixture ausente é recusado; use stop/start para recriar
+somente a demonstração descartável. `start` com ambiente já pronto conserva a
+sessão existente: substituir uma base anterior requer primeiro `stop`.
 
 `make dev-sintetico-status` verifica o supervisor e a disponibilidade HTTP;
 `make dev-sintetico-stop` encerra o runner e o container que pertencem à
@@ -345,7 +396,7 @@ Saída, 401, expiração e troca de identidade/perfil limpam cache e rascunhos.
 
 `MutationForm` registra uma UUID com método, caminho e hash SHA-256 do corpo em
 `POST /v1/operacoes`; em seguida envia a escrita uma vez com `X-Operacao-Id`.
-O protocolo cobre as 18 mutações de cadastro, atendimento e acompanhamento
+O protocolo cobre as 23 mutações de cadastro, atendimento e acompanhamento
 enumeradas no [contrato de recuperação](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md).
 O recibo mínimo de IDs/versão é confirmado na mesma transação da clínica e seus
 filhos. Rede, resposta inválida, 5xx ou cancelamento após envio clínico mantêm a
@@ -401,3 +452,21 @@ explícito e permite Sim/Não. Itens não selecionados não são registrados. Re
 familiar livre permanece separado dos exames; campos e escolhas passam por
 revisão. [Contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) e
 [validação proporcional](validacoes/VALIDACAO_7B_E3U.md), sem aceite humano presumido.
+
+O seed sintético do runner/--serve inclui os nomes canônicos hipertensao_arterial
+e diabetes, sem associação clínica pré-preenchida. [Prova de fixture e limites](validacoes/VALIDACAO_FIXTURE_DEMO_M3.md).
+
+
+## Continuidade M3 — parâmetros, atalhos e simulação
+
+Parâmetros humanos são acessados no exame expandido da ficha/consulta e mantêm
+ID/identificação do exame, retorno de origem, revisão dos seis campos, rascunho
+e recibo recuperável. [Provas E6U](validacoes/VALIDACAO_7B_E6U_PARAMETROS.md).
+A busca oferece [atalhos Editar/Novo atendimento](validacoes/VALIDACAO_8B3U_4.md)
+por pessoa aos perfis de escrita, preservando filtros/página ao voltar.
+
+A simulação XLSX exibe [totais disjuntos e códigos reais](validacoes/VALIDACAO_8C2_U1_RELATORIO.md),
+inclusive lote efetivo no no-op. Não habilita confirmação; a recuperação de uma
+importação confirmada ainda exige contrato próprio. A rejeição precoce preserva
+o rollback de todas as tabelas; sequências podem avançar. Não apresentar o
+resultado mínimo como ausência de todo efeito ou aceite de8C2B.1 integral.

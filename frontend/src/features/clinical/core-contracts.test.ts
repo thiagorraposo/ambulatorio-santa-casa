@@ -1,3 +1,4 @@
+import { FieldValidationError } from '../../shared/field-validation';
 import { describe, expect, it } from 'vitest';
 import type { AtendimentoDetalheResponse, PacienteDetalheResponse } from '../../api/contracts';
 import { attendanceBody, attendanceInitial, patientBody, patientInitial, type AttendanceDraft } from './core-contracts';
@@ -74,30 +75,44 @@ describe('escrita cadastral e atendimento composto', () => {
     const value = draft(); value.familyStatus = 'sim';
     expect(() => attendanceBody(value)).toThrow(/familiar/);
     value.families = [{ familiar: 'Familiar sintético', resultado: 'Resultado sintético' }]; value.familyStatus = 'nao';
-    expect(() => attendanceBody(value)).toThrow(/descartado/);
+    expect(() => attendanceBody(value)).toThrow(FieldValidationError);
     value.familyStatus = 'sim';
     value.exams = [{ tipoExameId: '42', bloco: 'trazido', identificacao: '', resultado: '', observacoes: '',
       catalog: { id: '42', codigo: 'laboratoriais', nome: 'Laboratoriais', ativo: true } }];
-    expect(() => attendanceBody(value)).toThrow(/identifique/);
+    expect(() => attendanceBody(value)).toThrow(new FieldValidationError([{ path: 'exames.0.identificacao', code: 'exam_identification' }]));
+    try { attendanceBody(value); } catch (error) { expect(error).toMatchObject({ errors: [{ path: 'exames.0.identificacao', code: 'exam_identification' }] }); }
   });
   it('preserva rastreio explicitamente desconhecido e valida precisão das medidas', () => {
     const value = draft(); value.familyStatus = 'desconhecido';
     expect(attendanceBody(value).rastreioFamiliar).toEqual({ familiaresExaminados: null, familiares: [] });
     value.clinical = { frequenciaCardiacaBpm: '80.5' };
-    expect(() => attendanceBody(value)).toThrow(/inteiro/);
+    expect(() => attendanceBody(value)).toThrow(FieldValidationError);
     value.clinical = { pesoKg: '65.123' };
-    expect(() => attendanceBody(value)).toThrow(/decimais/);
+    expect(() => attendanceBody(value)).toThrow(FieldValidationError);
   });
   it('exige resolução datada na criação composta e não descarta uma data incompatível', () => {
     const value = draft();
     value.pending = [{ descricao: 'Pendência sintética', status: 'resolvida' }];
-    expect(() => attendanceBody(value)).toThrow(/data de resolução/);
+    expect(() => attendanceBody(value)).toThrow(new FieldValidationError([{ path: 'pendencias.0.dataResolucao', code: 'pending_date' }]));
+    try { attendanceBody(value); } catch (error) { expect(error).toMatchObject({ errors: [{ path: 'pendencias.0.dataResolucao', code: 'pending_date' }] }); }
     value.pending[0]!.dataResolucao = '2026-02-02';
     expect(attendanceBody(value).pendencias).toEqual([
       { descricao: 'Pendência sintética', status: 'resolvida', dataResolucao: '2026-02-02' },
     ]);
     value.pending[0]!.status = 'aberta';
-    expect(() => attendanceBody(value)).toThrow(/Nenhum campo será descartado/);
+    expect(() => attendanceBody(value)).toThrow(new FieldValidationError([{ path: 'pendencias.0.status', code: 'pending_status' }]));
+    try { attendanceBody(value); } catch (error) { expect(error).toMatchObject({ errors: [{ path: 'pendencias.0.status', code: 'pending_status' }] }); }
+  });
+  it.each([
+    ['alturaCm', '1000', 'decimal_range'], ['pesoKg', '-1000', 'decimal_range'],
+    ['circunferenciaAbdominalCm', '1000', 'decimal_range'], ['saturacaoPercentual', '1000', 'decimal_range'],
+    ['frequenciaCardiacaBpm', '2147483648', 'integer_range'], ['paSistolicaMmhg', '-2147483649', 'integer_range'],
+    ['paDiastolicaMmhg', '2147483648', 'integer_range'],
+  ])('associa o limite físico de %s ao campo sem arredondar', (field, value, code) => {
+    const input = draft(); input.clinical = { [field]: value };
+    expect(() => attendanceBody(input)).toThrow(FieldValidationError);
+    try { attendanceBody(input); } catch (error) { expect(error).toMatchObject({ errors: [{ path: `dadosClinicos.${field}`, code }] }); }
+    expect(input.clinical[field]).toBe(value);
   });
   it('preserva desconhecido e não informado como estados distintos da pendência', () => {
     const value = draft();
@@ -108,4 +123,17 @@ describe('escrita cadastral e atendimento composto', () => {
       { descricao: 'Não informado sintético', status: 'nao_informado' },
     ]);
   });
+});
+
+it('recusa contexto simultâneo em criação e edição sem descartar valores', () => {
+  for (const original of [undefined, attendance]) {
+    const value = { ...draft(), original, values: { ...attendanceInitial(original), dataAtendimento: '2026-02-01',
+      ambulatorioUnicamente: 'sim', ambulatorioAnexoProjeto: 'sim' } };
+    try { attendanceBody(value); throw new Error('Deveria rejeitar'); }
+    catch (error) { expect(error).toMatchObject({ errors: [
+      { path: 'ambulatorioUnicamente', code: 'attendance_context' },
+      { path: 'ambulatorioAnexoProjeto', code: 'attendance_context' },
+    ] }); }
+    expect(value.values.ambulatorioAnexoProjeto).toBe('sim');
+  }
 });

@@ -59,9 +59,9 @@ describe('edição de atendimento legado com data desconhecida', () => {
     expect(date).toBeRequired();
     if (!creation) await user.clear(date);
     await user.type(screen.getByLabelText('Observações do atendimento'), 'Correção sintética');
-    await user.click(screen.getByRole('button', { name: creation ? 'Próxima etapa' : 'Salvar atendimento' }));
+    await user.click(screen.getByRole('button', { name: creation ? 'Próxima seção' : 'Salvar atendimento' }));
     expect(writes).not.toHaveBeenCalled();
-    if (creation) expect(screen.getByRole('status')).toHaveTextContent('Etapa 1 de 5: Atendimento');
+    if (creation) expect(screen.getByRole('status')).toHaveTextContent('Seção 1 de 12: Atendimento');
     expect(date).toBeRequired();
   });
 });
@@ -69,7 +69,7 @@ describe('edição de atendimento legado com data desconhecida', () => {
 it('restaura foco ao adicionar após remover pendências por teclado e preserva os outros valores', async () => {
   const { user, writes } = await setup(null, true);
   await user.type(screen.getByLabelText('Data do atendimento'), '2026-04-14');
-  for (let step = 0; step < 3; step++) await user.click(screen.getByRole('button', { name: 'Próxima etapa' }));
+  await user.click(screen.getByRole('button', { name: /^Observações$/ }));
   const add = screen.getByRole('button', { name: 'Adicionar pendência' });
   await user.click(add);
   await user.type(screen.getByLabelText('Descrição da pendência 1'), 'Primeira sintética');

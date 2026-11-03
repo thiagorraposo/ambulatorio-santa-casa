@@ -36,7 +36,7 @@ cleanup() {
   rm -f "$task_fixture"
 }
 trap cleanup EXIT
-psql -X -q -d "$task_db" -v ON_ERROR_STOP=1 -c "CREATE SCHEMA ambulatorio AUTHORIZATION ambulatorio_user; ALTER DATABASE $task_db SET search_path TO ambulatorio,public"
+psql -X -q -d "$task_db" -v ON_ERROR_STOP=1 -c "CREATE SCHEMA ambulatorio AUTHORIZATION CURRENT_USER; ALTER DATABASE $task_db SET search_path TO ambulatorio,public"
 for migration in sql/[0-9][0-9]_*.sql; do
   # 00/01 configuram o banco nominal. O equivalente isolado foi criado acima.
   if [[ "$migration" == sql/00_* || "$migration" == sql/01_* ]]; then continue; fi

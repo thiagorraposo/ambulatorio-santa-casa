@@ -56,7 +56,12 @@ describe('7D-U3.3 — exames da página com contexto recuperável', () => {
     await user.click(within(requested).getByText(/Exame sintético A/));
     expect(screen.getByText(first.resultado!)).not.toBeVisible();
     expect(within(requested).getAllByText('Não informado').length).toBeGreaterThan(0);
-    expect(within(requested).queryByRole('link')).not.toBeInTheDocument();
+    expect(within(requested).queryByRole('link', { name: /^Atendimento / })).not.toBeInTheDocument();
+    const parameters = new URL(within(requested).getByRole('link', {
+      name: `Parâmetros do exame ${second.nomeExame}, ID ${second.exameId}`,
+    }).getAttribute('href')!, 'http://app.local');
+    expect(parameters.pathname).toBe(`${path}/exames/${second.exameId}/resultados`);
+    expect(parameters.searchParams.get('retorno')).toBe(source.replace(first.exameId, second.exameId));
     await user.click(screen.getByRole('button', { name: 'Voltar no navegador' }));
     expect(screen.getByText(first.resultado!)).toBeVisible();
     expect(screen.getByTestId('location')).toHaveTextContent(source);

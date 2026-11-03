@@ -19,8 +19,9 @@ export function useFollowupDraft(key: string, initial: FollowupDraft) {
   return { model, setModel, setField, clearDraft, dirty };
 }
 
-export function FollowupField({ label, children, hint }: { label: string; children: (id: string) => ReactNode; hint?: string }) {
-  const id = useId();
+export function FollowupField({ label, children, hint, fieldId }: { fieldId?: string; label: string; children: (id: string) => ReactNode; hint?: string }) {
+  const autoId = useId();
+  const id = fieldId ?? autoId;
   return <div className="form-field"><label htmlFor={id}>{label}</label>{children(id)}
     {hint && <small className="muted">{hint}</small>}</div>;
 }

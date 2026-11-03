@@ -1,3 +1,17 @@
+import { AttendanceConfirmationController } from './attendance-confirmation.controller';
+import { AttendanceConfirmationService } from './attendance-confirmation.service';
+import { ResultadosExameController } from './resultados-exame.controller';
+import { ResultadosExameService } from './resultados-exame.service';
+import { ReacoesBznController } from './reacoes-bzn.controller';
+import { ReacoesBznService } from './reacoes-bzn.service';
+import { MedicamentosController } from './medicamentos.controller';
+import { MedicamentosService } from './medicamentos.service';
+import { ObitoController } from './obito.controller';
+import { ObitoService } from './obito.service';
+import { DispositivosController } from './dispositivos.controller';
+import { DispositivosService } from './dispositivos.service';
+import { AvcsController } from './avcs.controller';
+import { AvcsService } from './avcs.service';
 import { ComorbidadesController } from './comorbidades.controller';
 import { ComorbidadesService } from './comorbidades.service';
 import { ComplicacoesChagasController } from './complicacoes-chagas.controller';
@@ -13,6 +27,6 @@ import { RecursosClinicosService } from './recursos-clinicos.service';
 import { SorologiasController } from './sorologias.controller';
 import { SorologiasService } from './sorologias.service';
 
-@Module({ controllers: [ComorbidadesController, PacientesController, RecursosClinicosController, SorologiasController, CondicaoChagasController, ComplicacoesChagasController],
-  providers: [ComorbidadesService, PacientesService, PacientesRepository, RecursosClinicosService, SorologiasService, CondicaoChagasService, ComplicacoesChagasService] })
+@Module({ controllers: [AttendanceConfirmationController, ResultadosExameController, ReacoesBznController, MedicamentosController, ObitoController, DispositivosController, AvcsController, ComorbidadesController, PacientesController, RecursosClinicosController, SorologiasController, CondicaoChagasController, ComplicacoesChagasController],
+  providers: [AttendanceConfirmationService, ResultadosExameService, ReacoesBznService, MedicamentosService, ObitoService, DispositivosService, AvcsService, ComorbidadesService, PacientesService, PacientesRepository, RecursosClinicosService, SorologiasService, CondicaoChagasService, ComplicacoesChagasService] })
 export class PacientesModule {}

@@ -22,8 +22,7 @@ export class NotificationDto {
   @IsOptional() @IsString() @MaxLength(10000) observacoes?: string | null;
 }
 
-export class ReferralDto {
-  @Matches(idPattern) atendimentoId!: string;
+export class ReferralDataDto {
   @IsOptional() @Matches(idPattern) tipoEncaminhamentoId?: string | null;
   @IsOptional() @Matches(idPattern) projetoId?: string | null;
   @IsOptional() @IsIn(['ambulatorio', 'projeto_pesquisa', 'atencao_basica', 'servico_especializado', 'hospital', 'demanda_espontanea', 'outro', 'nao_informado']) origem?: string | null;
@@ -39,6 +38,10 @@ export class ReferralDto {
   @IsOptional() @IsString() @MaxLength(10000) motivo?: string | null;
   @IsOptional() @IsString() @MaxLength(10000) condutaOrientada?: string | null;
   @IsOptional() @IsString() @MaxLength(10000) observacoes?: string | null;
+}
+
+export class ReferralDto extends ReferralDataDto {
+  @Matches(idPattern) atendimentoId!: string;
 }
 
 export class ReferralQuery extends PageQuery {

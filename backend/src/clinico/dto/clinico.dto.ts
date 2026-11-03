@@ -41,14 +41,15 @@ export class PatientUpdateDto {
   @IsOptional() @IsObject() @ValidateNested() @Type(() => AddressDto) endereco?: AddressDto;
   @IsOptional() @IsArray() @ArrayMinSize(1) @ArrayMaxSize(10) @IsString({ each: true }) @Length(1, 30, { each: true }) telefonesAdicionar?: string[];
 }
+// Physical numeric(5,2)/integer limits, not physiological reference ranges.
 export class ClinicalDataDto {
-  @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) alturaCm?: number | null;
-  @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) pesoKg?: number | null;
-  @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) circunferenciaAbdominalCm?: number | null;
-  @IsOptional() @IsInt() frequenciaCardiacaBpm?: number | null;
-  @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) saturacaoPercentual?: number | null;
-  @IsOptional() @IsInt() paSistolicaMmhg?: number | null;
-  @IsOptional() @IsInt() paDiastolicaMmhg?: number | null;
+  @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) @Min(-999.99) @Max(999.99) alturaCm?: number | null;
+  @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) @Min(-999.99) @Max(999.99) pesoKg?: number | null;
+  @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) @Min(-999.99) @Max(999.99) circunferenciaAbdominalCm?: number | null;
+  @IsOptional() @IsInt() @Min(-2147483648) @Max(2147483647) frequenciaCardiacaBpm?: number | null;
+  @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) @Min(-999.99) @Max(999.99) saturacaoPercentual?: number | null;
+  @IsOptional() @IsInt() @Min(-2147483648) @Max(2147483647) paSistolicaMmhg?: number | null;
+  @IsOptional() @IsInt() @Min(-2147483648) @Max(2147483647) paDiastolicaMmhg?: number | null;
   @IsOptional() @IsString() @MaxLength(20) nyha?: string | null;
   @IsOptional() @IsString() @MaxLength(10000) observacoes?: string | null;
 }
@@ -120,8 +121,7 @@ export class BznReactionDto {
   @IsOptional() @IsString() @MaxLength(10000) consequencia?: string | null;
   @IsOptional() @IsString() @MaxLength(10000) observacoes?: string | null;
 }
-export class BznTreatmentCreateDto {
-  @IsOptional() @Matches(/^[1-9]\d{0,18}$/) atendimentoId?: string;
+export class BznTreatmentDataDto {
   @IsOptional() @IsBoolean() temIndicacao?: boolean | null;
   @IsOptional() @IsBoolean() iniciado?: boolean | null;
   @IsOptional() @IsBoolean() tratamentoPeloAmbulatorio?: boolean | null;
@@ -133,6 +133,9 @@ export class BznTreatmentCreateDto {
   @IsOptional() @IsBoolean() teveReacaoAdversa?: boolean | null;
   @IsOptional() @IsString() @MaxLength(10000) observacoes?: string | null;
   @IsOptional() @IsArray() @ArrayMaxSize(30) @IsObject({ each: true }) @ValidateNested({ each: true }) @Type(() => BznReactionDto) reacoes?: BznReactionDto[];
+}
+export class BznTreatmentCreateDto extends BznTreatmentDataDto {
+  @IsOptional() @Matches(/^[1-9]\d{0,18}$/) atendimentoId?: string;
 }
 export class AnnualFactDto {
   @IsInt() @Min(1) @Max(9999) ano!: number;

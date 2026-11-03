@@ -207,3 +207,13 @@ As decisões estruturais estão implementadas por
 Com o manifesto e a especificação normativa concluídos, o módulo físico está
 **implementado, validado e pronto para sustentar o importador sintético**. Isso
 não autoriza importar dados reais.
+
+
+### Continuidade M3 — relatório H14,02/11/2026
+
+[Contrato de contagens](CONTRATO_RELATORIO_IMPORTACAO_8C2B_1.md) e
+[provas](../validacoes/VALIDACAO_8C2B_1_RELATORIO.md) acrescentam totais disjuntos e
+códigos fechados à simulação/aplicação/no-op, preservando lote efetivo e
+sanitização. Prontidão técnica desse recorte comprovada, sem novos metadados ou
+candidatos; ausência de consumo de sequências continua pendente. Confirmação UI
+aguarda [recuperação autoritativa](PROPOSTA_CONFIRMACAO_IMPORTACAO_8C2U_2.md).

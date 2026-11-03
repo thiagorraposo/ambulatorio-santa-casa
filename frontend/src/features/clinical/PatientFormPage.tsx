@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import type { PacienteDetalheResponse, PacienteResponse } from '../../api/contracts';
 import { useApiQuery } from '../../api/useApiQuery';
 import { Card, EmptyState, PageHeading, QueryState } from '../../shared/ui';
@@ -10,14 +10,16 @@ import { booleanOptions, FormSection, InputField, SelectField } from './CoreFiel
 import { dirtyFields, patientBody, patientInitial } from './core-contracts';
 import { PatientCreateGate } from './PatientCreateGate';
 import { VersionComparison } from './VersionComparison';
+import { PatientsSearchReturn, patientsSearchReturn, searchReturnPath } from '../pacientes/PatientsSearchReturn';
+import { useSession } from '../../app/session';
 
 function PriorSearch({ onSearch, onNoMatchConfirmed }: { onSearch: () => void; onNoMatchConfirmed: () => void }) {
   const [name, setName] = useState('');
   const [search, setSearch] = useState('');
   const query = useApiQuery<PacienteResponse[]>(`/pacientes?nome=${encodeURIComponent(search)}&limit=20&offset=0`, !!search);
   const showingCurrentSearch = search !== '' && name.trim() === search;
-  return <Card><h2>Busque antes de cadastrar</h2>
-    <p>Confira possíveis cadastros pelo nome. Os resultados dependem do seu acesso e da página consultada.</p>
+  return <Card><h2>Verificar se o paciente já existe</h2>
+    <p className="notice">Antes de criar um cadastro, confira possíveis correspondências pelo nome. Os resultados dependem do seu acesso e da página consultada.</p>
     <form className="filters" aria-label="Busca prévia de pacientes" onSubmit={event => {
       event.preventDefault();
       const normalized = name.trim();
@@ -41,6 +43,7 @@ function PriorSearch({ onSearch, onNoMatchConfirmed }: { onSearch: () => void; o
 
 function PatientForm({ data }: { data?: PacienteDetalheResponse }) {
   const navigate = useNavigate();
+  const [search] = useSearchParams();
   const phoneFocus = useCollectionRemovalFocus();
   const initial = patientInitial(data);
   const [draft, setDraft, clearDraft] = useClinicalDraft(`patient:${data?.pacienteId ?? 'new'}`, {
@@ -70,7 +73,7 @@ function PatientForm({ data }: { data?: PacienteDetalheResponse }) {
         }} /> : undefined}
       submitLabel={data ? 'Salvar paciente' : 'Cadastrar paciente'}
       verificationPath={data ? path : '/pacientes'} verificationLabel={data ? 'Verificar registro salvo' : 'Verificar na busca de pacientes'}
-      onSaved={(response: { pacienteId: string }) => { clearDraft(); navigate(`/pacientes/${encodeURIComponent(response.pacienteId)}`, { state: { saved: 'Paciente salvo.' } }); }}>
+      onSaved={(response: { pacienteId: string }) => { clearDraft(); navigate(searchReturnPath(`/pacientes/${encodeURIComponent(response.pacienteId)}`, search.get('retorno')), { state: { saved: 'Paciente salvo.' } }); }}>
       <FormSection title="Identificação">
         <InputField label="Nome completo" value={draft.values.nome!} required maxLength={255} onChange={value => field('nome', value)} />
         <InputField label="Data de nascimento" type="date" value={draft.values.dataNascimento!} onChange={value => field('dataNascimento', value)} />
@@ -103,17 +106,22 @@ function PatientForm({ data }: { data?: PacienteDetalheResponse }) {
 
 function ExistingPatientForm({ id }: { id: string }) {
   const query = useApiQuery<PacienteDetalheResponse>(`/pacientes/${encodeURIComponent(id)}`);
-  return <DraftQueryState query={query}>{data => <PatientForm key={data.pacienteId} data={data} />}</DraftQueryState>;
+  return <DraftQueryState query={query}>{data => <><p>Paciente: {data.nome} · ID {data.pacienteId}</p><PatientForm key={data.pacienteId} data={data} /></>}</DraftQueryState>;
 }
 
 export default function PatientFormPage() {
+  const session = useSession();
   const { pacienteId } = useParams<{ pacienteId: string }>();
+  const [search] = useSearchParams();
+  const searchOrigin = patientsSearchReturn(search.get('retorno'));
   const [createAfterSearch, setCreateAfterSearch] = useState(false);
-  return <>
-    <nav className="breadcrumb" aria-label="Caminho da página"><Link to="/pacientes">Pacientes</Link>
-      {pacienteId && <Link to={`/pacientes/${pacienteId}`}>Ficha do paciente</Link>}</nav>
+  return <div className="patient-form-page">
+    <nav className="breadcrumb" aria-label="Caminho da página"><Link to={searchOrigin ?? '/pacientes'}>{searchOrigin?.startsWith('/dashboard') ? 'Dashboard' : 'Pacientes'}</Link>
+      {pacienteId && <Link to={searchReturnPath(`/pacientes/${pacienteId}`, searchOrigin)}>Ficha do paciente</Link>}</nav>
+    <PatientsSearchReturn />
     <PageHeading title={pacienteId ? 'Editar paciente' : 'Cadastrar paciente'} />
     <EditingGate>{pacienteId ? <ExistingPatientForm id={pacienteId} /> : <PatientCreateGate>
+      {session.user?.perfil === 'edicao' && <p className="notice">Ao cadastrar, você receberá acesso a este paciente para consultar, editar o cadastro e registrar atendimentos. Esse vínculo pode ser revogado pela Administração e será revogado se sua conta for inativada.</p>}
       <PriorSearch onSearch={() => setCreateAfterSearch(false)} onNoMatchConfirmed={() => setCreateAfterSearch(true)} />
       {createAfterSearch && <>
         <p role="status">Cadastro autorizado após sua revisão. Prosseguir não funde registros; nomes iguais podem pertencer a pessoas diferentes.</p>
@@ -121,5 +129,5 @@ export default function PatientFormPage() {
         <PatientForm key="new" />
       </>}
     </PatientCreateGate>}</EditingGate>
-  </>;
+  </div>;
 }

@@ -85,7 +85,7 @@ export default function PatientCsvExport({ nome, sexo, limit, offset, available 
       if (controller.current === pending) { controller.current = null; sending.current = false; }
     }
   };
-  return <section className="form-section" aria-label="Exportação da página de pacientes" onKeyDown={event => {
+  return <section className="patient-csv-export" aria-label="Exportação da página de pacientes" onKeyDown={event => {
     if (confirming && event.key === 'Escape') { event.preventDefault(); close(); }
   }}>
     <button ref={start} type="button" className="button button-secondary" disabled={!available || !authorized || busy}

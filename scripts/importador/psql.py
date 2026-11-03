@@ -45,17 +45,21 @@ class Database:
             self.run(command)
             return
         if command == "BEGIN":
+            if self.savepoint_active:
+                raise RuntimeError("Linha já possui savepoint no dry-run")
             self.run("SAVEPOINT importador_linha")
             self.savepoint_active = True
-        elif command == "COMMIT":
-            self.run("RELEASE SAVEPOINT importador_linha")
-            self.savepoint_active = False
-        elif command == "ROLLBACK" and self.savepoint_active:
-            self.run("ROLLBACK TO SAVEPOINT importador_linha")
+        elif command in {"COMMIT", "ROLLBACK"}:
+            if not self.savepoint_active:
+                # Nunca enviar COMMIT/ROLLBACK da linha para a transação externa.
+                # Após rollback externo, DML posterior entraria em autocommit.
+                raise RuntimeError("Linha sem savepoint ativo no dry-run")
+            if command == "ROLLBACK":
+                self.run("ROLLBACK TO SAVEPOINT importador_linha")
             self.run("RELEASE SAVEPOINT importador_linha")
             self.savepoint_active = False
         else:
-            self.run(command)
+            raise ValueError("Comando transacional de linha inválido no dry-run")
 
     def run(self, sql: str) -> list[str]:
         token = uuid.uuid4().hex

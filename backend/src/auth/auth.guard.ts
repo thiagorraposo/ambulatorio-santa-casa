@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
@@ -25,9 +25,13 @@ export class AuthGuard implements CanActivate {
       const user = await this.auth.resolveIdentity(payload);
       if (!user) throw new Error('invalid identity');
       request.user = user;
-      return true;
+
     } catch {
       throw new UnauthorizedException('Credencial inválida ou expirada');
     }
+    if (request.user?.trocaObrigatoria && !['/v1/auth/me', '/v1/auth/senha'].includes(request.path)) {
+      throw new ForbiddenException('Troca de senha obrigatória antes de continuar');
+    }
+    return true;
   }
 }

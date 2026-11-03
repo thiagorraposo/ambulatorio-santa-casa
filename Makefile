@@ -38,11 +38,11 @@ COMPACT ?= 0
 COMPACT_GOALS := $(if $(filter 1,$(COMPACT)),$(if $(_COMPACT_RUNNING),,$(MAKECMDGOALS)))
 ifneq ($(strip $(COMPACT_GOALS)),)
 COMPACT_TARGETS := git-status docs-check manifest-check manifest-source-check repository-check \
-	db-check db-test db-sorologia-upgrade-test db-condicao-upgrade-test db-complicacao-upgrade-test db-comorbidades-upgrade-test project-check docker-config-check docker-db-check docker-db-test \
+	db-check db-test db-sorologia-upgrade-test db-condicao-upgrade-test db-complicacao-upgrade-test db-comorbidades-upgrade-test db-avc-upgrade-test db-dispositivo-upgrade-test db-obito-upgrade-test db-reacoes-bzn-upgrade-test db-resultados-upgrade-test project-check docker-config-check docker-db-check docker-db-test \
 	docker-project-check docker-restore-check docker-restore-test importer-test \
 	backend-build backend-unit-test backend-integration-test backend-foundation-e2e \
 	backend-check backend-container-check backend-clinical-test workflow-test \
-	frontend-build frontend-unit-test frontend-e2e frontend-check
+	frontend-build frontend-unit-test frontend-e2e frontend-demo-test frontend-check
 ifneq ($(filter-out $(COMPACT_TARGETS),$(COMPACT_GOALS)),)
 $(error COMPACT=1 aceita somente alvos de validação ou git-status; consulte make help)
 endif
@@ -56,7 +56,7 @@ _compact-run:
 		-- $(MAKE) --no-print-directory _COMPACT_RUNNING=1 $(COMPACT_GOALS)
 else
 
-.PHONY: help git-status db-check db-test db-sorologia-upgrade-test db-condicao-upgrade-test db-complicacao-upgrade-test db-comorbidades-upgrade-test db-migrate db-migrate-one docs-check project-check repository-check \
+.PHONY: help git-status db-check db-test db-sorologia-upgrade-test db-condicao-upgrade-test db-complicacao-upgrade-test db-comorbidades-upgrade-test db-avc-upgrade-test db-dispositivo-upgrade-test db-obito-upgrade-test db-reacoes-bzn-upgrade-test db-resultados-upgrade-test db-migrate db-migrate-one docs-check project-check repository-check \
 	db-schema-dump docker-config-check docker-up docker-status docker-wait \
 	docker-stop docker-recreate docker-logs docker-migrate docker-db-check docker-db-test \
 	docker-schema-dump docker-project-check docker-destroy \
@@ -64,11 +64,12 @@ else
 	manifest-check manifest-source-check importer-fixture importer-run importer-dry-run importer-test \
 	backend-install backend-build backend-unit-test backend-db-setup backend-integration-test \
 	backend-foundation-e2e backend-clinical-test backend-check backend-up backend-container-check backend-logs backend-stop workflow-test \
-	frontend-install frontend-dev frontend-build frontend-unit-test frontend-e2e frontend-check \
+	frontend-install frontend-dev frontend-build frontend-unit-test frontend-e2e frontend-demo-test frontend-check \
 	dev-sintetico-start dev-sintetico-status dev-sintetico-stop
 
 help:
 	@echo "Comandos disponíveis:"
+	@echo "  make frontend-demo-test Validar a base demo no navegador/API/PostgreSQL descartáveis"
 	@echo "  make dev-sintetico-start Inicia PostgreSQL/API/frontend exclusivos com dados sintéticos"
 	@echo "  make dev-sintetico-status Exibe prontidão, endereços e login sintético"
 	@echo "  make dev-sintetico-stop Encerra somente os recursos sintéticos deste ambiente"
@@ -80,6 +81,11 @@ help:
 	@echo "  make db-condicao-upgrade-test Valida upgrade 65→66 em banco descartável (SYNTHETIC_PG_*)"
 	@echo "  make db-complicacao-upgrade-test Valida upgrade 66→67 em banco descartável (SYNTHETIC_PG_*)"
 	@echo "  make db-comorbidades-upgrade-test Valida upgrade 67→68 sem backfill (SYNTHETIC_PG_*)"
+	@echo "  make db-avc-upgrade-test Valida upgrade 68→69 e preservação da revisão anual"
+	@echo "  make db-dispositivo-upgrade-test Valida upgrade 69→70 sem reinterpretar legado"
+	@echo "  make db-obito-upgrade-test Valida upgrade 70→71 sem reinterpretar legado"
+	@echo "  make db-reacoes-bzn-upgrade-test Valida upgrade 71→72 sem backfill de reações"
+	@echo "  make db-resultados-upgrade-test Valida upgrade 72→73 no exame canônico"
 	@echo "  make docs-check      Verifica documentos obrigatórios e não vazios"
 	@echo "  make manifest-check  Valida o manifesto físico v1 versionado"
 	@echo "  make manifest-source-check Compara manifesto com cabeçalhos da fonte local ignorada"
@@ -155,6 +161,21 @@ db-complicacao-upgrade-test:
 
 db-comorbidades-upgrade-test:
 	@bash tests/backend/test_comorbidades_upgrade.sh
+
+db-avc-upgrade-test:
+	@bash tests/backend/test_avc_upgrade.sh
+
+db-dispositivo-upgrade-test:
+	@bash tests/backend/test_dispositivo_upgrade.sh
+
+db-obito-upgrade-test:
+	@bash tests/backend/test_obito_upgrade.sh
+
+db-reacoes-bzn-upgrade-test:
+	@bash tests/backend/test_reacoes_bzn_upgrade.sh
+
+db-resultados-upgrade-test:
+	@bash tests/backend/test_resultados_upgrade.sh
 
 db-check:
 	@command -v psql >/dev/null 2>&1 || { echo "Erro: psql não encontrado."; exit 1; }
@@ -341,6 +362,9 @@ frontend-unit-test:
 
 frontend-e2e: backend-build
 	@bash tests/frontend/test_e2e.sh
+
+frontend-demo-test: backend-build
+	@bash tests/frontend/test_e2e.sh --demo-test
 
 frontend-check: frontend-build frontend-unit-test frontend-e2e
 	@echo "OK: frontend compilado e testado com navegador/API sintéticos"

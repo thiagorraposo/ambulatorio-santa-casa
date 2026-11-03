@@ -264,3 +264,13 @@ checagem de portabilidade, não um bloqueio da migration no ambiente atual.
 Status: **implementada e validada** no PostgreSQL local 16.14. A migration foi
 aplicada sem backfill e o teste transacional passou nos 22 cenários, incluindo a
 auditoria posterior ao `ROLLBACK`.
+
+
+### Continuidade M3 — parâmetros canônicos, 02/11/2026
+
+O adiamento acima descreve a entrega original. O [contrato E6B](CONTRATO_RESULTADOS_7B_E6B.md)
+implementou SQL73/GET/POST com textos humanos literais, preservando o legado.
+A [interface E6U](../validacoes/VALIDACAO_7B_E6U_PARAMETROS.md) integra lista,
+formulário, revisão e recibos ao exame identificado. Prontidão técnica comprovada
+nesse recorte; datas/status, correções do pai e aceite humano seguem pendentes.
+Não implica importação dos novos parâmetros nem interpretação automática.

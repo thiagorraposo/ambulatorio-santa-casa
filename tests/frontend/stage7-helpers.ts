@@ -5,7 +5,12 @@ import { apiAs, fixture, type Perfil } from './fixtures';
 export { signIn } from './fixtures';
 
 export async function nextAttendanceStep(page: Page) {
-  await page.getByRole('button', { name: 'Próxima etapa', exact: true }).click();
+  await page.getByRole('button', { name: 'Próxima seção', exact: true }).click();
+}
+
+export async function attendanceSection(page: Page, title: string) {
+  await page.getByRole('navigation', { name: 'Seções do atendimento', exact: true })
+    .getByRole('button', { name: title, exact: true }).click();
 }
 
 export async function reviewAttendance(page: Page) {
@@ -14,9 +19,6 @@ export async function reviewAttendance(page: Page) {
 }
 
 export async function moveAttendanceToReview(page: Page) {
-  await nextAttendanceStep(page);
-  await nextAttendanceStep(page);
-  await nextAttendanceStep(page);
   await reviewAttendance(page);
 }
 
@@ -45,6 +47,26 @@ export async function seedAttendance(patientPath: string, extra: Record<string, 
   });
   expect(typeof attendance.atendimentoId).toBe('string');
   return { ...attendance, path: `${patientPath}/atendimentos/${attendance.atendimentoId}` };
+}
+
+/** Localiza um item pela paginação real, sem depender da primeira página do catálogo. */
+export async function checkComorbidityCatalogItem(page: Page, name: string) {
+  const target = page.getByLabel(`Avaliar ${name}`, { exact: true });
+  for (let offset = 0; offset <= 100000; offset += 20) {
+    await expect(page.getByText(/^Catálogo: itens/)).toContainText(`Catálogo: itens ${offset + 1}–`);
+    await expect(page.getByRole('checkbox').first()).toBeVisible();
+    if (await target.count()) { await target.check(); return; }
+    const next = page.getByRole('button', { name: 'Próxima página do catálogo', exact: true });
+    await expect(next, `Item ${name} deve existir no catálogo autorizado`).toBeEnabled();
+    const response = page.waitForResponse(item => {
+      const url = new URL(item.url());
+      return item.request().method() === 'GET' && url.pathname === '/v1/catalogos/comorbidades'
+        && url.searchParams.get('offset') === String(offset + 20);
+    });
+    await next.click();
+    expect((await response).status()).toBe(200);
+  }
+  throw new Error(`Item ${name} não encontrado no limite de paginação do catálogo`);
 }
 
 export const readPatient = (path: string) => apiJson<PacienteDetalheResponse>('GET', `${path}?limit=100&offset=0`);

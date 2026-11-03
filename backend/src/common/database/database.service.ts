@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Pool, QueryResult, QueryResultRow } from 'pg';
 import { AppConfig } from '../../config/app.config';
 import { clinicalOperationContext } from './clinical-operation.context';
+import { AsyncLocalStorage } from 'node:async_hooks';
 
 /** Consultas da mesma operacao usam a mesma conexao e a mesma transacao. */
 export interface Transaction {
@@ -13,6 +14,9 @@ export interface Transaction {
 export class DatabaseService implements OnModuleDestroy {
   private readonly pool: Pool;
   private readonly role: string;
+  private readonly coordinated = new AsyncLocalStorage<{
+    transaction: Transaction; actorId: string; active: boolean; failed: boolean;
+  }>();
 
   constructor(config: ConfigService<AppConfig, true>) {
     const database = config.get('database', { infer: true });
@@ -33,7 +37,31 @@ export class DatabaseService implements OnModuleDestroy {
     return this.transaction((transaction) => transaction.query<T>(text, values));
   }
 
+  /** Explicit composition only: existing services share this actor's single COMMIT and receipt. */
+  async coordinate<T>(actorId: string, operation: (transaction: Transaction) => Promise<T>): Promise<T> {
+    if (this.coordinated.getStore()) throw new Error('Coordenação clínica aninhada não permitida');
+    return this.transaction(async transaction => {
+      const scope = { transaction, actorId, active: true, failed: false };
+      try {
+        return await this.coordinated.run(scope, async () => {
+          const result = await operation(transaction);
+          if (scope.failed) throw new Error('Uma operação clínica falhou; confirmação integral cancelada');
+          return result;
+        });
+      } finally { scope.active = false; }
+    }, actorId);
+  }
+
   async transaction<T>(operation: (transaction: Transaction) => Promise<T>, actorId?: string): Promise<T> {
+    const coordinated = this.coordinated.getStore();
+    if (coordinated) {
+      if (!coordinated.active || coordinated.failed || (actorId !== undefined && actorId !== coordinated.actorId)) {
+        coordinated.failed = true;
+        throw new Error('Transação coordenada indisponível ou ator divergente');
+      }
+      try { return await operation(coordinated.transaction); }
+      catch (error) { coordinated.failed = true; throw error; }
+    }
     // Guards and read-only auxiliary transactions do not consume the write scope.
     const linked = actorId === undefined ? undefined : clinicalOperationContext.getStore();
     if (linked) {

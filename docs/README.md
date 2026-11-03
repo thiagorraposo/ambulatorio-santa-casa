@@ -9,10 +9,13 @@ fonte temática abaixo; relatórios registram provas e histórico preserva conte
 | Pergunta | Fonte principal |
 | --- | --- |
 | O que está implementado e o que falta? | [Estado atual](ESTADO_ATUAL_DO_PROJETO.md) |
+| Quais decisões de produto foram aprovadas para implementar M3? | [Respostas1–31 e divergências](dados/DECISOES_PRODUTO_M3_2026_11_02.md) — sintético; sem homologação ou dados reais |
+| Qual foi o resultado da avaliação humana M3 e quais achados ficaram abertos? | [Avaliação com a equipe Santa Casa](validacoes/AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md) — realizada com problemas, sem aceite integral |
 | Em que ordem trabalhar, qual frontend alcançar e quando concluir? | [Roadmap integrado: dez frentes e M1–M5](PROXIMOS_PASSOS.md#cobertura-obrigatória-e-ordem-de-trabalho), com [critério por incremento](PROXIMOS_PASSOS.md#critério-de-execução-e-conclusão-por-incremento) |
 | Como deve ser o produto completo? | [Visão e especificação](frontend/VISAO_E_ESPECIFICACAO.md) |
 | Qual elemento do protótipo corresponde a qual requisito? | [Matriz Figma → requisito → implementação → lacuna → entrega → aceite](frontend/MATRIZ_FIGMA_FRONTEND.md) |
 | Qual é o escopo e o aceite de cada entrega? | [Catálogo de entregas](frontend/ENTREGAS_DO_PRODUTO.md) |
+| Como executar e retomar as seis janelas de M3 até 03/11? | [Plano operacional e checkpoint único](execucao/PLANO_M3_2026_11_03.md) — preparação; implementação só após início autorizado |
 | Onde estão as comparações de telas? | [Capturas e propostas visuais](frontend/visuais/README.md) |
 
 ## Desenvolver e operar localmente
@@ -21,6 +24,7 @@ fonte temática abaixo; relatórios registram provas e histórico preserva conte
 | --- | --- |
 | Preparar ambiente, escolher banco e executar verificações | [Workflow de desenvolvimento](WORKFLOW_DE_DESENVOLVIMENTO.md) |
 | Abrir a demonstração, entender sessão e contratos de interface | [Frontend](FRONTEND.md) |
+| Apresentar o candidato congelado e recuperar a contingência | [Candidato, ensaio e roteiro Santa Casa](validacoes/CONGELAMENTO_DEMONSTRACAO_2026_11_02.md) |
 | Executar o importador sintético | [Guia do importador implementado](IMPORTADOR_SINTETICO_V1.md) |
 | Validar o navegador com API/PostgreSQL descartáveis | [Runner de testes](../tests/frontend/README.md) |
 | Fazer backup e testar recuperação do Docker | [Recuperação local e limites](RECUPERACAO_POSTGRESQL_DOCKER.md) |
@@ -38,11 +42,18 @@ fonte temática abaixo; relatórios registram provas e histórico preserva conte
 | Regras normativas de importação | [Especificação do importador](ESPECIFICACAO_IMPORTADOR_PLANILHA_V1.md) |
 | API e autorização | [Arquitetura do backend](ARQUITETURA_BACKEND.md) e [contratos clínicos](arquitetura/CONTRATOS_CLINICOS_ETAPA_5.md) |
 | Formulários e limites HTTP | [Recorte clínico](arquitetura/RECORTE_CLINICO_ETAPA_7.md) e [catálogos](arquitetura/CONTRATOS_CATALOGOS_ETAPA_7.md) |
+| Dashboard básico (8B1) | [Contrato](arquitetura/CONTRATO_DASHBOARD_8B1.md) · [validação](validacoes/VALIDACAO_8B1_DASHBOARD.md) |
+| Criação e primeiro acesso (8D2.3) | [Contrato](arquitetura/CONTRATO_CRIACAO_USUARIO_8D2.md) · [validação](validacoes/VALIDACAO_8D2_CRIACAO.md) |
+| Ativação/inativação administrativas (8D2.2) | [Contrato](arquitetura/CONTRATO_PERFIL_USUARIO_8D2.md#extensão-integrada--estado-8d2b2u2) · [validação integrada](validacoes/VALIDACAO_8D2_ESTADO.md) |
+| Alteração administrativa de perfil (8D2.1) | [Contrato](arquitetura/CONTRATO_PERFIL_USUARIO_8D2.md) · [validação integrada](validacoes/VALIDACAO_8D2_PERFIL.md) |
+| Leitura mínima de usuários (8D1) | [Contrato](arquitetura/CONTRATO_LEITURA_USUARIOS_8D1B.md) · [validação](validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md) |
+| Erros por campo do atendimento | [Contrato e limites](arquitetura/CONTRATO_ERROS_ATENDIMENTO_M3.md) |
 | Recuperação de escrita e paginação de familiares | [Operações](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) e [familiares](arquitetura/CONTRATO_FAMILIARES_ETAPA_7.md) |
 | Episódios individuais de sorologia | [Contrato 7B-E1B](arquitetura/CONTRATO_SOROLOGIAS_7B_E1B.md) |
 | Condição de Chagas por atendimento | [Contrato 7B-E2B.1](arquitetura/CONTRATO_CONDICAO_CHAGAS_7B_E2B_1.md) |
 | Complicações repetíveis por atendimento | [Contrato 7B-E2B.2](arquitetura/CONTRATO_COMPLICACOES_CHAGAS_7B_E2B_2.md) — CON-07–10, API sintética com evidência própria; sem aceite humano. |
 | Comorbidades: catálogo, avaliação e histórico familiar | [Contrato 7B-E3B](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) — decisões delegadas, API E3B.2 e interface E3U com validação técnica; aceite humano separado. |
+| AVC longitudinal e limites de eventos/dispositivos/óbito | [Contrato E4B](arquitetura/CONTRATO_EVENTOS_7B_E4B.md) — backend AVC validado, interface e agregado pendentes |
 | Revisão entre versões da planilha | [Contrato temporal](arquitetura/ESPECIFICACAO_REVISAO_TEMPORAL_PLANILHA.md) |
 
 Especificações por módulo em `arquitetura/`: [avaliação clínica](arquitetura/ESPECIFICACAO_MODULO_AVALIACAO_CLINICA.md),
@@ -71,7 +82,8 @@ São contratos específicos, não duplicatas do modelo físico ou dos relatório
 As fontes principais na raiz de `docs/` mantêm os caminhos exigidos pelo Makefile
 e pelas instruções do repositório. As coleções têm uma função cada:
 `arquitetura/` contratos, `dados/` semântica/layout, `frontend/` produto e entregas,
-`validacoes/` provas, `evidencias/` artefatos estruturais e `historico/` memória.
+`validacoes/` provas, `evidencias/` artefatos estruturais, `execucao/` planos
+operacionais temporários e `historico/` memória.
 Os únicos índices adicionais são os necessários para localizar as numerosas
 validações, os arquivos históricos e as imagens.
 
@@ -82,3 +94,15 @@ Nomes novos usam `MAIUSCULAS_COM_SUBLINHADO.md`, sem espaços/acentos; caminhos
 históricos ou exigidos pelas ferramentas não são renomeados apenas por estética.
 Veja [as regras de manutenção](AGENTS.md) e o
 [diagnóstico desta reorganização](historico/REORGANIZACAO_DOCUMENTAL_2026_10_23.md).
+
+- [Interface de óbito: provas técnicas e limites](validacoes/VALIDACAO_7B_E4U_OBITO.md).
+
+- [Medicamentos E5B: contrato de consulta e decisões de escrita](arquitetura/CONTRATO_MEDICAMENTOS_7B_E5B.md).
+
+- [Medicamentos E5U: consulta integrada e provas](validacoes/VALIDACAO_7B_E5U_LEITURA.md).
+
+- [Reação isolada BZN E1.2: contrato e evidências](arquitetura/CONTRATO_REACOES_BZN_7C_E1B.md).
+
+- [Reações BZN E1.2: interface, testes e limites visuais](validacoes/VALIDACAO_7C_E1U_REACOES.md).
+
+- [Resultados E6B: contrato canônico e evidências dos parâmetros](arquitetura/CONTRATO_RESULTADOS_7B_E6B.md).

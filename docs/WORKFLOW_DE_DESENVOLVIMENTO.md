@@ -10,9 +10,9 @@ produzir seu diagnóstico. Uma nova execução do mesmo evento/ref cancela a ant
 | Job | Verificações | Limite |
 | --- | --- | --- |
 | Quality | `docs-check`, `manifest-check`, `repository-check`, `workflow-test` e actionlint | 10 minutos; não usa banco. |
-| Database | Migrations 00–68, `importer-test`, `docker-db-test` e os upgrades de sorologia, condição, complicação e comorbidades | 15 minutos; instala ripgrep explicitamente; SQL, importação e upgrade sem backfill sintéticos. |
+| Database | Migrations 00–79, `importer-test`, `docker-db-test` e os upgrades de sorologia, condição, complicação, comorbidades, AVC, dispositivos, óbito, reações BZN e resultados canônicos | 15 minutos; instala ripgrep explicitamente; SQL, importação e upgrade sem backfill sintéticos. |
 | Backend | `npm ci`, `backend-check`, `backend-clinical-test` e `backend-container-check` | 25 minutos; build, unitários, integração, contratos/autenticação/RBAC, fluxos clínicos, saúde e usuário não-root. |
-| Frontend | `npm ci` em ambas as aplicações, Chromium e `frontend-check` | 25 minutos; TypeScript/Vite, componentes e navegador com API/PostgreSQL reais sintéticos. |
+| Frontend | `npm ci` em ambas as aplicações, Chromium e `frontend-check` | 45 minutos; TypeScript/Vite, componentes e navegador com API/PostgreSQL reais sintéticos. |
 
 Cada job com SQL usa `.github/compose.ci.yaml`: PostgreSQL 16.15 em `tmpfs`,
 sem volumes persistentes. O composite `synthetic-postgres` confere portas,
@@ -20,7 +20,7 @@ armazenamento e identidade antes de aplicar o bootstrap. As portas
 `POSTGRES_PORT`, `APP_DB_PORT` e `SYNTHETIC_PG_PORT` são `55457`, exigidas por
 D3/D8; o Compose persistente local continua em `5433`. Backend e frontend
 criam bancos e logins próprios para suas suítes. O job Frontend prepara somente
-a role de origem com SQL00; seu runner aplica 02–68 no banco exclusivo.
+a role de origem com SQL00; seu runner aplica 02–79 no banco exclusivo.
 Nenhuma permissão clínica é concedida manualmente para fazer teste passar.
 
 `db-sorologia-upgrade-test` requer `SYNTHETIC_PG_HOST`, `SYNTHETIC_PG_PORT`,
@@ -29,7 +29,7 @@ Cria/remove banco próprio, instala 02–64, prepara legado sintético e aplica 
 comprovando linha intacta, ausência de backfill e captura da alteração posterior.
 
 `db-condicao-upgrade-test` (65→66), `db-complicacao-upgrade-test` (66→67)
-e `db-comorbidades-upgrade-test` (67→68) usam o mesmo isolamento sintético.
+, `db-comorbidades-upgrade-test` (67→68) e `db-avc-upgrade-test` (68→69) e `db-dispositivo-upgrade-test` (69→70) e `db-obito-upgrade-test` (70→71) e `db-reacoes-bzn-upgrade-test` (71→72) e `db-resultados-upgrade-test` (72→73) usam o mesmo isolamento sintético.
 Os testes preservam legado/captura e verificam a ausência de backfill; o último
 não converte associações legadas em avaliações por atendimento.
 
@@ -67,6 +67,11 @@ jobs, sem tratar cancelado/ignorado como aprovado. Ao atualizar actions, Node/np
 PostgreSQL ou actionlint, confira versões oficiais e checksums, teste a alteração
 no PR e confirme novamente o workflow da `main` após merge. Não introduza
 `continue-on-error` nem contorne regras de aprovação humana.
+
+Para o ciclo temporário de seis janelas de M3 até 03/11/2026, usar o
+[plano operacional e checkpoint único](execucao/PLANO_M3_2026_11_03.md).
+Ele organiza a execução; roadmap, contratos e esta matriz de validação permanecem
+as fontes normativas. A preparação não inicia janelas nem autoriza implementação.
 
 ## Preparar o ambiente
 
@@ -185,7 +190,7 @@ versão original, rollback, episódios repetíveis e falha de resposta após com
 Famílias exigem evidência de páginas independentes de snapshots e filhos;
 recuperação usa UUID/método/caminho/hash, registro, uma escrita e verificação ou
 encerramento sem reaplicar clínica. O
-[protocolo](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) enumera as 18 mutações;
+[protocolo](arquitetura/RECUPERACAO_OPERACOES_ETAPA_7.md) enumera as 23 mutações;
 infraestrutura comum não dispensa comprovação das classes utilizadas. Recibos,
 rascunhos e contexto precisam sobreviver às navegações/reconsultas previstas,
 preservando a limpeza de sessão e a distinção de `null` na criação de pendências.
@@ -258,6 +263,63 @@ Nunca inclua senha no prompt, em documentação ou em arquivos versionados.
 padrão em `/tmp/schema_ambulatorio_docker.sql` e não substitui a evidência oficial.
 Enquanto a autorização institucional estiver pendente, `importer-run` deve
 receber exclusivamente fixtures sintéticas.
+
+## Entrega integrada de funcionalidades humanas
+
+Regra permanente determinada pelo responsável após a
+[avaliação humana M3](validacoes/AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md):
+nenhuma funcionalidade destinada ao usuário está concluída apenas por ter backend
+funcional. Ciclo padrão: **CONTRATO → BACKEND → FRONTEND → INTEGRAÇÃO → TESTES →
+VALIDAÇÃO VISUAL → EVIDÊNCIAS → COMMIT**. A ordem pode acompanhar dependências; nenhum
+critério pode ser omitido. Componentes exclusivamente internos podem ter exceção
+justificada no relatório, indicando por que não possuem interação humana.
+Um recorte B pode ser validado tecnicamente sem concluir sua capacidade de produto.
+
+O backend pode ser implementado primeiro. Para funcionalidades destinadas ao
+usuário, o Definition of Done exige interface correspondente na mesma unidade,
+conectada à API real, autorização, persistência/releitura, erros/carga/vazio,
+consistência com a referência oficial e fluxos positivos e negativos relevantes.
+Backend isolado é incremento parcial, mesmo com seus testes aprovados.
+
+Preservar endpoints e contratos comprovados; evoluir incrementalmente e reutilizar
+serviços. Não criar rotas sem necessidade funcional. Se uma mudança de contrato
+for indispensável, identificar consumidores, coordenar backend/frontend,
+preservar compatibilidade quando possível, executar regressões e documentar as
+incompatibilidades inevitáveis.
+
+### DoD e prontidão arquitetural
+
+Antes da implementação, explicitar campos/destinos HTTP, escopo por perfil,
+semântica de desconhecido/omissão, transação, auditoria, versões/conflitos e
+recuperação. Indicar contratos suficientes e decisões ainda abertas; prioridade
+não aprova permissões, política institucional ou regra clínica ausente.
+
+| Gate | Evidência exigida para a função humana |
+| --- | --- |
+| Contrato e backend | API real/autorizada, campos completos, validação sanitizada, persistência, auditoria e concorrência/recuperação pertinentes |
+| Frontend e navegação | Rotas e retorno ao contexto correto; formulários completos, dados reais da API e controles por permissão |
+| Estados e feedback | Carga, vazio, sucesso, erro específico, acesso recusado, conflito e resultado incerto distintos; sem zeros/sucesso fictícios |
+| Validação acessível | Campo/label/motivo, destaque e associação acessível, resumo navegável e foco no erro; valores válidos/rascunho preservados na tentativa inválida |
+| Integração e recuperação | Navegador/API/PostgreSQL sintético, persistência/releitura; novo/existente, perfis, revogação, conflito e falha de rede sem duplicação conforme impacto |
+| Interação e visual | Responsividade, teclado/foco e comparação com referência aplicável; diferenças/limites registrados, sem chamar captura isolada de aprovação |
+| Rastreabilidade | IDs oficiais, critérios por recorte, fonte/versionamento/ambiente, testes executados e limitações; matriz de cobertura atualizada e aceite humano separado |
+
+Erro de validação conhecido deve identificar campo/caminho seguro, código estável,
+rótulo legível, motivo e formato esperado quando pertinente. O frontend deve
+associá-lo ao controle, usar `aria-invalid`/descrição e resumo acessível com links
+para o campo/etapa correta, incluindo coleções. A falha não apaga formulário nem
+dados válidos. Autorização, conflito e falha inesperada têm tratamento distinto;
+401/troca de identidade continuam limpando dados conforme a política de segurança.
+Não expor SQL, stack, tokens, hashes, credenciais ou dados não autorizados.
+Erro inesperado usa mensagem genérica segura e correlação somente quando disponível;
+não inventar identificador nem transformar erro desconhecido em erro de um campo.
+
+A [matriz de cobertura frontend](frontend/MATRIZ_FIGMA_FRONTEND.md#cobertura-funcional-dirigida-após-avaliação-humana)
+usa as mesmas unidades FM/RQ do catálogo: funcionalidade→B→U→integração→testes→
+visual→pendências. Não criar catálogo paralelo ou percentual sem denominador.
+Gate ausente significa recorte parcial ou não pronto; auditoria documental não
+significa reprodução técnica. Aplicar os testes proporcionais abaixo; não repetir
+suítes funcionais numa entrega exclusivamente documental.
 
 ## Validação proporcional
 

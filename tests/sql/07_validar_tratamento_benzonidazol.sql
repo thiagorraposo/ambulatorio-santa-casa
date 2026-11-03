@@ -237,12 +237,17 @@ BEGIN
     RETURNING tratamento_benzonidazol_id INTO v_tratamento_cascade;
     INSERT INTO reacao_adversa_benzonidazol (tratamento_benzonidazol_id, descricao)
     VALUES (v_tratamento_cascade, 'Reacao sintetica cascade');
-    DELETE FROM paciente WHERE paciente_id = v_paciente_cascade;
-    IF EXISTS (SELECT 1 FROM tratamento_benzonidazol
-                WHERE tratamento_benzonidazol_id = v_tratamento_cascade)
-       OR EXISTS (SELECT 1 FROM reacao_adversa_benzonidazol
-                   WHERE tratamento_benzonidazol_id = v_tratamento_cascade) THEN
-        RAISE EXCEPTION 'cenario 16: CASCADE do paciente falhou';
+    -- SQL72 captura a reação; FK continua CASCADE, mas histórico auditado não pode ser apagado.
+    BEGIN
+        DELETE FROM paciente WHERE paciente_id = v_paciente_cascade;
+        RAISE EXCEPTION 'cenario 16: exclusão de reação auditada por CASCADE foi aceita';
+    EXCEPTION WHEN check_violation THEN
+        IF SQLERRM <> 'auditoria_alvo_protegido' THEN RAISE; END IF;
+    END;
+    IF NOT EXISTS (SELECT 1 FROM paciente WHERE paciente_id = v_paciente_cascade)
+       OR NOT EXISTS (SELECT 1 FROM tratamento_benzonidazol WHERE tratamento_benzonidazol_id = v_tratamento_cascade)
+       OR NOT EXISTS (SELECT 1 FROM reacao_adversa_benzonidazol WHERE tratamento_benzonidazol_id = v_tratamento_cascade) THEN
+        RAISE EXCEPTION 'cenario 16: recusa de CASCADE não preservou pai e reação';
     END IF;
 
     IF EXISTS (SELECT 1 FROM reacao_adversa_benzonidazol
@@ -319,11 +324,15 @@ BEGIN
     INSERT INTO reacao_adversa_benzonidazol (tratamento_benzonidazol_id, descricao)
     VALUES (v_tratamento_preservado, 'Reacao para exclusao')
     RETURNING reacao_adversa_benzonidazol_id INTO v_reacao_cascade;
-    DELETE FROM tratamento_benzonidazol
-     WHERE tratamento_benzonidazol_id = v_tratamento_preservado;
-    IF EXISTS (SELECT 1 FROM reacao_adversa_benzonidazol
-                WHERE reacao_adversa_benzonidazol_id = v_reacao_cascade) THEN
-        RAISE EXCEPTION 'cenario 22: CASCADE do tratamento falhou';
+    BEGIN
+        DELETE FROM tratamento_benzonidazol WHERE tratamento_benzonidazol_id = v_tratamento_preservado;
+        RAISE EXCEPTION 'cenario 22: exclusão do tratamento com reação auditada foi aceita';
+    EXCEPTION WHEN check_violation THEN
+        IF SQLERRM <> 'auditoria_alvo_protegido' THEN RAISE; END IF;
+    END;
+    IF NOT EXISTS (SELECT 1 FROM tratamento_benzonidazol WHERE tratamento_benzonidazol_id = v_tratamento_preservado)
+       OR NOT EXISTS (SELECT 1 FROM reacao_adversa_benzonidazol WHERE reacao_adversa_benzonidazol_id = v_reacao_cascade) THEN
+        RAISE EXCEPTION 'cenario 22: recusa de exclusão não preservou tratamento/reação';
     END IF;
     RAISE NOTICE 'OK: cenarios 15-22, delecoes, multiplicidade e textos livres validados';
 

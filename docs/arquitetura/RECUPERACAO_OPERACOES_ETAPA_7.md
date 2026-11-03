@@ -181,7 +181,7 @@ sem retomar ou repetir o comando.
 
 ## Inventário exaustivo da entrega
 
-O inventário atual contém 18 mutações, incluindo sorologia, condição,
+O inventário atual contém 23 mutações, incluindo sorologia, condição,
 complicações e avaliação de comorbidades. As provas datadas da entrega original abaixo continuam cobrindo
 suas 14 mutações; as extensões têm evidências próprias nos relatórios 7B-E.
 
@@ -197,6 +197,11 @@ Todos os caminhos abaixo têm prefixo `/v1`; `:id` é o paciente.
 | 7B-E2B.1 | `POST /pacientes/:id/atendimentos/:atendimentoId/condicao-chagas` | `condicaoChagasId` (criação única, sem upsert) |
 | 7B-E2B.2 | `POST /pacientes/:id/atendimentos/:atendimentoId/complicacoes-chagas` | `complicacaoChagasId` (ocorrências repetíveis, uma por intenção) |
 | 7B-E3B.2 | `POST /pacientes/:id/atendimentos/:atendimentoId/comorbidades` | `avaliacaoComorbidadesId` (snapshot e filhos no mesmo COMMIT) |
+| 7B-E4B, AVC | `POST /pacientes/:id/avcs` | `eventoId` (afirmação longitudinal repetível) |
+| 7B-E4B, dispositivos | `POST /pacientes/:id/dispositivos` | `dispositivoId` (criação inicial única por paciente/tipo) |
+| 7B-E4B, óbito | `POST /pacientes/:id/obito` | `obitoId` (estado inicial único por paciente) |
+| 7B-E6B parâmetros | `POST /pacientes/:id/exames/:exameId/resultados` | `resultadoId` (parâmetro do exame canônico) |
+| 7C-E1B E1.2 | `POST /pacientes/:id/tratamento-bzn/reacoes` | `reacaoId` (uma ocorrência no canônico existente) |
 | R6B-A.1 | `POST /pacientes/:id/tratamento-bzn` | `tratamentoId` (inclui reações da criação) |
 | R6B-A.1 | `POST /pacientes/:id/retornos-bzn` | `retornoId` |
 | R6B-A.3 | `PUT /pacientes/:id/projetos` | `projetoId` |

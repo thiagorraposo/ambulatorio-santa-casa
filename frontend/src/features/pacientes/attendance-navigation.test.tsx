@@ -60,6 +60,32 @@ beforeEach(() => {
 });
 
 describe('retorno autorizado à ficha de origem', () => {
+  it('mantém a busca filtrada ao percorrer ficha, atendimento e ficha novamente', async () => {
+    const user = userEvent.setup();
+    const search = '/pacientes?nome=Pessoa&sexo=feminino&limit=1&offset=2';
+    const origin = `${patientPath}?${new URLSearchParams({ retorno: search })}&${source.split('?')[1]}`;
+    show(origin);
+    await user.click(screen.getByRole('link', { name: `Atendimento ${attendanceId}` }));
+    const back = screen.getByRole('link', { name: 'Voltar à ficha de origem' });
+    expect(back).toHaveAttribute('href', origin);
+    expect(screen.getByRole('link', { name: /^Pacientes$/ })).toHaveAttribute('href', search);
+    await user.click(back);
+    expect(screen.getByRole('navigation', { name: 'Caminho da página' })).toContainElement(
+      screen.getByRole('link', { name: /^Pacientes$/ }),
+    );
+    expect(screen.getByRole('link', { name: /^Pacientes$/ })).toHaveAttribute('href', search);
+  });
+
+  it.each(['https://outside.invalid', '/pacientes/2', '/pacientes?retorno=https%3A%2F%2Foutside.invalid']) (
+    'remove retorno de busca inválido ou recursivo sem perder a ficha: %s', search => {
+      const origin = `${patientPath}?${new URLSearchParams({ aba: 'atendimentos', retorno: search })}`;
+      const back = new URL(attendanceReturn(patientPath, origin)!, 'http://app.local');
+      expect(back.pathname).toBe(patientPath);
+      expect(back.searchParams.get('aba')).toBe('atendimentos');
+      expect(back.searchParams.get('retorno')).toBe(search.startsWith('/pacientes?') ? '/pacientes' : null);
+    },
+  );
+
   it('abre detalhe e retorna explicitamente à aba, seleção e páginas exatas da ficha', async () => {
     const user = userEvent.setup();
     show(source);
@@ -101,6 +127,7 @@ describe('retorno autorizado à ficha de origem', () => {
     'usa histórico padrão quando retorno é ausente ou inválido: %s', raw => {
       show(`${detailPath}${raw === null ? '' : `?${new URLSearchParams({ retorno: raw })}`}`);
       expect(screen.getByRole('link', { name: 'Histórico do paciente' })).toHaveAttribute('href', `${patientPath}?aba=atendimentos`);
+      expect(screen.getByRole('link', { name: /^Pacientes$/ })).toHaveAttribute('href', '/pacientes');
       expect(screen.queryByRole('link', { name: 'Voltar à ficha de origem' })).not.toBeInTheDocument();
     },
   );
@@ -121,5 +148,14 @@ describe('retorno autorizado à ficha de origem', () => {
     expect(attendanceReturn(patientPath, parsed.searchParams.get('retorno'))).toBe(clean);
     expect(attendanceDetailPath(patientPath, attendanceId, clean)).toBe(target);
     expect(attendanceDetailPath(patientPath, attendanceId, detailPath)).toBe(detailPath);
+  });
+  it('preserva retorno analítico dentro da ficha e identifica Dashboard no breadcrumb', () => {
+    const dashboard = '/dashboard?inicio=2026-10-01&fim=2026-10-31&offset=20&nome=Ana';
+    const record = `${patientPath}?aba=atendimentos&${new URLSearchParams({ retorno: dashboard })}`;
+    const detail = attendanceDetailPath(patientPath, attendanceId, record);
+    expect(attendanceReturn(patientPath, new URL(detail, 'http://app.local').searchParams.get('retorno'))).toBe(record);
+    show(detail);
+    expect(screen.getByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', dashboard);
+    expect(screen.getByRole('link', { name: 'Voltar à ficha de origem' })).toHaveAttribute('href', record);
   });
 });

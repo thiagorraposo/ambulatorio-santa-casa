@@ -1,7 +1,67 @@
 # Estado atual do projeto
 
-Atualizado em: 2026-10-31. Síntese de implementação e evidências existentes;
+**Continuidade M3 — 03/11/2026:** a revisão humana comparativa está
+temporariamente adiada para priorizar a continuidade de M3. As validações técnicas
+continuam obrigatórias e os aceites humanos permanecem pendentes. A restrição de
+congelamento anterior foi substituída pelo comando de continuidade, preservando
+seu histórico. Fila e checkpoint no [plano vigente](execucao/PLANO_M3_2026_11_03.md).
+As 306 unidades e 118 E2E anteriores foram aprovados por composição; não houve
+nova execução integral no último SHA. Novas evidências serão registradas por unidade.
+
+
+**Entrega funcional de03/11:** [cadastro/edição por Edição integrado](validacoes/VALIDACAO_CADASTRO_EDICAO_M3.md)
+validado tecnicamente, com vínculo específico atômico, atendimento e revogação.
+Migration74 somente descartável; aceitações humanas pendentes. Próxima unidade:
+[8D leitura administrativa de login/estado validada](validacoes/VALIDACAO_8D1_LOGIN_ESTADO.md);
+[identificação própria de Minha conta também validada](validacoes/VALIDACAO_8D1_MINHA_CONTA.md).
+[Perfil8D2B.1/U.1 integrado](validacoes/VALIDACAO_8D2_PERFIL.md): versão, justificativa,
+recibo, último administrador e revogação JWT. Migration75 somente descartável.
+[Estado8D2B.2/U.2 também integrado](validacoes/VALIDACAO_8D2_ESTADO.md), com
+47 SQL,213 unidades backend,325 frontend integrais e7 E2E focados. Migration76
+somente descartável. Seguir criação/provisionamento8D2B.3/U.3; família8D parcial.
+
+
+**Histórico da retomada visual de 03/11:** atendimento organizado nas 12 seções
+informacionais, pacientes/formulários/ficha e componentes compartilhados
+aproximados da referência. Contratos, perfis e confirmações próprias preservados.
+[Comparação renderizada, suporte por seção e validações](validacoes/ADEQUACAO_VISUAL_FRONTEND_2026_11_03.md).
+O congelamento abaixo descreve o candidato anterior; esta retomada não o substitui
+nem conclui M3/8V1/8V2.
+
+**Congelamento histórico para apresentação:** candidato `c4a3c99`, runtime
+preservado, builds e40 E2E aprovados e ensaio separado no navegador/API/PostgreSQL
+sintéticos. [SHA completo, roteiro, evidências, ressalvas e contingência](validacoes/CONGELAMENTO_DEMONSTRACAO_2026_11_02.md).
+HUM-M3-03 permanece aberto; M3 não concluído nem homologado. A restrição de
+expansão foi sucedida pela continuidade autorizada em03/11.
+
+**Decisões de produto aprovadas:** [produto M3 de02/11](dados/DECISOES_PRODUTO_M3_2026_11_02.md).
+A política autoriza vínculo automático específico ao cadastro por Edição;
+implementação e validação seguem o contrato da unidade, sem aceite automático.
+
+Atualizado em: 2026-11-02. Síntese de implementação e evidências existentes;
 esta atualização documental não reexecuta as suítes da aplicação.
+
+## Fotografia de02/11 após avaliação humana M3
+
+A avaliação com a equipe do Centro de Pesquisa em Saúde da Santa Casa foi
+**REALIZADA — COM PROBLEMAS IDENTIFICADOS**. **ACEITE INTEGRAL NÃO REGISTRADO**;
+data exata da sessão, ambiente efetivamente usado e commit não foram confirmados.
+Fonte: [relato formal do responsável e decisões de produto](validacoes/AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md).
+M1/M2 não são reabertos; as evidências abaixo permanecem válidas nos seus recortes.
+
+| Prioridade | Estado atual versus requisito novo | Próxima validação |
+| --- | --- | --- |
+| P0 · confirmação de atendimento | Falha humana relatada após novo cadastro; mensagem genérica, sem causa/HTTP/campo comprovados. Lacuna de feedback confirmada por inspeção, não reprodução | Reproduzir UI/API/PostgreSQL sintético; corrigir causa real e validar persistência novo/existente, erros por campo, permissão/conflito e recibo sem duplicação |
+| P1 · cadastro/edição por Edição | Nova política desejada ainda não validada. Cadastro atualmente restringe Edição em vinculo_explicito; PATCH cadastral versionado/auditado já existe | Contratar acesso inicial ao criado sem vínculo automático/global; capacidade/backend/UI, whitelist cadastral, perfis e releitura |
+| P1 · gestão8D | [Listagem e detalhe mínimos integrados](validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md#consulta-individual-mínima--retomada-de-6764cb8); ampliação ainda incompleta; criar conta agora explicitamente8D2B.3/U.3, USR20–24, preservando19EX | Mínimos determinados e P-08 específico; leitura, comandos, auditoria, sessão e provisão segura por recorte |
+| P1 · cobertura frontend | Recortes B/U tecnicamente comprovados não constituem frontend completo; insuficiência relatada pela equipe permanece aberta | [Matriz dirigida de cobertura](frontend/MATRIZ_FIGMA_FRONTEND.md#cobertura-funcional-dirigida-após-avaliação-humana), DoD/prontidão integrada e nova avaliação dos cenários afetados |
+
+Candidato funcional anterior `a84001a` preservado. A existência de um percurso
+sintético positivo não fecha a falha humana com entradas não conhecidas.
+Nesta entrega foram feitas somente inspeções de código e documentação; nenhum
+reteste clínico, migration, dado real ou alteração da aplicação. Não declarar
+M3 tecnicamente concluída, formalmente aceita, percentual de cobertura ou EVM.
+Retomada funcional: [checkpoint/fila P0→P1→P2](execucao/PLANO_M3_2026_11_03.md#5-fila-dinâmica-e-regra-de-seleção).
 
 ## Escopo e estágio
 
@@ -36,6 +96,8 @@ escopo. Detalhes clínicos/operacionais ainda abertos não são decisões aprova
 
 | M3 — 7B-E3B.2 | Avaliação própria por atendimento, itens triestado e histórico familiar livre; SQL68 sem backfill, autorização, captura e recibo atômico. | [Contrato](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md)/[validação](validacoes/VALIDACAO_7B_E3B_2.md); tecnicamente validada, interface/aceite separados. |
 | M3 — 7B-E3U | Interface de avaliação por consulta: catálogo paginado, triestado, relato familiar, revisão, rascunho e recuperação por recibo. | [Validação](validacoes/VALIDACAO_7B_E3U.md); build, 259 unidades na composição 256+3 e quatro E2E novos por rodadas focadas. Baseline anterior de 76 E2E preservada, sem repetir a suíte completa; aceite humano pendente. |
+
+| M3 — 7B-E4B, recorte AVC | GET/POST longitudinal por paciente, quatro campos, captura SQL69, paginação e recibo; sem vínculo artificial com atendimento. | [Contrato](arquitetura/CONTRATO_EVENTOS_7B_E4B.md)/[prova](validacoes/VALIDACAO_7B_E4B_AVC.md); 183 unidades, 8 fundação, 110 HTTP, SQL/importador/upgrade validados. Interface E4U e demais EVT pendentes. |
 
 M2/VU1 está **aprovado por aceite humano em 31/10/2026**, conforme confirmação
 expressa do responsável de que passou em todos os testes de aceite humano.
@@ -103,3 +165,66 @@ Resultados e limitações por rodada estão no [índice de validações](validac
 A [fotografia anterior à reorganização](historico/ESTADO_2026_10_23.md) preserva
 integralmente as continuidades e contagens antes misturadas a esta síntese.
 O [registro de alterações](REGISTRO_DE_ALTERACOES.md) mantém a cronologia oficial.
+
+Continuidade E4U AVC: interface longitudinal implementada, com build/261 unidades
+e dois E2E reais focados aprovados. [Provas e limites](validacoes/VALIDACAO_7B_E4U_AVC.md);
+comparação visual renderizada e aceite humano permanecem pendentes.
+
+E4B marcapasso/CDI: backend de leitura/criação inicial implementado sobre SQL10,
+com captura70 e409 em existente; [provas](validacoes/VALIDACAO_7B_E4B_DISPOSITIVOS.md).
+Interface e aceite humano próprios, sem presumir resincronizador ou correção.
+
+E4U marcapasso/CDI implementada e validada tecnicamente no recorte inicial:
+[build/262 unidades/dois E2E/comparação renderizada](validacoes/VALIDACAO_7B_E4U_DISPOSITIVOS.md).
+Aceite humano/visual integral e demais EVT permanecem separados.
+
+E4B óbito inicial com data completa implementado conforme SQL10, sem upsert ou
+inferência; [provas e limites](validacoes/VALIDACAO_7B_E4B_OBITO.md). Interface,
+precisão parcial, aceite e conclusão do agregado permanecem separados.
+
+E4U óbito inicial: interface integrada e VALIDADA TECNICAMENTE sobre fa2329d,
+com build/263 unidades/dois E2E reais, recuperação e comparação renderizada.
+[Provas e limites](validacoes/VALIDACAO_7B_E4U_OBITO.md). Precisão parcial,
+ressincronizador, demais EVT e aceites continuam separados. Próxima: 7B-E5B,
+conferir contrato e modelo de medicamentos antes de publicar escrita.
+
+7B-E5B: recorte de catálogo/consulta de medicamentos por atendimento VALIDADO
+TECNICAMENTE (186 unidades e15 HTTP reais). [Contrato](arquitetura/CONTRATO_MEDICAMENTOS_7B_E5B.md)
+e [provas](validacoes/VALIDACAO_7B_E5B_LEITURA.md). Escrita integral depende de
+identificação/apresentação/unidade/cronologia definidas; leitura E5U pode avançar
+independentemente, sem prescrição ou alterações de legado.
+
+7B-E5U consulta de medicamentos VALIDADA TECNICAMENTE, sobre cfcdf60:
+[build/264 unidades/dois E2E reais](validacoes/VALIDACAO_7B_E5U_LEITURA.md).
+Cadastro de medicamentos e aceite integral seguem pendentes; próximo passo da
+fila é conferir o contrato7B-E6B de resultados antes de implementar a escrita.
+
+7C-E1B E1.2, reação isolada BZN: backend VALIDADO TECNICAMENTE sobre SQL15,
+com captura72; [contrato](arquitetura/CONTRATO_REACOES_BZN_7C_E1B.md) e
+[provas](validacoes/VALIDACAO_7C_E1B_REACOES.md). Próxima elegível: E1.2 de7C-E1U.
+E1.1 não incluída. E6 exige contrato para resultados no exame canônico H6:
+SQL07 liga resultados à estrutura legada; não equiparar IDs nem migrar legado.
+Essa lacuna técnica não foi declarada decisão clínica aprovada ou bloqueio humano.
+
+7C-E1U E1.2, reação isolada BZN: interface VALIDADA TECNICAMENTE com cinco
+campos/revisão/rascunho/recuperação e múltiplas intenções; [provas/limites](validacoes/VALIDACAO_7C_E1U_REACOES.md).
+E1.1/aceite continuam pendentes. Próxima: contrato7B-E6B para parâmetros no exame
+canônico, sem reutilizar a FK legada SQL07 ou inferir resultados/datas/diagnóstico.
+
+7B-E6B parâmetros do exame canônico VALIDADO TECNICAMENTE: RQ-EXA-09–13/16,
+SQL73,188 unidades/137 HTTP/44 SQL/upgrade sem backfill. [Contrato e limites](arquitetura/CONTRATO_RESULTADOS_7B_E6B.md).
+Vínculo canônico definido tecnicamente sem reinterpretar legado SQL07; valores
+textuais humanos, nenhum cálculo. Próxima: E6U desse recorte; datas/status do pai,
+correções e aceite integral continuam pendentes.
+
+
+Continuidade de 02/11/2026: [E6U parâmetros](validacoes/VALIDACAO_7B_E6U_PARAMETROS.md)
+VALIDADA TECNICAMENTE no recorte RQ-EXA-09–13/16, com API/PostgreSQL sintético,
+revisão e recuperação. Datas/status do pai e aceite humano permanecem pendentes.
+Próximas unidades e estado operacional no [checkpoint único](execucao/PLANO_M3_2026_11_03.md#10-checkpoint-único-e-transferência-de-contexto).
+
+
+Estado consolidado da retomada02/11: [entregas, regressão composta, candidato
+a84001a e gates](validacoes/RELATORIO_EXECUCAO_M3_2026_11_02.md). Demonstração
+sintética disponível para revisão; sem aceite humano novo ou conclusão deM3.
+Contagem de janelas/horas não consolidada; não afirmar três janelas completas.

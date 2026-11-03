@@ -1,0 +1,14 @@
+{
+  "sha": "c4a3c998f1b25addac65e1c79fb2b6a00f3fac73",
+  "branch": "feat/m3-janela-1-eventos",
+  "frontend": "http://127.0.0.1:4177",
+  "api": "http://127.0.0.1:6062",
+  "pgPort": 55458,
+  "engine": "153.0.8010.12",
+  "viewports": [
+    1440,
+    390,
+    320
+  ],
+  "data": "exclusivamente sintéticos"
+}

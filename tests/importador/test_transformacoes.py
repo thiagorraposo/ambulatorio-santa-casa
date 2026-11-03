@@ -8,7 +8,8 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
-from importar_planilha import bzn_duration, bool_value, date_value, normalized, number_value, HANDLED_TABLES, Importer, NONCRITICAL_POLICY, PROMOTION_REGISTRY, RowConflict, main
+from importador.psql import Database
+from importar_planilha import bzn_duration, bool_value, date_value, normalized, number_value, HANDLED_TABLES, Importer, import_issue_code, NONCRITICAL_POLICY, PROMOTION_REGISTRY, RowConflict, main
 
 
 class FinalidadeImportacaoTest(unittest.TestCase):
@@ -420,6 +421,62 @@ class ReconciliacaoBznTest(unittest.TestCase):
                                  f"tratamento_benzonidazol.{field}: divergência consolidada")
                 self.importer.insert_returning.assert_not_called()
                 self.importer.provenance.assert_not_called()
+
+
+
+
+class ImportIssueCodeTest(unittest.TestCase):
+    def test_vocabulary_and_priority_never_echo_source(self):
+        cases = [
+            ("importada", "SEGREDO", None),
+            ("importada_com_pendencia", "SEGREDO", "pendencia_nao_promovida"),
+            ("pendente", "SEGREDO", "falha_operacional"),
+            ("rejeitada", "SEGREDO data inválida", "data_invalida"),
+            ("rejeitada", "SEGREDO catálogo sintético inexistente", "catalogo_indisponivel"),
+            ("rejeitada", "SEGREDO conflito com data inválida", "data_invalida"),
+            ("rejeitada", "SEGREDO sem causa conhecida", "linha_rejeitada"),
+        ]
+        for status, message, expected in cases:
+            with self.subTest(status=status, expected=expected):
+                self.assertEqual(import_issue_code(status, message), expected)
+
+
+class DryRunTransactionBoundaryTest(unittest.TestCase):
+    def database(self):
+        db = Database.__new__(Database)
+        db.rollback_only = True
+        db.savepoint_active = False
+        db.run = Mock()
+        return db
+
+    def test_rejects_boundary_without_savepoint_without_sql_or_outer_rollback(self):
+        db = self.database()
+        for command in ("ROLLBACK", "COMMIT"):
+            with self.subTest(command=command), self.assertRaises(RuntimeError):
+                db.transaction(command)
+        with self.assertRaises(ValueError):
+            db.transaction("ROLLBACK; BEGIN")
+        db.run.assert_not_called()
+
+    def test_rejected_row_rolls_back_only_its_savepoint_and_can_continue(self):
+        db = self.database()
+        db.transaction("BEGIN")
+        db.transaction("ROLLBACK")
+        db.transaction("BEGIN")
+        db.transaction("COMMIT")
+        self.assertEqual([call.args[0] for call in db.run.call_args_list], [
+            "SAVEPOINT importador_linha", "ROLLBACK TO SAVEPOINT importador_linha",
+            "RELEASE SAVEPOINT importador_linha", "SAVEPOINT importador_linha",
+            "RELEASE SAVEPOINT importador_linha"])
+        self.assertFalse(db.savepoint_active)
+
+    def test_nested_line_begin_is_refused_without_replacing_existing_savepoint(self):
+        db = self.database()
+        db.transaction("BEGIN")
+        with self.assertRaises(RuntimeError):
+            db.transaction("BEGIN")
+        db.run.assert_called_once_with("SAVEPOINT importador_linha")
+        self.assertTrue(db.savepoint_active)
 
 
 if __name__ == "__main__": unittest.main()

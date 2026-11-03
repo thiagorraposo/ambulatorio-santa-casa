@@ -1,5 +1,12 @@
 # Modelo Físico Atual
 
+**Evolução incremental de03/11:** migration74 acrescenta vínculo automático
+específico ao cadastro por Edição e revogação na inativação; eventos podem
+registrar principal_db sem ator funcional para operações de infraestrutura.
+Validada somente em bancos descartáveis, sem backfill ou atualização do dump
+aplicado persistente. [Contrato e efeitos](arquitetura/CONTRATO_CADASTRO_EDICAO_M3.md).
+
+
 Atualizado em: 2026-10-01
 
 As seções iniciais descrevem a estrutura física aplicada no schema `ambulatorio`,
@@ -1239,3 +1246,43 @@ de revisão temporal; aplicação somente SELECT/INSERT e sequências USAGE.
 Não altera SQL06/importador, não copia legado nem atualiza este dump persistente.
 [Contrato/ADR-026](arquitetura/CONTRATO_COMORBIDADES_7B_E3B.md) e
 [evidência](validacoes/VALIDACAO_7B_E3B_2.md).
+
+## Evolução SQL69 — somente descartáveis
+
+Ativa prospectivamente tipo_evento/ocorreu/descricao/observacoes na captura de
+`evento_clinico`, preservando ano_evento, ACLs, funções e gatilhos anteriores.
+Guard só dos quatro campos novos mantém revisão anual D8. Não cria tabela,
+FK de atendimento, backfill nem altera este dump persistente.
+[Contrato e limites](arquitetura/CONTRATO_EVENTOS_7B_E4B.md).
+
+## Evolução SQL70 — somente descartáveis
+
+Captura prospectiva de tipo_dispositivo/possui_dispositivo/observacoes na tabela
+existente, com guard temporal específico. Sem backfill, alteração de ACLs,
+funções/gatilhos anteriores, cardinalidade ou FK de atendimento. Upgrade69→70
+confere legado e segurança. [Evidência](validacoes/VALIDACAO_7B_E4B_DISPOSITIVOS.md).
+
+## Evolução SQL71 — somente descartáveis
+
+Captura prospectiva de houve_obito/data_obito/causa_obito/observacoes em obito
+existente, guard temporal específico e nenhuma alteração de ACL/função/gatilho
+compartilhado. Sem backfill, snapshot por consulta ou data parcial fabricada.
+[Contrato/provas](validacoes/VALIDACAO_7B_E4B_OBITO.md).
+
+## Evolução SQL72 — somente descartáveis
+
+Reutiliza reacao_adversa_benzonidazol(SQL15), cinco campos prospectivos, sem
+backfill. Resolve paciente pela FK do tratamento, preservando os destinos
+anteriores. Captura/proteção histórica compartilhada e guard de revisão específico;
+ACLs originais de aplicação/importador preservadas. FKs continuam CASCADE, mas
+reações já auditadas não podem ser apagadas, inclusive pela cascata. Upgrade71→72
+validado; [provas](validacoes/VALIDACAO_7C_E1B_REACOES.md). Dump persistente não atualizado.
+
+## Evolução SQL73 — somente descartáveis
+
+Nova paciente_exame_resultado, FK RESTRICT ao exame canônico do paciente,
+parâmetros textuais humanos repetíveis, sem unicidade clínica. SQL07 preservada.
+Captura seis campos, resolução por FK e guard temporal fechado. Aplicação lê/insere;
+importador não escreve. Sem backfill ou mudança do pai/ACLs antigas. Upgrade72→73
+validado com legado coexistente; [provas](validacoes/VALIDACAO_7B_E6B_PARAMETROS.md).
+Dump persistente não atualizado.

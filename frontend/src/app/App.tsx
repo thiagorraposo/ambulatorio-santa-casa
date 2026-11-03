@@ -1,3 +1,18 @@
+import DashboardPage from '../features/dashboard/DashboardPage';
+import HomePage from '../features/home/HomePage';
+import AlterarSenha from '../features/usuarios/AlterarSenha';
+import UsuariosPage from '../features/usuarios/UsuariosPage';
+import ResultadosExamePage from '../features/resultados-exame/ResultadosExamePage';
+import ResultadoExameCreatePage from '../features/resultados-exame/ResultadoExameCreatePage';
+import ReacoesBznPage from '../features/reacoes-bzn/ReacoesBznPage';
+import ReacaoBznCreatePage from '../features/reacoes-bzn/ReacaoBznCreatePage';
+import MedicamentosPage from '../features/medicamentos/MedicamentosPage';
+import ObitoPage from '../features/obito/ObitoPage';
+import ObitoCreatePage from '../features/obito/ObitoCreatePage';
+import DispositivosPage from '../features/dispositivos/DispositivosPage';
+import DispositivoCreatePage from '../features/dispositivos/DispositivoCreatePage';
+import AvcsPage from '../features/avcs/AvcsPage';
+import AvcCreatePage from '../features/avcs/AvcCreatePage';
 import ComorbidadesPage from '../features/comorbidades/ComorbidadesPage';
 import ComorbidadesCreatePage from '../features/comorbidades/ComorbidadesCreatePage';
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
@@ -34,9 +49,9 @@ export function returnDestination(value: string | null): string {
 function RouteEffects() {
   const location = useLocation();
   useEffect(() => {
-    const name = location.pathname === '/login' ? 'Entrar' : location.pathname.startsWith('/pacientes')
+    const name = location.pathname === '/login' ? 'Entrar' : location.pathname === '/dashboard' ? 'Dashboard' : location.pathname.startsWith('/pacientes')
       ? 'Pacientes' : location.pathname.startsWith('/importacoes') ? 'Importações'
-      : location.pathname === '/minha-conta' ? 'Minha conta' : 'Início';
+      : location.pathname === '/minha-conta' ? 'Minha conta' : location.pathname === '/usuarios' || location.pathname.startsWith('/usuarios/') ? 'Usuários' : 'Início';
     document.title = `${name} | Ambulatório Santa Casa`;
     if (location.pathname !== '/login') document.querySelector<HTMLElement>('#conteudo')?.focus();
   }, [location.key, location.pathname]);
@@ -71,7 +86,7 @@ function LoginPage() {
   };
   return <main className="login-page" id="conteudo" tabIndex={-1}>
     <div className="login-brand"><span className="brand-mark" aria-hidden="true">+</span>
-      <p>Ambulatório <strong>Santa Casa</strong></p></div>
+      <p><strong>Centro de Pesquisa em Saúde</strong>Ambulatório Santa Casa<small>Sistema de Gestão Ambulatorial</small></p></div>
     <Card className="login-card">
       <PageHeading title="Entre na sua conta" description="Consulte os registros do ambulatório com seu acesso institucional." />
       {session.reason && session.reason !== 'signed_out' && <p className="notice" role="status">
@@ -101,7 +116,7 @@ function Layout({ children }: { children: ReactNode }) {
     <a className="skip-link" href="#conteudo">Ir para o conteúdo</a>
     <AppNavigation user={user} logout={session.logout} />
     <div className="workspace">
-      <header className="topbar"><span className="topbar-service">Ambulatório Santa Casa</span>
+      <header className="topbar"><span className="topbar-service">Centro de Pesquisa em Saúde — Hospital Santa Casa</span>
         <div className="topbar-identity"><span>{user.nome}</span>
           <span className="badge">{profiles[user.perfil]}</span></div></header>
       <main id="conteudo" className="page-content" tabIndex={-1}>{children}</main>
@@ -117,6 +132,7 @@ function ProtectedLayout() {
     const next = encodeURIComponent(`${location.pathname}${location.search}${location.hash}`);
     return <Navigate to={`/login?next=${next}`} replace />;
   }
+  if (session.user.trocaObrigatoria) return <main className="login-page" id="conteudo" tabIndex={-1}>{session.identityError ? <IdentityUnavailable /> : <AlterarSenha obrigatoria />}</main>;
   return <DraftProvider key={session.draftScope}><Layout>{session.identityError
     ? <IdentityUnavailable /> : <Outlet />}</Layout></DraftProvider>;
 }
@@ -136,22 +152,6 @@ function IdentityUnavailable() {
   </div>;
 }
 
-function HomePage() {
-  return <>
-    <PageHeading title="Início" description="Encontre um paciente e consulte os registros disponíveis para seu acesso." />
-    <div className="home-grid">
-      <Card><span className="section-label">REGISTROS DO AMBULATÓRIO</span>
-        <h2>Consulte a ficha do paciente</h2>
-        <p>Busque por nome ou sexo para abrir dados pessoais, atendimentos e acompanhamento.</p>
-        <Link to="/pacientes" className="button">Consultar pacientes <span aria-hidden="true">→</span></Link>
-      </Card>
-      <Card><span className="section-label">SEU ACESSO</span><h2>Minha conta</h2>
-        <p>Confira sua identificação e o perfil de acesso informado pelo serviço.</p>
-        <Link to="/minha-conta" className="button button-secondary">Ver minha conta</Link>
-      </Card>
-    </div>
-  </>;
-}
 
 function AccountPage() {
   const session = useSession();
@@ -159,10 +159,12 @@ function AccountPage() {
   return <><PageHeading title="Minha conta" description="Confira sua identificação e seu perfil de acesso." />
     <Card><dl className="record-grid"><div><dt>Nome</dt><dd>{user.nome}</dd></div>
       <div><dt>ID do usuário</dt><dd className="mono">{user.usuarioId}</dd></div>
-      <div><dt>Perfil</dt><dd>{profiles[user.perfil]}</dd></div></dl>
-      <p className="muted">Para solicitar alterações no seu acesso, procure a equipe responsável pelo sistema.</p>
+      <div><dt>Perfil</dt><dd>{profiles[user.perfil]}</dd></div>
+      {user.login !== undefined && <div><dt>Login</dt><dd>{user.login}</dd></div>}
+      {user.ativo !== undefined && <div><dt>Situação da conta</dt><dd>{user.ativo ? 'Ativa' : 'Inativa'}</dd></div>}</dl>
+      <p className="muted">Procure um administrador autorizado da unidade</p>
       <button className="button button-secondary" onClick={session.logout}>Sair da conta</button>
-    </Card></>;
+    </Card><AlterarSenha /></>;
 }
 
 function NotFoundPage() {
@@ -176,6 +178,9 @@ export default function App() {
     <Route path="/login" element={<LoginPage />} />
     <Route element={<ProtectedLayout />}>
       <Route index element={<HomePage />} />
+      <Route path="/dashboard" element={<DashboardPage title="Dashboard" />} />
+      <Route path="/usuarios" element={<UsuariosPage />} />
+      <Route path="/usuarios/:usuarioId" element={<UsuariosPage />} />
       <Route path="/pacientes" element={<PatientsPage />} />
       <Route path="/pacientes/novo" element={<PatientFormPage />} />
       <Route path="/pacientes/:pacienteId/editar" element={<PatientFormPage />} />
@@ -184,8 +189,19 @@ export default function App() {
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/editar" element={<AttendanceFormPage />} />
       <Route path="/pacientes/:pacienteId" element={<PatientPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId" element={<AttendancePage />} />
+      <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/medicamentos" element={<MedicamentosPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias" element={<SorologiasPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/sorologias/nova" element={<SorologiaCreatePage />} />
+      <Route path="/pacientes/:pacienteId/exames/:exameId/resultados" element={<ResultadosExamePage />} />
+      <Route path="/pacientes/:pacienteId/exames/:exameId/resultados/nova" element={<ResultadoExameCreatePage />} />
+      <Route path="/pacientes/:pacienteId/tratamento-bzn/reacoes" element={<ReacoesBznPage />} />
+      <Route path="/pacientes/:pacienteId/tratamento-bzn/reacoes/nova" element={<ReacaoBznCreatePage />} />
+      <Route path="/pacientes/:pacienteId/obito" element={<ObitoPage />} />
+      <Route path="/pacientes/:pacienteId/obito/nova" element={<ObitoCreatePage />} />
+      <Route path="/pacientes/:pacienteId/dispositivos" element={<DispositivosPage />} />
+      <Route path="/pacientes/:pacienteId/dispositivos/nova" element={<DispositivoCreatePage />} />
+      <Route path="/pacientes/:pacienteId/avcs" element={<AvcsPage />} />
+      <Route path="/pacientes/:pacienteId/avcs/nova" element={<AvcCreatePage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/comorbidades" element={<ComorbidadesPage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/comorbidades/nova" element={<ComorbidadesCreatePage />} />
       <Route path="/pacientes/:pacienteId/atendimentos/:atendimentoId/condicao-chagas" element={<CondicaoPage />} />

@@ -45,7 +45,7 @@ export class RecursosClinicosService {
     });
   }
 
-  async saveProject(user: AuthenticatedUser, patientId: string, dto: ProjectDto): Promise<{ projetoId: string }> {
+  async saveProject(user: AuthenticatedUser, patientId: string, dto: ProjectDto, createOnly = false): Promise<{ projetoId: string }> {
     return this.patientOperation(user, patientId, true, async tx => {
       const project = await tx.query('SELECT 1 FROM projeto_estudo WHERE projeto_estudo_id=$1 AND ativo FOR SHARE', [dto.projetoId]);
       if (!project.rowCount) throw new BadRequestException('Projeto ativo não encontrado');
@@ -59,9 +59,11 @@ export class RecursosClinicosService {
       const insertColumns = changes.map(([column]) => column).join(',');
       const insertPositions = changes.map((_, i) => `$${i + 3}`).join(',');
       const updates = changes.map(([column]) => `${column}=EXCLUDED.${column}`).join(',');
-      await tx.query(`INSERT INTO paciente_projeto_estudo(paciente_id,projeto_estudo_id,${insertColumns})
+      const saved = await tx.query(`INSERT INTO paciente_projeto_estudo(paciente_id,projeto_estudo_id,${insertColumns})
         VALUES($1,$2,${insertPositions}) ON CONFLICT(paciente_id,projeto_estudo_id)
-        DO UPDATE SET ${updates},atualizado_em=CURRENT_TIMESTAMP`, [patientId,dto.projetoId,...values]);
+        ${createOnly ? 'DO NOTHING' : `DO UPDATE SET ${updates},atualizado_em=CURRENT_TIMESTAMP`}
+        RETURNING projeto_estudo_id`, [patientId,dto.projetoId,...values]);
+      if (createOnly && !saved.rowCount) throw new ConflictException('Projeto já registrado; consulte o vínculo existente');
       return { projetoId: dto.projetoId };
     });
   }
@@ -76,7 +78,7 @@ export class RecursosClinicosService {
     });
   }
 
-  async saveNotification(user: AuthenticatedUser, patientId: string, dto: NotificationDto): Promise<{ notificacaoId: string }> {
+  async saveNotification(user: AuthenticatedUser, patientId: string, dto: NotificationDto, createOnly = false): Promise<{ notificacaoId: string }> {
     return this.patientOperation(user, patientId, true, async tx => {
       const columns = [
         ['paciente_notificado', dto.pacienteNotificado], ['numero_notificacao', dto.numeroNotificacao],
@@ -89,8 +91,9 @@ export class RecursosClinicosService {
       const positions = changes.map((_, i) => `$${i + 2}`).join(',');
       const updates = changes.map(([name]) => `${name}=EXCLUDED.${name}`).join(',');
       const result = await tx.query<{ notificacao_id: string }>(`INSERT INTO notificacao(paciente_id,${names}) VALUES($1,${positions})
-        ON CONFLICT(paciente_id) DO UPDATE SET ${updates},atualizado_em=CURRENT_TIMESTAMP
+        ON CONFLICT(paciente_id) ${createOnly ? 'DO NOTHING' : `DO UPDATE SET ${updates},atualizado_em=CURRENT_TIMESTAMP`}
         RETURNING notificacao_id::text`, [patientId,...values]);
+      if (createOnly && !result.rowCount) throw new ConflictException('Notificação já registrada; consulte o registro existente');
       return { notificacaoId: result.rows[0].notificacao_id };
     });
   }

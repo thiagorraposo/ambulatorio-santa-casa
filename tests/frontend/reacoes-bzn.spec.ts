@@ -1,0 +1,64 @@
+import {expect,test} from '@playwright/test';
+import {apiJson,seedPatient,signIn,assertAccessible,assertFitsViewport,loseResponseAfterCommit} from './stage7-helpers';
+test('E1.2 BZN: revisão, rascunho, duas intenções e confirmação perdida sem alterar canônico',async({page},info)=>{
+ const p=await seedPatient('Reações BZN');const path=`${p.path}/tratamento-bzn/reacoes`;
+ await apiJson('POST',`${p.path}/tratamento-bzn`,{iniciado:false,teveReacaoAdversa:null,temIndicacao:true});
+ const before=await apiJson<Record<string,unknown>>('GET',`${p.path}/tratamento-bzn`);
+ await signIn(page,'edicao',`${p.path}?aba=bzn&bznRetornosOffset=10`);
+ await page.getByRole('link',{name:'Reações do tratamento BZN',exact:true}).click();
+ await expect(page.getByRole('link',{name:'← Voltar à origem',exact:true})).toHaveAttribute('href',`${p.path}?aba=bzn&bznRetornosOffset=10`);
+ await page.getByRole('link',{name:'Registrar reação BZN',exact:true}).click();
+ await page.getByRole('button',{name:'Revisar reação BZN',exact:true}).click();
+ await expect(page.getByLabel('Descrição da reação',{exact:true})).toBeFocused();
+ await page.getByLabel('Descrição da reação',{exact:true}).fill('  Relato sintético sem interpretação  ');
+ await page.getByLabel('Gravidade informada',{exact:true}).fill('Gravidade literal sem escala');
+ await page.getByLabel('Data completa da reação',{exact:true}).fill('2026-02-01');
+ await page.getByLabel('Consequência informada',{exact:true}).fill('Consequência literal');
+ await page.getByLabel('Observações da reação',{exact:true}).fill('Observações literais');
+ await page.getByRole('link',{name:'← Voltar às reações',exact:true}).click();
+ await page.getByRole('dialog',{name:'Alterações não salvas',exact:true}).getByRole('button',{name:'Sair e manter rascunho',exact:true}).click();
+ await page.getByRole('link',{name:'Registrar reação BZN',exact:true}).click();
+ await expect(page.getByLabel('Gravidade informada',{exact:true})).toHaveValue('Gravidade literal sem escala');
+ for(const width of [1440,390,320]){
+  await page.setViewportSize({width,height:width===1440?960:844});await assertFitsViewport(page);await assertAccessible(page);
+  await page.screenshot({path:info.outputPath(`reacao-bzn-${width}.png`),fullPage:true});
+ }
+ await page.getByRole('button',{name:'Revisar reação BZN',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Revisão da reação BZN',exact:true})).toBeFocused();
+ await expect(page.getByRole('region',{name:'Resumo da reação BZN',exact:true}).locator('dt')).toHaveCount(5);
+ const lost=await loseResponseAfterCommit(page,'POST',path);
+ await page.getByRole('button',{name:'Confirmar reação BZN',exact:true}).click();
+ const sent=await lost.committed;expect(sent.status()).toBe(201);const first=(await sent.json()).reacaoId;
+ await page.getByRole('button',{name:'Verificar resultado do envio',exact:true}).click();
+ await expect(page.getByRole('heading',{name:`Reação confirmada ${first}`,exact:true})).toBeVisible();expect(lost.writes()).toBe(1);
+ await page.getByRole('button',{name:'Registrar outra reação',exact:true}).click();
+ await expect(page.getByLabel('Descrição da reação',{exact:true})).toHaveValue('');
+ await page.getByLabel('Descrição da reação',{exact:true}).fill('Segunda intenção sintética');
+ await page.getByRole('button',{name:'Revisar reação BZN',exact:true}).click();
+ const next=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===`/v1${path}`);
+ await page.getByRole('button',{name:'Confirmar reação BZN',exact:true}).click();const response=await next;expect(response.status()).toBe(201);
+ const second=(await response.json()).reacaoId;expect(second).not.toBe(first);
+ await expect(page.getByRole('heading',{name:`Reação confirmada ${first}`,exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:`Reação confirmada ${second}`,exact:true})).toBeVisible();
+ const rows=await apiJson<Array<Record<string,unknown>>>('GET',path);expect(rows).toHaveLength(2);
+ expect(rows[1]).toMatchObject({reacaoId:first,descricao:'  Relato sintético sem interpretação  ',gravidade:'Gravidade literal sem escala',
+  dataReacao:'2026-02-01',consequencia:'Consequência literal',observacoes:'Observações literais'});
+ expect(rows[0]).toMatchObject({reacaoId:second,dataReacao:null,gravidade:null});
+ const after=await apiJson<Record<string,unknown>>('GET',`${p.path}/tratamento-bzn`);
+ const {reacoes:ignoredBefore,...original}=before;const {reacoes:ignoredAfter,...unchanged}=after;expect(unchanged).toEqual(original);
+});
+test('E1.2 BZN: consulta só lê, paginação real, vazio e ausência do tratamento',async({page})=>{
+ const p=await seedPatient('Reações BZN paginação');const path=`${p.path}/tratamento-bzn/reacoes`;
+ await signIn(page,'edicao',`${path}/nova`);
+ await expect(page.getByText('É necessário um tratamento BZN já registrado para acrescentar uma reação.',{exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Confirmar reação BZN',exact:true})).toHaveCount(0);
+ expect(await apiJson('GET',`${p.path}/tratamento-bzn`)).toBeNull();
+ await apiJson('POST',`${p.path}/tratamento-bzn`,{observacoes:'Tratamento sintético'});
+ for(let n=1;n<=21;n++)await apiJson('POST',path,{descricao:`Relato sintético ${n}`});
+ await signIn(page,'consulta',path);await expect(page.getByRole('article')).toHaveCount(20);
+ await expect(page.getByRole('link',{name:'Registrar reação BZN',exact:true})).toHaveCount(0);
+ await page.getByRole('navigation',{name:'Paginação de reações BZN do paciente',exact:true}).getByRole('button',{name:'Próxima',exact:true}).click();
+ await expect(page.getByRole('article')).toHaveCount(1);
+ await expect(page.getByRole('article').getByText('Relato sintético 1',{exact:true})).toBeVisible();
+ await signIn(page,'consulta',`${path}/nova`);await expect(page.getByRole('heading',{name:'Acesso de consulta',exact:true})).toBeVisible();
+});

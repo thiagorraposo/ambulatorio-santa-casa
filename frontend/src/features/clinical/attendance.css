@@ -1,0 +1,47 @@
+/* Fluxo contínuo das 12 seções oficiais; contratos e entidades clínicas preservados. */
+.attendance-workflow { background: transparent; border: 0; padding: 0; box-shadow: none; max-width: 64rem; margin-inline: auto; }
+.attendance-layout { display: grid; grid-template-columns: 14rem minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+.attendance-sidebar { background: #fff; border: 1px solid var(--border); border-radius: .5rem; overflow: hidden; }
+.attendance-workflow .attendance-sidebar h2 { padding: .7rem .85rem; margin: 0; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-size: .75rem; }
+.attendance-sidebar nav { padding: .5rem 0; }
+.attendance-sidebar button { display: flex; align-items: center; gap: .6rem; width: 100%; padding: .375rem .8rem; border: 0; background: #fff; text-align: left; color: var(--muted); cursor: pointer; line-height: 1.3; font-size: .8rem; }
+.attendance-sidebar button:hover { background: #f4f6f9; }
+.attendance-sidebar button[aria-current] { background: #e8eef8; color: var(--primary); font-weight: 600; }
+.section-number { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: #f0f3f7; width: 1.4rem; height: 1.4rem; flex-shrink: 0; }
+[aria-current] > .section-number { background: var(--primary); color: white; }
+.attendance-sidebar small { display: block; font-size: .68rem; margin-top: .15rem; }
+.attendance-sidebar p { padding: .7rem .85rem; margin: 0; border-top: 1px solid var(--border); font-size: .75rem; color: var(--muted); }
+.attendance-content { min-width: 0; position: relative; }
+.attendance-content > .form-section, .complementary-section { background: white; padding: 1.25rem; border: 1px solid var(--border); border-radius: .5rem; }
+.attendance-content > .form-section > legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.attendance-content > .form-section > h2, .complementary-section > h2 { margin: -1.25rem -1.25rem 1.25rem; padding: 1rem 6.5rem 1rem 1.25rem; border-bottom: 1px solid var(--border); font-size: .95rem; }
+.attendance-content > .form-section > .form-section { border: 0; padding: 0; }
+.attendance-content > .form-section > .form-section > legend { font-size: .8rem; color: var(--muted); padding: 0; margin-bottom: .75rem; }
+.attendance-content .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+.attendance-content > .form-section:first-of-type .form-section:first-of-type .form-grid { grid-template-columns: minmax(0, 1fr); }
+.attendance-content > .form-section:first-of-type .form-section:first-of-type > legend,
+.attendance-content > .form-section:first-of-type .form-section:last-of-type > legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.section-progress { position: absolute; right: 1.25rem; top: 1rem; margin: 0; color: var(--muted); font-size: .75rem; max-width: 5.5rem; text-align: right; }
+.attendance-actions { justify-content: flex-end; }
+.attendance-workflow form > .form-actions { justify-content: flex-end; }
+.attendance-patient { display: flex; align-items: center; gap: .8rem; padding: .85rem 1rem; background: white; border: 1px solid var(--border); border-radius: .5rem; max-width: 64rem; margin: 0 auto 1.25rem; }
+.attendance-patient p { margin: 0; font-size: .8rem; }
+.patient-avatar { display: flex; align-items: center; justify-content: center; background: #e8eef8; color: var(--primary); border-radius: 50%; width: 2.25rem; height: 2.25rem; flex-shrink: 0; font-weight: 600; }
+.section-has-error, .section-has-error small { color: #8f2525 !important; }
+@media (max-width: 800px) {
+ .attendance-layout { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+ .attendance-sidebar nav { display: flex; overflow-x: auto; padding: .5rem; gap: .35rem; }
+ .attendance-sidebar button { width: 10.5rem; flex: 0 0 auto; min-height: 3.4rem; border: 1px solid var(--border); border-radius: .35rem; }
+ .attendance-sidebar h2 { font-size: .8rem; }
+ .attendance-sidebar p { padding: .5rem .85rem; }
+ .attendance-content .form-grid { grid-template-columns: minmax(0, 1fr); }
+ .attendance-content > .form-section, .complementary-section { padding: 1rem; }
+ .attendance-content > .form-section > h2, .complementary-section > h2 { margin: -1rem -1rem 1rem; padding: 1rem 6rem 1rem 1rem; }
+ .attendance-workflow.card { padding: 0; }
+}
+.attendance-form-page { max-width: 53rem; margin-inline: auto; }
+.attendance-workflow.card { background: transparent; border: 0; padding: 0; box-shadow: none; }
+.attendance-layout { grid-template-columns: 12.5rem minmax(0, 1fr); }
+@media (max-width: 800px) { .attendance-layout { grid-template-columns: minmax(0, 1fr); } }
+
+.attendance-content details, .attendance-content dd { overflow-wrap: anywhere; }

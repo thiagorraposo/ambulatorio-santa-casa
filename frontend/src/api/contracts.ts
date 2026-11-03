@@ -6,12 +6,16 @@ export interface AuthUser {
   usuarioId: string;
   nome: string;
   perfil: Perfil;
+  login?: string;
+  ativo?: boolean;
+  trocaObrigatoria?: boolean;
 }
 
 export interface LoginResponse {
   accessToken: string;
   tokenType: 'Bearer';
   expiresIn: number;
+  trocaObrigatoria?: boolean;
 }
 
 export interface ColecaoPaginaResponse { limit: number; offset: number }
@@ -224,12 +228,21 @@ export type ImportacaoCodigoErro = 'falha_operacional' | 'campo_obrigatorio_ause
 
 export type ImportacaoFinalidade = 'carga_inicial' | 'mesmo_conteudo' | 'revisao';
 
+export interface ImportacaoRelatorioResponse {
+  totalLinhas: number;
+  linhasImportadas: number;
+  linhasComPendencia: number;
+  linhasRejeitadas: number;
+  codigosErro: { codigo: ImportacaoCodigoErro; total: number }[];
+}
+
 export interface ImportacaoSubmitResponse {
   codigoLote: string;
   codigoLoteSolicitado: string;
   dryRun: boolean;
   loteId: string | null;
   status: string;
+  relatorio: ImportacaoRelatorioResponse;
 }
 
 export interface ImportacaoLoteResponse {
@@ -303,4 +316,54 @@ export interface AvaliacaoComorbidadesResponse {
   itens: Array<{ itemId: string; comorbidadeId: string; nomeComorbidade: string;
     possuiComorbidade: boolean | null; observacoes: string | null }>;
   historicoFamiliar: { possuiDoenca: boolean | null; descricao: string | null } | null;
+}
+
+export interface AvcResponse { eventoId: string; pacienteId: string; tipo: 'avc'; ocorreu: boolean | null; anoEvento: number | null; descricao: string | null; observacoes: string | null }
+export interface AvcCriadoResponse { eventoId: string }
+
+export interface DispositivoResponse { dispositivoId: string; pacienteId: string; tipoDispositivo: 'marcapasso' | 'cdi'; possuiDispositivo: boolean | null; observacoes: string | null }
+export interface DispositivoCriadoResponse { dispositivoId: string }
+
+export interface ObitoResponse { obitoId: string; pacienteId: string; houveObito: boolean | null; dataObito: string | null; causaObito: string | null; observacoes: string | null }
+export interface ObitoCriadoResponse { obitoId: string }
+
+/** Consulta literal SQL09; não constitui prescrição ou histórico de catálogo. */
+export interface MedicamentoResponse {
+  atendimentoMedicamentoId: string;
+  atendimentoId: string;
+  medicamentoId: string | null;
+  codigoMedicamento: string | null;
+  nomeMedicamento: string | null;
+  principioAtivo: string | null;
+  classeMedicamento: string | null;
+  nomeMedicamentoLivre: string | null;
+  tipoRegistro: string | null;
+  finalidadeUso: string | null;
+  dose: string | null;
+  viaAdministracao: string | null;
+  frequencia: string | null;
+  dataInicio: string | null;
+  dataFim: string | null;
+  usoAtual: boolean | null;
+  prescritoNoAtendimento: boolean | null;
+  statusUso: string | null;
+  motivo: string | null;
+  observacoes: string | null;
+}
+
+export interface ReacaoBznOcorrenciaResponse {
+  reacaoId:string; tratamentoId:string; descricao:string|null; gravidade:string|null;
+  dataReacao:string|null; consequencia:string|null; observacoes:string|null;
+}
+export interface ReacaoBznCriadaResponse { reacaoId:string }
+
+export interface ResultadoExameResponse {
+  resultadoId:string;exameId:string;nomeParametro:string;valorInformado:string|null;unidadeInformada:string|null;
+  referenciaInformada:string|null;interpretacaoInformada:string|null;observacoes:string|null;
+}
+
+export interface ResultadoExameCriadoResponse {resultadoId:string}
+
+export interface UsuarioResumo {
+  usuarioId: string; nome: string; perfil: 'consulta' | 'edicao' | 'administracao'; login: string; ativo: boolean; versao?: string;
 }
