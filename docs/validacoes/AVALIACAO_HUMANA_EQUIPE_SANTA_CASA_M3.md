@@ -110,3 +110,18 @@ não testam as capacidades novas e não concedem aceite humano**. Alterações
 restritas a arquivosMarkdown emdocs; nenhuma suíte clínica, banco, runtime ou
 migration foi executada/modificada nesta entrega. Log documental de referência:
 `/tmp/ambulatorio-check-rsduympe/output.log` (volátil); revisão final antes do commit.
+
+## Achados adicionais recebidos na sprint final — 03/11/2026
+
+Fonte: novo relato do responsável; SHA/ambiente das tentativas humanas não
+confirmados. Não constitui homologação. O novo comando suspende expansão alheia
+à estabilização e exige ensaio técnico dos três perfis.
+
+| Achado | Defeito relatado | Tratamento técnico desta execução |
+| --- | --- | --- |
+| HUM-M3-06 · P0 | Qualidade desigual entre perfis, menus e funcionalidades dispersos, layout e navegação inconsistentes | Início por perfil e retornos contextualizados; ensaio e limitações no relatório abaixo |
+| HUM-M3-07 · P0 | Início e Dashboard praticamente equivalentes | Início operacional separado da análise |
+| HUM-M3-08 · P0 | Dashboard incompleto, filtros e exportação insuficientes | Filtros combinados, série/tabela/resultados e CSV autorizado auditado de todas as páginas |
+
+[Provas, versão e roteiro reproduzível](ESTABILIZACAO_FINAL_M3_2026_11_03.md).
+Correção técnica não encerra os achados por aceite humano; M3/8V1/8V2 pendentes.

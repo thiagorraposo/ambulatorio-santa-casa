@@ -39,6 +39,22 @@ nativos. Não há novas funcionalidades clínicas, permissões ou biblioteca de 
 As [evidências1440/390](evidencias/frontend_referencia_2026_11_03/README.md) incluem
 antes/depois e protótipo; não representam aprovação integral de8V1/8V2.
 
+## Estabilização final — Início e análise separados
+
+Início orienta o trabalho por perfil, com busca real de pacientes, instruções do
+percurso, cadastro condicionado à capacidade e atalhos para Dashboard, Importações,
+Minha conta e gestão administrativa. Não repete os indicadores analíticos.
+Dashboard combina período, nome, ID, sexo, participação em projeto e status de
+pendência; mantém filtros, ordenação e página na URL, permite limpeza individual
+ou geral e abre ficha/atendimento com retorno à análise. Ficha, edição, cancelamento
+e confirmação conservam a origem validada de Pacientes ou Dashboard.
+
+Dashboard inclui quatro indicadores reais, série mensal com tabela equivalente,
+resultados navegáveis e CSV de **todas** as páginas filtradas/ordenadas, até5.000
+atendimentos, com auditoria e proteção contra fórmulas. O CSV antigo da busca
+continua exportando apenas sua página. [Semântica e limites da API](arquitetura/CONTRATO_DASHBOARD_8B1.md#extensão-de-estabilização--filtros-série-e-csv-em-03112026).
+[Ensaio, versão demonstrável e contingência](validacoes/ESTABILIZACAO_FINAL_M3_2026_11_03.md).
+
 ## Preparação e comandos
 
 Use Node.js 24 e npm. As dependências são fixadas por `frontend/package-lock.json`.
@@ -78,7 +94,7 @@ O runner [`tests/frontend/test_e2e.sh`](../tests/frontend/test_e2e.sh) recebe
 `SYNTHETIC_PG_HOST`, `SYNTHETIC_PG_PORT`, `SYNTHETIC_PG_USER` e `PGPASSWORD` pelo
 ambiente, todos obrigatórios. O usuário deve poder criar banco e login de teste.
 Ele cria seu banco e roles de teste, aplica as
-migrations 02–73 apenas nesse banco, inicia API/Vite e encerra os recursos que
+migrations 02–79 apenas nesse banco, inicia API/Vite e encerra os recursos que
 criou.
 Não lê `.env` para selecionar o banco de teste. Não exige build do frontend para
 servir Vite; o build de produção é verificado separadamente por `frontend-check`.

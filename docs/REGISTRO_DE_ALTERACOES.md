@@ -1,5 +1,15 @@
 # Registro de Alterações
 
+## 2026-11-03 — Estabilizar experiência operacional e analítica dos três perfis
+
+Início por perfil separado de Dashboard; busca e tarefas reais, navegação com
+retorno preservado entre análise/busca, ficha e escrita/confirmação. Dashboard
+combina filtros autorizados, série mensal/tabela, resultados paginados e CSV de
+todas as páginas, até5.000, neutralizado e auditado pela nova migration79.
+Importações e fluxo único preservados; sem ampliar RBAC ou usar banco persistente.
+[Ensaio, validações, contingência e limites](validacoes/ESTABILIZACAO_FINAL_M3_2026_11_03.md).
+Novos achados humanos registrados sem homologação de M3/8V1/8V2.
+
 ## 2026-11-03 — Entregar dashboard básico com quatro indicadores reais
 
 API e interface de Início/Dashboard agregam pacientes autorizados, consultas
