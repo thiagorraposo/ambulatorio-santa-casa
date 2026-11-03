@@ -188,7 +188,7 @@ details[open] > summary { padding-bottom: 1rem; }
 .form-field [aria-invalid="true"] { border: 2px solid #8f2525; }
 .field-error { color: #8f2525; margin: .25rem 0; }
 
-.users-table { min-width: 26rem; }
+.users-table { min-width: 40rem; }
 .users-table th:first-child, .users-table td:last-child { white-space: nowrap; }
 
 /* A busca usa somente nome e ID publicados pela API, sem colunas simuladas. */

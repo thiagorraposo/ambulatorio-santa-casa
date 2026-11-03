@@ -1411,7 +1411,7 @@ somente documental; prioridade não constitui homologação institucional.
 
 #### 8D1B — Consultar usuários e identidade ampliada com escopo explícito
 
-**Estado e cobertura:** IMPLEMENTADA SEM VALIDAÇÃO COMPLETA nos recortes de listagem e consulta individual mínima ID/nome/perfil; [prova B/U](../validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md). Histórico e me ampliado permanecem pendentes, sem aceite agregado. RQ-NAV-07; RQ-USR-01–10,24; RQ-CTA-03–04 (telas/elementos na matriz).
+**Estado e cobertura:** IMPLEMENTADA SEM VALIDAÇÃO COMPLETA no agregado; listagem/detalhe ID/nome/login/perfil/estado possuem [incremento integrado próprio](../validacoes/VALIDACAO_8D1_LOGIN_ESTADO.md), sucedendo a projeção mínima; [prova B/U](../validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md). Histórico e me ampliado permanecem pendentes, sem aceite agregado. RQ-NAV-07; RQ-USR-01–10,24; RQ-CTA-03–04 (telas/elementos na matriz).
 
 **Escopo:** D1B.1 listagem paginada, consulta de conta e histórico administrativo autorizado de criação, alteração de perfil e ativação/inativação; D1B.2 me com campos aprovados. Duas unidades separadas, sem senha/hash.
 
@@ -1442,7 +1442,7 @@ perfis, recusas, vazio/erro e releitura real na interface correspondente.
 
 #### 8D1U — Ler usuários e Minha conta sem afirmar estado fictício
 
-**Estado e cobertura:** IMPLEMENTADA SEM VALIDAÇÃO COMPLETA nos recortes de listagem e consulta individual mínima ID/nome/perfil; [prova B/U](../validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md). Histórico e me ampliado permanecem pendentes, sem aceite agregado. RQ-NAV-07; RQ-USR-01–10,24; RQ-CTA-03–04 (telas/elementos na matriz).
+**Estado e cobertura:** IMPLEMENTADA SEM VALIDAÇÃO COMPLETA no agregado; listagem/detalhe ID/nome/login/perfil/estado possuem [incremento integrado próprio](../validacoes/VALIDACAO_8D1_LOGIN_ESTADO.md), sucedendo a projeção mínima; [prova B/U](../validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md). Histórico e me ampliado permanecem pendentes, sem aceite agregado. RQ-NAV-07; RQ-USR-01–10,24; RQ-CTA-03–04 (telas/elementos na matriz).
 
 **Escopo:** D1U.1 tabela/consulta/histórico administrativo e autoações indisponíveis conforme regra; D1U.2 dados de conta/suporte/sair. Duas unidades; ações de alteração em D2U.
 

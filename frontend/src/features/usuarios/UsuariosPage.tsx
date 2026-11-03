@@ -4,7 +4,7 @@ import { useApiQuery } from '../../api/useApiQuery';
 import { Card, EmptyState, PageHeading, QueryState, TableScroll } from '../../shared/ui';
 import { pagePath, Pagination, usePage } from '../pacientes/pagination';
 
-interface UsuarioResumo { usuarioId: string; nome: string; perfil: 'consulta' | 'edicao' | 'administracao' }
+import type { UsuarioResumo } from '../../api/contracts';
 const profiles = { consulta: 'Consulta', edicao: 'Edição', administracao: 'Administração' };
 
 function UsersList() {
@@ -12,15 +12,15 @@ function UsersList() {
   const page = usePage();
   const query = useApiQuery<UsuarioResumo[]>(pagePath('/usuarios', page.limit, page.offset));
   return <>
-    <PageHeading title="Usuários" description="Consulte os nomes e perfis das contas do ambulatório." />
+    <PageHeading title="Usuários" description="Consulte a identificação, o perfil e a situação das contas do ambulatório." />
     <Card>
       <QueryState query={query} emptyMessage="Nenhum usuário nesta página.">
         {rows => rows.length === 0 ? <EmptyState>Nenhum usuário nesta página.</EmptyState> :
           <TableScroll label="Usuários do ambulatório"><table className="data-table users-table">
             <caption className="sr-only">Usuários desta página</caption>
-            <thead><tr><th scope="col">ID</th><th scope="col">Nome</th><th scope="col">Perfil</th></tr></thead>
+            <thead><tr><th scope="col">ID</th><th scope="col">Nome</th><th scope="col">Login</th><th scope="col">Perfil</th><th scope="col">Situação da conta</th></tr></thead>
             <tbody>{rows.map(row => <tr key={row.usuarioId}><td className="mono">{row.usuarioId}</td>
-              <td><Link to={pagePath(`/usuarios/${encodeURIComponent(row.usuarioId)}`, page.limit, page.offset)}>{row.nome}</Link>{row.usuarioId === session.user?.usuarioId && <span className="muted"> (você)</span>}</td><td><span className="badge">{profiles[row.perfil]}</span></td></tr>)}</tbody>
+              <td><Link to={pagePath(`/usuarios/${encodeURIComponent(row.usuarioId)}`, page.limit, page.offset)}>{row.nome}</Link>{row.usuarioId === session.user?.usuarioId && <span className="muted"> (você)</span>}</td><td>{row.login}</td><td><span className="badge">{profiles[row.perfil]}</span></td><td>{row.ativo ? 'Ativa' : 'Inativa'}</td></tr>)}</tbody>
           </table></TableScroll>}
       </QueryState>
       <Pagination label="usuários" {...page} onChange={page.changePage}
@@ -39,6 +39,8 @@ function UserDetail({ usuarioId }: { usuarioId: string }) {
       <QueryState query={query}>{user => <dl className="details-list">
         <div><dt>ID</dt><dd className="mono">{user.usuarioId}</dd></div>
         <div><dt>Nome</dt><dd>{user.nome}</dd></div>
+        <div><dt>Login</dt><dd>{user.login}</dd></div>
+        <div><dt>Situação da conta</dt><dd>{user.ativo ? 'Ativa' : 'Inativa'}</dd></div>
         <div><dt>Perfil</dt><dd><span className="badge">{profiles[user.perfil]}</span></dd></div>
       </dl>}</QueryState>
     </Card>

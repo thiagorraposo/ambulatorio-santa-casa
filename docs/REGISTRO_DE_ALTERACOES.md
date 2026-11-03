@@ -1,5 +1,13 @@
 # Registro de Alterações
 
+## 2026-11-03 — Integrar login e situação na leitura administrativa8D
+
+GETs administrativos existentes e lista/detalhe passam a publicar login e estado
+real ativo/inativo, conforme decisão8. Campos anteriores/RBAC/paginação preservados;
+sem rota nova, migration ou comandos fictícios. Testes/projeção exata, perfis,
+conta inativa e comparação visual na [prova integrada](validacoes/VALIDACAO_8D1_LOGIN_ESTADO.md).
+Histórico, Minha conta ampliada e comandos8D2 continuam escopos próprios.
+
 ## 2026-11-03 — Integrar cadastro e edição por Edição com vínculo específico
 
 Capacidade real habilita busca/formulário existente; migration74 cria vínculo e

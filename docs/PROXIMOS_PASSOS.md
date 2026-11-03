@@ -11,7 +11,8 @@ nova execução integral no último SHA. Novas evidências serão registradas po
 
 **Incremento integrado de03/11:** cadastro/edição por Edição validado tecnicamente,
 conforme [provas e limites](validacoes/VALIDACAO_CADASTRO_EDICAO_M3.md). Seguir a
-mesma fila M3 para leitura administrativa8D de login/estado; não concluir a família
+mesma fila M3; [leitura administrativa8D de login/estado validada](validacoes/VALIDACAO_8D1_LOGIN_ESTADO.md).
+Próxima: identificação ampliada de Minha conta. Não concluir a família
 8D ou os achados humanos por associação. Sem reinício das seis janelas.
 
 

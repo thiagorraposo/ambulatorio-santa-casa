@@ -9,6 +9,7 @@ de testes não é uma contagem atual e aceite sintético não autoriza dados rea
 
 | Escopo | Evidência | Leitura correta |
 | --- | --- | --- |
+| 8D login/estado administrativo | [Validação integrada](VALIDACAO_8D1_LOGIN_ESTADO.md) | Lista/detalhe reais com cinco campos,19 HTTP/10 E2E; comandos e aceite próprios pendentes. |
 | M3 cadastro/edição por Edição | [Validação integrada](VALIDACAO_CADASTRO_EDICAO_M3.md) | Vínculo atômico/específico, PATCH, atendimento, revogação e concorrência; sem aceite humano. |
 | CI — diagnóstico e estabilização por componente | [Validação de 26/10](VALIDACAO_CI_2026_10_26.md) | Causas originais reproduzidas; arquitetura, verificações locais e procedimento para conferir o aceite remoto no PR/main. |
 | Etapa 5 — backend/importação | [Aceite integrado](ACEITE_INTEGRADO_ETAPA_5.md) | Matriz F01–F16/T01–T18 e limites sintéticos. |

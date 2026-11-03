@@ -5,11 +5,14 @@ import { assertAccessible, assertFitsViewport, signIn } from './stage7-helpers';
 test('8D1U.1: Administração consulta usuários reais, pagina, recupera leitura e mantém URL', async ({ page }, testInfo) => {
   const expectedResponse = await apiAs('administracao', 'GET', '/usuarios?limit=1&offset=0');
   expect(expectedResponse.status).toBe(200);
-  const expected = await expectedResponse.json() as Array<{ usuarioId: string; nome: string; perfil: string }>;
+  const expected = await expectedResponse.json() as Array<{ usuarioId: string; nome: string; perfil: string; login: string; ativo: boolean }>;
   await signIn(page, 'administracao', '/usuarios?limit=1&offset=0');
   await expect(page.getByRole('heading', { name: 'Usuários', exact: true })).toBeVisible();
   await expect(page.getByRole('table')).toContainText(expected[0]!.nome);
   await expect(page.getByRole('table')).toContainText(expected[0]!.usuarioId);
+  await expect(page.getByRole('table')).toContainText(expected[0]!.login);
+  await expect(page.getByRole('columnheader', { name: 'Situação da conta', exact: true })).toBeVisible();
+  await expect(page.getByRole('table')).toContainText(expected[0]!.ativo ? 'Ativa' : 'Inativa');
   await page.getByRole('button', { name: 'Próxima', exact: true }).click();
   await expect(page).toHaveURL(/offset=1/);
   const secondResponse = await apiAs('administracao', 'GET', '/usuarios?limit=1&offset=1');
@@ -54,7 +57,7 @@ for (const profile of ['consulta', 'edicao'] as const) {
 
 test('8D1U.1: detalhe real conserva página, recarga, teclado e leitura em telas menores', async ({ page }, testInfo) => {
   const response = await apiAs('administracao', 'GET', '/usuarios?limit=1&offset=1');
-  const [user] = await response.json() as Array<{ usuarioId: string; nome: string; perfil: string }>;
+  const [user] = await response.json() as Array<{ usuarioId: string; nome: string; perfil: string; login: string; ativo: boolean }>;
   const detail = await apiAs('administracao', 'GET', `/usuarios/${user!.usuarioId}`);
   expect(detail.status).toBe(200);
   expect(await detail.json()).toEqual(user);
@@ -65,6 +68,8 @@ test('8D1U.1: detalhe real conserva página, recarga, teclado e leitura em telas
   await expect(page.getByRole('heading', { name: 'Dados do usuário', exact: true })).toBeVisible();
   await expect(page.locator('dl')).toContainText(user!.usuarioId);
   await expect(page.locator('dl')).toContainText(user!.nome);
+  await expect(page.locator('dl')).toContainText(user!.login);
+  await expect(page.locator('dl')).toContainText(user!.ativo ? 'Ativa' : 'Inativa');
   await expect(page).toHaveTitle('Usuários | Ambulatório Santa Casa');
   await page.reload(); await signInCurrentPage(page, 'administracao');
   await expect(page.locator('dl')).toContainText(user!.usuarioId);
@@ -143,4 +148,21 @@ test('8D1U.1: troca de conta por navegação mantém dados antigos ocultos duran
   await delayed.done;
   await expect(page.locator('dl')).toContainText(second.nome);
   await expect(page.locator('dl')).not.toContainText(first.nome);
+});
+
+test('8D1: Administração consulta login e situação real de conta inativa sem comandos de alteração', async ({ page }) => {
+  const user = fixture.users.consulta;
+  try {
+    await setUserActive('consulta', false);
+    await signIn(page, 'administracao', `/usuarios/${user.usuarioId}`);
+    await expect(page.getByRole('heading', { name: 'Dados do usuário', exact: true })).toBeVisible();
+    await expect(page.locator('dl')).toContainText(user.login);
+    await expect(page.locator('dl')).toContainText('Inativa');
+    expect(await (await apiAs('administracao', 'GET', `/usuarios/${user.usuarioId}`)).json()).toMatchObject({ login: user.login, ativo: false });
+    await expect(page.getByRole('button', { name: /ativar|inativar|alterar perfil/i })).toHaveCount(0);
+    await page.getByRole('link', { name: 'Voltar aos usuários', exact: true }).click();
+    await expect(page.getByRole('row').filter({ has: page.getByRole('link', { name: user.nome, exact: true }) })).toContainText('Inativa');
+  } finally {
+    await setUserActive('consulta', true); await restoreUserGrants('consulta');
+  }
 });

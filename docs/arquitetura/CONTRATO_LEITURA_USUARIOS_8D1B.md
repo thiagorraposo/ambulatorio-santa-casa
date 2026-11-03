@@ -1,5 +1,10 @@
 # Leitura mínima de usuários — 8D1B.1 / 8D1U.1
 
+**Vigente em03/11:** a [ampliação integrada de login/estado](#ampliação-integrada-de0311--login-e-estado)
+sucede a projeção mínima histórica abaixo. Preserva os endpoints e os campos
+anteriores; comandos, histórico e Minha conta mantêm escopos próprios.
+
+
 Recorte técnico de listagem, conforme os mínimos de
 [8D1D](PROPOSTA_IDENTIDADE_ADMINISTRACAO_8D1D.md). Administração é o perfil de
 gestão determinado; Consulta/Edição não listam terceiros. O gate de campos
@@ -110,3 +115,29 @@ lacunas. Aplicar a matriz de validação para mudança backend/frontend; aprovei
 as provas anteriores apenas nas camadas inalteradas. A preparação textual anterior conserva sua validação documental;
 comandos, falhas de ambiente e composição funcional deste incremento estão no
 relatório do detalhe, sem alegar nova rodada integral do frontend.
+
+## Ampliação integrada de03/11 — login e estado
+
+As decisões3/8 autorizam Administração a consultar ID/nome/login/perfil/estado.
+Este incremento de8D1B.1/U.1 sucede as projeções mínimas acima exclusivamente para
+lista/detalhe, sem concluir histórico, Minha conta ou comandos8D2.
+
+Objetivo/aceite: identificar contas homônimas e distinguir estado ativo/inativo
+real na lista e no detalhe. Os GET existentes acrescentam `login: string` e
+`ativo: boolean` à projeção pública administrativa. Preservam ID textual,
+paginação, ordenação, status HTTP e os campos anteriores; sem filtros novos,
+rota nova, migration, escrita ou evento fictício. Consumidores afetados:
+UsuariosPage e testes de projeção/navegador, atualizados na mesma unidade.
+A ampliação é aditiva; não exige provisionamento de credenciais8D2.
+
+O estado vem de usuario_aplicacao.ativo, sem inferência pelo perfil ou sessão.
+A UI mostra “Ativa”/“Inativa”, com rótulo “Situação da conta”, sem controles de
+ativação. Conta alvo inativa continua consultável somente pela Administração
+ativa. Requisitante inativo retorna401; Consulta/Edição403 antes de revelar dados.
+Não publicar hash, senha, e-mail inferido ou dados clínicos. Erros públicos não
+incluem login de terceiros. Nenhuma alteração no /auth/me.
+
+Validação: projeção exata SQL/API para contas ativas/inativas e IDs grandes,
+perfis, parâmetros/404, navegador com carga/erro/vazio/retorno/recarga e comparação
+visual da tabela/detalhe1440/390/320. Referência oficial de usuários, componentes
+estabilizados e rolagem acessível preservados; aceites humanos próprios pendentes.

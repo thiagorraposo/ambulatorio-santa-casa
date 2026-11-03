@@ -12,7 +12,8 @@ nova execução integral no último SHA. Novas evidências serão registradas po
 **Entrega funcional de03/11:** [cadastro/edição por Edição integrado](validacoes/VALIDACAO_CADASTRO_EDICAO_M3.md)
 validado tecnicamente, com vínculo específico atômico, atendimento e revogação.
 Migration74 somente descartável; aceitações humanas pendentes. Próxima unidade:
-8D leitura administrativa de login/estado, preservando rotas e autorização.
+[8D leitura administrativa de login/estado validada](validacoes/VALIDACAO_8D1_LOGIN_ESTADO.md);
+seguir para identificação ampliada de Minha conta, preservando rotas e autorização.
 
 
 **Histórico da retomada visual de 03/11:** atendimento organizado nas 12 seções
