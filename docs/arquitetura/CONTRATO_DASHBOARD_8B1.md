@@ -21,7 +21,7 @@ pendencias,lotes}`. Cada indicador contém `estado`, `valor`, `definicao` e
 
 | Indicador | População e fonte | Período |
 | --- | --- | --- |
-| Pacientes autorizados | Linhas distintas de `paciente`, escopo clínico vigente aplicado antes de contar; sem joins a projetos | Não aplicado |
+| Pacientes autorizados | Linhas distintas de `paciente`, escopo clínico vigente aplicado antes de contar; filtros opcionais descritos abaixo, sem multiplicar pacientes por projetos | Não aplicado |
 | Atendimentos realizados | Linhas persistidas de `atendimento` dos pacientes autorizados, pela `data_atendimento` efetiva; não soma pessoas, acompanhamentos planejados ou datas ausentes | Datas inclusivas |
 | Pendências abertas | Linhas de `pendencia_atendimento` dos pacientes autorizados com estado atual literal `aberta` ou `em_andamento`; não interpreta texto, null, `nao_informado` ou inconsistência de importação | Não aplicado |
 | Lotes concluídos | Lotes com capacidade nominal ativa **e** autorização individual de SQL58; estados `concluido` e `concluido_com_pendencias`, pela `finalizado_em` | Desde início 00:00 até o dia seguinte ao fim, exclusivo |
@@ -73,3 +73,41 @@ Testes próprios: `backend/test/unit/dashboard.spec.ts`,
 `tests/sql/50_validar_capacidade_dashboard.sql`. O contrato não afirma execução
 aprovada, integração visual ou conclusão de 8B1: as provas e seus SHAs devem ser
 registrados no relatório da unidade após execução.
+
+## Extensão de estabilização — filtros, série e CSV em 03/11/2026
+
+O comando do responsável para a sprint final autoriza este recorte analítico
+mínimo. `GET /v1/dashboard` aceita também `nome` (1–120 caracteres, busca parcial),
+`pacienteId`, `sexo` (feminino/masculino/outro/nao_informado), `projetoId`
+e `statusPendencia` (aberta/em_andamento/resolvida). Filtros combinados por AND
+selecionam a população autorizada **antes** das contagens. Projeto exige
+participação registrada verdadeira; status exige ao menos uma pendência daquele
+paciente, de qualquer data. Não se infere origem, fila ou comparecimento.
+Pacientes/pendências atuais conservam sua definição temporal; lotes recebem
+somente período e autorização própria, sem filtros clínicos.
+
+Ordenação: `data_desc` (padrão), `data_asc`, `nome_asc`, com desempate determinístico
+por identificadores. `limit` padrão20, máximo100; `offset` padrão0, máximo100000.
+Resposta acrescenta `resultados [{pacienteId,nome,atendimentoId,dataAtendimento,
+pendenciasAbertas}]`, `paginacao {limit,offset,total}`, `serieAtendimentos
+[{mes,total}]` e `projetos [{projetoId,nome}]`. A série mensal considera os mesmos
+atendimentos do resultado; meses sem registros não são fabricados. O catálogo
+mostra apenas projetos com participação em pacientes autorizados, independente
+dos filtros da análise. Indicadores, série, total e página compartilham statement
+e snapshot; navegação para registros revalida autorização na API de destino.
+
+`GET /v1/dashboard/export.csv` usa os mesmos filtros e ordenação, ignora paginação
+e exporta todas as linhas autorizadas até **5.000 atendimentos**. Excesso retorna
+400 JSON sanitizado, sem arquivo truncado. Cabeçalho:
+`paciente_id,nome,atendimento_id,data_atendimento,pendencias_abertas`.
+Reutiliza `csvCell` para quoting e neutralização de fórmulas. Resposta de sucesso
+`text/csv`, attachment, `Cache-Control: no-store`; erros mantêm JSON.
+
+A nova migration incremental79 registra cada exportação concluída no ledger
+`dashboard_exportacao_evento`: ator/contexto autenticados, instante, ordenação,
+volume e filtros minimizados (presença de busca nominal, sem seu texto). Aplicação
+não escreve diretamente no ledger, nem altera/apaga/trunca eventos. Não concede
+acesso clínico ou capacidade de importação. Evidência estrutural desta extensão:
+[SQL79](../../sql/79_auditoria_exportacao_dashboard.sql); dump persistente preservado.
+Limites: auditoria comprova a geração no servidor, não recebimento humano; dados
+podem mudar entre a visualização e a exportação, que revalida o escopo corrente.

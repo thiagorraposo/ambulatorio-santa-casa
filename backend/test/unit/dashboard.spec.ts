@@ -35,7 +35,7 @@ describe('Dashboard P-05', () => {
     }) };
     const response = await new DashboardService(database as never, access as never).get(user, { inicio: '2026-10-30', fim: '2026-10-31' });
     expect(access.identity).toHaveBeenCalledWith({ query }, user);
-    expect(query).toHaveBeenCalledWith(expect.stringContaining('pacientes_autorizados AS MATERIALIZED'), ['2026-10-30', '2026-10-31', '31']);
+    expect(query).toHaveBeenCalledWith(expect.stringContaining('pacientes_autorizados AS MATERIALIZED'), ['2026-10-30', '2026-10-31', '31', 20, 0]);
     expect(response.indicadores.pacientes).toMatchObject({ estado: 'disponivel', valor: 3, periodoAplicado: false });
     expect(response.indicadores.atendimentos).toMatchObject({ valor: 3, periodoAplicado: true });
     expect(response.indicadores.pendencias).toMatchObject({ valor: 2, periodoAplicado: false });
@@ -52,5 +52,48 @@ describe('Dashboard P-05', () => {
     await expect(service.get(user, {})).rejects.toThrow('Falha sintética');
     access.identity.mockRejectedValueOnce(new UnauthorizedException());
     await expect(service.get(user, {})).rejects.toThrow(UnauthorizedException);
+  });
+});
+
+
+describe('Dashboard filtered CSV contract', () => {
+  function service(rows: unknown[] = []) {
+    const query = jest.fn().mockResolvedValueOnce({ rows });
+    const database = { transaction: jest.fn(async (fn: (tx: unknown) => unknown) => fn({ query })) };
+    const access = { requireEnabled: jest.fn(), identity: jest.fn(), scope: jest.fn().mockReturnValue({
+      sql: 'p.paciente_id IN (SELECT paciente_id FROM acesso_paciente WHERE usuario_id=$3)', values: ['31'],
+    }) };
+    return { query, access, service: new DashboardService(database as never, access as never) };
+  }
+  it('valida dimensões, paginação e ordenação por allowlist', async () => {
+    for (const input of [{ pacienteId: '0' }, { projetoId: '1 OR TRUE' }, { sexo: 'x' },
+      { statusPendencia: 'cancelada' }, { ordenacao: 'nome DESC; SELECT 1' }, { limit: '101' },
+      { offset: '-1' }, { nome: ['A','B'] }, { limit: ['1','2'] }]) {
+      expect(await validate(plainToInstance(DashboardQuery, input))).not.toHaveLength(0);
+    }
+    expect(await validate(plainToInstance(DashboardQuery, { pacienteId: '12', projetoId: '2',
+      sexo: 'feminino', statusPendencia: 'resolvida', ordenacao: 'nome_asc', limit: '10', offset: '20' }))).toHaveLength(0);
+  });
+  it('exporta todas as linhas filtradas e audita sem guardar nome pesquisado ou paginação', async () => {
+    const row = { pacienteId: '1', nome: '=CMD()', atendimentoId: '2', dataAtendimento: '2026-10-31', pendenciasAbertas: 1 };
+    const setup = service([row]);
+    expect(await setup.service.exportCsv(user, { inicio: '2026-10-30', fim: '2026-10-31',
+      nome: 'busca sintética', pacienteId: '1', sexo: 'feminino', projetoId: '2', statusPendencia: 'aberta',
+      ordenacao: 'nome_asc', limit: 1, offset: 100 })).toEqual([row]);
+    const [sql, values] = setup.query.mock.calls[0];
+    expect(sql).toContain('LIMIT 5001'); expect(sql).not.toContain('OFFSET');
+    expect(sql).toContain('AND pp.participa IS TRUE'); expect(sql).toContain('ORDER BY nome ASC,paciente_id ASC');
+    expect(values).toEqual(['2026-10-30', '2026-10-31', '31', '%busca sintética%', '1', 'feminino', '2', 'aberta']);
+    expect(setup.access.identity).toHaveBeenCalled();
+    const [auditSql, auditValues] = setup.query.mock.calls[1];
+    expect(auditSql).toContain('dashboard_registrar_exportacao');
+    expect(JSON.parse(auditValues[0])).toEqual({ inicio: '2026-10-30', fim: '2026-10-31',
+      pacienteId: '1', nomeFiltrado: true, sexo: 'feminino', projetoId: '2', statusPendencia: 'aberta' });
+    expect(auditValues.slice(1)).toEqual(['nome_asc', 1]);
+  });
+  it('não entrega nem audita arquivo truncado acima de5000', async () => {
+    const setup = service(Array.from({ length: 5001 }, () => ({})));
+    await expect(setup.service.exportCsv(user, {})).rejects.toThrow('Exportação excede 5000');
+    expect(setup.query).toHaveBeenCalledTimes(1);
   });
 });

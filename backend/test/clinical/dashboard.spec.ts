@@ -91,7 +91,10 @@ suite('8B1 dashboard com PostgreSQL e população conhecida', () => {
       expect(body.indicadores.atendimentos).toMatchObject({ estado: 'disponivel', valor: 3, periodoAplicado: true });
       expect(body.indicadores.pendencias).toMatchObject({ estado: 'disponivel', valor: 2, periodoAplicado: false });
       expect(body.indicadores.lotes).toMatchObject({ estado: 'sem_permissao', valor: null });
-      expect(JSON.stringify(body)).not.toMatch(/pacienteId|atendimentoId|senha_hash|Dashboard paciente/);
+      expect(JSON.stringify(body)).not.toMatch(/senha_hash|Dashboard paciente C/);
+      expect(body.paginacao).toEqual({ limit: 20, offset: 0, total: 3 });
+      expect(body.resultados).toHaveLength(3);
+      expect(body.serieAtendimentos).toEqual([{ mes: '2026-10', total: 3 }]);
     }
     expect((await get('administracao').expect(200)).body.indicadores.lotes).toMatchObject({ estado: 'sem_permissao', valor: null });
   });
@@ -121,6 +124,63 @@ suite('8B1 dashboard com PostgreSQL e população conhecida', () => {
     expect(body.indicadores.lotes.valor).toBeNull();
     await owner.query('INSERT INTO ambulatorio.dashboard_importacao_leitor(usuario_id) VALUES($1)', [ids.vazio]);
     expect((await get('vazio').expect(200)).body.indicadores.lotes).toMatchObject({ estado: 'disponivel', valor: 0 });
+  });
+  it('combina filtros de pacientes, pendência e projeto sem duplicar pessoas; pagina e ordena', async () => {
+    const project = (await owner.query(`INSERT INTO ambulatorio.projeto_estudo(codigo_projeto,nome_projeto)
+      VALUES('DASHBOARD-AUTORIZADO','Projeto dashboard autorizado') RETURNING projeto_estudo_id::text`)).rows[0].projeto_estudo_id;
+    const hiddenProject = (await owner.query(`INSERT INTO ambulatorio.projeto_estudo(codigo_projeto,nome_projeto)
+      VALUES('DASHBOARD-OCULTO','Projeto dashboard oculto') RETURNING projeto_estudo_id::text`)).rows[0].projeto_estudo_id;
+    await owner.query(`INSERT INTO ambulatorio.paciente_projeto_estudo(paciente_id,projeto_estudo_id,participa)
+      VALUES($1,$3,true),($2,$3,true),($4,$5,true)`, [patients.A,patients.B,project,patients.C,hiddenProject]);
+    await owner.query("UPDATE ambulatorio.paciente SET sexo='feminino' WHERE paciente_id=$1", [patients.A]);
+    const filtered = (await get('consulta', `inicio=2026-10-30&fim=2026-10-31&nome=Dashboard%20paciente&sexo=feminino&projetoId=${project}&statusPendencia=resolvida&ordenacao=data_asc&limit=1&offset=1`).expect(200)).body;
+    expect(filtered.indicadores.pacientes.valor).toBe(1);
+    expect(filtered.indicadores.atendimentos.valor).toBe(2);
+    expect(filtered.indicadores.pendencias.valor).toBe(1);
+    expect(filtered.paginacao).toEqual({ limit: 1, offset: 1, total: 2 });
+    expect(filtered.resultados).toEqual([{ pacienteId: patients.A, nome: 'Dashboard paciente A sintético',
+      atendimentoId: attendances.A[2], dataAtendimento: '2026-10-31', pendenciasAbertas: 0 }]);
+    expect(filtered.projetos).toContainEqual({ projetoId: project, nome: 'Projeto dashboard autorizado' });
+    expect(filtered.projetos).not.toContainEqual(expect.objectContaining({ projetoId: hiddenProject }));
+    const forbidden = (await get('consulta', `inicio=2026-10-30&fim=2026-10-31&pacienteId=${patients.C}`).expect(200)).body;
+    expect(forbidden.resultados).toEqual([]); expect(forbidden.indicadores.pacientes.valor).toBe(0);
+    expect((await get('consulta', `inicio=2026-10-30&fim=2026-10-31&projetoId=${hiddenProject}`).expect(200)).body.resultados).toEqual([]);
+  });
+  it('CSV dos três perfis ignora página, respeita filtros e ordem, neutraliza fórmulas e registra ator', async () => {
+    const name = '  =SUM(1,2) "sintético"';
+    await owner.query('UPDATE ambulatorio.paciente SET nome=$2 WHERE paciente_id=$1', [patients.A,name]);
+    for (const profile of ['consulta','edicao','administracao']) {
+      const response = await http().get(`/v1/dashboard/export.csv?inicio=2026-10-30&fim=2026-10-31&pacienteId=${patients.A}&ordenacao=data_asc&limit=1&offset=999`).auth(tokens[profile], { type: 'bearer' }).expect(200);
+      expect(response.headers['content-type']).toMatch(/text\/csv/);
+      expect(response.headers['cache-control']).toBe('no-store');
+      expect(response.text.split('\n').filter(Boolean)).toHaveLength(3);
+      expect(response.text).toContain('"\'  =SUM(1,2) ""sintético"""');
+      expect(response.text.indexOf('2026-10-30')).toBeLessThan(response.text.indexOf('2026-10-31'));
+      const audit = (await owner.query(`SELECT ator_usuario_id::text,quantidade,ordenacao,filtros FROM ambulatorio.dashboard_exportacao_evento
+        WHERE ator_usuario_id=$1 ORDER BY exportacao_id DESC LIMIT 1`, [ids[profile]])).rows[0];
+      expect(audit).toMatchObject({ ator_usuario_id: ids[profile], quantidade: 2, ordenacao: 'data_asc',
+        filtros: { inicio: '2026-10-30', fim: '2026-10-31', pacienteId: patients.A, nomeFiltrado: false } });
+    }
+    const empty = await http().get(`/v1/dashboard/export.csv?inicio=2026-10-30&fim=2026-10-31&pacienteId=${patients.C}`).auth(tokens.consulta, { type: 'bearer' }).expect(200);
+    expect(empty.text.trim()).toBe('paciente_id,nome,atendimento_id,data_atendimento,pendencias_abertas');
+    await owner.query("UPDATE ambulatorio.paciente SET nome='Dashboard paciente A sintético' WHERE paciente_id=$1", [patients.A]);
+    await http().get('/v1/dashboard/export.csv').expect(401);
+    await http().get('/v1/dashboard/export.csv?ordenacao=sql').auth(tokens.consulta, { type: 'bearer' }).expect(400);
+  });
+  it('volume superior a5000 recebe erro explícito sem arquivo parcial ou evento de sucesso', async () => {
+    const patient = (await owner.query("INSERT INTO ambulatorio.paciente(nome) VALUES('Volume CSV sintético') RETURNING paciente_id::text")).rows[0].paciente_id;
+    await owner.query(`INSERT INTO ambulatorio.atendimento(paciente_id,data_atendimento)
+      SELECT $1,'2026-10-30'::date FROM generate_series(1,5001)`, [patient]);
+    const before = (await owner.query('SELECT count(*)::int AS n FROM ambulatorio.dashboard_exportacao_evento')).rows[0].n;
+    const response = await http().get(`/v1/dashboard/export.csv?inicio=2026-10-30&fim=2026-10-31&pacienteId=${patient}`)
+      .auth(tokens.administracao, { type: 'bearer' }).expect(400);
+    expect(response.headers['content-type']).toMatch(/application\/json/);
+    expect(JSON.stringify(response.body)).toContain('5000');
+    expect((await owner.query('SELECT count(*)::int AS n FROM ambulatorio.dashboard_exportacao_evento')).rows[0].n).toBe(before);
+  }, 30000);
+  it('SQL51 valida auditoria append-only sob rollback', async () => {
+    const { readFileSync } = await import('node:fs');
+    await owner.query(readFileSync('../tests/sql/51_validar_auditoria_exportacao_dashboard.sql','utf8').replace(/^\\set.*$/gm,''));
   });
   it('revoga capacidade e escopo na requisição seguinte sem reautenticar', async () => {
     await owner.query(`UPDATE ambulatorio.dashboard_importacao_leitor SET revogado_em=clock_timestamp(),revogado_por_principal=session_user
