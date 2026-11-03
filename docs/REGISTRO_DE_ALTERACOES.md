@@ -1,5 +1,17 @@
 # Registro de Alterações
 
+## 2026-11-03 — Respeitar limite real no setup E2E de vínculos
+
+Após a integração da PR #24, o Frontend da execução41720322918 falhou em quatro
+setups de concessão de acesso com HTTP429, antes da interação humana. A PR e a
+rodada local anteriores haviam passado. Regressão dirigida reproduziu 200 esperado
+versus429 com o limiter real. `apiJson` passa a aguardar o cabeçalho validado e
+retomar uma única vez somente PUT administrativo de acesso recusado com429;
+rede, outros status e mutações clínicas continuam sem repetição automática.
+A regressão esgota a janela por entradas inválidas e comprova acesso após a espera.
+Nenhuma alteração de produto, banco, permissões ou desativação de verificações.
+Resultados da correção e CI ficam na PR de acompanhamento vinculada à #24.
+
 ## 2026-11-03 — Organizar publicação integrada de M3 pelo GitHub Flow
 
 Entrega reunida na branch existente `feat/m3-janela-1-eventos`, preservando os

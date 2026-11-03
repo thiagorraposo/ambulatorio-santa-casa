@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, type APIResponse, type Page, type Response as BrowserResponse } from '@playwright/test';
 import type { AtendimentoDetalheResponse, PacienteDetalheResponse } from '../../frontend/src/api/contracts';
-import { apiAs, fixture, type Perfil } from './fixtures';
+import { apiAs, fixture, waitForRateLimitWindow, type Perfil } from './fixtures';
 export { signIn } from './fixtures';
 
 export async function nextAttendanceStep(page: Page) {
@@ -23,7 +23,16 @@ export async function moveAttendanceToReview(page: Page) {
 }
 
 export async function apiJson<T>(method: string, path: string, body?: unknown, perfil: Perfil = 'administracao'): Promise<T> {
-  const response = await apiAs(perfil, method, path, body);
+  let response = await apiAs(perfil, method, path, body);
+  // Somente concessão/revogação sintética: 429 comprova recusa antes da escrita.
+  // Não repetir erros de rede, clínica ou outros status; manter uma única retomada.
+  if (response.status === 429 && perfil === 'administracao' && method === 'PUT'
+    && /^\/pacientes\/[1-9]\d*\/acesso\/[1-9]\d*$/.test(path)) {
+    const seconds = Number(response.headers.get('retry-after') ?? response.headers.get('x-ratelimit-reset'));
+    expect(Number.isFinite(seconds) && seconds > 0 && seconds <= 60).toBe(true);
+    await waitForRateLimitWindow(seconds * 1000 + 200);
+    response = await apiAs(perfil, method, path, body);
+  }
   expect(response.status, `${method} ${path}`).toBe(method === 'POST' ? 201 : 200);
   return await response.json() as T;
 }
