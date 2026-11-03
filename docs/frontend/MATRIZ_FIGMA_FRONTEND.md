@@ -78,6 +78,17 @@ vínculos, criar políticas institucionais ou substituir o candidato comprovado.
 [Auditoria dirigida de cobertura](#cobertura-funcional-dirigida-após-avaliação-humana)
 alimenta o Capability Mapping deste mesmo documento, sem catálogo concorrente.
 
+## Adequação visual de 03/11/2026
+
+[Comparação renderizada e mapa das 12 seções](../validacoes/ADEQUACAO_VISUAL_FRONTEND_2026_11_03.md)
+sucedem a fotografia histórica somente na apresentação descrita. FM/RQ-ATD-01–05:
+índice das 12 seções, seleção livre, contador, estados e revisão preservada;
+complementos e registros longitudinais mantêm confirmação própria. FM/RQ-LIS-01,
+05–13: hierarquia, filtros, nome/ID/ações, densidade e reflow sem projeção inventada.
+FM/RQ-LOG, NAV, CAD, FIC/HIS e EST: componentes compartilhados e recortes visuais
+exercitados no relatório; não significa cobertura de todos os IDs dessas famílias.
+Sem novos contratos, permissões ou aceite integral 8V1/8V2.
+
 ## Como ler e manter a rastreabilidade
 
 Cada linha tem ID estável `FM-FAMÍLIA-NN`. Seu requisito individual é
@@ -619,8 +630,8 @@ V: 12 seções/revisão Figma vs formulário longo atual. F: atomicidade real nu
 
 | Elemento / requisito | Objetivo | Observado no protótipo | Atual e diferença específica | Produto, decisão e destino | HTTP / lacuna | Entrega | Aceite e evidência |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| <a id="fm-atd-01"></a>**FM-ATD-01** / RQ-ATD-01<br>Cabeçalho pessoa/código/nascimento | Organizar/concluir consulta sem perda | Card acima das seções; não fixo ao rolar | Texto pessoa/ID sem cabeçalho persistente | **Adaptar · VU1**. Pessoa e intenção visíveis; ID secundário | H4/H5 · G-ETAPAS | [7D-U1](ENTREGAS_DO_PRODUTO.md#7d-u1) | Paciente permanece visível ao mudar etapa/rolar. Evidência atual: OBS/EST; aceite do pacote pendente. |
-| <a id="fm-atd-02"></a>**FM-ATD-02** / RQ-ATD-02<br>Seções 1–12, contador e seleção direta | Organizar/concluir consulta sem perda | Sidebar de 12; guarda useState | Um formulário contínuo com fieldsets | **Adaptar · VU1**. VU1 cinco etapas; PC amplia com contratos aceitos | H4/H5 · G-ETAPAS | [7D-U1](ENTREGAS_DO_PRODUTO.md#7d-u1) | Mudar etapa conserva valores; nenhuma seção promete campo sem destino. Evidência atual: OBS/EST; aceite do pacote pendente. |
+| <a id="fm-atd-01"></a>**FM-ATD-01** / RQ-ATD-01<br>Cabeçalho pessoa/código/nascimento | Organizar/concluir consulta sem perda | Card acima das seções; não fixo ao rolar | Card pessoa/ID acima do índice; não fixo ao rolar | **Adaptar · VU1**. Pessoa e intenção visíveis; ID secundário | H4/H5 · G-ETAPAS | [7D-U1](ENTREGAS_DO_PRODUTO.md#7d-u1) | Paciente permanece visível ao mudar etapa/rolar. Evidência atual: OBS/EST; aceite do pacote pendente. |
+| <a id="fm-atd-02"></a>**FM-ATD-02** / RQ-ATD-02<br>Seções 1–12, contador e seleção direta | Organizar/concluir consulta sem perda | Sidebar de 12; guarda useState | Índice de 12 seções, rascunho em memória e revisão separada; confirmações próprias preservadas | **Adaptar · VU1; apresentação M3 atualizada em03/11**. Índice das 12 seções informacionais; preenchimentos iniciais e confirmações próprias explicitados, sem 12 etapas obrigatórias | H4/H5 · G-ETAPAS | [7D-U1](ENTREGAS_DO_PRODUTO.md#7d-u1) | Mudar etapa conserva valores; nenhuma seção promete campo sem destino. Evidência atual: OBS/EST; aceite do pacote pendente. |
 | <a id="fm-atd-03"></a>**FM-ATD-03** / RQ-ATD-03<br>Anterior/Próxima | Organizar/concluir consulta sem perda | Valida só data ao avançar | Ausentes | **Adaptar · VU1**. Navegação de etapas e erro focado no campo | H4/H5 · G-ETAPAS | [7D-U1](ENTREGAS_DO_PRODUTO.md#7d-u1) | Voltar/avançar não salva nem perde rascunho. Evidência atual: OBS/EST; aceite do pacote pendente. |
 | <a id="fm-atd-04"></a>**FM-ATD-04** / RQ-ATD-04<br>Cancelar | Organizar/concluir consulta sem perda | Sai sem proteção | Só breadcrumb e diálogo genérico; sem botão | **Adaptar · VU1**. Ação explícita voltar à consulta/ficha com decisão de rascunho | H4/H5 · G-ETAPAS | [7D-U1](ENTREGAS_DO_PRODUTO.md#7d-u1) | Cancelar não descarta silenciosamente; confirmação tem foco. Evidência atual: OBS/EST; aceite do pacote pendente. |
 | <a id="fm-atd-05"></a>**FM-ATD-05** / RQ-ATD-05<br>Revisar dados | Organizar/concluir consulta sem perda | Modal com oito itens/contagens | Ausente | **Adaptar · VU1**. Revisão completa antes de confirmar atendimento | H4/H5 · G-ETAPAS | [7D-U2](ENTREGAS_DO_PRODUTO.md#7d-u2) | Todos os valores preenchidos constam; voltar preserva dados. Evidência atual: OBS/EST; aceite do pacote pendente. |

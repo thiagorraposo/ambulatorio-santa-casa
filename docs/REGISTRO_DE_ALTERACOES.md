@@ -1,5 +1,14 @@
 # Registro de Alterações
 
+## 2026-11-03 — Aproximar o frontend da referência oficial
+
+Preservadas e completadas alterações preexistentes: atendimento nas 12 seções
+informacionais, navegação livre e revisão, listagem com nome/ID/ações e reflow,
+cabeçalhos e agrupamentos de cadastro, ficha e recursos clínicos consistentes.
+Contratos, perfis, rascunhos, recibos e confirmações próprias mantidos.
+[Comparação visual, mapa de suporte e validações](validacoes/ADEQUACAO_VISUAL_FRONTEND_2026_11_03.md).
+Sem backend novo, migrations, dados reais, push/deploy ou aceite8V1/8V2.
+
 ## 2026-11-02 — Congelar candidato sintético para apresentação Santa Casa
 
 Candidato `c4a3c998f1b25addac65e1c79fb2b6a00f3fac73` fixado em branch local,

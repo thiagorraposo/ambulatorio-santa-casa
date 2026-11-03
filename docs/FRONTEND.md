@@ -1,6 +1,6 @@
 # Frontend — leitura e fluxos clínicos
 
-Atualizado em: 2026-10-31. Fundação 6A–6B e recorte clínico original
+Atualizado em: 2026-11-03. Fundação 6A–6B e recorte clínico original
 implementados e validados com dados sintéticos. M1 e M2/VU1 possuem aceite
 humano registrado; o [parecer de M2](validacoes/VALIDACAO_7D_A1.md#aceite-humano-oficial-de-m2--31102026)
 não aceita as extensões de M3 ou o produto completo. Contagens e limites de cada
@@ -21,6 +21,23 @@ pretendida está na [visão de produto](frontend/VISAO_E_ESPECIFICACAO.md);
 a [matriz Figma/frontend](frontend/MATRIZ_FIGMA_FRONTEND.md) inventaria campos,
 ações e destinos, e os [pacotes do roadmap](frontend/ENTREGAS_DO_PRODUTO.md#pacotes-verificáveis-do-produto-frontend)
 definem dependências e aceite. Proposta não é contrato publicado.
+
+## Apresentação vigente — adequação à referência em03/11
+
+Atendimento organizado nas 12 seções informacionais oficiais, com seleção livre,
+estados de preenchimento/validação e revisão final. O POST inicial conserva seus
+campos; complementos e registros longitudinais usam as interfaces e confirmações
+próprias existentes. O [mapa de suporte por seção](validacoes/ADEQUACAO_VISUAL_FRONTEND_2026_11_03.md)
+registra contratos, comparação renderizada, testes e limites.
+
+Pacientes prioriza nome, ID secundário e ações autorizadas; em telas pequenas as
+linhas se reorganizam em cartões. Filtros e CSV conservam escopo/página reais.
+Cabeçalhos, cartões, formulários, tabelas e mensagens compartilham paleta e
+espaçamentos da referência. Cadastro mantém busca prévia e capacidade efetiva;
+formulários clínicos usam largura limitada, duas colunas/uma no mobile e controles
+nativos. Não há novas funcionalidades clínicas, permissões ou biblioteca de UI.
+As [evidências1440/390](evidencias/frontend_referencia_2026_11_03/README.md) incluem
+antes/depois e protótipo; não representam aprovação integral de8V1/8V2.
 
 ## Preparação e comandos
 

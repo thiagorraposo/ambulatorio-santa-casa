@@ -314,13 +314,16 @@ próprio; criar outro registro não é correção.
 
 ### Atendimento novo, revisão e detalhe — ATD, DIA, CON, COM, MED, EVT, PRJ, EXN, BZN, ECR, NTF, OBS
 
-VU1: cabeçalho visível com pessoa e intenção, etapas **Atendimento → Avaliação e
-Chagas → Exames e familiares → Pendências → Revisão**. Não são os doze módulos
-completos do protótipo. Cada etapa conserva valores em memória; a revisão mostra
-todos os campos preenchidos, ausências relevantes e quantidades/identificações
-dos filhos, com Voltar e editar e Confirmar atendimento. Só validar formatos e
-invariantes existentes; nenhum score. Em mobile, etapa atual/total e controle
-anterior/próxima acima das ações finais. Erro leva ao campo/etapa correspondente.
+Apresentação vigente de M3 em03/11: cabeçalho com pessoa e intenção, índice das
+**12 seções informacionais da referência**, seleção livre e revisão final.
+Substitui a apresentação anterior em cinco etapas, preservando o mesmo suporte
+do primeiro POST. Seções com confirmação própria orientam para as áreas reais;
+não são etapas obrigatórias nem anunciam gravação conjunta. O
+[mapa por seção e evidência renderizada](../validacoes/ADEQUACAO_VISUAL_FRONTEND_2026_11_03.md)
+explicita campos e fronteiras. Campos conservam valores em memória; a revisão
+mostra todos os valores enviados e seus filhos. Só validar formatos e invariantes
+existentes; nenhum score. Mobile usa índice horizontal e contador; erro leva ao
+campo/seção correspondente.
 
 O primeiro POST grava núcleo, avaliação, diagnóstico, exames, rastreio e
 pendências numa transação. Não incluir BZN/projeto/notificação/encaminhamento

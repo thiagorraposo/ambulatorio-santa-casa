@@ -1,5 +1,11 @@
 # Caderno visual — observação e proposta
 
+**Continuidade de03/11/2026:** [comparação atual das 12 seções e telas existentes](../../validacoes/ADEQUACAO_VISUAL_FRONTEND_2026_11_03.md),
+com capturas antes/depois, mapa de suporte e limites. As imagens abaixo mantêm
+sua procedência histórica; o wireframe de cinco etapas não representa a
+organização informacional vigente.
+
+
 Data: 2026-10-05; código `29b3186`. Este caderno apoia a
 [visão de produto](../VISAO_E_ESPECIFICACAO.md) e a
 [matriz individual](../MATRIZ_FIGMA_FRONTEND.md). Capturas mostram o código

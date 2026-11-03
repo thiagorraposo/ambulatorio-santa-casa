@@ -1,5 +1,12 @@
 # Estado atual do projeto
 
+**Retomada visual autorizada em 03/11:** atendimento organizado nas 12 seções
+informacionais, pacientes/formulários/ficha e componentes compartilhados
+aproximados da referência. Contratos, perfis e confirmações próprias preservados.
+[Comparação renderizada, suporte por seção e validações](validacoes/ADEQUACAO_VISUAL_FRONTEND_2026_11_03.md).
+O congelamento abaixo descreve o candidato anterior; esta retomada não o substitui
+nem conclui M3/8V1/8V2.
+
 **Congelamento temporário para apresentação:** candidato `c4a3c99`, runtime
 preservado, builds e40 E2E aprovados e ensaio separado no navegador/API/PostgreSQL
 sintéticos. [SHA completo, roteiro, evidências, ressalvas e contingência](validacoes/CONGELAMENTO_DEMONSTRACAO_2026_11_02.md).

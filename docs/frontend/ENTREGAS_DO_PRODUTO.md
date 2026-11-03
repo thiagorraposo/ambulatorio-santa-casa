@@ -82,6 +82,14 @@ P2 conserva todo o restante deM3 obrigatório, sem exclusão de requisito.
 A reprodução/correção do P0 preserva versões/recibos já existentes; a P-03 de
 projetos/notificação não deve ser usada para postergar a investigação do percurso.
 
+### Adequação de apresentação em03/11/2026
+
+Retomada autorizada restrita ao frontend existente: índice informacional das
+12 seções em7D-U1/U2, lista de pacientes, formulários e componentes visuais.
+[Mapa HTTP por seção, capturas comparativas e testes](../validacoes/ADEQUACAO_VISUAL_FRONTEND_2026_11_03.md).
+Confirmações separadas, regras clínicas, P0 humano e unidades8D preservados;
+esta prova não encerra os pacotes agregados nem homologa8V1/8V2.
+
 ### Validação proporcional dos pacotes futuros
 
 Os códigos abaixo são planos de validação, **não comandos executados nesta
