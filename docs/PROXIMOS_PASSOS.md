@@ -1,5 +1,14 @@
 # Roadmap do Projeto
 
+**Continuidade M3 — 03/11/2026:** a revisão humana comparativa está
+temporariamente adiada para priorizar a continuidade de M3. As validações técnicas
+continuam obrigatórias e os aceites humanos permanecem pendentes. A restrição de
+congelamento anterior foi substituída pelo comando de continuidade, preservando
+seu histórico. Fila e checkpoint no [plano vigente](execucao/PLANO_M3_2026_11_03.md).
+As 306 unidades e 118 E2E anteriores foram aprovados por composição; não houve
+nova execução integral no último SHA. Novas evidências serão registradas por unidade.
+
+
 **Atualização de produto:** [decisões M3 de02/11](dados/DECISOES_PRODUTO_M3_2026_11_02.md)
 autorizam regras e implementação sintética, incluindo vínculo automático
 específico para o paciente cadastrado por Edição. Contratos técnicos/entregas

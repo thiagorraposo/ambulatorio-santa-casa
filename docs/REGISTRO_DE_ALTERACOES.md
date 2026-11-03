@@ -1,5 +1,15 @@
 # Registro de Alterações
 
+## 2026-11-03 — Retomar execução contínua de M3 com DoD integrado
+
+Revisão humana comparativa temporariamente adiada, sem aprovação/homologação.
+Validações técnicas obrigatórias e aceites pendentes. Workflow permanente completa
+contrato→backend→frontend→integração→testes→validação visual→evidências→commit,
+com preservação de contratos e backend isolado identificado como parcial.
+Fila vigente retomada, seis janelas e marcos preservados; HEAD inicial c2129b3,
+árvore limpa. Continuidade funcional autorizada após validação documental.
+
+
 ## 2026-11-03 — Aproximar o frontend da referência oficial
 
 Preservadas e completadas alterações preexistentes: atendimento nas 12 seções

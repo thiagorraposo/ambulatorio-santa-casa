@@ -1,5 +1,12 @@
 # Matriz Figma Make × frontend × produto
 
+**Continuidade de03/11:** revisão humana comparativa temporariamente adiada;
+validações técnicas obrigatórias e aceites pendentes. Para novas funções humanas,
+B/U devem formar unidade integrada conforme o [DoD permanente](../WORKFLOW_DE_DESENVOLVIMENTO.md#entrega-integrada-de-funcionalidades-humanas).
+Preservar referência oficial e telas estabilizadas. Provas anteriores de306 unidades
+/118 E2E são por composição, sem execução integral no último SHA.
+
+
 **Política vigente de02/11:** [decisões de produto1–31](../dados/DECISOES_PRODUTO_M3_2026_11_02.md).
 As referências a escolhas P-03–P-09 pendentes devem ser lidas com essa atualização;
 a implementação/cobertura comprovada de cada FM/RQ permanece a registrada, sem

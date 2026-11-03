@@ -1,6 +1,15 @@
 # Estado atual do projeto
 
-**Retomada visual autorizada em 03/11:** atendimento organizado nas 12 seções
+**Continuidade M3 — 03/11/2026:** a revisão humana comparativa está
+temporariamente adiada para priorizar a continuidade de M3. As validações técnicas
+continuam obrigatórias e os aceites humanos permanecem pendentes. A restrição de
+congelamento anterior foi substituída pelo comando de continuidade, preservando
+seu histórico. Fila e checkpoint no [plano vigente](execucao/PLANO_M3_2026_11_03.md).
+As 306 unidades e 118 E2E anteriores foram aprovados por composição; não houve
+nova execução integral no último SHA. Novas evidências serão registradas por unidade.
+
+
+**Histórico da retomada visual de 03/11:** atendimento organizado nas 12 seções
 informacionais, pacientes/formulários/ficha e componentes compartilhados
 aproximados da referência. Contratos, perfis e confirmações próprias preservados.
 [Comparação renderizada, suporte por seção e validações](validacoes/ADEQUACAO_VISUAL_FRONTEND_2026_11_03.md).

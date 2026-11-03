@@ -270,10 +270,22 @@ Regra permanente determinada pelo responsável após a
 [avaliação humana M3](validacoes/AVALIACAO_HUMANA_EQUIPE_SANTA_CASA_M3.md):
 nenhuma funcionalidade destinada ao usuário está concluída apenas por ter backend
 funcional. Ciclo padrão: **CONTRATO → BACKEND → FRONTEND → INTEGRAÇÃO → TESTES →
-VALIDAÇÃO VISUAL → EVIDÊNCIAS**. A ordem pode acompanhar dependências; nenhum
+VALIDAÇÃO VISUAL → EVIDÊNCIAS → COMMIT**. A ordem pode acompanhar dependências; nenhum
 critério pode ser omitido. Componentes exclusivamente internos podem ter exceção
 justificada no relatório, indicando por que não possuem interação humana.
 Um recorte B pode ser validado tecnicamente sem concluir sua capacidade de produto.
+
+O backend pode ser implementado primeiro. Para funcionalidades destinadas ao
+usuário, o Definition of Done exige interface correspondente na mesma unidade,
+conectada à API real, autorização, persistência/releitura, erros/carga/vazio,
+consistência com a referência oficial e fluxos positivos e negativos relevantes.
+Backend isolado é incremento parcial, mesmo com seus testes aprovados.
+
+Preservar endpoints e contratos comprovados; evoluir incrementalmente e reutilizar
+serviços. Não criar rotas sem necessidade funcional. Se uma mudança de contrato
+for indispensável, identificar consumidores, coordenar backend/frontend,
+preservar compatibilidade quando possível, executar regressões e documentar as
+incompatibilidades inevitáveis.
 
 ### DoD e prontidão arquitetural
 
