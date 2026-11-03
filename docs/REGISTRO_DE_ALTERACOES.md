@@ -1,5 +1,15 @@
 # Registro de Alterações
 
+## 2026-11-02 — Delimitar consulta individual mínima de usuários
+
+Retomado checkpoint `1abe410` com Git limpo. Preparada a
+[proposta de leitura individual](arquitetura/CONTRATO_LEITURA_USUARIOS_8D1B.md#proposta-de-próximo-incremento--consulta-individual-mínima)
+com ID/nome/perfil, capacidades por perfil, HTTP, retorno paginado, critérios
+e gates de histórico/campos adicionais. Apenas documentação; listagem validada
+e regressão anterior preservadas, sem repetir suítes ou alterar ambiente.
+[Inspeção e limites](validacoes/VALIDACAO_8D1_LEITURA_MINIMA.md#retomada-de-1abe410--proposta-de-consulta-individual).
+Checkpoint indica implementação mínima B/U como próxima ação elegível.
+
 ## 2026-11-02 — Corrigir chaves dos formulários de acompanhamento
 
 `FollowupDraftFields` passa `key` diretamente aos componentes booleano,

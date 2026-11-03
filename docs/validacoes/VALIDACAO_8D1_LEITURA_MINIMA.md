@@ -78,3 +78,33 @@ largura mínima dentro da região rolável com foco e setas, sem rolagem horizon
 da página. Perfil pode exigir rolagem da tabela em320; eixo/ordem de colunas se
 mantêm. Não há captura mobile de referência neste confronto nem equivalência
 pixel a pixel; revisão humana/aceite8V1/8V2 e fluxos de mutação continuam pendentes.
+
+
+## Retomada de 1abe410 — proposta de consulta individual
+
+Retomada em 02/11/2026, branch `feat/m3-janela-1-eventos`, HEAD inicial
+`1abe410b65fdf3cde42015f61ddd9808b965699d`, árvore limpa e sem upstream
+configurado. `origin` cadastrado; não houve consulta remota, commit de aplicação,
+push ou troca de branch. A próxima ação expressa do checkpoint era delimitar a
+proposta de consulta individual e seus gates antes de implementar.
+
+Inspeção dirigida do catálogo D1B.1/U.1, contrato de leitura, proposta 8D1D,
+controller/service de usuários e `UsuariosPage.tsx`: há GET de coleção com
+projeção explícita ID/nome/perfil e página de listagem; não há rota individual
+nesses arquivos. Histórico de operações e campos adicionais continuam pendentes.
+Os guards H1 e a validação textual de bigint existentes podem ser reutilizados.
+
+A [proposta de consulta individual](../arquitetura/CONTRATO_LEITURA_USUARIOS_8D1B.md#proposta-de-próximo-incremento--consulta-individual-mínima)
+especifica HTTP/capacidades por perfil, projeção mínima, erros, navegação com
+retorno paginado, estados e critérios API/PostgreSQL/navegador. Os três campos
+e Administração já têm contrato suficiente; implementar esse recorte não exige
+aprovar novas políticas institucionais. Histórico, campos ampliados e mutações
+conservam gates específicos. Não foi criado ID novo nem declarado USR-24 completo.
+
+Validação desta preparação: `make docs-check COMPACT=1` aprovado (log
+`/tmp/ambulatorio-check-v5kwjh4m/output.log`), revisão manual dos links/âncoras
+e conteúdo, `git diff --check` aprovado e status revisado. Somente documentação
+alterada; nenhuma suíte funcional repetida, ambiente iniciado ou conexão ao
+banco. As provas de listagem acima e a regressão b95df82 (306 unidades/110 E2E)
+permanecem no seu escopo; não provam o detalhe proposto. Próxima unidade concreta:
+implementar B/U mínimo e executar a composição de validações pertinente ao diff.
