@@ -1,5 +1,11 @@
 # Estado atual do projeto
 
+**Congelamento temporário para apresentação:** candidato `c4a3c99`, runtime
+preservado, builds e40 E2E aprovados e ensaio separado no navegador/API/PostgreSQL
+sintéticos. [SHA completo, roteiro, evidências, ressalvas e contingência](validacoes/CONGELAMENTO_DEMONSTRACAO_2026_11_02.md).
+HUM-M3-03 permanece aberto; M3 não concluído nem homologado. Não retomar
+expansão automaticamente após esse marco; cadastro por Edição e8D preservados.
+
 **Decisões posteriores aprovadas:** [produto M3 de02/11](dados/DECISOES_PRODUTO_M3_2026_11_02.md).
 Esta atualização registra política, sem mudar o runtime comprovado. A restrição
 atual de cadastro por Edição passa a ser lacuna de implementação, com vínculo

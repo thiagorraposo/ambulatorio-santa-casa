@@ -1,0 +1,76 @@
+{
+  "patientId": "9007199254806515",
+  "attendanceId": "22",
+  "secondId": "23",
+  "payload": {
+    "dataAtendimento": "2026-11-02",
+    "ambulatorioUnicamente": true,
+    "observacoes": "Primeiro atendimento do ensaio final exclusivamente sintético",
+    "dadosClinicos": {
+      "alturaCm": 170.25,
+      "pesoKg": 65.25,
+      "frequenciaCardiacaBpm": 72,
+      "observacoes": "Avaliação registrada no ensaio sintético final"
+    }
+  },
+  "committed": {
+    "status": 201,
+    "body": {
+      "atendimentoId": "22"
+    }
+  },
+  "first": {
+    "status": 200,
+    "body": {
+      "atendimentoId": "22",
+      "dataAtendimento": "2026-11-02",
+      "localizacaoProntuario": null,
+      "ambulatorioUnicamente": true,
+      "ambulatorioAnexoProjeto": null,
+      "observacoes": "Primeiro atendimento do ensaio final exclusivamente sintético",
+      "versao": "1",
+      "dadosClinicos": {
+        "alturaCm": "170.25",
+        "pesoKg": "65.25",
+        "circunferenciaAbdominalCm": null,
+        "frequenciaCardiacaBpm": 72,
+        "saturacaoPercentual": null,
+        "paSistolicaMmhg": null,
+        "paDiastolicaMmhg": null,
+        "nyha": null,
+        "observacoes": "Avaliação registrada no ensaio sintético final"
+      },
+      "diagnosticoChagas": null,
+      "exames": [],
+      "pendencias": [],
+      "rastreioFamiliar": null,
+      "rastreiosFamiliares": [],
+      "paginacaoColecoes": {
+        "limit": 20,
+        "offset": 0
+      }
+    }
+  },
+  "second": {
+    "status": 200,
+    "body": {
+      "atendimentoId": "23",
+      "dataAtendimento": "2026-11-03",
+      "localizacaoProntuario": null,
+      "ambulatorioUnicamente": null,
+      "ambulatorioAnexoProjeto": null,
+      "observacoes": "Segunda consulta sintética sem herança clínica",
+      "versao": "1",
+      "dadosClinicos": null,
+      "diagnosticoChagas": null,
+      "exames": [],
+      "pendencias": [],
+      "rastreioFamiliar": null,
+      "rastreiosFamiliares": [],
+      "paginacaoColecoes": {
+        "limit": 20,
+        "offset": 0
+      }
+    }
+  }
+}

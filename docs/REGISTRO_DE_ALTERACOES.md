@@ -1,5 +1,17 @@
 # Registro de Alterações
 
+## 2026-11-02 — Congelar candidato sintético para apresentação Santa Casa
+
+Candidato `c4a3c998f1b25addac65e1c79fb2b6a00f3fac73` fixado em branch local,
+sem mudança de runtime. Builds backend/frontend e40 E2E integrados aprovados;
+ensaio separado no Chromium com API/PostgreSQL descartáveis comprovou cadastro,
+atendimento/medidas, recuperação sem duplicação, histórico, isolamento, leitura,
+403 e CSV real. Capturas1440/390/320, SQL, recibos e hashes preservados.
+HUM-M3-03 continua aberto; sem causa humana inventada, melhoria visual nova ou
+aceite8V1/8V2. Ambiente encerrado; contingência b95df82 em checkout isolado.
+[Roteiro, resultados, limitações e contingência](validacoes/CONGELAMENTO_DEMONSTRACAO_2026_11_02.md).
+Checkpoint impede expansão automática de M3 após o congelamento.
+
 ## 2026-11-02 — Registrar decisões de produto M3 para implementação sintética
 
 Consolidadas as [respostas1–31](dados/DECISOES_PRODUTO_M3_2026_11_02.md)

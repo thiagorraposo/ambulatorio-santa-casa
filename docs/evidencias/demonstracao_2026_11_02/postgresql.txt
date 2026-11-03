@@ -1,0 +1,18 @@
+Banco descartável: etapa6_frontend_1559838_1793666375_fbf816
+ atendimento_id |   paciente_id    | origem_registro  | altura_cm | peso_kg | frequencia_cardiaca_bpm
+----------------+------------------+------------------+-----------+---------+-------------------------
+             22 | 9007199254806515 | cadastro_sistema |    170.25 |   65.25 |                      72
+             23 | 9007199254806515 | cadastro_sistema |           |         |
+(2 rows)
+
+ metodo |                   caminho                   |   estado   |             resultado              | usuario_id
+--------+---------------------------------------------+------------+------------------------------------+------------
+ POST   | /v1/pacientes                               | confirmada | {"pacienteId": "9007199254806515"} |          3
+ POST   | /v1/pacientes/9007199254806515/atendimentos | confirmada | {"atendimentoId": "22"}            |          3
+ POST   | /v1/pacientes/9007199254806515/atendimentos | confirmada | {"atendimentoId": "23"}            |          3
+(3 rows)
+
+ tabela_destino | eventos | atores |   origens
+----------------+---------+--------+-------------
+ atendimento    |       4 | {3}    | {aplicacao}
+(1 row)

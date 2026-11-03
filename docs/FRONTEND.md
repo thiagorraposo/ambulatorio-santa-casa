@@ -93,6 +93,10 @@ frontend.
 
 ## Demonstração sintética isolada
 
+O [registro do candidato da apresentação](validacoes/CONGELAMENTO_DEMONSTRACAO_2026_11_02.md)
+fixa SHA, evidências do percurso real, roteiro, ressalvas e contingência.
+Não equivale a homologação clínica ou conclusão de M3.
+
 `make dev-sintetico-start` cria um PostgreSQL 16.15 exclusivo e inicia o runner
 `test_e2e.sh --serve`, com migrations e fixture sintéticas. Requer Python 3.9+
 em Linux com suporte a pidfd, Docker, Node.js 24, clientes PostgreSQL e build preparados

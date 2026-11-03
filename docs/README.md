@@ -24,6 +24,7 @@ fonte temática abaixo; relatórios registram provas e histórico preserva conte
 | --- | --- |
 | Preparar ambiente, escolher banco e executar verificações | [Workflow de desenvolvimento](WORKFLOW_DE_DESENVOLVIMENTO.md) |
 | Abrir a demonstração, entender sessão e contratos de interface | [Frontend](FRONTEND.md) |
+| Apresentar o candidato congelado e recuperar a contingência | [Candidato, ensaio e roteiro Santa Casa](validacoes/CONGELAMENTO_DEMONSTRACAO_2026_11_02.md) |
 | Executar o importador sintético | [Guia do importador implementado](IMPORTADOR_SINTETICO_V1.md) |
 | Validar o navegador com API/PostgreSQL descartáveis | [Runner de testes](../tests/frontend/README.md) |
 | Fazer backup e testar recuperação do Docker | [Recuperação local e limites](RECUPERACAO_POSTGRESQL_DOCKER.md) |

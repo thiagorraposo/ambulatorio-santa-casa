@@ -1,0 +1,493 @@
+{
+  "sha": "c4a3c998f1b25addac65e1c79fb2b6a00f3fac73",
+  "stats": {
+    "startTime": "2026-11-03T00:40:26.462Z",
+    "duration": 501984.079,
+    "expected": 40,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cenarios": [
+    {
+      "cenario": "P0: contexto inválido, correção e releitura de atendimento — paciente novo pela interface",
+      "arquivo": "attendance-validation.spec.ts",
+      "linha": 7,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "P0: contexto inválido, correção e releitura de atendimento — paciente existente",
+      "arquivo": "attendance-validation.spec.ts",
+      "linha": 7,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "P0: limites de registro e familiares apontam campo e etapa antes de confirmar",
+      "arquivo": "attendance-validation.spec.ts",
+      "linha": 83,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "M3 demonstração sintética: cadastro buscado, consulta, episódios, parâmetros, histórico e CSV",
+      "arquivo": "m3-demo.spec.ts",
+      "linha": 8,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D-R2: 403 de escrita permite revisar o mesmo rascunho e confirmar após restaurar o vínculo",
+      "arquivo": "stage7-access-recovery.spec.ts",
+      "linha": 5,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7A: cadastro exige nome, usa busca prévia e mantém homônimos separados",
+      "arquivo": "stage7.spec.ts",
+      "linha": 11,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7A: resultado vazio exige confirmação e falha de busca não libera cadastro",
+      "arquivo": "stage7.spec.ts",
+      "linha": 71,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7A: edição preserva contatos, endereço, estados desconhecidos e IDs textuais",
+      "arquivo": "stage7.spec.ts",
+      "linha": 101,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7A/7D: 409 mantém o rascunho e a versão original do paciente sem sobrescrita",
+      "arquivo": "stage7.spec.ts",
+      "linha": 137,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7A/7B: PATCH do núcleo usa a versão carregada e preserva filhos do atendimento",
+      "arquivo": "stage7.spec.ts",
+      "linha": 178,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7A/7D: 409 do atendimento mantém a versão e as alterações locais",
+      "arquivo": "stage7.spec.ts",
+      "linha": 207,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D: consulta não escreve, vínculo delimita edição e administração segue a API",
+      "arquivo": "stage7.spec.ts",
+      "linha": 224,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D: revogação da permissão recusa a preparação com 403 e conserva rascunho sem sucesso",
+      "arquivo": "stage7.spec.ts",
+      "linha": 248,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D: draft protege navegação, voltar, teclado, mobile e zoom; saída apaga o draft",
+      "arquivo": "stage7.spec.ts",
+      "linha": 267,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D: expiração limpa alterações clínicas em memória antes da nova sessão",
+      "arquivo": "stage7.spec.ts",
+      "linha": 320,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7B: atendimento composto valida ambiguidades, faz rollback e salva todos os campos preenchidos",
+      "arquivo": "stage7.spec.ts",
+      "linha": 336,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7C: BZN único com reação, retornos repetidos e ano informado separado de visitas",
+      "arquivo": "stage7.spec.ts",
+      "linha": 475,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7C: projeto, notificação, encaminhamento, contrarreferências e resolução de pendência",
+      "arquivo": "stage7.spec.ts",
+      "linha": 574,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D-U1: cancelar pede decisão e preserva o rascunho sem escrever",
+      "arquivo": "stage7.spec.ts",
+      "linha": 705,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D-U2: cliques repetidos na confirmação gravam um atendimento apenas",
+      "arquivo": "stage7.spec.ts",
+      "linha": 732,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D-U4.2: etapas do atendimento e diálogo funcionam por teclado em telas estreitas e zoom",
+      "arquivo": "stage7.spec.ts",
+      "linha": 748,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D: resposta perdida após commit exige verificação e não repete atendimento",
+      "arquivo": "stage7.spec.ts",
+      "linha": 786,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D: conflito no acompanhamento conserva o atendimento confirmado e o rascunho posterior",
+      "arquivo": "stage7.spec.ts",
+      "linha": 822,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D: 401 real em escrita encerra sessão e remove rascunho clínico",
+      "arquivo": "stage7.spec.ts",
+      "linha": 850,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D: resposta antiga de escrita não navega nem mostra sucesso após trocar identidade",
+      "arquivo": "stage7.spec.ts",
+      "linha": 868,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7A/7D: política clínica impede formulário de cadastro mesmo com perfil de edição",
+      "arquivo": "stage7.spec.ts",
+      "linha": 896,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D: perda da resposta do PATCH confirma pela ficha sem repetir alteração versionada",
+      "arquivo": "stage7.spec.ts",
+      "linha": 915,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D: resposta perdida de retorno-anual preserva episódio único e sua intenção ao voltar",
+      "arquivo": "stage7.spec.ts",
+      "linha": 956,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D: resposta perdida de contrarreferencia preserva episódio único e sua intenção ao voltar",
+      "arquivo": "stage7.spec.ts",
+      "linha": 956,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D: falha de rede na revalidação durante escrita oculta e recupera a intenção incerta sem duplicar",
+      "arquivo": "stage7.spec.ts",
+      "linha": 1014,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "7D: reconsulta com vínculo revogado oculta formulário antes da resposta e conserva o rascunho",
+      "arquivo": "stage7.spec.ts",
+      "linha": 1065,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "8D1U.1: Administração consulta usuários reais, pagina, recupera leitura e mantém URL",
+      "arquivo": "usuarios.spec.ts",
+      "linha": 5,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "8D1U.1: consulta não lista terceiros por menu ou URL",
+      "arquivo": "usuarios.spec.ts",
+      "linha": 42,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "8D1U.1: edicao não lista terceiros por menu ou URL",
+      "arquivo": "usuarios.spec.ts",
+      "linha": 42,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "8D1U.1: detalhe real conserva página, recarga, teclado e leitura em telas menores",
+      "arquivo": "usuarios.spec.ts",
+      "linha": 55,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "8D1U.1: detalhe distingue 404, erro e repetição sem mostrar conta anterior",
+      "arquivo": "usuarios.spec.ts",
+      "linha": 82,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "8D1U.1: consulta não consulta detalhe por URL nem a própria conta administrativa",
+      "arquivo": "usuarios.spec.ts",
+      "linha": 104,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "8D1U.1: edicao não consulta detalhe por URL nem a própria conta administrativa",
+      "arquivo": "usuarios.spec.ts",
+      "linha": 104,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "8D1U.1: inativação real do requisitante oculta detalhe e encerra sessão",
+      "arquivo": "usuarios.spec.ts",
+      "linha": 116,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "cenario": "8D1U.1: troca de conta por navegação mantém dados antigos ocultos durante carga",
+      "arquivo": "usuarios.spec.ts",
+      "linha": 130,
+      "status": "expected",
+      "resultados": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    }
+  ]
+}

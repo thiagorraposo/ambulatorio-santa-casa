@@ -1,0 +1,13 @@
+{
+  "01-login-desktop.png": "4dfe33c6743b6484401a1d638e0b2ce93d21eafac7f91b6aecab0916c368a32c",
+  "05-validacao-mobile.png": "1cca5a13ee402d91dc55602f3c8619792cd20b1664cc9fa9179da444f9328095",
+  "09-atendimento-persistido.png": "4b1d887ddc36a8b5da9534cfb9e43c5da62b8e012aa630ed2af8820c923be7f9",
+  "14-consulta-320.png": "316cf7f3a738bbf1ce04013fdfa9c81fe735147e717d02c18e84d3ca91ba479e",
+  "15-csv-confirmacao.png": "20adcfa548b877bf8a5e75e83a61fc30193f8c4e2bfc9d6fa07ed797328ced3f",
+  "17-busca-mobile.png": "08f18e10e3e2ddd810a42f23ae5c2bb26f2c3a70bc5355281f8c49be172b80a0",
+  "ambiente.json": "37639fd2d3ed6c7a4296ababe8b998e23170e924856b0848c10dbc0b6c14a295",
+  "releitura.json": "9bbdb1c4bde9e74434e74d1cf0d816a555095d2a202bb4cbc8ad79f7bd4b4789",
+  "postgresql.txt": "53416591f33cb553e95c7e73840791fffc15be39667703b2434dd541e7df1158",
+  "pacientes.csv": "e894f7cbf7f4872556b2941e7efe40eb74a6a4e8c33412708c8a8d8db2642561",
+  "regressao.json": "96888bac6f69d68996337b8eb428d37793fb474a320c024a47d143a4cccecfb4"
+}
