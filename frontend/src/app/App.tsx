@@ -171,8 +171,10 @@ function AccountPage() {
   return <><PageHeading title="Minha conta" description="Confira sua identificação e seu perfil de acesso." />
     <Card><dl className="record-grid"><div><dt>Nome</dt><dd>{user.nome}</dd></div>
       <div><dt>ID do usuário</dt><dd className="mono">{user.usuarioId}</dd></div>
-      <div><dt>Perfil</dt><dd>{profiles[user.perfil]}</dd></div></dl>
-      <p className="muted">Para solicitar alterações no seu acesso, procure a equipe responsável pelo sistema.</p>
+      <div><dt>Perfil</dt><dd>{profiles[user.perfil]}</dd></div>
+      {user.login !== undefined && <div><dt>Login</dt><dd>{user.login}</dd></div>}
+      {user.ativo !== undefined && <div><dt>Situação da conta</dt><dd>{user.ativo ? 'Ativa' : 'Inativa'}</dd></div>}</dl>
+      <p className="muted">Procure um administrador autorizado da unidade</p>
       <button className="button button-secondary" onClick={session.logout}>Sair da conta</button>
     </Card></>;
 }

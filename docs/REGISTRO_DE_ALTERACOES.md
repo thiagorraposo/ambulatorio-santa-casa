@@ -1,5 +1,13 @@
 # Registro de Alterações
 
+## 2026-11-03 — Integrar identificação própria e suporte em Minha conta
+
+/auth/me amplia login/situação reais, sem hash ou leitura de terceiros; interface
+reaproveita identidade em memória e publica suporte da decisão10. Contratos e
+sessão preservados, projeção antiga aceita sem inventar dados. Builds,211 unidades
+backend,311 frontend integrais,8 fundação,22 HTTP e4+2 E2E focados aprovados.
+[Provas e comparação visual](validacoes/VALIDACAO_8D1_MINHA_CONTA.md), sem aceite humano.
+
 ## 2026-11-03 — Integrar login e situação na leitura administrativa8D
 
 GETs administrativos existentes e lista/detalhe passam a publicar login e estado

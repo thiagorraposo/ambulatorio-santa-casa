@@ -13,7 +13,7 @@ async function setup(path = '/minha-conta') {
   const fetcher = vi.fn<typeof fetch>(async url => {
     if (url === '/v1/auth/login') return Response.json({ accessToken: 'sintetico', tokenType: 'Bearer', expiresIn: 900 });
     if (url === '/v1/auth/me') return unavailable ? Response.json({ message: 'Detalhe interno não deve aparecer' }, { status: 503 })
-      : Response.json({ usuarioId: '9007199254740993', nome: 'Profissional Sintético', perfil: 'consulta' });
+      : Response.json({ usuarioId: '9007199254740993', nome: 'Profissional Sintético', perfil: 'consulta', login: 'consulta@example.invalid', ativo: true });
     throw new Error(`Leitura inesperada: ${url}`);
   });
   const manager = new SessionManager(fetcher); managers.push(manager);
@@ -23,12 +23,14 @@ async function setup(path = '/minha-conta') {
 }
 
 describe('7D-U4.1 — conta, falha de identidade e página desconhecida', () => {
-  it('mostra identidade real e orientação de suporte, sem inventar login/status ou edição de perfil', async () => {
+  it('mostra identidade real e orientação de suporte, login/status próprios e suporte aprovado sem edição de perfil', async () => {
     const { user, fetcher } = await setup();
     expect(screen.getByRole('heading', { name: 'Minha conta', level: 1 })).toBeVisible();
     expect(screen.getByText('9007199254740993')).toBeVisible();
     expect(screen.getByText('Profissional Sintético', { selector: 'dd' })).toBeVisible();
-    expect(screen.getByText(/procure a equipe responsável/)).toBeVisible();
+    expect(screen.getByText('consulta@example.invalid', { selector: 'dd' })).toBeVisible();
+    expect(screen.getByText('Ativa', { selector: 'dd' })).toBeVisible();
+    expect(screen.getByText(/Procure um administrador autorizado da unidade/)).toBeVisible();
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Sair da conta' }));
     expect(await screen.findByRole('heading', { name: 'Entre na sua conta' })).toBeVisible();

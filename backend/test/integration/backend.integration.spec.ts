@@ -76,8 +76,8 @@ describe('Backend com PostgreSQL real', () => {
   it('/auth/me expõe somente identidade autorizada e bloqueia usuário inativado', async () => {
     const response = await request(app.getHttpServer()).get('/auth/me')
       .set('Authorization', `Bearer ${consultaToken}`).expect(200);
-    expect(response.body).toEqual({ usuarioId: expect.any(String), nome: 'Consulta Sintetica', perfil: 'consulta' });
-    expect(response.body).not.toHaveProperty('login');
+    expect(response.body).toEqual({ usuarioId: expect.any(String), nome: 'Consulta Sintetica', perfil: 'consulta', login: process.env.TEST_LOGIN_CONSULTA, ativo: true });
+    expect(Object.keys(response.body).sort()).toEqual(['ativo', 'login', 'nome', 'perfil', 'usuarioId']);
     expect(response.body).not.toHaveProperty('senha_hash');
     const inactive = await database.query<{ usuario_id: string }>(
       'SELECT usuario_id::text FROM usuario_aplicacao WHERE login = $1', [process.env.TEST_LOGIN_INATIVO!]);

@@ -5,6 +5,8 @@ export interface AuthenticatedUser {
   usuarioId: string;
   nome: string;
   perfil: Perfil;
+  login?: string;
+  ativo?: boolean;
 }
 
 export interface TokenPayload {

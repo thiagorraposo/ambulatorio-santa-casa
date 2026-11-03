@@ -32,6 +32,6 @@ export class AuthService {
   async resolveIdentity(payload: TokenPayload): Promise<AuthenticatedUser | undefined> {
     if (payload.typ !== 'access' || !/^\d+$/.test(payload.sub)) return undefined;
     const user = await this.repository.findActiveById(payload.sub);
-    return user ? { usuarioId: user.usuario_id, nome: user.nome, perfil: user.perfil } : undefined;
+    return user ? { usuarioId: user.usuario_id, nome: user.nome, perfil: user.perfil, login: user.login, ativo: user.ativo } : undefined;
   }
 }

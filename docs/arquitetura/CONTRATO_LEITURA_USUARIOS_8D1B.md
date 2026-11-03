@@ -2,7 +2,8 @@
 
 **Vigente em03/11:** a [ampliação integrada de login/estado](#ampliação-integrada-de0311--login-e-estado)
 sucede a projeção mínima histórica abaixo. Preserva os endpoints e os campos
-anteriores; comandos, histórico e Minha conta mantêm escopos próprios.
+anteriores; [identificação própria de Minha conta](#identificação-própria-integrada--8d1b2u2)
+tem incremento integrado próprio. Comandos e histórico mantêm seus escopos.
 
 
 Recorte técnico de listagem, conforme os mínimos de
@@ -141,3 +142,26 @@ Validação: projeção exata SQL/API para contas ativas/inativas e IDs grandes,
 perfis, parâmetros/404, navegador com carga/erro/vazio/retorno/recarga e comparação
 visual da tabela/detalhe1440/390/320. Referência oficial de usuários, componentes
 estabilizados e rolagem acessível preservados; aceites humanos próprios pendentes.
+
+## Identificação própria integrada — 8D1B.2/U.2
+
+Decisões8/10 autorizam consultar os próprios dados e fixam orientação de suporte.
+Este recorte amplia GET /auth/me e o alias legado com login/ativo, preservando
+ID/nome/perfil e login/token. O guard revalida a identidade ativa pelo sub do JWT;
+a consulta não aceita escolher outra conta. SQL projeta login sem hash, e o
+mapeamento retorna somente a identidade pública. Requisitante inativo permanece401.
+Não criar endpoint ou duplicar a leitura da conta na interface: reaproveitar a
+identidade em memória já obtida no login/revalidação, sem storage persistente.
+
+Frontend aceita a projeção antiga sem campos adicionais para compatibilidade,
+mostrando login/situação somente quando retornados pelo serviço, sem inferência.
+Se presentes, login deve ser texto não vazio e ativo=true; projeção inconsistente
+não abre sessão. A API atual sempre fornece os cinco campos para identidade ativa.
+Erros de identidade, expiração e troca de usuário continuam ocultando os dados e
+limpando cache. Suporte: “Procure um administrador autorizado da unidade”.
+
+Objetivo/aceite: três perfis consultam ID/nome/login/perfil/situação próprios e
+orientação real, mantendo saída e recuperação de falha de identidade. Projeção
+exata, sem hash/token, 401 real e revalidação; navegador nos três perfis, teclado,
+320/390/1440 e referência de Minha conta. Troca de senha, gestão de credenciais,
+histórico, me adicional e aceite humano continuam unidades próprias pendentes.

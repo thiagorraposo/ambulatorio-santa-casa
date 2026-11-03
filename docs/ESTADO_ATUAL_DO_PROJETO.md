@@ -13,7 +13,8 @@ nova execução integral no último SHA. Novas evidências serão registradas po
 validado tecnicamente, com vínculo específico atômico, atendimento e revogação.
 Migration74 somente descartável; aceitações humanas pendentes. Próxima unidade:
 [8D leitura administrativa de login/estado validada](validacoes/VALIDACAO_8D1_LOGIN_ESTADO.md);
-seguir para identificação ampliada de Minha conta, preservando rotas e autorização.
+[identificação própria de Minha conta também validada](validacoes/VALIDACAO_8D1_MINHA_CONTA.md).
+Seguir8D2 por recortes com contrato de versão/sessão/auditoria; sem concluir a família8D.
 
 
 **Histórico da retomada visual de 03/11:** atendimento organizado nas 12 seções

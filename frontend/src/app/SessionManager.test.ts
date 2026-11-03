@@ -100,6 +100,23 @@ describe('sessão em memória e cache clínico', () => {
     expect(session.getSnapshot().user).toEqual(user);
   });
 
+  it('preserva somente login/estado próprios adicionais em memória e limpa ao sair', async () => {
+    const extended = { ...user, login: 'proprio@example.invalid', ativo: true };
+    const session = manager(vi.fn<typeof fetch>().mockResolvedValueOnce(token())
+      .mockResolvedValueOnce(Response.json({ ...extended, senha_hash: 'nunca-publicar-sintetico' })));
+    await session.login('sintetico', 'senha-sintetica');
+    expect(session.getSnapshot().user).toEqual(extended);
+    session.logout();
+    expect(session.getSnapshot().user).toBeNull();
+  });
+
+  it.each([{ login: '' }, { login: 42 }, { ativo: false }, { ativo: 'true' }])('recusa projeção adicional inconsistente: %o', async extra => {
+    const session = manager(vi.fn<typeof fetch>().mockResolvedValueOnce(token())
+      .mockResolvedValueOnce(Response.json({ ...user, ...extra })));
+    await expect(session.login('sintetico', 'senha-sintetica')).rejects.toMatchObject({ status: 502 });
+    expect(session.getSnapshot().user).toBeNull();
+  });
+
   it('recusa identidade fora do contrato sem conceder sessão', async () => {
     const session = manager(vi.fn<typeof fetch>().mockResolvedValueOnce(token())
       .mockResolvedValueOnce(Response.json({ ...user, perfil: 'superusuario' })));

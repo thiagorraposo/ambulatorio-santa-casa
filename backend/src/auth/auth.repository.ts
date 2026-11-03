@@ -22,9 +22,9 @@ export class AuthRepository {
     return result.rows[0];
   }
 
-  async findActiveById(usuarioId: string): Promise<Omit<UsuarioAuthRow, 'senha_hash' | 'login'> | undefined> {
-    const result = await this.database.query<Omit<UsuarioAuthRow, 'senha_hash' | 'login'>>(
-      `SELECT usuario_id::text, nome, perfil, ativo
+  async findActiveById(usuarioId: string): Promise<Omit<UsuarioAuthRow, 'senha_hash'> | undefined> {
+    const result = await this.database.query<Omit<UsuarioAuthRow, 'senha_hash'>>(
+      `SELECT usuario_id::text, nome, perfil, login, ativo
          FROM usuario_aplicacao WHERE usuario_id = $1 AND ativo = TRUE LIMIT 1`, [usuarioId]);
     return result.rows[0];
   }

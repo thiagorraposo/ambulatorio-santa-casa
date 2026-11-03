@@ -38,6 +38,17 @@ suite('8D1B.1 leitura mínima de usuários', () => {
     }
     await http().get('/v1/usuarios').auth(tokens.inativo, { type: 'bearer' }).expect(401);
   });
+  it('cada perfil consulta somente sua identificação ampliada sem hash ou credencial', async () => {
+    await http().get('/v1/auth/me').expect(401);
+    await http().get('/v1/auth/me').auth(tokens.inativo, { type: 'bearer' }).expect(401);
+    for (const profile of ['consulta', 'edicao', 'administracao']) {
+      const expected = (await owner.query(`SELECT usuario_id::text AS "usuarioId",nome,login,perfil,ativo
+        FROM ambulatorio.usuario_aplicacao WHERE login=$1`, [`8d-${profile}@example.invalid`])).rows[0];
+      const response = await http().get('/v1/auth/me').auth(tokens[profile], { type: 'bearer' }).expect(200);
+      expect(response.body).toEqual(expected);
+      expect(Object.keys(response.body).sort()).toEqual(['ativo', 'login', 'nome', 'perfil', 'usuarioId']);
+    }
+  });
   it('projeta ID textual/nome/login/perfil/estado e pagina homônimos sem duplicação', async () => {
     const expected = (await owner.query(`SELECT usuario_id::text AS "usuarioId",nome,perfil,login,ativo
       FROM ambulatorio.usuario_aplicacao ORDER BY nome,usuario_id LIMIT 4`)).rows;

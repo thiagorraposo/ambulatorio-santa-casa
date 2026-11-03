@@ -6,6 +6,8 @@ export interface AuthUser {
   usuarioId: string;
   nome: string;
   perfil: Perfil;
+  login?: string;
+  ativo?: boolean;
 }
 
 export interface LoginResponse {
