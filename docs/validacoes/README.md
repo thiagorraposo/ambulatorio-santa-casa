@@ -9,6 +9,7 @@ de testes não é uma contagem atual e aceite sintético não autoriza dados rea
 
 | Escopo | Evidência | Leitura correta |
 | --- | --- | --- |
+| 8D criação e primeiro acesso | [Validação integrada](VALIDACAO_8D2_CRIACAO.md) | Criação, uso único, troca obrigatória, recibos e recuperação; sem aceite humano. |
 | 8D estado administrativo | [Validação integrada](VALIDACAO_8D2_ESTADO.md) | Ativação/inativação, concorrência e revogação sem restauração;325 unidades frontend integrais e7 E2E focados; sem aceite humano. |
 | 8D perfil administrativo | [Validação integrada](VALIDACAO_8D2_PERFIL.md) | API/UI/PostgreSQL, versão/justificativa/recibo, concorrência e revogação JWT; sem aceite humano. |
 | 8D Minha conta | [Identificação própria integrada](VALIDACAO_8D1_MINHA_CONTA.md) | Cinco campos reais/suporte/saída;311 unidades frontend integrais,22 HTTP e4+2 E2E focados;8D agregado pendente. |

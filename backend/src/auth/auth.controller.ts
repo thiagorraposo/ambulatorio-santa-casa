@@ -3,6 +3,7 @@ import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { AuthenticatedUser } from './auth.types';
 import { CurrentUser } from './current-user.decorator';
+import { TrocarSenhaDto } from './dto/senha.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponse } from './dto/login.response';
 import { Perfis } from './perfis.decorator';
@@ -17,6 +18,13 @@ export class AuthController {
   @Post('login')
   login(@Body() input: LoginDto): Promise<LoginResponse> {
     return this.auth.login(input.login, input.senha);
+  }
+
+  @Post('senha')
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Perfis('consulta', 'edicao', 'administracao')
+  changePassword(@Body() dto: TrocarSenhaDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.auth.changePassword(user, dto.senhaAtual, dto.novaSenha);
   }
 
   @Get('me')

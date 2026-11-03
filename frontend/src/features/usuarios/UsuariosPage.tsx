@@ -6,6 +6,8 @@ import { pagePath, Pagination, usePage } from '../pacientes/pagination';
 
 import type { UsuarioResumo } from '../../api/contracts';
 import { AlterarConta, profiles } from './AlterarConta';
+import CriarUsuario from './CriarUsuario';
+import RecuperarCredencial from './RecuperarCredencial';
 
 function UsersList() {
   const session = useSession();
@@ -13,6 +15,7 @@ function UsersList() {
   const query = useApiQuery<UsuarioResumo[]>(pagePath('/usuarios', page.limit, page.offset));
   return <>
     <PageHeading title="Usuários" description="Consulte a identificação, o perfil e a situação das contas do ambulatório." />
+    <Link className="button" to="/usuarios/novo">Criar usuário</Link>
     <Card>
       <QueryState query={query} emptyMessage="Nenhum usuário nesta página.">
         {rows => rows.length === 0 ? <EmptyState>Nenhum usuário nesta página.</EmptyState> :
@@ -44,7 +47,7 @@ function UserDetail({ usuarioId }: { usuarioId: string }) {
         <div><dt>Login</dt><dd>{user.login}</dd></div>
         <div><dt>Situação da conta</dt><dd>{user.ativo ? 'Ativa' : 'Inativa'}</dd></div>
         <div><dt>Perfil</dt><dd><span className="badge">{profiles[user.perfil]}</span></dd></div>
-      </dl><AlterarConta key={`${user.usuarioId}:${kind}`} user={user} kind={kind} /></>}</QueryState>
+      </dl><AlterarConta key={`${user.usuarioId}:${kind}`} user={user} kind={kind} /><RecuperarCredencial key={`recuperacao:${user.usuarioId}`} user={user} /></>}</QueryState>
     </Card>
   </>;
 }
@@ -52,7 +55,7 @@ function UserDetail({ usuarioId }: { usuarioId: string }) {
 export default function UsuariosPage() {
   const session = useSession();
   const { usuarioId } = useParams();
-  return session.user?.perfil === 'administracao' ? (usuarioId ? <UserDetail key={usuarioId} usuarioId={usuarioId} /> : <UsersList />) : <Card>
+  return session.user?.perfil === 'administracao' ? (usuarioId === 'novo' ? <CriarUsuario /> : usuarioId ? <UserDetail key={usuarioId} usuarioId={usuarioId} /> : <UsersList />) : <Card>
     <PageHeading title="Acesso administrativo necessário" description="A consulta de usuários exige perfil de Administração." />
     <Link to="/">Voltar ao início</Link>
   </Card>;

@@ -8,12 +8,14 @@ export interface AuthUser {
   perfil: Perfil;
   login?: string;
   ativo?: boolean;
+  trocaObrigatoria?: boolean;
 }
 
 export interface LoginResponse {
   accessToken: string;
   tokenType: 'Bearer';
   expiresIn: number;
+  trocaObrigatoria?: boolean;
 }
 
 export interface ColecaoPaginaResponse { limit: number; offset: number }

@@ -1,7 +1,7 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { compare } from 'bcryptjs';
+import { compare, hash } from 'bcryptjs';
 import { AppConfig } from '../config/app.config';
 import { AuthRepository } from './auth.repository';
 import { AuthenticatedUser, SESSION_VERSION, TokenPayload } from './auth.types';
@@ -23,16 +23,29 @@ export class AuthService {
       this.logger.warn(JSON.stringify({ event: 'authentication', outcome: 'failure' }));
       throw new UnauthorizedException('Credenciais inválidas');
     }
+    if (user.troca_obrigatoria && !await this.repository.consumeInitial(user)) {
+      throw new UnauthorizedException('Credenciais inválidas');
+    }
     const expiresIn = this.config.get('auth.jwtExpiresInSeconds', { infer: true });
     const accessToken = await this.jwt.signAsync({ sub: user.usuario_id, typ: 'access', ver: user.geracao_sessao ?? '0' } satisfies TokenPayload);
     this.logger.log(JSON.stringify({ event: 'authentication', outcome: 'success', userId: user.usuario_id }));
-    return { accessToken, tokenType: 'Bearer', expiresIn };
+    return { accessToken, tokenType: 'Bearer', expiresIn, ...(user.troca_obrigatoria ? {trocaObrigatoria: true} : {}) };
+  }
+
+  async changePassword(identity: AuthenticatedUser, current: string, next: string) {
+    if (Buffer.byteLength(next, 'utf8') > 72 || current === next) throw new BadRequestException('Escolha uma nova senha forte de até 72 bytes');
+    const user = await this.repository.findByLogin(identity.login!);
+    if (!user || user.usuario_id !== identity.usuarioId || (user.geracao_sessao ?? '0') !== identity[SESSION_VERSION]
+      || !await compare(current, user.senha_hash)) throw new UnauthorizedException('Credencial atual inválida');
+    if (!await this.repository.changePassword(user, await hash(next, 12))) throw new UnauthorizedException('Sessão inválida; procure um administrador autorizado da unidade');
+    return {alterada: true};
   }
 
   async resolveIdentity(payload: TokenPayload): Promise<AuthenticatedUser | undefined> {
     if (payload.typ !== 'access' || !/^\d+$/.test(payload.sub)) return undefined;
     const user = await this.repository.findActiveById(payload.sub);
     if (!user || (payload.ver ?? '0') !== (user.geracao_sessao ?? '0')) return undefined;
-    return { [SESSION_VERSION]: user.geracao_sessao ?? '0', usuarioId: user.usuario_id, nome: user.nome, perfil: user.perfil, login: user.login, ativo: user.ativo };
+    if (user.troca_obrigatoria && (!user.credencial_consumida_em || !user.credencial_expira_em || new Date(user.credencial_expira_em).getTime() <= Date.now())) return undefined;
+    return { ...(user.troca_obrigatoria ? {trocaObrigatoria: true} : {}), [SESSION_VERSION]: user.geracao_sessao ?? '0', usuarioId: user.usuario_id, nome: user.nome, perfil: user.perfil, login: user.login, ativo: user.ativo };
   }
 }

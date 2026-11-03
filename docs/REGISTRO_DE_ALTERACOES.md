@@ -1,5 +1,15 @@
 # Registro de Alterações
 
+## 2026-11-03 — Integrar criação de usuários e primeiro acesso obrigatório
+
+Migration77, API e interface administrativas criam conta com credencial temporária
+forte de exibição única, prazo configurável e consumo transacional. Sessão inicial
+restrita à troca de senha; novo hash revoga sessões. Recuperação não administrativa
+com versão/justificativa e recibo sem segredo. Proteções de perfil/estado preservadas;
+dono de credenciais separado do dono da auditoria. [Contrato](arquitetura/CONTRATO_CRIACAO_USUARIO_8D2.md)
+e [provas técnicas](validacoes/VALIDACAO_8D2_CRIACAO.md). Somente PostgreSQL sintético
+descartável; sem aceite institucional ou conclusão integral de M3.
+
 ## 2026-11-03 — Integrar rascunho das12 seções e confirmação coordenada do atendimento
 
 P0 funcional M3 assume prioridade máxima. Campos dos serviços clínicos existentes

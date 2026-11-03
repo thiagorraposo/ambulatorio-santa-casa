@@ -10,6 +10,7 @@ export interface AuthenticatedUser {
   perfil: Perfil;
   login?: string;
   ativo?: boolean;
+  trocaObrigatoria?: boolean;
 }
 
 export interface TokenPayload {

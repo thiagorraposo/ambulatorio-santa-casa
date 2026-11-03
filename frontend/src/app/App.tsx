@@ -1,3 +1,4 @@
+import AlterarSenha from '../features/usuarios/AlterarSenha';
 import UsuariosPage from '../features/usuarios/UsuariosPage';
 import ResultadosExamePage from '../features/resultados-exame/ResultadosExamePage';
 import ResultadoExameCreatePage from '../features/resultados-exame/ResultadoExameCreatePage';
@@ -129,6 +130,7 @@ function ProtectedLayout() {
     const next = encodeURIComponent(`${location.pathname}${location.search}${location.hash}`);
     return <Navigate to={`/login?next=${next}`} replace />;
   }
+  if (session.user.trocaObrigatoria) return <main className="login-page" id="conteudo" tabIndex={-1}>{session.identityError ? <IdentityUnavailable /> : <AlterarSenha obrigatoria />}</main>;
   return <DraftProvider key={session.draftScope}><Layout>{session.identityError
     ? <IdentityUnavailable /> : <Outlet />}</Layout></DraftProvider>;
 }
@@ -176,7 +178,7 @@ function AccountPage() {
       {user.ativo !== undefined && <div><dt>Situação da conta</dt><dd>{user.ativo ? 'Ativa' : 'Inativa'}</dd></div>}</dl>
       <p className="muted">Procure um administrador autorizado da unidade</p>
       <button className="button button-secondary" onClick={session.logout}>Sair da conta</button>
-    </Card></>;
+    </Card><AlterarSenha /></>;
 }
 
 function NotFoundPage() {

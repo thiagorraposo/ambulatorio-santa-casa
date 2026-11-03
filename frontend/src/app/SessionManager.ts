@@ -15,12 +15,14 @@ function identity(value: AuthUser): AuthUser {
   if (!value || typeof value.usuarioId !== 'string' || !/^\d+$/.test(value.usuarioId)
     || typeof value.nome !== 'string' || !['consulta', 'edicao', 'administracao'].includes(value.perfil)
     || (value.login !== undefined && (typeof value.login !== 'string' || !value.login.trim()))
-    || (value.ativo !== undefined && value.ativo !== true)) {
+    || (value.ativo !== undefined && value.ativo !== true)
+    || (value.trocaObrigatoria !== undefined && typeof value.trocaObrigatoria !== 'boolean')) {
     throw new ApiError(502);
   }
   return { usuarioId: value.usuarioId, nome: value.nome, perfil: value.perfil,
     ...(value.login === undefined ? {} : { login: value.login }),
-    ...(value.ativo === undefined ? {} : { ativo: value.ativo }) };
+    ...(value.ativo === undefined ? {} : { ativo: value.ativo }),
+    ...(value.trocaObrigatoria ? { trocaObrigatoria: true } : {}) };
 }
 
 export class SessionManager {
