@@ -1,5 +1,19 @@
 # Registro de Alterações
 
+## 2026-11-03 — Organizar publicação integrada de M3 pelo GitHub Flow
+
+Entrega reunida na branch existente `feat/m3-janela-1-eventos`, preservando os
+68 commits de implementação/evidências e incorporando `origin/main` por merge
+sem conflitos (`0f67429`). Nenhuma migration anterior foi alterada; as migrations
+69–79 são incrementais. Validação e publicação seguem o workflow oficial, com
+PostgreSQL exclusivo em tmpfs na porta 55457, sem operar os ambientes persistentes.
+Resultados locais, CI e limites ficam na descrição da PR e nas execuções do GitHub
+Actions vinculadas, evitando duplicar seu estado transitório neste registro.
+Publicação técnica não equivale a homologação humana de M3/8V1/8V2.
+O job Frontend passa de 25 para 45 minutos: a rodada local integral ultrapassou
+25 minutos (149 cenários em 35,4 minutos) com esperas do limiter real, sem falhas
+ou redução de cobertura; margem adicional inclui a preparação do runner.
+
 ## 2026-11-03 — Substituir a base de demonstração por dez pacientes fictícios
 
 Seed existente ganha perfil demonstrativo exclusivo de --serve/--demo-test, com

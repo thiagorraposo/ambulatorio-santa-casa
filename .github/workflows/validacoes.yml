@@ -166,7 +166,7 @@ jobs:
   frontend:
     name: Frontend
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 45
     env:
       PGPASSWORD: senha_exclusivamente_sintetica_ci
     steps:
