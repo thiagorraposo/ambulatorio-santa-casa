@@ -114,6 +114,11 @@ Os testes executam serialmente para compartilhar fixtures e respeitar o limite
 real de login. O helper comum respeita os cabeçalhos reais de limite por IP e
 aguarda a janela indicada. Somente esse tempo de espera é acrescentado ao
 timeout do cenário; ações mantêm limite de 10 segundos e asserções de 8 segundos.
+O setup de vínculos via `apiJson` também aceita uma única retomada de PUT de
+acesso administrativo após 429, aguardando o cabeçalho real (até 60 segundos).
+Rede, demais status e mutações clínicas não são repetidos por esse helper.
+`access-rate-limit.spec.ts` esgota a janela com entradas inválidas, comprova 429
+e verifica concessão/releitura após a espera, sem alterar o limiter.
 Não há retry automático do teste, mudança do limiter ou espera fixa para encobrir
 ações lentas. Breadcrumbs usam separadores gráficos em CSS que não alteram o
 nome acessível dos links localizados pelos testes.
